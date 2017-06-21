@@ -2,13 +2,12 @@ package cn.muye.dispatch.service.impl;
 
 import cn.mrobot.bean.misssion.FeatureItemType;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.SearchConstants;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.FeatureItemTypeMapper;
 import cn.muye.dispatch.service.FeatureItemTypeService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

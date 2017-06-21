@@ -1,22 +1,13 @@
 package cn.muye.area.point.controller;
 
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.DeviceType;
-import cn.mrobot.bean.enums.MessageStatusType;
-import cn.mrobot.bean.enums.MessageType;
-import cn.mrobot.bean.misssion.FeatureItem;
-import cn.mrobot.bean.slam.SlamRequestBody;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
-import cn.muye.bean.AjaxResult;
-import cn.muye.bean.CommonInfo;
-import cn.muye.bean.MessageInfo;
-import cn.muye.bean.SearchConstants;
-import cn.muye.service.MessageSendService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.bean.CommonInfo;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.service.MessageSendService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -26,7 +17,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,7 +45,7 @@ public class PointController {
 		try {
 
 			List<MapPoint> pointListDB = pointService.findByName(mapPoint.getPointName(), mapPoint.getSceneName());
-			if (pointListDB.size() > 0 && !pointListDB.get(1).getId().equals(mapPoint.getId())){
+			if (pointListDB.size() > 0 && !pointListDB.get(0).getId().equals(mapPoint.getId())){
 				return AjaxResult.failed("已存在相同名称的导航点");
 			}
 

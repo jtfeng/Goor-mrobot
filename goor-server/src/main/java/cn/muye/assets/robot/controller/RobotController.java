@@ -1,10 +1,10 @@
 package cn.muye.assets.robot.controller;
 
-import cn.mrobot.bean.robot.Robot;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.AjaxResult;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.AjaxResult;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -71,13 +71,13 @@ public class RobotController {
             robotDb.setName(robot.getName());
             robotDb.setCode(robot.getCode());
             robotDb.setDescription(robot.getDescription());
-            robotDb.setTypeId(robot.getTypeId());
             robotDb.setUpdateTime(new Date());
             robotDb.setBoxActivated(robot.getBoxActivated());
             robotService.update(robotDb);
             return AjaxResult.success(robotDb, "修改成功");
         } else if (robot.getId() == null){
             robot.setCreateTime(new Date());
+            robot.setBoxActivated(true);
             robotService.save(robot);
             return AjaxResult.success(robot, "新增成功");
         } else {
@@ -90,8 +90,7 @@ public class RobotController {
     @ResponseBody
     public AjaxResult deleteRobot(@ApiParam(value = "机器人")@PathVariable String id) {
         if (id != null) {
-            Robot robot = robotService.getById(Long.valueOf(id));
-            robotService.deleteById(robot.getId());
+            robotService.deleteById(Long.valueOf(id));
             return AjaxResult.success("删除成功");
         } else {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误，查询失败");
@@ -105,4 +104,5 @@ public class RobotController {
 //        List<RobotType> list = robotTypeService.listType();
 //        return AjaxResult.success(list, "查询成功");
 //    }
+
 }

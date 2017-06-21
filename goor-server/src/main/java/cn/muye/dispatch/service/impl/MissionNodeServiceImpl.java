@@ -2,7 +2,7 @@ package cn.muye.dispatch.service.impl;
 
 import cn.mrobot.bean.misssion.MissionNode;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.SearchConstants;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.MissionNodeMapper;
 import cn.muye.dispatch.service.MissionNodeService;
 import com.alibaba.fastjson.JSON;

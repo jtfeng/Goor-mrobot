@@ -30,18 +30,15 @@
         <dependency>
             <groupId>com.myee.mpush</groupId>
             <artifactId>mpush-client-java</artifactId>
-            <version>0.0.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>cn.mrobot</groupId>
             <artifactId>goor-domain</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cn.mrobot</groupId>
             <artifactId>goor-utils</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-net</groupId>
@@ -104,11 +101,11 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <dependency>
+        <!--<dependency> 暂时除去，存在冲突，无法获取表名称
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

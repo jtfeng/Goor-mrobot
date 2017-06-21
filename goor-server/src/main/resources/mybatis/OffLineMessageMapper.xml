@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.muye.mapper.message.OffLineMessageMapper">
+<mapper namespace="cn.muye.base.mapper.message.OffLineMessageMapper">
 
-  <resultMap id="offLineMessageResult" type="cn.muye.model.message.OffLineMessage">
+  <resultMap id="offLineMessageResult" type="cn.muye.base.model.message.OffLineMessage">
     <result property="id" column="ID"/>
     <result property="senderId" column="SENDER_ID"/>
     <result property="sendDeviceType" column="SEND_DEVICE_TYPE"/>
@@ -77,7 +77,7 @@
     WHERE o.SUCCESS = #{success} AND SEND_COUNT<![CDATA[<=200 ]]>;
   </select>
 
-  <insert id="save" parameterType="cn.muye.model.message.OffLineMessage" useGeneratedKeys="true" keyProperty="id">
+  <insert id="save" parameterType="cn.muye.base.model.message.OffLineMessage" useGeneratedKeys="true" keyProperty="id">
     INSERT INTO OFFLINE_MESSAGE(
     ID,
     SENDER_ID,

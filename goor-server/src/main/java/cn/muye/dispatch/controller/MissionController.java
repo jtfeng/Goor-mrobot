@@ -1,28 +1,23 @@
 package cn.muye.dispatch.controller;
 
 import cn.mrobot.bean.misssion.*;
-import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.mrobot.utils.ajax.AjaxResponse;
-import cn.muye.bean.AjaxResult;
-import cn.muye.bean.SearchConstants;
+import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.service.*;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Jelynn on 2017/6/14.
