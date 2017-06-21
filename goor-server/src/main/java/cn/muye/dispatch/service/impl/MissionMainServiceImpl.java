@@ -4,7 +4,7 @@ import cn.mrobot.bean.misssion.MissionChain;
 import cn.mrobot.bean.misssion.MissionMain;
 import cn.mrobot.bean.misssion.MissionMainChainXREF;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.SearchConstants;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.MissionMainChainXREFMapper;
 import cn.muye.dispatch.mapper.MissionMainMapper;
 import cn.muye.dispatch.service.MissionMainService;

@@ -3,7 +3,7 @@ package cn.muye.assets.robot.controller;
 import cn.mrobot.bean.robot.Robot;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.AjaxResult;
+import cn.muye.base.bean.AjaxResult;
 import cn.muye.assets.robot.service.RobotService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

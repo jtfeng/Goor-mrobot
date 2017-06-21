@@ -4,8 +4,8 @@ import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.AjaxResult;
-import cn.muye.bean.SearchConstants;
+import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.log.service.LogInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -19,9 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.

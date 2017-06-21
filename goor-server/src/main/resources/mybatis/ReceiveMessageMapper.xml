@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.muye.mapper.message.ReceiveMessageMapper">
+<mapper namespace="cn.muye.base.mapper.message.ReceiveMessageMapper">
 
-  <resultMap id="receiveMessageResult" type="cn.muye.model.message.ReceiveMessage">
+  <resultMap id="receiveMessageResult" type="cn.muye.base.model.message.ReceiveMessage">
     <result property="id" column="ID"/>
     <result property="senderId" column="SENDER_ID"/>
     <result property="sendDeviceType" column="SEND_DEVICE_TYPE"/>
@@ -92,7 +92,7 @@
     WHERE o.ID = #{id} AND o.SENDER_ID = #{senderId};
   </select>
 
-  <insert id="save" parameterType="cn.muye.model.message.ReceiveMessage" useGeneratedKeys="true" keyProperty="id">
+  <insert id="save" parameterType="cn.muye.base.model.message.ReceiveMessage" useGeneratedKeys="true" keyProperty="id">
     INSERT INTO RECEIVE_MESSAGE(
     ID,
     SENDER_ID,

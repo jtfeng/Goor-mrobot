@@ -1,8 +1,8 @@
 package cn.muye;
 
-import cn.muye.core.converter.FastJsonHttpMessageConverter;
-import cn.muye.listener.ClientListenerImp;
-import cn.muye.service.batch.ScheduledHandle;
+import cn.muye.base.converter.FastJsonHttpMessageConverter;
+import cn.muye.base.listener.ClientListenerImp;
+import cn.muye.base.service.batch.ScheduledHandle;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.mpush.api.Client;

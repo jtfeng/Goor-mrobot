@@ -2,7 +2,7 @@ package cn.muye.log.service;
 
 import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.SearchConstants;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.log.mapper.LogInfoMapper;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;

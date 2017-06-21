@@ -3,7 +3,7 @@ package cn.muye.assets.shelf.controller;
 import cn.mrobot.bean.shelf.Shelf;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.bean.AjaxResult;
+import cn.muye.base.bean.AjaxResult;
 import cn.muye.assets.shelf.service.ShelfService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

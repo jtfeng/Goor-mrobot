@@ -7,7 +7,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.mapper.StationMapper;
 import cn.muye.area.station.service.StationMapPointXREFService;
 import cn.muye.area.station.service.StationService;
-import cn.muye.bean.SearchConstants;
+import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;

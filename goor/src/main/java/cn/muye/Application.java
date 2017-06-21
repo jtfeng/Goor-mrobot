@@ -1,8 +1,8 @@
 package cn.muye;
 
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.muye.listener.*;
-import cn.muye.service.batch.ScheduledHandle;
+import cn.muye.base.listener.*;
+import cn.muye.base.service.batch.ScheduledHandle;
 import com.github.pagehelper.PageHelper;
 import com.mpush.api.Client;
 import com.mpush.api.ClientListener;
@@ -41,7 +41,7 @@ import java.util.concurrent.ThreadFactory;
 @ComponentScan
 @EnableScheduling
 @EnableTransactionManagement
-@MapperScan("cn.muye.mapper")
+@MapperScan("cn.muye.base.mapper")
 public class Application {
 	private static Logger logger = Logger.getLogger(Application.class);
 

@@ -1,7 +1,7 @@
 package cn.muye.menu.controller;
 
 import cn.mrobot.utils.StringUtil;
-import cn.muye.bean.AjaxResult;
+import cn.muye.base.bean.AjaxResult;
 import cn.muye.menu.bean.Menu;
 import cn.muye.menu.service.MenuService;
 import com.wordnik.swagger.annotations.ApiOperation;
