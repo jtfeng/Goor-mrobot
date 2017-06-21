@@ -15,13 +15,13 @@ VALUES (
 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7iViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2fBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/jMv2Ggb2XAeZhlLD28fHwIDAQAB',
 'http://push.myee7.com/allocServer/',
 'http://push.myee7.com/pushServer/api/admin/push.json',
-'cookyPlus1301_jelynn',
+'cookyPlus1301',
 'ubuntu_1',
-'cookyPlus1301_jelynn',
-'cookyPlus1301_jelynn',
-'cookyPlus1301_jelynn',
-'cookyPlus1301_jelynn',
-'cookyPlus1301_jelynn',
+'cookyPlus1301',
+'cookyPlus1301',
+'cookyPlus1301',
+'cookyPlus1301',
+'cookyPlus1301',
 '192.168.3.51'
 );
 
