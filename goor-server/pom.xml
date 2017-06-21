@@ -30,18 +30,15 @@
         <dependency>
             <groupId>com.myee.mpush</groupId>
             <artifactId>mpush-client-java</artifactId>
-            <version>0.0.7-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>cn.mrobot</groupId>
             <artifactId>goor-domain</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>cn.mrobot</groupId>
             <artifactId>goor-utils</artifactId>
-            <version>0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>commons-net</groupId>
