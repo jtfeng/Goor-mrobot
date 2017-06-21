@@ -3,7 +3,9 @@ package cn.muye.area.station.service.impl;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationMapPointXREF;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.mapper.StationMapper;
 import cn.muye.area.station.service.StationMapPointXREFService;
 import cn.muye.area.station.service.StationService;
@@ -35,6 +37,8 @@ public class StationServiceImpl implements StationService {
     protected StationMapper stationMapper;
 	@Autowired
 	protected StationMapPointXREFService stationMapPointXREFService;
+	@Autowired
+	protected PointService pointService;
 
 	@Override
 	public long save(Station station) {
@@ -82,17 +86,44 @@ public class StationServiceImpl implements StationService {
 		if(whereRequest.getQueryObj() != null){
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 			Object name = map.get(SearchConstants.SEARCH_NAME);
+			//TODO 方法一：　测试用多表联查查数据库,缺点是pageHelper分页条数会按照leftjoin查询条数去算，不准确
+			/*result = stationMapper.list(name);*/
+
+			//方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
 			Example example = new Example(Station.class);
-			example.createCriteria().andCondition("NAME like", "%"+name+"%");
-			example.setOrderByClause("NAME ASC");
+			example.createCriteria().andCondition("NAME like", "%" + name + "%");
+			example.setOrderByClause("ID DESC");
 			temp = stationMapper.selectByExample(example);
 		}else {
+			//TODO 方法一：　测试用多表联查查数据库,缺点是pageHelper分页条数会按照leftjoin查询条数去算，不准确
+			/*result = stationMapper.list(null);*/
+
+			//方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
 			temp = stationMapper.selectAll();
 		}
 
-		//TODO 把关联的点放到站里面
+		//如果用公共Mapper查询，则需手动用For循环把关联的点放到站里面
+		if(temp != null && temp.size() > 0) {
+			for(Station station:temp) {
+				List<MapPoint> resultMapPoint = new ArrayList<MapPoint>();
+				WhereRequest whereRequestTemp = new WhereRequest();
+				whereRequest.setQueryObj("{\""+SearchConstants.SEARCH_STATION_ID+"\":"+station.getId()+"}");
+				List<StationMapPointXREF> stationMapPointXREFList = stationMapPointXREFService.list(whereRequestTemp);
+				//如果没有关联点，则直接返回
+				if(stationMapPointXREFList == null || stationMapPointXREFList.size() <= 0) {
+					result.add(station);
+					continue;
+				}
 
-
+				//如果有关联点，则更新station的点列表
+				for(StationMapPointXREF stationMapPointXREF : stationMapPointXREFList) {
+					MapPoint mapPoint = pointService.findById(stationMapPointXREF.getMapPointId());
+					resultMapPoint.add(mapPoint);
+				}
+				station.setMapPoints(resultMapPoint);
+				result.add(station);
+			}
+		}
 
 		return result;
 	}
