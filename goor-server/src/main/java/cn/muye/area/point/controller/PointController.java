@@ -45,7 +45,7 @@ public class PointController {
 		try {
 
 			List<MapPoint> pointListDB = pointService.findByName(mapPoint.getPointName(), mapPoint.getSceneName());
-			if (pointListDB.size() > 0 && !pointListDB.get(1).getId().equals(mapPoint.getId())){
+			if (pointListDB.size() > 0 && !pointListDB.get(0).getId().equals(mapPoint.getId())){
 				return AjaxResult.failed("已存在相同名称的导航点");
 			}
 
