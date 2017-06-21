@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.dispatch.mapper.FeatureItemMapper">
+
+    <resultMap id="featureItem" type="cn.mrobot.bean.misssion.FeatureItem">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="value" column="VALUE"/>
+        <result property="description" column="DESCRIPTION"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        NAME,
+        VALUE,
+        DESCRIPTION
+    </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.misssion.FeatureItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO D_FEATURE_ITEM(
+        ID,
+        NAME,
+        VALUE,
+        DESCRIPTION
+        ) values (
+        #{id},
+        #{name},
+        #{value},
+        #{description}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <select id="get" resultMap="featureItem">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_FEATURE_ITEM
+        WHERE ID = #{id}
+    </select>
+
+    <select id="validate" resultMap="featureItem">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_FEATURE_ITEM
+        <where>
+            <if test="name != null ">
+                AND NAME = #{name}
+            </if>
+            <if test="value != null ">
+                OR VALUE = #{value}
+            </if>
+        </where>
+    </select>
+
+    <select id="list" resultMap="featureItem">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_FEATURE_ITEM
+        <where>
+            <if test="name != null ">
+                AND NAME LIKE  CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

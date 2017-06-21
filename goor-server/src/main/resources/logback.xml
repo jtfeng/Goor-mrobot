@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!--
+        override logback.xml location :
+        -Dlogging.config="file:logback.xml"
+        -Dlogging.config="file:./logback.xml"
+    -->
+
+    <!-- TEST 1 ============================================================================ -->
+
+    <!-- if you w ant to include spring boot own logging add the following line -->
+    <!--<include resource="org/springframework/boot/logging/logback/base.xml"/>-->
+
+
+    <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n</Pattern>-->
+            <pattern>goor-server [%d{yyyy-MM-dd HH:mm:ss.SSS,UTC}] %-5p %c{1}:%-5L %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>TRACE</level>
+        </filter>
+    </appender>
+
+    <appender name="dailyRollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!--<File>logs/daily/rest-demo.log</File>-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <FileNamePattern>/logs/daily/rest-access.%d{yyyy-MM-dd}.log</FileNamePattern>
+
+            <!-- keep 365 days' worth of history -->
+            <maxHistory>365</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %n</Pattern>
+        </encoder>
+    </appender>
+    <!--<appender name="minuteRollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">-->
+        <!--<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">-->
+            <!--&lt;!&ndash; rollover every minute &ndash;&gt;-->
+            <!--<FileNamePattern>logs/minutes/rest-access-minute.%d{yyyy-MM-dd_HH-mm}.log</FileNamePattern>-->
+
+            <!--&lt;!&ndash; keep 30 minutes' worth of history &ndash;&gt;-->
+            <!--<maxHistory>5</maxHistory>-->
+        <!--</rollingPolicy>-->
+
+        <!--<encoder>-->
+            <!--<Pattern>%-4relative [%thread] %-5level %logger{35} - %msg %n</Pattern>-->
+        <!--</encoder>-->
+    <!--</appender>-->
+
+    <!-- SPECIFIC LEVEL OF LOGGING BY CLASS -->
+    <logger name="net.javabeat.service" level="DEBUG"></logger>
+    <logger name="net.javabeat.model" level="DEBUG"></logger>
+
+    <logger name="net.javabeat" additivity="false">
+        <level value="INFO" /> <!-- general level of logging -->
+        <appender-ref ref="dailyRollingFileAppender"/>
+        <!--<appender-ref ref="minuteRollingFileAppender"/>-->
+        <appender-ref ref="consoleAppender" />
+    </logger>
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="consoleAppender" />
+        <appender-ref ref="dailyRollingFileAppender" />
+        <!--<appender-ref ref="minuteRollingFileAppender" />-->
+    </root>
+
+</configuration>

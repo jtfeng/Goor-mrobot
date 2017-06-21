@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.shiro.mapper.RolePermissionMapper">
+
+    <resultMap id="rolePermissionResult" type="cn.muye.shiro.bean.RolePermission">
+        <result property="rId" column="RID"/>
+        <result property="pId" column="PID"/>
+    </resultMap>
+
+    <select id="listPermissionsByRoleId" resultMap="rolePermissionResult">
+        select RID,PID from D_ROLE_PERMISSION
+        where RID= #{rId}
+    </select>
+
+    <insert id="bindRolePermission">
+        insert into D_ROLE_PERMISSION(
+            RID,
+            PID
+        ) values (
+            #{roleId},
+            #{permissionId}
+        )
+    </insert>
+
+    <delete id="deleteByRoleId">
+        delete from D_ROLE_PERMISSION where RID = #{rId}
+    </delete>
+
+</mapper>

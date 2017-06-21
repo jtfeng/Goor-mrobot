@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.mapper.config.AppConfigMapper">
+
+  <resultMap id="appConfigResult" type="cn.muye.model.config.AppConfig">
+    <result property="id" column="ID"/>
+    <result property="mpushPublicKey" column="MPUSH_PUBLICKEY"/>
+    <result property="mpushAllocServer" column="MPUSH_ALLOCSERVER"/>
+    <result property="mpushPushServer" column="MPUSH_PUSHSERVER"/>
+    <result property="mpushDeviceId" column="MPUSH_DEVICEID"/>
+    <result property="mpushOsName" column="MPUSH_OSNAME"/>
+    <result property="mpushOsVersion" column="MPUSH_OSVERSION"/>
+    <result property="mpushClientVersion" column="MPUSH_CLIENTVERSION"/>
+    <result property="mpushUserId" column="MPUSH_USERID"/>
+    <result property="mpushTags" column="MPUSH_TAGS"/>
+    <result property="mpushSessionStorageDir" column="MPUSH_SESSIONSTORAGEDIR"/>
+    <result property="rosPath" column="ROS_PATH"/>
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    ID,
+    MPUSH_PUBLICKEY,
+    MPUSH_ALLOCSERVER,
+    MPUSH_PUSHSERVER,
+    MPUSH_DEVICEID,
+    MPUSH_OSNAME,
+    MPUSH_OSVERSION,
+    MPUSH_CLIENTVERSION,
+    MPUSH_USERID,
+    MPUSH_TAGS,
+    MPUSH_SESSIONSTORAGEDIR,
+    ROS_PATH
+  </sql>
+
+  <select id="get" resultMap="appConfigResult">
+    SELECT
+      <include refid="Base_Column_List" />
+    FROM APP_CONFIG a
+    WHERE a.ID = #{id};
+  </select>
+
+</mapper>

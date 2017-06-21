@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.dispatch.mapper.MissionMainMapper">
+
+    <resultMap id="missionMain" type="cn.mrobot.bean.misssion.MissionMain">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="updateTime" column="UPDATE_TIME"/>
+        <result property="intervalTime" column="INTERVAL_TIME"/>
+        <result property="repeatCount" column="REPEAT_COUNT"/>
+        <result property="startTime" column="START_TIME"/>
+        <result property="priority" column="PRIORITY"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        NAME,
+        DESCRIPTION,
+        DEVICE_ID,
+        CREATE_TIME,
+        UPDATE_TIME,
+        REPEAT_COUNT,
+        INTERVAL_TIME,
+        START_TIME,
+        PRIORITY
+    </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionMain" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO D_MISSION_MAIN(
+        ID,
+        NAME,
+        DESCRIPTION,
+        DEVICE_ID,
+        CREATE_TIME,
+        UPDATE_TIME,
+        REPEAT_COUNT,
+        INTERVAL_TIME,
+        START_TIME,
+        PRIORITY
+        ) values (
+        #{id},
+        #{name},
+        #{description},
+        #{deviceId},
+        #{createTime},
+        #{updateTime},
+        #{repeatCount},
+        #{intervalTime},
+        #{startTime},
+        #{priority}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <update id="update">
+        UPDATE D_MISSION_MAIN
+        <trim prefix="set" suffixOverrides=",">
+            <if test="name != null">
+                NAME = #{name},
+            </if>
+            <if test="description != null">
+                DESCRIPTION = #{description},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime},
+            </if>
+            <if test="updateTime != null">
+                UPDATE_TIME = #{updateTime},
+            </if>
+            <if test="intervalTime != null">
+                INTERVAL_TIME = #{intervalTime},
+            </if>
+            <if test="repeatCount != null">
+                REPEAT_COUNT = #{repeatCount},
+            </if>
+            <if test="startTime != null">
+                START_TIME = #{startTime},
+            </if>
+            <if test="priority != null">
+                PRIORITY = #{priority},
+            </if>
+        </trim>
+        WHERE
+        ID = #{id}
+    </update>
+
+    <select id="get" resultMap="missionMain">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_MAIN
+        WHERE ID = #{id}
+    </select>
+
+    <select id="findByName" resultMap="missionMain">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_MAIN
+        WHERE NAME = #{name}
+    </select>
+
+    <delete id="delete" parameterType="long">
+        delete from D_MISSION_MAIN where ID = #{id}
+    </delete>
+
+    <select id="list" resultMap="missionMain">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_MAIN d
+        <where>
+            <if test="name != null">
+                AND d.NAME like CONCAT('%',#{name},'%')
+            </if>
+            <if test="deviceId != null">
+                AND d.DEVICE_ID = #{deviceId}
+            </if>
+            <if test="beginDate != null ">
+                AND d.CREATE_TIME &gt;= #{beginDate}
+            </if>
+            <if test="endDate != null">
+                AND d.CREATE_TIME &lt; #{endDate}
+            </if>
+            <if test="priority != null">
+                AND d.PRIORITY = #{priority}
+            </if>
+        </where>
+        ORDER BY NAME
+    </select>
+
+    <select id="listAll" resultMap="missionMain">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_MAIN d
+        ORDER BY NAME
+    </select>
+
+</mapper>

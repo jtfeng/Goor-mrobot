@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.dispatch.mapper.MissionMainChainXREFMapper">
+
+    <resultMap id="missionMainChainXREF" type="cn.mrobot.bean.misssion.MissionMainChainXREF">
+        <result property="id" column="ID"/>
+        <result property="missionMainId" column="MISSION_MAIN_ID"/>
+        <result property="missionChainId" column="MISSION_CHAIN_ID"/>
+        <association property="missionMain"
+                     javaType="cn.mrobot.bean.misssion.MissionMain"
+                     column="MISSION_MAIN_ID"
+                     select="cn.muye.dispatch.mapper.MissionMainMapper.get"/>
+        <association property="missionChain"
+                     javaType="cn.mrobot.bean.misssion.MissionChain"
+                     column="MISSION_CHAIN_ID"
+                     select="cn.muye.dispatch.mapper.MissionChainMapper.get"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        MISSION_MAIN_ID,
+        MISSION_CHAIN_ID
+    </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionMainChainXREF" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO D_MISSION_MAIN_CHAIN_XREF(
+        ID,
+        MISSION_MAIN_ID,
+        MISSION_CHAIN_ID
+        ) values (
+        #{id},
+        #{missionMainId},
+        #{missionChainId}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <delete id="delete" parameterType="long">
+        delete from D_MISSION_MAIN_CHAIN_XREF where ID = #{id}
+    </delete>
+
+    <delete id="deleteByMainId" parameterType="long">
+        delete from D_MISSION_MAIN_CHAIN_XREF where MISSION_MAIN_ID = #{missionMainId}
+    </delete>
+
+    <select id="findByMainId" resultMap="missionMainChainXREF">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_MAIN_CHAIN_XREF
+        WHERE MISSION_MAIN_ID = #{missionMainId}
+    </select>
+</mapper>

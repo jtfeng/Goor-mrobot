@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.log.mapper.LogInfoMapper">
+
+    <resultMap id="logInfo" type="cn.mrobot.bean.log.LogInfo">
+        <result property="id" column="ID"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="message" column="MESSAGE"/>
+        <result property="logLevelName" column="LOG_LEVEL"/>
+        <result property="logTypeName" column="LOG_TYPE" />
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="handlePerson" column="HANDLE_PERSON"/>
+        <result property="handleTime" column="HANDLE_TIME"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        DEVICE_ID,
+        MESSAGE,
+        LOG_LEVEL,
+        LOG_TYPE,
+        CREATE_DATE,
+        HANDLE_PERSON,
+        HANDLE_TIME
+    </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.log.LogInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO LOG_INFO(
+        ID,
+        DEVICE_ID,
+        MESSAGE,
+        LOG_LEVEL,
+        LOG_TYPE,
+        CREATE_DATE,
+        HANDLE_PERSON,
+        HANDLE_TIME
+        ) values (
+        #{id},
+        #{deviceId},
+        #{message},
+        #{logLevelName},
+        #{logTypeName},
+        #{createDate},
+        #{handlePerson},
+        #{handleTime}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <select id="lists" resultMap="logInfo" parameterType="string">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM LOG_INFO c
+        <where>
+            <if test="deviceId != null">
+                AND c.DEVICE_ID = #{deviceId}
+            </if>
+            <if test="logLevelName != null">
+                AND c.LOG_LEVEL = #{logLevelName}
+            </if>
+            <if test="logTypeName != null">
+                AND c.LOG_TYPE = #{logTypeName}
+            </if>
+            <if test="beginDate != null">
+                AND c.CREATE_DATE &gt;= #{beginDate}
+            </if>
+            <if test="endDate != null">
+                AND c.CREATE_DATE &lt; #{endDate}
+            </if>
+        </where>
+        ORDER BY CREATE_DATE;
+    </select>
+
+</mapper>

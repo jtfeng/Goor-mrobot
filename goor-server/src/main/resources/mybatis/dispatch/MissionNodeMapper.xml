@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.dispatch.mapper.MissionNodeMapper">
+
+    <resultMap id="missionNode" type="cn.mrobot.bean.misssion.MissionNode">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="repeatCount" column="REPEAT_COUNT"/>
+        <result property="intervalTime" column="INTERVAL_TIME"/>
+        <result property="data" column="DATA"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="updateTime" column="UPDATE_TIME"/>
+        <result property="priority" column="PRIORITY"/>
+        <result property="featureItemId" column="FEATURE_ITEM_ID"/>
+        <result property="missionChainId" column="MISSION_CHAIN_ID"/>
+        <result property="featureItemTypeId" column="FEATURE_ITEM_TYPE_ID"/>
+        <association property="featureItem"
+                     javaType="cn.mrobot.bean.misssion.FeatureItem"
+                     column="FEATURE_ITEM_ID"
+                     select="cn.muye.dispatch.mapper.FeatureItemMapper.get"/>
+        <association property="featureItemType"
+                     javaType="cn.mrobot.bean.misssion.FeatureItemType"
+                     column="FEATURE_ITEM_TYPE_ID"
+                     select="cn.muye.dispatch.mapper.FeatureItemTypeMapper.get"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        NAME,
+        DESCRIPTION,
+        REPEAT_COUNT,
+        INTERVAL_TIME,
+        DATA,
+        CREATE_TIME,
+        UPDATE_TIME,
+        PRIORITY,
+        MISSION_CHAIN_ID,
+        FEATURE_ITEM_ID,
+        FEATURE_ITEM_TYPE_ID
+    </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionNode" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO D_MISSION_NODE(
+        ID,
+        NAME,
+        DESCRIPTION,
+        REPEAT_COUNT,
+        INTERVAL_TIME,
+        DATA,
+        CREATE_TIME,
+        UPDATE_TIME,
+        PRIORITY,
+        MISSION_CHAIN_ID,
+        FEATURE_ITEM_ID,
+        FEATURE_ITEM_TYPE_ID
+        ) values (
+        #{id},
+        #{name},
+        #{description},
+        #{repeatCount},
+        #{intervalTime},
+        #{data},
+        #{createTime},
+        #{updateTime},
+        #{priority},
+        #{missionChainId},
+        #{featureItemId},
+        #{featureItemTypeId}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <select id="findByName" resultMap="missionNode">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_NODE
+        WHERE NAME = #{name}
+    </select>
+
+    <select id="get" resultMap="missionNode">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_NODE
+        WHERE ID = #{id}
+    </select>
+
+    <update id="update">
+        UPDATE D_MISSION_NODE
+        <trim prefix="set" suffixOverrides=",">
+            <if test="description != null">
+                DESCRIPTION = #{description},
+            </if>
+            <if test="repeatCount != null">
+                REPEAT_COUNT = #{repeatCount},
+            </if>
+            <if test="intervalTime != null">
+                INTERVAL_TIME = #{intervalTime},
+            </if>
+            <if test="intervalTime != null">
+                MISSION_CHAIN_ID = #{missionChainId},
+            </if>
+            <if test="data != null">
+                DATA = #{data},
+            </if>
+            <if test="updateTime != null">
+                UPDATE_TIME = #{updateTime},
+            </if>
+            <if test="featureItemId != null">
+                FEATURE_ITEM_ID = #{featureItemId},
+            </if>
+            <if test="featureItemTypeId != null">
+                FEATURE_ITEM_TYPE_ID = #{featureItemTypeId},
+            </if>
+        </trim>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="list" resultMap="missionNode">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_NODE d
+        <where>
+            <if test="name != null">
+                AND d.NAME like CONCAT('%',#{name},'%')
+            </if>
+            <if test="missionChainId != null">
+                AND d.MISSION_CHAIN_ID = #{missionChainId}
+            </if>
+            <if test="beginDate != null ">
+                AND d.CREATE_TIME &gt;= #{beginDate}
+            </if>
+            <if test="endDate != null">
+                AND d.CREATE_TIME &lt; #{endDate}
+            </if>
+            <if test="priority != null">
+                AND d.PRIORITY = #{priority}
+            </if>
+        </where>
+        ORDER BY NAME
+    </select>
+
+    <select id="listAll" resultMap="missionNode">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_NODE d
+        ORDER BY NAME
+    </select>
+
+    <delete id="delete" parameterType="long">
+        DELETE FROM D_MISSION_NODE WHERE ID = #{id}
+    </delete>
+
+</mapper>

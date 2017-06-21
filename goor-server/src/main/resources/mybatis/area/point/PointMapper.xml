@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.area.point.mapper.PointMapper">
+
+    <resultMap id="mapPoint" type="cn.mrobot.bean.area.point.MapPoint">
+        <result property="id" column="ID"/>
+        <result property="pointName" column="POINT_NAME"/>
+        <result property="pointAlias" column="POINT_ALIAS"/>
+        <result property="sceneName" column="SCENE_NAME"/>
+        <result property="mapName" column="MAP_NAME"/>
+        <result property="x" column="X"/>
+        <result property="y" column="Y"/>
+        <result property="th" column="TH"/>
+        <result property="mapPointTypeId" column="MAP_POINT_TYPE_ID"/>
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        ID,
+        POINT_NAME,
+        POINT_ALIAS,
+        SCENE_NAME,
+        MAP_NAME,
+        X,
+        Y,
+        TH,
+        MAP_POINT_TYPE_ID
+    </sql>
+
+    <select id="get" resultMap="mapPoint">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM APP_CONFIG a
+        WHERE a.ID = #{id};
+    </select>
+
+</mapper>

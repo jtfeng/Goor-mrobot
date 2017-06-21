@@ -1,0 +1,28 @@
+INSERT INTO APP_CONFIG (
+MPUSH_PUBLICKEY,
+MPUSH_ALLOCSERVER,
+MPUSH_PUSHSERVER,
+MPUSH_DEVICEID,
+MPUSH_OSNAME,
+MPUSH_OSVERSION,
+MPUSH_CLIENTVERSION,
+MPUSH_USERID,
+MPUSH_TAGS,
+MPUSH_SESSIONSTORAGEDIR,
+ROS_PATH
+)
+VALUES (
+'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7iViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2fBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/jMv2Ggb2XAeZhlLD28fHwIDAQAB',
+'http://push.myee7.com/allocServer/',
+'http://push.myee7.com/pushServer/api/admin/push.json',
+'goor-server',
+'ubuntu_1',
+'goor-server',
+'goor-server',
+'goor-server',
+'goor-server',
+'goor-server',
+'192.168.3.51'
+);
+
+

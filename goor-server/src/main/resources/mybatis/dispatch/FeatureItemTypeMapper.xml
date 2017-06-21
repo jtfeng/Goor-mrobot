@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.dispatch.mapper.FeatureItemTypeMapper">
+
+    <resultMap id="featureItemType" type="cn.mrobot.bean.misssion.FeatureItemType">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="value" column="VALUE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="dataModel" column="DATA_MODEL"/>
+        <result property="featureItemId" column="FEATURE_ITEM_ID"/>
+        <!-- featureItem所对应featureItemType信息 -->
+        <!-- association：用于映射关联查询单个对象的信息
+            property：要讲关联查询的用户信息映射到订单pojo列中的哪个属性里
+            javaType:表示关联查询的对象类型（可以使用别名）
+         -->
+        <association property="featureItem"
+                     javaType="cn.mrobot.bean.misssion.FeatureItem"
+                     column="FEATURE_ITEM_ID"
+                     select="cn.muye.dispatch.mapper.FeatureItemMapper.get"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        NAME,
+        VALUE,
+        DESCRIPTION,
+        DATA_MODEL,
+        FEATURE_ITEM_ID
+    </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.misssion.FeatureItemType" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO D_FEATURE_ITEM_TYPE(
+        ID,
+        NAME,
+        VALUE,
+        DESCRIPTION,
+        DATA_MODEL,
+        FEATURE_ITEM_ID
+        ) values (
+        #{id},
+        #{name},
+        #{value},
+        #{description},
+        #{dataModel},
+        #{featureItemId}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <select id="get" resultMap="featureItemType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_FEATURE_ITEM_TYPE
+        WHERE ID = #{id}
+    </select>
+
+    <select id="validate" resultMap="featureItemType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_FEATURE_ITEM_TYPE
+        <where>
+            <if test="name != null ">
+                AND NAME = #{name}
+            </if>
+            <if test="value != null ">
+                OR VALUE = #{value}
+            </if>
+        </where>
+    </select>
+
+
+    <select id="list" resultMap="featureItemType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_FEATURE_ITEM_TYPE
+        <where>
+            <if test="featureItemId != null">
+                AND FEATURE_ITEM_ID = #{featureItemId}
+            </if>
+            <if test="name != null">
+                AND NAME = #{name}
+            </if>
+        </where>
+    </select>
+
+</mapper>
