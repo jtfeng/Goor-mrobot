@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
 import java.util.List;
 
 /**
@@ -17,11 +18,16 @@ public class RobotService {
 
     @Autowired
     private RobotMapper robotMapper;
+    @Autowired
+    private RobotPasswordService robotPasswordService;
 
     public List<Robot> listRobot() {
         Example example = new Example(Robot.class);
         example.setOrderByClause("ID DESC");
         List<Robot> list = robotMapper.selectByExample(example);
+        for (Robot robot : list) {
+            robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
+        }
         return list;
     }
 
@@ -35,6 +41,7 @@ public class RobotService {
 
     public void save(Robot robot) {
         robotMapper.insert(robot);
+        robotPasswordService.saveRobotPassword(robot);
     }
 
     public void deleteById(Long id) {
