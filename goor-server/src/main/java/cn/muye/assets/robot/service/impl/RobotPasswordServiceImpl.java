@@ -1,8 +1,8 @@
 package cn.muye.assets.robot.service.impl;
 
-import cn.mrobot.bean.robot.Robot;
+import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotType;
 import cn.mrobot.bean.robot.RobotPassword;
-import cn.mrobot.bean.robot.RobotType;
 import cn.mrobot.utils.AutoNumUtil;
 import cn.muye.assets.robot.mapper.RobotPasswordMapper;
 import cn.muye.assets.robot.mapper.RobotTypeMapper;
@@ -24,6 +24,7 @@ public class RobotPasswordServiceImpl implements RobotPasswordService {
 
     @Autowired
     private RobotTypeMapper robotTypeMapper;
+
     @Autowired
     private RobotPasswordMapper robotPasswordMapper;
 

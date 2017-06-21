@@ -1,62 +1,25 @@
 package cn.muye.assets.robot.service;
 
-import cn.mrobot.bean.robot.Robot;
-import cn.muye.assets.robot.mapper.RobotMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
+import cn.mrobot.bean.assets.robot.Robot;
 
 import java.util.List;
 
 /**
- * Created by Ray.Fu on 2017/6/12.
+ * Created by Ray.Fu on 2017/6/21.
  */
-@Service
-@Transactional
-public class RobotService {
+public interface RobotService {
 
-    @Autowired
-    private RobotMapper robotMapper;
-    @Autowired
-    private RobotPasswordService robotPasswordService;
+    List<Robot> listRobot();
 
-    public List<Robot> listRobot() {
-        Example example = new Example(Robot.class);
-        example.setOrderByClause("ID DESC");
-        List<Robot> list = robotMapper.selectByExample(example);
-        for (Robot robot : list) {
-            robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
-        }
-        return list;
-    }
+    Robot getById(Long id);
 
-    public Robot getById(Long id) {
-        return robotMapper.selectByPrimaryKey(id);
-    }
+    void update(Robot robotDb);
 
-    public void update(Robot robotDb) {
-        robotMapper.updateByPrimaryKey(robotDb);
-    }
+    void save(Robot robot);
 
-    public void save(Robot robot) {
-        robotMapper.insert(robot);
-        robotPasswordService.saveRobotPassword(robot);
-    }
+    void deleteById(Long id);
 
-    public void deleteById(Long id) {
-        robotMapper.deleteByPrimaryKey(id);
-    }
+    Robot getByName(String name);
 
-    public Robot getByName(String name) {
-        Robot robot = new Robot();
-        robot.setName(name);
-        return robotMapper.selectOne(robot);
-    }
-
-    public Robot getByCode(String code) {
-        Robot robot = new Robot();
-        robot.setCode(code);
-        return robotMapper.selectOne(robot);
-    }
+    Robot getByCode(String code);
 }

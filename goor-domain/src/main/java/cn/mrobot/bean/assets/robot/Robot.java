@@ -1,5 +1,6 @@
-package cn.mrobot.bean.robot;
+package cn.mrobot.bean.assets.robot;
 
+import cn.mrobot.bean.robot.RobotPassword;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.*;
