@@ -109,7 +109,7 @@ public class StationController {
 			}
 			stationService.delete(stationDB);
 
-			return AjaxResult.success();
+			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed();
@@ -224,7 +224,7 @@ public class StationController {
 		Integer typeId = mapPoint.getMapPointTypeId();
 		if(typeId != null) {
 			//TODO 等待Jelynn添加方法
-//			mapPoint.setMapPointType(MapPointType.getTypeJson(typeId));
+			mapPoint.setMapPointType(MapPointType.getTypeJson(typeId));
 		}
 		return mapPoint;
 	}

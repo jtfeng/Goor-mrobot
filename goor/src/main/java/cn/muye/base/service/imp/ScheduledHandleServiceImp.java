@@ -100,17 +100,33 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 //        logger.info("-->> Scheduled rosHealthCheck start");
             try {
                 ros = applicationContext.getBean(Ros.class);
-                SingleFactory.getHeartTopicInstance().publish(SingleFactory.getMessageInstance());
+                if(null == ros){
+                    logger.error("-->> ros is not connect");
+                    return;
+                }
+                new Topic(applicationContext.getBean(Ros.class), TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING).publish(SingleFactory.getMessageInstance());
                 if(!SingleFactory.getHeartTopicInstance().isSubscribed()){
-                    SingleFactory.getHeartTopicInstance().subscribe(SingleFactory.getTopicCallbackInstance());
+                    SingleFactory.getHeartTopicInstance().subscribe(new TopicCallback() {
+                        @Override
+                        public void handleMessage(Message message) {
+                            logger.error("-->> ros renew subscribe");
+                            CacheInfoManager.setTopicHeartCheckCache();
+                        }
+                    });
                 }
 //                logger.info("rosHealthCheck heartTime="+CacheInfoManager.getTopicHeartCheckCache());
                 if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX){
                     ros.disconnect();
                     ros.connect();
-                    SingleFactory.getHeartTopicInstance().subscribe(SingleFactory.getTopicCallbackInstance());
-                    SingleFactory.getHeartTopicInstance().publish(SingleFactory.getMessageInstance());
-                    this.reSubScribeTopic();
+                    SingleFactory.getHeartTopicInstance().subscribe(new TopicCallback() {
+                        @Override
+                        public void handleMessage(Message message) {
+                            logger.error("-->> ros reconnect and renew subscribe");
+                            CacheInfoManager.setTopicHeartCheckCache();
+                        }
+                    });
+                    new Topic(applicationContext.getBean(Ros.class), TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING).publish(SingleFactory.getMessageInstance());
+                    this.reSubScribeTopic();//业务topic subscribe
                 }
             } catch (Exception e) {
                 logger.error("-->> Scheduled rosHealthCheck Exception", e);
