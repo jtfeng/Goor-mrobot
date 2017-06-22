@@ -1,6 +1,7 @@
 package cn.muye.area.point.controller;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.base.bean.AjaxResult;
@@ -8,6 +9,9 @@ import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.MessageSendService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -103,6 +108,24 @@ public class PointController {
 			}
 			pointService.delete(pointDB);
 			return AjaxResult.success("删除成功");
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			return AjaxResult.failed("系统错误");
+		}
+	}
+
+	/**
+	 * 级联查询目标点，地图名->目标点类型->目标点
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "area/point/cascade", method = RequestMethod.GET)
+	@ResponseBody
+//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
+	public AjaxResult cascadeMapPoint() throws Exception {
+		try {
+			List<CascadeMapPoint> cascadeMapPointList = pointService.cascadeMapPoint();
+			return AjaxResult.success(cascadeMapPointList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed("系统错误");

@@ -1,10 +1,13 @@
 package cn.muye.area.point.service;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.WhereRequest;
+import com.alibaba.fastjson.JSONArray;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -32,4 +35,6 @@ public interface PointService {
 	List<MapPoint> list(WhereRequest whereRequest);
 
 	void handle(SlamResponseBody slamResponseBody);
+
+	List<CascadeMapPoint>  cascadeMapPoint();
 }
