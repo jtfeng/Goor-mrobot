@@ -9,6 +9,7 @@ import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.download.DownloadHandle;
 import cn.muye.base.listener.AppSubListenerImpl;
+import cn.muye.base.listener.CheckHeartSubListenerImpl;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.MessageSendService;
@@ -97,36 +98,23 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public void rosHealthCheck() {
-//        logger.info("-->> Scheduled rosHealthCheck start");
+        logger.info("-->> Scheduled rosHealthCheck start");
             try {
                 ros = applicationContext.getBean(Ros.class);
                 if(null == ros){
                     logger.error("-->> ros is not connect");
                     return;
                 }
-                new Topic(applicationContext.getBean(Ros.class), TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING).publish(SingleFactory.getMessageInstance());
-                if(!SingleFactory.getHeartTopicInstance().isSubscribed()){
-                    SingleFactory.getHeartTopicInstance().subscribe(new TopicCallback() {
-                        @Override
-                        public void handleMessage(Message message) {
-                            logger.error("-->> ros renew subscribe");
-                            CacheInfoManager.setTopicHeartCheckCache();
-                        }
-                    });
-                }
-//                logger.info("rosHealthCheck heartTime="+CacheInfoManager.getTopicHeartCheckCache());
+                Topic topic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
+                topic.publish(SingleFactory.getMessageInstance());//如果已经订阅了，会自动执行订阅方法
+                logger.info("rosHealthCheck heartTime="+CacheInfoManager.getTopicHeartCheckCache());
                 if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX){
                     ros.disconnect();
                     ros.connect();
-                    SingleFactory.getHeartTopicInstance().subscribe(new TopicCallback() {
-                        @Override
-                        public void handleMessage(Message message) {
-                            logger.error("-->> ros reconnect and renew subscribe");
-                            CacheInfoManager.setTopicHeartCheckCache();
-                        }
-                    });
-                    new Topic(applicationContext.getBean(Ros.class), TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING).publish(SingleFactory.getMessageInstance());
-                    this.reSubScribeTopic();//业务topic subscribe
+                    TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
+                    topic.subscribe(checkHeartCallback);
+                    topic.publish(SingleFactory.getMessageInstance());
+                    this.reSubScribeTopic();//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
                 }
             } catch (Exception e) {
                 logger.error("-->> Scheduled rosHealthCheck Exception", e);

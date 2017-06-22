@@ -237,9 +237,9 @@ public class Application {
 	public Ros ros() {
 		Ros ros = new Ros(rosPath);
 		ros.connect();
-//		Topic echoBack = new Topic(ros, Constant.ODOM, Constant.TOPIC_NAV_MSGS);
-//		TopicCallback topicCallback = new TopicDemoListenerImp();
-//		echoBack.subscribe(topicCallback);
+		Topic checkHeartTopic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
+		checkHeartTopic.subscribe(checkHeartCallback);
 		//订阅工控的topic。所有工控信息全发布在这个topic中，通过sub_name进行区分
 		Topic appSubTopic = new Topic(ros, TopicConstants.APP_SUB, TopicConstants.TOPIC_TYPE_STRING);
 		TopicCallback appSubCallback = new AppSubListenerImpl();
