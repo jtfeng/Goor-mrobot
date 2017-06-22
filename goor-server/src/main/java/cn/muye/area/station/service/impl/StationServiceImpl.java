@@ -107,7 +107,7 @@ public class StationServiceImpl implements StationService {
 			for(Station station:temp) {
 				List<MapPoint> resultMapPoint = new ArrayList<MapPoint>();
 				WhereRequest whereRequestTemp = new WhereRequest();
-				whereRequest.setQueryObj("{\""+SearchConstants.SEARCH_STATION_ID+"\":"+station.getId()+"}");
+				whereRequestTemp.setQueryObj("{\""+SearchConstants.SEARCH_STATION_ID+"\":"+station.getId()+"}");
 				List<StationMapPointXREF> stationMapPointXREFList = stationMapPointXREFService.list(whereRequestTemp);
 				//如果没有关联点，则直接返回
 				if(stationMapPointXREFList == null || stationMapPointXREFList.size() <= 0) {
