@@ -2,9 +2,7 @@ package cn.mrobot.bean.area.map;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Date;
 
 /**
@@ -20,32 +18,49 @@ import java.util.Date;
 public class MapZip {
 
 	@Id
-	private int id;
-
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	/**
+	 * 地图名
+	 */
 	@Column(name = "MAP_NAME")
 	private String mapName;
 
+	/**
+	 * 场景名
+	 */
 	@Column(name = "SCENE_NAME")
-	@JSONField(name = "scene_name")
 	private String sceneName;
 
+	/**
+	 * 文件存放路径
+	 */
 	@Column(name = "FILE_PATH")
 	private String filePath;
+
+	/**
+	 * 文件名称
+	 */
+	@Column(name = "FILE_NAME")
+	private String fileName;
 
 	@Column(name = "VERSION")
 	private String version;
 
-	@Column(name = "FILE_NAME")
-	private String fileName;
+	/**
+	 * 文件机器人上存放路径
+	 */
+	@Column(name = "ROBOT_PATH")
+	private String robotPath;
 
 	@Column(name = "CREATE_DATE")
 	private Date createDate;
 
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -95,5 +110,13 @@ public class MapZip {
 
 	public void setCreateDate(Date createDate) {
 		this.createDate = createDate;
+	}
+
+	public String getRobotPath() {
+		return robotPath;
+	}
+
+	public void setRobotPath(String robotPath) {
+		this.robotPath = robotPath;
 	}
 }

@@ -2,10 +2,7 @@ package cn.mrobot.bean.area.point;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * Created by Chay on 2017/6/7.
@@ -15,6 +12,7 @@ import javax.persistence.Transient;
 public class MapPoint {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     /**
      * 点名：唯一标识符
@@ -66,13 +64,17 @@ public class MapPoint {
 	@Column(name = "MAP_POINT_TYPE_ID")
     private int mapPointTypeId;
 
+	/**
+	 * 点类型:不存库
+	 * */
+	@Transient
+	@JSONField(name = "map_point_type")
+	private String mapPointType;
+
+	@Column(name = "POINT_LEVEL")
 	@JSONField(name = "point_level")
 	private int pointLevel;
-    /**
-     * 点类型:不存库
-     * */
-	@Transient
-    private MapPointType mapPointType;
+
 
     public Long getId() {
         return id;
@@ -146,13 +148,13 @@ public class MapPoint {
         this.mapPointTypeId = mapPointTypeId;
     }
 
-    public MapPointType getMapPointType() {
-        return mapPointType;
-    }
+	public String getMapPointType() {
+		return mapPointType;
+	}
 
-    public void setMapPointType(MapPointType mapPointType) {
-        this.mapPointType = mapPointType;
-    }
+	public void setMapPointType(String mapPointType) {
+		this.mapPointType = mapPointType;
+	}
 
 	public int getPointLevel() {
 		return pointLevel;
