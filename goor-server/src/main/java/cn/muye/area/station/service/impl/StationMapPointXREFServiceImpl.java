@@ -60,6 +60,14 @@ public class StationMapPointXREFServiceImpl implements StationMapPointXREFServic
 	}
 
 	@Override
+	public List<StationMapPointXREF> listByStationId(Long stationId) {
+		WhereRequest whereRequestTemp = new WhereRequest();
+		whereRequestTemp.setQueryObj("{\""+SearchConstants.SEARCH_STATION_ID+"\":"+stationId+"}");
+		List<StationMapPointXREF> stationMapPointXREFList = list(whereRequestTemp);
+		return stationMapPointXREFList;
+	}
+
+	@Override
 	public void delete(long id) {
 		mapper.deleteByPrimaryKey(id);
 	}

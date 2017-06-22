@@ -76,7 +76,20 @@ public class StationServiceImpl implements StationService {
 
 	@Override
 	public Station findById(long id) {
-		return stationMapper.selectByPrimaryKey(id);
+		Station station = stationMapper.selectByPrimaryKey(id);
+		List<MapPoint> resultMapPoint = new ArrayList<MapPoint>();
+		List<StationMapPointXREF> stationMapPointXREFList = stationMapPointXREFService.listByStationId(id);
+		//如果没有关联点，则直接返回
+		if(stationMapPointXREFList != null && stationMapPointXREFList.size() > 0) {
+			//如果有关联点，则更新station的点列表
+			for(StationMapPointXREF stationMapPointXREF : stationMapPointXREFList) {
+				MapPoint mapPoint = pointService.findById(stationMapPointXREF.getMapPointId());
+				resultMapPoint.add(mapPoint);
+			}
+			station.setMapPoints(resultMapPoint);
+		}
+
+		return station;
 	}
 
 	@Override
@@ -99,16 +112,16 @@ public class StationServiceImpl implements StationService {
 			/*result = stationMapper.list(null);*/
 
 			//方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
-			temp = stationMapper.selectAll();
+			Example example = new Example(Station.class);
+			example.setOrderByClause("ID DESC");
+			temp = stationMapper.selectByExample(example);
 		}
 
 		//如果用公共Mapper查询，则需手动用For循环把关联的点放到站里面
 		if(temp != null && temp.size() > 0) {
 			for(Station station:temp) {
 				List<MapPoint> resultMapPoint = new ArrayList<MapPoint>();
-				WhereRequest whereRequestTemp = new WhereRequest();
-				whereRequestTemp.setQueryObj("{\""+SearchConstants.SEARCH_STATION_ID+"\":"+station.getId()+"}");
-				List<StationMapPointXREF> stationMapPointXREFList = stationMapPointXREFService.list(whereRequestTemp);
+				List<StationMapPointXREF> stationMapPointXREFList = stationMapPointXREFService.listByStationId(station.getId());
 				//如果没有关联点，则直接返回
 				if(stationMapPointXREFList == null || stationMapPointXREFList.size() <= 0) {
 					result.add(station);
@@ -137,6 +150,9 @@ public class StationServiceImpl implements StationService {
 
 	@Override
 	public void delete(Station station) {
+		//先删除关联的点
+		stationMapPointXREFService.deleteByStationId(station.getId());
+		//再删除站
 		stationMapper.delete(station);
 	}
 

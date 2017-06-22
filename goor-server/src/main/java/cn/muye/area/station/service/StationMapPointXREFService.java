@@ -25,6 +25,8 @@ public interface StationMapPointXREFService {
 
 	List<StationMapPointXREF> list(WhereRequest whereRequest);
 
+	List<StationMapPointXREF> listByStationId(Long stationId);
+
 	void delete(long id);
 
 	void deleteByStationId(long id);
