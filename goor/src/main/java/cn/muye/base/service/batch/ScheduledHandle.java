@@ -107,8 +107,8 @@ public class ScheduledHandle {
             public void run() {
                 try {
                     ScheduledHandleService service = new ScheduledHandleServiceImp();
-//                    service.rosHealthCheck();
-//                    logger.info("schedule rosHealthCheckScheduled");
+                    service.rosHealthCheck();
+                    logger.info("schedule rosHealthCheckScheduled");
                 } catch (Exception e) {
                     logger.error("schedule rosHealthCheckScheduled exception", e);
                 }

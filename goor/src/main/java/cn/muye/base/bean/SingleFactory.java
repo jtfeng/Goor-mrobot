@@ -34,30 +34,13 @@ public class SingleFactory implements ApplicationContextAware {
 
     public static Message getMessageInstance() {
         if (message == null) {
-            synchronized (Topic.class) {
+            synchronized (Message.class) {
                 if (message == null) {
                     message = new Message(TopicConstants.CHECK_HEART_MESSAGE);
                 }
             }
         }
         return message;
-    }
-
-    public static TopicCallback getTopicCallbackInstance() {
-        if (topicCallback == null) {
-            synchronized (Topic.class) {
-                if (topicCallback == null) {
-                    topicCallback = new TopicCallback() {
-                        @Override
-                        public void handleMessage(Message message) {
-                            System.out.println("-->> ros heart: " + message.toString());
-                            CacheInfoManager.setTopicHeartCheckCache();
-                        }
-                    };
-                }
-            }
-        }
-        return topicCallback;
     }
 
     @Override
