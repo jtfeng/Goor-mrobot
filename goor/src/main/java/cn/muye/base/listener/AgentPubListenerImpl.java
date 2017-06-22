@@ -1,5 +1,6 @@
 package cn.muye.base.listener;
 
+import cn.mrobot.bean.FileResult;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.DeviceType;
@@ -7,6 +8,8 @@ import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.ExecutorLog;
 import cn.mrobot.bean.log.ExecutorLogType;
+import cn.mrobot.utils.HttpClientUtil;
+import cn.mrobot.utils.ZipUtils;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
@@ -15,6 +18,7 @@ import cn.muye.base.service.MessageSendService;
 import cn.muye.base.service.imp.MessageSendServiceImp;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Maps;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
 import edu.wpi.rail.jrosbridge.messages.Message;
 import org.slf4j.Logger;
@@ -24,6 +28,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import javax.json.JsonObject;
+import java.io.File;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 

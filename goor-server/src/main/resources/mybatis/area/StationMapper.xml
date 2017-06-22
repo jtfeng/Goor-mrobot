@@ -7,6 +7,21 @@
         <result property="name" column="NAME"/>
         <result property="stationTypeId" column="STATION_TYPE_ID"/>
         <result property="description" column="DESCRIPTION"/>
+        <!-- ofType指定students集合中的对象类型 -->
+        <collection property="mapPoints" resultMap="mapPoint">
+        </collection>
+    </resultMap>
+
+    <resultMap id="mapPoint" type="cn.mrobot.bean.area.point.MapPoint">
+        <result property="id" column="POINT_ID"/>
+        <result property="pointName" column="POINT_NAME"/>
+        <result property="pointAlias" column="POINT_ALIAS"/>
+        <result property="sceneName" column="SCENE_NAME"/>
+        <result property="mapName" column="MAP_NAME"/>
+        <result property="x" column="X"/>
+        <result property="y" column="Y"/>
+        <result property="th" column="TH"/>
+        <result property="mapPointTypeId" column="MAP_POINT_TYPE_ID"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -48,10 +63,35 @@
         where ID=#{id}
     </select>
 
+    <!--<select id="list" resultMap="station">-->
+        <!--SELECT-->
+        <!--<include refid="Base_Column_List"/>-->
+        <!--FROM A_STATION-->
+        <!--<where>-->
+            <!--<if test="name != null ">-->
+                <!--AND NAME LIKE  CONCAT('%',#{name},'%')-->
+            <!--</if>-->
+        <!--</where>-->
+    <!--</select>-->
+
     <select id="list" resultMap="station">
         SELECT
-        <include refid="Base_Column_List"/>
-        FROM A_STATION
+        ast.ID,
+        ast.NAME,
+        ast.STATION_TYPE_ID,
+        ast.DESCRIPTION,
+        am.ID POINT_ID,
+        am.POINT_NAME,
+        am.POINT_ALIAS,
+        am.SCENE_NAME,
+        am.MAP_NAME,
+        am.X,
+        am.Y,
+        am.TH,
+        am.MAP_POINT_TYPE_ID
+        FROM A_STATION ast
+        LEFT JOIN A_STATION_MAP_POINT_XREF asmx ON ast.ID = asmx.STATION_ID
+        LEFT JOIN A_MAP_POINT am ON am.ID = asmx.MAP_POINT_ID
         <where>
             <if test="name != null ">
                 AND NAME LIKE  CONCAT('%',#{name},'%')

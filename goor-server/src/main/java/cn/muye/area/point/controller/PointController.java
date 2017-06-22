@@ -45,12 +45,20 @@ public class PointController {
 		try {
 
 			List<MapPoint> pointListDB = pointService.findByName(mapPoint.getPointName(), mapPoint.getSceneName());
-			if (pointListDB.size() > 0 && !pointListDB.get(1).getId().equals(mapPoint.getId())){
+			if (pointListDB.size() > 0 && !pointListDB.get(0).getId().equals(mapPoint.getId())){
 				return AjaxResult.failed("已存在相同名称的导航点");
 			}
 
 			if (mapPoint.getId() != null) {
-				pointService.update(mapPoint);
+				MapPoint mapPointDB = pointService.findById(mapPoint.getId());
+				mapPointDB.setMapName(mapPoint.getMapName());
+				mapPointDB.setMapPointTypeId(mapPoint.getMapPointTypeId());
+				mapPointDB.setPointAlias(mapPoint.getPointAlias());
+				mapPointDB.setTh(mapPoint.getTh());
+				mapPointDB.setX(mapPoint.getX());
+				mapPointDB.setY(mapPoint.getY());
+				mapPointDB.setPointLevel(mapPoint.getPointLevel());
+				pointService.update(mapPointDB);
 			} else {
 				pointService.save(mapPoint);
 			}
@@ -58,7 +66,7 @@ public class PointController {
 			return AjaxResult.success(mapPoint);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(1,"后台错误" );
+			return AjaxResult.failed(1,"系统错误" );
 		}
 	}
 
@@ -94,11 +102,10 @@ public class PointController {
 				return AjaxResult.failed("删除对象不存在");
 			}
 			pointService.delete(pointDB);
-
 			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed();
+			return AjaxResult.failed("系统错误");
 		}
 	}
 

@@ -32,4 +32,6 @@ public class SearchConstants {
 	public static String SEARCH_POINT_ALIAS = "pointAlias";
 	public static String SEARCH_SCENE_NAME = "sceneName";
 	public static String SEARCH_MAP_POINT_TYPE_ID = "mapPointTypeId";
+
+	public static String SEARCH_MAP_NAME = "mapName";
 }

@@ -1,4 +1,4 @@
-package cn.mrobot.bean.robot;
+package cn.mrobot.bean.assets.robot;
 
 import javax.persistence.Table;
 

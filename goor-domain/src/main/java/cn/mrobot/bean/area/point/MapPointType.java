@@ -1,5 +1,10 @@
 package cn.mrobot.bean.area.point;
 
+import com.alibaba.fastjson.JSON;
+
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by Chay on 2017/6/7.
  * 导航目标点类型
@@ -61,6 +66,19 @@ public enum MapPointType {
 		for (MapPointType c : MapPointType.values()) {
 			if (c.getCaption() == caption) {
 				return c;
+			}
+		}
+		return null;
+	}
+
+	public static String getTypeJson(int caption){
+		for (MapPointType c : MapPointType.values()) {
+			if (c.getCaption() == caption) {
+				Map result = new HashMap<String,Object>();
+				result.put("name",c);
+				result.put("value",c.getValue());
+				result.put("caption",c.getCaption());
+				return JSON.toJSONString(result);
 			}
 		}
 		return null;

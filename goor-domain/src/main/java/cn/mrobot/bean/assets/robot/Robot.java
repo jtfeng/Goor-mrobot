@@ -1,9 +1,11 @@
-package cn.mrobot.bean.robot;
+package cn.mrobot.bean.assets.robot;
 
+import cn.mrobot.bean.robot.RobotPassword;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Ray.Fu on 2017/6/12.
@@ -33,6 +35,17 @@ public class Robot {
 
     @JSONField(format = "yyyy-MM-dd")
     private Date updateTime; //修改时间
+
+    @Transient
+    private List<RobotPassword> passwords;
+
+    public List<RobotPassword> getPasswords() {
+        return passwords;
+    }
+
+    public void setPasswords(List<RobotPassword> passwords) {
+        this.passwords = passwords;
+    }
 
     public Long getId() {
         return id;

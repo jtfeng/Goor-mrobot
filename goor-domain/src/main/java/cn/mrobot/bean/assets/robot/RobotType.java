@@ -1,4 +1,4 @@
-package cn.mrobot.bean.robot;
+package cn.mrobot.bean.assets.robot;
 
 
 import javax.persistence.GeneratedValue;
@@ -14,17 +14,17 @@ public class RobotType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     private String name; //机器人类型名称
 
     private Integer boxCount; //格子数量
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

@@ -97,7 +97,7 @@ public class PointServiceImpl implements PointService {
 		MapPoint mapPoint;
 		for (int i = 0; i < mapPointList.size(); i++) {
 			mapPoint = mapPointList.get(i);
-			mapPoint.setMapPointType(MapPointType.getType(mapPoint.getMapPointTypeId()));
+			mapPoint.setMapPointType(MapPointType.getTypeJson(mapPoint.getMapPointTypeId()));
 			result.add(mapPoint);
 		}
 		return result;
@@ -114,7 +114,7 @@ public class PointServiceImpl implements PointService {
 	@Override
 	public void handle(SlamResponseBody slamResponseBody) {
 
-		if(TopicConstants.POINT_LOAD.equals(slamResponseBody.getSubName())){
+		if (TopicConstants.POINT_LOAD.equals(slamResponseBody.getSubName())) {
 			//获取地图导航点
 			JSONObject jsonObject = JSON.parseObject(slamResponseBody.getData().toString());
 			String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);

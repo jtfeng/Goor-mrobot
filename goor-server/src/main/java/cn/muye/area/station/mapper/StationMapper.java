@@ -3,6 +3,9 @@ package cn.muye.area.station.mapper;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.muye.util.MyMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -21,6 +24,6 @@ public interface StationMapper  extends MyMapper<Station> {
 //
 //	Station findById(long id);
 //
-//	List<Station> list(@Param("name") Object name);
+	List<Station> list(@Param("name") Object name);
 }
 

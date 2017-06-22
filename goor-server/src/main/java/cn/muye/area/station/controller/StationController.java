@@ -1,6 +1,7 @@
 package cn.muye.area.station.controller;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.utils.StringUtil;
@@ -8,6 +9,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -69,6 +71,11 @@ public class StationController {
 
 	}
 
+	/**
+	 * 查询单个站接口
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping(value = {"area/station/{id}"}, method = RequestMethod.GET)
 	@ApiOperation(value = "查询站详情", httpMethod = "GET", notes = "查询站详情")
 	@ResponseBody
@@ -86,6 +93,11 @@ public class StationController {
 		return AjaxResult.success(toEntity(station), "查询成功");
 	}
 
+	/**
+	 * 删除单个站接口
+	 * @param id
+	 * @return
+	 */
 	@RequestMapping(value = "area/station/{id}", method = RequestMethod.DELETE)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
@@ -97,13 +109,18 @@ public class StationController {
 			}
 			stationService.delete(stationDB);
 
-			return AjaxResult.success();
+			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed();
 		}
 	}
 
+	/**
+	 * 新增或修改站
+	 * @param station
+	 * @return
+	 */
 	@RequestMapping(value = {"area/station"}, method = RequestMethod.POST)
 	@ApiOperation(value = "新增或修改站", httpMethod = "POST", notes = "新增或修改站")
 	@ResponseBody
@@ -144,7 +161,6 @@ public class StationController {
 			stationService.save(station);
 			System.out.println("###########"+station.getId());
 
-			//TODO station转returnMap
 			return AjaxResult.success(toEntity(station), "新增成功");
 		} else {
 			return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
@@ -208,7 +224,7 @@ public class StationController {
 		Integer typeId = mapPoint.getMapPointTypeId();
 		if(typeId != null) {
 			//TODO 等待Jelynn添加方法
-//			mapPoint.setMapPointType(MapPointType.getTypeJson(typeId));
+			mapPoint.setMapPointType(MapPointType.getTypeJson(typeId));
 		}
 		return mapPoint;
 	}
