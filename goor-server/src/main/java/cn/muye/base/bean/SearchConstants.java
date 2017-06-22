@@ -10,6 +10,9 @@ package cn.muye.base.bean;
  * Version:1.0
  */
 public class SearchConstants {
+	//TODO  从登录用户获取关联门店ID，现在写死
+	public static Long FAKE_MERCHANT_SOTRE_ID = 100L;
+
 	//查询的常量字段
 	public static String SEARCH_BEGIN_DATE = "beginDate";
 	public static String SEARCH_END_DATE = "endDate";

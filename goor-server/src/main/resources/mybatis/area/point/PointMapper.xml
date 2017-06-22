@@ -11,10 +11,11 @@
         <result property="x" column="X"/>
         <result property="y" column="Y"/>
         <result property="th" column="TH"/>
+        <result property="pointLevel" column="POINT_LEVEL"/>
         <result property="mapPointTypeId" column="MAP_POINT_TYPE_ID"/>
     </resultMap>
 
-    <sql id="Base_Column_List" >
+    <sql id="Base_Column_List">
         ID,
         POINT_NAME,
         POINT_ALIAS,
@@ -23,14 +24,35 @@
         X,
         Y,
         TH,
+        POINT_LEVEL,
         MAP_POINT_TYPE_ID
     </sql>
 
-    <select id="get" resultMap="mapPoint">
+    <select id="selectMapName" resultType="String">
+        SELECT DISTINCT MAP_NAME
+        FROM A_MAP_POINT;
+    </select>
+
+    <select id="selectPointTypeByMapName" resultType="int">
+        SELECT DISTINCT MAP_POINT_TYPE_ID
+        FROM A_MAP_POINT a
+        WHERE a.MAP_NAME = #{mapName};
+    </select>
+
+    <select id="selectPointByPointTypeMapName" resultMap="mapPoint">
         SELECT
-        <include refid="Base_Column_List" />
-        FROM APP_CONFIG a
-        WHERE a.ID = #{id};
+        <include refid="Base_Column_List"/>
+        FROM A_MAP_POINT a
+        <where>
+            <trim>
+                <if test = "mapName != null">
+                    and a.MAP_NAME = #{mapName}
+                </if>
+                <if test="mapPointTypeId != null">
+                    and a.MAP_POINT_TYPE_ID = #{mapPointTypeId}
+                </if>
+            </trim>
+        </where>
     </select>
 
 </mapper>

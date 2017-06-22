@@ -2,6 +2,8 @@ package cn.muye.area.point.service.impl;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
+import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
+import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.WhereRequest;
@@ -18,7 +20,9 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -138,4 +142,59 @@ public class PointServiceImpl implements PointService {
 		}
 	}
 
+	@Override
+	public List<CascadeMapPoint> cascadeMapPoint() {
+		List<CascadeMapPoint> cascadeMapPointList = new ArrayList<>();
+		List<String> mapNameList = pointMapper.selectMapName();
+		String mapName;
+		int  pointTypeId;
+		for (int i = 0; i < mapNameList.size(); i++) {
+			CascadeMapPoint cascadeMapPoint = new CascadeMapPoint();
+			mapName = mapNameList.get(i);
+			List<Integer> pointTypeIdList = pointMapper.selectPointTypeByMapName(mapName);
+			JSONObject object = new JSONObject();
+			JSONArray mapPointArray = new JSONArray();
+			List<CascadeMapPointType> cascadeMapPointTypeList = new ArrayList<>();
+
+			for(int j = 0; j < pointTypeIdList.size(); j ++){
+				CascadeMapPointType cascadeMapPointType = new CascadeMapPointType();
+				pointTypeId = pointTypeIdList.get(j);
+				List<MapPoint> mapPointList = pointMapper.selectPointByPointTypeMapName(mapName, pointTypeId);
+				cascadeMapPointType.setId(pointTypeId);
+				cascadeMapPointType.setName(MapPointType.getValue(pointTypeId));
+				cascadeMapPointType.setChild(mapPointList);
+				cascadeMapPointTypeList.add(cascadeMapPointType);
+			}
+
+			cascadeMapPoint.setId(0);
+			cascadeMapPoint.setMapName(mapName);
+			cascadeMapPoint.setChild(cascadeMapPointTypeList);
+			cascadeMapPointList.add(cascadeMapPoint);
+		}
+		return cascadeMapPointList;
+	}
+
+//	@Override
+//	public JSONArray cascadeMapPoint() {
+//		JSONArray result = new JSONArray();
+//		List<String> mapNameList = pointMapper.selectMapName();
+//		String mapName;
+//		int  pointTypeId;
+//		for (int i = 0; i < mapNameList.size(); i++) {
+//			mapName = mapNameList.get(i);
+//			List<Integer> pointTypeIdList = pointMapper.selectPointTypeByMapName(mapName);
+//			JSONObject object = new JSONObject();
+//			JSONArray mapPointArray = new JSONArray();
+//			for(int j = 0; j < pointTypeIdList.size(); j ++){
+//				JSONObject mapPointObject = new JSONObject();
+//				pointTypeId = pointTypeIdList.get(j);
+//				List<MapPoint> mapPointList = pointMapper.selectPointByPointTypeMapName(mapName, pointTypeId);
+//				mapPointObject.put(pointTypeId+"", mapPointList);
+//				mapPointArray.add(mapPointObject);
+//			}
+//			object.put(mapName,mapPointArray);
+//			result.add(object);
+//		}
+//		return result;
+//	}
 }

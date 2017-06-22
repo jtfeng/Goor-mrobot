@@ -52,6 +52,14 @@ public enum MapPointType {
 		return caption;
 	}
 
+	public int getIndustrialControlCaption() {
+		return industrialControlCaption;
+	}
+
+	public double getScale() {
+		return scale;
+	}
+
 	public static String getValue(int caption) {
 		String value = "";
 		for (MapPointType noticeType : MapPointType.values()) {
@@ -78,6 +86,8 @@ public enum MapPointType {
 				result.put("name",c);
 				result.put("value",c.getValue());
 				result.put("caption",c.getCaption());
+				result.put("industrialControlCaption",c.getIndustrialControlCaption());
+				result.put("scale",c.getScale());
 				return JSON.toJSONString(result);
 			}
 		}

@@ -4,16 +4,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class BaseBean implements Serializable {
-    private Long merchantId;//关联门店ID
+    private Long storeId;//关联门店ID
     private Long createdBy;//创建用户
     private Date created;//创建时间
 
-    public Long getMerchantId() {
-        return merchantId;
+    public Long getStoreId() {
+        return storeId;
     }
 
-    public void setMerchantId(Long merchantId) {
-        this.merchantId = merchantId;
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 
     public Long getCreatedBy() {
