@@ -4,10 +4,9 @@ import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.service.MessageSendService;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
-import cn.muye.base.service.MessageSendService;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mpush.util.crypto.MD5Utils;
 import org.apache.commons.io.FileUtils;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -88,7 +86,6 @@ public class ResourceController {
                 resource.setPath(path.toString());
                 resource.setMd5(MD5Utils.encrypt(file.getBytes()));
                 //resource.setContent();
-                resource.setCreateTime(new Date());
                 resourceService.save(resource);
                 return AjaxResult.success(resource, "资源上传成功");
             }
@@ -108,8 +105,7 @@ public class ResourceController {
     @ResponseBody
     private AjaxResult pageResourceList(WhereRequest whereRequest){
         try {
-            PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-            List<Resource> resourceList = resourceService.listByType(RESOURCE_TYPE_BASE);
+            List<Resource> resourceList = resourceService.listByType(RESOURCE_TYPE_BASE,whereRequest.getPage(),whereRequest.getPageSize());
             PageInfo<Resource> pageList = new PageInfo<>(resourceList);
             return AjaxResult.success(pageList,"资源查询成功");
         } catch (Exception e) {
@@ -128,7 +124,7 @@ public class ResourceController {
     @ResponseBody
     private AjaxResult pushToAgent(@RequestBody ResourceToAgentBean resourceToAgentBean){
         try {
-            Resource resource = resourceService.getById(resourceToAgentBean.getResourceId());
+            Resource resource = resourceService.findById(resourceToAgentBean.getResourceId());
             return AjaxResult.success(resource,"资源推送成功");
         } catch (Exception e) {
             e.printStackTrace();

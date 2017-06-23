@@ -1,5 +1,6 @@
 package cn.mrobot.bean.assets.robot;
 
+import cn.mrobot.bean.base.BaseBean;
 import cn.mrobot.bean.robot.RobotPassword;
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -11,11 +12,7 @@ import java.util.List;
  * Created by Ray.Fu on 2017/6/12.
  */
 @Table(name = "AS_ROBOT")
-public class Robot {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Robot extends BaseBean{
 
     private String name; //机器人名称
 
@@ -29,9 +26,6 @@ public class Robot {
     private Integer batteryThreshold; //机器人电量阈值
 
     private Boolean boxActivated; //启用和冻结（格子用的）
-
-    @JSONField(format = "yyyy-MM-dd")
-    private Date createTime; //创建时间
 
     @JSONField(format = "yyyy-MM-dd")
     private Date updateTime; //修改时间
@@ -87,13 +81,6 @@ public class Robot {
         this.description = description;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
 
     public Date getUpdateTime() {
         return updateTime;

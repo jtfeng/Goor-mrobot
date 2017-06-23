@@ -4,9 +4,9 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotType;
 import cn.mrobot.bean.robot.RobotPassword;
 import cn.mrobot.utils.AutoNumUtil;
-import cn.muye.assets.robot.mapper.RobotPasswordMapper;
 import cn.muye.assets.robot.mapper.RobotTypeMapper;
 import cn.muye.assets.robot.service.RobotPasswordService;
+import cn.muye.base.service.imp.BaseServiceImpl;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,10 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class RobotPasswordServiceImpl implements RobotPasswordService {
+public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> implements RobotPasswordService {
 
     @Autowired
     private RobotTypeMapper robotTypeMapper;
-
-    @Autowired
-    private RobotPasswordMapper robotPasswordMapper;
 
     @Override
     public void saveRobotPassword(Robot robot) {
@@ -35,12 +32,15 @@ public class RobotPasswordServiceImpl implements RobotPasswordService {
         List<RobotPassword> addList = Lists.newArrayList();
         for (int i = 1; i <= boxCount ; i++){
             RobotPassword robotPassWord = new RobotPassword();
+            robotPassWord.setCreated(robot.getCreated());
+            robotPassWord.setCreatedBy(robot.getCreatedBy());
+            robotPassWord.setStoreId(robot.getStoreId());
             robotPassWord.setBoxNum(i);
             robotPassWord.setRobotId(robot.getId());
             robotPassWord.setPassword(AutoNumUtil.createRandomVcode());
             addList.add(robotPassWord);
         }
-        robotPasswordMapper.insertList(addList);
+        myMapper.insertList(addList);
 
     }
 
@@ -49,6 +49,15 @@ public class RobotPasswordServiceImpl implements RobotPasswordService {
         Example example = new Example(RobotPassword.class);
         example.createCriteria().andCondition("ROBOT_ID =" + robotId);
         example.setOrderByClause("BOX_NUM ASC");
-        return robotPasswordMapper.selectByExample(example);
+        return myMapper.selectByExample(example);
     }
+
+    @Override
+    public void batchUpdateRobotPwdList(List<RobotPassword> robotPasswordList) {
+        for (RobotPassword robotPassword : robotPasswordList) {
+            super.updateSelectiveByStoreId(robotPassword);
+        }
+    }
+
+
 }

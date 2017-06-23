@@ -1,17 +1,19 @@
 package cn.muye.assets.robot.controller;
 
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.robot.RobotPassword;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.AjaxResult;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Date;
 import java.util.List;
 
@@ -23,13 +25,14 @@ public class RobotController {
 
     @Autowired
     private RobotService robotService;
+    @Autowired
+    private RobotPasswordService robotPasswordService;
 
     @RequestMapping(value = {"assets/robot"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询机器人列表", httpMethod = "GET", notes = "查询机器人列表")
     @ResponseBody
     public AjaxResult robotList(WhereRequest whereRequest) {
-        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-        List<Robot> list = robotService.listRobot();
+        List<Robot> list = robotService.listRobot(whereRequest);
         PageInfo<Robot> pageList = new PageInfo<>(list);
         return AjaxResult.success(pageList, "查询成功");
     }
@@ -73,12 +76,11 @@ public class RobotController {
             robotDb.setDescription(robot.getDescription());
             robotDb.setUpdateTime(new Date());
             robotDb.setBoxActivated(robot.getBoxActivated());
-            robotService.update(robotDb);
+            robotService.updateByStoreId(robotDb);
             return AjaxResult.success(robotDb, "修改成功");
         } else if (robot.getId() == null){
-            robot.setCreateTime(new Date());
             robot.setBoxActivated(true);
-            robotService.save(robot);
+            robotService.saveRobot(robot);
             return AjaxResult.success(robot, "新增成功");
         } else {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误，查询失败");
@@ -90,7 +92,7 @@ public class RobotController {
     @ResponseBody
     public AjaxResult deleteRobot(@ApiParam(value = "机器人")@PathVariable String id) {
         if (id != null) {
-            robotService.deleteById(Long.valueOf(id));
+            robotService.deleteRobotById(Long.valueOf(id));
             return AjaxResult.success("删除成功");
         } else {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误，查询失败");
@@ -104,5 +106,24 @@ public class RobotController {
 //        List<RobotType> list = robotTypeService.listType();
 //        return AjaxResult.success(list, "查询成功");
 //    }
+    @RequestMapping(value = {"assets/robotPassword"}, method = RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult changeRobotPwd(@RequestBody Robot robot) {
+        try {
+            for (RobotPassword robotPassword : robot.getPasswords()) {
+                String password = robotPassword.getPassword();
+                String regex = "^\\d{4}$";
+                boolean flag = password.matches(regex);
+                if(!flag){
+                    return AjaxResult.failed("密码必须为4位数字");
+                }
+            }
+            robotPasswordService.batchUpdateRobotPwdList(robot.getPasswords());
+            return AjaxResult.success("修改密码成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("修改密码出错");
+        }
+    }
 
 }
