@@ -1,22 +1,14 @@
 package cn.mrobot.bean.resource;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import cn.mrobot.bean.base.BaseBean;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.Date;
 
 /**
  * Created by Selim on 2017/6/12.
  */
 @Table(name = "RE_RESOURCE")
-public class Resource {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Resource extends BaseBean{
 
     private Integer resourceType; //资源类型
 
@@ -33,11 +25,6 @@ public class Resource {
     private String path; //文件的相对路径
 
     private String content; //备注 添加版本？
-
-    @JSONField(format = "yyyy-mm-dd HH:mm:ss")
-    private Date createTime; //创建时间
-
-    private Long userId; //todo  用户
 
     public String getMd5() {
         return md5;
@@ -118,11 +105,5 @@ public class Resource {
         this.content = content;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
 }

@@ -1,9 +1,10 @@
 package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.muye.assets.robot.mapper.RobotMapper;
+import cn.mrobot.bean.robot.RobotPassword;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.service.imp.BaseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,17 +17,15 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class RobotServiceImpl implements RobotService {
+public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotService {
 
-    @Autowired
-    private RobotMapper robotMapper;
     @Autowired
     private RobotPasswordService robotPasswordService;
 
     public List<Robot> listRobot() {
         Example example = new Example(Robot.class);
         example.setOrderByClause("ID DESC");
-        List<Robot> list = robotMapper.selectByExample(example);
+        List<Robot> list = myMapper.selectByExample(example);
         for (Robot robot : list) {
             robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
         }
@@ -34,31 +33,29 @@ public class RobotServiceImpl implements RobotService {
     }
 
     public Robot getById(Long id) {
-        return robotMapper.selectByPrimaryKey(id);
+        return myMapper.selectByPrimaryKey(id);
     }
 
-    public void update(Robot robotDb) {
-        robotMapper.updateByPrimaryKey(robotDb);
-    }
 
-    public void save(Robot robot) {
-        robotMapper.insert(robot);
+    public void saveRobot(Robot robot) {
+        super.save(robot);
         robotPasswordService.saveRobotPassword(robot);
     }
 
-    public void deleteById(Long id) {
-        robotMapper.deleteByPrimaryKey(id);
+    public void deleteRobotById(Long id) {
+        myMapper.deleteByPrimaryKey(id);
+        robotPasswordService.deleteByStoreId(new RobotPassword(id));
     }
 
     public Robot getByName(String name) {
         Robot robot = new Robot();
         robot.setName(name);
-        return robotMapper.selectOne(robot);
+        return myMapper.selectOne(robot);
     }
 
     public Robot getByCode(String code) {
         Robot robot = new Robot();
         robot.setCode(code);
-        return robotMapper.selectOne(robot);
+        return myMapper.selectOne(robot);
     }
 }

@@ -1,9 +1,9 @@
 package cn.muye.resource.service.impl;
 
 import cn.mrobot.bean.resource.Resource;
-import cn.muye.resource.mapper.ResourceMapper;
+import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.resource.service.ResourceService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.github.pagehelper.PageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
@@ -15,31 +15,15 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class ResourceServiceImpl implements ResourceService {
-
-    @Autowired
-    private ResourceMapper resourceMapper;
+public class ResourceServiceImpl extends BaseServiceImpl<Resource> implements ResourceService {
 
     @Override
-    public void save(Resource resource) {
-        resourceMapper.insert(resource);
-    }
-
-    @Override
-    public List<Resource> list() {
-        return resourceMapper.selectAll();
-    }
-
-    @Override
-    public List<Resource> listByType(Integer resourceType) {
+    public List<Resource> listByType(Integer resourceType, int page, int pageSize) {
+        PageHelper.startPage(page,pageSize);
         Example example = new Example(Resource.class);
         example.createCriteria().andCondition("RESOURCE_TYPE =", resourceType);
-        example.setOrderByClause("CREATE_TIME DESC");
-        return resourceMapper.selectByExample(example);
+        example.setOrderByClause("CREATED DESC");
+        return myMapper.selectByExample(example);
     }
 
-    @Override
-    public Resource getById(Long resourceId) {
-        return resourceMapper.selectByPrimaryKey(resourceId);
-    }
 }
