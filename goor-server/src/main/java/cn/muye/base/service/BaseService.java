@@ -9,14 +9,13 @@ import java.util.List;
  */
 public interface BaseService<T extends BaseBean> extends BaseCrudService<T> {
 
-    //判定当前storeId的 RUD
-    int deleteByStoreId(T entity);
-
+    //判定当前storeId的 RU
     int updateByStoreId(T entity);
 
     int updateSelectiveByStoreId(T entity);
 
-    List<T> listAllByStoreId();
+    List<T> listAllByStoreId(Class<T> clazz);
 
-    List<T> listPageByStoreId(int page, int pageSize);
+    List<T> listPageByStoreIdAndOrder(int page, int pageSize, Class<T> clazz, String order);
+
 }

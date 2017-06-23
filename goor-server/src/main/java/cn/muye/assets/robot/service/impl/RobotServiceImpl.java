@@ -2,13 +2,13 @@ package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.robot.RobotPassword;
+import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -22,10 +22,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Autowired
     private RobotPasswordService robotPasswordService;
 
-    public List<Robot> listRobot() {
-        Example example = new Example(Robot.class);
-        example.setOrderByClause("ID DESC");
-        List<Robot> list = myMapper.selectByExample(example);
+    public List<Robot> listRobot(WhereRequest whereRequest) {
+        List<Robot> list = super.listPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),Robot.class,"ID DESC");
         for (Robot robot : list) {
             robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
         }
@@ -44,7 +42,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     public void deleteRobotById(Long id) {
         myMapper.deleteByPrimaryKey(id);
-        robotPasswordService.deleteByStoreId(new RobotPassword(id));
+        robotPasswordService.delete(new RobotPassword(null,id));
     }
 
     public Robot getByName(String name) {

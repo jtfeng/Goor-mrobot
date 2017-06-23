@@ -7,13 +7,13 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.AjaxResult;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Date;
 import java.util.List;
 
@@ -32,8 +32,7 @@ public class RobotController {
     @ApiOperation(value = "查询机器人列表", httpMethod = "GET", notes = "查询机器人列表")
     @ResponseBody
     public AjaxResult robotList(WhereRequest whereRequest) {
-        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-        List<Robot> list = robotService.listRobot();
+        List<Robot> list = robotService.listRobot(whereRequest);
         PageInfo<Robot> pageList = new PageInfo<>(list);
         return AjaxResult.success(pageList, "查询成功");
     }

@@ -55,7 +55,7 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
     @Override
     public void batchUpdateRobotPwdList(List<RobotPassword> robotPasswordList) {
         for (RobotPassword robotPassword : robotPasswordList) {
-            myMapper.updateByPrimaryKeySelective(robotPassword);
+            super.updateSelectiveByStoreId(robotPassword);
         }
     }
 

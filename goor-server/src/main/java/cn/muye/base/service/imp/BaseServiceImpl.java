@@ -1,6 +1,7 @@
 package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.BaseService;
 import com.github.pagehelper.PageHelper;
@@ -15,32 +16,37 @@ import java.util.List;
 @Service
 public abstract class BaseServiceImpl<T extends BaseBean>  extends BaseCrudServiceImpl<T> implements BaseService<T> {
 
-    //关系到storeId
-    public int deleteByStoreId(T entity) {
-        entity.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        return myMapper.delete(entity);
-    }
-
     public int updateByStoreId(T entity) {
-        entity.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        return myMapper.updateByPrimaryKey(entity);
+        Example example = new Example(entity.getClass());
+        example.createCriteria()
+                .andCondition("ID =", entity.getId())
+                .andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
+        return myMapper.updateByExample(entity, example);
     }
 
     public int updateSelectiveByStoreId(T entity) {
-        entity.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        return myMapper.updateByPrimaryKeySelective(entity);
+        Example example = new Example(entity.getClass());
+        example.createCriteria()
+                .andCondition("ID =", entity.getId())
+                .andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
+        return myMapper.updateByExampleSelective(entity, example);
     }
 
-    public List<T> listAllByStoreId() {
-        Example example = new Example(myMapper.getClass());
+    public List<T> listAllByStoreId(Class<T> clazz) {
+        Example example = new Example(clazz);
         example.createCriteria().andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
         return myMapper.selectByExample(example);
     }
 
-    public List<T> listPageByStoreId(int page, int pageSize) {
+    public List<T> listPageByStoreIdAndOrder(int page, int pageSize, Class<T> clazz, String order) {
         PageHelper.startPage(page, pageSize);
-        Example example = new Example(myMapper.getClass());
+        Example example = new Example(clazz);
         example.createCriteria().andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if(!StringUtil.isNullOrEmpty(order)){
+            example.setOrderByClause(order);
+        }
         return myMapper.selectByExample(example);
     }
+
+
 }

@@ -1,6 +1,7 @@
 package cn.muye.assets.robot.service;
 
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  */
 public interface RobotService extends BaseService<Robot>{
 
-    List<Robot> listRobot();
+    List<Robot> listRobot(WhereRequest whereRequest);
 
     Robot getById(Long id);
 
