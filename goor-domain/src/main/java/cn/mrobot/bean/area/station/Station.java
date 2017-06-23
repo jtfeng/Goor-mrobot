@@ -1,6 +1,7 @@
 package cn.mrobot.bean.area.station;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.*;
@@ -12,10 +13,7 @@ import java.util.List;
  * 护士站
  */
 @Table(name = "A_STATION")
-public class Station {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Station extends BaseBean{
     /**
      * 站名
      */
@@ -29,8 +27,8 @@ public class Station {
     /**
      * 站类型JSON串:不存库
      * */
-    @Transient
-    private String stationType;
+//    @Transient
+//    private String stationType;
     /**
      * 描述
      */
@@ -40,14 +38,6 @@ public class Station {
      * */
     @Transient
     private List<MapPoint> mapPoints;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
@@ -65,13 +55,13 @@ public class Station {
         this.stationTypeId = stationTypeId;
     }
 
-    public String getStationType() {
-        return stationType;
-    }
-
-    public void setStationType(String stationType) {
-        this.stationType = stationType;
-    }
+//    public String getStationType() {
+//        return stationType;
+//    }
+//
+//    public void setStationType(String stationType) {
+//        this.stationType = stationType;
+//    }
 
     public List<MapPoint> getMapPoints() {
         return mapPoints;

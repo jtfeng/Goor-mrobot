@@ -1,7 +1,6 @@
 package cn.muye.area.station.controller;
 
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.utils.StringUtil;
@@ -9,7 +8,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
-import com.alibaba.fastjson.JSON;
+import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -21,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,7 +53,8 @@ public class StationController {
 	private AjaxResult pageStation(WhereRequest whereRequest){
 		try {
 			PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-			List<Station> stationList = stationService.list(whereRequest);
+			//TODO 从session取切换门店的ID，现在先写死
+			List<Station> stationList = stationService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
 			List<Station> returnList = new ArrayList<Station>();
 			if(stationList != null && stationList.size() > 0) {
 				for(Station station:stationList) {
@@ -85,8 +86,9 @@ public class StationController {
 		}
 		Station station = null;
 		try {
-			station = stationService.findById(Long.valueOf(id));
-		} catch (NumberFormatException e) {
+			//TODO 从session取切换门店的ID，现在先写死
+			station = stationService.findById(Long.valueOf(id),SearchConstants.FAKE_MERCHANT_STORE_ID);
+		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
 			return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
 		}
@@ -103,7 +105,8 @@ public class StationController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
 	public AjaxResult deleteMapPoint(@PathVariable long id) throws Exception {
 		try {
-			Station stationDB = stationService.findById(id);
+			//TODO 从session取切换门店的ID，现在先写死
+			Station stationDB = stationService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID);
 			if (stationDB == null) {
 				return AjaxResult.failed("删除对象不存在");
 			}
@@ -112,7 +115,7 @@ public class StationController {
 			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed();
+			return AjaxResult.failed("出错");
 		}
 	}
 
@@ -125,45 +128,56 @@ public class StationController {
 	@ApiOperation(value = "新增或修改站", httpMethod = "POST", notes = "新增或修改站")
 	@ResponseBody
 	public AjaxResult saveOrUpdateStation(@ApiParam(value = "站")@RequestBody Station station) {
-		Integer stationTypeId = station.getStationTypeId();
-		if (stationTypeId == null || stationTypeId <= 0 || StationType.getType(stationTypeId) == null) {
-			return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站类型有误");
-		}
-		String name = station.getName();
-		if (StringUtil.isNullOrEmpty(name)) {
-			return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站名称不能为空");
-		}
-		//判断是否有重复的名称,且查找到的对象ID不是提交的对象ID
-		List<Station> stationDbList = stationService.listByName(name);
-		int size = stationDbList.size();
-		Long id = station.getId();
-		if (stationDbList != null
-				&& (size > 1
-					|| (size == 1 && id != null && !stationDbList.get(0).getId().equals(id)))) {
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "站名称重复");
-		}
+		try {
+			Integer stationTypeId = station.getStationTypeId();
+			if (stationTypeId == null || stationTypeId <= 0 || StationType.getType(stationTypeId) == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站类型有误");
+            }
+			String name = station.getName();
+			if (StringUtil.isNullOrEmpty(name)) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站名称不能为空");
+            }
+			//判断是否有重复的名称,且查找到的对象ID不是提交的对象ID
+			List<Station> stationDbList = stationService.listByName(name);
+			int size = stationDbList.size();
+			Long id = station.getId();
+			if (stationDbList != null
+                    && (size > 1
+                        || (size == 1 && id != null && !stationDbList.get(0).getId().equals(id)))) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "站名称重复");
+            }
 
-		//校验点都是数据库里的点
-		if(!isPointExist(station)) {
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "点参数错误");
-		}
+			//校验点都是数据库里的点
+			if(!isPointExist(station)) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "点参数错误");
+            }
 
-		if (station != null && id != null) { //修改
-			Station stationDb = stationService.findById(id);
-			stationDb.setName(station.getName());
-			stationDb.setStationTypeId(station.getStationTypeId());
-			stationDb.setDescription(station.getDescription());
-			stationDb.setMapPoints(station.getMapPoints());
+			if (station != null && id != null) { //修改
+				//TODO 从session取切换门店的ID，现在先写死
+                Station stationDb = stationService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                stationDb.setName(station.getName());
+                stationDb.setStationTypeId(station.getStationTypeId());
+                stationDb.setDescription(station.getDescription());
+                stationDb.setMapPoints(station.getMapPoints());
 
-			stationService.update(stationDb);
-			return AjaxResult.success(toEntity(stationDb), "修改成功");
-		} else if (station != null && id == null){
-			stationService.save(station);
-			System.out.println("###########"+station.getId());
+                stationService.update(stationDb);
+                return AjaxResult.success(toEntity(stationDb), "修改成功");
+            } else if (station != null && id == null){
+				//TODO 从session取切换门店的ID，现在先写死
+				station.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+				station.setCreated(new Date());
+				//TODO 从session取登录用户ID
+				station.setCreatedBy(SearchConstants.FAKE_MERCHANT_STORE_ID);
 
-			return AjaxResult.success(toEntity(station), "新增成功");
-		} else {
-			return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+                stationService.save(station);
+
+                return AjaxResult.success(toEntity(station), "新增成功");
+            } else {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+            }
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			return AjaxResult.failed("出错");
 		}
 	}
 
@@ -195,12 +209,15 @@ public class StationController {
 	 * @return
 	 */
 	private Station toEntity(Station station) {
-		Integer typeId = station.getStationTypeId();
-		if(typeId != null) {
-			station.setStationType(StationType.getTypeJson(typeId));
-		}
+//		Integer typeId = station.getStationTypeId();
+//		if(typeId != null) {
+//			station.setStationType(StationType.getTypeJson(typeId));
+//		}
 
-		List<MapPoint> pointList = station.getMapPoints();
+		List<MapPoint> pointList = null;
+		if(station != null) {
+			pointList = station.getMapPoints();
+		}
 		if(pointList != null && pointList.size() > 0) {
 			List<MapPoint> resultPointList = new ArrayList<MapPoint>();
 			for(MapPoint mapPoint : pointList) {
@@ -221,11 +238,10 @@ public class StationController {
 	 * @return
 	 */
 	private MapPoint toEntity(MapPoint mapPoint) {
-		Integer typeId = mapPoint.getMapPointTypeId();
-		if(typeId != null) {
-			//TODO 等待Jelynn添加方法
-			mapPoint.setMapPointType(MapPointType.getTypeJson(typeId));
-		}
+//		Integer typeId = mapPoint.getMapPointTypeId();
+//		if(typeId != null) {
+//			mapPoint.setMapPointType(MapPointType.getTypeJson(typeId));
+//		}
 		return mapPoint;
 	}
 }

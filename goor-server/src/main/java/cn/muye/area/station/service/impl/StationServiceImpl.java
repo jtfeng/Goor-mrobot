@@ -3,7 +3,6 @@ package cn.muye.area.station.service.impl;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationMapPointXREF;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.mapper.StationMapper;
@@ -75,8 +74,17 @@ public class StationServiceImpl implements StationService {
 	}
 
 	@Override
-	public Station findById(long id) {
-		Station station = stationMapper.selectByPrimaryKey(id);
+	public Station findById(long id, Long storeId) {
+		 stationMapper.selectByPrimaryKey(id);
+		Example example = new Example(Station.class);
+		example.createCriteria().andCondition("ID =", id);
+		example.createCriteria().andCondition("STORE_ID =", storeId);
+		example.setOrderByClause("ID DESC");
+		List<Station> temp = stationMapper.selectByExample(example);
+		if(temp == null || temp.size() <= 0) {
+			return null;
+		}
+		Station station = temp.get(0);
 		List<MapPoint> resultMapPoint = new ArrayList<MapPoint>();
 		List<StationMapPointXREF> stationMapPointXREFList = stationMapPointXREFService.listByStationId(id);
 		//如果没有关联点，则直接返回
@@ -93,7 +101,7 @@ public class StationServiceImpl implements StationService {
 	}
 
 	@Override
-	public List<Station> list(WhereRequest whereRequest) {
+	public List<Station> list(WhereRequest whereRequest, long storeId) {
 		List<Station> temp = new ArrayList<Station>();
 		List<Station> result = new ArrayList<Station>();
 		if(whereRequest.getQueryObj() != null){
@@ -105,6 +113,7 @@ public class StationServiceImpl implements StationService {
 			//方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
 			Example example = new Example(Station.class);
 			example.createCriteria().andCondition("NAME like", "%" + name + "%");
+			example.createCriteria().andCondition("STORE_ID =", storeId);
 			example.setOrderByClause("ID DESC");
 			temp = stationMapper.selectByExample(example);
 		}else {
