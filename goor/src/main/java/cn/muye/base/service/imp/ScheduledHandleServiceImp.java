@@ -6,10 +6,10 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SingleFactory;
+import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.download.DownloadHandle;
-import cn.muye.base.listener.AppSubListenerImpl;
-import cn.muye.base.listener.CheckHeartSubListenerImpl;
+import cn.muye.base.listener.*;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.MessageSendService;
@@ -107,14 +107,15 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 }
                 Topic topic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
                 topic.publish(SingleFactory.getMessageInstance());//如果已经订阅了，会自动执行订阅方法
-                logger.info("rosHealthCheck heartTime="+CacheInfoManager.getTopicHeartCheckCache());
+                logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
                 if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX){
                     ros.disconnect();
                     ros.connect();
                     TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
                     topic.subscribe(checkHeartCallback);
                     topic.publish(SingleFactory.getMessageInstance());
-                    this.reSubScribeTopic();//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
+					TopicSubscribeInfo.reSubScribeTopic(ros);//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
+//					this.reSubScribeTopic();//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
                 }
             } catch (Exception e) {
                 logger.error("-->> Scheduled rosHealthCheck Exception", e);
@@ -266,9 +267,23 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     //当网络断开时从新订阅
     private void reSubScribeTopic(){
         ros = applicationContext.getBean(Ros.class);
-        Topic appSubTopic = new Topic(ros, TopicConstants.APP_SUB, TopicConstants.TOPIC_TYPE_STRING);
-        TopicCallback appSubCallback = new AppSubListenerImpl();
-        appSubTopic.subscribe(appSubCallback);
+
+		//订阅工控的topic。所有工控信息全发布在这个topic中，通过sub_name进行区分
+		Topic appSubTopic = new Topic(ros, TopicConstants.APP_SUB, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback appSubCallback = new AppSubListenerImpl();
+		appSubTopic.subscribe(appSubCallback);
+		//订阅应用发布、工控接收的topic。所有应用信息全发布在这个topic中，通过pub_name进行区分
+		Topic appPubTopic = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback appPubCallback = new AppPubListenerImpl();
+		appPubTopic.subscribe(appPubCallback);
+		//订阅agent发布的topic。所有agent发布信息全发布在这个topic中，通过pub_name进行区分
+		Topic agentPubTopic = new Topic(ros, TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback agentPubCallback = new AgentPubListenerImpl();
+		agentPubTopic.subscribe(agentPubCallback);
+		//订阅agent接收的topic。所有agent接收信息全发布在这个topic中，通过sub_name进行区分
+		Topic agentSubTopic = new Topic(ros, TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback agentSubCallback = new AgentSubListenerImpl();
+		agentSubTopic.subscribe(agentSubCallback);
     }
 
     @Override

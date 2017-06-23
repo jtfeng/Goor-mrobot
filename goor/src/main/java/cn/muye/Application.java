@@ -1,6 +1,7 @@
 package cn.muye;
 
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.listener.*;
 import cn.muye.base.service.batch.ScheduledHandle;
 import com.github.pagehelper.PageHelper;
@@ -240,26 +241,7 @@ public class Application {
 		Topic checkHeartTopic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
 		TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
 		checkHeartTopic.subscribe(checkHeartCallback);
-		//订阅工控的topic。所有工控信息全发布在这个topic中，通过sub_name进行区分
-		Topic appSubTopic = new Topic(ros, TopicConstants.APP_SUB, TopicConstants.TOPIC_TYPE_STRING);
-		TopicCallback appSubCallback = new AppSubListenerImpl();
-		appSubTopic.subscribe(appSubCallback);
-		//cloud topic
-//		Topic cloudBack = new Topic(ros, Constant.CLOUD_SUB, Constant.TOPIC_TYPE_STRING);
-//		TopicCallback cloudTopicCallback = new TopicCloudListenerImp();
-//		cloudBack.subscribe(cloudTopicCallback);
-		//订阅应用发布、工控接收的topic。所有应用信息全发布在这个topic中，通过pub_name进行区分
-		Topic appPubTopic = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
-		TopicCallback appPubCallback = new AppPubListenerImpl();
-		appPubTopic.subscribe(appPubCallback);
-		//订阅agent发布的topic。所有agent发布信息全发布在这个topic中，通过pub_name进行区分
-		Topic agentPubTopic = new Topic(ros, TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING);
-		TopicCallback agentPubCallback = new AgentPubListenerImpl();
-		agentPubTopic.subscribe(agentPubCallback);
-		//订阅agent接收的topic。所有agent接收信息全发布在这个topic中，通过sub_name进行区分
-		Topic agentSubTopic = new Topic(ros, TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING);
-		TopicCallback agentSubCallback = new AgentSubListenerImpl();
-		agentSubTopic.subscribe(agentSubCallback);
+		TopicSubscribeInfo.reSubScribeTopic(ros);
 		return ros;
 	}
 
