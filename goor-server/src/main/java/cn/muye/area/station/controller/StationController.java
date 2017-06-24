@@ -155,6 +155,9 @@ public class StationController {
 			if (station != null && id != null) { //修改
 				//TODO 从session取切换门店的ID，现在先写死
                 Station stationDb = stationService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID);
+				if(stationDb == null) {
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要修改的对象不存在");
+				}
                 stationDb.setName(station.getName());
                 stationDb.setStationTypeId(station.getStationTypeId());
                 stationDb.setDescription(station.getDescription());

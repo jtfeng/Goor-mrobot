@@ -74,7 +74,7 @@ public class StationServiceImpl implements StationService {
 	}
 
 	@Override
-	public Station findById(long id, Long storeId) {
+	public Station findById(long id, long storeId) {
 		 stationMapper.selectByPrimaryKey(id);
 		Example example = new Example(Station.class);
 		example.createCriteria().andCondition("ID =", id);

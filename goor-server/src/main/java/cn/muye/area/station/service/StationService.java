@@ -21,7 +21,7 @@ public interface StationService {
 
 	void update(Station station );
 
-	Station findById(long id, Long storeId);
+	Station findById(long id, long storeId);
 
 	List<Station> list(WhereRequest whereRequest, long storeId);
 
