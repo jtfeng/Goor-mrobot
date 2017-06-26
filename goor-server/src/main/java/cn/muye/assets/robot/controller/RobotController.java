@@ -106,7 +106,7 @@ public class RobotController {
 //        List<RobotType> list = robotTypeService.listType();
 //        return AjaxResult.success(list, "查询成功");
 //    }
-    @RequestMapping(value = {"assets/robotPassword"}, method = RequestMethod.POST)
+    @RequestMapping(value = {"assets/robotPassword"}, method = RequestMethod.PUT)
     @ResponseBody
     public AjaxResult changeRobotPwd(@RequestBody Robot robot) {
         try {

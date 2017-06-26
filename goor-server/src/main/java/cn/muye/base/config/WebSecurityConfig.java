@@ -12,11 +12,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
+        http.
+                authorizeRequests()
                 .antMatchers("/","/login").permitAll()//根路径和/login路径不拦截
                 .antMatchers("/websocket").permitAll()
                 .antMatchers("/test").permitAll()
+                .antMatchers("/resource/**").permitAll()
+                .antMatchers("/assets/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
@@ -26,6 +28,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
                 .and()
                 .logout()
                 .permitAll();
+        //暂时去除csrf 对于post方法的拦截
+        http.csrf().disable();
     }
 
     //4在内存中配置两个用户 wyf 和 wisely ,密码和用户名一致,角色是 USER

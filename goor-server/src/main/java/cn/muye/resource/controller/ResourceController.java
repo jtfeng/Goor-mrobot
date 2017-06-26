@@ -4,6 +4,7 @@ import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.controller.BaseController;
 import cn.muye.base.service.MessageSendService;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
@@ -12,7 +13,6 @@ import com.mpush.util.crypto.MD5Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +26,7 @@ import java.util.UUID;
  */
 @Controller
 @RequestMapping("resource")
-public class ResourceController {
+public class ResourceController extends BaseController{
 
     public static final Integer RESOURCE_TYPE_BASE = 1;
 
@@ -34,12 +34,6 @@ public class ResourceController {
     private ResourceService resourceService;
     @Autowired
     private MessageSendService messageSendService;
-
-    @Value("${goor.push.dirs}")
-    private String DOWNLOAD_HOME;
-
-    @Value("${goor.push.http}")
-    private String DOWNLOAD_HTTP;
 
     /**
      * 保存一个resource (上传)
