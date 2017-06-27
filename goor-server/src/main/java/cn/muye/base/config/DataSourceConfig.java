@@ -1,5 +1,6 @@
 package cn.muye.base.config;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,6 +16,6 @@ public class DataSourceConfig {
     @Bean(name = "dataSource")
     @ConfigurationProperties(prefix="spring.datasource")
     public DataSource dataSource() {
-        return new org.apache.tomcat.jdbc.pool.DataSource();
+        return new DruidDataSource();
     }
 }
