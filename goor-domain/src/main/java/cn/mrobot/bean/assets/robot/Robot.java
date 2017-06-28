@@ -1,7 +1,6 @@
 package cn.mrobot.bean.assets.robot;
 
 import cn.mrobot.bean.base.BaseBean;
-import cn.mrobot.bean.robot.RobotPassword;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.*;
@@ -12,7 +11,7 @@ import java.util.List;
  * Created by Ray.Fu on 2017/6/12.
  */
 @Table(name = "AS_ROBOT")
-public class Robot extends BaseBean{
+public class Robot extends BaseBean {
 
     private String name; //机器人名称
 

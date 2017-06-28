@@ -1,10 +1,11 @@
 package cn.muye.assets.shelf.controller;
 
-import cn.mrobot.bean.shelf.Shelf;
+import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.assets.shelf.service.ShelfService;
+import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,8 @@ public class ShelfController {
     @RequestMapping(value = "assets/shelf", method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult list(WhereRequest whereRequest) {
-        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-        List<Shelf> list = shelfService.list();
+//        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+        List<Shelf> list = shelfService.listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), Shelf.class, "ID DESC");
         PageInfo<Shelf> pageList = new PageInfo<>(list);
         return AjaxResult.success(pageList, "查询成功");
     }
@@ -48,6 +49,7 @@ public class ShelfController {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "货架编号重复");
         }
         if (id == null) {
+            shelf.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
             shelfService.save(shelf);
             return AjaxResult.success(shelf, "新增成功");
         } else {
@@ -56,7 +58,8 @@ public class ShelfController {
             shelfDb.setCode(shelf.getCode());
             shelfDb.setRfid(shelf.getRfid());
             shelfDb.setType(shelf.getType());
-            shelfService.update(shelfDb);
+            shelfDb.setDescription(shelf.getDescription());
+            shelfService.updateByStoreId(shelfDb);
             return AjaxResult.success(shelfDb, "修改成功");
         }
     }

@@ -1,6 +1,6 @@
 package cn.muye.assets.shelf.mapper;
 
-import cn.mrobot.bean.shelf.Shelf;
+import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.muye.util.MyMapper;
 
 /**

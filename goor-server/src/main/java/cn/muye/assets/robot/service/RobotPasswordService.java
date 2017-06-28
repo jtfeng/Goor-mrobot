@@ -1,8 +1,8 @@
 package cn.muye.assets.robot.service;
 
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.robot.RobotPassword;
 import cn.muye.base.service.BaseService;
+import cn.mrobot.bean.assets.robot.RobotPassword;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package cn.muye.assets.robot.controller;
 
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.robot.RobotPassword;
+import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -49,6 +49,12 @@ public class RobotController {
         }
     }
 
+    /**
+     * 新增或修改机器人
+     *
+     * @param robot
+     * @return
+     */
     @RequestMapping(value = {"assets/robot"}, method = RequestMethod.POST)
     @ApiOperation(value = "新增或修改机器人", httpMethod = "POST", notes = "新增或修改机器人")
     @ResponseBody

@@ -1,6 +1,6 @@
 package cn.muye.assets.robot.mapper;
 
-import cn.mrobot.bean.robot.RobotPassword;
+import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.muye.util.MyMapper;
 
 /**

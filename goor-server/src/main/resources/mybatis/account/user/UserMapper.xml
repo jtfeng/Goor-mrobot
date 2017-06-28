@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.account.user.mapper.UserMapper">
+
+    <resultMap id="userResult" type="cn.mrobot.bean.account.User">
+        <result property="id" column="ID"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="password" column="PASSWORD"/>
+        <result property="activated" column="ACTIVATED"/>
+        <result property="directLoginKey" column="DIRECT_LOGIN_KEY"/>
+        <result property="roleId" column="ROLE_ID"/>
+    </resultMap>
+
+    <select id="list" resultMap="userResult" parameterType="java.util.Map">
+        SELECT
+            u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+          u.ACTIVATED,
+   u.DIRECT_LOGIN_KEY,
+           ur.ROLE_ID
+        FROM
+            AC_USER u
+        LEFT JOIN AC_USER_ROLE_XREF ur ON u.ID = ur.USER_ID
+        ORDER BY
+            u.ID DESC
+    </select>
+
+    <update id="fakeDeleteById">
+        update AC_USER set ACTIVATED= 0 where ID= #{id}
+    </update>
+
+    <select id="getByUserName" resultMap="userResult">
+        SELECT u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+            u.ACTIVATED,
+            u.DIRECT_LOGIN_KEY
+        FROM AC_USER u WHERE u.USER_NAME = #{userName}
+    </select>
+
+    <select id="getUserByDirectKey" resultMap="userResult">
+        SELECT u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+            u.ACTIVATED,
+            u.DIRECT_LOGIN_KEY
+        FROM AC_USER u WHERE u.DIRECT_LOGIN_KEY = #{directLoginKey}
+    </select>
+</mapper>

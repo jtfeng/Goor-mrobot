@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.account.role.mapper.RoleMapper">
+
+    <resultMap id="roleResult" type="cn.mrobot.bean.account.Role">
+        <result property="id" column="ID"/>
+        <result property="cnName" column="CN_NAME"/>
+        <result property="roleType" column="ROLE_TYPE"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="created" column="CREATED"/>
+    </resultMap>
+
+    <select id="getById" resultMap="roleResult">
+        SELECT ID,
+            CN_NAME,
+            ROLE_TYPE,
+            STORE_ID,
+            CREATED_BY,
+            CREATED
+        FROM AC_ROLE WHERE ID = #{id}
+    </select>
+
+    <select id="getByCnName" resultMap="roleResult">
+        SELECT ID,
+            CN_NAME,
+            ROLE_TYPE,
+            STORE_ID,
+            CREATED_BY,
+            CREATED
+        FROM AC_ROLE WHERE CN_NAME = #{cnName}
+    </select>
+
+</mapper>

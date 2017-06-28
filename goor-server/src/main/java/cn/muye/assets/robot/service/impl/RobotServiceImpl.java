@@ -1,7 +1,7 @@
 package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.robot.RobotPassword;
+import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;

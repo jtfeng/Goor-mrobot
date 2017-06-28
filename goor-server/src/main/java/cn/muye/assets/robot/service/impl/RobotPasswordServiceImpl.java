@@ -2,7 +2,7 @@ package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotType;
-import cn.mrobot.bean.robot.RobotPassword;
+import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.utils.AutoNumUtil;
 import cn.muye.assets.robot.mapper.RobotTypeMapper;
 import cn.muye.assets.robot.service.RobotPasswordService;
