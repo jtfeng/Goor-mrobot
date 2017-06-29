@@ -1,23 +1,31 @@
 package cn.muye.resource.controller;
 
+import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.DeviceType;
+import cn.mrobot.bean.enums.MessageStatusType;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.bean.CommonInfo;
+import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.controller.BaseController;
-import cn.muye.base.service.MessageSendService;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.mpush.util.crypto.MD5Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +41,7 @@ public class ResourceController extends BaseController{
     @Autowired
     private ResourceService resourceService;
     @Autowired
-    private MessageSendService messageSendService;
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 保存一个resource (上传)
@@ -50,6 +58,7 @@ public class ResourceController extends BaseController{
             StringBuffer path = new StringBuffer("/"+ resourceType.toString());
             File dest = FileUtils.getFile(DOWNLOAD_HOME + File.separator + resourceType);
             dest.mkdirs();
+            Resource resource = new Resource();
             boolean bool = false;
             String generateName = "";
             if(!file.isEmpty()){
@@ -65,20 +74,19 @@ public class ResourceController extends BaseController{
                 if(!dest.exists()){
                     dest.createNewFile();
                 }
-                file.transferTo(dest);
-                bool = true;
-            }
-            if(bool){
-                path.append("/" + generateName);
-                //上传成功后添加入表
-                Resource resource = new Resource();
-                resource.setResourceType(resourceType);
                 resource.setFileSize(file.getSize());
                 resource.setOriginName(file.getOriginalFilename());
                 resource.setGenerateName(generateName);
                 resource.setFileType(file.getContentType());
                 resource.setPath(path.toString());
                 resource.setMd5(MD5Utils.encrypt(file.getBytes()));
+                file.transferTo(dest);
+                bool = true;
+            }
+            if(bool){
+                path.append("/" + generateName);
+                //上传成功后添加入表
+                resource.setResourceType(resourceType);
                 //resource.setContent();
                 resourceService.save(resource);
                 return AjaxResult.success(resource, "资源上传成功");
@@ -119,7 +127,29 @@ public class ResourceController extends BaseController{
     private AjaxResult pushToAgent(@RequestBody ResourceToAgentBean resourceToAgentBean){
         try {
             Resource resource = resourceService.findById(resourceToAgentBean.getResourceId());
-            return AjaxResult.success(resource,"资源推送成功");
+            CommonInfo commonInfo = new CommonInfo();
+            commonInfo.setTopicName("/enva_test");
+            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            commonInfo.setLocalFileName(resource.getOriginName());
+            commonInfo.setLocalPath("/home");
+            commonInfo.setRemoteFileUrl(resource.getPath());
+            commonInfo.setMD5(resource.getMd5());
+            commonInfo.setPublishMessage(JSON.toJSONString(commonInfo));
+            String text = JSON.toJSONString(commonInfo);
+            byte[] b = text.getBytes();
+            MessageInfo info = new MessageInfo(MessageType.EXECUTOR_RESOURCE, text, b);
+            info.setMessageStatusType(MessageStatusType.FILE_NOT_DOWNLOADED);
+            info.setReceiptWebSocket(true);
+            info.setWebSocketId("user-9");
+            info.setSendDeviceType(DeviceType.GOOR_SERVER);
+            info.setReceiverDeviceType(DeviceType.GOOR);
+            info.setMessageKind(0);
+            info.setMessageType(MessageType.EXECUTOR_RESOURCE);
+            info.setMessageStatusType(MessageStatusType.INIT);
+            info.setSendTime(new Date());
+            info.setUpdateTime(info.getSendTime());
+            info.setSendCount(0);
+            return (AjaxResult)rabbitTemplate.convertSendAndReceive("directExchange", "direct.common", info);
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("系统内部出错");
