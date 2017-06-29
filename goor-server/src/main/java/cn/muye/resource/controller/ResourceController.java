@@ -76,9 +76,7 @@ public class ResourceController extends BaseController{
                 }
                 resource.setFileSize(file.getSize());
                 resource.setOriginName(file.getOriginalFilename());
-                resource.setGenerateName(generateName);
                 resource.setFileType(file.getContentType());
-                resource.setPath(path.toString());
                 resource.setMd5(MD5Utils.encrypt(file.getBytes()));
                 file.transferTo(dest);
                 bool = true;
@@ -86,7 +84,9 @@ public class ResourceController extends BaseController{
             if(bool){
                 path.append("/" + generateName);
                 //上传成功后添加入表
+                resource.setGenerateName(generateName);
                 resource.setResourceType(resourceType);
+                resource.setPath(path.toString());
                 //resource.setContent();
                 resourceService.save(resource);
                 return AjaxResult.success(resource, "资源上传成功");
