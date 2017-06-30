@@ -112,7 +112,7 @@ public class StationController {
 			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed("出错");
+			return AjaxResult.failed("被使用，无法删除");
 		}
 	}
 
