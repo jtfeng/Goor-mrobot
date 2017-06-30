@@ -52,18 +52,15 @@ public class StationController {
 	@ResponseBody
 	private AjaxResult pageStation(WhereRequest whereRequest){
 		try {
-			PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
 			//TODO 从session取切换门店的ID，现在先写死
 			List<Station> stationList = stationService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-			List<Station> returnList = new ArrayList<Station>();
 			if(stationList != null && stationList.size() > 0) {
 				for(Station station:stationList) {
 					station = toEntity(station);
-					returnList.add(station);
 				}
 			}
 
-			PageInfo<Station> pageList = new PageInfo<Station>(returnList);
+			PageInfo<Station> pageList = new PageInfo<Station>(stationList);
 			return AjaxResult.success(pageList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
@@ -80,7 +77,7 @@ public class StationController {
 	@RequestMapping(value = {"area/station/{id}"}, method = RequestMethod.GET)
 	@ApiOperation(value = "查询站详情", httpMethod = "GET", notes = "查询站详情")
 	@ResponseBody
-	public AjaxResult getStation(@ApiParam(value = "站ID") @PathVariable String id) {
+	public AjaxResult getStation(@ApiParam(value = "站ID") @PathVariable Long id) {
 		if (id == null) {
 			return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
 		}
@@ -222,14 +219,12 @@ public class StationController {
 			pointList = station.getMapPoints();
 		}
 		if(pointList != null && pointList.size() > 0) {
-			List<MapPoint> resultPointList = new ArrayList<MapPoint>();
 			for(MapPoint mapPoint : pointList) {
 				MapPoint mapPointDB = pointService.findById(mapPoint.getId());
 				if(mapPointDB != null) {
-					resultPointList.add(toEntity(mapPointDB));
+					toEntity(mapPointDB);
 				}
 			}
-			station.setMapPoints(resultPointList);
 		}
 
 		return station;

@@ -3,6 +3,7 @@ package cn.muye.area.station.service;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.base.service.BaseService;
 
 import java.util.List;
 
@@ -15,11 +16,11 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-public interface StationService {
+public interface StationService extends BaseService<Station>{
 
-	long save(Station station);
+	int save(Station station);
 
-	void update(Station station );
+	int update(Station station );
 
 	Station findById(long id, long storeId);
 
@@ -27,6 +28,6 @@ public interface StationService {
 
 	List<Station> listByName(String name);
 
-	void delete(Station station);
+	int delete(Station station);
 }
 

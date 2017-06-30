@@ -19,7 +19,7 @@ public interface StationMapPointXREFMapper extends MyMapper<StationMapPointXREF>
 //
 //	void update(Station station );
 //
-//	Station findById(long id);
+//	Station findByStation(long id);
 //
 //	List<Station> list(@Param("name") Object name);
 }
