@@ -14,7 +14,6 @@
     <select id="getById" resultMap="roleResult">
         SELECT ID,
             CN_NAME,
-            ROLE_TYPE,
             STORE_ID,
             CREATED_BY,
             CREATED
@@ -24,7 +23,6 @@
     <select id="getByCnName" resultMap="roleResult">
         SELECT ID,
             CN_NAME,
-            ROLE_TYPE,
             STORE_ID,
             CREATED_BY,
             CREATED

@@ -19,8 +19,6 @@ public class Role extends BaseBean {
 
     private String cnName; //角色名称
 
-    private Integer roleType; //角色类型
-
     public Long getId() {
         return id;
     }
@@ -37,11 +35,4 @@ public class Role extends BaseBean {
         this.cnName = cnName;
     }
 
-    public Integer getRoleType() {
-        return roleType;
-    }
-
-    public void setRoleType(Integer roleType) {
-        this.roleType = roleType;
-    }
 }

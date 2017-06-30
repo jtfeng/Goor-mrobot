@@ -6,11 +6,12 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.SearchConstants;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,17 +40,19 @@ public class ShelfController {
         }
         //判断是否有重复的名称
         Shelf shelfDbByName = shelfService.getByName(shelf.getName());
-        if (shelfDbByName != null && shelfDbByName.getId() != shelf.getId()) {
+        if (shelfDbByName != null && !shelfDbByName.getId().equals(shelf.getId())) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "货架名称重复");
         }
         Long id = shelf.getId();
         //判断是否有重复的编号
         Shelf shelfDbByCode = shelfService.getByCode(shelf.getCode());
-        if (shelfDbByCode != null && shelfDbByCode.getId() != id) {
+        if (shelfDbByCode != null && !shelfDbByCode.getId().equals(id)) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "货架编号重复");
         }
         if (id == null) {
             shelf.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            shelf.setCreated(new Date());
+            shelf.setCreatedBy(1L);
             shelfService.save(shelf);
             return AjaxResult.success(shelf, "新增成功");
         } else {

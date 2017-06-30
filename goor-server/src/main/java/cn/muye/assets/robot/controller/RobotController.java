@@ -13,7 +13,6 @@ import com.wordnik.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
 import java.util.List;
 
@@ -28,6 +27,11 @@ public class RobotController {
     @Autowired
     private RobotPasswordService robotPasswordService;
 
+    /**
+     * 查询机器人列表
+     * @param whereRequest
+     * @return
+     */
     @RequestMapping(value = {"assets/robot"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询机器人列表", httpMethod = "GET", notes = "查询机器人列表")
     @ResponseBody
@@ -35,18 +39,6 @@ public class RobotController {
         List<Robot> list = robotService.listRobot(whereRequest);
         PageInfo<Robot> pageList = new PageInfo<>(list);
         return AjaxResult.success(pageList, "查询成功");
-    }
-
-    @RequestMapping(value = {"assets/robot/{id}"}, method = RequestMethod.GET)
-    @ApiOperation(value = "查询机器人详情", httpMethod = "GET", notes = "查询机器人详情")
-    @ResponseBody
-    public AjaxResult robotDetail(@ApiParam(value = "机器人ID") @PathVariable String id) {
-        if (id != null) {
-            Robot robot = robotService.getById(Long.valueOf(id));
-            return AjaxResult.success(robot, "查询成功");
-        } else {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
-        }
     }
 
     /**
@@ -65,14 +57,17 @@ public class RobotController {
         if (StringUtil.isNullOrEmpty(robot.getName()) || StringUtil.isNullOrEmpty(robot.getCode())) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
         }
+        if (robot.getBatteryThreshold() == null) {
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
+        }
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robot.getName());
-        if (robotDbByName != null && robotDbByName.getId() != robot.getId()) {
+        if (robotDbByName != null && !robotDbByName.getId().equals(robot.getId())) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
         }
         //判断是否有重复的编号
         Robot robotDbByCode = robotService.getByCode(robot.getCode());
-        if (robotDbByCode != null && robotDbByCode.getId() != robot.getId()) {
+        if (robotDbByCode != null && !robotDbByCode.getId().equals(robot.getId())) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
         }
         if (robot.getId() != null) { //修改
@@ -82,6 +77,7 @@ public class RobotController {
             robotDb.setDescription(robot.getDescription());
             robotDb.setUpdateTime(new Date());
             robotDb.setBoxActivated(robot.getBoxActivated());
+            robotDb.setBatteryThreshold(robot.getBatteryThreshold());
             robotService.updateByStoreId(robotDb);
             return AjaxResult.success(robotDb, "修改成功");
         } else if (robot.getId() == null){

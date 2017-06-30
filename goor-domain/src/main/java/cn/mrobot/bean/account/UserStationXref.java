@@ -8,14 +8,14 @@ import javax.persistence.Table;
 /**
  * Created by Ray.Fu on 2017/6/28.
  */
-@Table(name = "AC_ROLE_STATION_XREF")
-public class RoleStationXref {
+@Table(name = "AC_USER_STATION_XREF")
+public class UserStationXref {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long roleId;
+    private Long userId;
 
     private Long stationId;
 
@@ -27,12 +27,12 @@ public class RoleStationXref {
         this.id = id;
     }
 
-    public Long getRoleId() {
-        return roleId;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setRoleId(Long roleId) {
-        this.roleId = roleId;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public Long getStationId() {

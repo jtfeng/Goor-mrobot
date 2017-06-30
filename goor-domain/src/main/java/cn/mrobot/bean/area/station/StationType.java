@@ -2,7 +2,9 @@ package cn.mrobot.bean.area.station;
 
 import com.alibaba.fastjson.JSON;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -46,6 +48,20 @@ public enum StationType {
 		return null;
 	}
 
+	public static Map list() {
+		Map map = new HashMap();
+		List<Map> resultList = new ArrayList<Map>();
+		for (StationType c : StationType.values()) {
+			Map result = new HashMap<String,Object>();
+			result.put("name",c);
+			result.put("value",c.getValue());
+			result.put("caption",c.getCaption());
+			resultList.add(result) ;
+		}
+		map.put("stationType", resultList);
+		return map;
+	}
+
 	public static String getTypeJson(int caption){
 		for (StationType c : StationType.values()) {
 			if (c.getCaption() == caption) {
@@ -63,4 +79,5 @@ public enum StationType {
 		this.caption = caption;
 		this.value = value;
 	}
+
 }

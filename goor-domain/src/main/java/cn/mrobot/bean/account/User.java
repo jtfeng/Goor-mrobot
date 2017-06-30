@@ -23,7 +23,10 @@ public class User extends BaseBean{
     private Integer directLoginKey; //快捷登陆口令（4位码）
 
     @Transient
-    private Integer userType; //用户类型(1- 超级管理员， 2- 普通管理员)
+    private Long roleId; //用户类型(1- 超级管理员， 2- 医院管理员, 3-站管理员)
+
+    @Transient
+    private String stationIds; //站ID
 
     @Transient
     private String roleName; //角色名称
@@ -71,12 +74,12 @@ public class User extends BaseBean{
         this.directLoginKey = directLoginKey;
     }
 
-    public Integer getUserType() {
-        return userType;
+    public Long getRoleId() {
+        return roleId;
     }
 
-    public void setUserType(Integer userType) {
-        this.userType = userType;
+    public void setRoleId(Long roleId) {
+        this.roleId = roleId;
     }
 
     public String getRoleName() {
@@ -93,5 +96,13 @@ public class User extends BaseBean{
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public String getStationIds() {
+        return stationIds;
+    }
+
+    public void setStationIds(String stationIds) {
+        this.stationIds = stationIds;
     }
 }

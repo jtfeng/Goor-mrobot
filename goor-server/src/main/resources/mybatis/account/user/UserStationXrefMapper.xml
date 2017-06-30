@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.account.role.mapper.UserStationXrefMapper">
+
+    <resultMap id="userStationXrefResult" type="cn.mrobot.bean.account.UserStationXref">
+        <result property="id" column="ID"/>
+        <result property="userId" column="USER_ID"/>
+        <result property="stationId" column="STATION_ID"/>
+    </resultMap>
+
+    <select id="getByUserId" resultMap="userStationXrefResult">
+        SELECT
+            ID,
+            USER_ID,
+            STATION_ID
+        FROM AC_USER_STATION_XREF
+        WHERE USER_ID= #{userId}
+    </select>
+
+</mapper>

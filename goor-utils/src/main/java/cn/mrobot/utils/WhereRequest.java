@@ -1,7 +1,6 @@
 package cn.mrobot.utils;
 
 
-import java.util.List;
 
 /**
  * Created by Ray.Fu on 2016/7/20.

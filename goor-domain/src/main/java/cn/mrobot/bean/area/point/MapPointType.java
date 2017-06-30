@@ -1,8 +1,11 @@
 package cn.mrobot.bean.area.point;
 
+import cn.mrobot.bean.area.station.StationType;
 import com.alibaba.fastjson.JSON;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,5 +102,21 @@ public enum MapPointType {
 		this.value = value;
 		this.industrialControlCaption = industrialControlCaption;
 		this.scale = scale;
+	}
+
+	public static Map list() {
+		Map map = new HashMap();
+		List<Map> resultList = new ArrayList<Map>();
+		for (MapPointType c : MapPointType.values()) {
+			Map result = new HashMap<String,Object>();
+			result.put("name",c);
+			result.put("value",c.getValue());
+			result.put("caption",c.getCaption());
+			result.put("industrialControlCaption", c.getIndustrialControlCaption());
+			result.put("scale", c.getScale());
+			resultList.add(result) ;
+		}
+		map.put("mapPointType", resultList);
+		return map;
 	}
 }
