@@ -47,8 +47,7 @@ public enum RoleTypeEnum {
         return null;
     }
 
-    public static Map list() {
-        Map map = new HashMap();
+    public static List list() {
         List<Map> resultList = new ArrayList<Map>();
         for (RoleTypeEnum c : RoleTypeEnum.values()) {
             Map result = new HashMap<String,Object>();
@@ -57,8 +56,7 @@ public enum RoleTypeEnum {
             result.put("caption",c.getCaption());
             resultList.add(result) ;
         }
-        map.put("roleType", resultList);
-        return map;
+        return resultList;
     }
 
     public static String getTypeJson(int caption){

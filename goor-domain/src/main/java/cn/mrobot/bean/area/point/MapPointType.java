@@ -104,8 +104,7 @@ public enum MapPointType {
 		this.scale = scale;
 	}
 
-	public static Map list() {
-		Map map = new HashMap();
+	public static List list() {
 		List<Map> resultList = new ArrayList<Map>();
 		for (MapPointType c : MapPointType.values()) {
 			Map result = new HashMap<String,Object>();
@@ -116,7 +115,6 @@ public enum MapPointType {
 			result.put("scale", c.getScale());
 			resultList.add(result) ;
 		}
-		map.put("mapPointType", resultList);
-		return map;
+		return resultList;
 	}
 }
