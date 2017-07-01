@@ -1,9 +1,6 @@
 package cn.muye.account.user.service.impl;
 
-import cn.mrobot.bean.account.Role;
-import cn.mrobot.bean.account.UserStationXref;
-import cn.mrobot.bean.account.User;
-import cn.mrobot.bean.account.UserRoleXref;
+import cn.mrobot.bean.account.*;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.role.service.RoleService;
@@ -72,8 +69,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Role roleDb = roleService.getById(user.getRoleId());
         user.setRoleName(roleDb.getCnName());
         //如果角色是站管理员
-        //todo 常量
-        if (user.getRoleId().equals(3L)) {
+        if (user.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption())) {
             //删掉之前的user绑定station
             userStationXrefService.deleteByUserId(userId);
             String stationIds = user.getStationIds();

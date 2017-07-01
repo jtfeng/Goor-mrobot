@@ -21,6 +21,7 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.net.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.mrobot.bean.constant.Constant;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -40,7 +41,16 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    static HttpClient httpClient = new HttpClient();
+    private static HttpClient httpClient = new HttpClient();
+
+    @Value("${authServer.host}")
+    private String authServerHost;
+
+    @Value("${authServer.port}")
+    private String authServerPort;
+
+    @Value("${authServer.api}")
+    private String authServerApi;
 
     /**
      * 新增修改用户
@@ -148,11 +158,7 @@ public class UserController {
     @ResponseBody
     public AjaxResult login(String userName, String password) {
         User user = doLogin(userName, password);
-        //写入枚举
-        Map map = new HashMap();
-        map.put("user", user);
-        map.put("enums", getAllEnums());
-        return AjaxResult.success(map, "登录成功");
+        return doCheckLogin(user);
     }
 
     /**
@@ -169,21 +175,25 @@ public class UserController {
             User userDb = userService.getUserByDirectKey(Integer.valueOf(directLoginKey));
             if (userDb != null) {
                 User user = doLogin(userDb.getUserName(), userDb.getPassword());
-                if (user != null) {
-                    //写入枚举
-                    Map map = new HashMap();
-                    map.put("user", user);
-                    map.put("enums", getAllEnums());
-                    return AjaxResult.success(map, "登录成功");
-                } else {
-                    return AjaxResult.failed("登录失败");
-                }
+                return doCheckLogin(user);
             } else {
                 return AjaxResult.failed("用户不存在");
             }
         } catch (NumberFormatException e) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
         } finally {
+        }
+    }
+
+    private AjaxResult doCheckLogin(User user) {
+        if (user != null) {
+            //写入枚举
+            Map map = new HashMap();
+            map.put("user", user);
+            map.put("enums", getAllEnums());
+            return AjaxResult.success(map, "登录成功");
+        } else {
+            return AjaxResult.failed("登录失败");
         }
     }
 
@@ -257,9 +267,9 @@ public class UserController {
         HttpClientParams httpParams = new HttpClientParams();
         httpParams.setSoTimeout(30000);
         httpClient.setParams(httpParams);
-        httpClient.getHostConfiguration().setHost(Constant.AUTHORIZE_SERVER, Constant.AUTHORIZE_SERVER_PORT);
+        httpClient.getHostConfiguration().setHost(authServerHost, Integer.valueOf(authServerPort));
         httpClient.getParams().setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, "UTF-8");
-        PostMethod login = new PostMethod(Constant.AUTH_SERVER_URL);
+        PostMethod login = new PostMethod(authServerApi);
         login.addRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
         final String auth = "Basic " + new String(Base64.encodeBase64(new StringBuilder(Constant.AUTHORIZE_USERNAME + ":" + Constant.AUTHORIZE_PASSWORD).toString().getBytes()));
         login.addRequestHeader("Authorization", auth);
