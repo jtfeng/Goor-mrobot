@@ -5,6 +5,7 @@ import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
+import cn.mrobot.dto.account.UserDto;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.user.service.UserService;
@@ -22,8 +23,6 @@ import org.apache.commons.net.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -88,7 +87,7 @@ public class UserController {
         Long id = user.getId();
         if (id == null) {
             userService.addUser(user);
-            return AjaxResult.success(user, "新增成功");
+            return AjaxResult.success(entityToDto(user), "新增成功");
         } else {
             User userDbById = userService.getById(id);
             if (userDbById != null) {
@@ -101,7 +100,7 @@ public class UserController {
                 }
                 userDbById.setDirectLoginKey(user.getDirectLoginKey());
                 userService.updateUser(userDbById);
-                return AjaxResult.success(userDbById, "修改成功");
+                return AjaxResult.success(entityToDto(userDbById), "修改成功");
             } else {
                 return AjaxResult.failed("不存在该用户");
             }
@@ -119,7 +118,13 @@ public class UserController {
     @ResponseBody
     public AjaxResult list(WhereRequest whereRequest) {
         List<User> list = userService.list(whereRequest);
-        PageInfo<User> pageList = new PageInfo<>(list);
+        List<UserDto> dtoList = new ArrayList<>();
+        if (list != null) {
+            for (User u : list) {
+                dtoList.add(entityToDto(u));
+            }
+        }
+        PageInfo<UserDto> pageList = new PageInfo<>(dtoList);
         return AjaxResult.success(pageList, "查询成功");
     }
 
@@ -149,30 +154,36 @@ public class UserController {
     /**
      * 正常登录
      *
-     * @param userName
-     * @param password
+     * @param userParam
      * @return
      */
     @RequestMapping(value = {"account/user/login"}, method = RequestMethod.POST)
     @ApiOperation(value = "登录接口", httpMethod = "POST", notes = "登录接口")
     @ResponseBody
-    public AjaxResult login(String userName, String password) {
-        User user = doLogin(userName, password);
+    public AjaxResult login(@RequestBody User userParam) {
+        if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
+        }
+        User user = doLogin(userParam.getUserName(), userParam.getPassword());
         return doCheckLogin(user);
     }
 
     /**
      * 四位码快捷登录
      *
-     * @param directLoginKey
+     * @param userParam
      * @return
      */
     @RequestMapping(value = {"account/user/login/pad"}, method = RequestMethod.POST)
     @ApiOperation(value = "PAD登录接口", httpMethod = "POST", notes = "PAD登录接口")
     @ResponseBody
-    public AjaxResult directKeyLogin(String directLoginKey) {
+    public AjaxResult directKeyLogin(@RequestBody User userParam) {
         try {
-            User userDb = userService.getUserByDirectKey(Integer.valueOf(directLoginKey));
+            if (userParam.getDirectLoginKey() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
+            }
+            Integer directLoginKey = userParam.getDirectLoginKey();
+            User userDb = userService.getUserByDirectKey(directLoginKey);
             if (userDb != null) {
                 User user = doLogin(userDb.getUserName(), userDb.getPassword());
                 return doCheckLogin(user);
@@ -189,7 +200,7 @@ public class UserController {
         if (user != null) {
             //写入枚举
             Map map = new HashMap();
-            map.put("user", user);
+            map.put("user", entityToDto(user));
             map.put("enums", getAllEnums());
             return AjaxResult.success(map, "登录成功");
         } else {
@@ -291,16 +302,29 @@ public class UserController {
         }
     }
 
+    private UserDto entityToDto(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setUserName(user.getUserName());
+        userDto.setAccessToken(user.getAccessToken());
+        userDto.setRoleId(user.getRoleId());
+        userDto.setRoleName(user.getRoleName());
+        userDto.setDirectLoginKey(user.getDirectLoginKey());
+        userDto.setActivated(user.getActivated());
+        userDto.setStationIds(user.getStationIds());
+        return userDto;
+    }
+
     /**
      * 获取所有的枚举类
      * @return
      */
-    public final static List getAllEnums() {
-        List<Map> list = new ArrayList<Map>();
-        list.add(MapPointType.list());
-        list.add(StationType.list());
-        list.add(RoleTypeEnum.list());
-        list.add(RobotTypeEnum.list());
-        return list;
+    public final static Map getAllEnums() {
+        Map map = new HashMap();
+        map.put("mapPointType", MapPointType.list());
+        map.put("stationType", StationType.list());
+        map.put("roleType", RoleTypeEnum.list());
+        map.put("robotType", RobotTypeEnum.list());
+        return map;
     }
 }

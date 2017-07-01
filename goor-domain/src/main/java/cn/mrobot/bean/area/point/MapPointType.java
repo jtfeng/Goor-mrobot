@@ -117,8 +117,7 @@ public enum MapPointType {
 		this.direction = direction;
 	}
 
-	public static Map list() {
-		Map map = new HashMap();
+	public static List list() {
 		List<Map> resultList = new ArrayList<Map>();
 		for (MapPointType c : MapPointType.values()) {
 			Map result = new HashMap<String,Object>();
@@ -130,8 +129,7 @@ public enum MapPointType {
 			result.put("direction",c.getDirection());
 			resultList.add(result) ;
 		}
-		map.put("mapPointType", resultList);
-		return map;
+		return resultList;
 	}
 
 

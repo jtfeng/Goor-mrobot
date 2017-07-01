@@ -48,8 +48,7 @@ public enum StationType {
 		return null;
 	}
 
-	public static Map list() {
-		Map map = new HashMap();
+	public static List list() {
 		List<Map> resultList = new ArrayList<Map>();
 		for (StationType c : StationType.values()) {
 			Map result = new HashMap<String,Object>();
@@ -58,8 +57,7 @@ public enum StationType {
 			result.put("caption",c.getCaption());
 			resultList.add(result) ;
 		}
-		map.put("stationType", resultList);
-		return map;
+		return resultList;
 	}
 
 	public static String getTypeJson(int caption){
