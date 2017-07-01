@@ -60,6 +60,19 @@ public class RabbitMQConfig {
         return new DirectExchange("directExchange");
     }
 
+    /**
+     * X86与云端时间同步队列
+     */
+    @Bean
+    public Queue timeSynchronizedUp() {
+        return new Queue("time.synchronized.up", false);
+    }
+
+    @Bean
+    public Queue timeSynchronizedDown() {
+        return new Queue("time.synchronized.down", false);
+    }
+
     @Bean
     public Binding bindingTopicExchangeMessage(Queue topicMessageCommand, TopicExchange topicExchange) {
         return BindingBuilder.bind(topicMessageCommand).to(topicExchange).with("topic.message");
