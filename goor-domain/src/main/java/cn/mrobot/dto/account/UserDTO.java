@@ -1,10 +1,14 @@
 package cn.mrobot.dto.account;
 
 
+import cn.mrobot.bean.area.station.Station;
+
+import java.util.List;
+
 /**
  * Created by Ray.Fu on 2017/7/1.
  */
-public class UserDto {
+public class UserDTO {
 
     private Long id;
 
@@ -16,11 +20,9 @@ public class UserDto {
 
     private Long roleId; //用户类型(1- 超级管理员， 2- 医院管理员, 3-站管理员)
 
-    private String stationIds; //站ID
+    private List<Station> stationList; //站LIST
 
     private String roleName; //角色名称
-
-    private String accessToken; //登录验证码
 
     public Long getId() {
         return id;
@@ -62,12 +64,12 @@ public class UserDto {
         this.roleId = roleId;
     }
 
-    public String getStationIds() {
-        return stationIds;
+    public List<Station> getStationList() {
+        return stationList;
     }
 
-    public void setStationIds(String stationIds) {
-        this.stationIds = stationIds;
+    public void setStationList(List<Station> stationList) {
+        this.stationList = stationList;
     }
 
     public String getRoleName() {
@@ -78,11 +80,4 @@ public class UserDto {
         this.roleName = roleName;
     }
 
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
 }

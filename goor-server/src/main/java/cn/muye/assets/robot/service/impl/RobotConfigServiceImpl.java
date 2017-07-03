@@ -38,7 +38,7 @@ public class RobotConfigServiceImpl implements RobotConfigService {
      * @param robotId
      * @return
      */
-    public RobotConfig getConfigByRobotId(Long robotId) {
+    public RobotConfig getByRobotId(Long robotId) {
         RobotConfig robotConfig = new RobotConfig();
         robotConfig.setRobotId(robotId);
         return robotConfigMapper.selectOne(robotConfig);

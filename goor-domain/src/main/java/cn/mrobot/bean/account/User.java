@@ -1,18 +1,16 @@
 package cn.mrobot.bean.account;
 
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by Ray.Fu on 2017/6/22.
  */
 @Table(name = "AC_USER")
 public class User extends BaseBean{
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     private String userName; //用户名
 
@@ -26,21 +24,10 @@ public class User extends BaseBean{
     private Long roleId; //用户类型(1- 超级管理员， 2- 医院管理员, 3-站管理员)
 
     @Transient
-    private String stationIds; //站ID
+    private List<Station> stationList; //绑定的站List
 
     @Transient
     private String roleName; //角色名称
-
-    @Transient
-    private String accessToken; //登录验证码
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getUserName() {
         return userName;
@@ -90,19 +77,11 @@ public class User extends BaseBean{
         this.roleName = roleName;
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public List<Station> getStationList() {
+        return stationList;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public String getStationIds() {
-        return stationIds;
-    }
-
-    public void setStationIds(String stationIds) {
-        this.stationIds = stationIds;
+    public void setStationList(List<Station> stationList) {
+        this.stationList = stationList;
     }
 }

@@ -1,10 +1,13 @@
 package cn.muye.assets.shelf.service.impl;
 
 import cn.mrobot.bean.assets.shelf.Shelf;
+import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.shelf.mapper.ShelfMapper;
 import cn.muye.assets.shelf.service.ShelfService;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.BaseService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +25,18 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
     @Autowired
     private ShelfMapper shelfMapper;
 
-    public List<Shelf> list() {
+    public List<Shelf> listPageByStoreIdAndOrder(int page, int pageSize, String queryObj, Class<Shelf> clazz, String order) {
         Example example = new Example(Shelf.class);
+        Example.Criteria criteria = example.createCriteria();
+        JSONObject jsonObject = JSONObject.parseObject(queryObj);
+        String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
+        if (!StringUtil.isNullOrEmpty(name)) {
+            criteria.andCondition("NAME like", "%" + name + "%");
+        }
+        String code = (String)jsonObject.get(SearchConstants.SEARCH_CODE);
+        if (!StringUtil.isNullOrEmpty(code)) {
+            criteria.andCondition("CODE =", code);
+        }
         example.setOrderByClause("ID DESC");
         List<Shelf> list = shelfMapper.selectByExample(example);
         return list;

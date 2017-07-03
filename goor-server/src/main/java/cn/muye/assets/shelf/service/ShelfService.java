@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface ShelfService extends BaseService<Shelf> {
 
-    List<Shelf> list();
+    List<Shelf> listPageByStoreIdAndOrder(int page, int pageSize, String queryObj, Class<Shelf> clazz, String order);
 
     Shelf getByName(String name);
 

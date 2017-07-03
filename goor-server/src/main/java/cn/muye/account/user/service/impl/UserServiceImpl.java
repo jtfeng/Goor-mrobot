@@ -1,6 +1,7 @@
 package cn.muye.account.user.service.impl;
 
 import cn.mrobot.bean.account.*;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.role.service.RoleService;
@@ -10,12 +11,12 @@ import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.Date;
 import java.util.List;
 
@@ -72,8 +73,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         if (user.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption())) {
             //删掉之前的user绑定station
             userStationXrefService.deleteByUserId(userId);
-            String stationIds = user.getStationIds();
-            saveUserStationXref(stationIds, userId);
+            List<Station> stationIdList = user.getStationList();
+            saveUserStationXref(stationIdList, userId);
         }
     }
 
@@ -88,21 +89,21 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Long userId = user.getId();
         UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
         Long roleId = user.getRoleId();
-        String stationIds = user.getStationIds();
+        List<Station> stationList = user.getStationList();
         Role roleDb = roleService.getById(roleId);
         user.setRoleName(roleDb.getCnName());
         if (userRoleXrefDb != null) {
             ////如果原来角色是3，变更角色是2就需要把user_station_xref的记录删掉
-            if (userRoleXrefDb.getRoleId().equals(3L) && roleId.equals(2L)) {
+            if (userRoleXrefDb.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && roleId.equals(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) {
                 userStationXrefService.deleteByUserId(userId);
             }
-            if (userRoleXrefDb.getRoleId().equals(3L) && roleId.equals(3L) && !StringUtil.isNullOrEmpty(stationIds) && stationIds.split(",").length > 0) {
+            if (userRoleXrefDb.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && roleId.equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList != null && stationList.size() > 0) {
                 userStationXrefService.deleteByUserId(userId);
-                saveUserStationXref(stationIds, userId);
+                saveUserStationXref(stationList, userId);
             }
             ////如果原来角色是2，变更角色是3就需要增加一条user_station_xref的记录
-            if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(2L) && roleId.equals(3L) && !StringUtil.isNullOrEmpty(stationIds) && stationIds.split(",").length > 0) {
-                saveUserStationXref(stationIds, userId);
+            if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()) && roleId.equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList != null && stationList.size() > 0) {
+                saveUserStationXref(stationList, userId);
             }
             userRoleXrefDb.setRoleId(roleId);
             userRoleXrefService.update(userRoleXrefDb);
@@ -111,23 +112,25 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             userRoleXrefDb.setUserId(userId);
             userRoleXrefDb.setRoleId(roleId);
             userRoleXrefService.save(userRoleXrefDb);
-            if (roleId.equals(3L) && !StringUtil.isNullOrEmpty(stationIds) && stationIds.split(",").length > 0) {
-                saveUserStationXref(stationIds, userId);
+            if (roleId.equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList != null && stationList.size() > 0) {
+                saveUserStationXref(stationList, userId);
             }
         }
     }
 
     /**
      * 保存用户站关联记录
-     * @param stationIds
+     * @param stationList
      * @param userId
      */
-    private void saveUserStationXref(String stationIds, Long userId) {
-        for (String stationId : stationIds.split(",")) {
-            UserStationXref userStationXref = new UserStationXref();
-            userStationXref.setUserId(userId);
-            userStationXref.setStationId(Long.valueOf(stationId));
-            userStationXrefService.save(userStationXref);
+    private void saveUserStationXref(List<Station> stationList, Long userId) {
+        if (stationList != null && stationList.size() > 0) {
+            for (Station station : stationList) {
+                UserStationXref userStationXref = new UserStationXref();
+                userStationXref.setUserId(userId);
+                userStationXref.setStationId(station.getId());
+                userStationXrefService.save(userStationXref);
+            }
         }
     }
 
@@ -135,7 +138,15 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     public List<User> list(WhereRequest whereRequest) {
         PageHelper.startPage(whereRequest.getPage(),whereRequest.getPageSize());
         Example example = new Example(User.class);
-        example.createCriteria().andCondition("ACTIVATED =", ACTIVATED);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("ACTIVATED =", ACTIVATED);
+        if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
+            JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
+            String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
+            if (!StringUtil.isNullOrEmpty(name)) {
+                criteria.andCondition("USER_NAME like", "%" + name + "%");
+            }
+        };
         example.setOrderByClause("ID DESC");
         List<User> userList = userMapper.selectByExample(example);
         if (userList != null && userList.size() > 0) {

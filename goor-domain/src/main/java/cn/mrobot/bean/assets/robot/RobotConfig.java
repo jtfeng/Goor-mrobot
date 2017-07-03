@@ -1,12 +1,14 @@
 package cn.mrobot.bean.assets.robot;
 
+import cn.mrobot.bean.base.BaseBean;
+
 import javax.persistence.Table;
 
 /**
  * Created by Ray.Fu on 2017/6/19.
  */
 @Table(name = "AS_ROBOT_CONFIG")
-public class RobotConfig {
+public class RobotConfig extends BaseBean {
 
     private Long robotId; //机器人ID
 

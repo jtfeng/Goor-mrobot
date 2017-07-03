@@ -13,10 +13,6 @@ import javax.persistence.Table;
 @Table(name = "AS_SHELF")
 public class Shelf extends BaseBean {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
     private String code; //货架编号
 
     private String rfid; //RFID编号

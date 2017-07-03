@@ -22,4 +22,6 @@ public interface RobotService extends BaseService<Robot>{
     Robot getByName(String name);
 
     Robot getByCode(String code);
+
+    void updateRobot(Robot robot);
 }
