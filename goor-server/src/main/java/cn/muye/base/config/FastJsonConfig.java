@@ -28,7 +28,8 @@ public class FastJsonConfig extends WebMvcConfigurerAdapter {
         fastConverter.setSupportedMediaTypes(fastMedisTypes);
         SerializerFeature[] serializerFeatures = {
                         SerializerFeature.PrettyFormat,
-                        SerializerFeature.WriteMapNullValue
+                        SerializerFeature.WriteMapNullValue,
+                        SerializerFeature.DisableCircularReferenceDetect
         };
         fastConverter.setSerializerFeature(serializerFeatures);
         //4、将convert添加到converters
