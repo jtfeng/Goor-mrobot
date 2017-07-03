@@ -124,8 +124,9 @@ public class UserController {
                 dtoList.add(entityToDto(u));
             }
         }
-        PageInfo<UserDto> pageList = new PageInfo<>(dtoList);
-        return AjaxResult.success(pageList, "查询成功");
+        PageInfo<UserDto> userPageInfo = new PageInfo(list);
+        userPageInfo.setList(dtoList);
+        return AjaxResult.success(userPageInfo, "查询成功");
     }
 
     /**
