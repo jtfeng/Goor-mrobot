@@ -32,7 +32,7 @@ public interface PointService {
 
 	List<MapPoint> findBySceneName(String sceneName);
 
-	List<MapPoint> list(WhereRequest whereRequest);
+	List<MapPoint> list(WhereRequest whereRequest, long storeId);
 
 	void handle(SlamResponseBody slamResponseBody);
 
