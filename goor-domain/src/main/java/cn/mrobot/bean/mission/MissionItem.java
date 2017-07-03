@@ -30,9 +30,6 @@ public class MissionItem extends BaseBean {
 	private String data;//任务详细/功能数据
 
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	private Date createTime;
-
-	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
 
 	private Integer priority;//优先级
@@ -49,7 +46,7 @@ public class MissionItem extends BaseBean {
 		private int repeatCount;
 		private Long intervalTime;
 		private String data;
-		private Date createTime;
+		private Date created;
 		private Date updateTime;
 		private Integer priority;//优先级
 		private Long missionChainId;
@@ -81,8 +78,8 @@ public class MissionItem extends BaseBean {
 			return this;
 		}
 
-		public Builder createTime(Date createTime) {
-			this.createTime = createTime;
+		public Builder created(Date created) {
+			this.created = created;
 			return this;
 		}
 
@@ -125,7 +122,7 @@ public class MissionItem extends BaseBean {
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
 		data = builder.data;
-		createTime = builder.createTime;
+		created = builder.created;
 		updateTime = builder.updateTime;
 		priority = builder.priority;
 		missionChainId = builder.missionChainId;
@@ -187,14 +184,6 @@ public class MissionItem extends BaseBean {
 
 	public void setData(String data) {
 		this.data = data;
-	}
-
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
 	}
 
 	public Date getUpdateTime() {

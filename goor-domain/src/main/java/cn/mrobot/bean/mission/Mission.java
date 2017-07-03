@@ -25,8 +25,6 @@ public class Mission extends BaseBean {
 	private String description; //描述
 
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	private Date createTime;
-
 	private Date updateTime;
 
 	private int repeatCount;
@@ -46,7 +44,7 @@ public class Mission extends BaseBean {
 
 		private String name;
 		private String description;
-		private Date createTime;
+		private Date created;
 		private Date updateTime;
 		private Integer priority;
 		private int repeatCount;
@@ -64,8 +62,8 @@ public class Mission extends BaseBean {
 			return this;
 		}
 
-		public Builder createTime(Date createTime) {
-			this.createTime = createTime;
+		public Builder created(Date created) {
+			this.created = created;
 			return this;
 		}
 
@@ -109,7 +107,7 @@ public class Mission extends BaseBean {
 	private Mission(Builder builder) {
 		name = builder.name;
 		description = builder.description;
-		createTime = builder.createTime;
+		created = builder.created;
 		priority = builder.priority;
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
@@ -180,14 +178,6 @@ public class Mission extends BaseBean {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
 	}
 
 	public Date getUpdateTime() {
