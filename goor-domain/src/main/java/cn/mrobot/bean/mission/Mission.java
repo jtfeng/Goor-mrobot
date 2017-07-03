@@ -1,10 +1,11 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
+import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.dto.mission.MissionDTO;
+import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +16,7 @@ import java.util.List;
  * Describe:  总任务 (任务串)
  * Version:1.0
  */
-public class Mission implements Serializable {
+public class Mission extends BaseBean {
 
 	private Long id;
 
@@ -24,15 +25,13 @@ public class Mission implements Serializable {
 	private String description; //描述
 
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	private Date createTime;
-
 	private Date updateTime;
 
 	private int repeatCount;
 
 	private Long intervalTime;
 
-	private List<MissionItem> missionItemList;
+	private Set<MissionItem> missionItemSet;
 
 	private Long missionMainId;
 
@@ -45,12 +44,12 @@ public class Mission implements Serializable {
 
 		private String name;
 		private String description;
-		private Date createTime;
+		private Date created;
 		private Date updateTime;
 		private Integer priority;
 		private int repeatCount;
 		private Long intervalTime;
-		private List<MissionItem> missionItemList;
+		private Set<MissionItem> missionItemSet;
 		private Long missionMainId;
 
 		public Builder name(String name) {
@@ -63,8 +62,8 @@ public class Mission implements Serializable {
 			return this;
 		}
 
-		public Builder createTime(Date createTime) {
-			this.createTime = createTime;
+		public Builder created(Date created) {
+			this.created = created;
 			return this;
 		}
 
@@ -84,8 +83,8 @@ public class Mission implements Serializable {
 			return this;
 		}
 
-		public Builder missionNodeList(List<MissionItem> missionItemList) {
-			this.missionItemList = missionItemList;
+		public Builder missionNodeSet(Set<MissionItem> missionItemSet) {
+			this.missionItemSet = missionItemSet;
 			return this;
 		}
 
@@ -108,13 +107,29 @@ public class Mission implements Serializable {
 	private Mission(Builder builder) {
 		name = builder.name;
 		description = builder.description;
-		createTime = builder.createTime;
+		created = builder.created;
 		priority = builder.priority;
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
 		missionMainId = builder.missionMainId;
-		missionItemList = builder.missionItemList;
+		missionItemSet = builder.missionItemSet;
 		updateTime = builder.updateTime;
+	}
+
+	public MissionDTO toDTO() {
+		MissionDTO missionDTO = new MissionDTO();
+		missionDTO.setId(this.getId());
+		missionDTO.setIntervalTime(this.getIntervalTime());
+		missionDTO.setRepeatCount(this.getRepeatCount());
+		Set<MissionItem> missionItems = this.getMissionItemSet();
+		if(missionItems != null) {
+			Set<MissionItemDTO> missionItemDTOS = new HashSet<MissionItemDTO>();
+			for(MissionItem missionItem : missionItems) {
+				missionItemDTOS.add(missionItem.toDTO());
+			}
+			missionDTO.setMissionItemDTOSet(missionItemDTOS);
+		}
+		return missionDTO;
 	}
 
 	public int getRepeatCount() {
@@ -165,14 +180,6 @@ public class Mission implements Serializable {
 		this.description = description;
 	}
 
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
-
 	public Date getUpdateTime() {
 		return updateTime;
 	}
@@ -189,11 +196,11 @@ public class Mission implements Serializable {
 		this.priority = priority;
 	}
 
-	public List<MissionItem> getMissionItemList() {
-		return missionItemList;
+	public Set<MissionItem> getMissionItemSet() {
+		return missionItemSet;
 	}
 
-	public void setMissionItemList(List<MissionItem> missionItemList) {
-		this.missionItemList = missionItemList;
+	public void setMissionItemSet(Set<MissionItem> missionItemSet) {
+		this.missionItemSet = missionItemSet;
 	}
 }

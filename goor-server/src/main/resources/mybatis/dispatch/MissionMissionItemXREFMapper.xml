@@ -2,16 +2,16 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.muye.dispatch.mapper.MissionMissionItemXREFMapper">
 
-    <resultMap id="missionMissionItemXREF" type="cn.mrobot.bean.misssion.MissionMissionItemXREF">
+    <resultMap id="missionMissionItemXREF" type="cn.mrobot.bean.mission.MissionMissionItemXREF">
         <result property="id" column="ID"/>
         <result property="missionChainId" column="MISSION_CHAIN_ID"/>
         <result property="missionNodeId" column="MISSION_NODE_ID"/>
         <association property="mission"
-                     javaType="cn.mrobot.bean.misssion.Mission"
+                     javaType="cn.mrobot.bean.mission.Mission"
                      column="MISSION_CHAIN_ID"
                      select="cn.muye.dispatch.mapper.MissionMapper.get"/>
         <association property="missionItem"
-                     javaType="cn.mrobot.bean.misssion.MissionItem"
+                     javaType="cn.mrobot.bean.mission.MissionItem"
                      column="MISSION_NODE_ID"
                      select="cn.muye.dispatch.mapper.MissionItemMapper.get"/>
     </resultMap>
@@ -22,7 +22,7 @@
         MISSION_NODE_ID
     </sql>
 
-    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionMissionItemXREF" useGeneratedKeys="true" keyProperty="id">
+    <insert id="save" parameterType="cn.mrobot.bean.mission.MissionMissionItemXREF" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_MISSION_NODE_CHAIN_XREF(
         ID,
         MISSION_CHAIN_ID,

@@ -51,11 +51,7 @@ public enum StationType {
 	public static List list() {
 		List<Map> resultList = new ArrayList<Map>();
 		for (StationType c : StationType.values()) {
-			Map result = new HashMap<String,Object>();
-			result.put("name",c);
-			result.put("value",c.getValue());
-			result.put("caption",c.getCaption());
-			resultList.add(result) ;
+			resultList.add(toDTO(c)) ;
 		}
 		return resultList;
 	}
@@ -63,14 +59,18 @@ public enum StationType {
 	public static String getTypeJson(int caption){
 		for (StationType c : StationType.values()) {
 			if (c.getCaption() == caption) {
-				Map result = new HashMap<String,Object>();
-				result.put("name",c);
-				result.put("value",c.getValue());
-				result.put("caption",c.getCaption());
-				return JSON.toJSONString(result);
+				return JSON.toJSONString(toDTO(c));
 			}
 		}
 		return null;
+	}
+
+	private static Map toDTO(StationType c) {
+		Map result = new HashMap<String,Object>();
+		result.put("name",c);
+		result.put("value",c.getValue());
+		result.put("caption",c.getCaption());
+		return result;
 	}
 
 	private StationType(int caption, String value) {

@@ -1,4 +1,4 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
 /**
  * Created by Chay on 2017/03/15.

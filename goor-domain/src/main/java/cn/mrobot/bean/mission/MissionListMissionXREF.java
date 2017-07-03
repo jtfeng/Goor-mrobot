@@ -1,4 +1,4 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
 /**
  * Created with IntelliJ IDEA.

@@ -1,8 +1,8 @@
 package cn.muye.dispatch.service.impl;
 
-import cn.mrobot.bean.misssion.Mission;
-import cn.mrobot.bean.misssion.MissionMissionItemXREF;
-import cn.mrobot.bean.misssion.MissionItem;
+import cn.mrobot.bean.mission.Mission;
+import cn.mrobot.bean.mission.MissionMissionItemXREF;
+import cn.mrobot.bean.mission.MissionItem;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.MissionMapper;
@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -111,13 +113,13 @@ public class MissionServiceImpl implements MissionService {
 		Mission mission;
 		List<Mission> result = new ArrayList<>();
 		for (int i = 0; i < missionList.size(); i++) {
-			List<MissionItem> missionItemList = new ArrayList<>();
+			Set<MissionItem> missionItemList = new HashSet<>();
 			mission = missionList.get(i);
 			List<MissionMissionItemXREF> missionMissionItemXREFList = missionMissionItemXREFMapper.findByChainId(mission.getId());
 			for (int j = 0; j < missionMissionItemXREFList.size(); j++) {
 				missionItemList.add(missionMissionItemXREFList.get(j).getMissionItem());
 			}
-			mission.setMissionItemList(missionItemList);
+			mission.setMissionItemSet(missionItemList);
 			result.add(mission);
 		}
 		return result;

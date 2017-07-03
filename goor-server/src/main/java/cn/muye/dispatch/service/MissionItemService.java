@@ -1,7 +1,7 @@
 package cn.muye.dispatch.service;
 
 
-import cn.mrobot.bean.misssion.MissionItem;
+import cn.mrobot.bean.mission.MissionItem;
 import cn.mrobot.utils.WhereRequest;
 
 import java.util.List;

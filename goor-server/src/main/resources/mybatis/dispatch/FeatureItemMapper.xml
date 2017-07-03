@@ -2,10 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.muye.dispatch.mapper.FeatureItemMapper">
 
-    <resultMap id="featureItem" type="cn.mrobot.bean.misssion.FeatureItem">
+    <resultMap id="featureItem" type="cn.mrobot.bean.mission.FeatureItem">
         <result property="id" column="ID"/>
         <result property="name" column="NAME"/>
         <result property="value" column="VALUE"/>
+        <result property="dataModel" column="DATA_MODEL"/>
         <result property="description" column="DESCRIPTION"/>
     </resultMap>
 
@@ -13,19 +14,22 @@
         ID,
         NAME,
         VALUE,
+        DATA_MODEL,
         DESCRIPTION
     </sql>
 
-    <insert id="save" parameterType="cn.mrobot.bean.misssion.FeatureItem" useGeneratedKeys="true" keyProperty="id">
+    <insert id="save" parameterType="cn.mrobot.bean.mission.FeatureItem" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_FEATURE_ITEM(
         ID,
         NAME,
         VALUE,
+        DATA_MODEL,
         DESCRIPTION
         ) values (
         #{id},
         #{name},
         #{value},
+        #{dataModel},
         #{description}
         );
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">

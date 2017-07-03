@@ -1,5 +1,7 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
+import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.Date;
@@ -13,7 +15,7 @@ import java.util.Date;
  * Describe: 子任务
  * Version:1.0
  */
-public class MissionItem {
+public class MissionItem extends BaseBean {
 
 	private Long id;
 
@@ -28,9 +30,6 @@ public class MissionItem {
 	private String data;//任务详细/功能数据
 
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	private Date createTime;
-
-	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;
 
 	private Integer priority;//优先级
@@ -41,24 +40,18 @@ public class MissionItem {
 
 	private FeatureItem featureItem;
 
-	private Long featureItemTypeId;
-
-	private FeatureItemType featureItemType;
-
 	public static class Builder {
 		private String name;
 		private String description;
 		private int repeatCount;
 		private Long intervalTime;
 		private String data;
-		private Date createTime;
+		private Date created;
 		private Date updateTime;
 		private Integer priority;//优先级
 		private Long missionChainId;
 		private Long featureItemId;
 		private FeatureItem featureItem;
-		private Long featureItemTypeId;
-		private FeatureItemType featureItemType;
 
 		public Builder name(String name) {
 			this.name = name;
@@ -85,8 +78,8 @@ public class MissionItem {
 			return this;
 		}
 
-		public Builder createTime(Date createTime) {
-			this.createTime = createTime;
+		public Builder created(Date created) {
+			this.created = created;
 			return this;
 		}
 
@@ -115,15 +108,6 @@ public class MissionItem {
 			return this;
 		}
 
-		public Builder featureItemTypeId(Long featureItemTypeId) {
-			this.featureItemTypeId = featureItemTypeId;
-			return this;
-		}
-
-		public Builder featureItemType(FeatureItemType featureItemType) {
-			this.featureItemType = featureItemType;
-			return this;
-		}
 		public MissionItem build() {
 			return new MissionItem(this);
 		}
@@ -138,14 +122,20 @@ public class MissionItem {
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
 		data = builder.data;
-		createTime = builder.createTime;
+		created = builder.created;
 		updateTime = builder.updateTime;
 		priority = builder.priority;
 		missionChainId = builder.missionChainId;
 		featureItemId = builder.featureItemId;
 		featureItem = builder.featureItem;
-		featureItemTypeId = builder.featureItemTypeId;
-		featureItemType = builder.featureItemType;
+	}
+
+	public MissionItemDTO toDTO() {
+		MissionItemDTO missionItemDTO = new MissionItemDTO();
+		missionItemDTO.setId(this.getId());
+		missionItemDTO.setName(this.getName());
+		missionItemDTO.setData(this.getData());
+		return missionItemDTO;
 	}
 
 	public Long getId() {
@@ -196,14 +186,6 @@ public class MissionItem {
 		this.data = data;
 	}
 
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
-
 	public Date getUpdateTime() {
 		return updateTime;
 	}
@@ -242,21 +224,5 @@ public class MissionItem {
 
 	public void setFeatureItem(FeatureItem featureItem) {
 		this.featureItem = featureItem;
-	}
-
-	public Long getFeatureItemTypeId() {
-		return featureItemTypeId;
-	}
-
-	public void setFeatureItemTypeId(Long featureItemTypeId) {
-		this.featureItemTypeId = featureItemTypeId;
-	}
-
-	public FeatureItemType getFeatureItemType() {
-		return featureItemType;
-	}
-
-	public void setFeatureItemType(FeatureItemType featureItemType) {
-		this.featureItemType = featureItemType;
 	}
 }
