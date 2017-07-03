@@ -70,7 +70,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Role roleDb = roleService.getById(user.getRoleId());
         user.setRoleName(roleDb.getCnName());
         //如果角色是站管理员
-        if (user.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption())) {
+        if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
             //删掉之前的user绑定station
             userStationXrefService.deleteByUserId(userId);
             List<Station> stationIdList = user.getStationList();
@@ -94,15 +94,15 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         user.setRoleName(roleDb.getCnName());
         if (userRoleXrefDb != null) {
             ////如果原来角色是3，变更角色是2就需要把user_station_xref的记录删掉
-            if (userRoleXrefDb.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && roleId.equals(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) {
+            if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
                 userStationXrefService.deleteByUserId(userId);
             }
-            if (userRoleXrefDb.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && roleId.equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList != null && stationList.size() > 0) {
+            if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
                 userStationXrefService.deleteByUserId(userId);
                 saveUserStationXref(stationList, userId);
             }
             ////如果原来角色是2，变更角色是3就需要增加一条user_station_xref的记录
-            if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()) && roleId.equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList != null && stationList.size() > 0) {
+            if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
                 saveUserStationXref(stationList, userId);
             }
             userRoleXrefDb.setRoleId(roleId);
@@ -112,7 +112,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             userRoleXrefDb.setUserId(userId);
             userRoleXrefDb.setRoleId(roleId);
             userRoleXrefService.save(userRoleXrefDb);
-            if (roleId.equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList != null && stationList.size() > 0) {
+            if (roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
                 saveUserStationXref(stationList, userId);
             }
         }

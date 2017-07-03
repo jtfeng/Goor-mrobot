@@ -3,6 +3,7 @@ package cn.muye.account.user.controller;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.area.point.MapPointType;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.dto.account.UserDTO;
@@ -70,10 +71,13 @@ public class UserController {
         if (user.getRoleId() == null) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
         }
-        if (user.getRoleId() != null && user.getRoleId().equals(3L) && user.getStationList() == null && user.getStationList().size() == 0) {
+        if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null) {
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
+        }
+        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() == null) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
         }
-        if (user.getRoleId() != null && user.getRoleId().equals(1L)) {
+        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
         }
         User userDb = userService.getByUserName(user.getUserName());
