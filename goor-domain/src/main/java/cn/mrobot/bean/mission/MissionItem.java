@@ -1,5 +1,7 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
+import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.Date;
@@ -13,7 +15,7 @@ import java.util.Date;
  * Describe: 子任务
  * Version:1.0
  */
-public class MissionItem {
+public class MissionItem extends BaseBean {
 
 	private Long id;
 
@@ -41,10 +43,6 @@ public class MissionItem {
 
 	private FeatureItem featureItem;
 
-	private Long featureItemTypeId;
-
-	private FeatureItemType featureItemType;
-
 	public static class Builder {
 		private String name;
 		private String description;
@@ -57,8 +55,6 @@ public class MissionItem {
 		private Long missionChainId;
 		private Long featureItemId;
 		private FeatureItem featureItem;
-		private Long featureItemTypeId;
-		private FeatureItemType featureItemType;
 
 		public Builder name(String name) {
 			this.name = name;
@@ -115,15 +111,6 @@ public class MissionItem {
 			return this;
 		}
 
-		public Builder featureItemTypeId(Long featureItemTypeId) {
-			this.featureItemTypeId = featureItemTypeId;
-			return this;
-		}
-
-		public Builder featureItemType(FeatureItemType featureItemType) {
-			this.featureItemType = featureItemType;
-			return this;
-		}
 		public MissionItem build() {
 			return new MissionItem(this);
 		}
@@ -144,8 +131,14 @@ public class MissionItem {
 		missionChainId = builder.missionChainId;
 		featureItemId = builder.featureItemId;
 		featureItem = builder.featureItem;
-		featureItemTypeId = builder.featureItemTypeId;
-		featureItemType = builder.featureItemType;
+	}
+
+	public MissionItemDTO toDTO() {
+		MissionItemDTO missionItemDTO = new MissionItemDTO();
+		missionItemDTO.setId(this.getId());
+		missionItemDTO.setName(this.getName());
+		missionItemDTO.setData(this.getData());
+		return missionItemDTO;
 	}
 
 	public Long getId() {
@@ -242,21 +235,5 @@ public class MissionItem {
 
 	public void setFeatureItem(FeatureItem featureItem) {
 		this.featureItem = featureItem;
-	}
-
-	public Long getFeatureItemTypeId() {
-		return featureItemTypeId;
-	}
-
-	public void setFeatureItemTypeId(Long featureItemTypeId) {
-		this.featureItemTypeId = featureItemTypeId;
-	}
-
-	public FeatureItemType getFeatureItemType() {
-		return featureItemType;
-	}
-
-	public void setFeatureItemType(FeatureItemType featureItemType) {
-		this.featureItemType = featureItemType;
 	}
 }

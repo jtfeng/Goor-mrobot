@@ -1,8 +1,8 @@
 package cn.muye.dispatch.service.impl;
 
-import cn.mrobot.bean.misssion.Mission;
-import cn.mrobot.bean.misssion.MissionList;
-import cn.mrobot.bean.misssion.MissionListMissionXREF;
+import cn.mrobot.bean.mission.Mission;
+import cn.mrobot.bean.mission.MissionList;
+import cn.mrobot.bean.mission.MissionListMissionXREF;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.MissionListMissionXREFMapper;

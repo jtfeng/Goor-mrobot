@@ -1,6 +1,6 @@
 package cn.muye.dispatch.service.impl;
 
-import cn.mrobot.bean.misssion.FeatureItemType;
+import cn.mrobot.bean.mission.FeatureItemType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.FeatureItemTypeMapper;

@@ -1,4 +1,4 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
 import javax.persistence.Column;
 import javax.persistence.Id;

@@ -1,6 +1,6 @@
 package cn.muye.dispatch.mapper;
 
-import cn.mrobot.bean.misssion.MissionMissionItemXREF;
+import cn.mrobot.bean.mission.MissionMissionItemXREF;
 
 import java.util.List;
 

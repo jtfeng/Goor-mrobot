@@ -1,6 +1,6 @@
 package cn.muye.dispatch.controller;
 
-import cn.mrobot.bean.misssion.*;
+import cn.mrobot.bean.mission.*;
 import cn.mrobot.utils.WhereRequest;
 import cn.mrobot.utils.ajax.AjaxResponse;
 import cn.muye.base.bean.AjaxResult;

@@ -1,10 +1,11 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
+import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.dto.mission.MissionDTO;
+import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,7 +16,7 @@ import java.util.List;
  * Describe:  总任务 (任务串)
  * Version:1.0
  */
-public class Mission implements Serializable {
+public class Mission extends BaseBean {
 
 	private Long id;
 
@@ -32,7 +33,7 @@ public class Mission implements Serializable {
 
 	private Long intervalTime;
 
-	private List<MissionItem> missionItemList;
+	private Set<MissionItem> missionItemSet;
 
 	private Long missionMainId;
 
@@ -50,7 +51,7 @@ public class Mission implements Serializable {
 		private Integer priority;
 		private int repeatCount;
 		private Long intervalTime;
-		private List<MissionItem> missionItemList;
+		private Set<MissionItem> missionItemSet;
 		private Long missionMainId;
 
 		public Builder name(String name) {
@@ -84,8 +85,8 @@ public class Mission implements Serializable {
 			return this;
 		}
 
-		public Builder missionNodeList(List<MissionItem> missionItemList) {
-			this.missionItemList = missionItemList;
+		public Builder missionNodeSet(Set<MissionItem> missionItemSet) {
+			this.missionItemSet = missionItemSet;
 			return this;
 		}
 
@@ -113,8 +114,24 @@ public class Mission implements Serializable {
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
 		missionMainId = builder.missionMainId;
-		missionItemList = builder.missionItemList;
+		missionItemSet = builder.missionItemSet;
 		updateTime = builder.updateTime;
+	}
+
+	public MissionDTO toDTO() {
+		MissionDTO missionDTO = new MissionDTO();
+		missionDTO.setId(this.getId());
+		missionDTO.setIntervalTime(this.getIntervalTime());
+		missionDTO.setRepeatCount(this.getRepeatCount());
+		Set<MissionItem> missionItems = this.getMissionItemSet();
+		if(missionItems != null) {
+			Set<MissionItemDTO> missionItemDTOS = new HashSet<MissionItemDTO>();
+			for(MissionItem missionItem : missionItems) {
+				missionItemDTOS.add(missionItem.toDTO());
+			}
+			missionDTO.setMissionItemDTOSet(missionItemDTOS);
+		}
+		return missionDTO;
 	}
 
 	public int getRepeatCount() {
@@ -189,11 +206,11 @@ public class Mission implements Serializable {
 		this.priority = priority;
 	}
 
-	public List<MissionItem> getMissionItemList() {
-		return missionItemList;
+	public Set<MissionItem> getMissionItemSet() {
+		return missionItemSet;
 	}
 
-	public void setMissionItemList(List<MissionItem> missionItemList) {
-		this.missionItemList = missionItemList;
+	public void setMissionItemSet(Set<MissionItem> missionItemSet) {
+		this.missionItemSet = missionItemSet;
 	}
 }
