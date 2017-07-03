@@ -1,10 +1,9 @@
 package cn.muye.dispatch.mapper;
 
 
-import cn.mrobot.bean.misssion.MissionNode;
+import cn.mrobot.bean.misssion.MissionItem;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,24 +15,24 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-public interface MissionNodeMapper {
+public interface MissionItemMapper {
 
-	long save(MissionNode missionNode);
+	long save(MissionItem missionItem);
 
-	MissionNode findByName(String name);
+	MissionItem findByName(String name);
 
-	void update(MissionNode missionNode);
+	void update(MissionItem missionItem);
 
-	void delete(MissionNode missionNode);
+	void delete(MissionItem missionItem);
 
-	MissionNode get(long id);
+	MissionItem get(long id);
 
-	List<MissionNode> list(@Param("missionChainId") Object missionChainId,
+	List<MissionItem> list(@Param("missionChainId") Object missionChainId,
 						   @Param("name") Object name,
 						   @Param("beginDate") Object beginDate,
 						   @Param("endDate") Object endDate,
 						   @Param("priority") Object priority);
 
-	List<MissionNode> listAll();
+	List<MissionItem> listAll();
 }
 

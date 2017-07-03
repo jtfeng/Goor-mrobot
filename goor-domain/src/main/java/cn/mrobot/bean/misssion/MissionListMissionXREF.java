@@ -9,15 +9,15 @@ package cn.mrobot.bean.misssion;
  * Describe:
  * Version:1.0
  */
-public class MissionMainChainXREF {
+public class MissionListMissionXREF {
 
 	private Long id;
 
-	private MissionMain missionMain;
+	private MissionList missionList;
 
 	private Long missionMainId;
 
-	private MissionChain missionChain;
+	private Mission mission;
 
 	private Long missionChainId;
 
@@ -29,12 +29,12 @@ public class MissionMainChainXREF {
 		this.id = id;
 	}
 
-	public MissionMain getMissionMain() {
-		return missionMain;
+	public MissionList getMissionList() {
+		return missionList;
 	}
 
-	public void setMissionMain(MissionMain missionMain) {
-		this.missionMain = missionMain;
+	public void setMissionList(MissionList missionList) {
+		this.missionList = missionList;
 	}
 
 	public Long getMissionMainId() {
@@ -45,12 +45,12 @@ public class MissionMainChainXREF {
 		this.missionMainId = missionMainId;
 	}
 
-	public MissionChain getMissionChain() {
-		return missionChain;
+	public Mission getMission() {
+		return mission;
 	}
 
-	public void setMissionChain(MissionChain missionChain) {
-		this.missionChain = missionChain;
+	public void setMission(Mission mission) {
+		this.mission = mission;
 	}
 
 	public Long getMissionChainId() {
@@ -67,7 +67,7 @@ public class MissionMainChainXREF {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		MissionMainChainXREF that = (MissionMainChainXREF) o;
+		MissionListMissionXREF that = (MissionListMissionXREF) o;
 
 		if (missionMainId != null && missionChainId != null){
 			return missionChainId.equals(that.getMissionChainId()) && missionMainId.equals(that.getMissionMainId());

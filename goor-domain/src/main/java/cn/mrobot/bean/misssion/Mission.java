@@ -15,7 +15,7 @@ import java.util.List;
  * Describe:  总任务 (任务串)
  * Version:1.0
  */
-public class MissionChain implements Serializable {
+public class Mission implements Serializable {
 
 	private Long id;
 
@@ -32,13 +32,13 @@ public class MissionChain implements Serializable {
 
 	private Long intervalTime;
 
-	private List<MissionNode> missionNodeList;
+	private List<MissionItem> missionItemList;
 
 	private Long missionMainId;
 
 	private Integer priority;//优先级
 
-	public MissionChain() {
+	public Mission() {
 	}
 
 	public static class Builder {
@@ -50,7 +50,7 @@ public class MissionChain implements Serializable {
 		private Integer priority;
 		private int repeatCount;
 		private Long intervalTime;
-		private List<MissionNode> missionNodeList;
+		private List<MissionItem> missionItemList;
 		private Long missionMainId;
 
 		public Builder name(String name) {
@@ -84,8 +84,8 @@ public class MissionChain implements Serializable {
 			return this;
 		}
 
-		public Builder missionNodeList(List<MissionNode> missionNodeList) {
-			this.missionNodeList = missionNodeList;
+		public Builder missionNodeList(List<MissionItem> missionItemList) {
+			this.missionItemList = missionItemList;
 			return this;
 		}
 
@@ -100,12 +100,12 @@ public class MissionChain implements Serializable {
 			return this;
 		}
 
-		public MissionChain build() {
-			return new MissionChain(this);
+		public Mission build() {
+			return new Mission(this);
 		}
 	}
 
-	private MissionChain(Builder builder) {
+	private Mission(Builder builder) {
 		name = builder.name;
 		description = builder.description;
 		createTime = builder.createTime;
@@ -113,7 +113,7 @@ public class MissionChain implements Serializable {
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
 		missionMainId = builder.missionMainId;
-		missionNodeList = builder.missionNodeList;
+		missionItemList = builder.missionItemList;
 		updateTime = builder.updateTime;
 	}
 
@@ -189,11 +189,11 @@ public class MissionChain implements Serializable {
 		this.priority = priority;
 	}
 
-	public List<MissionNode> getMissionNodeList() {
-		return missionNodeList;
+	public List<MissionItem> getMissionItemList() {
+		return missionItemList;
 	}
 
-	public void setMissionNodeList(List<MissionNode> missionNodeList) {
-		this.missionNodeList = missionNodeList;
+	public void setMissionItemList(List<MissionItem> missionItemList) {
+		this.missionItemList = missionItemList;
 	}
 }

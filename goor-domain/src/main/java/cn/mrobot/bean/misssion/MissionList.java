@@ -15,7 +15,7 @@ import java.util.List;
  * Describe: 总任务 (任务串)
  * Version:1.0
  */
-public class MissionMain implements Serializable{
+public class MissionList implements Serializable{
 
 	private Long id;
 
@@ -31,7 +31,7 @@ public class MissionMain implements Serializable{
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;    //更新时间
 
-	private List<MissionChain> missionChainList;
+	private List<Mission> missionList;
 
 	/**
 	 * //间隔时间
@@ -57,7 +57,7 @@ public class MissionMain implements Serializable{
 		private int repeatCount;
 		private Long startTime;
 		private Integer priority;//优先级
-		private List<MissionChain> missionChainList;
+		private List<Mission> missionList;
 
 		public Builder name(String name) {
 			this.name = name;
@@ -104,20 +104,20 @@ public class MissionMain implements Serializable{
 			return this;
 		}
 
-		public Builder missionChainList(List<MissionChain> missionChainList) {
-			this.missionChainList = missionChainList;
+		public Builder missionChainList(List<Mission> missionList) {
+			this.missionList = missionList;
 			return this;
 		}
 
-		public MissionMain build() {
-			return new MissionMain(this);
+		public MissionList build() {
+			return new MissionList(this);
 		}
 	}
 
-	public MissionMain() {
+	public MissionList() {
 	}
 
-	private MissionMain(Builder builder) {
+	private MissionList(Builder builder) {
 		name = builder.name;
 		description = builder.description;
 		deviceId = builder.deviceId;
@@ -127,7 +127,7 @@ public class MissionMain implements Serializable{
 		intervalTime = builder.intervalTime;
 		repeatCount = builder.repeatCount;
 		priority = builder.priority;
-		missionChainList = builder.missionChainList;
+		missionList = builder.missionList;
 	}
 
 	public Long getId() {
@@ -210,11 +210,11 @@ public class MissionMain implements Serializable{
 		this.priority = priority;
 	}
 
-	public List<MissionChain> getMissionChainList() {
-		return missionChainList;
+	public List<Mission> getMissionList() {
+		return missionList;
 	}
 
-	public void setMissionChainList(List<MissionChain> missionChainList) {
-		this.missionChainList = missionChainList;
+	public void setMissionList(List<Mission> missionList) {
+		this.missionList = missionList;
 	}
 }

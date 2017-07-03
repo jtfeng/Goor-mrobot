@@ -13,7 +13,7 @@ import java.util.Date;
  * Describe: 子任务
  * Version:1.0
  */
-public class MissionNode {
+public class MissionItem {
 
 	private Long id;
 
@@ -124,15 +124,15 @@ public class MissionNode {
 			this.featureItemType = featureItemType;
 			return this;
 		}
-		public MissionNode build() {
-			return new MissionNode(this);
+		public MissionItem build() {
+			return new MissionItem(this);
 		}
 	}
 
-	public MissionNode() {
+	public MissionItem() {
 	}
 
-	private MissionNode(Builder builder) {
+	private MissionItem(Builder builder) {
 		name = builder.name;
 		description = builder.description;
 		repeatCount = builder.repeatCount;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.muye.dispatch.mapper.MissionChainMapper">
+<mapper namespace="cn.muye.dispatch.mapper.MissionMapper">
 
-    <resultMap id="missionChain" type="cn.mrobot.bean.misssion.MissionChain">
+    <resultMap id="mission" type="cn.mrobot.bean.misssion.Mission">
         <result property="id" column="ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
@@ -26,7 +26,7 @@
         PRIORITY
     </sql>
 
-    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionMain" useGeneratedKeys="true" keyProperty="id">
+    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionList" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_MISSION_CHAIN(
             ID,
             NAME,
@@ -82,7 +82,7 @@
         ID = #{id}
     </update>
 
-    <select id="get" resultMap="missionChain">
+    <select id="get" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_CHAIN
@@ -93,14 +93,14 @@
         DELETE FROM D_MISSION_CHAIN WHERE ID = #{id}
     </delete>
 
-    <select id="findByName" resultMap="missionChain">
+    <select id="findByName" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_CHAIN
         WHERE NAME = #{name}
     </select>
 
-    <select id="list" resultMap="missionChain">
+    <select id="list" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_CHAIN d
@@ -127,7 +127,7 @@
         ORDER BY NAME
     </select>
 
-    <select id="listAll" resultMap="missionChain">
+    <select id="listAll" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_CHAIN d

@@ -1,7 +1,6 @@
 package cn.muye.dispatch.mapper;
 
-import cn.mrobot.bean.misssion.MissionChainNodeXREF;
-import cn.mrobot.bean.misssion.MissionMainChainXREF;
+import cn.mrobot.bean.misssion.MissionListMissionXREF;
 
 import java.util.List;
 
@@ -14,13 +13,13 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-public interface MissionMainChainXREFMapper {
+public interface MissionListMissionXREFMapper {
 
-	long save(MissionMainChainXREF missionMainChainXREF);
+	long save(MissionListMissionXREF missionListMissionXREF);
 
 	void delete(long id);
 
 	void deleteByMainId(long missionMainId);
 
-	List<MissionMainChainXREF> findByMainId(long missionMainId);
+	List<MissionListMissionXREF> findByMainId(long missionMainId);
 }
