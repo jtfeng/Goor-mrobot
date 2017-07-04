@@ -3,7 +3,6 @@ package cn.muye.account.user.controller;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.area.point.MapPointType;
-import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.dto.account.UserDTO;
@@ -20,13 +19,12 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.net.util.Base64;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +35,8 @@ import java.util.Map;
  */
 @Controller
 public class UserController {
+
+    private static Logger LOGGER = Logger.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -62,52 +62,58 @@ public class UserController {
     @ApiOperation(value = "新增修改用户接口", httpMethod = "POST", notes = "新增修改用户接口")
     @ResponseBody
     public AjaxResult addOrUpdateUser(@RequestBody User user) {
-        if (user == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
-        }
-        if (StringUtil.isNullOrEmpty(user.getUserName()) || StringUtil.isNullOrEmpty(user.getPassword())) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
-        }
-        if (user.getRoleId() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
-        }
-        if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
-        }
-        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
-        }
-        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
-        }
-        User userDb = userService.getByUserName(user.getUserName());
-        if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
-            return AjaxResult.failed("用户名重复");
-        }
-        User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey());
-        if (userDbByDirectKey != null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
-            return AjaxResult.failed("4位快捷码重复");
-        }
-        Long id = user.getId();
-        if (id == null) {
-            userService.addUser(user);
-            return AjaxResult.success(entityToDto(user), "新增成功");
-        } else {
-            User userDbById = userService.getById(id);
-            if (userDbById != null) {
-                userDbById.setUserName(user.getUserName());
-                userDbById.setPassword(user.getPassword());
-                userDbById.setRoleId(user.getRoleId());
-                userDbById.setStationList(user.getStationList());
-                if (user.getActivated() != null) {
-                    userDbById.setActivated(user.getActivated());
-                }
-                userDbById.setDirectLoginKey(user.getDirectLoginKey());
-                userService.updateUser(userDbById);
-                return AjaxResult.success(entityToDto(userDbById), "修改成功");
-            } else {
-                return AjaxResult.failed("不存在该用户");
+        try {
+            if (user == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
             }
+            if (StringUtil.isNullOrEmpty(user.getUserName()) || StringUtil.isNullOrEmpty(user.getPassword())) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
+            }
+            if (user.getRoleId() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
+            }
+            if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
+            }
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
+            }
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
+            }
+            User userDb = userService.getByUserName(user.getUserName());
+            if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
+                return AjaxResult.failed("用户名重复");
+            }
+            User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey());
+            if (userDbByDirectKey != null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
+                return AjaxResult.failed("4位快捷码重复");
+            }
+            Long id = user.getId();
+            if (id == null) {
+                userService.addUser(user);
+                return AjaxResult.success(entityToDto(user), "新增成功");
+            } else {
+                User userDbById = userService.getById(id);
+                if (userDbById != null) {
+                    userDbById.setUserName(user.getUserName());
+                    userDbById.setPassword(user.getPassword());
+                    userDbById.setRoleId(user.getRoleId());
+                    userDbById.setStationList(user.getStationList());
+                    if (user.getActivated() != null) {
+                        userDbById.setActivated(user.getActivated());
+                    }
+                    userDbById.setDirectLoginKey(user.getDirectLoginKey());
+                    userService.updateUser(userDbById);
+                    return AjaxResult.success(entityToDto(userDbById), "修改成功");
+                } else {
+                    return AjaxResult.failed("不存在该用户");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("database error", e);
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "站点ID不存在");
+        } finally {
         }
     }
 
@@ -165,11 +171,11 @@ public class UserController {
     @RequestMapping(value = {"account/user/login"}, method = RequestMethod.POST)
     @ApiOperation(value = "登录接口", httpMethod = "POST", notes = "登录接口")
     @ResponseBody
-    public AjaxResult login(@RequestBody User userParam, HttpServletResponse httpResponse) {
+    public AjaxResult login(@RequestBody User userParam) {
         if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
         }
-        Map map = doLogin(userParam.getUserName(), userParam.getPassword(), httpResponse);
+        Map map = doLogin(userParam.getUserName(), userParam.getPassword());
         return doCheckLogin(map);
     }
 
@@ -182,7 +188,7 @@ public class UserController {
     @RequestMapping(value = {"account/user/login/pad"}, method = RequestMethod.POST)
     @ApiOperation(value = "PAD登录接口", httpMethod = "POST", notes = "PAD登录接口")
     @ResponseBody
-    public AjaxResult directKeyLogin(@RequestBody User userParam, HttpServletResponse response) {
+    public AjaxResult directKeyLogin(@RequestBody User userParam) {
         try {
             if (userParam.getDirectLoginKey() == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
@@ -190,7 +196,7 @@ public class UserController {
             Integer directLoginKey = userParam.getDirectLoginKey();
             User userDb = userService.getUserByDirectKey(directLoginKey);
             if (userDb != null) {
-                Map map = doLogin(userDb.getUserName(), userDb.getPassword(), response);
+                Map map = doLogin(userDb.getUserName(), userDb.getPassword());
                 return doCheckLogin(map);
             } else {
                 return AjaxResult.failed("用户不存在");
@@ -247,7 +253,7 @@ public class UserController {
      * @param password
      * @return
      */
-    private Map<String, Object> doLogin(String userName, String password, HttpServletResponse response) {
+    private Map<String, Object> doLogin(String userName, String password) {
         //调auth_server的token接口
         User user = null;
         Map map = new HashMap();
@@ -260,7 +266,7 @@ public class UserController {
                 if (list != null) {
                     user = list.get(0);
                     map.put("user", user);
-                    response.setHeader("access_token", accessToken);
+                    map.put("access_token", accessToken);
                     return map;
                 } else {
                     return null;
