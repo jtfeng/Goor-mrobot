@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +48,16 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Example example = new Example(User.class);
         example.createCriteria().andCondition("USER_NAME =", userName);
         example.createCriteria().andCondition("PASSWORD =", password);
-        return userMapper.selectByExample(example);
+        List<User> userList = userMapper.selectByExample(example);
+        if (userList != null && userList.size() > 0) {
+            for (User u : userList) {
+                List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
+                List<Station> stationList = new ArrayList<>();
+                addToStationList(userStationXrefDbList, stationList);
+                u.setStationList(stationList);
+            }
+        }
+        return userList;
     }
 
     /**
@@ -151,6 +162,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         List<User> userList = userMapper.selectByExample(example);
         if (userList != null && userList.size() > 0) {
             for (User u : userList) {
+                List<Station> stationList = new ArrayList<>();
+                List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
                 UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
                 if (xref != null) {
                     Role roleDb = roleService.getById(xref.getRoleId());
@@ -159,9 +172,21 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                         u.setRoleName(roleDb.getCnName());
                     }
                 }
+                addToStationList(userStationXrefDbList, stationList);
+                u.setStationList(stationList);
             }
         }
         return userList;
+    }
+
+    private void addToStationList(List<UserStationXref> userStationXrefDbList, List<Station> stationList) {
+        if (userStationXrefDbList != null && userStationXrefDbList.size() > 0) {
+            for (UserStationXref ux : userStationXrefDbList) {
+                Station station = new Station();
+                station.setId(ux.getId());
+                stationList.add(station);
+            }
+        }
     }
 
     @Override

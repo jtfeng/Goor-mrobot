@@ -19,23 +19,24 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.net.util.Base64;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.servlet.http.Cookie;
 
 /**
  * Created by Ray.Fu on 2017/6/13.
  */
 @Controller
 public class UserController {
+
+    private static Logger LOGGER = Logger.getLogger(UserController.class);
 
     @Autowired
     private UserService userService;
@@ -61,52 +62,58 @@ public class UserController {
     @ApiOperation(value = "新增修改用户接口", httpMethod = "POST", notes = "新增修改用户接口")
     @ResponseBody
     public AjaxResult addOrUpdateUser(@RequestBody User user) {
-        if (user == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
-        }
-        if (StringUtil.isNullOrEmpty(user.getUserName()) || StringUtil.isNullOrEmpty(user.getPassword())) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
-        }
-        if (user.getRoleId() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
-        }
-        if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
-        }
-        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
-        }
-        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
-        }
-        User userDb = userService.getByUserName(user.getUserName());
-        if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
-            return AjaxResult.failed("用户名重复");
-        }
-        User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey());
-        if (userDbByDirectKey != null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
-            return AjaxResult.failed("4位快捷码重复");
-        }
-        Long id = user.getId();
-        if (id == null) {
-            userService.addUser(user);
-            return AjaxResult.success(entityToDto(user), "新增成功");
-        } else {
-            User userDbById = userService.getById(id);
-            if (userDbById != null) {
-                userDbById.setUserName(user.getUserName());
-                userDbById.setPassword(user.getPassword());
-                userDbById.setRoleId(user.getRoleId());
-                userDbById.setStationList(user.getStationList());
-                if (user.getActivated() != null) {
-                    userDbById.setActivated(user.getActivated());
-                }
-                userDbById.setDirectLoginKey(user.getDirectLoginKey());
-                userService.updateUser(userDbById);
-                return AjaxResult.success(entityToDto(userDbById), "修改成功");
-            } else {
-                return AjaxResult.failed("不存在该用户");
+        try {
+            if (user == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
             }
+            if (StringUtil.isNullOrEmpty(user.getUserName()) || StringUtil.isNullOrEmpty(user.getPassword())) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
+            }
+            if (user.getRoleId() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
+            }
+            if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
+            }
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
+            }
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
+            }
+            User userDb = userService.getByUserName(user.getUserName());
+            if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
+                return AjaxResult.failed("用户名重复");
+            }
+            User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey());
+            if (userDbByDirectKey != null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
+                return AjaxResult.failed("4位快捷码重复");
+            }
+            Long id = user.getId();
+            if (id == null) {
+                userService.addUser(user);
+                return AjaxResult.success(entityToDto(user), "新增成功");
+            } else {
+                User userDbById = userService.getById(id);
+                if (userDbById != null) {
+                    userDbById.setUserName(user.getUserName());
+                    userDbById.setPassword(user.getPassword());
+                    userDbById.setRoleId(user.getRoleId());
+                    userDbById.setStationList(user.getStationList());
+                    if (user.getActivated() != null) {
+                        userDbById.setActivated(user.getActivated());
+                    }
+                    userDbById.setDirectLoginKey(user.getDirectLoginKey());
+                    userService.updateUser(userDbById);
+                    return AjaxResult.success(entityToDto(userDbById), "修改成功");
+                } else {
+                    return AjaxResult.failed("不存在该用户");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("database error", e);
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "站点ID不存在");
+        } finally {
         }
     }
 
