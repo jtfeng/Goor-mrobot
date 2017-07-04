@@ -1,19 +1,12 @@
 package cn.muye.resource.controller;
 
-import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.DeviceType;
-import cn.mrobot.bean.enums.MessageStatusType;
-import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.AjaxResult;
-import cn.muye.base.bean.CommonInfo;
-import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.controller.BaseController;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
-import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.mpush.util.crypto.MD5Utils;
 import org.apache.commons.io.FileUtils;
@@ -25,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -127,7 +119,8 @@ public class ResourceController extends BaseController{
     private AjaxResult pushToAgent(@RequestBody ResourceToAgentBean resourceToAgentBean){
         try {
             Resource resource = resourceService.findById(resourceToAgentBean.getResourceId());
-            CommonInfo commonInfo = new CommonInfo();
+            //暂时去除todo中
+            /*CommonInfo commonInfo = new CommonInfo();
             commonInfo.setTopicName("/enva_test");
             commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
             commonInfo.setLocalFileName(resource.getOriginName());
@@ -149,7 +142,8 @@ public class ResourceController extends BaseController{
             info.setSendTime(new Date());
             info.setUpdateTime(info.getSendTime());
             info.setSendCount(0);
-            return (AjaxResult)rabbitTemplate.convertSendAndReceive("directExchange", "direct.common", info);
+            return (AjaxResult)rabbitTemplate.convertSendAndReceive("directExchange", "direct.common", info);*/
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("系统内部出错");

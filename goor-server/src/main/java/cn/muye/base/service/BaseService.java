@@ -18,4 +18,5 @@ public interface BaseService<T extends BaseBean> extends BaseCrudService<T> {
 
     List<T> listPageByStoreIdAndOrder(int page, int pageSize, Class<T> clazz, String order);
 
+
 }
