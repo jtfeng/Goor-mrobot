@@ -9,6 +9,7 @@ import cn.muye.account.role.service.UserStationXrefService;
 import cn.muye.account.user.mapper.UserMapper;
 import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
+import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -40,6 +41,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Autowired
     private UserStationXrefService userStationXrefService;
+
+    @Autowired
+    private StationService stationService;
 
     private static final int ACTIVATED = 1; //有效
 
@@ -182,9 +186,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     private void addToStationList(List<UserStationXref> userStationXrefDbList, List<Station> stationList) {
         if (userStationXrefDbList != null && userStationXrefDbList.size() > 0) {
             for (UserStationXref ux : userStationXrefDbList) {
-                Station station = new Station();
-                station.setId(ux.getId());
-                stationList.add(station);
+                Station stationDb = stationService.findById(ux.getStationId());
+                stationList.add(stationDb);
             }
         }
     }
