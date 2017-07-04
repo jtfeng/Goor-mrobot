@@ -72,9 +72,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     public void addUser(User user) {
         user.setActivated(true);
         user.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        user.setCreated(new Date());
+        user.setCreateTime(new Date());
         user.setCreatedBy(1L);
-        user.setCreated(new Date());
+        user.setCreateTime(new Date());
         userMapper.insert(user);
         Long userId = user.getId();
         //保存用户角色

@@ -44,7 +44,7 @@ public class Mission extends BaseBean {
 
 		private String name;
 		private String description;
-		private Date created;
+		private Date createTime;
 		private Date updateTime;
 		private Integer priority;
 		private int repeatCount;
@@ -62,8 +62,8 @@ public class Mission extends BaseBean {
 			return this;
 		}
 
-		public Builder created(Date created) {
-			this.created = created;
+		public Builder createTime(Date createTime) {
+			this.createTime = createTime;
 			return this;
 		}
 
@@ -107,7 +107,7 @@ public class Mission extends BaseBean {
 	private Mission(Builder builder) {
 		name = builder.name;
 		description = builder.description;
-		created = builder.created;
+		createTime = builder.createTime;
 		priority = builder.priority;
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;

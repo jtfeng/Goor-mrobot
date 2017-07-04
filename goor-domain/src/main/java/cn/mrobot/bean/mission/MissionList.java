@@ -5,7 +5,6 @@ import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionListDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -53,7 +52,7 @@ public class MissionList extends BaseBean{
 
 		private String name;  //总任务名称
 		private String description;
-		private Date created;  //创建时间
+		private Date createTime;  //创建时间
 		private Date updateTime;    //更新时间
 		private Long intervalTime;
 		private int repeatCount;
@@ -78,8 +77,8 @@ public class MissionList extends BaseBean{
 			return this;
 		}
 
-		public Builder created(Date created) {
-			this.created = created;
+		public Builder createTime(Date createTime) {
+			this.createTime = createTime;
 			return this;
 		}
 
@@ -129,7 +128,7 @@ public class MissionList extends BaseBean{
 	private MissionList(Builder builder) {
 		name = builder.name;
 		description = builder.description;
-		created = builder.created;
+		createTime = builder.createTime;
 		updateTime = builder.updateTime;
 		startTime = builder.startTime;
 		stopTime = builder.stopTime;

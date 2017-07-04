@@ -9,7 +9,6 @@ import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -19,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -165,7 +163,7 @@ public class StationController {
             } else if (station != null && id == null){
 				//TODO 从session取切换门店的ID，现在先写死
 				station.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-				station.setCreated(new Date());
+				station.setCreateTime(new Date());
 				//TODO 从session取登录用户ID
 				station.setCreatedBy(SearchConstants.FAKE_MERCHANT_STORE_ID);
 

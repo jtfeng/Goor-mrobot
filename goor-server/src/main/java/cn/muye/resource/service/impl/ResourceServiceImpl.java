@@ -22,7 +22,7 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resource> implements Re
         PageHelper.startPage(page,pageSize);
         Example example = new Example(Resource.class);
         example.createCriteria().andCondition("RESOURCE_TYPE =", resourceType);
-        example.setOrderByClause("CREATED DESC");
+        example.setOrderByClause("CREATE_TIME DESC");
         return myMapper.selectByExample(example);
     }
 

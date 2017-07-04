@@ -46,7 +46,7 @@ public class MissionItem extends BaseBean {
 		private int repeatCount;
 		private Long intervalTime;
 		private String data;
-		private Date created;
+		private Date createTime;
 		private Date updateTime;
 		private Integer priority;//优先级
 		private Long missionChainId;
@@ -78,8 +78,8 @@ public class MissionItem extends BaseBean {
 			return this;
 		}
 
-		public Builder created(Date created) {
-			this.created = created;
+		public Builder createTime(Date createTime) {
+			this.createTime = createTime;
 			return this;
 		}
 
@@ -122,7 +122,7 @@ public class MissionItem extends BaseBean {
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
 		data = builder.data;
-		created = builder.created;
+		createTime = builder.createTime;
 		updateTime = builder.updateTime;
 		priority = builder.priority;
 		missionChainId = builder.missionChainId;

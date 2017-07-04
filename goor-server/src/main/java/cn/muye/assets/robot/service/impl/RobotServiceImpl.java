@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -94,7 +93,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotConfig.setBatteryThreshold(robot.getBatteryThreshold());
         robotConfig.setRobotId(robot.getId());
         robotConfig.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        robotConfig.setCreated(new Date());
+        robotConfig.setCreateTime(new Date());
         robotConfig.setCreatedBy(1L);
         robotConfigService.add(robotConfig);
         robotPasswordService.saveRobotPassword(robot);

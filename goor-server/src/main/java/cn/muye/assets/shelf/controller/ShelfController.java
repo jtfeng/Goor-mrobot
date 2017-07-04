@@ -50,7 +50,7 @@ public class ShelfController {
         }
         if (id == null) {
             shelf.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            shelf.setCreated(new Date());
+            shelf.setCreateTime(new Date());
             shelf.setCreatedBy(1L);
             shelfService.save(shelf);
             return AjaxResult.success(shelf, "新增成功");

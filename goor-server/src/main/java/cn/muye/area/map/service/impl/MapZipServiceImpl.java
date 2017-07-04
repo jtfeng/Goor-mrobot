@@ -11,10 +11,8 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
-import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -45,7 +43,7 @@ public class MapZipServiceImpl implements MapZipService {
 
 	@Override
 	public long save(MapZip mapZip) {
-		mapZip.setCreated(new Date());
+		mapZip.setCreateTime(new Date());
 		return mapZipMapper.insert(mapZip);
 	}
 
@@ -76,7 +74,7 @@ public class MapZipServiceImpl implements MapZipService {
 			}
 		}
 		condition.createCriteria().andCondition("STORE_ID =" + storeId);
-		condition.setOrderByClause("CREATED desc");
+		condition.setOrderByClause("CREATE_TIME desc");
 		List<MapZip> mapZipList = mapZipMapper.selectByExample(condition);
 		return mapZipList;
 	}
