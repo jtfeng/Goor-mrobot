@@ -4,6 +4,9 @@
 
     <resultMap id="chargeInfo" type="cn.muye.log.charge.bean.ChargeInfo">
         <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
         <result property="deviceId" column="DEVICE_ID"/>
         <result property="chargingStatus" column="CHARGING_STATUS"/>
         <result property="pluginStatus" column="PLUGIN_STATUS"/>
@@ -13,6 +16,9 @@
 
     <sql id="Base_Column_List">
     ID,
+    STORE_ID,
+    CREATED_BY,
+    CREATE_TIME,
     DEVICE_ID,
     CHARGING_STATUS,
     PLUGIN_STATUS,
@@ -23,6 +29,9 @@
     <insert id="save" parameterType="cn.muye.log.charge.bean.ChargeInfo" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO CHARGING_INFO(
         ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
         DEVICE_ID,
         CHARGING_STATUS,
         PLUGIN_STATUS,
@@ -30,6 +39,9 @@
         CREATE_DATE
         ) values (
         #{id},
+        #{storeId},
+        #{createdBy},
+        #{createTime},
         #{deviceId},
         #{chargingStatus},
         #{pluginStatus},
