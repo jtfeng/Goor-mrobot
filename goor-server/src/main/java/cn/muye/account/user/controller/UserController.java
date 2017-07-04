@@ -1,10 +1,12 @@
 package cn.muye.account.user.controller;
 
+import cn.mrobot.bean.account.Role;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
+import cn.mrobot.dto.account.RoleDTO;
 import cn.mrobot.dto.account.UserDTO;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
@@ -13,6 +15,7 @@ import cn.muye.base.bean.AjaxResult;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -25,6 +28,8 @@ import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,6 +86,9 @@ public class UserController {
             if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
             }
+            if (user.getDirectLoginKey() != null && user.getDirectLoginKey() > 9999 && user.getDirectLoginKey() < 1000) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "快捷密码必须是4位数");
+            }
             User userDb = userService.getByUserName(user.getUserName());
             if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
                 return AjaxResult.failed("用户名重复");
@@ -97,7 +105,9 @@ public class UserController {
                 User userDbById = userService.getById(id);
                 if (userDbById != null) {
                     userDbById.setUserName(user.getUserName());
-                    userDbById.setPassword(user.getPassword());
+                    if (!StringUtil.isNullOrEmpty(user.getPassword())) {
+                        userDbById.setPassword(user.getPassword());
+                    }
                     userDbById.setRoleId(user.getRoleId());
                     userDbById.setStationList(user.getStationList());
                     if (user.getActivated() != null) {
@@ -208,10 +218,10 @@ public class UserController {
     }
 
     private AjaxResult doCheckLogin(Map map) {
-        User user = (User) map.get("user");
-        if (user != null) {
+        UserDTO userDTO = (UserDTO) map.get("user");
+        if (userDTO != null) {
             //写入枚举
-            map.put("enums", getAllEnums());
+            map.put("enums", getAllEnums(userDTO));
             return AjaxResult.success(map, "登录成功");
         } else {
             return AjaxResult.failed("登录失败");
@@ -265,7 +275,7 @@ public class UserController {
                 List<User> list = userService.getUser(userName, password);
                 if (list != null) {
                     user = list.get(0);
-                    map.put("user", user);
+                    map.put("user", entityToDto(user));
                     map.put("access_token", accessToken);
                     return map;
                 } else {
@@ -276,7 +286,7 @@ public class UserController {
             e.printStackTrace();
         } finally {
         }
-        return null;
+        return map;
     }
 
     /**
@@ -321,7 +331,6 @@ public class UserController {
         userDTO.setUserName(user.getUserName());
         userDTO.setRoleId(user.getRoleId());
         userDTO.setRoleName(user.getRoleName());
-        userDTO.setDirectLoginKey(user.getDirectLoginKey());
         userDTO.setActivated(user.getActivated());
         userDTO.setStationList(user.getStationList());
         return userDTO;
@@ -332,12 +341,47 @@ public class UserController {
      *
      * @return
      */
-    public final static Map getAllEnums() {
+    public final static Map getAllEnums(UserDTO userDTO) {
         Map map = new HashMap();
         map.put("mapPointType", MapPointType.list());
         map.put("stationType", StationType.list());
         map.put("roleType", RoleTypeEnum.list());
         map.put("robotType", RobotTypeEnum.list());
+        //把当前用户能新建什么角色的用户放入常量返回前端
+        List<RoleDTO> listNew = new ArrayList<>();
+        if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+            Role role1 = new Role();
+            role1.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
+            role1.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
+            Role role2 = new Role();
+            role2.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+            role2.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            listNew.add(entityToDTO(role1));
+            listNew.add(entityToDTO(role2));
+            map.put("roleCreateLimit", listNew);
+        } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))){
+            Role role = new Role();
+            role.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+            role.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            listNew.add(entityToDTO(role));
+            map.put("roleCreateLimit", listNew);
+        } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
+            map.put("roleCreateLimit", null);
+        } else {
+            map.put("roleCreateLimit", null);
+        }
         return map;
+    }
+
+    /**
+     * 角色实体转DTO
+     * @param role
+     * @return
+     */
+    private static RoleDTO entityToDTO(Role role) {
+        RoleDTO dto = new RoleDTO();
+        dto.setId(role.getId());
+        dto.setName(role.getCnName());
+        return dto;
     }
 }

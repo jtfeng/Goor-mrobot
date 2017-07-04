@@ -2,6 +2,7 @@ package cn.mrobot.bean.account;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.dto.area.station.StationDTO4User;
 
 import javax.persistence.*;
 import java.util.List;
@@ -24,7 +25,7 @@ public class User extends BaseBean{
     private Long roleId; //用户类型(1- 超级管理员， 2- 医院管理员, 3-站管理员)
 
     @Transient
-    private List<Station> stationList; //绑定的站List
+    private List<StationDTO4User> stationList; //绑定的站List
 
     @Transient
     private String roleName; //角色名称
@@ -77,11 +78,11 @@ public class User extends BaseBean{
         this.roleName = roleName;
     }
 
-    public List<Station> getStationList() {
+    public List<StationDTO4User> getStationList() {
         return stationList;
     }
 
-    public void setStationList(List<Station> stationList) {
+    public void setStationList(List<StationDTO4User> stationList) {
         this.stationList = stationList;
     }
 }
