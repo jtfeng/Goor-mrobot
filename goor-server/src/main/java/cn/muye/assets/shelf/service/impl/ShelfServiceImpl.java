@@ -28,14 +28,16 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
     public List<Shelf> listPageByStoreIdAndOrder(int page, int pageSize, String queryObj, Class<Shelf> clazz, String order) {
         Example example = new Example(Shelf.class);
         Example.Criteria criteria = example.createCriteria();
-        JSONObject jsonObject = JSONObject.parseObject(queryObj);
-        String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
-        if (!StringUtil.isNullOrEmpty(name)) {
-            criteria.andCondition("NAME like", "%" + name + "%");
-        }
-        String code = (String)jsonObject.get(SearchConstants.SEARCH_CODE);
-        if (!StringUtil.isNullOrEmpty(code)) {
-            criteria.andCondition("CODE =", code);
+        if (queryObj != null) {
+            JSONObject jsonObject = JSONObject.parseObject(queryObj);
+            String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
+            if (!StringUtil.isNullOrEmpty(name)) {
+                criteria.andCondition("NAME like", "%" + name + "%");
+            }
+            String code = (String)jsonObject.get(SearchConstants.SEARCH_CODE);
+            if (!StringUtil.isNullOrEmpty(code)) {
+                criteria.andCondition("CODE =", code);
+            }
         }
         example.setOrderByClause("ID DESC");
         List<Shelf> list = shelfMapper.selectByExample(example);
