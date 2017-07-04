@@ -3,7 +3,6 @@ package cn.muye.account.user.controller;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.area.point.MapPointType;
-import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.dto.account.UserDTO;
@@ -25,12 +24,12 @@ import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.Cookie;
 
 /**
  * Created by Ray.Fu on 2017/6/13.
@@ -165,11 +164,11 @@ public class UserController {
     @RequestMapping(value = {"account/user/login"}, method = RequestMethod.POST)
     @ApiOperation(value = "登录接口", httpMethod = "POST", notes = "登录接口")
     @ResponseBody
-    public AjaxResult login(@RequestBody User userParam, HttpServletResponse httpResponse) {
+    public AjaxResult login(@RequestBody User userParam) {
         if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
         }
-        Map map = doLogin(userParam.getUserName(), userParam.getPassword(), httpResponse);
+        Map map = doLogin(userParam.getUserName(), userParam.getPassword());
         return doCheckLogin(map);
     }
 
@@ -182,7 +181,7 @@ public class UserController {
     @RequestMapping(value = {"account/user/login/pad"}, method = RequestMethod.POST)
     @ApiOperation(value = "PAD登录接口", httpMethod = "POST", notes = "PAD登录接口")
     @ResponseBody
-    public AjaxResult directKeyLogin(@RequestBody User userParam, HttpServletResponse response) {
+    public AjaxResult directKeyLogin(@RequestBody User userParam) {
         try {
             if (userParam.getDirectLoginKey() == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
@@ -190,7 +189,7 @@ public class UserController {
             Integer directLoginKey = userParam.getDirectLoginKey();
             User userDb = userService.getUserByDirectKey(directLoginKey);
             if (userDb != null) {
-                Map map = doLogin(userDb.getUserName(), userDb.getPassword(), response);
+                Map map = doLogin(userDb.getUserName(), userDb.getPassword());
                 return doCheckLogin(map);
             } else {
                 return AjaxResult.failed("用户不存在");
@@ -247,7 +246,7 @@ public class UserController {
      * @param password
      * @return
      */
-    private Map<String, Object> doLogin(String userName, String password, HttpServletResponse response) {
+    private Map<String, Object> doLogin(String userName, String password) {
         //调auth_server的token接口
         User user = null;
         Map map = new HashMap();
@@ -260,7 +259,7 @@ public class UserController {
                 if (list != null) {
                     user = list.get(0);
                     map.put("user", user);
-                    response.setHeader("access_token", accessToken);
+                    map.put("access_token", accessToken);
                     return map;
                 } else {
                     return null;
