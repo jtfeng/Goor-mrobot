@@ -163,16 +163,16 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         PageHelper.startPage(whereRequest.getPage(),whereRequest.getPageSize());
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andCondition("ACTIVATED =", ACTIVATED);
+        criteria = criteria.andCondition("ACTIVATED =", ACTIVATED);
         if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
             JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
             String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
             if (!StringUtil.isNullOrEmpty(name)) {
-                criteria.andCondition("USER_NAME like", "%" + name + "%");
+                criteria = criteria.andCondition("USER_NAME like", "%" + name + "%");
             }
         };
         if (storeId != null) {
-            criteria.andCondition("STORE_ID =", storeId);
+            criteria = criteria.andCondition("STORE_ID =", storeId);
         }
         example.setOrderByClause("ID DESC");
         List<User> userList = userMapper.selectByExample(example);
