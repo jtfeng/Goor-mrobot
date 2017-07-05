@@ -64,6 +64,10 @@ public class UserController {
     @Value("${authServer.api}")
     private String authServerApi;
 
+    private static final int SOURCE_TYPE_LIST = 1; //列表来源
+
+    private static final int SOURCE_TYPE_OTHER = 2; //其他来源
+
     /**
      * 新增修改用户
      *
@@ -107,7 +111,7 @@ public class UserController {
             Long id = user.getId();
             if (id == null) {
                 userService.addUser(user);
-                return AjaxResult.success(entityToDto(user), "新增成功");
+                return AjaxResult.success(entityToDto(user, SOURCE_TYPE_OTHER), "新增成功");
             } else {
                 User userDbById = userService.getById(id);
                 if (userDbById != null) {
@@ -123,7 +127,7 @@ public class UserController {
                         userDbById.setDirectLoginKey(user.getDirectLoginKey());
                     }
                     userService.updateUser(userDbById);
-                    return AjaxResult.success(entityToDto(userDbById), "修改成功");
+                    return AjaxResult.success(entityToDto(userDbById, SOURCE_TYPE_OTHER), "修改成功");
                 } else {
                     return AjaxResult.failed("不存在该用户");
                 }
@@ -154,7 +158,7 @@ public class UserController {
         List<UserDTO> dtoList = new ArrayList<>();
         if (list != null) {
             for (User u : list) {
-                dtoList.add(entityToDto(u));
+                dtoList.add(entityToDto(u, SOURCE_TYPE_LIST));
             }
         }
         PageInfo<UserDTO> userPageInfo = new PageInfo(list);
@@ -288,7 +292,7 @@ public class UserController {
                 List<User> list = userService.getUser(userName, password);
                 if (list != null) {
                     user = list.get(0);
-                    map.put("user", entityToDto(user));
+                    map.put("user", entityToDto(user, SOURCE_TYPE_OTHER));
                     map.put("access_token", accessToken);
                     return map;
                 } else {
@@ -338,7 +342,13 @@ public class UserController {
         }
     }
 
-    private UserDTO entityToDto(User user) {
+    /**
+     * 根据调用方法的源头不一样来给stationList不同的值
+     * @param user
+     * @param sourceType
+     * @return
+     */
+    private UserDTO entityToDto(User user, int sourceType) {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setUserName(user.getUserName());
@@ -346,23 +356,29 @@ public class UserController {
         userDTO.setRoleName(user.getRoleName());
         userDTO.setActivated(user.getActivated());
         List<StationDTO4User> stationDTO4UserList = new ArrayList<>();
-        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())))  {
-            List<Station> stationList = stationService.list(null, user.getStoreId());
-            if (stationList != null && stationList.size() > 0) {
-                for (Station station : stationList) {
-                    stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
-                }
+        if (sourceType == SOURCE_TYPE_LIST) {
+            if (user.getRoleId() != null && (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) || user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))))  {
+                userDTO.setStationList(stationDTO4UserList);
             }
-            userDTO.setStationList(stationDTO4UserList);
-        }
-        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
-            List<Station> stationList = stationService.list(null, null);
-            if (stationList != null && stationList.size() > 0) {
-                for (Station station : stationList) {
-                    stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
+        } else {
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())))  {
+                List<Station> stationList = stationService.list(null, user.getStoreId());
+                if (stationList != null && stationList.size() > 0) {
+                    for (Station station : stationList) {
+                        stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
+                    }
                 }
+                userDTO.setStationList(stationDTO4UserList);
             }
-            userDTO.setStationList(stationDTO4UserList);
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                List<Station> stationList = stationService.list(null, null);
+                if (stationList != null && stationList.size() > 0) {
+                    for (Station station : stationList) {
+                        stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
+                    }
+                }
+                userDTO.setStationList(stationDTO4UserList);
+            }
         }
         if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
             userDTO.setStationList(user.getStationList());
@@ -399,11 +415,11 @@ public class UserController {
             map.put("roleCreateLimit", listNew);
         } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))){
             Role role = new Role();
-            role.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
-            role.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            role.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
+            role.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
             Role role1 = new Role();
-            role1.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
-            role1.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
+            role1.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+            role1.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
             listNew.add(entityToDTO(role));
             listNew.add(entityToDTO(role1));
             map.put("roleCreateLimit", listNew);
