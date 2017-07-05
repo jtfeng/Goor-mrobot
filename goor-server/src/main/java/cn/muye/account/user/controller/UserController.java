@@ -74,9 +74,6 @@ public class UserController {
             if (user.getId() == null && StringUtil.isNullOrEmpty(user.getUserName())) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
             }
-            if (user.getId() != null && StringUtil.isNullOrEmpty(user.getUserName())) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名不能为空");
-            }
             if (user.getRoleId() == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
             }
@@ -107,7 +104,6 @@ public class UserController {
             } else {
                 User userDbById = userService.getById(id);
                 if (userDbById != null) {
-                    userDbById.setUserName(user.getUserName());
                     if (!StringUtil.isNullOrEmpty(user.getPassword())) {
                         userDbById.setPassword(user.getPassword());
                     }
