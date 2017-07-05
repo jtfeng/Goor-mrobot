@@ -71,14 +71,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         } else {
             list = super.listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), Robot.class, "ID DESC");
         }
-        if (list != null && list.size() > 0) {
-            for (Robot robot : list) {
-                robot.setBatteryThreshold(robotConfigService.getByRobotId(robot.getId()).getBatteryThreshold());
-            }
-            for (Robot robot : list) {
-                robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
-            }
-        }
+        list.forEach(robot -> {
+            robot.setBatteryThreshold(robotConfigService.getByRobotId(robot.getId()).getBatteryThreshold());
+            robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
+        });
         return list;
     }
 

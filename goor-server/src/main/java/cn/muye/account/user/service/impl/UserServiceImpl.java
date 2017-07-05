@@ -2,6 +2,7 @@ package cn.muye.account.user.service.impl;
 
 import cn.mrobot.bean.account.*;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.role.service.RoleService;
@@ -18,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -56,9 +56,18 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         if (userList != null && userList.size() > 0) {
             for (User u : userList) {
                 List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
-                List<Station> stationList = new ArrayList<>();
+                UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(u.getId());
+                if (userRoleXrefDb != null) {
+                    Role roleDb = roleService.getById(userRoleXrefDb.getRoleId());
+                    if (roleDb != null) {
+                        u.setRoleId(roleDb.getId());
+                        u.setRoleName(roleDb.getCnName());
+                    }
+                }
+                List<StationDTO4User> stationList = new ArrayList<>();
                 addToStationList(userStationXrefDbList, stationList);
                 u.setStationList(stationList);
+
             }
         }
         return userList;
@@ -88,7 +97,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
             //删掉之前的user绑定station
             userStationXrefService.deleteByUserId(userId);
-            List<Station> stationIdList = user.getStationList();
+            List<StationDTO4User> stationIdList = user.getStationList();
             saveUserStationXref(stationIdList, userId);
         }
     }
@@ -104,7 +113,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Long userId = user.getId();
         UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
         Long roleId = user.getRoleId();
-        List<Station> stationList = user.getStationList();
+        List<StationDTO4User> stationList = user.getStationList();
         Role roleDb = roleService.getById(roleId);
         user.setRoleName(roleDb.getCnName());
         if (userRoleXrefDb != null) {
@@ -138,12 +147,12 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
      * @param stationList
      * @param userId
      */
-    private void saveUserStationXref(List<Station> stationList, Long userId) {
+    private void saveUserStationXref(List<StationDTO4User> stationList, Long userId) {
         if (stationList != null && stationList.size() > 0) {
-            for (Station station : stationList) {
+            for (StationDTO4User stationDTO4User : stationList) {
                 UserStationXref userStationXref = new UserStationXref();
                 userStationXref.setUserId(userId);
-                userStationXref.setStationId(station.getId());
+                userStationXref.setStationId(stationDTO4User.getId());
                 userStationXrefService.save(userStationXref);
             }
         }
@@ -166,7 +175,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         List<User> userList = userMapper.selectByExample(example);
         if (userList != null && userList.size() > 0) {
             for (User u : userList) {
-                List<Station> stationList = new ArrayList<>();
+                List<StationDTO4User> stationList = new ArrayList<>();
                 List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
                 UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
                 if (xref != null) {
@@ -183,14 +192,32 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         return userList;
     }
 
-    private void addToStationList(List<UserStationXref> userStationXrefDbList, List<Station> stationList) {
+    /**
+     * 从用户站点关系表中封装成stationList，set到用户实体
+     * @param userStationXrefDbList
+     * @param stationList
+     */
+    private void addToStationList(List<UserStationXref> userStationXrefDbList, List<StationDTO4User> stationList) {
         if (userStationXrefDbList != null && userStationXrefDbList.size() > 0) {
             for (UserStationXref ux : userStationXrefDbList) {
                 Station stationDb = stationService.findById(ux.getStationId());
-                stationList.add(stationDb);
+                stationList.add(stationToDTO(stationDb));
             }
         }
     }
+
+    /**
+     *
+     * @param station
+     * @return
+     */
+    private StationDTO4User stationToDTO(Station station) {
+        StationDTO4User stationDTO4User = new StationDTO4User();
+        stationDTO4User.setId(station.getId());
+        stationDTO4User.setName(station.getName());
+        return stationDTO4User;
+    }
+
 
     @Override
     public User getUserByDirectKey(Integer directKey) {

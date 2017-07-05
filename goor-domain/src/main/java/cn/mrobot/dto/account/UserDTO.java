@@ -2,6 +2,7 @@ package cn.mrobot.dto.account;
 
 
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.dto.area.station.StationDTO4User;
 
 import java.util.List;
 
@@ -16,11 +17,9 @@ public class UserDTO {
 
     private Boolean activated; //是否启用
 
-    private Integer directLoginKey; //快捷登陆口令（4位码）
-
     private Long roleId; //用户类型(1- 超级管理员， 2- 医院管理员, 3-站管理员)
 
-    private List<Station> stationList; //站LIST
+    private List<StationDTO4User> stationList; //站LIST
 
     private String roleName; //角色名称
 
@@ -48,14 +47,6 @@ public class UserDTO {
         this.activated = activated;
     }
 
-    public Integer getDirectLoginKey() {
-        return directLoginKey;
-    }
-
-    public void setDirectLoginKey(Integer directLoginKey) {
-        this.directLoginKey = directLoginKey;
-    }
-
     public Long getRoleId() {
         return roleId;
     }
@@ -64,11 +55,11 @@ public class UserDTO {
         this.roleId = roleId;
     }
 
-    public List<Station> getStationList() {
+    public List<StationDTO4User> getStationList() {
         return stationList;
     }
 
-    public void setStationList(List<Station> stationList) {
+    public void setStationList(List<StationDTO4User> stationList) {
         this.stationList = stationList;
     }
 
