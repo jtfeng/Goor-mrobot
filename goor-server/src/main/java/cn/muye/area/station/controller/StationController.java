@@ -218,6 +218,9 @@ public class StationController {
 		}
 		if(pointList != null && pointList.size() > 0) {
 			for(MapPoint mapPoint : pointList) {
+				if(mapPoint == null) {
+					continue;
+				}
 				MapPoint mapPointDB = pointService.findById(mapPoint.getId());
 				if(mapPointDB != null) {
 					toEntity(mapPointDB);

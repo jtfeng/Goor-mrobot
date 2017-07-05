@@ -138,9 +138,17 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 				//如果有关联点，则更新station的点列表
 				for(StationMapPointXREF stationMapPointXREF : stationMapPointXREFList) {
 					MapPoint mapPoint = pointService.findById(stationMapPointXREF.getMapPointId());
+					if(mapPoint == null) {
+						stationMapPointXREFService.deleteByPointId(stationMapPointXREF.getMapPointId());
+						continue;
+					}
 					resultMapPoint.add(mapPoint);
 				}
-				station.setMapPoints(resultMapPoint);
+
+				if( resultMapPoint != null && resultMapPoint.size() > 0 ) {
+					station.setMapPoints(resultMapPoint);
+				}
+
 			}
 		}
 
