@@ -384,12 +384,16 @@ public class UserController {
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+            Role role0 = new Role();
+            role0.setId(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()));
+            role0.setCnName(RoleTypeEnum.SUPER_ADMIN.getValue());
             Role role1 = new Role();
             role1.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
             role1.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
             Role role2 = new Role();
             role2.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
             role2.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            listNew.add(entityToDTO(role0));
             listNew.add(entityToDTO(role1));
             listNew.add(entityToDTO(role2));
             map.put("roleCreateLimit", listNew);
@@ -397,10 +401,18 @@ public class UserController {
             Role role = new Role();
             role.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
             role.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            Role role1 = new Role();
+            role1.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
+            role1.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
             listNew.add(entityToDTO(role));
+            listNew.add(entityToDTO(role1));
             map.put("roleCreateLimit", listNew);
-        } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
-            map.put("roleCreateLimit", null);
+        } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+            Role role1 = new Role();
+            role1.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+            role1.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            listNew.add(entityToDTO(role1));
+            map.put("roleCreateLimit", listNew);
         } else {
             map.put("roleCreateLimit", null);
         }
