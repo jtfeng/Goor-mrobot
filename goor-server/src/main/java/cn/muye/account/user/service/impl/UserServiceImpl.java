@@ -159,7 +159,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public List<User> list(WhereRequest whereRequest) {
+    public List<User> list(WhereRequest whereRequest, Long storeId) {
         PageHelper.startPage(whereRequest.getPage(),whereRequest.getPageSize());
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
@@ -171,6 +171,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 criteria.andCondition("USER_NAME like", "%" + name + "%");
             }
         };
+        if (storeId != null) {
+            criteria.andCondition("STORE_ID =", storeId);
+        }
         example.setOrderByClause("ID DESC");
         List<User> userList = userMapper.selectByExample(example);
         if (userList != null && userList.size() > 0) {
@@ -211,7 +214,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
      * @param station
      * @return
      */
-    private StationDTO4User stationToDTO(Station station) {
+    public static StationDTO4User stationToDTO(Station station) {
         StationDTO4User stationDTO4User = new StationDTO4User();
         stationDTO4User.setId(station.getId());
         stationDTO4User.setName(station.getName());
