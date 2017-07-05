@@ -3,6 +3,7 @@ package cn.muye.account.user.controller;
 import cn.mrobot.bean.account.Role;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
+import cn.mrobot.bean.account.UserRoleXref;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
@@ -12,6 +13,7 @@ import cn.mrobot.dto.account.UserDTO;
 import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
 import cn.muye.account.user.service.impl.UserServiceImpl;
 import cn.muye.area.station.service.StationService;
@@ -19,7 +21,6 @@ import cn.muye.base.bean.AjaxResult;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -52,6 +53,9 @@ public class UserController {
 
     @Autowired
     private StationService stationService;
+
+    @Autowired
+    private UserRoleXrefService userRoleXrefService;
 
     private static HttpClient httpClient = new HttpClient();
 
@@ -154,7 +158,11 @@ public class UserController {
         if (userDb == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "当前用户不存在");
         }
-        List<User> list = userService.list(whereRequest, userDb.getStoreId());
+        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userDb.getId());
+        if (userRoleXrefDb != null) {
+            userDb.setRoleId(userRoleXrefDb.getRoleId());
+        }
+        List<User> list = userService.list(whereRequest, userDb);
         List<UserDTO> dtoList = new ArrayList<>();
         if (list != null) {
             for (User u : list) {

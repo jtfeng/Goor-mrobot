@@ -28,6 +28,9 @@ public class User extends BaseBean{
     private List<StationDTO4User> stationList; //绑定的站List
 
     @Transient
+    private Long storeId; //店铺ID
+
+    @Transient
     private String roleName; //角色名称
 
     public String getUserName() {
@@ -84,5 +87,15 @@ public class User extends BaseBean{
 
     public void setStationList(List<StationDTO4User> stationList) {
         this.stationList = stationList;
+    }
+
+    @Override
+    public Long getStoreId() {
+        return storeId;
+    }
+
+    @Override
+    public void setStoreId(Long storeId) {
+        this.storeId = storeId;
     }
 }

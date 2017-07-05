@@ -159,7 +159,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public List<User> list(WhereRequest whereRequest, Long storeId) {
+    public List<User> list(WhereRequest whereRequest, User user) {
         PageHelper.startPage(whereRequest.getPage(),whereRequest.getPageSize());
         Example example = new Example(User.class);
         Example.Criteria criteria = example.createCriteria();
@@ -171,28 +171,44 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 criteria = criteria.andCondition("USER_NAME like", "%" + name + "%");
             }
         };
-        if (storeId != null) {
-            criteria = criteria.andCondition("STORE_ID =", storeId);
-        }
-        example.setOrderByClause("ID DESC");
-        List<User> userList = userMapper.selectByExample(example);
-        if (userList != null && userList.size() > 0) {
-            for (User u : userList) {
-                List<StationDTO4User> stationList = new ArrayList<>();
-                List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
-                UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
-                if (xref != null) {
-                    Role roleDb = roleService.getById(xref.getRoleId());
-                    if (roleDb != null) {
-                        u.setRoleId(roleDb.getId());
-                        u.setRoleName(roleDb.getCnName());
-                    }
-                }
-                addToStationList(userStationXrefDbList, stationList);
-                u.setStationList(stationList);
+        if (user != null) {
+            if (user.getStoreId() != null) {
+                criteria = criteria.andCondition("STORE_ID =", user.getStoreId());
             }
+            example.setOrderByClause("ID DESC");
+            List<User> userList = userMapper.selectByExample(example);
+            if (userList != null && userList.size() > 0) {
+                for (User u : userList) {
+                    List<StationDTO4User> stationList = new ArrayList<>();
+                    List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
+                    UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
+                    if (xref != null) {
+                        Role roleDb = roleService.getById(xref.getRoleId());
+                        if (roleDb != null) {
+                            u.setRoleId(roleDb.getId());
+                            u.setRoleName(roleDb.getCnName());
+                        }
+                    }
+                    addToStationList(userStationXrefDbList, stationList);
+                    u.setStationList(stationList);
+                }
+            }
+            List<User> finalUserList = new ArrayList<>();
+            if (userList != null && userList.size() > 0) {
+                for (User u : userList) {
+                    if (!user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption())) && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) && (user.getStoreId().equals(u.getStoreId()) || user.getId().equals(u.getId()))) {
+                        finalUserList.add(u);
+                    } else if (!user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption())) && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (user.getId().equals(u.getId()))){
+                        finalUserList.add(u);
+                    } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                        finalUserList.add(u);
+                    } else {}
+                }
+            }
+            return finalUserList;
+        } else {
+            return null;
         }
-        return userList;
     }
 
     /**
