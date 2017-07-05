@@ -82,7 +82,7 @@ public class FeatureItemController {
 			}
 
 			featureItemService.save(featureItem);
-			return AjaxResult.success();
+			return AjaxResult.success(featureItem,"新增成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed();

@@ -100,7 +100,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 	}
 
 	@Override
-	public List<Station> list(WhereRequest whereRequest, long storeId) {
+	public List<Station> list(WhereRequest whereRequest, Long storeId) {
 		PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
 		List<Station> stationList = new ArrayList<Station>();
 		if(whereRequest.getQueryObj() != null){
@@ -122,6 +122,10 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 			//方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
 			Example example = new Example(Station.class);
 			example.setOrderByClause("ID DESC");
+			//超级管理员传storeId=null，能查看所有站；医院管理员传storeId!=null，只能查看该医院的站
+			if(storeId != null) {
+				example.createCriteria().andCondition("STORE_ID =", storeId);
+			}
 			stationList = myMapper.selectByExample(example);
 		}
 
@@ -139,6 +143,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 				for(StationMapPointXREF stationMapPointXREF : stationMapPointXREFList) {
 					MapPoint mapPoint = pointService.findById(stationMapPointXREF.getMapPointId());
 					if(mapPoint == null) {
+						//如果关联的点不存在，手动删除点的关联关系
 						stationMapPointXREFService.deleteByPointId(stationMapPointXREF.getMapPointId());
 						continue;
 					}
