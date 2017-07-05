@@ -4,13 +4,17 @@ import cn.mrobot.bean.account.Role;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.area.point.MapPointType;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.dto.account.RoleDTO;
 import cn.mrobot.dto.account.UserDTO;
+import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.user.service.UserService;
+import cn.muye.account.user.service.impl.UserServiceImpl;
+import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -46,6 +50,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private StationService stationService;
+
     private static HttpClient httpClient = new HttpClient();
 
     @Value("${authServer.host}")
@@ -77,10 +84,10 @@ public class UserController {
             if (user.getRoleId() == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
             }
-            if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null) {
+            if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null && user.getStationList().size() > 0) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
             }
-            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() == null) {
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (user.getStationList() == null || user.getStationList().size() == 0)) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
             }
             if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
@@ -137,8 +144,13 @@ public class UserController {
     @RequestMapping(value = {"account/user"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询用户接口", httpMethod = "GET", notes = "查询用户接口")
     @ResponseBody
-    public AjaxResult list(WhereRequest whereRequest) {
-        List<User> list = userService.list(whereRequest);
+    public AjaxResult list(WhereRequest whereRequest, Principal principal) {
+        String userName = principal.getName();
+        User userDb = userService.getByUserName(userName);
+        if (userDb == null) {
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "当前用户不存在");
+        }
+        List<User> list = userService.list(whereRequest, userDb.getStoreId());
         List<UserDTO> dtoList = new ArrayList<>();
         if (list != null) {
             for (User u : list) {
@@ -333,7 +345,28 @@ public class UserController {
         userDTO.setRoleId(user.getRoleId());
         userDTO.setRoleName(user.getRoleName());
         userDTO.setActivated(user.getActivated());
-        userDTO.setStationList(user.getStationList());
+        List<StationDTO4User> stationDTO4UserList = new ArrayList<>();
+        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())))  {
+            List<Station> stationList = stationService.list(null, user.getStoreId());
+            if (stationList != null && stationList.size() > 0) {
+                for (Station station : stationList) {
+                    stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
+                }
+            }
+            userDTO.setStationList(stationDTO4UserList);
+        }
+        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+            List<Station> stationList = stationService.list(null, null);
+            if (stationList != null && stationList.size() > 0) {
+                for (Station station : stationList) {
+                    stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
+                }
+            }
+            userDTO.setStationList(stationDTO4UserList);
+        }
+        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+            userDTO.setStationList(user.getStationList());
+        }
         return userDTO;
     }
 
