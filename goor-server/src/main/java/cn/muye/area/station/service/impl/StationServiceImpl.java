@@ -101,9 +101,13 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 
 	@Override
 	public List<Station> list(WhereRequest whereRequest, Long storeId) {
-		PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+		//如果whereRequest不为null，则分页
+		if(whereRequest != null) {
+			PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+		}
+
 		List<Station> stationList = new ArrayList<Station>();
-		if(whereRequest.getQueryObj() != null){
+		if(whereRequest != null && whereRequest.getQueryObj() != null){
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 			Object name = map.get(SearchConstants.SEARCH_NAME);
 			//TODO 方法一：　测试用多表联查查数据库,缺点是pageHelper分页条数会按照leftjoin查询条数去算，不准确
