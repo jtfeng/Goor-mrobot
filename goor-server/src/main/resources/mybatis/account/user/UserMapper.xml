@@ -9,6 +9,7 @@
         <result property="activated" column="ACTIVATED"/>
         <result property="directLoginKey" column="DIRECT_LOGIN_KEY"/>
         <result property="roleId" column="ROLE_ID"/>
+        <result property="storeId" column="STORE_ID"/>
     </resultMap>
 
     <select id="list" resultMap="userResult" parameterType="java.util.Map">
@@ -35,7 +36,8 @@
             u.USER_NAME,
             u.PASSWORD,
             u.ACTIVATED,
-            u.DIRECT_LOGIN_KEY
+            u.DIRECT_LOGIN_KEY,
+            u.STORE_ID
         FROM AC_USER u WHERE u.USER_NAME = #{userName}
     </select>
 
