@@ -3,6 +3,9 @@ package cn.muye.account.user.mapper;
 import cn.mrobot.bean.account.User;
 import cn.muye.util.MyMapper;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by Ray.Fu on 2017/6/13.
  */
@@ -13,4 +16,10 @@ public interface UserMapper extends MyMapper<User> {
     void fakeDeleteById(Long id);
 
     User getUserByDirectKey(Integer directKey);
+
+    List<User> selectBySuperAdmin(Map map);
+
+    List<User> selectByHospitalAdmin(Map map);
+
+    List<User> selectByStationAdmin(Map map);
 }

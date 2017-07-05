@@ -19,9 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+
+import java.util.*;
 
 /**
  * Created by Ray.Fu on 2017/6/22.
@@ -161,22 +160,39 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     @Override
     public List<User> list(WhereRequest whereRequest, User user) {
         PageHelper.startPage(whereRequest.getPage(),whereRequest.getPageSize());
-        Example example = new Example(User.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria = criteria.andCondition("ACTIVATED =", ACTIVATED);
+        Map map = new HashMap<>();
         if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
             JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
             String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
             if (!StringUtil.isNullOrEmpty(name)) {
-                criteria = criteria.andCondition("USER_NAME like", "%" + name + "%");
+                map.put("name", name);
             }
         };
+        List<User> userList = null;
         if (user != null) {
-            if (user.getStoreId() != null) {
-                criteria = criteria.andCondition("STORE_ID =", user.getStoreId());
+            //如果是超级管理员
+            if (user.getRoleId() != null) {
+              if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                  //todo 以后从切换门店的Session里拿
+                  Long storeId = user.getStoreId();
+                  map.put("storeId", storeId);
+                  userList = userMapper.selectBySuperAdmin(map);
+              } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
+                  //只拿自己和storeId相同的站管理员
+                  Long storeId = user.getStoreId();
+                  //加上所有role_id是3的storeId等于storeId的
+                  map.put("userId", user.getId());
+                  map.put("storeId", storeId);
+                  map.put("roleId", Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+                  userList = userMapper.selectByHospitalAdmin(map);
+              } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+                  //只拿自己
+                  map.put("userId", user.getId());
+                  userList = userMapper.selectByStationAdmin(map);
+              } else {
+              }
+              }
             }
-            example.setOrderByClause("ID DESC");
-            List<User> userList = userMapper.selectByExample(example);
             if (userList != null && userList.size() > 0) {
                 for (User u : userList) {
                     List<StationDTO4User> stationList = new ArrayList<>();
@@ -193,22 +209,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                     u.setStationList(stationList);
                 }
             }
-            List<User> finalUserList = new ArrayList<>();
-            if (userList != null && userList.size() > 0) {
-                for (User u : userList) {
-                    if (!user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption())) && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) && (user.getStoreId().equals(u.getStoreId()) || user.getId().equals(u.getId()))) {
-                        finalUserList.add(u);
-                    } else if (!user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption())) && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (user.getId().equals(u.getId()))){
-                        finalUserList.add(u);
-                    } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
-                        finalUserList.add(u);
-                    } else {}
-                }
-            }
-            return finalUserList;
-        } else {
-            return null;
-        }
+            return userList;
     }
 
     /**
