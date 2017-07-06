@@ -1,17 +1,13 @@
 package cn.muye.area.point.controller;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.base.bean.AjaxResult;
-import cn.muye.base.bean.CommonInfo;
-import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.MessageSendService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -22,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -54,8 +49,16 @@ public class PointController {
 				return AjaxResult.failed("已存在相同名称的导航点");
 			}
 
+			int mapPointTypeId = mapPoint.getMapPointTypeId();
+			if (mapPointTypeId <= 0 ||  MapPointType.getType(mapPointTypeId) == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "点类型有误");
+			}
+
 			if (mapPoint.getId() != null) {
 				MapPoint mapPointDB = pointService.findById(mapPoint.getId());
+				if(null == mapPointDB){
+					mapPointDB = new MapPoint();
+				}
 				mapPointDB.setMapName(mapPoint.getMapName());
 				mapPointDB.setMapPointTypeId(mapPoint.getMapPointTypeId());
 				mapPointDB.setPointAlias(mapPoint.getPointAlias());
@@ -64,11 +67,11 @@ public class PointController {
 				mapPointDB.setY(mapPoint.getY());
 				mapPointDB.setPointLevel(mapPoint.getPointLevel());
 				pointService.update(mapPointDB);
+				return AjaxResult.success(mapPointDB);
 			} else {
 				pointService.save(mapPoint);
+				return AjaxResult.success(mapPoint);
 			}
-
-			return AjaxResult.success(mapPoint);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed(1,"系统错误" );
@@ -80,7 +83,7 @@ public class PointController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
 	public AjaxResult listMapPoint(WhereRequest whereRequest, HttpServletRequest request) throws Exception {
 		try {
-			List<MapPoint> pointListDB = pointService.list(whereRequest);
+			List<MapPoint> pointListDB = pointService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 

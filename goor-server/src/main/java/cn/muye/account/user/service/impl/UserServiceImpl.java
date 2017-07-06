@@ -1,9 +1,8 @@
 package cn.muye.account.user.service.impl;
 
-import cn.mrobot.bean.account.Role;
-import cn.mrobot.bean.account.UserStationXref;
-import cn.mrobot.bean.account.User;
-import cn.mrobot.bean.account.UserRoleXref;
+import cn.mrobot.bean.account.*;
+import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.role.service.RoleService;
@@ -11,16 +10,17 @@ import cn.muye.account.role.service.UserStationXrefService;
 import cn.muye.account.user.mapper.UserMapper;
 import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
+import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by Ray.Fu on 2017/6/22.
@@ -41,6 +41,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     @Autowired
     private UserStationXrefService userStationXrefService;
 
+    @Autowired
+    private StationService stationService;
+
     private static final int ACTIVATED = 1; //有效
 
     @Override
@@ -48,7 +51,25 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Example example = new Example(User.class);
         example.createCriteria().andCondition("USER_NAME =", userName);
         example.createCriteria().andCondition("PASSWORD =", password);
-        return userMapper.selectByExample(example);
+        List<User> userList = userMapper.selectByExample(example);
+        if (userList != null && userList.size() > 0) {
+            for (User u : userList) {
+                List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
+                UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(u.getId());
+                if (userRoleXrefDb != null) {
+                    Role roleDb = roleService.getById(userRoleXrefDb.getRoleId());
+                    if (roleDb != null) {
+                        u.setRoleId(roleDb.getId());
+                        u.setRoleName(roleDb.getCnName());
+                    }
+                }
+                List<StationDTO4User> stationList = new ArrayList<>();
+                addToStationList(userStationXrefDbList, stationList);
+                u.setStationList(stationList);
+
+            }
+        }
+        return userList;
     }
 
     /**
@@ -59,9 +80,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     public void addUser(User user) {
         user.setActivated(true);
         user.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        user.setCreated(new Date());
+        user.setCreateTime(new Date());
         user.setCreatedBy(1L);
-        user.setCreated(new Date());
+        user.setCreateTime(new Date());
         userMapper.insert(user);
         Long userId = user.getId();
         //保存用户角色
@@ -72,12 +93,11 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Role roleDb = roleService.getById(user.getRoleId());
         user.setRoleName(roleDb.getCnName());
         //如果角色是站管理员
-        //todo 常量
-        if (user.getRoleId().equals(3L)) {
+        if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
             //删掉之前的user绑定station
             userStationXrefService.deleteByUserId(userId);
-            String stationIds = user.getStationIds();
-            saveUserStationXref(stationIds, userId);
+            List<StationDTO4User> stationIdList = user.getStationList();
+            saveUserStationXref(stationIdList, userId);
         }
     }
 
@@ -92,21 +112,21 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Long userId = user.getId();
         UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
         Long roleId = user.getRoleId();
-        String stationIds = user.getStationIds();
+        List<StationDTO4User> stationList = user.getStationList();
         Role roleDb = roleService.getById(roleId);
         user.setRoleName(roleDb.getCnName());
         if (userRoleXrefDb != null) {
             ////如果原来角色是3，变更角色是2就需要把user_station_xref的记录删掉
-            if (userRoleXrefDb.getRoleId().equals(3L) && roleId.equals(2L)) {
+            if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
                 userStationXrefService.deleteByUserId(userId);
             }
-            if (userRoleXrefDb.getRoleId().equals(3L) && roleId.equals(3L) && !StringUtil.isNullOrEmpty(stationIds) && stationIds.split(",").length > 0) {
+            if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
                 userStationXrefService.deleteByUserId(userId);
-                saveUserStationXref(stationIds, userId);
+                saveUserStationXref(stationList, userId);
             }
             ////如果原来角色是2，变更角色是3就需要增加一条user_station_xref的记录
-            if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(2L) && roleId.equals(3L) && !StringUtil.isNullOrEmpty(stationIds) && stationIds.split(",").length > 0) {
-                saveUserStationXref(stationIds, userId);
+            if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
+                saveUserStationXref(stationList, userId);
             }
             userRoleXrefDb.setRoleId(roleId);
             userRoleXrefService.update(userRoleXrefDb);
@@ -115,47 +135,109 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             userRoleXrefDb.setUserId(userId);
             userRoleXrefDb.setRoleId(roleId);
             userRoleXrefService.save(userRoleXrefDb);
-            if (roleId.equals(3L) && !StringUtil.isNullOrEmpty(stationIds) && stationIds.split(",").length > 0) {
-                saveUserStationXref(stationIds, userId);
+            if (roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
+                saveUserStationXref(stationList, userId);
             }
         }
     }
 
     /**
      * 保存用户站关联记录
-     * @param stationIds
+     * @param stationList
      * @param userId
      */
-    private void saveUserStationXref(String stationIds, Long userId) {
-        for (String stationId : stationIds.split(",")) {
-            UserStationXref userStationXref = new UserStationXref();
-            userStationXref.setUserId(userId);
-            userStationXref.setStationId(Long.valueOf(stationId));
-            userStationXrefService.save(userStationXref);
+    private void saveUserStationXref(List<StationDTO4User> stationList, Long userId) {
+        if (stationList != null && stationList.size() > 0) {
+            for (StationDTO4User stationDTO4User : stationList) {
+                UserStationXref userStationXref = new UserStationXref();
+                userStationXref.setUserId(userId);
+                userStationXref.setStationId(stationDTO4User.getId());
+                userStationXrefService.save(userStationXref);
+            }
         }
     }
 
     @Override
-    public List<User> list(WhereRequest whereRequest) {
+    public List<User> list(WhereRequest whereRequest, User user) {
         PageHelper.startPage(whereRequest.getPage(),whereRequest.getPageSize());
-        Example example = new Example(User.class);
-        example.createCriteria().andCondition("ACTIVATED =", ACTIVATED);
-        example.setOrderByClause("ID DESC");
-        List<User> userList = userMapper.selectByExample(example);
-        if (userList != null && userList.size() > 0) {
-            for (User u : userList) {
-                UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
-                if (xref != null) {
-                    Role roleDb = roleService.getById(xref.getRoleId());
-                    if (roleDb != null) {
-                        u.setRoleId(roleDb.getId());
-                        u.setRoleName(roleDb.getCnName());
+        Map map = new HashMap<>();
+        if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
+            JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
+            String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
+            if (!StringUtil.isNullOrEmpty(name)) {
+                map.put("name", name);
+            }
+        };
+        List<User> userList = null;
+        if (user != null) {
+            //如果是超级管理员
+            if (user.getRoleId() != null) {
+              if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                  //todo 以后从切换门店的Session里拿
+                  Long storeId = user.getStoreId();
+                  map.put("storeId", storeId);
+                  userList = userMapper.selectBySuperAdmin(map);
+              } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
+                  //只拿自己和storeId相同的站管理员
+                  Long storeId = user.getStoreId();
+                  //加上所有role_id是3的storeId等于storeId的
+                  map.put("userId", user.getId());
+                  map.put("storeId", storeId);
+                  map.put("roleId", Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+                  userList = userMapper.selectByHospitalAdmin(map);
+              } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+                  //只拿自己
+                  map.put("userId", user.getId());
+                  userList = userMapper.selectByStationAdmin(map);
+              } else {
+              }
+              }
+            }
+            if (userList != null && userList.size() > 0) {
+                for (User u : userList) {
+                    List<StationDTO4User> stationList = new ArrayList<>();
+                    List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
+                    UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
+                    if (xref != null) {
+                        Role roleDb = roleService.getById(xref.getRoleId());
+                        if (roleDb != null) {
+                            u.setRoleId(roleDb.getId());
+                            u.setRoleName(roleDb.getCnName());
+                        }
                     }
+                    addToStationList(userStationXrefDbList, stationList);
+                    u.setStationList(stationList);
                 }
             }
-        }
-        return userList;
+            return userList;
     }
+
+    /**
+     * 从用户站点关系表中封装成stationList，set到用户实体
+     * @param userStationXrefDbList
+     * @param stationList
+     */
+    private void addToStationList(List<UserStationXref> userStationXrefDbList, List<StationDTO4User> stationList) {
+        if (userStationXrefDbList != null && userStationXrefDbList.size() > 0) {
+            for (UserStationXref ux : userStationXrefDbList) {
+                Station stationDb = stationService.findById(ux.getStationId());
+                stationList.add(stationToDTO(stationDb));
+            }
+        }
+    }
+
+    /**
+     *
+     * @param station
+     * @return
+     */
+    public static StationDTO4User stationToDTO(Station station) {
+        StationDTO4User stationDTO4User = new StationDTO4User();
+        stationDTO4User.setId(station.getId());
+        stationDTO4User.setName(station.getName());
+        return stationDTO4User;
+    }
+
 
     @Override
     public User getUserByDirectKey(Integer directKey) {

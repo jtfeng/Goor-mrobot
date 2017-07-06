@@ -15,7 +15,7 @@ public abstract class BaseBean implements Serializable {
     protected Long storeId;//关联门店ID
     protected Long createdBy;//创建用户
     @JSONField(format = "yyyy-mm-dd HH:mm:ss")
-    protected Date created;//创建时间
+    protected Date createTime;//创建时间
 
     public BaseBean() {
     }
@@ -33,7 +33,7 @@ public abstract class BaseBean implements Serializable {
     }
 
     public void preSave(){
-        this.created = new Date();
+        this.createTime = new Date();
     }
 
     public Long getStoreId() {
@@ -52,11 +52,11 @@ public abstract class BaseBean implements Serializable {
         this.createdBy = createdBy;
     }
 
-    public Date getCreated() {
-        return created;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setCreated(Date created) {
-        this.created = created;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }

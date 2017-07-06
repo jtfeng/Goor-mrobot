@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.List;
+
 /**
  * Created by Ray.Fu on 2017/6/28.
  */
@@ -28,5 +30,10 @@ public class UserStationXrefServiceImpl implements UserStationXrefService {
         Example example = new Example(UserStationXref.class);
         example.createCriteria().andCondition("USER_ID =", userId);
         return userStationXrefMapper.deleteByExample(example);
+    }
+
+    @Override
+    public List<UserStationXref> getByUserId(Long userId) {
+        return userStationXrefMapper.getByUserId(userId);
     }
 }

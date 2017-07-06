@@ -1,5 +1,6 @@
 package cn.mrobot.bean.area.point;
 
+import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.*;
@@ -9,11 +10,8 @@ import javax.persistence.*;
  * 导航目标点
  */
 @Table(name = "A_MAP_POINT")
-public class MapPoint {
+public class MapPoint extends BaseBean {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     /**
      * 点名：唯一标识符
      */
@@ -74,15 +72,6 @@ public class MapPoint {
 	@Column(name = "POINT_LEVEL")
 	@JSONField(name = "point_level")
 	private int pointLevel;
-
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getPointName() {
         return pointName;

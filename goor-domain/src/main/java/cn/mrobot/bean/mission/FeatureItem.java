@@ -1,4 +1,4 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -32,6 +32,8 @@ public class FeatureItem {
 
 	@Column(name = "DESCRIPTION")
 	private String description;
+
+	private String dataModel; //数据模板，方便前端用户输入
 
 	public FeatureItem() {
 	}
@@ -77,6 +79,14 @@ public class FeatureItem {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getDataModel() {
+		return dataModel;
+	}
+
+	public void setDataModel(String dataModel) {
+		this.dataModel = dataModel;
 	}
 
 	@Override

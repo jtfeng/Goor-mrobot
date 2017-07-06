@@ -16,11 +16,15 @@ import java.util.List;
  */
 public interface MapZipService {
 
+	void update(MapZip mapZip);
+
 	MapZip getMapZip(long id);
 
 	long save(MapZip mapZip);
 
 	void delete(MapZip mapZip);
 
-	List<MapZip> list(WhereRequest whereRequest);
+	List<MapZip> list(MapZip mapZip);
+
+	List<MapZip> list(WhereRequest whereRequest, long storeId);
 }

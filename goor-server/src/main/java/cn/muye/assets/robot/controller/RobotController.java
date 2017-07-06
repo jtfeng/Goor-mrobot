@@ -2,6 +2,7 @@ package cn.muye.assets.robot.controller;
 
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotPassword;
+import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -51,7 +52,7 @@ public class RobotController {
     @ApiOperation(value = "新增或修改机器人", httpMethod = "POST", notes = "新增或修改机器人")
     @ResponseBody
     public AjaxResult addOrUpdateRobot(@ApiParam(value = "机器人")@RequestBody Robot robot) {
-        if (robot.getTypeId() == null || robot.getTypeId() <= 0 || robot.getTypeId() > 3) {
+        if (robot.getTypeId() == null || robot.getTypeId() <= 0 || robot.getTypeId() > RobotTypeEnum.DRAWER.getCaption()) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
         }
         if (StringUtil.isNullOrEmpty(robot.getName()) || StringUtil.isNullOrEmpty(robot.getCode())) {
@@ -78,7 +79,7 @@ public class RobotController {
             robotDb.setUpdateTime(new Date());
             robotDb.setBoxActivated(robot.getBoxActivated());
             robotDb.setBatteryThreshold(robot.getBatteryThreshold());
-            robotService.updateByStoreId(robotDb);
+            robotService.updateRobot(robotDb);
             return AjaxResult.success(robotDb, "修改成功");
         } else if (robot.getId() == null){
             robot.setBoxActivated(true);

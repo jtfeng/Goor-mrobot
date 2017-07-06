@@ -1,6 +1,6 @@
 package cn.muye.dispatch.controller;
 
-import cn.mrobot.bean.misssion.FeatureItemType;
+import cn.mrobot.bean.mission.FeatureItemType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.dispatch.service.FeatureItemService;

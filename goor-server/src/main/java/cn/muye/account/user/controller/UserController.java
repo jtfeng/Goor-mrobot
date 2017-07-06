@@ -1,17 +1,25 @@
 package cn.muye.account.user.controller;
 
+import cn.mrobot.bean.account.Role;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
+import cn.mrobot.bean.account.UserRoleXref;
 import cn.mrobot.bean.area.point.MapPointType;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
+import cn.mrobot.dto.account.RoleDTO;
+import cn.mrobot.dto.account.UserDTO;
+import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
+import cn.muye.account.user.service.impl.UserServiceImpl;
+import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.apache.commons.httpclient.*;
@@ -19,13 +27,14 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.net.util.Base64;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import cn.mrobot.bean.constant.Constant;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,10 +46,31 @@ import java.util.Map;
 @Controller
 public class UserController {
 
+    private static Logger LOGGER = Logger.getLogger(UserController.class);
+
     @Autowired
     private UserService userService;
 
-    static HttpClient httpClient = new HttpClient();
+    @Autowired
+    private StationService stationService;
+
+    @Autowired
+    private UserRoleXrefService userRoleXrefService;
+
+    private static HttpClient httpClient = new HttpClient();
+
+    @Value("${authServer.host}")
+    private String authServerHost;
+
+    @Value("${authServer.port}")
+    private String authServerPort;
+
+    @Value("${authServer.api}")
+    private String authServerApi;
+
+    private static final int SOURCE_TYPE_LIST = 1; //列表来源
+
+    private static final int SOURCE_TYPE_OTHER = 2; //其他来源
 
     /**
      * 新增修改用户
@@ -52,49 +82,64 @@ public class UserController {
     @ApiOperation(value = "新增修改用户接口", httpMethod = "POST", notes = "新增修改用户接口")
     @ResponseBody
     public AjaxResult addOrUpdateUser(@RequestBody User user) {
-        if (user == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
-        }
-        if (StringUtil.isNullOrEmpty(user.getUserName()) || StringUtil.isNullOrEmpty(user.getPassword())) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
-        }
-        if (user.getRoleId() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
-        }
-        if (user.getRoleId() != null && user.getRoleId().equals(3L) && user.getStationIds() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
-        }
-        if (user.getRoleId() != null && user.getRoleId().equals(1L)) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
-        }
-        User userDb = userService.getByUserName(user.getUserName());
-        if (userDb!= null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
-            return AjaxResult.failed("用户名重复");
-        }
-        User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey());
-        if (userDbByDirectKey!= null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
-            return AjaxResult.failed("4位快捷码重复");
-        }
-        Long id = user.getId();
-        if (id == null) {
-            userService.addUser(user);
-            return AjaxResult.success(user, "新增成功");
-        } else {
-            User userDbById = userService.getById(id);
-            if (userDbById != null) {
-                userDbById.setUserName(user.getUserName());
-                userDbById.setPassword(user.getPassword());
-                userDbById.setRoleId(user.getRoleId());
-                userDbById.setStationIds(user.getStationIds());
-                if (user.getActivated() != null) {
-                    userDbById.setActivated(user.getActivated());
-                }
-                userDbById.setDirectLoginKey(user.getDirectLoginKey());
-                userService.updateUser(userDbById);
-                return AjaxResult.success(userDbById, "修改成功");
-            } else {
-                return AjaxResult.failed("不存在该用户");
+        try {
+            if (user == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
             }
+            if (user.getId() == null && StringUtil.isNullOrEmpty(user.getUserName())) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
+            }
+            if (user.getRoleId() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
+            }
+            if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null && user.getStationList().size() > 0) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
+            }
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (user.getStationList() == null || user.getStationList().size() == 0)) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
+            }
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
+            }
+            if (user.getDirectLoginKey() != null && user.getDirectLoginKey() > 9999 && user.getDirectLoginKey() < 1000) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "快捷密码必须是4位数");
+            }
+            User userDb = userService.getByUserName(user.getUserName());
+            if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
+                return AjaxResult.failed("用户名重复");
+            }
+            User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey());
+            if (userDbByDirectKey != null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
+                return AjaxResult.failed("4位快捷码重复");
+            }
+            Long id = user.getId();
+            if (id == null) {
+                userService.addUser(user);
+                return AjaxResult.success(entityToDto(user, SOURCE_TYPE_OTHER), "新增成功");
+            } else {
+                User userDbById = userService.getById(id);
+                if (userDbById != null) {
+                    if (!StringUtil.isNullOrEmpty(user.getPassword())) {
+                        userDbById.setPassword(user.getPassword());
+                    }
+                    userDbById.setRoleId(user.getRoleId());
+                    userDbById.setStationList(user.getStationList());
+                    if (user.getActivated() != null) {
+                        userDbById.setActivated(user.getActivated());
+                    }
+                    if (user.getDirectLoginKey() != null) {
+                        userDbById.setDirectLoginKey(user.getDirectLoginKey());
+                    }
+                    userService.updateUser(userDbById);
+                    return AjaxResult.success(entityToDto(userDbById, SOURCE_TYPE_OTHER), "修改成功");
+                } else {
+                    return AjaxResult.failed("不存在该用户");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("database error", e);
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "站点ID不存在");
+        } finally {
         }
     }
 
@@ -107,10 +152,26 @@ public class UserController {
     @RequestMapping(value = {"account/user"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询用户接口", httpMethod = "GET", notes = "查询用户接口")
     @ResponseBody
-    public AjaxResult list(WhereRequest whereRequest) {
-        List<User> list = userService.list(whereRequest);
-        PageInfo<User> pageList = new PageInfo<>(list);
-        return AjaxResult.success(pageList, "查询成功");
+    public AjaxResult list(WhereRequest whereRequest, Principal principal) {
+        String userName = principal.getName();
+        User userDb = userService.getByUserName(userName);
+        if (userDb == null) {
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "当前用户不存在");
+        }
+        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userDb.getId());
+        if (userRoleXrefDb != null) {
+            userDb.setRoleId(userRoleXrefDb.getRoleId());
+        }
+        List<User> list = userService.list(whereRequest, userDb);
+        List<UserDTO> dtoList = new ArrayList<>();
+        if (list != null) {
+            for (User u : list) {
+                dtoList.add(entityToDto(u, SOURCE_TYPE_LIST));
+            }
+        }
+        PageInfo<UserDTO> userPageInfo = new PageInfo(list);
+        userPageInfo.setList(dtoList);
+        return AjaxResult.success(userPageInfo, "查询成功");
     }
 
     /**
@@ -139,51 +200,56 @@ public class UserController {
     /**
      * 正常登录
      *
-     * @param userName
-     * @param password
+     * @param userParam
      * @return
      */
     @RequestMapping(value = {"account/user/login"}, method = RequestMethod.POST)
     @ApiOperation(value = "登录接口", httpMethod = "POST", notes = "登录接口")
     @ResponseBody
-    public AjaxResult login(String userName, String password) {
-        User user = doLogin(userName, password);
-        //写入枚举
-        Map map = new HashMap();
-        map.put("user", user);
-        map.put("enums", getAllEnums());
-        return AjaxResult.success(map, "登录成功");
+    public AjaxResult login(@RequestBody User userParam) {
+        if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
+        }
+        Map map = doLogin(userParam.getUserName(), userParam.getPassword());
+        return doCheckLogin(map);
     }
 
     /**
      * 四位码快捷登录
      *
-     * @param directLoginKey
+     * @param userParam
      * @return
      */
     @RequestMapping(value = {"account/user/login/pad"}, method = RequestMethod.POST)
     @ApiOperation(value = "PAD登录接口", httpMethod = "POST", notes = "PAD登录接口")
     @ResponseBody
-    public AjaxResult directKeyLogin(String directLoginKey) {
+    public AjaxResult directKeyLogin(@RequestBody User userParam) {
         try {
-            User userDb = userService.getUserByDirectKey(Integer.valueOf(directLoginKey));
+            if (userParam.getDirectLoginKey() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
+            }
+            Integer directLoginKey = userParam.getDirectLoginKey();
+            User userDb = userService.getUserByDirectKey(directLoginKey);
             if (userDb != null) {
-                User user = doLogin(userDb.getUserName(), userDb.getPassword());
-                if (user != null) {
-                    //写入枚举
-                    Map map = new HashMap();
-                    map.put("user", user);
-                    map.put("enums", getAllEnums());
-                    return AjaxResult.success(map, "登录成功");
-                } else {
-                    return AjaxResult.failed("登录失败");
-                }
+                Map map = doLogin(userDb.getUserName(), userDb.getPassword());
+                return doCheckLogin(map);
             } else {
                 return AjaxResult.failed("用户不存在");
             }
         } catch (NumberFormatException e) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
         } finally {
+        }
+    }
+
+    private AjaxResult doCheckLogin(Map map) {
+        UserDTO userDTO = (UserDTO) map.get("user");
+        if (userDTO != null) {
+            //写入枚举
+            map.put("enums", getAllEnums(userDTO));
+            return AjaxResult.success(map, "登录成功");
+        } else {
+            return AjaxResult.failed("登录失败");
         }
     }
 
@@ -222,9 +288,10 @@ public class UserController {
      * @param password
      * @return
      */
-    private User doLogin(String userName, String password) {
+    private Map<String, Object> doLogin(String userName, String password) {
         //调auth_server的token接口
         User user = null;
+        Map map = new HashMap();
         try {
             String accessToken = doAuthorize(userName, password);
             //判断token不等于null，说明已经登录
@@ -233,8 +300,9 @@ public class UserController {
                 List<User> list = userService.getUser(userName, password);
                 if (list != null) {
                     user = list.get(0);
-                    user.setAccessToken(accessToken);
-                    return user;
+                    map.put("user", entityToDto(user, SOURCE_TYPE_OTHER));
+                    map.put("access_token", accessToken);
+                    return map;
                 } else {
                     return null;
                 }
@@ -243,11 +311,12 @@ public class UserController {
             e.printStackTrace();
         } finally {
         }
-        return null;
+        return map;
     }
 
     /**
      * 认证和权限校验，请求认证权限服务器
+     *
      * @param username
      * @param pwd
      * @return
@@ -257,10 +326,10 @@ public class UserController {
         HttpClientParams httpParams = new HttpClientParams();
         httpParams.setSoTimeout(30000);
         httpClient.setParams(httpParams);
-        httpClient.getHostConfiguration().setHost(Constant.AUTHORIZE_SERVER, Constant.AUTHORIZE_SERVER_PORT);
+        httpClient.getHostConfiguration().setHost(authServerHost, Integer.valueOf(authServerPort));
         httpClient.getParams().setParameter(HttpMethodParams.HTTP_CONTENT_CHARSET, "UTF-8");
-        PostMethod login = new PostMethod(Constant.AUTH_SERVER_URL);
-        login.addRequestHeader("Content-Type","application/x-www-form-urlencoded; charset=UTF-8");
+        PostMethod login = new PostMethod(authServerApi);
+        login.addRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         final String auth = "Basic " + new String(Base64.encodeBase64(new StringBuilder(Constant.AUTHORIZE_USERNAME + ":" + Constant.AUTHORIZE_PASSWORD).toString().getBytes()));
         login.addRequestHeader("Authorization", auth);
         NameValuePair userName = new NameValuePair("username", username);// 邮箱
@@ -282,15 +351,107 @@ public class UserController {
     }
 
     /**
-     * 获取所有的枚举类
+     * 根据调用方法的源头不一样来给stationList不同的值
+     * @param user
+     * @param sourceType
      * @return
      */
-    public final static List getAllEnums() {
-        List<Map> list = new ArrayList<Map>();
-        list.add(MapPointType.list());
-        list.add(StationType.list());
-        list.add(RoleTypeEnum.list());
-        list.add(RobotTypeEnum.list());
-        return list;
+    private UserDTO entityToDto(User user, int sourceType) {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(user.getId());
+        userDTO.setUserName(user.getUserName());
+        userDTO.setRoleId(user.getRoleId());
+        userDTO.setRoleName(user.getRoleName());
+        userDTO.setActivated(user.getActivated());
+        List<StationDTO4User> stationDTO4UserList = new ArrayList<>();
+        if (sourceType == SOURCE_TYPE_LIST) {
+            if (user.getRoleId() != null && (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) || user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))))  {
+                userDTO.setStationList(stationDTO4UserList);
+            }
+        } else {
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())))  {
+                List<Station> stationList = stationService.list(null, user.getStoreId());
+                if (stationList != null && stationList.size() > 0) {
+                    for (Station station : stationList) {
+                        stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
+                    }
+                }
+                userDTO.setStationList(stationDTO4UserList);
+            }
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                List<Station> stationList = stationService.list(null, null);
+                if (stationList != null && stationList.size() > 0) {
+                    for (Station station : stationList) {
+                        stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
+                    }
+                }
+                userDTO.setStationList(stationDTO4UserList);
+            }
+        }
+        if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+            userDTO.setStationList(user.getStationList());
+        }
+        return userDTO;
+    }
+
+    /**
+     * 获取所有的枚举类
+     *
+     * @return
+     */
+    public final static Map getAllEnums(UserDTO userDTO) {
+        Map map = new HashMap();
+        map.put("mapPointType", MapPointType.list());
+        map.put("stationType", StationType.list());
+        map.put("roleType", RoleTypeEnum.list());
+        map.put("robotType", RobotTypeEnum.list());
+        //把当前用户能新建什么角色的用户放入常量返回前端
+        List<RoleDTO> listNew = new ArrayList<>();
+        if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+            Role role0 = new Role();
+            role0.setId(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()));
+            role0.setCnName(RoleTypeEnum.SUPER_ADMIN.getValue());
+            Role role1 = new Role();
+            role1.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
+            role1.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
+            Role role2 = new Role();
+            role2.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+            role2.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            listNew.add(entityToDTO(role0));
+            listNew.add(entityToDTO(role1));
+            listNew.add(entityToDTO(role2));
+            map.put("roleCreateLimit", listNew);
+        } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))){
+            Role role = new Role();
+            role.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
+            role.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
+            Role role1 = new Role();
+            role1.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+            role1.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            listNew.add(entityToDTO(role));
+            listNew.add(entityToDTO(role1));
+            map.put("roleCreateLimit", listNew);
+        } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+            Role role1 = new Role();
+            role1.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+            role1.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+            listNew.add(entityToDTO(role1));
+            map.put("roleCreateLimit", listNew);
+        } else {
+            map.put("roleCreateLimit", null);
+        }
+        return map;
+    }
+
+    /**
+     * 角色实体转DTO
+     * @param role
+     * @return
+     */
+    private static RoleDTO entityToDTO(Role role) {
+        RoleDTO dto = new RoleDTO();
+        dto.setId(role.getId());
+        dto.setName(role.getCnName());
+        return dto;
     }
 }

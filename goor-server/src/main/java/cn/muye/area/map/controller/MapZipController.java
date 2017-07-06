@@ -1,10 +1,10 @@
 package cn.muye.area.map.controller;
 
 import cn.mrobot.bean.area.map.MapZip;
-import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.service.MapZipService;
 import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -37,8 +37,19 @@ public class MapZipController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
 	public AjaxResult saveMapZip(@RequestBody MapZip mapZip) throws Exception {
 		try {
-			mapZipService.save(mapZip);
-			return AjaxResult.success(mapZip);
+			MapZip mapZipCondition = new MapZip();
+			mapZipCondition.setFileName(mapZip.getFileName());
+			List<MapZip> mapZipList = mapZipService.list(mapZipCondition);
+			if(mapZipList.size() > 0 && mapZipList.get(0).getId() != mapZip.getId()){
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "文件名重复");
+			}
+			if(mapZip.getId() != null && mapZip.getId() > 0){
+				mapZipService.update(mapZip);
+				return AjaxResult.success(mapZip);
+			}else {
+				mapZipService.save(mapZip);
+				return AjaxResult.success(mapZip);
+			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed("系统错误");
@@ -51,7 +62,7 @@ public class MapZipController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
 	public AjaxResult listMapZip(WhereRequest whereRequest) throws Exception {
 		try {
-			List<MapZip> mapZipList = mapZipService.list(whereRequest);
+			List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
 			int pageNo = (whereRequest.getPage() == 0) ? 1 : whereRequest.getPage();
 			int pageSize = (whereRequest.getPageSize() == 0) ? 10 : whereRequest.getPage();
 

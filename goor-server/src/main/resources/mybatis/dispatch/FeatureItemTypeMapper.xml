@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.muye.dispatch.mapper.FeatureItemTypeMapper">
 
-    <resultMap id="featureItemType" type="cn.mrobot.bean.misssion.FeatureItemType">
+    <resultMap id="featureItemType" type="cn.mrobot.bean.mission.FeatureItemType">
         <result property="id" column="ID"/>
         <result property="name" column="NAME"/>
         <result property="value" column="VALUE"/>
@@ -15,7 +15,7 @@
             javaType:表示关联查询的对象类型（可以使用别名）
          -->
         <association property="featureItem"
-                     javaType="cn.mrobot.bean.misssion.FeatureItem"
+                     javaType="cn.mrobot.bean.mission.FeatureItem"
                      column="FEATURE_ITEM_ID"
                      select="cn.muye.dispatch.mapper.FeatureItemMapper.get"/>
     </resultMap>
@@ -29,7 +29,7 @@
         FEATURE_ITEM_ID
     </sql>
 
-    <insert id="save" parameterType="cn.mrobot.bean.misssion.FeatureItemType" useGeneratedKeys="true" keyProperty="id">
+    <insert id="save" parameterType="cn.mrobot.bean.mission.FeatureItemType" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_FEATURE_ITEM_TYPE(
         ID,
         NAME,

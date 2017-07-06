@@ -24,7 +24,7 @@ public interface StationService extends BaseService<Station>{
 
 	Station findById(long id, long storeId);
 
-	List<Station> list(WhereRequest whereRequest, long storeId);
+	List<Station> list(WhereRequest whereRequest, Long storeId);
 
 	List<Station> listByName(String name);
 

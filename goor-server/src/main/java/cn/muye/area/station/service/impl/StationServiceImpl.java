@@ -100,10 +100,14 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 	}
 
 	@Override
-	public List<Station> list(WhereRequest whereRequest, long storeId) {
-		PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+	public List<Station> list(WhereRequest whereRequest, Long storeId) {
+		//如果whereRequest不为null，则分页
+		if(whereRequest != null) {
+			PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+		}
+
 		List<Station> stationList = new ArrayList<Station>();
-		if(whereRequest.getQueryObj() != null){
+		if(whereRequest != null && whereRequest.getQueryObj() != null){
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 			Object name = map.get(SearchConstants.SEARCH_NAME);
 			//TODO 方法一：　测试用多表联查查数据库,缺点是pageHelper分页条数会按照leftjoin查询条数去算，不准确
@@ -122,6 +126,10 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 			//方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
 			Example example = new Example(Station.class);
 			example.setOrderByClause("ID DESC");
+			//超级管理员传storeId=null，能查看所有站；医院管理员传storeId!=null，只能查看该医院的站
+			if(storeId != null) {
+				example.createCriteria().andCondition("STORE_ID =", storeId);
+			}
 			stationList = myMapper.selectByExample(example);
 		}
 
@@ -138,9 +146,18 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 				//如果有关联点，则更新station的点列表
 				for(StationMapPointXREF stationMapPointXREF : stationMapPointXREFList) {
 					MapPoint mapPoint = pointService.findById(stationMapPointXREF.getMapPointId());
+					if(mapPoint == null) {
+						//如果关联的点不存在，手动删除点的关联关系
+						stationMapPointXREFService.deleteByPointId(stationMapPointXREF.getMapPointId());
+						continue;
+					}
 					resultMapPoint.add(mapPoint);
 				}
-				station.setMapPoints(resultMapPoint);
+
+				if( resultMapPoint != null && resultMapPoint.size() > 0 ) {
+					station.setMapPoints(resultMapPoint);
+				}
+
 			}
 		}
 

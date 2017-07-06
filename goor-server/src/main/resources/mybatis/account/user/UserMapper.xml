@@ -9,6 +9,7 @@
         <result property="activated" column="ACTIVATED"/>
         <result property="directLoginKey" column="DIRECT_LOGIN_KEY"/>
         <result property="roleId" column="ROLE_ID"/>
+        <result property="storeId" column="STORE_ID"/>
     </resultMap>
 
     <select id="list" resultMap="userResult" parameterType="java.util.Map">
@@ -35,7 +36,8 @@
             u.USER_NAME,
             u.PASSWORD,
             u.ACTIVATED,
-            u.DIRECT_LOGIN_KEY
+            u.DIRECT_LOGIN_KEY,
+            u.STORE_ID
         FROM AC_USER u WHERE u.USER_NAME = #{userName}
     </select>
 
@@ -46,5 +48,86 @@
             u.ACTIVATED,
             u.DIRECT_LOGIN_KEY
         FROM AC_USER u WHERE u.DIRECT_LOGIN_KEY = #{directLoginKey}
+    </select>
+
+    <select id="selectBySuperAdmin" resultMap="userResult" parameterType="java.util.Map">
+        SELECT
+            u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+          u.ACTIVATED,
+   u.DIRECT_LOGIN_KEY,
+           ur.ROLE_ID
+        FROM
+            AC_USER u
+        LEFT JOIN AC_USER_ROLE_XREF ur ON u.ID = ur.USER_ID
+        where 1=1
+        <if test="storeId != null">
+            and u.STORE_ID = #{storeId}
+        </if>
+        <if test="name != null and name != '' ">
+            and u.USER_NAME = #{name}
+        </if>
+        ORDER BY
+            u.ID DESC
+    </select>
+
+    <select id="selectByHospitalAdmin" resultMap="userResult" parameterType="java.util.Map">
+        select * from
+        (SELECT
+            u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+            u.ACTIVATED,
+            u.DIRECT_LOGIN_KEY,
+            ur.ROLE_ID
+          FROM
+        AC_USER u
+        LEFT JOIN AC_USER_ROLE_XREF ur ON u.ID = ur.USER_ID
+        where 1=1
+        <if test="userId != null">
+            and u.ID = #{userId}
+        </if>
+        union all
+            SELECT
+            u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+            u.ACTIVATED,
+            u.DIRECT_LOGIN_KEY,
+            ur.ROLE_ID
+            FROM
+            AC_USER u
+            LEFT JOIN AC_USER_ROLE_XREF ur ON u.ID = ur.USER_ID
+            where 1=1
+            <if test="storeId != null">
+                and u.STORE_ID = #{storeId}
+            </if>
+            <if test="roleId != null">
+                and ur.ROLE_ID = #{roleId}
+            </if>
+        <if test="name != null and name != '' ">
+            and u.USER_NAME = #{name}
+        </if>) rs
+        ORDER BY
+        rs.ID DESC
+    </select>
+
+
+    <select id="selectByStationAdmin" resultMap="userResult" parameterType="java.util.Map">
+        SELECT
+            u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+            u.ACTIVATED,
+            u.DIRECT_LOGIN_KEY,
+            ur.ROLE_ID
+        FROM
+            AC_USER u
+        LEFT JOIN AC_USER_ROLE_XREF ur ON u.ID = ur.USER_ID
+        where 1=1
+        <if test="userId != null">
+            and u.ID = #{userId}
+        </if>
     </select>
 </mapper>

@@ -4,6 +4,7 @@ import cn.mrobot.bean.base.BaseBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.BaseCrudService;
 import cn.muye.util.MyMapper;
+import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,11 +19,12 @@ public abstract class BaseCrudServiceImpl<T extends BaseBean>  implements BaseCr
 
     @Autowired
     protected MyMapper<T> myMapper;
+    @Autowired
+    private UserUtil userUtil;
 
     public int save(T entity) {
         entity.preSave();
-        //todo
-        entity.setCreatedBy(1L);
+        entity.setCreatedBy(userUtil.getCurrentUserId());
         entity.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         return myMapper.insert(entity);
     }

@@ -4,6 +4,9 @@
 
     <resultMap id="mapPoint" type="cn.mrobot.bean.area.point.MapPoint">
         <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
         <result property="pointName" column="POINT_NAME"/>
         <result property="pointAlias" column="POINT_ALIAS"/>
         <result property="sceneName" column="SCENE_NAME"/>
@@ -17,6 +20,9 @@
 
     <sql id="Base_Column_List">
         ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
         POINT_NAME,
         POINT_ALIAS,
         SCENE_NAME,

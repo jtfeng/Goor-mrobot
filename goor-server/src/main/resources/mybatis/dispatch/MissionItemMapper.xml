@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.muye.dispatch.mapper.MissionNodeMapper">
+<mapper namespace="cn.muye.dispatch.mapper.MissionItemMapper">
 
-    <resultMap id="missionNode" type="cn.mrobot.bean.misssion.MissionNode">
+    <resultMap id="missionItem" type="cn.mrobot.bean.mission.MissionItem">
         <result property="id" column="ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
@@ -14,15 +14,10 @@
         <result property="priority" column="PRIORITY"/>
         <result property="featureItemId" column="FEATURE_ITEM_ID"/>
         <result property="missionChainId" column="MISSION_CHAIN_ID"/>
-        <result property="featureItemTypeId" column="FEATURE_ITEM_TYPE_ID"/>
         <association property="featureItem"
-                     javaType="cn.mrobot.bean.misssion.FeatureItem"
+                     javaType="cn.mrobot.bean.mission.FeatureItem"
                      column="FEATURE_ITEM_ID"
                      select="cn.muye.dispatch.mapper.FeatureItemMapper.get"/>
-        <association property="featureItemType"
-                     javaType="cn.mrobot.bean.misssion.FeatureItemType"
-                     column="FEATURE_ITEM_TYPE_ID"
-                     select="cn.muye.dispatch.mapper.FeatureItemTypeMapper.get"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -36,11 +31,10 @@
         UPDATE_TIME,
         PRIORITY,
         MISSION_CHAIN_ID,
-        FEATURE_ITEM_ID,
-        FEATURE_ITEM_TYPE_ID
+        FEATURE_ITEM_ID
     </sql>
 
-    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionNode" useGeneratedKeys="true" keyProperty="id">
+    <insert id="save" parameterType="cn.mrobot.bean.mission.MissionItem" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_MISSION_NODE(
         ID,
         NAME,
@@ -52,8 +46,7 @@
         UPDATE_TIME,
         PRIORITY,
         MISSION_CHAIN_ID,
-        FEATURE_ITEM_ID,
-        FEATURE_ITEM_TYPE_ID
+        FEATURE_ITEM_ID
         ) values (
         #{id},
         #{name},
@@ -66,21 +59,20 @@
         #{priority},
         #{missionChainId},
         #{featureItemId},
-        #{featureItemTypeId}
         );
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS ID
         </selectKey>
     </insert>
 
-    <select id="findByName" resultMap="missionNode">
+    <select id="findByName" resultMap="missionItem">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_NODE
         WHERE NAME = #{name}
     </select>
 
-    <select id="get" resultMap="missionNode">
+    <select id="get" resultMap="missionItem">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_NODE
@@ -111,14 +103,11 @@
             <if test="featureItemId != null">
                 FEATURE_ITEM_ID = #{featureItemId},
             </if>
-            <if test="featureItemTypeId != null">
-                FEATURE_ITEM_TYPE_ID = #{featureItemTypeId},
-            </if>
         </trim>
         WHERE ID = #{id}
     </update>
 
-    <select id="list" resultMap="missionNode">
+    <select id="list" resultMap="missionItem">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_NODE d
@@ -142,7 +131,7 @@
         ORDER BY NAME
     </select>
 
-    <select id="listAll" resultMap="missionNode">
+    <select id="listAll" resultMap="missionItem">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_NODE d

@@ -32,7 +32,7 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
         List<RobotPassword> addList = Lists.newArrayList();
         for (int i = 1; i <= boxCount ; i++){
             RobotPassword robotPassWord = new RobotPassword();
-            robotPassWord.setCreated(robot.getCreated());
+            robotPassWord.setCreateTime(robot.getCreateTime());
             robotPassWord.setCreatedBy(robot.getCreatedBy());
             robotPassWord.setStoreId(robot.getStoreId());
             robotPassWord.setBoxNum(i);

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.muye.dispatch.mapper.MissionMainChainXREFMapper">
+<mapper namespace="cn.muye.dispatch.mapper.MissionListMissionXREFMapper">
 
-    <resultMap id="missionMainChainXREF" type="cn.mrobot.bean.misssion.MissionMainChainXREF">
+    <resultMap id="missionListMissionXREF" type="cn.mrobot.bean.mission.MissionListMissionXREF">
         <result property="id" column="ID"/>
         <result property="missionMainId" column="MISSION_MAIN_ID"/>
         <result property="missionChainId" column="MISSION_CHAIN_ID"/>
-        <association property="missionMain"
-                     javaType="cn.mrobot.bean.misssion.MissionMain"
+        <association property="missionDTOList"
+                     javaType="cn.mrobot.bean.mission.MissionList"
                      column="MISSION_MAIN_ID"
-                     select="cn.muye.dispatch.mapper.MissionMainMapper.get"/>
-        <association property="missionChain"
-                     javaType="cn.mrobot.bean.misssion.MissionChain"
+                     select="cn.muye.dispatch.mapper.MissionListMapper.get"/>
+        <association property="mission"
+                     javaType="cn.mrobot.bean.mission.Mission"
                      column="MISSION_CHAIN_ID"
-                     select="cn.muye.dispatch.mapper.MissionChainMapper.get"/>
+                     select="cn.muye.dispatch.mapper.MissionMapper.get"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -22,7 +22,7 @@
         MISSION_CHAIN_ID
     </sql>
 
-    <insert id="save" parameterType="cn.mrobot.bean.misssion.MissionMainChainXREF" useGeneratedKeys="true" keyProperty="id">
+    <insert id="save" parameterType="cn.mrobot.bean.mission.MissionListMissionXREF" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_MISSION_MAIN_CHAIN_XREF(
         ID,
         MISSION_MAIN_ID,
@@ -45,7 +45,7 @@
         delete from D_MISSION_MAIN_CHAIN_XREF where MISSION_MAIN_ID = #{missionMainId}
     </delete>
 
-    <select id="findByMainId" resultMap="missionMainChainXREF">
+    <select id="findByMainId" resultMap="missionListMissionXREF">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_MAIN_CHAIN_XREF

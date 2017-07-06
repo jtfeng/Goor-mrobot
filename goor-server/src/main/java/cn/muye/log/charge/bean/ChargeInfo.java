@@ -1,5 +1,6 @@
 package cn.muye.log.charge.bean;
 
+import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import java.io.Serializable;
@@ -14,9 +15,7 @@ import java.util.Date;
  * Describe: 充电状态实体
  * Version:1.0
  */
-public class ChargeInfo implements Serializable{
-
-	private long id;
+public class ChargeInfo extends BaseBean{
 
 	@JSONField(name = "device_id")
 	private String deviceId;
@@ -29,18 +28,6 @@ public class ChargeInfo implements Serializable{
 
 	@JSONField(name = "power_percent")
 	private int powerPercent;  //电量  范围  0-100
-
-	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	private Date createDate;
-
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
 
 	public String getDeviceId() {
 		return deviceId;
@@ -74,11 +61,4 @@ public class ChargeInfo implements Serializable{
 		this.powerPercent = powerPercent;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
 }

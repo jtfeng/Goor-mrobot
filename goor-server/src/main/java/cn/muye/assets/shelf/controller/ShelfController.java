@@ -26,8 +26,7 @@ public class ShelfController {
     @RequestMapping(value = "assets/shelf", method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult list(WhereRequest whereRequest) {
-//        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-        List<Shelf> list = shelfService.listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), Shelf.class, "ID DESC");
+        List<Shelf> list = shelfService.listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), whereRequest.getQueryObj(), Shelf.class, "ID DESC");
         PageInfo<Shelf> pageList = new PageInfo<>(list);
         return AjaxResult.success(pageList, "查询成功");
     }
@@ -51,7 +50,7 @@ public class ShelfController {
         }
         if (id == null) {
             shelf.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            shelf.setCreated(new Date());
+            shelf.setCreateTime(new Date());
             shelf.setCreatedBy(1L);
             shelfService.save(shelf);
             return AjaxResult.success(shelf, "新增成功");

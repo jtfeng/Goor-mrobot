@@ -1,5 +1,6 @@
 package cn.mrobot.bean.area.map;
 
+import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.*;
@@ -15,11 +16,8 @@ import java.util.Date;
  * Version:1.0
  */
 @Table(name = "A_MAP_ZIP")
-public class MapZip {
+public class MapZip extends BaseBean {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
 	/**
 	 * 地图名
 	 */
@@ -52,17 +50,6 @@ public class MapZip {
 	 */
 	@Column(name = "ROBOT_PATH")
 	private String robotPath;
-
-	@Column(name = "CREATE_DATE")
-	private Date createDate;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
 
 	public String getMapName() {
 		return mapName;
@@ -104,14 +91,6 @@ public class MapZip {
 		this.fileName = fileName;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-
 	public String getRobotPath() {
 		return robotPath;
 	}
@@ -119,4 +98,5 @@ public class MapZip {
 	public void setRobotPath(String robotPath) {
 		this.robotPath = robotPath;
 	}
+
 }

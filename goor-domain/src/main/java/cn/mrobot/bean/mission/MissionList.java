@@ -1,8 +1,11 @@
-package cn.mrobot.bean.misssion;
+package cn.mrobot.bean.mission;
 
+import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.dto.mission.MissionDTO;
+import cn.mrobot.dto.mission.MissionListDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -15,7 +18,7 @@ import java.util.List;
  * Describe: 总任务 (任务串)
  * Version:1.0
  */
-public class MissionMain implements Serializable{
+public class MissionList extends BaseBean{
 
 	private Long id;
 
@@ -23,15 +26,12 @@ public class MissionMain implements Serializable{
 
 	private String description;
 
-	private String deviceId;
-
-	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	private Date createTime;  //创建时间
+	private String missionListType;
 
 	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date updateTime;    //更新时间
 
-	private List<MissionChain> missionChainList;
+	private List<Mission> missionList;
 
 	/**
 	 * //间隔时间
@@ -44,28 +44,31 @@ public class MissionMain implements Serializable{
 
 	private Long startTime;
 
+	private Long stopTime;
+
 	private Integer priority;//优先级
 
 	public static class Builder {
 
 		private String name;  //总任务名称
 		private String description;
-		private String deviceId;
 		private Date createTime;  //创建时间
 		private Date updateTime;    //更新时间
 		private Long intervalTime;
 		private int repeatCount;
 		private Long startTime;
+		private Long stopTime;
 		private Integer priority;//优先级
-		private List<MissionChain> missionChainList;
+		private String missionListType;
+		private List<Mission> missionList;
 
 		public Builder name(String name) {
 			this.name = name;
 			return this;
 		}
 
-		public Builder deviceId(String deviceId) {
-			this.deviceId = deviceId;
+		public Builder missionListType(String missionListType) {
+			this.missionListType = missionListType;
 			return this;
 		}
 
@@ -89,6 +92,11 @@ public class MissionMain implements Serializable{
 			return this;
 		}
 
+		public Builder stopTime(Long stopTime) {
+			this.stopTime = stopTime;
+			return this;
+		}
+
 		public Builder intervalTime(Long intervalTime) {
 			this.intervalTime = intervalTime;
 			return this;
@@ -104,30 +112,51 @@ public class MissionMain implements Serializable{
 			return this;
 		}
 
-		public Builder missionChainList(List<MissionChain> missionChainList) {
-			this.missionChainList = missionChainList;
+		public Builder missionChainList(List<Mission> missionList) {
+			this.missionList = missionList;
 			return this;
 		}
 
-		public MissionMain build() {
-			return new MissionMain(this);
+		public MissionList build() {
+			return new MissionList(this);
 		}
 	}
 
-	public MissionMain() {
+	public MissionList() {
 	}
 
-	private MissionMain(Builder builder) {
+	private MissionList(Builder builder) {
 		name = builder.name;
 		description = builder.description;
-		deviceId = builder.deviceId;
 		createTime = builder.createTime;
 		updateTime = builder.updateTime;
 		startTime = builder.startTime;
+		stopTime = builder.stopTime;
 		intervalTime = builder.intervalTime;
 		repeatCount = builder.repeatCount;
 		priority = builder.priority;
-		missionChainList = builder.missionChainList;
+		missionList = builder.missionList;
+		missionListType = builder.missionListType;
+	}
+
+	public MissionListDTO toDTO() {
+		MissionListDTO missionListDTO = new MissionListDTO();
+		missionListDTO.setId(this.getId());
+		missionListDTO.setIntervalTime(this.getIntervalTime());
+		missionListDTO.setMissionListType(this.getMissionListType());
+		missionListDTO.setPriority(this.getPriority());
+		missionListDTO.setRepeatCount(this.getRepeatCount());
+		missionListDTO.setStartTime(this.getStartTime());
+		missionListDTO.setStopTime(this.getStopTime());
+		List<Mission> missions = this.getMissionList();
+		if(missions != null) {
+			List<MissionDTO> missionDTOS = new ArrayList<MissionDTO>();
+			for(Mission mission : missions) {
+				missionDTOS.add(mission.toDTO());
+			}
+			missionListDTO.setMissionDTOList(missionDTOS);
+		}
+		return missionListDTO;
 	}
 
 	public Long getId() {
@@ -152,22 +181,6 @@ public class MissionMain implements Serializable{
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public String getDeviceId() {
-		return deviceId;
-	}
-
-	public void setDeviceId(String deviceId) {
-		this.deviceId = deviceId;
-	}
-
-	public Date getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
 	}
 
 	public Date getUpdateTime() {
@@ -202,6 +215,14 @@ public class MissionMain implements Serializable{
 		this.startTime = startTime;
 	}
 
+	public Long getStopTime() {
+		return stopTime;
+	}
+
+	public void setStopTime(Long stopTime) {
+		this.stopTime = stopTime;
+	}
+
 	public Integer getPriority() {
 		return priority;
 	}
@@ -210,11 +231,20 @@ public class MissionMain implements Serializable{
 		this.priority = priority;
 	}
 
-	public List<MissionChain> getMissionChainList() {
-		return missionChainList;
+	public List<Mission> getMissionList() {
+		return missionList;
 	}
 
-	public void setMissionChainList(List<MissionChain> missionChainList) {
-		this.missionChainList = missionChainList;
+	public void setMissionList(List<Mission> missionList) {
+		this.missionList = missionList;
 	}
+
+	public String getMissionListType() {
+		return missionListType;
+	}
+
+	public void setMissionListType(String missionListType) {
+		this.missionListType = missionListType;
+	}
+
 }

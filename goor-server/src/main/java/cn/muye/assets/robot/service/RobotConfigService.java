@@ -9,4 +9,8 @@ import cn.mrobot.bean.assets.robot.RobotConfig;
 public interface RobotConfigService {
 
     void add(RobotConfig robotConfig);
+
+    void update(RobotConfig robotConfig);
+
+    RobotConfig getByRobotId(Long robotId);
 }

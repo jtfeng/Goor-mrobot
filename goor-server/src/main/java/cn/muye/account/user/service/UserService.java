@@ -17,7 +17,7 @@ public interface UserService extends BaseService<User> {
 
     void updateUser(User user);
 
-    List<User> list(WhereRequest whereRequest);
+    List<User> list(WhereRequest whereRequest, User user);
 
     User getUserByDirectKey(Integer directKey);
 

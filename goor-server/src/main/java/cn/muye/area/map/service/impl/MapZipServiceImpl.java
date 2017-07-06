@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -33,13 +32,18 @@ public class MapZipServiceImpl implements MapZipService {
 	private MapZipMapper mapZipMapper;
 
 	@Override
+	public void update(MapZip mapZip) {
+		mapZipMapper.updateByPrimaryKey(mapZip);
+	}
+
+	@Override
 	public MapZip getMapZip(long id) {
 		return mapZipMapper.selectByPrimaryKey(id);
 	}
 
 	@Override
 	public long save(MapZip mapZip) {
-		mapZip.setCreateDate(new Date());
+		mapZip.setCreateTime(new Date());
 		return mapZipMapper.insert(mapZip);
 	}
 
@@ -55,20 +59,23 @@ public class MapZipServiceImpl implements MapZipService {
 	}
 
 	@Override
-	public List<MapZip> list(WhereRequest whereRequest) {
-		List<MapZip> mapZipList = new ArrayList<>();
+	public List<MapZip> list(MapZip mapZip) {
+		return mapZipMapper.select(mapZip);
+	}
+
+	@Override
+	public List<MapZip> list(WhereRequest whereRequest, long storeId) {
+		Condition condition = new Condition(MapPoint.class);
 		if (whereRequest.getQueryObj() != null) {
 			JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
 			Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
-			Condition condition = new Condition(MapPoint.class);
 			if (mapName != null) {
 				condition.createCriteria().andCondition("MAP_NAME like '%" + mapName + "%'");
 			}
-			condition.setOrderByClause("CREATE_DATE desc");
-			mapZipList = mapZipMapper.selectByExample(condition);
-		} else {
-			mapZipList = mapZipMapper.selectAll();
 		}
+		condition.createCriteria().andCondition("STORE_ID =" + storeId);
+		condition.setOrderByClause("CREATE_TIME desc");
+		List<MapZip> mapZipList = mapZipMapper.selectByExample(condition);
 		return mapZipList;
 	}
 }

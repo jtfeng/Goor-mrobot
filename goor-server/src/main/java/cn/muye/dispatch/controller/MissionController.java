@@ -1,10 +1,9 @@
 package cn.muye.dispatch.controller;
 
-import cn.mrobot.bean.misssion.*;
+import cn.mrobot.bean.mission.*;
 import cn.mrobot.utils.WhereRequest;
 import cn.mrobot.utils.ajax.AjaxResponse;
 import cn.muye.base.bean.AjaxResult;
-import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.service.*;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
@@ -28,29 +27,29 @@ public class MissionController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MissionController.class);
 
 	@Autowired
-	private MissionNodeService missionNodeService;
+	private MissionItemService missionItemService;
 	@Autowired
-	private MissionChainService missionChainService;
+	private MissionService missionService;
 	@Autowired
-	private MissionMainService missionMainService;
+	private MissionListService missionListService;
 
-	//missionNode-----------------------------------------------------------------------
+	//missionItem-----------------------------------------------------------------------
 	@RequestMapping(value = {"dispatch/mission/node"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_u')")
-	public AjaxResponse saveOrUpdateMissionNode(@RequestBody MissionNode missionNode, HttpServletRequest request) throws Exception {
+	public AjaxResponse saveOrUpdateMissionNode(@RequestBody MissionItem missionItem, HttpServletRequest request) throws Exception {
 		try {
-			String missionNodeName = missionNode.getName();
-			MissionNode missionNodeDB = missionNodeService.findByName(missionNodeName);
-			if (missionNodeDB != null && !missionNodeDB.getId().equals(missionNode.getId())) {
+			String missionNodeName = missionItem.getName();
+			MissionItem missionItemDB = missionItemService.findByName(missionNodeName);
+			if (missionItemDB != null && !missionItemDB.getId().equals(missionItem.getId())) {
 				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "已存在相同名称的任务节点！");
 			}
 
-			if (missionNode.getId() != null) {
-				missionNode.setUpdateTime(new Date());
-				missionNodeService.update(missionNode);
+			if (missionItem.getId() != null) {
+				missionItem.setUpdateTime(new Date());
+				missionItemService.update(missionItem);
 			} else {
-				missionNodeService.save(missionNode);
+				missionItemService.save(missionItem);
 			}
 			return AjaxResponse.success();
 		} catch (Exception e) {
@@ -68,12 +67,12 @@ public class MissionController {
 			if (id == null) {
 				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "参数错误");
 			}
-			MissionNode missionNodeDB = missionNodeService.get(id);
-			if (missionNodeDB == null) {
+			MissionItem missionItemDB = missionItemService.get(id);
+			if (missionItemDB == null) {
 				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "要删除的对象不存在");
 			}
 
-			missionNodeService.delete(missionNodeDB);
+			missionItemService.delete(missionItemDB);
 			return AjaxResponse.success();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -86,7 +85,7 @@ public class MissionController {
 	@ResponseBody
 	public AjaxResult pageMissionNode(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
-			List<MissionNode> missionNodeList = missionNodeService.list(whereRequest);
+			List<MissionItem> missionItemList = missionItemService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
@@ -94,10 +93,10 @@ public class MissionController {
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
 
-			PageInfo<MissionNode> page = new PageInfo<MissionNode>();
+			PageInfo<MissionItem> page = new PageInfo<MissionItem>();
 			PageHelper.startPage(pageNo, pageSize);
 			//用PageInfo对结果进行包装
-			page.setList(missionNodeList);
+			page.setList(missionItemList);
 			return AjaxResult.success(page);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -109,31 +108,31 @@ public class MissionController {
 	@ResponseBody
 	public List listMissionNode(HttpServletRequest request) {
 		try {
-			return missionNodeService.list();
+			return missionItemService.list();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return null;
 		}
 	}
 
-	//missionChain-----------------------------------------------------------------------
+	//mission-----------------------------------------------------------------------
 	@RequestMapping(value = {"dispatch/mission/chain"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionchain_u')")
-	public AjaxResponse saveOrUpdateMissionChain(@RequestBody MissionChain missionChain, HttpServletRequest request) throws Exception {
+	public AjaxResponse saveOrUpdateMissionChain(@RequestBody Mission mission, HttpServletRequest request) throws Exception {
 		AjaxResponse resp;
 		try {
-			String missionChainName = missionChain.getName();
-			MissionChain missionChainDB = missionChainService.findByName(missionChainName);
-			if (missionChainDB != null && !missionChainDB.getId().equals(missionChain.getId())) {
+			String missionChainName = mission.getName();
+			Mission missionDB = missionService.findByName(missionChainName);
+			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
 				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "已存在相同名称的任务串！");
 			}
 
-			if (missionChain.getId() != null) {
-				missionChain.setUpdateTime(new Date());
-				missionChainService.update(missionChain);
+			if (mission.getId() != null) {
+				mission.setUpdateTime(new Date());
+				missionService.update(mission);
 			} else {
-				missionChainService.save(missionChain);
+				missionService.save(mission);
 			}
 			resp = AjaxResponse.success();
 		} catch (Exception e) {
@@ -151,15 +150,15 @@ public class MissionController {
 										HttpServletRequest request) throws Exception {
 		AjaxResponse resp;
 		try {
-			MissionChain missionChainDB = missionChainService.get(missionChainId);
-			if (missionChainDB == null) {
+			Mission missionDB = missionService.get(missionChainId);
+			if (missionDB == null) {
 				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "任务串不存在！");
 			}
 
 			List<Long> bindList = JSON.parseArray(bingString, Long.class);
 
-			missionChainDB.setUpdateTime(new Date());
-			missionChainService.update(missionChainDB, bindList);
+			missionDB.setUpdateTime(new Date());
+			missionService.update(missionDB, bindList);
 			resp = AjaxResponse.success();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -174,12 +173,12 @@ public class MissionController {
 	public AjaxResponse deleteMissionChain(@PathVariable long id, HttpServletRequest request) throws Exception {
 		AjaxResponse resp;
 		try {
-			MissionChain missionChainDB = missionChainService.get(id);
-			if (missionChainDB == null) {
+			Mission missionDB = missionService.get(id);
+			if (missionDB == null) {
 				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "要删除的对象不存在");
 			}
 
-			missionChainService.delete(missionChainDB);
+			missionService.delete(missionDB);
 			return AjaxResponse.success();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -192,7 +191,7 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionchain_r')")
 	public AjaxResult pageMissionChain(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
-			List<MissionChain> missionChainList = missionChainService.list(whereRequest);
+			List<Mission> missionList = missionService.list(whereRequest);
 
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
@@ -201,7 +200,7 @@ public class MissionController {
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
 			//用PageInfo对结果进行包装
-			PageInfo<MissionChain> page = new PageInfo<MissionChain>(missionChainList);
+			PageInfo<Mission> page = new PageInfo<Mission>(missionList);
 			return AjaxResult.success(page);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -213,31 +212,31 @@ public class MissionController {
 	@ResponseBody
 	public List listMissionChain(HttpServletRequest request) {
 		try {
-			List<MissionChain> missionChainList = missionChainService.list();
-			return missionChainList;
+			List<Mission> missionList = missionService.list();
+			return missionList;
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return null;
 		}
 	}
 
-	//missionMain-----------------------------------------------------------------------
+	//missionList-----------------------------------------------------------------------
 	@RequestMapping(value = {"dispatch/mission/main"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionmain_u')")
-	public AjaxResult saveOrUpdateMissionMain(@RequestBody MissionMain missionMain, HttpServletRequest request) throws Exception {
+	public AjaxResult saveOrUpdateMissionMain(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
 		try {
-			String missionMainName = missionMain.getName();
-			MissionMain missionMainDB = missionMainService.findByName(missionMainName);
-			if (missionMainDB != null && !missionMainDB.getId().equals(missionMain.getId())) {
+			String missionMainName = missionList.getName();
+			MissionList missionListDB = missionListService.findByName(missionMainName);
+			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
 				return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "已存在相同名称的任务串！");
 			}
 
-			if (missionMain.getId() != null) {
-				missionMain.setUpdateTime(new Date());
-				missionMainService.update(missionMain);
+			if (missionList.getId() != null) {
+				missionList.setUpdateTime(new Date());
+				missionListService.update(missionList);
 			} else {
-				missionMainService.save(missionMain);
+				missionListService.save(missionList);
 			}
 			return AjaxResult.success();
 
@@ -252,12 +251,12 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionmain_d')")
 	public AjaxResult deleteMissionMain(@PathVariable long id, HttpServletRequest request) throws Exception {
 		try {
-			MissionMain missionMainDB = missionMainService.get(id);
-			if (missionMainDB == null) {
+			MissionList missionListDB = missionListService.get(id);
+			if (missionListDB == null) {
 				return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "要删除的对象不存在");
 			}
 
-			missionMainService.delete(missionMainDB);
+			missionListService.delete(missionListDB);
 			return AjaxResult.success();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -270,14 +269,14 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionmain_r')")
 	public AjaxResult pageMissionMain(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
-			List<MissionMain> missionMainList = missionMainService.list(whereRequest);
+			List<MissionList> missionListList = missionListService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
 			pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
-			PageInfo<MissionMain> page = new PageInfo<>(missionMainList);
+			PageInfo<MissionList> page = new PageInfo<>(missionListList);
 			return AjaxResult.success(page);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -289,8 +288,8 @@ public class MissionController {
 	@ResponseBody
 	public AjaxResult listMissionMain(HttpServletRequest request) {
 		try {
-			List<MissionMain> missionMainList = missionMainService.list();
-			return AjaxResult.success(missionMainList);
+			List<MissionList> missionListList = missionListService.list();
+			return AjaxResult.success(missionListList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed(-1, "出错");
@@ -304,15 +303,15 @@ public class MissionController {
 									   @RequestParam("bingString") String bingString,
 									   HttpServletRequest request) throws Exception {
 		try {
-			MissionMain missionMainDB = missionMainService.get(missionMainId);
-			if (missionMainDB == null) {
+			MissionList missionListDB = missionListService.get(missionMainId);
+			if (missionListDB == null) {
 				return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "总任务不存在！");
 			}
 
 			List<Long> bindList = JSON.parseArray(bingString, Long.class);
 
-			missionMainDB.setUpdateTime(new Date());
-			missionMainService.update(missionMainDB, bindList);
+			missionListDB.setUpdateTime(new Date());
+			missionListService.update(missionListDB, bindList);
 			return AjaxResult.success();
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -321,7 +320,7 @@ public class MissionController {
 	}
 
 //	//把类转换成entry返回给前端，解耦和
-//	private Map objectToEntry(MissionNode missionNode) {
+//	private Map objectToEntry(MissionItem missionNode) {
 //		Map entry = new HashMap();
 //		entry.put("id", missionNode.getId());
 //		entry.put("name", missionNode.getName());

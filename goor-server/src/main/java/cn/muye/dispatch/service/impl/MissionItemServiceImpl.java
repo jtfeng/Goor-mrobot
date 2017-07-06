@@ -1,10 +1,10 @@
 package cn.muye.dispatch.service.impl;
 
-import cn.mrobot.bean.misssion.MissionNode;
+import cn.mrobot.bean.mission.MissionItem;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.dispatch.mapper.MissionNodeMapper;
-import cn.muye.dispatch.service.MissionNodeService;
+import cn.muye.dispatch.mapper.MissionItemMapper;
+import cn.muye.dispatch.service.MissionItemService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,40 +25,40 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class MissionNodeServiceImpl implements MissionNodeService {
+public class MissionItemServiceImpl implements MissionItemService {
 
 	@Autowired
-	protected MissionNodeMapper missionNodeMapper;
+	protected MissionItemMapper missionItemMapper;
 
 	@Override
-	public long save(MissionNode missionNode) {
-		return missionNodeMapper.save(missionNode);
+	public long save(MissionItem missionItem) {
+		return missionItemMapper.save(missionItem);
 	}
 
 	@Override
-	public MissionNode findByName(String name) {
-		return missionNodeMapper.findByName(name);
+	public MissionItem findByName(String name) {
+		return missionItemMapper.findByName(name);
 	}
 
 	@Override
-	public void update(MissionNode missionNode) {
-		missionNodeMapper.update(missionNode);
+	public void update(MissionItem missionItem) {
+		missionItemMapper.update(missionItem);
 	}
 
 	@Override
-	public void delete(MissionNode missionNode) {
-		missionNodeMapper.delete(missionNode);
+	public void delete(MissionItem missionItem) {
+		missionItemMapper.delete(missionItem);
 	}
 
 	@Override
-	public MissionNode get(long id) {
-		return missionNodeMapper.get(id);
+	public MissionItem get(long id) {
+		return missionItemMapper.get(id);
 	}
 
 	@Override
-	public List<MissionNode> list(WhereRequest whereRequest) {
+	public List<MissionItem> list(WhereRequest whereRequest) {
 
-		List<MissionNode> missionChainList = new ArrayList<>();
+		List<MissionItem> missionChainList = new ArrayList<>();
 		if (whereRequest.getQueryObj() != null) {
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 			Object missionChainId = map.get(SearchConstants.SEARCH_MISSION_CHAIN_ID);
@@ -67,16 +67,16 @@ public class MissionNodeServiceImpl implements MissionNodeService {
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
 			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionChainList = missionNodeMapper.list(name, missionChainId, beginDate, endDate, priority);
+			missionChainList = missionItemMapper.list(name, missionChainId, beginDate, endDate, priority);
 		}else {
-			missionChainList = missionNodeMapper.listAll();
+			missionChainList = missionItemMapper.listAll();
 		}
 		return missionChainList;
 	}
 
 	@Override
-	public List<MissionNode> list() {
-		return missionNodeMapper.listAll();
+	public List<MissionItem> list() {
+		return missionItemMapper.listAll();
 	}
 
 }

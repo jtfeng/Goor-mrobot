@@ -1,7 +1,7 @@
 package cn.muye.dispatch.mapper;
 
 
-import cn.mrobot.bean.misssion.FeatureItem;
+import cn.mrobot.bean.mission.FeatureItem;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

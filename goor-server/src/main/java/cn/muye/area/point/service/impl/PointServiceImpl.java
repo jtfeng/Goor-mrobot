@@ -18,11 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -70,7 +69,7 @@ public class PointServiceImpl implements PointService {
 	}
 
 	@Override
-	public List<MapPoint> list(WhereRequest whereRequest) {
+	public List<MapPoint> list(WhereRequest whereRequest, long storeId) {
 		List<MapPoint> mapPointList = new ArrayList<>();
 		if (whereRequest.getQueryObj() != null) {
 			JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
@@ -91,10 +90,16 @@ public class PointServiceImpl implements PointService {
 			if (mapPointTypeId != null) {
 				condition.createCriteria().andCondition("MAP_POINT_TYPE_ID =" + pointName);
 			}
-
+			if (storeId != 0) {
+				condition.createCriteria().andCondition("STORE_ID =" + storeId);
+			}
+			condition.orderBy("ID DESC");
 			mapPointList = pointMapper.selectByExample(condition);
 		} else {
-			mapPointList = pointMapper.selectAll();
+			Example example = new Example(MapPoint.class);
+			example.createCriteria().andCondition("STORE_ID = " + storeId);
+			example.setOrderByClause("ID DESC");
+			mapPointList = pointMapper.selectByExample(example);
 		}
 		//处理枚举类型
 		List<MapPoint> result = new ArrayList<>();
@@ -152,8 +157,6 @@ public class PointServiceImpl implements PointService {
 			CascadeMapPoint cascadeMapPoint = new CascadeMapPoint();
 			mapName = mapNameList.get(i);
 			List<Integer> pointTypeIdList = pointMapper.selectPointTypeByMapName(mapName);
-			JSONObject object = new JSONObject();
-			JSONArray mapPointArray = new JSONArray();
 			List<CascadeMapPointType> cascadeMapPointTypeList = new ArrayList<>();
 
 			for(int j = 0; j < pointTypeIdList.size(); j ++){
