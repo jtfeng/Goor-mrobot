@@ -46,8 +46,9 @@
             u.USER_NAME,
             u.PASSWORD,
             u.ACTIVATED,
-            u.DIRECT_LOGIN_KEY
-        FROM AC_USER u WHERE u.DIRECT_LOGIN_KEY = #{directLoginKey}
+            u.DIRECT_LOGIN_KEY,
+            u.STORE_ID
+        FROM AC_USER u WHERE u.DIRECT_LOGIN_KEY = #{directLoginKey} and u.STORE_ID = #{storeId}
     </select>
 
     <select id="selectBySuperAdmin" resultMap="userResult" parameterType="java.util.Map">

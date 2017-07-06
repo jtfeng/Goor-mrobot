@@ -2,6 +2,7 @@ package cn.muye.account.user.mapper;
 
 import cn.mrobot.bean.account.User;
 import cn.muye.util.MyMapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ public interface UserMapper extends MyMapper<User> {
 
     void fakeDeleteById(Long id);
 
-    User getUserByDirectKey(Integer directKey);
+    User getUserByDirectKey(@Param("directLoginKey") Integer directKey,@Param("storeId") Long storeId);
 
     List<User> selectBySuperAdmin(Map map);
 

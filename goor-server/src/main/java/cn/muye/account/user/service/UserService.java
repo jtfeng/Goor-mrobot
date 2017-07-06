@@ -19,7 +19,7 @@ public interface UserService extends BaseService<User> {
 
     List<User> list(WhereRequest whereRequest, User user);
 
-    User getUserByDirectKey(Integer directKey);
+    User getUserByDirectKey(Integer directKey, Long storeId);
 
     User getByUserName(String username);
 

@@ -240,8 +240,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
 
     @Override
-    public User getUserByDirectKey(Integer directKey) {
-        return userMapper.getUserByDirectKey(directKey);
+    public User getUserByDirectKey(Integer directKey, Long storeId) {
+        return userMapper.getUserByDirectKey(directKey, storeId);
     }
 
     @Override
