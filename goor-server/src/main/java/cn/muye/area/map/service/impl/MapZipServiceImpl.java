@@ -1,6 +1,5 @@
 package cn.muye.area.map.service.impl;
 
-import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.utils.WhereRequest;
