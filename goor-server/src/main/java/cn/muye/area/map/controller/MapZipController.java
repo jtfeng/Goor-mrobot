@@ -1,11 +1,10 @@
 package cn.muye.area.map.controller;
 
-import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.area.map.service.MapSyncService;
+//import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.MapZipService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.AjaxResult;
@@ -42,8 +41,8 @@ public class MapZipController {
     @Autowired
     private RobotService robotService;
 
-    @Autowired
-    private MapSyncService mapSyncService;
+//    @Autowired
+//    private MapSyncService mapSyncService;
 
     @RequestMapping(value = "area/mapzip", method = {RequestMethod.POST, RequestMethod.PUT})
     @ResponseBody
@@ -134,12 +133,12 @@ public class MapZipController {
                 robotList.add(robotService.getById(deviceIds.get(i)));
             }
             String result;
-            if (robotList.size() <= 0 || robotList.isEmpty()) {
-                result = mapSyncService.syncMap(mapZip, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            } else {
-                result = mapSyncService.syncMap(mapZip, robotList);
-            }
-            return AjaxResult.success(result);
+//            if (robotList.size() <= 0 || robotList.isEmpty()) {
+//                result = mapSyncService.syncMap(mapZip, SearchConstants.FAKE_MERCHANT_STORE_ID);
+//            } else {
+//                result = mapSyncService.syncMap(mapZip, robotList);
+//            }
+            return AjaxResult.success();
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
             return AjaxResult.failed("系统错误");
