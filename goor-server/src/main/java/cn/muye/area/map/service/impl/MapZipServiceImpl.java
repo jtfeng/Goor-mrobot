@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
+import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
 import java.util.Date;
@@ -66,14 +67,19 @@ public class MapZipServiceImpl implements MapZipService {
 	@Override
 	public List<MapZip> list(WhereRequest whereRequest, long storeId) {
 		Condition condition = new Condition(MapPoint.class);
+		Example.Criteria criteria = condition.createCriteria();
 		if (whereRequest.getQueryObj() != null) {
 			JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
 			Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
+			Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
 			if (mapName != null) {
-				condition.createCriteria().andCondition("MAP_NAME like '%" + mapName + "%'");
+				criteria.andCondition("MAP_NAME like '%" + mapName + "%'");
+			}
+			if (sceneName != null) {
+				criteria.andCondition("SCENE_NAME like '%" + sceneName + "%'");
 			}
 		}
-		condition.createCriteria().andCondition("STORE_ID =" + storeId);
+		criteria.andCondition("STORE_ID =" + storeId);
 		condition.setOrderByClause("CREATE_TIME desc");
 		List<MapZip> mapZipList = mapZipMapper.selectByExample(condition);
 		return mapZipList;
