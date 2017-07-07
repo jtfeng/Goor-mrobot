@@ -19,6 +19,9 @@ import org.springframework.core.Ordered;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -116,6 +119,10 @@ public class Application {
         return scheduledExecutor;
     }
 
+    /**
+     * 配置认证错误过滤器
+     * @return
+     */
     @Bean
     public FilterRegistrationBean myFilterRegistration() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
@@ -123,11 +130,29 @@ public class Application {
         registration.addUrlPatterns("/*");
         registration.addInitParameter("excludedUrl", "/account/user/logOut,/account/user/login/pad,/account/user/login");
         registration.setName("authValidationExceptionFilter");
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return registration;
     }
 
-	/**
+    /**
+     * 跨域过滤器
+     * @return
+     */
+    @Bean
+    public FilterRegistrationBean corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("*");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return bean;
+    }
+
+    /**
      * Start
      */
     public static void main(String[] args) {
