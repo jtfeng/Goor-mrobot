@@ -18,6 +18,7 @@ import cn.muye.account.user.service.UserService;
 import cn.muye.account.user.service.impl.UserServiceImpl;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
@@ -33,7 +34,6 @@ import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,7 +108,8 @@ public class UserController {
             if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
                 return AjaxResult.failed("用户名重复");
             }
-            User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey());
+            //todo StoreId暂时用100去代替，以后用session里获取
+            User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey(), SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (userDbByDirectKey != null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
                 return AjaxResult.failed("4位快捷码重复");
             }
@@ -229,7 +230,8 @@ public class UserController {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
             }
             Integer directLoginKey = userParam.getDirectLoginKey();
-            User userDb = userService.getUserByDirectKey(directLoginKey);
+            //todo StoreId暂时用100去代替，以后用session里获取
+            User userDb = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (userDb != null) {
                 Map map = doLogin(userDb.getUserName(), userDb.getPassword());
                 return doCheckLogin(map);

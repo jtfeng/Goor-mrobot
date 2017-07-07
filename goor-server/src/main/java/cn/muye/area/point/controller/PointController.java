@@ -41,10 +41,10 @@ public class PointController {
 	@RequestMapping(value = "area/point", method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult saveOrUpdate(HttpServletRequest request, @RequestBody MapPoint mapPoint) throws Exception {
+	public AjaxResult saveOrUpdate(HttpServletRequest request, @RequestBody MapPoint mapPoint){
 		try {
 
-			List<MapPoint> pointListDB = pointService.findByName(mapPoint.getPointName(), mapPoint.getSceneName());
+			List<MapPoint> pointListDB = pointService.findByName(mapPoint.getPointName(), mapPoint.getSceneName(),mapPoint.getMapName(),SearchConstants.FAKE_MERCHANT_STORE_ID);
 			if (pointListDB.size() > 0 && !pointListDB.get(0).getId().equals(mapPoint.getId())){
 				return AjaxResult.failed("已存在相同名称的导航点");
 			}
@@ -81,7 +81,7 @@ public class PointController {
 	@RequestMapping(value = "area/point", method = RequestMethod.GET)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult listMapPoint(WhereRequest whereRequest, HttpServletRequest request) throws Exception {
+	public AjaxResult listMapPoint(WhereRequest whereRequest, HttpServletRequest request) {
 		try {
 			List<MapPoint> pointListDB = pointService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
 			Integer pageNo = whereRequest.getPage();
@@ -103,7 +103,7 @@ public class PointController {
 	@RequestMapping(value = "area/point/{id}", method = RequestMethod.DELETE)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult deleteMapPoint(@PathVariable long id) throws Exception {
+	public AjaxResult deleteMapPoint(@PathVariable long id){
 		try {
 			MapPoint pointDB = pointService.findById(id);
 			if (pointDB == null) {
@@ -125,7 +125,7 @@ public class PointController {
 	@RequestMapping(value = "area/point/cascade", method = RequestMethod.GET)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult cascadeMapPoint() throws Exception {
+	public AjaxResult cascadeMapPoint(){
 		try {
 			List<CascadeMapPoint> cascadeMapPointList = pointService.cascadeMapPoint();
 			return AjaxResult.success(cascadeMapPointList);

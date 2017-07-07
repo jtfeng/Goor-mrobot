@@ -4,6 +4,7 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotType;
 import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.utils.AutoNumUtil;
+import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.mapper.RobotTypeMapper;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.base.service.imp.BaseServiceImpl;
@@ -57,6 +58,17 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
         for (RobotPassword robotPassword : robotPasswordList) {
             super.updateSelectiveByStoreId(robotPassword);
         }
+    }
+
+    @Override
+    public RobotPassword findByRobotIdAndBoxNumAndPswd(RobotPassword robotPassword) {
+        if (robotPassword == null ||
+                robotPassword.getBoxNum() == null ||
+                robotPassword.getRobotId() == null ||
+                StringUtil.isEmpty(robotPassword.getPassword())){
+            return null;
+        }
+        return myMapper.selectOne(robotPassword);
     }
 
 

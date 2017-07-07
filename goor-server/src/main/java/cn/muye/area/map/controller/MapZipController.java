@@ -35,7 +35,7 @@ public class MapZipController {
 	@RequestMapping(value = "area/mapzip", method = {RequestMethod.POST,RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult saveMapZip(@RequestBody MapZip mapZip) throws Exception {
+	public AjaxResult saveMapZip(@RequestBody MapZip mapZip) {
 		try {
 			MapZip mapZipCondition = new MapZip();
 			mapZipCondition.setFileName(mapZip.getFileName());
@@ -60,7 +60,7 @@ public class MapZipController {
 	@RequestMapping(value = "area/mapzip", method = RequestMethod.GET)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult listMapZip(WhereRequest whereRequest) throws Exception {
+	public AjaxResult listMapZip(WhereRequest whereRequest){
 		try {
 			List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
 			int pageNo = (whereRequest.getPage() == 0) ? 1 : whereRequest.getPage();
@@ -78,7 +78,7 @@ public class MapZipController {
 	@RequestMapping(value = "area/mapzip/{id}", method = RequestMethod.DELETE)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult deleteMapZip(@PathVariable Long id) throws Exception {
+	public AjaxResult deleteMapZip(@PathVariable Long id){
 		try {
 			if(null == id){
 				return AjaxResult.failed(2,"参数错误");
