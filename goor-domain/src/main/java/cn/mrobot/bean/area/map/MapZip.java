@@ -51,6 +51,12 @@ public class MapZip extends BaseBean {
 	@Column(name = "ROBOT_PATH")
 	private String robotPath;
 
+	@Column(name = "DEVICE_ID")
+	private String deviceId;
+
+	@Column(name = "FILE_UPLOAD_ID")
+	private Long fileUploadId;
+
 	public String getMapName() {
 		return mapName;
 	}
@@ -99,4 +105,19 @@ public class MapZip extends BaseBean {
 		this.robotPath = robotPath;
 	}
 
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+
+	public Long getFileUploadId() {
+		return fileUploadId;
+	}
+
+	public void setFileUploadId(Long fileUploadId) {
+		this.fileUploadId = fileUploadId;
+	}
 }
