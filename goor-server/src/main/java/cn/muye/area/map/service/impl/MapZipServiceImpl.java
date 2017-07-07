@@ -1,5 +1,6 @@
 package cn.muye.area.map.service.impl;
 
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.utils.WhereRequest;
@@ -9,11 +10,13 @@ import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -29,59 +32,101 @@ import java.util.List;
 @Service
 public class MapZipServiceImpl implements MapZipService {
 
-	@Autowired
-	private MapZipMapper mapZipMapper;
+    @Autowired
+    private MapZipMapper mapZipMapper;
 
-	@Override
-	public void update(MapZip mapZip) {
-		mapZipMapper.updateByPrimaryKey(mapZip);
-	}
+    @Value("${goor.push.http}")
+    private String DOWNLOAD_HTTP;
 
-	@Override
-	public MapZip getMapZip(long id) {
-		return mapZipMapper.selectByPrimaryKey(id);
-	}
+    @Override
+    public void update(MapZip mapZip) {
+        mapZipMapper.updateByPrimaryKey(mapZip);
+    }
 
-	@Override
-	public long save(MapZip mapZip) {
-		mapZip.setCreateTime(new Date());
-		return mapZipMapper.insert(mapZip);
-	}
+    @Override
+    public MapZip getMapZip(long id) {
+        MapZip mapZip = mapZipMapper.selectByPrimaryKey(id);
+        mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
+        return mapZip;
+    }
 
-	@Override
-	public void delete(MapZip mapZip) {
-		//删除文件
-		String filePath = mapZip.getFilePath();
-		File file = new File(filePath);
-		if(file.exists()){
-			file.delete();
-		}
-		mapZipMapper.delete(mapZip);
-	}
+    @Override
+    public long save(MapZip mapZip) {
+        mapZip.setCreateTime(new Date());
+        return mapZipMapper.insert(mapZip);
+    }
 
-	@Override
-	public List<MapZip> list(MapZip mapZip) {
-		return mapZipMapper.select(mapZip);
-	}
+    @Override
+    public void delete(MapZip mapZip) {
+        //删除文件
+        String filePath = mapZip.getFilePath();
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+        mapZipMapper.delete(mapZip);
+    }
 
-	@Override
-	public List<MapZip> list(WhereRequest whereRequest, long storeId) {
-		Condition condition = new Condition(MapPoint.class);
-		Example.Criteria criteria = condition.createCriteria();
-		if (whereRequest.getQueryObj() != null) {
-			JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
-			Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
-			Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
-			if (mapName != null) {
-				criteria.andCondition("MAP_NAME like '%" + mapName + "%'");
-			}
-			if (sceneName != null) {
-				criteria.andCondition("SCENE_NAME like '%" + sceneName + "%'");
-			}
-		}
-		criteria.andCondition("STORE_ID =" + storeId);
-		condition.setOrderByClause("CREATE_TIME desc");
-		List<MapZip> mapZipList = mapZipMapper.selectByExample(condition);
-		return mapZipList;
-	}
+    @Override
+    public List<MapZip> list(MapZip mapZip) {
+        return parseLocalPath(mapZipMapper.select(mapZip));
+    }
+
+    @Override
+    public List<MapZip> list(WhereRequest whereRequest, long storeId) {
+        Condition condition = new Condition(MapPoint.class);
+        Example.Criteria criteria = condition.createCriteria();
+        if (whereRequest.getQueryObj() != null) {
+            JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
+            Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
+            Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
+            if (mapName != null) {
+                criteria.andCondition("MAP_NAME like '%" + mapName + "%'");
+            }
+            if (sceneName != null) {
+                criteria.andCondition("SCENE_NAME like '%" + sceneName + "%'");
+            }
+        }
+        criteria.andCondition("STORE_ID =" + storeId);
+        condition.setOrderByClause("CREATE_TIME desc");
+        List<MapZip> mapZipList = mapZipMapper.selectByExample(condition);
+        return parseLocalPath(mapZipList);
+    }
+
+    @Override
+    public MapZip latestZip(Long storeId) {
+        Condition condition = new Condition(MapPoint.class);
+        Example.Criteria criteria = condition.createCriteria();
+        if (storeId != null) {
+            criteria.andCondition("storeId=" + storeId);
+        }
+        condition.setOrderByClause("CREATE_TIME desc");
+        List<MapZip> mapZipList = mapZipMapper.selectByExample(condition);
+        if (mapZipList.size() > 0) {
+            MapZip mapZip = mapZipList.get(0);
+            mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
+            return mapZip;
+        }
+        return null;
+    }
+
+    private List<MapZip> parseLocalPath(List<MapZip> mapZipList) {
+        List<MapZip> resultList = new ArrayList<>();
+        for (int i = 0; i < mapZipList.size(); i++) {
+            MapZip mapZip = mapZipList.get(i);
+            mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
+            resultList.add(mapZip);
+        }
+        return resultList;
+    }
+
+    private String parseLocalPath(String localPath) {
+        //将文件路径封装成http路径
+        int index = localPath.indexOf(SearchConstants.FAKE_MERCHANT_STORE_ID + "");
+        if(index >= 0){
+            return DOWNLOAD_HTTP + localPath.substring(index);
+        }
+        return "";
+    }
 }
+

@@ -1,10 +1,16 @@
 package cn.muye.area.map.controller;
 
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.MapZipService;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
+import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -13,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,72 +34,115 @@ import java.util.List;
 @Controller
 public class MapZipController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(MapZipController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapZipController.class);
 
-	@Autowired
-	private MapZipService mapZipService;
+    @Autowired
+    private MapZipService mapZipService;
 
-	@RequestMapping(value = "area/mapzip", method = {RequestMethod.POST,RequestMethod.PUT})
-	@ResponseBody
+    @Autowired
+    private RobotService robotService;
+
+    @Autowired
+    private MapSyncService mapSyncService;
+
+    @RequestMapping(value = "area/mapzip", method = {RequestMethod.POST, RequestMethod.PUT})
+    @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult saveMapZip(@RequestBody MapZip mapZip) {
-		try {
-			MapZip mapZipCondition = new MapZip();
-			mapZipCondition.setFileName(mapZip.getFileName());
-			List<MapZip> mapZipList = mapZipService.list(mapZipCondition);
-			if(mapZipList.size() > 0 && mapZipList.get(0).getId() != mapZip.getId()){
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "文件名重复");
-			}
-			if(mapZip.getId() != null && mapZip.getId() > 0){
-				mapZipService.update(mapZip);
-				return AjaxResult.success(mapZip);
-			}else {
-				mapZipService.save(mapZip);
-				return AjaxResult.success(mapZip);
-			}
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed("系统错误");
-		}
-	}
+    public AjaxResult saveMapZip(@RequestBody MapZip mapZip) {
+        try {
+            MapZip mapZipCondition = new MapZip();
+            mapZipCondition.setFileName(mapZip.getFileName());
+            List<MapZip> mapZipList = mapZipService.list(mapZipCondition);
+            if (mapZipList.size() > 0 && mapZipList.get(0).getId() != mapZip.getId()) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "文件名重复");
+            }
+            if (mapZip.getId() != null && mapZip.getId() > 0) {
+                mapZipService.update(mapZip);
+                return AjaxResult.success(mapZip);
+            } else {
+                mapZipService.save(mapZip);
+                return AjaxResult.success(mapZip);
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
 
 
-	@RequestMapping(value = "area/mapzip", method = RequestMethod.GET)
-	@ResponseBody
+    @RequestMapping(value = "area/mapzip", method = RequestMethod.GET)
+    @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult listMapZip(WhereRequest whereRequest){
-		try {
-			List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-			int pageNo = (whereRequest.getPage() == 0) ? 1 : whereRequest.getPage();
-			int pageSize = (whereRequest.getPageSize() == 0) ? 10 : whereRequest.getPage();
+    public AjaxResult listMapZip(WhereRequest whereRequest) {
+        try {
+            List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            int pageNo = (whereRequest.getPage() == 0) ? 1 : whereRequest.getPage();
+            int pageSize = (whereRequest.getPageSize() == 0) ? 10 : whereRequest.getPage();
 
-			PageHelper.startPage(pageNo, pageSize);
-			PageInfo<MapZip> page = new PageInfo<>(mapZipList);
-			return AjaxResult.success(page);
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed("系统错误");
-		}
-	}
+            PageHelper.startPage(pageNo, pageSize);
+            PageInfo<MapZip> page = new PageInfo<>(mapZipList);
+            return AjaxResult.success(page);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
 
-	@RequestMapping(value = "area/mapzip/{id}", method = RequestMethod.DELETE)
-	@ResponseBody
+    @RequestMapping(value = "area/mapzip/{id}", method = RequestMethod.DELETE)
+    @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult deleteMapZip(@PathVariable Long id){
-		try {
-			if(null == id){
-				return AjaxResult.failed(2,"参数错误");
-			}
+    public AjaxResult deleteMapZip(@PathVariable Long id) {
+        try {
+            if (null == id) {
+                return AjaxResult.failed(2, "参数错误");
+            }
 
-			MapZip mapZip = mapZipService.getMapZip(id);
-			if(null == mapZip){
-				return AjaxResult.failed("删除对象不存在");
-			}
-			mapZipService.delete(mapZip);
-			return AjaxResult.success("删除成功");
-		} catch (Exception e) {
-			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed("系统错误");
-		}
-	}
+            MapZip mapZip = mapZipService.getMapZip(id);
+            if (null == mapZip) {
+                return AjaxResult.failed("删除对象不存在");
+            }
+            mapZipService.delete(mapZip);
+            return AjaxResult.success("删除成功");
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
+
+    /**
+     * 地图同步
+     *
+     * @param id
+     * @param bindStr
+     * @return
+     */
+    @RequestMapping(value = "area/mapZip/sync", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult syncMap(@RequestParam("id") Long id, @RequestParam(value = "bindStr", required = false) String bindStr) {
+        try {
+
+            MapZip mapZip = mapZipService.getMapZip(id);
+            if (null == mapZip) {
+                return AjaxResult.failed("地图压缩包不存在");
+            }
+            List<Long> deviceIds = new ArrayList<>();
+            if (!StringUtil.isNullOrEmpty(bindStr)) {
+                deviceIds = JSONArray.parseArray(bindStr, Long.class);
+            }
+            List<Robot> robotList = new ArrayList<>();
+            for (int i = 0; i < deviceIds.size(); i++) {
+                robotList.add(robotService.getById(deviceIds.get(i)));
+            }
+            String result;
+            if (robotList.size() <= 0 || robotList.isEmpty()) {
+                result = mapSyncService.syncMap(mapZip, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            } else {
+                result = mapSyncService.syncMap(mapZip, robotList);
+            }
+            return AjaxResult.success(result);
+        } catch (Exception e) {
+            LOGGER.error("地图同步出错", e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
 }
