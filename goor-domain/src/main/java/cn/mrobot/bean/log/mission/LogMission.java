@@ -1,0 +1,132 @@
+package cn.mrobot.bean.log.mission;
+
+import cn.mrobot.bean.base.BaseBean;
+
+import javax.persistence.Table;
+
+/**
+ * Created by abel on 17-7-7.
+ */
+@Table(name = "LOG_MISSION")
+public class LogMission extends BaseBean {
+    private static final long serialVersionUID = -5855449136015060858L;
+
+    public static enum MissionLogType{
+        MISSION_LIST,
+        MISSION,
+        MISSION_ITEM,
+        NOT_USE;
+        public static MissionLogType valueOf(int ordinal) {
+            if (ordinal < 0 || ordinal >= values().length) {
+                return NOT_USE;
+            }
+            return values()[ordinal];
+        }
+    }
+
+    /**
+     *任务日志类型：0-任务列表日志，1-任务日志，2-任务节点日志
+     */
+    private Integer missionType;
+    /**
+     *任务列表ID
+     */
+    private Integer missionListId;
+    /**
+     *任务ID
+     */
+    private Integer missionId;
+    /**
+     *任务节点ID
+     */
+    private Integer missionItemId;
+    /**
+     *任务列表重复
+     */
+    private Integer missionListRepeatTimes;
+    /**
+     * 任务重复
+     */
+    private Integer missionRepeatTimes;
+    /**
+     * event 目前包括（后续可能增加）：
+     start_success：开始成功
+     start_fail：开始失败
+     pause_success：暂停成功
+     pause_fail：暂停失败
+     resume_success：恢复成功
+     resume_fail：恢复失败
+     cancel_success：取消成功
+     cancel_fail：取消失败
+     finish：完成
+     */
+    private String missionEvent;
+    /**
+     * 事件描述，对于特殊的事件加以说明，若无说明则为空字符串
+     */
+    private String missionDescription;
+
+    public Integer getMissionType() {
+        return missionType;
+    }
+
+    public void setMissionType(Integer missionType) {
+        this.missionType = missionType;
+    }
+
+    public Integer getMissionListId() {
+        return missionListId;
+    }
+
+    public void setMissionListId(Integer missionListId) {
+        this.missionListId = missionListId;
+    }
+
+    public Integer getMissionId() {
+        return missionId;
+    }
+
+    public void setMissionId(Integer missionId) {
+        this.missionId = missionId;
+    }
+
+    public Integer getMissionItemId() {
+        return missionItemId;
+    }
+
+    public void setMissionItemId(Integer missionItemId) {
+        this.missionItemId = missionItemId;
+    }
+
+    public Integer getMissionListRepeatTimes() {
+        return missionListRepeatTimes;
+    }
+
+    public void setMissionListRepeatTimes(Integer missionListRepeatTimes) {
+        this.missionListRepeatTimes = missionListRepeatTimes;
+    }
+
+    public Integer getMissionRepeatTimes() {
+        return missionRepeatTimes;
+    }
+
+    public void setMissionRepeatTimes(Integer missionRepeatTimes) {
+        this.missionRepeatTimes = missionRepeatTimes;
+    }
+
+    public String getMissionEvent() {
+        return missionEvent;
+    }
+
+    public void setMissionEvent(String missionEvent) {
+        this.missionEvent = missionEvent;
+    }
+
+    public String getMissionDescription() {
+        return missionDescription;
+    }
+
+    public void setMissionDescription(String missionDescription) {
+        this.missionDescription = missionDescription;
+    }
+}

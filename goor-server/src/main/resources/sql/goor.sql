@@ -790,6 +790,39 @@ INSERT INTO `LOG_INFO` VALUES ('9', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_
 INSERT INTO `LOG_INFO` VALUES ('10', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-09 15:44:20', 'null', '2017-06-20 14:23:37');
 
 -- ----------------------------
+-- Table structure for LOG_MISSION
+-- ----------------------------
+DROP TABLE IF EXISTS `LOG_MISSION`;
+CREATE TABLE `LOG_MISSION` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `MISSION_TYPE` int(11) NOT NULL COMMENT '任务日志类型：0-任务列表日志，1-任务日志，2-任务节点日志',
+  `MISSION_LIST_ID` int(11) NOT NULL COMMENT '任务列表ID',
+  `MISSION_ID` int(11) DEFAULT NULL COMMENT '任务ID',
+  `MISSION_ITEM_ID` int(11) DEFAULT NULL COMMENT '任务节点ID',
+  `MISSION_LIST_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务列表重复',
+  `MISSION_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务重复',
+  `MISSION_EVENT` varchar(255) NOT NULL COMMENT 'event 目前包括（后续可能增加）：
+    start_success：开始成功
+    start_fail：开始失败
+    pause_success：暂停成功
+    pause_fail：暂停失败
+    resume_success：恢复成功
+    resume_fail：恢复失败
+    cancel_success：取消成功
+    cancel_fail：取消失败
+    finish：完成',
+  `MISSION_DESCRIPTION` varchar(65535) NOT NULL COMMENT '事件描述，对于特殊的事件加以说明，若无说明则为空字符串',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of LOG_MISSION
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for M_MERCHANT_STORE
 -- ----------------------------
 DROP TABLE IF EXISTS `M_MERCHANT_STORE`;

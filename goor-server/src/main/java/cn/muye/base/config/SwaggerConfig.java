@@ -11,9 +11,9 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Created by zl on 2015/8/27.
  */
-@Configuration
-@EnableSwagger
-@EnableAutoConfiguration
+//@Configuration
+//@EnableSwagger
+//@EnableAutoConfiguration
 public class SwaggerConfig
 {
 
