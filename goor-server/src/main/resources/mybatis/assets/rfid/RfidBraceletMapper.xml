@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.assets.rfidbracelet.mapper.RfidBraceletMapper">
+
+    <resultMap id="robotResult" type="cn.mrobot.bean.assets.robot.Robot">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="typeId" column="TYPE_ID"/>
+        <result property="batteryThreshold" column="BATTERY_THRESHOLD"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="boxActivated" column="BOX_ACTIVATED"/>
+    </resultMap>
+
+    <select id="listRobot" resultMap="robotResult">
+        SELECT
+        robot.ID,
+        robot.NAME as NAME,
+        robot.CODE,
+        type.ID as TYPE_ID,
+        config.BATTERY_THRESHOLD,
+        ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
+        robot.BOX_ACTIVATED
+        FROM
+        AS_ROBOT robot
+        LEFT JOIN AS_ROBOT_TYPE type ON robot.TYPE_ID = type.ID
+        LEFT JOIN AS_ROBOT_CONFIG config ON robot.ID = config.ROBOT_ID
+        ORDER BY ID DESC
+    </select>
+
+</mapper>
