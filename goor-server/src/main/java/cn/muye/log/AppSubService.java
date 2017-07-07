@@ -48,10 +48,6 @@ public class AppSubService implements ApplicationContextAware {
 			chargeInfoService.save(chargeInfo);
 		}else if (TopicConstants.MOTION_PLANNER_MOTION_STATUS.endsWith(slamResponseBody.getSubName())){
 			//TODO
-		}else if (slamResponseBody.getSubName().indexOf(POINT_PREFIX) >= 0){
-			//导航目标点相关
-			pointService = applicationContext.getBean(PointService.class);
-			pointService.handle(slamResponseBody);
 		}
 	}
 
