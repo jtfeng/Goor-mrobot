@@ -1,5 +1,7 @@
 package cn.mrobot.bean.assets.robot;
 
+import cn.mrobot.bean.base.BaseBean;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -9,13 +11,15 @@ import javax.persistence.Table;
  * Created by Ray.Fu on 2017/7/6.
  */
 @Table(name = "AS_GOOD_TYPE")
-public class GoodType {
+public class GoodType extends BaseBean{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
+
+    private String description;
 
     public Long getId() {
         return id;
@@ -31,5 +35,13 @@ public class GoodType {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
