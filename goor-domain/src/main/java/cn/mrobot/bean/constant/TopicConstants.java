@@ -11,7 +11,7 @@ package cn.mrobot.bean.constant;
  */
 public class TopicConstants {
 
-	public static final String AGENT_PREFIX = "agent_local"; //需要agent本地处理的topic
+	public static final String LAGENT_PREFIX = "agent_local"; //需要agent本地处理的topic
 
 	public static final String DATA = "data";
 
@@ -37,6 +37,9 @@ public class TopicConstants {
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
 	public static final String ROBOT_CODE = "robot_code";//机器人主板编号
 	public static final String STATION_INFO = "station_info";//机器人主板编号
+
+	/* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
+	public static final String PICK_UP_PSWD_VERIFY = "pick_up_pswd_verify";
 
 	public static final String STATUS_DISPATCH = "status_dispatch";//调度任务状态
 

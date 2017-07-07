@@ -1,11 +1,17 @@
 package cn.muye.base.service.imp;
 
+import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.ExecutorLog;
 import cn.mrobot.bean.log.ExecutorLogType;
+import cn.mrobot.bean.message.data.PickUpPswdVerifyBean;
 import cn.mrobot.bean.slam.SlamResponseBody;
+import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.assets.robot.service.RobotPasswordService;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.log.AppSubService;
@@ -14,9 +20,11 @@ import cn.muye.base.service.MessageSendService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.reflect.TypeToken;
 import com.mpush.api.Client;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -37,6 +45,12 @@ public class MessageHandleServiceImp implements MessageHandleService, Applicatio
 	private ReceiveMessageService receiveMessageService;
 
 	private AppSubService appSubService;
+
+	@Autowired
+	private RobotPasswordService robotPasswordService;
+
+	@Autowired
+	private RobotService robotService;
 
 	private void getScheduledExecutorService() {
 		scheduledExecutorService = applicationContext.getBean(ScheduledExecutorService.class);
@@ -141,13 +155,117 @@ public class MessageHandleServiceImp implements MessageHandleService, Applicatio
 				MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
 				messageSendService.sendNoStatusMessage(robotCode, info);
 
-			}
-			else {
+			} else if (pubName.equalsIgnoreCase(TopicConstants.PICK_UP_PSWD_VERIFY)){
+				/* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
+				handlePickUpPswdVerify((PickUpPswdVerifyBean) JsonUtils.fromJson(getPubData(requestDataObject),
+						new TypeToken<PickUpPswdVerifyBean>(){}.getType()));
+			} else {
 				//TODO
 			}
 
 		} else {
 			//TODO
+		}
+	}
+
+	/**
+	 * 获取消息里的data
+	 * @param requestDataObject
+	 * @return
+	 */
+	private String getPubData(JSONObject requestDataObject){
+		if (requestDataObject == null){
+			return "";
+		}
+		String ret = null;
+		try {
+			ret = requestDataObject.getString(TopicConstants.DATA);
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		return ret;
+	}
+
+	/**
+	 * 给指定机器人发送消息
+	 * @param robotCode
+	 * @param slamResponseBody
+	 */
+	private void sendRobotMessage(String robotCode, SlamResponseBody slamResponseBody){
+		if (slamResponseBody == null){
+			return;
+		}
+
+		JSONObject messageObject = new JSONObject();
+		messageObject.put(TopicConstants.DATA, JSON.toJSONString(slamResponseBody));
+
+		CommonInfo commonInfo = new CommonInfo();
+		commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+		commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+		commonInfo.setPublishMessage(messageObject.toJSONString());
+		String text = JSON.toJSONString(commonInfo);
+		byte[] b = text.getBytes();
+		//用EXECUTOR_COMMAND就会发topic
+		MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
+		messageSendService.sendNoStatusMessage(robotCode, info);
+	}
+
+	/* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
+	private void handlePickUpPswdVerify(PickUpPswdVerifyBean bean) {
+		SlamResponseBody slamResponseBody = new SlamResponseBody();
+		slamResponseBody.setSubName(TopicConstants.PICK_UP_PSWD_VERIFY);
+
+		if (bean == null ||
+				StringUtil.isEmpty(bean.getRobotCode()) ||
+				StringUtil.isEmpty(bean.getPswd())){
+			// TODO: 17-7-5 检索参数不合法，返回错误
+			if (!StringUtil.isEmpty(bean.getRobotCode())){
+				bean.setRetCode(PickUpPswdVerifyBean.RET_CODE_ERROR_PARA);
+				slamResponseBody.setData(JsonUtils.toJson(bean,
+						new TypeToken<PickUpPswdVerifyBean>(){}.getType()));
+				sendRobotMessage(bean.getRobotCode(), slamResponseBody);
+			}
+			return;
+		}
+
+		//判断参数是否合法
+		if (bean.getBoxNum() == null ||
+				bean.getBoxNum() <= 0){
+			bean.setBoxNum(1);
+		}
+		//进行业务逻辑
+		//首先由robot code 查询机器人的记录
+		Robot robot = robotService.getByCode(bean.getRobotCode());
+		if (robot == null ||
+				robot.getId() == null){
+			// TODO: 17-7-5 没有查到机器人记录，返回错误
+			if (!StringUtil.isEmpty(bean.getRobotCode())){
+				bean.setRetCode(PickUpPswdVerifyBean.RET_CODE_ERROR_ROBOT);
+				slamResponseBody.setData(JsonUtils.toJson(bean,
+						new TypeToken<PickUpPswdVerifyBean>(){}.getType()));
+				sendRobotMessage(bean.getRobotCode(), slamResponseBody);
+			}
+			return;
+		}
+
+		//查询对应密码记录是否存在
+		RobotPassword robotPassword = new RobotPassword();
+		robotPassword.setBoxNum(bean.getBoxNum());
+		robotPassword.setPassword(bean.getPswd());
+		robotPassword.setRobotId(robot.getId());
+		robotPassword = robotPasswordService.findByRobotIdAndBoxNumAndPswd(robotPassword);
+		if (robotPassword == null){
+			//没有查询到记录，验证失败
+			bean.setRetCode(PickUpPswdVerifyBean.RET_CODE_ERROR_NO_RECORD);
+		}else{
+			//查询到记录了，验证成功
+			bean.setRetCode(PickUpPswdVerifyBean.RET_CODE_SUCCESS);
+		}
+
+		if (!StringUtil.isEmpty(bean.getRobotCode())){
+			slamResponseBody.setData(JsonUtils.toJson(bean,
+					new TypeToken<PickUpPswdVerifyBean>(){}.getType()));
+			sendRobotMessage(bean.getRobotCode(), slamResponseBody);
 		}
 	}
 
