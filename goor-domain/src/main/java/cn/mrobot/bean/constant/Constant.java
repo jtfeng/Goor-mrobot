@@ -31,4 +31,8 @@ public class Constant {
 
     public static final String AUTHORIZE_PASSWORD = "web_secret";
 
+    public static final int ERROR_CODE_NOT_AUTHORIZED = 40001; //未授权
+
+    public static final int ERROR_CODE_NOT_LOGGED = 40002; //未登录
+
 }

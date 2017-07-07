@@ -2,9 +2,7 @@ package cn.muye.base.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 
 /**
  * Created by Ray.Fu on 2017/6/28.
@@ -16,9 +14,10 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/account/user/login").permitAll()
                 .antMatchers("/account/user/login/pad").permitAll()
+                .antMatchers("/account/user/logOut").permitAll()
                 .antMatchers("/resources/static/**").permitAll()
                 .antMatchers("/druid/**").permitAll()
+//                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
     }
-
 }

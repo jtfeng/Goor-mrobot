@@ -1,5 +1,6 @@
 package cn.muye;
 
+import cn.muye.base.filter.AuthValidationExceptionFilter;
 import cn.muye.base.listener.ClientListenerImp;
 import cn.muye.base.service.batch.ScheduledHandle;
 import com.mpush.api.Client;
@@ -11,12 +12,13 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.core.Ordered;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
@@ -114,6 +116,16 @@ public class Application {
         return scheduledExecutor;
     }
 
+    @Bean
+    public FilterRegistrationBean myFilterRegistration() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new AuthValidationExceptionFilter());
+        registration.addUrlPatterns("/*");
+        registration.addInitParameter("excludedUrl", "/account/user/logOut,/account/user/login/pad,/account/user/login");
+        registration.setName("authValidationExceptionFilter");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        return registration;
+    }
 
 	/**
      * Start
