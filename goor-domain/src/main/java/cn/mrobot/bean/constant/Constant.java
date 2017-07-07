@@ -27,6 +27,11 @@ public class Constant {
 
 	public static final String GOOR_SERVER = "goor-server";
 
+	//文件上传状态
+	public final static Integer FILE_OK = 0; //传输成功
+	public final static Integer FILE_FAIL = 1;  //传输失败
+	public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
+
     public static final String AUTHORIZE_USERNAME = "web";
 
     public static final String AUTHORIZE_PASSWORD = "web_secret";
@@ -34,5 +39,9 @@ public class Constant {
     public static final int ERROR_CODE_NOT_AUTHORIZED = 40001; //未授权
 
     public static final int ERROR_CODE_NOT_LOGGED = 40002; //未登录
+
+    //地图文件场景下的点和地图路径名
+    public final static String MAP_FILE_PATH = "map"; // 地图
+    public final static String POINT_FILE_PATH = "point"; // 导航目标点
 
 }
