@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.order.mapper.OrderSettingMapper">
+
+    <resultMap id="orderSettingResult" type="cn.mrobot.bean.order.OrderSetting">
+        <id property="id" column="id" />
+        <result property="nickName" column="nickName" />
+        <result property="stationId" column="stationId" />
+        <result property="packageType" column="packageType" />
+        <result property="defaultSetting" column="defaultSetting" />
+        <result property="storeId" column="storeId" />
+        <result property="createBy" column="createBy" />
+        <result property="createTime" column="createTime" />
+        <association property="startPoint" javaType="cn.mrobot.bean.area.point.MapPoint">
+            <id column="startPointId" property="id"/>
+            <result column="startPointName" property="pointName"/>
+            <result column="startPointAlias" property="pointAlias"/>
+            <result column="startSceneName" property="sceneName"/>
+            <result column="startMapName" property="mapName"/>
+        </association>
+        <association property="endPoint" javaType="cn.mrobot.bean.area.point.MapPoint">
+            <id column="endPointId" property="id"/>
+            <result column="endPointName" property="pointName"/>
+            <result column="endPointAlias" property="pointAlias"/>
+            <result column="endSceneName" property="sceneName"/>
+            <result column="endMapName" property="mapName"/>
+        </association>
+        <association property="goodType" javaType="cn.mrobot.bean.assets.robot.GoodType">
+            <id column="id" property="id"/>
+            <result column="typeName" property="name"/>
+        </association>
+    </resultMap>
+
+    <sql id = "orderSettingColumn">
+        os.id AS "id",
+        os.nick_name AS "nickName",
+        os.station_id AS "stationId",
+        os.package_type AS "packageType",
+        os.default_setting AS "defaultSetting",
+        os.store_id AS "storeId",
+        os.created_by AS "createdBy",
+        os.create_time AS "createTime",
+        ps.id AS "startPointId",
+        ps.point_name AS "startPointName",
+        ps.point_alias AS "startPointAlias",
+        ps.scene_name AS "startSceneName",
+        ps.map_name AS "startMapName",
+        pe.id AS "endPointId",
+        pe.point_name AS "endPointName",
+        pe.point_alias AS "endPointAlias",
+        pe.scene_name AS "endSceneName",
+        pe.map_name AS "endMapName",
+        t.id AS "typeId",
+        t.name AS "typeName"
+    </sql>
+
+    <sql id = "orderSettingJoin">
+        LEFT JOIN A_MAP_POINT ps ON os.start_point_id = ps.id
+        LEFT JOIN A_MAP_POINT pe ON os.end_point_id = pe.id
+        LEFT JOIN AS_GOOD_TYPE t ON os.good_type_id = t.id
+    </sql>
+
+    <select id="getById" resultMap="orderSettingResult">
+        select
+        <include refid="orderSettingColumn" />
+        from OR_ORDER_SETTING os
+        <include refid="orderSettingJoin" />
+        where os.id = #{id};
+    </select>
+
+    <insert id="saveOrderSetting" parameterType="cn.mrobot.bean.order.OrderSetting" useGeneratedKeys="true" keyProperty="id">
+        insert into OR_ORDER_SETTING(
+        nick_name,
+        station_id,
+        start_point_id,
+        end_point_id,
+        good_type_id,
+        package_type,
+        default_setting,
+        delete_status,
+        store_id,
+        create_by,
+        create_time
+        ) values (
+        #{nickName},
+        #{stationId},
+        #{startPoint.id},
+        #{endPoint.id},
+        #{goodType.id},
+        #{packageType},
+        #{defaultSetting},
+        #{deleteStatus},
+        #{storeId},
+        #{createdBy},
+        #{createTime}
+        )
+    </insert>
+
+    <update id="updateOrderSetting" parameterType="cn.mrobot.bean.order.OrderSetting">
+        update OR_ORDER_SETTING
+        <set>
+            <if test="nickName != null" >
+                nick_name = #{nickName},
+            </if>
+            <if test="stationId != null" >
+                station_id = #{stationId},
+            </if>
+            <if test="startPoint != null and startPoint.id != null and startPoint.id != ''" >
+                start_point_id = #{startPoint.id},
+            </if>
+            <if test="endPoint != null and endPoint.id != null and endPoint.id != ''" >
+                end_point_id = #{endPoint.id},
+            </if>
+            <if test="goodType != null and goodType.id != null and goodType.id != ''" >
+                good_type_id = #{goodType.id},
+            </if>
+            <if test="packageType != null" >
+                package_type = #{packageType},
+            </if>
+            <if test="defaultSetting != null" >
+                default_setting = #{defaultSetting},
+            </if>
+            <if test="deleteStatus != null" >
+                delete_status = #{deleteStatus}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+
+</mapper>

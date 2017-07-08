@@ -1,10 +1,8 @@
 package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.base.BaseBean;
-import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.BaseCrudService;
 import cn.muye.util.MyMapper;
-import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,17 +13,13 @@ import java.util.List;
  * Created by Selim on 2017/6/23.
  */
 @Service
-public abstract class BaseCrudServiceImpl<T extends BaseBean>  implements BaseCrudService<T> {
+public abstract class BaseCrudServiceImpl<T extends BaseBean>  extends BasePreInject<T> implements BaseCrudService<T> {
 
     @Autowired
     protected MyMapper<T> myMapper;
-    @Autowired
-    private UserUtil userUtil;
 
     public int save(T entity) {
-        entity.preSave();
-        entity.setCreatedBy(userUtil.getCurrentUserId());
-        entity.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        preInject(entity);
         return myMapper.insert(entity);
     }
 
