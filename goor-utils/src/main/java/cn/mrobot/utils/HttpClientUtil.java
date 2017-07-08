@@ -218,7 +218,7 @@ public class HttpClientUtil {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	public static String executeUploadFile(CloseableHttpClient httpClient, String remoteFileUrl, String localFilePath,long jumpSize, String charset, boolean closeHttpClient) throws ClientProtocolException, IOException {
+	public static String executeUploadFile(CloseableHttpClient httpClient, String remoteFileUrl, String localFilePath,long jumpSize, String charset, boolean closeHttpClient, String otherInfo) throws ClientProtocolException, IOException {
 		CloseableHttpResponse httpResponse = null;
 		try {
 			if (httpClient == null) {
@@ -232,6 +232,7 @@ public class HttpClientUtil {
 			InputStreamEntity inEntity = new InputStreamEntity(in,localFile.length(),null);
 			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(600000).setConnectTimeout(5000).build();
 			HttpPost httpPost = new HttpPost(remoteFileUrl);
+			httpPost.addHeader("otherInfo", otherInfo);
 			httpPost.setEntity(inEntity);
 			httpPost.setConfig(requestConfig);
 			httpResponse = httpClient.execute(httpPost);
