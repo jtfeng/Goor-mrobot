@@ -40,22 +40,22 @@ public class ErrorController extends BasicErrorController {
         int errorCode = (int) body.get("status");
         if (errorCode == Constant.ERROR_CODE_NOT_LOGGED) {
             map.put("message", "用户未登录");
-            map.put("code", AjaxResult.CODE_NOT_LOGGED_ERROR);
+            map.put("code", Constant.ERROR_CODE_NOT_LOGGED);
             map.put("data", "");
             map.put("success", false);
-            return new ResponseEntity<>(map, HttpStatus.valueOf(Constant.ERROR_CODE_NOT_LOGGED));
+            return new ResponseEntity<>(map, HttpStatus.OK);
         } else if (errorCode == Constant.ERROR_CODE_NOT_AUTHORIZED) {
             map.put("message", "用户无权限");
-            map.put("code", AjaxResult.CODE_NOT_AUTHORIZED_ERROR);
+            map.put("code", Constant.ERROR_CODE_NOT_AUTHORIZED);
             map.put("data", "");
             map.put("success", false);
-            return new ResponseEntity<>(map, HttpStatus.valueOf(Constant.ERROR_CODE_NOT_AUTHORIZED));
+            return new ResponseEntity<>(map, HttpStatus.OK);
         } else {
             map.put("message", "系统内部错误");
             map.put("code", AjaxResult.CODE_SYSTEM_ERROR);
             map.put("data", "");
             map.put("success", false);
-            return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(map, HttpStatus.OK);
         }
     }
 

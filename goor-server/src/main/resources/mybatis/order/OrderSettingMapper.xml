@@ -25,7 +25,7 @@
             <result column="endSceneName" property="sceneName"/>
             <result column="endMapName" property="mapName"/>
         </association>
-        <association property="goodType" javaType="cn.mrobot.bean.assets.robot.GoodType">
+        <association property="goodType" javaType="cn.mrobot.bean.assets.good.GoodType">
             <id column="id" property="id"/>
             <result column="typeName" property="name"/>
         </association>

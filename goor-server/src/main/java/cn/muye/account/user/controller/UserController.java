@@ -19,6 +19,7 @@ import cn.muye.account.user.service.impl.UserServiceImpl;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
@@ -34,10 +35,8 @@ import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +73,9 @@ public class UserController {
     private static final int SOURCE_TYPE_LIST = 1; //列表来源
 
     private static final int SOURCE_TYPE_OTHER = 2; //其他来源
+
+    @Autowired
+    private UserUtil userUtil;
 
     /**
      * 新增修改用户
@@ -156,9 +158,8 @@ public class UserController {
     @RequestMapping(value = {"account/user"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询用户接口", httpMethod = "GET", notes = "查询用户接口")
     @ResponseBody
-    public AjaxResult list(WhereRequest whereRequest, Principal principal) {
-        String userName = principal.getName();
-        User userDb = userService.getByUserName(userName);
+    public AjaxResult list(WhereRequest whereRequest) {
+        User userDb = userUtil.getCurrentUser();
         if (userDb == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "当前用户不存在");
         }

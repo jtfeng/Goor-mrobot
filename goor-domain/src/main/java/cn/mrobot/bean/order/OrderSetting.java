@@ -1,7 +1,7 @@
 package cn.mrobot.bean.order;
 
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.assets.robot.GoodType;
+import cn.mrobot.bean.assets.good.GoodType;
 import cn.mrobot.bean.base.BaseBean;
 
 /**

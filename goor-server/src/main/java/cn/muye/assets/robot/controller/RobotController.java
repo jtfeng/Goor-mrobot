@@ -3,14 +3,20 @@ package cn.muye.assets.robot.controller;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.AjaxResult;
+import cn.muye.util.aes.AES;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
+import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +27,10 @@ import java.util.List;
  * Created by Ray.Fu on 2017/6/12.
  */
 @Controller
+@Api(value = "机器人模块", description = "机器人模块")
 public class RobotController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RobotController.class);
 
     @Autowired
     private RobotService robotService;
@@ -30,6 +39,7 @@ public class RobotController {
 
     /**
      * 查询机器人列表
+     *
      * @param whereRequest
      * @return
      */
@@ -51,7 +61,7 @@ public class RobotController {
     @RequestMapping(value = {"assets/robot"}, method = RequestMethod.POST)
     @ApiOperation(value = "新增或修改机器人", httpMethod = "POST", notes = "新增或修改机器人")
     @ResponseBody
-    public AjaxResult addOrUpdateRobot(@ApiParam(value = "机器人")@RequestBody Robot robot) {
+    public AjaxResult addOrUpdateRobot(@ApiParam(value = "机器人") @RequestBody Robot robot) {
         if (robot.getTypeId() == null || robot.getTypeId() <= 0 || robot.getTypeId() > RobotTypeEnum.DRAWER.getCaption()) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
         }
@@ -81,7 +91,7 @@ public class RobotController {
             robotDb.setBatteryThreshold(robot.getBatteryThreshold());
             robotService.updateRobot(robotDb);
             return AjaxResult.success(robotDb, "修改成功");
-        } else if (robot.getId() == null){
+        } else if (robot.getId() == null) {
             robot.setBoxActivated(true);
             robotService.saveRobot(robot);
             return AjaxResult.success(robot, "新增成功");
@@ -90,10 +100,53 @@ public class RobotController {
         }
     }
 
+    /**
+     * 自动注册接口
+     * @param robot
+     * @return
+     */
+    @RequestMapping(value = {"assets/robot/register"}, method = RequestMethod.POST)
+    @ApiOperation(value = "自动注册机器人", httpMethod = "POST", notes = "自动注册机器人")
+    @ResponseBody
+    public AjaxResult registerRobot(@RequestParam("robot") byte[] robot) {
+        try {
+            byte[] robotByte = AES.decrypt(robot, Constant.AES_KEY.getBytes());
+            Robot robotNew = JSON.parseObject(robotByte, Robot.class);
+            if (robotNew.getId() != null) {
+                return AjaxResult.failed("注册失败，配置文件有误");
+            }
+            if (robotNew.getTypeId() == null || robotNew.getTypeId() <= 0 || robotNew.getTypeId() > RobotTypeEnum.DRAWER.getCaption()) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
+            }
+            if (StringUtil.isNullOrEmpty(robotNew.getName()) || StringUtil.isNullOrEmpty(robotNew.getCode())) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
+            }
+            if (robotNew.getBatteryThreshold() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
+            }
+            //判断是否有重复的名称
+            Robot robotDbByName = robotService.getByName(robotNew.getName());
+            if (robotDbByName != null && !robotDbByName.getId().equals(robotNew.getId())) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
+            }
+            //判断是否有重复的编号
+            Robot robotDbByCode = robotService.getByCode(robotNew.getCode());
+            if (robotDbByCode != null && !robotDbByCode.getId().equals(robotNew.getId())) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
+            }
+            robotService.saveRobot(robotNew);
+            return AjaxResult.success("注册成功");
+        } catch (Exception e) {
+            LOGGER.error("注册失败, 错误日志 >>>> {}", e.getMessage());
+            return AjaxResult.failed("注册失败");
+        } finally {
+        }
+    }
+
     @RequestMapping(value = {"assets/robot/{id}"}, method = RequestMethod.DELETE)
     @ApiOperation(value = "删除机器人", httpMethod = "DELETE", notes = "删除机器人")
     @ResponseBody
-    public AjaxResult deleteRobot(@ApiParam(value = "机器人")@PathVariable String id) {
+    public AjaxResult deleteRobot(@ApiParam(value = "机器人") @PathVariable String id) {
         if (id != null) {
             robotService.deleteRobotById(Long.valueOf(id));
             return AjaxResult.success("删除成功");
@@ -102,14 +155,8 @@ public class RobotController {
         }
     }
 
-//    @RequestMapping(value = {"robotType"}, method = RequestMethod.GET)
-//    @ApiOperation(value = "查询机器人类型列表", httpMethod = "GET", notes = "查询机器人类型列表")
-//    @ResponseBody
-//    public AjaxResult robotTypeList() {
-//        List<RobotType> list = robotTypeService.listType();
-//        return AjaxResult.success(list, "查询成功");
-//    }
     @RequestMapping(value = {"assets/robotPassword"}, method = RequestMethod.PUT)
+    @ApiOperation(value = "修改机器人密码", httpMethod = "DELETE", notes = "修改机器人密码")
     @ResponseBody
     public AjaxResult changeRobotPwd(@RequestBody Robot robot) {
         try {
@@ -117,7 +164,7 @@ public class RobotController {
                 String password = robotPassword.getPassword();
                 String regex = "^\\d{4}$";
                 boolean flag = password.matches(regex);
-                if(!flag){
+                if (!flag) {
                     return AjaxResult.failed("密码必须为4位数字");
                 }
             }

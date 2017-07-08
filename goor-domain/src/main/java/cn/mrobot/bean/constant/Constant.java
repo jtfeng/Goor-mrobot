@@ -44,4 +44,5 @@ public class Constant {
     public final static String MAP_FILE_PATH = "map"; // 地图
     public final static String POINT_FILE_PATH = "point"; // 导航目标点
 
+    public final static String AES_KEY = "trOmVF7Uaqd4h9AN"; //自助注册AES校验码
 }
