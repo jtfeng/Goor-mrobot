@@ -13,7 +13,6 @@
         <module>goor-server</module>
         <module>goor-domain</module>
         <module>goor-utils</module>
-        <module>mpush-client-java</module>
     </modules>
 
     <properties>
