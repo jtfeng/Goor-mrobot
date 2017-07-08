@@ -20,10 +20,16 @@ public class CacheInfoManager implements ApplicationContextAware {
 	/** AppConfig 的缓存 */
 	private static ConcurrentHashMapCache<Long, AppConfig> appConfigCache = new ConcurrentHashMapCache<Long, AppConfig>();
 
+	/** topicHeartCheck 的缓存 */
+	private static ConcurrentHashMapCache<Integer, String> messageCache = new ConcurrentHashMapCache<Integer, String>();
+
 	static {
 
 		// AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
 		appConfigCache.setMaxLifeTime(0);
+		// messageCache，单位毫秒，永久保存
+		messageCache.setMaxLifeTime(0);
+		messageCache.put(1,"");
 
 	}
 
@@ -50,6 +56,16 @@ public class CacheInfoManager implements ApplicationContextAware {
 			return appConfig;
 		}
 		return appConfigInfo;
+	}
+
+
+	public static void setMessageCache(String text){
+		messageCache.remove(1);
+		messageCache.put(1, text);
+	}
+
+	public static String getMessageCache(String deviceId){
+		return messageCache.get(1);
 	}
 
 	@Override

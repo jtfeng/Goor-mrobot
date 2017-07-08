@@ -16,7 +16,7 @@ public class DemoConsumer {
 
 //    @RabbitListener(queues ="enva")
 //    @RabbitHandler
-    @RabbitListener(queues ="direct.commands")
+//    @RabbitListener(queues ="direct.commands")
 //    @RabbitListener(queues = "enva", containerFactory="rabbitListenerContainerFactory")
     public String processMessage(@Payload String request) {
         if(request != null){
@@ -27,7 +27,7 @@ public class DemoConsumer {
     }
 
 //    @RabbitListener(queues ="enva_send_only")
-    @RabbitListener(queues ="direct.command")
+//    @RabbitListener(queues ="direct.command")
 //    @RabbitListener(queues = "enva_send_only", containerFactory="rabbitListenerContainerFactory")
     public String processMessageSendOnly(@Payload String request) {
         if(request != null){
@@ -37,7 +37,7 @@ public class DemoConsumer {
     }
 
     //    @RabbitListener(queues ="enva_send_only")
-    @RabbitListener(queues ="direct.resource")
+//    @RabbitListener(queues ="direct.resource")
 //    @RabbitListener(queues = "enva_send_only", containerFactory="rabbitListenerContainerFactory")
     public String processMessageResource(@Payload String request) {
         if(request != null){
@@ -47,7 +47,7 @@ public class DemoConsumer {
     }
 
     //    @RabbitListener(queues ="enva_send_only")
-    @RabbitListener(queues ="fanout.command")
+//    @RabbitListener(queues ="fanout.command")
 //    @RabbitListener(queues = "enva_send_only", containerFactory="rabbitListenerContainerFactory")
     public  String  processfanoutMessageCommand(@Payload String request) {
         if(request != null){

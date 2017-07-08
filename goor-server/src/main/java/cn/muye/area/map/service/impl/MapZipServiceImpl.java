@@ -45,8 +45,11 @@ public class MapZipServiceImpl implements MapZipService {
     @Override
     public MapZip getMapZip(long id) {
         MapZip mapZip = mapZipMapper.selectByPrimaryKey(id);
-        mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
-        return mapZip;
+        if(mapZip != null){
+            mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
+            return mapZip;
+        }
+        return null;
     }
 
     @Override
@@ -113,8 +116,10 @@ public class MapZipServiceImpl implements MapZipService {
         List<MapZip> resultList = new ArrayList<>();
         for (int i = 0; i < mapZipList.size(); i++) {
             MapZip mapZip = mapZipList.get(i);
-            mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
-            resultList.add(mapZip);
+            if(mapZip != null){
+                mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
+                resultList.add(mapZip);
+            }
         }
         return resultList;
     }
