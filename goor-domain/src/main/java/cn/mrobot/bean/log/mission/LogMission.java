@@ -151,4 +151,36 @@ public class LogMission extends BaseBean {
     public void setMissionDescription(String missionDescription) {
         this.missionDescription = missionDescription;
     }
+
+    public int getChargingStatus() {
+        return chargingStatus;
+    }
+
+    public void setChargingStatus(int chargingStatus) {
+        this.chargingStatus = chargingStatus;
+    }
+
+    public int getPluginStatus() {
+        return pluginStatus;
+    }
+
+    public void setPluginStatus(int pluginStatus) {
+        this.pluginStatus = pluginStatus;
+    }
+
+    public int getPowerPercent() {
+        return powerPercent;
+    }
+
+    public void setPowerPercent(int powerPercent) {
+        this.powerPercent = powerPercent;
+    }
+
+    public String getRos() {
+        return ros;
+    }
+
+    public void setRos(String ros) {
+        this.ros = ros;
+    }
 }
