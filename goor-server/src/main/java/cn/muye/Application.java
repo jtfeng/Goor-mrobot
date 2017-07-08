@@ -120,20 +120,20 @@ public class Application {
         return scheduledExecutor;
     }
 
-//    /**
-//     * 配置认证错误过滤器
-//     * @return
-//     */
-//    @Bean
-//    public FilterRegistrationBean myFilterRegistration() {
-//        FilterRegistrationBean registration = new FilterRegistrationBean();
-//        registration.setFilter(new AuthValidationExceptionFilter());
-//        registration.addUrlPatterns("/*");
-//        registration.addInitParameter("excludedUrl", "/account/user/logOut,/account/user/login/pad,/account/user/login");
-//        registration.setName("authValidationExceptionFilter");
-//        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
-//        return registration;
-//    }
+    /**
+     * 配置认证错误过滤器
+     * @return
+     */
+    @Bean
+    public FilterRegistrationBean myFilterRegistration() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new AuthValidationExceptionFilter());
+        registration.addUrlPatterns("/*");
+        registration.addInitParameter("excludedUrl", "/account/user/logOut,/account/user/login/pad,/account/user/login");
+        registration.setName("authValidationExceptionFilter");
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        return registration;
+    }
 
     /**
      * 跨域过滤器
