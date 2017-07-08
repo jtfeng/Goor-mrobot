@@ -27,7 +27,7 @@
         <!--<File>logs/daily/rest-demo.log</File>-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- daily rollover -->
-            <FileNamePattern>/logs/daily/rest-access.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>/logs/goor-server/daily/rest-access.%d{yyyy-MM-dd}.log</FileNamePattern>
 
             <!-- keep 365 days' worth of history -->
             <maxHistory>365</maxHistory>

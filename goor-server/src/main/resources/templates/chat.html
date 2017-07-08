@@ -25,7 +25,7 @@
         sendSpittle(text);
     });
     //链接endpoint名称为 "/endpointChat" 的endpoint。
-    var sock = new SockJS("http://172.16.0.225:8060/endpointChat");
+    var sock = new SockJS("http://localhost:8060/endpointChat");
     console.log(sock)
     var stomp = Stomp.over(sock);
     console.log(stomp)

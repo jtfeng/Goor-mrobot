@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.TransactionManagementConfigurer;
 
@@ -12,7 +13,7 @@ import javax.sql.DataSource;
 /**
  * Created by Selim on 2017/6/26.
  */
-@Configuration
+@Component
 public class TransactionConfig implements TransactionManagementConfigurer{
 
     @Autowired

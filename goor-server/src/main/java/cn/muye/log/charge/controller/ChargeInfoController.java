@@ -9,7 +9,6 @@ import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.log.charge.bean.ChargeInfo;
 import cn.muye.log.charge.service.ChargeInfoService;
-import cn.muye.base.service.MessageSendService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
@@ -44,9 +43,6 @@ public class ChargeInfoController implements ApplicationContextAware {
 
 	private ChargeInfoService chargeInfoService;
 
-	@Autowired
-	private MessageSendService messageSendService;
-
 	/**
 	 * 实时获取电量信息
 	 *
@@ -69,18 +65,18 @@ public class ChargeInfoController implements ApplicationContextAware {
 
 		String text = JSON.toJSONString(commonInfo);
 		byte[] b = text.getBytes();
-		MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
-		info.setMessageStatusType(MessageStatusType.INIT);
-//		info.setReceiptWebSocket(true);
-//		info.setWebSocketId("user-9");
-		info.setSendDeviceType(DeviceType.GOOR_SERVER);
-		info.setReceiverDeviceType(DeviceType.GOOR);
-		info.setMessageKind(0);
-		info.setSendTime(new Date());
-		info.setUpdateTime(new Date());
-		info.setSendCount(0);
-
-		messageSendService.sendNoStatusMessage(deviceId, info);
+//		MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
+//		info.setMessageStatusType(MessageStatusType.INIT);
+////		info.setReceiptWebSocket(true);
+////		info.setWebSocketId("user-9");
+//		info.setSendDeviceType(DeviceType.GOOR_SERVER);
+//		info.setReceiverDeviceType(DeviceType.GOOR);
+//		info.setMessageKind(0);
+//		info.setSendTime(new Date());
+//		info.setUpdateTime(new Date());
+//		info.setSendCount(0);
+//
+//		messageSendService.sendNoStatusMessage(deviceId, info);
 		return AjaxResult.success();
 	}
 

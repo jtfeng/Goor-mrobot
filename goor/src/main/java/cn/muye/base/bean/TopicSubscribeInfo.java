@@ -1,13 +1,14 @@
 package cn.muye.base.bean;
 
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.muye.base.listener.AgentPubListenerImpl;
-import cn.muye.base.listener.AgentSubListenerImpl;
-import cn.muye.base.listener.AppPubListenerImpl;
-import cn.muye.base.listener.AppSubListenerImpl;
+import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.listener.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
+import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 
@@ -16,7 +17,7 @@ import java.io.Serializable;
  * Created by enva on 2017/5/9.
  */
 public class TopicSubscribeInfo implements Serializable {
-
+	private static Logger logger = Logger.getLogger(TopicSubscribeInfo.class);
 	//当网络断开时从新订阅
 	public static void reSubScribeTopic(Ros ros){
 
@@ -36,5 +37,33 @@ public class TopicSubscribeInfo implements Serializable {
 		Topic agentSubTopic = new Topic(ros, TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING);
 		TopicCallback agentSubCallback = new AgentSubListenerImpl();
 		agentSubTopic.subscribe(agentSubCallback);
+		//接收机器人当前位置
+		Topic currentPoseTopic = new Topic(ros, TopicConstants.CURRENT_POSE, TopicConstants.TOPIC_NAV_MSGS);
+		TopicCallback currentPoseCallback = new CurrentPoseListenerImpl();
+		currentPoseTopic.subscribe(currentPoseCallback);
+	}
+
+	public static boolean checkSubNameIsNeedConsumer(String message){
+		JSONObject jsonObject = JSON.parseObject(message);
+		String data = jsonObject.getString(TopicConstants.DATA);
+		JSONObject jsonObjectData = JSON.parseObject(data);
+		String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
+		if(CacheInfoManager.getNameSubCache(messageName)){
+			logger.info(" ====== message.toString()===" + message);
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean checkPubNameIsNeedConsumer(String message){
+		JSONObject jsonObject = JSON.parseObject(message);
+		String data = jsonObject.getString(TopicConstants.DATA);
+		JSONObject jsonObjectData = JSON.parseObject(data);
+		String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
+		if(CacheInfoManager.getNameSubCache(messageName)){
+			logger.info(" ====== message.toString()===" + message);
+			return true;
+		}
+		return false;
 	}
 }

@@ -3,6 +3,7 @@ package cn.muye.base.controller;
 
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
@@ -12,7 +13,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-
+@CrossOrigin
 @ServerEndpoint(value = "/websocket")
 @Component
 public class ExampleWebSocketController {

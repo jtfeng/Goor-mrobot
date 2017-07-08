@@ -1,25 +1,27 @@
 package cn.muye.base.controller;
 
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.MessageStatusType;
-import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.utils.Base64;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.publisher.AppSubService;
-import cn.muye.base.service.MessageSendService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.messages.Message;
 import org.apache.log4j.Logger;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Date;
+import java.util.UUID;
 
 @Controller
 public class ExampleController {
@@ -28,17 +30,17 @@ public class ExampleController {
     @Autowired
     private Ros ros;
 
-    @Autowired
-    private MessageSendService messageSendService;
-
 	@Autowired
 	private AppSubService logPublishService;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 
     @RequestMapping(value = "test1", method= RequestMethod.POST)
     @ResponseBody
     public AjaxResult test1(@RequestParam("aa")String aa) {
-        logger.info("sssssssssssssssssss======" + messageSendService);
+//        logger.info("sssssssssssssssssss======" + messageSendService);
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName("/enva_test");
         commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
@@ -49,37 +51,37 @@ public class ExampleController {
         commonInfo.setPublishMessage(JSON.toJSONString(commonInfo));
         String text = JSON.toJSONString(commonInfo);
         byte[] b = text.getBytes();
-        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_RESOURCE, text, b);
-        info.setMessageStatusType(MessageStatusType.FILE_NOT_DOWNLOADED);
-        info.setReceiptWebSocket(true);
-        info.setWebSocketId("user-9");
+//        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_RESOURCE, text, b);
+//        info.setMessageStatusType(MessageStatusType.FILE_NOT_DOWNLOADED);
+//        info.setReceiptWebSocket(true);
+//        info.setWebSocketId("user-9");
 //        info.setMessageKind(1);
 
 //        messageSendService.sendMessage("cookyPlus1301_test1", info);
-        messageSendService.sendNoStatusMessage("cookyPlus1301_test1", info);
+//        messageSendService.sendNoStatusMessage("cookyPlus1301_test1", info);
         return AjaxResult.success();
     }
 
     @RequestMapping(value = "test2", method= RequestMethod.POST)
     @ResponseBody
     public AjaxResult test2(@RequestParam("aa")String aa) {
-        logger.info("sssssssssssssssssss======" + messageSendService);
-        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
-        byte[] b = text.getBytes();
-        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_LOG, text, b);
-        info.setMessageStatusType(MessageStatusType.FILE_NOT_DOWNLOADED);
-        messageSendService.sendNoStatusMessage("cookyPlus1301_test1", info);
+//        logger.info("sssssssssssssssssss======" + messageSendService);
+//        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
+//        byte[] b = text.getBytes();
+//        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_LOG, text, b);
+//        info.setMessageStatusType(MessageStatusType.FILE_NOT_DOWNLOADED);
+//        messageSendService.sendNoStatusMessage("cookyPlus1301_test1", info);
         return AjaxResult.success();
     }
 
     @RequestMapping(value = "test3", method= RequestMethod.POST)
     @ResponseBody
     public AjaxResult test3(@RequestParam("aa")String aa) {
-        logger.info("sssssssssssssssssss======" + messageSendService);
-        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
-        byte[] b = text.getBytes();
-        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_RESOURCE, text, b);
-        messageSendService.sendNoStatusMessage("cookyPlus1301_test1", info);
+//        logger.info("sssssssssssssssssss======" + messageSendService);
+//        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
+//        byte[] b = text.getBytes();
+//        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_RESOURCE, text, b);
+//        messageSendService.sendNoStatusMessage("cookyPlus1301_test1", info);
         return AjaxResult.success();
     }
 
@@ -123,11 +125,11 @@ public class ExampleController {
     @RequestMapping(value = "test5", method= RequestMethod.POST)
     @ResponseBody
     public AjaxResult test5(@RequestParam("aa")String aa) {
-        logger.info("sssssssssssssssssss======" + messageSendService);
-        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
-        byte[] b = text.getBytes();
-        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
-        messageSendService.sendMessage("cookyPlus1301_test1", info);
+//        logger.info("sssssssssssssssssss======" + messageSendService);
+//        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
+//        byte[] b = text.getBytes();
+//        MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
+//        messageSendService.sendMessage("cookyPlus1301_test1", info);
         return AjaxResult.success();
     }
 
@@ -169,5 +171,17 @@ public class ExampleController {
 			e.printStackTrace();
 			return AjaxResult.failed();
 		}
+	}
+
+	@RequestMapping(value = "testRabbitMq", method= RequestMethod.POST)
+	@ResponseBody
+	public AjaxResult testRabbitMq(@RequestParam("aa")String aa) {
+		MessageInfo info = new MessageInfo();
+		info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+		info.setSendTime(new Date());
+//		String jsonString = JSON.toJSONString(info);
+//		String content = Base64.encode(jsonString);
+		rabbitTemplate.convertAndSend("topicExchange1","topic.SNabc001",info);
+		return AjaxResult.success();
 	}
 }

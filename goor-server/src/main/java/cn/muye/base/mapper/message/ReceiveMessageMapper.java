@@ -1,12 +1,14 @@
 package cn.muye.base.mapper.message;
 
 import cn.muye.base.model.message.ReceiveMessage;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * Created by enva on 2017/5/11.
  */
+@Component
 public interface ReceiveMessageMapper {
 
     ReceiveMessage get(Long id);
@@ -23,7 +25,7 @@ public interface ReceiveMessageMapper {
 
     List<ReceiveMessage> listByMessageSuccess(ReceiveMessage message);
 
-    List<ReceiveMessage> listByIdAndSenderId(ReceiveMessage receiveMessage);
+    List<ReceiveMessage> listByUUID(ReceiveMessage receiveMessage);
 
     void delete(ReceiveMessage receiveMessage);
 

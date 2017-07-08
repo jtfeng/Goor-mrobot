@@ -1,5 +1,9 @@
 package cn.mrobot.bean.constant;
 
+import cn.mrobot.bean.base.PubBean;
+import cn.mrobot.bean.base.PubData;
+import com.alibaba.fastjson.JSON;
+
 /**
  * Created with IntelliJ IDEA.
  * Project Name : goor-common
@@ -29,6 +33,7 @@ public class TopicConstants {
 	public static final String APP_SUB = "/app_sub";
 	public static final String AGENT_PUB = "/agent_pub";
 	public static final String AGENT_SUB = "/agent_sub";
+	public static final String CURRENT_POSE = "/current_pose";
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
@@ -45,7 +50,7 @@ public class TopicConstants {
 
 	//订阅topic
 	public static final String ODOM = "/odom";//TODO test
-	public static final String TOPIC_NAV_MSGS = "nav_msgs/Odometry";//TODO test
+	public static final String TOPIC_NAV_MSGS = "nav_msgs/Odometry";
 
 	//维持心跳topic
 	public static final String CHECK_HEART_TOPIC = "/checkHeartTopic";
@@ -73,4 +78,49 @@ public class TopicConstants {
 	//agent定义的topic
 	public static final String AGENT_LOCAL_MAP_UPLOAD = "agent_local_map_upload";
 	public static final String ZIP_FILE_SUFFIX = ".zip";
+
+
+	//pub name
+	public static final String MAP_CURRENT_GET = "map_current_get";
+
+
+	//sub name
+
+
+
+	//定义Queue
+	public static final String DIRECT_CURRENT_POSE = "direct.current_pose";
+	public static final String DIRECT_APP_PUB = "direct.app_pub";
+	public static final String DIRECT_APP_SUB = "direct.app_sub";
+	public static final String DIRECT_AGENT_PUB = "direct.agent_pub";
+	public static final String DIRECT_AGENT_SUB = "direct.agent_sub";
+	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";
+
+	public static final String TOPIC_COMMAND = "#{'topic.command.'+'${local.robot.SN}'}";
+	public static final String TOPIC_RECEIVE_COMMAND = "#{'topic.command.receive.'+'${local.robot.SN}'}";
+	public static final String FANOUT_COMMAND = "#{'fanout.command.'+'${local.robot.SN}'}";
+
+	public static final String TOPIC_RESOURCE = "#{'topic.resource.'+'${local.robot.SN}'}";
+	public static final String TOPIC_RECEIVE_RESOURCE = "#{'topic.resource.receive.'+'${local.robot.SN}'}";
+	public static final String FANOUT_RESOURCE = "#{'fanout.resource.'+'${local.robot.SN}'}";
+
+	public static final String FANOUT_SERVER_COMMAND = "fanout.server";
+	public static final String TOPIC_SERVER_COMMAND = "topic.server";
+
+	public static final String TOPIC_COMMAND_ROUTING_KEY = "topic.command.";
+	public static final String TOPIC_COMMAND_RECEIVE_ROUTING_KEY = "topic.command.receive.";
+	public static final String TOPIC_RESOURCE_ROUTING_KEY = "topic.resource.";
+	public static final String TOPIC_RESOURCE_RECEIVE_ROUTING_KEY = "topic.resource.receive.";
+
+	//定义server routingKey
+	public static final String TOPIC_SERVER_ROUTING_KEY = "topic.#";
+
+	//定义Exchange
+	public static final String FANOUT_COMMAND_EXCHANGE = "fanoutCommandExchange";
+	public static final String FANOUT_RESOURCE_EXCHANGE = "fanoutResourceExchange";
+	public static final String TOPIC_EXCHANGE = "topicExchange1";
+
+	//pub to ros message
+	public static final String GET_CURRENT_MAP_PUB_MESSAGE = JSON.toJSONString(new PubData(JSON.toJSONString(new PubBean(TopicConstants.MAP_CURRENT_GET))));
+
 }

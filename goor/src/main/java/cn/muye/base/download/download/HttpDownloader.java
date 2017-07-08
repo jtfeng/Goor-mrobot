@@ -10,7 +10,6 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.file.FileHelper;
 import cn.muye.base.model.message.ReceiveMessage;
-import cn.muye.base.service.MessageSendService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import com.mpush.api.Client;
@@ -39,24 +38,19 @@ public class HttpDownloader extends Thread {
 	private Ros ros;
 	private Client client;
 	private MessageInfo messageInfo;
-	private MessageSendService messageSendService;
 	private CommonInfo commonInfo;
 	private ReceiveMessageService receiveMessageService;
 
 	public HttpDownloader(IDownloadInfo info,
 						  int maxRetry,
 						  Ros ros,
-						  Client client,
 						  MessageInfo messageInfo,
-						  MessageSendService messageSendService,
 						  CommonInfo commonInfo,
 						  ReceiveMessageService receiveMessageService) {
 		this.info = info;
 		this.maxRetry = maxRetry;
 		this.ros = ros;
-		this.client = client;
 		this.messageInfo = messageInfo;
-		this.messageSendService = messageSendService;
 		this.commonInfo = commonInfo;
 		this.receiveMessageService = receiveMessageService;
 	}
@@ -93,11 +87,12 @@ public class HttpDownloader extends Thread {
 					fileCheck();
 				}
 				if(isDone && !MessageType.EXECUTOR_UPGRADE.equals(messageInfo.getMessageType())){//普通资源下载
-					if(messageInfo.isFailResend()){//检查是否
+//					if(messageInfo.isFailResend()){//检查是否
 						this.fileCheck();
-					}else{
-						this.noticeRos();
-					}
+//					}
+//					else{
+//						this.noticeRos();
+//					}
 				}
 				logger.info(info.getPair().localName + " Download is done! isDone=="+isDone+"");
 			}
@@ -110,14 +105,18 @@ public class HttpDownloader extends Thread {
 			String localTempPath = info.getPair().getLocalFullPath();
 			if(FileHelper.existsFile(localTempPath)){
 				fileCheck();//文件未处理的，再处理一次
-			}else if(messageInfo.isFailResend()
-					&& FileHelper.existsFile(localTempPath.substring(0, localTempPath.lastIndexOf(Constant.TEMP)))){
+			}else if(
+//					messageInfo.isFailResend()
+//					&&
+							FileHelper.existsFile(localTempPath.substring(0, localTempPath.lastIndexOf(Constant.TEMP)))){
 				updateReplyMessage();//存库下载完成的资源
 				noticeRos();
-			}else if(!messageInfo.isFailResend()
-					&& FileHelper.existsFile(localTempPath.substring(0, localTempPath.lastIndexOf(Constant.TEMP)))){//
-				noticeRos();//未存库下载完成的资源，直接通知
-			}else{
+			}
+//			else if(!messageInfo.isFailResend()
+//					&& FileHelper.existsFile(localTempPath.substring(0, localTempPath.lastIndexOf(Constant.TEMP)))){//
+//				noticeRos();//未存库下载完成的资源，直接通知
+//			}
+			else{
 				logger.error("-->> no find local file, please check.....");
 			}
 			logger.info(info.getPair().localName + " Need not to download!");
@@ -143,12 +142,8 @@ public class HttpDownloader extends Thread {
 				logger.error("-->> update local file name fail");
 				return;
 			}
-			if(messageInfo.isFailResend()){
-				this.updateReplyMessage();
-				noticeRos();//多发布一次
-			}else{
-				noticeRos();
-			}
+			this.updateReplyMessage();
+			noticeRos();//发布一次
 		} catch (IOException e) {
 			logger.error("-->> fileCheck error", e);
 		}
@@ -156,7 +151,6 @@ public class HttpDownloader extends Thread {
 
 	public void updateReplyMessage(){
 		try {
-			messageInfo.setFinish(false);
 			messageInfo.setRelyMessage("resource download success");
 			messageInfo.setMessageStatusType(MessageStatusType.FILE_DOWNLOAD_COMPLETE);
 			messageInfo.setSuccess(false);//重新发送回执消息
@@ -169,30 +163,23 @@ public class HttpDownloader extends Thread {
 
 	public void noticeRos(){
 		try {
-			logger.debug("-->>download publishMessage start");
+			logger.error("-->>download publishMessage start");
 			CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
 			if((System.currentTimeMillis()- CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX){
 				Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
 				Message toSend = new Message(commonInfo.getPublishMessage());
 				echo.publish(toSend);
-				if(messageInfo.isFailResend()){
-					ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
-					receiveMessage.setMessageStatusType(MessageStatusType.PUBLISH_ROS_MESSAGE.getIndex());
-					receiveMessage.setSuccess(false);
-					receiveMessageService.update(receiveMessage);
-				}else {
-					messageSendService.sendWebSocketMessage(messageInfo, MessageStatusType.PUBLISH_ROS_MESSAGE, null);
-				}
+
+				ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
+				receiveMessage.setMessageStatusType(MessageStatusType.PUBLISH_ROS_MESSAGE.getIndex());
+				receiveMessage.setSuccess(false);
+				receiveMessageService.update(receiveMessage);
 			}else{
-				logger.debug("-->>download publishMessage fail, ros not connect");
-				if(messageInfo.isFailResend()){
-					ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
-					receiveMessage.setMessageStatusType(MessageStatusType.ROS_OFF_LINE.getIndex());
-					receiveMessage.setSuccess(false);
-					receiveMessageService.update(receiveMessage);
-				}else {
-					messageSendService.sendWebSocketMessage(messageInfo, MessageStatusType.ROS_OFF_LINE, null);
-				}
+				logger.error("-->>download publishMessage fail, ros not connect");
+				ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
+				receiveMessage.setMessageStatusType(MessageStatusType.ROS_OFF_LINE.getIndex());
+				receiveMessage.setSuccess(false);
+				receiveMessageService.update(receiveMessage);
 			}
 		} catch (Exception e) {
 			logger.error("-->> download publishMessage Exception", e);

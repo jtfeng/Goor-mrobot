@@ -7,6 +7,7 @@ import cn.muye.base.model.message.ReceiveMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -34,13 +35,10 @@ public class ReceiveMessageService {
     }
 
     public long save(ReceiveMessage message) throws Exception{
-        if(message.getId() == null || message.getId().longValue() <=0){
+        if(StringUtils.isEmpty(message.getUuId())){
             return 0L;
         }
         AppConfig config = appConfigMapper.get(1);
-        if(!config.getMpushUserId().equals(message.getReceiverId())){
-            return 0L;
-        }
         message.setUpdateTime(new Date());
         message.setSuccess(false);//设置为false
         return receiveMessageMapper.save(message);
@@ -63,8 +61,8 @@ public class ReceiveMessageService {
         return receiveMessageMapper.listByMessageSuccess(message);
     }
 
-    public List<ReceiveMessage> listByIdAndSenderId(ReceiveMessage message) throws Exception{
-        return receiveMessageMapper.listByIdAndSenderId(message);
+    public List<ReceiveMessage> listByUUID(ReceiveMessage message) throws Exception{
+        return receiveMessageMapper.listByUUID(message);
     }
 
     public void delete(ReceiveMessage message) throws Exception{

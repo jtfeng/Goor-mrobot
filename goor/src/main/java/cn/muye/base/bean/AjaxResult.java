@@ -1,6 +1,8 @@
 package cn.muye.base.bean;
 
-public class AjaxResult {
+import java.io.Serializable;
+
+public class AjaxResult implements Serializable{
 	public static final int CODE_SUCCESS = 0;
 	public static final int CODE_FAILED = 1;
 	private int code;

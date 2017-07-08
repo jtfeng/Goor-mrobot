@@ -2,7 +2,6 @@ package cn.muye.base.service.batch;
 
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
-import cn.muye.base.service.MessageSendService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import org.apache.log4j.Logger;
@@ -28,9 +27,6 @@ public class ScheduleTasks {
 
     @Autowired
     private ReceiveMessageService receiveMessageService;
-
-    @Autowired
-    private MessageSendService messageSendService;
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
