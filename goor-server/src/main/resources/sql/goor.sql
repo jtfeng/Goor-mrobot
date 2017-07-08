@@ -20,16 +20,19 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `A_MAP_POINT`;
 CREATE TABLE `A_MAP_POINT` (
-  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `POINT_NAME` varchar(256) NOT NULL COMMENT '唯一标识符',
-  `POINT_ALIAS` varchar(256) NOT NULL COMMENT '显示名称',
-  `SCENE_NAME` varchar(256) DEFAULT NULL COMMENT '地图场景名',
-  `MAP_NAME` varchar(256) DEFAULT NULL COMMENT '地图名',
-  `X` double(10,3) DEFAULT NULL,
-  `Y` double(10,3) DEFAULT NULL,
-  `TH` double(10,3) DEFAULT NULL,
-  `MAP_POINT_TYPE_ID` int(11) DEFAULT NULL COMMENT '点类型索引',
-  `POINT_LEVEL` int(11) DEFAULT NULL COMMENT '导航点等级',
+  ID BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL COMMENT '主键',
+  STORE_ID BIGINT COMMENT '店铺ID',
+  CREATED_BY BIGINT COMMENT '创建人',
+  CREATE_TIME datetime COMMENT '创建时间' DEFAULT NOW(),
+  POINT_NAME VARCHAR(256) NOT NULL COMMENT '唯一标识符',
+  POINT_ALIAS VARCHAR(256) NOT NULL COMMENT '显示名称',
+  SCENE_NAME VARCHAR(256) COMMENT '地图场景名',
+  MAP_NAME VARCHAR(256) COMMENT '地图名',
+  POINT_LEVEL INT  COMMENT '导航点等级',
+  X DOUBLE(20,15) COMMENT '坐标X',
+  Y DOUBLE(20,15) COMMENT '坐标Y',
+  TH DOUBLE(20,15) COMMENT '坐标旋转角度',
+  MAP_POINT_TYPE_ID INT COMMENT '点类型索引',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8;
 
@@ -568,51 +571,6 @@ CREATE TABLE `CHARGING_INFO` (
 -- ----------------------------
 -- Records of CHARGING_INFO
 -- ----------------------------
-INSERT INTO `CHARGING_INFO` VALUES ('1', 'cookyPlus1301_test1', '\0', '\0', '55', '2017-06-07 18:06:34');
-INSERT INTO `CHARGING_INFO` VALUES ('2', 'cookyPlus1301_test1', '\0', '\0', '46', '2017-06-07 18:06:50');
-INSERT INTO `CHARGING_INFO` VALUES ('3', 'cookyPlus1301_test1', '\0', '\0', '46', '2017-06-07 18:06:50');
-INSERT INTO `CHARGING_INFO` VALUES ('4', 'cookyPlus1301_test1', '\0', '\0', '60', '2017-06-08 10:47:45');
-INSERT INTO `CHARGING_INFO` VALUES ('5', 'cookyPlus1301_test1', '\0', '\0', '56', '2017-06-08 11:05:30');
-INSERT INTO `CHARGING_INFO` VALUES ('6', 'cookyPlus1301_test1', '\0', '\0', '60', '2017-06-08 15:18:24');
-INSERT INTO `CHARGING_INFO` VALUES ('7', 'cookyPlus1301_test1', '\0', '\0', '56', '2017-06-08 16:13:08');
-INSERT INTO `CHARGING_INFO` VALUES ('8', 'cookyPlus1301_test1', '\0', '\0', '60', '2017-06-08 16:13:46');
-INSERT INTO `CHARGING_INFO` VALUES ('9', 'cookyPlus1301_test1', '\0', '\0', '60', '2017-06-08 16:13:47');
-INSERT INTO `CHARGING_INFO` VALUES ('10', 'cookyPlus1301chay', '\0', '\0', '58', '2017-06-10 13:02:19');
-INSERT INTO `CHARGING_INFO` VALUES ('11', 'cookyPlus1301chay', '\0', '\0', '58', '2017-06-10 13:44:20');
-INSERT INTO `CHARGING_INFO` VALUES ('12', 'cookyPlus1301chay', '\0', '\0', '56', '2017-06-10 19:15:21');
-INSERT INTO `CHARGING_INFO` VALUES ('13', 'cookyPlus1301chay', '\0', '\0', '57', '2017-06-10 19:16:17');
-INSERT INTO `CHARGING_INFO` VALUES ('14', 'cookyPlus1301chay', '\0', '\0', '61', '2017-06-13 15:36:24');
-INSERT INTO `CHARGING_INFO` VALUES ('15', 'cookyPlus1301chay', '\0', '\0', '59', '2017-06-13 17:10:49');
-INSERT INTO `CHARGING_INFO` VALUES ('16', 'cookyPlus1301chay', '\0', '\0', '66', '2017-06-13 17:36:05');
-INSERT INTO `CHARGING_INFO` VALUES ('17', 'cookyPlus1301chay', '\0', '\0', '61', '2017-06-13 17:36:38');
-INSERT INTO `CHARGING_INFO` VALUES ('18', 'cookyPlus1301chay', '\0', '\0', '62', '2017-06-13 17:49:01');
-INSERT INTO `CHARGING_INFO` VALUES ('19', 'cookyPlus1301chay', '\0', '\0', '61', '2017-06-13 17:52:14');
-INSERT INTO `CHARGING_INFO` VALUES ('20', 'cookyPlus1301chay', '\0', '\0', '62', '2017-06-13 18:01:16');
-INSERT INTO `CHARGING_INFO` VALUES ('21', 'cookyPlus1301chay', '\0', '\0', '61', '2017-06-13 18:20:12');
-INSERT INTO `CHARGING_INFO` VALUES ('22', 'cookyPlus1301chay', '\0', '\0', '62', '2017-06-13 18:23:43');
-INSERT INTO `CHARGING_INFO` VALUES ('23', 'cookyPlus1301chay', '\0', '\0', '60', '2017-06-13 18:53:53');
-INSERT INTO `CHARGING_INFO` VALUES ('24', 'cookyPlus1301chay', '\0', '\0', '61', '2017-06-13 19:11:11');
-INSERT INTO `CHARGING_INFO` VALUES ('25', 'cookyPlus1301chay', '\0', '\0', '59', '2017-06-13 19:13:44');
-INSERT INTO `CHARGING_INFO` VALUES ('26', 'cookyPlus1301chay', '\0', '\0', '60', '2017-06-13 19:44:15');
-INSERT INTO `CHARGING_INFO` VALUES ('27', 'cookyPlus1301chay', '\0', '\0', '61', '2017-06-13 19:47:12');
-INSERT INTO `CHARGING_INFO` VALUES ('28', 'cookyPlus1301chay', '\0', '\0', '56', '2017-06-13 19:48:43');
-INSERT INTO `CHARGING_INFO` VALUES ('29', 'cookyPlus1301chay', '\0', '\0', '62', '2017-06-13 19:52:19');
-INSERT INTO `CHARGING_INFO` VALUES ('30', 'cookyPlus1301_jelynn', '\0', '\0', '61', '2017-06-17 16:13:26');
-INSERT INTO `CHARGING_INFO` VALUES ('31', 'cookyPlus1301chay', '\0', '\0', '61', '2017-06-17 16:13:26');
-INSERT INTO `CHARGING_INFO` VALUES ('32', 'cookyPlus1301_jelynn', '\0', '\0', '63', '2017-06-17 16:20:10');
-INSERT INTO `CHARGING_INFO` VALUES ('33', 'cookyPlus1301_jelynn', '\0', '\0', '47', '2017-06-17 16:26:17');
-INSERT INTO `CHARGING_INFO` VALUES ('34', 'cookyPlus1301chay', '\0', '\0', '47', '2017-06-17 16:26:17');
-INSERT INTO `CHARGING_INFO` VALUES ('35', 'cookyPlus1301chay', '\0', '\0', '47', '2017-06-17 16:41:33');
-INSERT INTO `CHARGING_INFO` VALUES ('36', 'cookyPlus1301_jelynn', '\0', '\0', '47', '2017-06-17 16:41:33');
-INSERT INTO `CHARGING_INFO` VALUES ('37', 'cookyPlus1301chay', '\0', '\0', '49', '2017-06-17 16:59:59');
-INSERT INTO `CHARGING_INFO` VALUES ('38', 'cookyPlus1301_jelynn', '\0', '\0', '49', '2017-06-17 16:59:59');
-INSERT INTO `CHARGING_INFO` VALUES ('39', 'cookyPlus1301_jelynn', '\0', '\0', '47', '2017-06-17 17:11:46');
-INSERT INTO `CHARGING_INFO` VALUES ('40', 'cookyPlus1301chay', '\0', '\0', '47', '2017-06-17 17:11:46');
-INSERT INTO `CHARGING_INFO` VALUES ('41', 'cookyPlus1301_jelynn', '\0', '\0', '61', '2017-06-19 09:37:09');
-INSERT INTO `CHARGING_INFO` VALUES ('42', 'cookyPlus1301_jelynn', '\0', '\0', '59', '2017-06-19 09:37:55');
-INSERT INTO `CHARGING_INFO` VALUES ('43', 'cookyPlus1301_jelynn', '\0', '\0', '60', '2017-06-19 09:43:35');
-INSERT INTO `CHARGING_INFO` VALUES ('44', 'cookyPlus1301_jelynn', '\0', '\0', '57', '2017-06-19 09:48:00');
-INSERT INTO `CHARGING_INFO` VALUES ('45', 'cookyPlus1301_jelynn', '\0', '\0', '60', '2017-06-19 09:49:19');
 INSERT INTO `CHARGING_INFO` VALUES ('46', 'cookyPlus1301_jelynn', '\0', '\0', '62', '2017-06-19 09:55:30');
 INSERT INTO `CHARGING_INFO` VALUES ('47', 'cookyPlus1301_jelynn', '\0', '\0', '60', '2017-06-19 10:00:37');
 
@@ -778,12 +736,6 @@ CREATE TABLE `LOG_INFO` (
 -- ----------------------------
 -- Records of LOG_INFO
 -- ----------------------------
-INSERT INTO `LOG_INFO` VALUES ('1', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-08 15:43:54', null, null);
-INSERT INTO `LOG_INFO` VALUES ('2', 'dasdf', 'asdfasdf', 'WARNING', 'INFO_EXECUTE_TASK', '2017-06-08 15:43:54', null, null);
-INSERT INTO `LOG_INFO` VALUES ('3', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_TASK', '2017-06-08 15:43:54', null, null);
-INSERT INTO `LOG_INFO` VALUES ('4', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:19', null, null);
-INSERT INTO `LOG_INFO` VALUES ('5', 'dasdf', 'asdfasdf', 'WARNING', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:19', null, null);
-INSERT INTO `LOG_INFO` VALUES ('6', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
 INSERT INTO `LOG_INFO` VALUES ('7', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
 INSERT INTO `LOG_INFO` VALUES ('8', 'dasdf', 'asdfasdf', 'WARNING', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
 INSERT INTO `LOG_INFO` VALUES ('9', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
@@ -812,10 +764,14 @@ CREATE TABLE `LOG_MISSION` (
     cancel_success：取消成功
     cancel_fail：取消失败
     finish：完成',
-  `MISSION_DESCRIPTION` varchar(65535) NOT NULL COMMENT '事件描述，对于特殊的事件加以说明，若无说明则为空字符串',
+  `MISSION_DESCRIPTION` TEXT NOT NULL COMMENT '事件描述，对于特殊的事件加以说明，若无说明则为空字符串',
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
   `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  `CHARGING_STATUS` BIT DEFAULT 0 COMMENT '充电状态  1：正在充电  0：未充电',
+  `PLUGIN_STATUS` BIT DEFAULT 0  COMMENT '1：插入充电桩   0：未插入充电桩',
+  `POWER_PERCENT` INT DEFAULT 0 COMMENT '电量  范围  0-100',
+  `ROS` varchar(200) DEFAULT NULL COMMENT 'ros当前位置信息',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -1047,3 +1003,53 @@ INSERT INTO `AC_GOOD_TYPE` VALUES ('3', '被草', '2017-07-07 11:47:09', null, '
 INSERT INTO `AC_GOOD_TYPE` VALUES ('4', '医疗器械', '2017-07-07 11:47:12', null, '1', '100');
 INSERT INTO `AC_GOOD_TYPE` VALUES ('5', '餐饮', '2017-07-07 11:47:14', null, '1', '100');
 
+-- ----------------------------
+-- Table structure for A_MAP_ZIP
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS A_MAP_ZIP
+(
+  ID BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL COMMENT '主键',
+  STORE_ID BIGINT COMMENT '店铺ID',
+  CREATED_BY BIGINT COMMENT '创建人',
+  CREATE_TIME datetime COMMENT '创建时间' DEFAULT NOW(),
+  MAP_NAME VARCHAR(50) COMMENT '地图名称',
+  SCENE_NAME VARCHAR(50) NOT NULL COMMENT '场景名称',
+  FILE_PATH VARCHAR(256) COMMENT '文件路径',
+  VERSION VARCHAR(50) COMMENT '版本号',
+  FILE_NAME VARCHAR(50) COMMENT '文件名',
+  MD5 VARCHAR(256) COMMENT 'MD5',
+  DEVICE_ID VARCHAR(256) COMMENT '上传地图的设备编号',
+  FILE_UPLOAD_ID BIGINT COMMENT '文件上传编号',
+  ROBOT_PATH VARCHAR(256) COMMENT '机器人上存储路径'
+);
+
+-- ----------------------------
+-- Table structure for A_MAP_INFO
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS A_MAP_INFO
+(
+  ID BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL COMMENT '主键',
+  STORE_ID BIGINT COMMENT '店铺ID',
+  CREATED_BY BIGINT COMMENT '创建人',
+  CREATE_TIME datetime COMMENT '创建时间' DEFAULT NOW(),
+  MAP_NAME VARCHAR(50) COMMENT '地图名',
+  SCENE_NAME VARCHAR(50) COMMENT '场景名',
+  MAP_ALIAS VARCHAR(50) COMMENT '场景名',
+  PNG_IMAGE_LOCAL_PATH VARCHAR(100) COMMENT '地图png文件本地地址',
+  ROS VARCHAR(400)
+);
+
+-- ----------------------------
+-- Table structure for C_FILE_UPLOAD
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS C_FILE_UPLOAD
+(
+  ID BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL COMMENT '主键',
+  NAME VARCHAR(50) NOT NULL COMMENT '名称',
+  LENGTH BIGINT COMMENT '长度',
+  PATH VARCHAR(256) COMMENT '路径',
+  MD5 VARCHAR(256) COMMENT 'MD5',
+  STATUS INT COMMENT '状态（0传输成功 1传输失败）',
+  CREATE_TIME DATETIME COMMENT '创建时间' DEFAULT NOW(),
+  UPDATE_TIME DATETIME COMMENT '更新时间'
+);

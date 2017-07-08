@@ -1,6 +1,7 @@
 package cn.mrobot.bean.log.mission;
 
 import cn.mrobot.bean.base.BaseBean;
+import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.Table;
 
@@ -70,6 +71,14 @@ public class LogMission extends BaseBean {
      * 事件描述，对于特殊的事件加以说明，若无说明则为空字符串
      */
     private String missionDescription;
+
+    private int chargingStatus; //充电状态  1：正在充电  0：未充电
+
+    private int pluginStatus; // 1：插入充电桩   0：未插入充电桩
+
+    private int powerPercent;  //电量  范围  0-100
+
+    private String ros; //ros当前位置信息
 
     public String getRobotCode() {
         return robotCode;
