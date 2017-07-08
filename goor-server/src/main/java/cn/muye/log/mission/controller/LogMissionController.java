@@ -5,10 +5,10 @@ import cn.mrobot.bean.log.mission.LogMission.MissionLogType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.log.mission.service.LogMissionService;
-import com.wordnik.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -20,7 +20,8 @@ import static cn.mrobot.bean.log.mission.LogMission.MissionLogType.MISSION_LIST;
 /**
  * Created by abel on 17-7-7.
  */
-@Controller
+@RestController
+@RequestMapping("log/mission")
 @Api(
         value = "任务日志功能",
         description = "任务日志功能")
@@ -30,16 +31,21 @@ public class LogMissionController {
     LogMissionService logMissionService;
 
 
-    @PostMapping("log/mission")
+    @PostMapping()
     @ApiOperation(
             value = "任务日志新增提交",
             notes = "任务日志新增提交")
-    @ResponseBody
-    public AjaxResult addLogMission(@RequestBody LogMission body) {
+    public AjaxResult addLogMission(
+            @ApiParam(
+                    required = true,
+                    name = "body",
+                    value = "入参对象")
+            @RequestBody LogMission body) {
         try {
             if (body.getMissionType() == null ||
-                    body.getStoreId() == null){
-                throw new Exception("参数不合法，请设置任务日志类型和店铺id。");
+                    body.getStoreId() == null ||
+                    StringUtil.isEmpty(body.getRobotCode())){
+                throw new Exception("参数不合法，请设置任务日志类型和店铺id以及机器人编号。");
             }
             switch (MissionLogType.valueOf(body.getMissionType())){
                 case MISSION_LIST:

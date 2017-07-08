@@ -11,7 +11,7 @@ import javax.persistence.Table;
 public class LogMission extends BaseBean {
     private static final long serialVersionUID = -5855449136015060858L;
 
-    public static enum MissionLogType{
+    public enum MissionLogType{
         MISSION_LIST,
         MISSION,
         MISSION_ITEM,
@@ -23,6 +23,11 @@ public class LogMission extends BaseBean {
             return values()[ordinal];
         }
     }
+
+    /**
+     * 机器人编号
+     */
+    private String robotCode;
 
     /**
      *任务日志类型：0-任务列表日志，1-任务日志，2-任务节点日志
@@ -65,6 +70,14 @@ public class LogMission extends BaseBean {
      * 事件描述，对于特殊的事件加以说明，若无说明则为空字符串
      */
     private String missionDescription;
+
+    public String getRobotCode() {
+        return robotCode;
+    }
+
+    public void setRobotCode(String robotCode) {
+        this.robotCode = robotCode;
+    }
 
     public Integer getMissionType() {
         return missionType;
