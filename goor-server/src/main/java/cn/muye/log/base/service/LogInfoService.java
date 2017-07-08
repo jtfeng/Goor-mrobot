@@ -1,14 +1,14 @@
-package cn.muye.log.service;
+package cn.muye.log.base.service;
 
 import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.log.mapper.LogInfoMapper;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import cn.muye.log.base.mapper.LogInfoMapper;
 
 import java.util.ArrayList;
 import java.util.List;

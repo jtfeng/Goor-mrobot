@@ -1,10 +1,10 @@
-package cn.muye.log;
+package cn.muye.log.base;
 
 
 import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.log.LogType;
-import cn.muye.log.service.LogInfoService;
+import cn.muye.log.base.service.LogInfoService;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;

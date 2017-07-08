@@ -1,11 +1,9 @@
-package cn.muye.log.mapper;
+package cn.muye.log.base.mapper;
 
 import cn.mrobot.bean.log.LogInfo;
 import org.apache.ibatis.annotations.Param;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Created with IntelliJ IDEA.
