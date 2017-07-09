@@ -1,17 +1,8 @@
 package cn.muye.base.listener;
 
-import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.bean.enums.DeviceType;
-import cn.mrobot.bean.enums.MessageStatusType;
-import cn.mrobot.bean.enums.MessageType;
-import cn.mrobot.bean.log.ExecutorLog;
-import cn.mrobot.bean.log.ExecutorLogType;
-import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.base.model.config.AppConfig;
-import cn.muye.base.service.MessageSendService;
-import cn.muye.base.service.imp.MessageSendServiceImp;
-import com.alibaba.fastjson.JSON;
+import cn.muye.base.bean.SingleFactory;
+import cn.muye.base.bean.TopicSubscribeInfo;
+import cn.muye.base.producer.ProducerCommon;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
 import edu.wpi.rail.jrosbridge.messages.Message;
 import org.slf4j.Logger;
@@ -29,7 +20,7 @@ import org.springframework.context.ApplicationContextAware;
  * Describe:
  * Version:1.0
  */
-public class AgentSubListenerImpl implements TopicCallback, ApplicationContextAware {
+public class AgentSubListenerImpl implements TopicCallback {
 
 	private static ApplicationContext applicationContext;
 
@@ -38,24 +29,11 @@ public class AgentSubListenerImpl implements TopicCallback, ApplicationContextAw
 	@Override
 	public void handleMessage(Message message) {
 		logger.info("From ROS ====== agent_sub topic  " + message.toString());
-		String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
-		byte[] b = text.getBytes();
-		ExecutorLog logInfo = new ExecutorLog();
-		logInfo.setData(message.toString());
-		logInfo.setType(ExecutorLogType.AGENT_SUB);
-
-		MessageInfo info = new MessageInfo(MessageType.EXECUTOR_LOG, JSON.toJSONString(logInfo), b);
-		info.setMessageStatusType(MessageStatusType.PUBLISH_ROS_MESSAGE);
-		AppConfig appConfig = CacheInfoManager.getAppConfigCache(1L);
-		info.setSenderId(appConfig.getMpushUserId());
-		info.setSendDeviceType(DeviceType.GOOR);
-		info.setReceiverDeviceType(DeviceType.GOOR_SERVER);
-		MessageSendService messageSendService = new MessageSendServiceImp();
-		messageSendService.sendReplyMessage(Constant.GOOR_SERVER, info);
+		if(TopicSubscribeInfo.checkSubNameIsNeedConsumer(message.toString())){
+			logger.info(" ====== message.toString()===" + message.toString());
+			ProducerCommon msg = SingleFactory.getProducerCommon();
+			msg.sendAgentSubMessage(message.toString());
+		}
 	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		AgentSubListenerImpl.applicationContext = applicationContext;
-	}
 }

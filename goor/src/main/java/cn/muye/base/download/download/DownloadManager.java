@@ -7,9 +7,7 @@ import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.download.file.FileHelper;
 import cn.muye.base.download.file.IDataLineProcesser;
-import cn.muye.base.service.MessageSendService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
-import com.mpush.api.Client;
 import edu.wpi.rail.jrosbridge.Ros;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,18 +41,14 @@ public class DownloadManager {
 	public static void HttpDownload(RemoteLocalPair pair,
 									int maxHttpRetry,
 									Ros ros,
-									Client client,
 									MessageInfo messageInfo,
-									MessageSendService messageSendService,
 									CommonInfo commonInfo,
 									ReceiveMessageService receiveMessageService){
 		GeneralDownloadInfo info = new GeneralDownloadInfo(pair);
 		HttpDownloader downloader = new HttpDownloader(info,
 				maxHttpRetry,
 				ros,
-				client,
 				messageInfo,
-				messageSendService,
 				commonInfo,
 				receiveMessageService);
 		downloader.run();

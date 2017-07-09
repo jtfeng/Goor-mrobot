@@ -7,7 +7,7 @@ public enum MessageStatusType {
     PUBLISH_ROS_MESSAGE("发送消息成功", 3),//publish ros message success
     CANCEL_MESSAGE("消息取消", 4),//消息取消
     FAILURE_MESSAGE("消息发送失败", 5),//失败消息
-    SUCCESS_MESSAGE("消息发送成功", 6),//成功消息
+    SUCCESS_MESSAGE("消息发送成功,正在载入,请稍后邮箱查看是否处理成功!", 6),//成功消息
     PARAMETER_ERROR("参数传入错误", 7),//参数错误
     PROCESSING_MESSAGE("消息正在处理", 8),//消息处理中
     ROS_OFF_LINE("机器人不在线", 9);//ros不在线

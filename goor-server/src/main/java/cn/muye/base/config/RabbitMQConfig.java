@@ -1,63 +1,61 @@
 package cn.muye.base.config;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Created by Selim on 2017/6/26.
- */
+
 @Configuration
 public class RabbitMQConfig {
 
+    //从服务端发送到客户端命令队列
+    //以下为服务器一对多发送
     @Bean
-    public Queue directMessageCommand() {
-        return new Queue("direct.command");
+    public Queue fanoutCommon() {
+        return new Queue(TopicConstants.FANOUT_SERVER_COMMAND,false,false,true);
     }
 
     @Bean
-    public Queue directMessageResource() {
-        return new Queue("direct.resource");
+    public FanoutExchange fanoutCommandExchange() {
+        return new FanoutExchange(TopicConstants.FANOUT_COMMAND_EXCHANGE,false,true);
     }
 
     @Bean
-    public Queue directMessageCommon() {
-        return new Queue("direct.common");
+    public FanoutExchange fanoutResourceExchange() {
+        return new FanoutExchange(TopicConstants.FANOUT_RESOURCE_EXCHANGE,false,true);
     }
 
     @Bean
-    public Queue fanoutMessageCommand() {
-        return new Queue("fanout.command");
+    public Binding bindingFanoutCommandExchange(Queue fanoutCommon, FanoutExchange fanoutCommandExchange) {
+        return BindingBuilder.bind(fanoutCommon).to(fanoutCommandExchange);
     }
 
     @Bean
-    public Queue fanoutMessageResource() {
-        return new Queue("fanout.resource");
+    public Binding bindingFanoutResourceExchange(Queue fanoutCommon, FanoutExchange fanoutResourceExchange) {
+        return BindingBuilder.bind(fanoutCommon).to(fanoutResourceExchange);
     }
 
+    //以下为服务器一对一发送
     @Bean
-    public Queue topicMessageCommand() {
-        return new Queue("topic.command");
-    }
-
-    @Bean
-    public Queue topicMessages() {
-        return new Queue("topic.messages");
+    public Queue topicCommon() {
+        return new Queue(TopicConstants.TOPIC_SERVER_COMMAND, false, false, true);
     }
 
     @Bean
     public TopicExchange topicExchange() {
-        return new TopicExchange("topicExchange");
+        return new TopicExchange(TopicConstants.TOPIC_EXCHANGE, false, true);
     }
 
     @Bean
-    public FanoutExchange fanoutExchange() {
-        return new FanoutExchange("fanoutExchange");
+    public Binding bindingTopicExchangeMessages(Queue topicCommon, TopicExchange topicExchange) {
+        return BindingBuilder.bind(topicCommon).to(topicExchange).with(TopicConstants.TOPIC_SERVER_ROUTING_KEY);
     }
 
+    //以下为goor客户端上报到goor-server端上报队列
     @Bean
-    public DirectExchange directExchange() {
-        return new DirectExchange("directExchange");
+    public Queue directCommandReport() {
+        return new Queue(TopicConstants.DIRECT_COMMAND_REPORT,false,false,true);
     }
 
     /**
@@ -74,33 +72,27 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding bindingTopicExchangeMessage(Queue topicMessageCommand, TopicExchange topicExchange) {
-        return BindingBuilder.bind(topicMessageCommand).to(topicExchange).with("topic.message");
+    public Queue directAppSub() {
+        return new Queue(TopicConstants.DIRECT_APP_SUB,false,false,true);
     }
 
     @Bean
-    public Binding bindingTopicExchangeMessages(Queue topicMessages, TopicExchange topicExchange) {
-        return BindingBuilder.bind(topicMessages).to(topicExchange).with("topic.#");
+    public Queue directAppPub() {
+        return new Queue(TopicConstants.DIRECT_APP_PUB,false,false,true);
     }
 
     @Bean
-    public Binding bindingDirectExchangeCommand(Queue directMessageCommand, DirectExchange directExchange) {
-        return BindingBuilder.bind(directMessageCommand).to(directExchange).with("direct.common");
+    public Queue directAgentSub() {
+        return new Queue(TopicConstants.DIRECT_AGENT_SUB,false,false,true);
     }
 
     @Bean
-    public Binding bindingDirectExchangeResource(Queue directMessageResource, DirectExchange directExchange) {
-        return BindingBuilder.bind(directMessageResource).to(directExchange).with("direct.common");
+    public Queue directAgentPub() {
+        return new Queue(TopicConstants.DIRECT_AGENT_PUB,false,false,true);
     }
 
     @Bean
-    public Binding bindingFanoutExchangeCommand(Queue fanoutMessageCommand, FanoutExchange fanoutExchange) {
-        return BindingBuilder.bind(fanoutMessageCommand).to(fanoutExchange);
+    public Queue directCurrentPosition() {
+        return new Queue(TopicConstants.DIRECT_CURRENT_POSE,false,false,true);
     }
-
-    @Bean
-    public Binding bindingFanoutExchangeResource(Queue fanoutMessageResource, FanoutExchange fanoutExchange) {
-        return BindingBuilder.bind(fanoutMessageResource).to(fanoutExchange);
-    }
-
 }

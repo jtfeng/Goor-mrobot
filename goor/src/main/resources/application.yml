@@ -1,0 +1,47 @@
+#数据库数据源配置
+spring:
+  datasource:
+#    schema: file:/mnt/h2-schema.sql
+#    data: file:/mnt/h2-data.sql
+#    url: jdbc:h2:file:/mnt/push/h2db/mpush;MODE=MySQL;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    schema: classpath:/sql/h2-schema.sql
+    data: classpath:/sql/h2-data.sql
+    url: jdbc:h2:file:E:\\myee\\h2db\\mpush;MODE=MySQL;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1
+    username: test
+    password: test
+    driverClassName: org.h2.Driver
+#h2页面访问配置
+  h2:
+    console:
+      enabled: true
+      path: /console
+
+#本服务器端口号
+server:
+  port: 8070
+
+#ros配置
+ros:
+  path: 192.168.3.51
+
+#机器序列号
+local:
+  robot:
+    SN: SNCookyPlus1301001
+
+#rabbitmq配置
+spring:
+  application:
+    name: spirng-boot-rabbitmq-goor-8070
+  rabbitmq:
+    host: 172.16.1.155
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+
+#如需添加需要订阅的消息，未添加此名称，不会发送到云端，如有添加其他topic，请在以下注释注明
+#(目前添加的topic有：app_sub、app_pub、agent_sub、agent_pub)
+#加入需要的pub_name或sub_name(添加逗号分隔,以英文输入法的非圆角)
+sub:
+  name: map_current_get

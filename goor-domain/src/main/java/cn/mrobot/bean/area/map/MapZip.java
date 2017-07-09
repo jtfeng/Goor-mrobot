@@ -37,6 +37,11 @@ public class MapZip extends BaseBean {
 	private String filePath;
 
 	/**
+	 * 文件http路径
+	 */
+	@Transient
+	private String fileHttpPath;
+	/**
 	 * 文件名称
 	 */
 	@Column(name = "FILE_NAME")
@@ -119,5 +124,13 @@ public class MapZip extends BaseBean {
 
 	public void setFileUploadId(Long fileUploadId) {
 		this.fileUploadId = fileUploadId;
+	}
+
+	public String getFileHttpPath() {
+		return fileHttpPath;
+	}
+
+	public void setFileHttpPath(String fileHttpPath) {
+		this.fileHttpPath = fileHttpPath;
 	}
 }

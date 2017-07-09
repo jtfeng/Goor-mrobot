@@ -23,11 +23,13 @@ public class CacheInfoManager implements ApplicationContextAware {
 	/** topicHeartCheck 的缓存 */
 	private static ConcurrentHashMapCache<Integer, Long> topicHeartCheckCache = new ConcurrentHashMapCache<Integer, Long>();
 
-	static {
+	/** sub_name 的缓存 */
+	private static ConcurrentHashMapCache<String, Integer> nameSubCache = new ConcurrentHashMapCache<String, Integer>();
 
-		// AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
+	static {
 		appConfigCache.setMaxLifeTime(0);
 		topicHeartCheckCache.setMaxLifeTime(0);
+		nameSubCache.setMaxLifeTime(0);
 		topicHeartCheckCache.put(1, System.currentTimeMillis());
 	}
 
@@ -37,6 +39,17 @@ public class CacheInfoManager implements ApplicationContextAware {
 
 	public static void removeAppConfigCache(Long id) {
 		appConfigCache.remove(id);
+	}
+
+	public static void setNameSubCache(String nameSub){
+		nameSubCache.put(nameSub, 1);
+	}
+
+	public static boolean getNameSubCache(String nameSub){
+		if(nameSubCache.get(nameSub) > 0){
+			return true;
+		}
+		return false;
 	}
 
 	public static void setTopicHeartCheckCache(){

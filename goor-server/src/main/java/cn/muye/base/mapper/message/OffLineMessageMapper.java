@@ -1,12 +1,14 @@
 package cn.muye.base.mapper.message;
 
 import cn.muye.base.model.message.OffLineMessage;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * Created by enva on 2017/5/11.
  */
+@Component
 public interface OffLineMessageMapper {
 
     OffLineMessage get(Long id);

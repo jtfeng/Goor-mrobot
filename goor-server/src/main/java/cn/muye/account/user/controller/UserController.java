@@ -19,6 +19,7 @@ import cn.muye.account.user.service.impl.UserServiceImpl;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
@@ -34,7 +35,8 @@ import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +73,9 @@ public class UserController {
     private static final int SOURCE_TYPE_LIST = 1; //列表来源
 
     private static final int SOURCE_TYPE_OTHER = 2; //其他来源
+
+    @Autowired
+    private UserUtil userUtil;
 
     /**
      * 新增修改用户
@@ -153,9 +158,8 @@ public class UserController {
     @RequestMapping(value = {"account/user"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询用户接口", httpMethod = "GET", notes = "查询用户接口")
     @ResponseBody
-    public AjaxResult list(WhereRequest whereRequest, Principal principal) {
-        String userName = principal.getName();
-        User userDb = userService.getByUserName(userName);
+    public AjaxResult list(WhereRequest whereRequest) {
+        User userDb = userUtil.getCurrentUser();
         if (userDb == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "当前用户不存在");
         }
@@ -207,11 +211,12 @@ public class UserController {
     @RequestMapping(value = {"account/user/login"}, method = RequestMethod.POST)
     @ApiOperation(value = "登录接口", httpMethod = "POST", notes = "登录接口")
     @ResponseBody
-    public AjaxResult login(@RequestBody User userParam) {
+    public AjaxResult login(@RequestBody User userParam, HttpServletRequest request) {
         if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
         }
-        Map map = doLogin(userParam.getUserName(), userParam.getPassword());
+        HttpSession session = request.getSession();
+        Map map = doLogin(userParam.getUserName(), userParam.getPassword(), session);
         return doCheckLogin(map);
     }
 
@@ -224,8 +229,9 @@ public class UserController {
     @RequestMapping(value = {"account/user/login/pad"}, method = RequestMethod.POST)
     @ApiOperation(value = "PAD登录接口", httpMethod = "POST", notes = "PAD登录接口")
     @ResponseBody
-    public AjaxResult directKeyLogin(@RequestBody User userParam) {
+    public AjaxResult directKeyLogin(@RequestBody User userParam, HttpServletRequest request) {
         try {
+            HttpSession session = request.getSession();
             if (userParam.getDirectLoginKey() == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
             }
@@ -233,7 +239,7 @@ public class UserController {
             //todo StoreId暂时用100去代替，以后用session里获取
             User userDb = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (userDb != null) {
-                Map map = doLogin(userDb.getUserName(), userDb.getPassword());
+                Map map = doLogin(userDb.getUserName(), userDb.getPassword(), session);
                 return doCheckLogin(map);
             } else {
                 return AjaxResult.failed("用户不存在");
@@ -282,6 +288,19 @@ public class UserController {
         return null;
     }*/
 
+    /**
+     * 注销接口
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = {"account/user/logOut"}, method = RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult logOut(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        session.removeAttribute("access_token");
+        return AjaxResult.success("注销成功");
+    }
+
 
     /**
      * 登录方法
@@ -290,7 +309,7 @@ public class UserController {
      * @param password
      * @return
      */
-    private Map<String, Object> doLogin(String userName, String password) {
+    private Map<String, Object> doLogin(String userName, String password, HttpSession session) {
         //调auth_server的token接口
         User user = null;
         Map map = new HashMap();
@@ -298,6 +317,7 @@ public class UserController {
             String accessToken = doAuthorize(userName, password);
             //判断token不等于null，说明已经登录
             if (!StringUtil.isNullOrEmpty(accessToken)) {
+                session.setAttribute("access_token", accessToken);
                 //查询用户的
                 List<User> list = userService.getUser(userName, password);
                 if (list != null) {

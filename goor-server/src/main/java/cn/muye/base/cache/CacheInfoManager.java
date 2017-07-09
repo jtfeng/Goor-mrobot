@@ -1,5 +1,6 @@
 package cn.muye.base.cache;
 
+import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.model.config.AppConfig;
 import cn.muye.base.service.mapper.config.AppConfigService;
 import org.apache.log4j.Logger;
@@ -19,12 +20,13 @@ public class CacheInfoManager implements ApplicationContextAware {
 	
 	/** AppConfig 的缓存 */
 	private static ConcurrentHashMapCache<Long, AppConfig> appConfigCache = new ConcurrentHashMapCache<Long, AppConfig>();
+	private static ConcurrentHashMapCache<String, MessageInfo> messageCache = new ConcurrentHashMapCache<String, MessageInfo>();
 
 	static {
 
 		// AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
 		appConfigCache.setMaxLifeTime(0);
-
+		messageCache.setMaxLifeTime(0);
 	}
 
 	private CacheInfoManager() {
@@ -33,6 +35,14 @@ public class CacheInfoManager implements ApplicationContextAware {
 
 	public static void removeAppConfigCache(Long id) {
 		appConfigCache.remove(id);
+	}
+
+	public static void setMessageCache(MessageInfo info){
+		messageCache.put(info.getSenderId(), info);
+	}
+
+	public static MessageInfo getMessageCache(String senderId){
+		return messageCache.get(senderId);
 	}
 
 	/**

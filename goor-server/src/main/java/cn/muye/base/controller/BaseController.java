@@ -21,4 +21,5 @@ public abstract class BaseController {
 
     @Value("${goor.push.http}")
     protected String DOWNLOAD_HTTP;
+
 }

@@ -48,7 +48,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         PageHelper.startPage(page, pageSize);
         Example example = new Example(clazz);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
+        criteria = criteria.andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (name != null) {
             criteria.andCondition("NAME like", "%" + name + "%");
         }
@@ -76,6 +76,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
         });
         return list;
+    }
+
+    @Override
+    public List<Robot> listRobot(Long storeId) {
+        Example example = new Example(Robot.class);
+       example.createCriteria().andCondition("STORE_ID =", storeId);
+        return myMapper.selectByExample(example);
     }
 
     public Robot getById(Long id) {

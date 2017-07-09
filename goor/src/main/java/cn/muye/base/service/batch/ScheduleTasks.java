@@ -2,7 +2,6 @@ package cn.muye.base.service.batch;
 
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
-import cn.muye.base.service.MessageSendService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -29,9 +28,6 @@ public class ScheduleTasks {
 
     @Autowired
     private ReceiveMessageService receiveMessageService;
-
-    @Autowired
-    private MessageSendService messageSendService;
 
     @Autowired
     private Ros ros;

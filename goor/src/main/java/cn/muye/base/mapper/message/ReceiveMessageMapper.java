@@ -23,7 +23,7 @@ public interface ReceiveMessageMapper {
 
     List<ReceiveMessage> listByMessageSuccess(ReceiveMessage message);
 
-    List<ReceiveMessage> listByIdAndSenderId(ReceiveMessage receiveMessage);
+    List<ReceiveMessage> listByUUID(ReceiveMessage receiveMessage);
 
     void delete(ReceiveMessage receiveMessage);
 

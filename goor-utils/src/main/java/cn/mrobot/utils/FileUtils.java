@@ -157,4 +157,84 @@ public class FileUtils {
             return file;
         }
     }
+    /**
+     * 向文件追加写入内容
+     * @param file
+     * @param conent
+     */
+    public static void appendWriteToFile(String file, String conent){
+        try {
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(file, true)));
+            try {
+                out.write(conent + "\n");
+            } finally {
+                out.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 读取文本文件内容到一个字符串中
+     * @param file
+     * @return
+     */
+    public static String readFileAsString(String file){
+        String ret = null;
+        FileReader fileReader = null;
+        BufferedReader bufferedReader = null;
+        StringBuffer stringBuffer = new StringBuffer();
+        try {
+            fileReader = new FileReader(file);
+            bufferedReader = new BufferedReader(fileReader);
+            String readLine;
+            do {
+                readLine = bufferedReader.readLine();
+                if (readLine != null){
+                    stringBuffer.append(readLine);
+                }
+            }while (readLine != null);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+
+            try {
+                if (bufferedReader != null)
+                    bufferedReader.close();
+                if (fileReader != null)
+                    fileReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        ret = stringBuffer.toString();
+        return ret;
+    }
+
+    /**
+     * 递归删除目录下的所有文件及子目录下所有文件
+     *
+     * @param dir
+     *            将要删除的文件目录
+     * @return boolean Returns "true" if all deletions were successful. If a
+     *         deletion fails, the method stops attempting to delete and returns
+     *         "false".
+     */
+    public static boolean deleteDir(File dir) {
+        if (dir.isDirectory()) {
+            String[] children = dir.list();//递归删除目录中的子目录下
+            for (int i=0; i<children.length; i++) {
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success) {
+                    return false;
+                }
+            }
+        }
+        // 目录此时为空，可以删除
+        return dir.delete();
+    }
 }

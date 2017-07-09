@@ -33,9 +33,9 @@ public class Mission extends BaseBean {
 
 	private Set<MissionItem> missionItemSet;
 
-	private Long missionMainId;
+//	private Long missionMainId;
 
-	private Integer priority;//优先级
+//	private Integer priority;//优先级
 
 	public Mission() {
 	}
@@ -46,11 +46,11 @@ public class Mission extends BaseBean {
 		private String description;
 		private Date createTime;
 		private Date updateTime;
-		private Integer priority;
+//		private Integer priority;
 		private int repeatCount;
 		private Long intervalTime;
 		private Set<MissionItem> missionItemSet;
-		private Long missionMainId;
+//		private Long missionMainId;
 
 		public Builder name(String name) {
 			this.name = name;
@@ -73,10 +73,10 @@ public class Mission extends BaseBean {
 		}
 
 
-		public Builder priority(Integer priority) {
-			this.priority = priority;
-			return this;
-		}
+//		public Builder priority(Integer priority) {
+//			this.priority = priority;
+//			return this;
+//		}
 
 		public Builder repeatCount(int repeatCount) {
 			this.repeatCount = repeatCount;
@@ -94,10 +94,10 @@ public class Mission extends BaseBean {
 		}
 
 
-		public Builder missionMainId(Long missionMainId) {
-			this.missionMainId = missionMainId;
-			return this;
-		}
+//		public Builder missionMainId(Long missionMainId) {
+//			this.missionMainId = missionMainId;
+//			return this;
+//		}
 
 		public Mission build() {
 			return new Mission(this);
@@ -108,10 +108,10 @@ public class Mission extends BaseBean {
 		name = builder.name;
 		description = builder.description;
 		createTime = builder.createTime;
-		priority = builder.priority;
+//		priority = builder.priority;
 		repeatCount = builder.repeatCount;
 		intervalTime = builder.intervalTime;
-		missionMainId = builder.missionMainId;
+//		missionMainId = builder.missionMainId;
 		missionItemSet = builder.missionItemSet;
 		updateTime = builder.updateTime;
 	}
@@ -148,13 +148,13 @@ public class Mission extends BaseBean {
 		this.intervalTime = intervalTime;
 	}
 
-	public Long getMissionMainId() {
-		return missionMainId;
-	}
-
-	public void setMissionMainId(Long missionMainId) {
-		this.missionMainId = missionMainId;
-	}
+//	public Long getMissionListId() {
+//		return missionMainId;
+//	}
+//
+//	public void setMissionListId(Long missionMainId) {
+//		this.missionMainId = missionMainId;
+//	}
 
 	public Long getId() {
 		return id;
@@ -188,13 +188,13 @@ public class Mission extends BaseBean {
 		this.updateTime = updateTime;
 	}
 
-	public Integer getPriority() {
-		return priority;
-	}
-
-	public void setPriority(Integer priority) {
-		this.priority = priority;
-	}
+//	public Integer getPriority() {
+//		return priority;
+//	}
+//
+//	public void setPriority(Integer priority) {
+//		this.priority = priority;
+//	}
 
 	public Set<MissionItem> getMissionItemSet() {
 		return missionItemSet;

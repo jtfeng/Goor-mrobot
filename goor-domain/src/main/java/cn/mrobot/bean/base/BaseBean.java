@@ -14,7 +14,7 @@ public abstract class BaseBean implements Serializable {
     protected Long id; //id提取
     protected Long storeId;//关联门店ID
     protected Long createdBy;//创建用户
-    @JSONField(format = "yyyy-mm-dd HH:mm:ss")
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     protected Date createTime;//创建时间
 
     public BaseBean() {

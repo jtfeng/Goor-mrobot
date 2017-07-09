@@ -2,6 +2,7 @@ package cn.muye;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.TopicSubscribeInfo;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.listener.*;
 import cn.muye.base.service.batch.ScheduledHandle;
 import com.github.pagehelper.PageHelper;
@@ -46,131 +47,8 @@ import java.util.concurrent.ThreadFactory;
 public class Application {
 	private static Logger logger = Logger.getLogger(Application.class);
 
-
-
-	@Value("${mpush.publicKey}")
-	private String publicKey;
-
-	@Value("${mpush.allocServer}")
-	private String allocServer;
-
-	@Value("${ros.path}")
-	private String rosPath;
-
-	@Value("${mpush.deviceId}")
-	private String deviceId;
-
-	@Value("${mpush.osName}")
-	private String osName;
-
-	@Value("${mpush.osVersion}")
-	private String osVersion;
-
-	@Value("${mpush.clientVersion}")
-	private String clientVersion;
-
-	@Value("${mpush.userId}")
-	private String userId;
-
-	@Value("${mpush.tags}")
-	private String tags;
-
-	@Value("${mpush.sessionStorageDir}")
-	private String sessionStorageDir;
-
-	@Bean
-	public Queue directMessageCommand() {
-		return new Queue("direct.command");
-	}
-
-	@Bean
-	public Queue directMessageResource() {
-		return new Queue("direct.resource");
-	}
-
-	@Bean
-	public Queue directMessageCommon() {
-		return new Queue("direct.common");
-	}
-
-	@Bean
-	public Queue fanoutMessageCommand() {
-		return new Queue("fanout.command");
-	}
-
-	@Bean
-	public Queue fanoutMessageResource() {
-		return new Queue("fanout.resource");
-	}
-
-	@Bean
-	public Queue topicMessageCommand() {
-		return new Queue("topic.command");
-	}
-
-	@Bean
-	public Queue topicMessages() {
-		return new Queue("topic.messages");
-	}
-
-	@Bean
-	public TopicExchange topicExchange() {
-		return new TopicExchange("topicExchange");
-	}
-
-	@Bean
-	public FanoutExchange fanoutExchange() {
-		return new FanoutExchange("fanoutExchange");
-	}
-
-	@Bean
-	public DirectExchange directExchange() {
-		return new DirectExchange("directExchange");
-	}
-
-	/**
-	 * X86与云端时间同步队列
-	 *
-	 * */
-	@Bean
-	public Queue timeSynchronizedUp() {
-		return new Queue("time.synchronized.up", false);
-	}
-
-	@Bean
-	public Queue timeSynchronizedDown() {
-		return new Queue("time.synchronized.down", false);
-	}
-
-	@Bean
-	public Binding bindingTopicExchangeMessage(Queue topicMessageCommand, TopicExchange topicExchange) {
-		return BindingBuilder.bind(topicMessageCommand).to(topicExchange).with("topic.message");
-	}
-
-	@Bean
-	public Binding bindingTopicExchangeMessages(Queue topicMessages, TopicExchange topicExchange) {
-		return BindingBuilder.bind(topicMessages).to(topicExchange).with("topic.#");
-	}
-
-	@Bean
-	public Binding bindingDirectExchangeCommand(Queue directMessageCommand, DirectExchange directExchange) {
-		return BindingBuilder.bind(directMessageCommand).to(directExchange).with("direct.common");
-	}
-
-	@Bean
-	public Binding bindingDirectExchangeResource(Queue directMessageResource, DirectExchange directExchange) {
-		return BindingBuilder.bind(directMessageResource).to(directExchange).with("direct.common");
-	}
-
-	@Bean
-	public Binding bindingFanoutExchangeCommand(Queue fanoutMessageCommand, FanoutExchange fanoutExchange) {
-		return BindingBuilder.bind(fanoutMessageCommand).to(fanoutExchange);
-	}
-
-	@Bean
-	public Binding bindingFanoutExchangeResource(Queue fanoutMessageResource, FanoutExchange fanoutExchange) {
-		return BindingBuilder.bind(fanoutMessageResource).to(fanoutExchange);
-	}
+	@Value("${sub.name}")
+	private String subName;
 
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
@@ -202,61 +80,17 @@ public class Application {
 	}
 
 	@Bean
+	public String subName(){
+		String[] arraySubName = subName.split(",");
+		for(String subName : arraySubName){
+			CacheInfoManager.setNameSubCache(subName);
+		}
+		return subName;
+	}
+
+	@Bean
 	public PlatformTransactionManager transactionManager() {
 		return new DataSourceTransactionManager(dataSource());
-	}
-
-	@Bean
-	public Client getClient() {
-		int sleep = 1000;
-
-		ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
-			@Override
-			public Thread newThread(Runnable r) {
-				return new Thread(r, "Application ClientListenerImp");
-			}
-		});
-		ClientListener listener = new ClientListenerImp(scheduledExecutor);
-		Client client = null;
-		String cacheDir = Application.class.getResource("/").getFile();
-		client = ClientConfig
-				.build()
-				.setPublicKey(publicKey)
-				.setAllotServer(allocServer)
-//                    .setServerHost(allocServer)
-//                    .setServerPort(3000)
-				.setDeviceId(deviceId)
-				.setOsName(osName)
-				.setOsVersion(osVersion)
-				.setClientVersion(clientVersion)
-				.setUserId(userId)
-				.setTags(tags)
-				.setSessionStorageDir(cacheDir + sessionStorageDir)
-				.setLogger(new DefaultLogger())
-				.setLogEnabled(true)
-				.setEnableHttpProxy(true)
-				.setClientListener(listener)
-				.create();
-		client.start();
-
-		try {
-			Thread.sleep(sleep);
-		} catch (InterruptedException e) {
-			logger.error("Application client start sleep error=========", e);
-		}
-
-		return client;
-	}
-
-	@Bean
-	public Ros ros() {
-		Ros ros = new Ros(rosPath);
-		ros.connect();
-		Topic checkHeartTopic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
-		TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
-		checkHeartTopic.subscribe(checkHeartCallback);
-		TopicSubscribeInfo.reSubScribeTopic(ros);
-		return ros;
 	}
 
 	@Bean

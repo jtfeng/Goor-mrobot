@@ -7,7 +7,6 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.base.service.MessageSendService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -34,9 +33,6 @@ public class PointController {
 	private static Logger LOGGER = LoggerFactory.getLogger(PointController.class);
 	@Autowired
 	private PointService pointService;
-
-	@Autowired
-	private MessageSendService messageSendService;
 
 	@RequestMapping(value = "area/point", method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody

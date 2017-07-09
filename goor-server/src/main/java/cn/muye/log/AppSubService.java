@@ -1,10 +1,8 @@
 package cn.muye.log;
 
-import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.ExecutorLog;
 import cn.mrobot.bean.slam.SlamResponseBody;
-import cn.muye.area.point.service.PointService;
 import cn.muye.log.charge.bean.ChargeInfo;
 import cn.muye.log.charge.service.ChargeInfoService;
 import com.alibaba.fastjson.JSON;
@@ -35,8 +33,6 @@ public class AppSubService implements ApplicationContextAware {
 
 	private ChargeInfoService chargeInfoService;
 
-	private PointService pointService;
-
 	public void handle(ExecutorLog logInfo, String senderId){
 		logger.info("senderId = "+ senderId + " logInfo =" +JSON.toJSONString(logInfo));
 		JSONObject logDataObject = JSON.parseObject(logInfo.getData());
@@ -48,10 +44,6 @@ public class AppSubService implements ApplicationContextAware {
 			chargeInfoService.save(chargeInfo);
 		}else if (TopicConstants.MOTION_PLANNER_MOTION_STATUS.endsWith(slamResponseBody.getSubName())){
 			//TODO
-		}else if (slamResponseBody.getSubName().indexOf(POINT_PREFIX) >= 0){
-			//导航目标点相关
-			pointService = applicationContext.getBean(PointService.class);
-			pointService.handle(slamResponseBody);
 		}
 	}
 

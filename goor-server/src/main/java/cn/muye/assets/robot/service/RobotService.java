@@ -13,6 +13,8 @@ public interface RobotService extends BaseService<Robot>{
 
     List<Robot> listRobot(WhereRequest whereRequest);
 
+    List<Robot> listRobot(Long storeId);
+
     Robot getById(Long id);
 
     void saveRobot(Robot robot);

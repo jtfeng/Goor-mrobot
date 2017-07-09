@@ -64,16 +64,9 @@ public class ZipUtils {
             }
             zos.flush();
         } catch (Exception e) {
+			e.printStackTrace();
 			LOGGER.error("文件压缩出错", e);
-        } finally {
-            try {
-                if (null != zos)
-                    zos.close();
-            } catch (IOException e) {
-				LOGGER.error("文件压缩出错", e);
-            }
-        }
-
+		}
     }
 
     /**
@@ -130,8 +123,12 @@ public class ZipUtils {
             return true;
         } catch (Exception e) {
 			LOGGER.error("压缩文件出错", e);
-        }
-        return false;
+        }finally {
+			if(null != zos){
+				zos.close();
+			}
+		}
+		return false;
     }
 
     /**
@@ -154,11 +151,6 @@ public class ZipUtils {
                 fileName = fileName.substring(0, fileName.lastIndexOf("."));
             }
             unzipFilePath = unzipFilePath + File.separator + fileName;
-        }
-        //创建解压缩文件保存的路径
-        File unzipFileDir = new File(unzipFilePath);
-        if (!unzipFileDir.exists() || !unzipFileDir.isDirectory()) {
-            unzipFileDir.mkdirs();
         }
 
         //开始解压
@@ -192,9 +184,9 @@ public class ZipUtils {
             //创建解压文件
             entryFile = new File(entryFilePath);
             if (entryFile.exists()) {
-                //检测文件是否允许删除，如果不允许删除，将会抛出SecurityException
-                SecurityManager securityManager = new SecurityManager();
-                securityManager.checkDelete(entryFilePath);
+//                //检测文件是否允许删除，如果不允许删除，将会抛出SecurityException
+//                SecurityManager securityManager = new SecurityManager();
+//                securityManager.checkDelete(entryFilePath);
                 //删除已存在的目标文件
                 entryFile.delete();
             }
@@ -212,17 +204,17 @@ public class ZipUtils {
     }
 
     public static void main(String[] args) {
-//        String zipPath = "d:\\ziptest\\test";
-//        String savePath = "d:\\ziptest";
-//        String zipFileName = "test.zip";
+//        String zipPath = "E:\\documents\\upload";
+//        String savePath = "E:\\documents";
+//        String zipFileName = "upload.zip";
 //        try {
 //            zip(zipPath, savePath, zipFileName);
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
 //
-        String zipFilePath = "D:\\ziptest\\rawfiles\\test.zip";
-        String unzipFilePath = "D:\\ziptest\\unzipPath";
+        String zipFilePath = "E:\\documents\\upload.zip";
+        String unzipFilePath = "E:\\ziptest\\unzipPath";
         try {
             unzip(zipFilePath, unzipFilePath, false);
         } catch (Exception e) {

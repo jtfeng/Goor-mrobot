@@ -3,20 +3,12 @@
 <mapper namespace="cn.muye.base.mapper.message.OffLineMessageMapper">
 
   <resultMap id="offLineMessageResult" type="cn.muye.base.model.message.OffLineMessage">
-    <result property="id" column="ID"/>
+    <result property="uuId" column="UUID"/>
     <result property="senderId" column="SENDER_ID"/>
-    <result property="sendDeviceType" column="SEND_DEVICE_TYPE"/>
     <result property="receiverId" column="RECEIVER_ID"/>
-    <result property="receiverDeviceType" column="RECEIVER_DEVICE_TYPE"/>
-    <result property="webSocketId" column="WEBSOCKET_ID"/>
-    <result property="receiptWebSocket" column="RECEIPT_WEBSOCKET"/>
-    <result property="finish" column="FINISH"/>
     <result property="messageKind" column="MESSAGE_KIND"/>
     <result property="messageType" column="MESSAGE_TYPE"/>
-    <result property="failResend" column="FAIL_RESEND"/>
-    <result property="sessionId" column="SESSION_ID"/>
     <result property="messageStatusType" column="MESSAGE_STATUS_TYPE"/>
-    <result property="version" column="VERSION"/>
     <result property="relyMessage" column="RELY_MESSAGE"/>
     <result property="messageText" column="MESSAGE_TEXT"/>
     <result property="messageBinary" column="MESSAGE_BINARY"/>
@@ -27,20 +19,12 @@
   </resultMap>
 
   <sql id="Base_Column_List" >
-    ID,
+    UUID,
     SENDER_ID,
-    SEND_DEVICE_TYPE,
     RECEIVER_ID,
-    RECEIVER_DEVICE_TYPE,
-    WEBSOCKET_ID,
-    RECEIPT_WEBSOCKET,
-    FINISH,
     MESSAGE_KIND,
     MESSAGE_TYPE,
-    FAIL_RESEND,
-    SESSION_ID,
     MESSAGE_STATUS_TYPE,
-    VERSION,
     RELY_MESSAGE,
     MESSAGE_TEXT,
     MESSAGE_BINARY,
@@ -54,14 +38,14 @@
     SELECT
       <include refid="Base_Column_List" />
     FROM OFFLINE_MESSAGE o
-    WHERE o.ID = #{id};
+    WHERE o.UUID = #{uuId};
   </select>
 
   <select id="getByIsSuccess" resultMap="offLineMessageResult">
     SELECT
     <include refid="Base_Column_List" />
     FROM OFFLINE_MESSAGE o
-    WHERE o.SUCCESS = #{success} ORDER BY o.ID ASC limit 1;
+    WHERE o.SUCCESS = #{success} ASC limit 1;
   </select>
 
   <select id="list" resultMap="offLineMessageResult">
@@ -77,22 +61,14 @@
     WHERE o.SUCCESS = #{success} AND SEND_COUNT<![CDATA[<=200 ]]>;
   </select>
 
-  <insert id="save" parameterType="cn.muye.base.model.message.OffLineMessage" useGeneratedKeys="true" keyProperty="id">
+  <insert id="save" parameterType="cn.muye.base.model.message.OffLineMessage">
     INSERT INTO OFFLINE_MESSAGE(
-    ID,
+    UUID,
     SENDER_ID,
-    SEND_DEVICE_TYPE,
     RECEIVER_ID,
-    RECEIVER_DEVICE_TYPE,
-    WEBSOCKET_ID,
-    RECEIPT_WEBSOCKET,
-    FINISH,
     MESSAGE_KIND,
     MESSAGE_TYPE,
-    FAIL_RESEND,
-    SESSION_ID,
     MESSAGE_STATUS_TYPE,
-    VERSION,
     RELY_MESSAGE,
     MESSAGE_TEXT,
     MESSAGE_BINARY,
@@ -101,20 +77,12 @@
     UPDATE_TIME,
     SUCCESS
     ) values (
-    #{id},
+    #{uuId},
     #{senderId},
-    #{sendDeviceType},
     #{receiverId},
-    #{receiverDeviceType},
-    #{webSocketId},
-    #{receiptWebSocket},
-    #{finish},
     #{messageKind},
     #{messageType},
-    #{failResend},
-    #{sessionId},
     #{messageStatusType},
-    #{version},
     #{relyMessage},
     #{messageText},
     #{messageBinary},
@@ -122,10 +90,7 @@
     #{sendTime},
     #{updateTime},
     #{success}
-    );
-    <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
-      SELECT LAST_INSERT_ID() AS ID
-    </selectKey>
+    )
   </insert>
 
   <update id="update">
@@ -134,23 +99,8 @@
     <if test="senderId != null">
       SENDER_ID = #{senderId},
     </if>
-    <if test="sendDeviceType != null">
-      SEND_DEVICE_TYPE = #{sendDeviceType},
-    </if>
     <if test="receiverId != null">
       RECEIVER_ID = #{receiverId},
-    </if>
-    <if test="receiverDeviceType != null">
-      RECEIVER_DEVICE_TYPE = #{receiverDeviceType},
-    </if>
-    <if test="webSocketId != null">
-      WEBSOCKET_ID = #{webSocketId},
-    </if>
-    <if test="receiptWebSocket != null">
-      RECEIPT_WEBSOCKET = #{receiptWebSocket},
-    </if>
-    <if test="finish != null">
-      FINISH = #{finish},
     </if>
     <if test="messageKind != null">
       MESSAGE_KIND = #{messageKind},
@@ -158,17 +108,8 @@
     <if test="messageType != null">
       MESSAGE_TYPE = #{messageType},
     </if>
-    <if test="failResend != null">
-      FAIL_RESEND = #{failResend},
-    </if>
-    <if test="sessionId != null">
-      SESSION_ID = #{sessionId},
-    </if>
     <if test="messageStatusType != null">
       MESSAGE_STATUS_TYPE = #{messageStatusType},
-    </if>
-    <if test="version != null">
-      VERSION = #{version},
     </if>
     <if test="relyMessage != null">
       RELY_MESSAGE = #{relyMessage},
@@ -190,12 +131,12 @@
     </if>
     UPDATE_TIME = #{updateTime}
     WHERE
-    ID = #{id}
+    UUID = #{uuId}
   </update>
 
   <delete id="delete">
     delete from OFFLINE_MESSAGE
-    where SUCCESS = TRUE AND ID = #{id}
+    where SUCCESS = TRUE AND UUID = #{uuId}
   </delete>
 
   <delete id="deleteBySendTime">

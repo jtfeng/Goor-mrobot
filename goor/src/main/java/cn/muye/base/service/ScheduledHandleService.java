@@ -1,13 +1,12 @@
 package cn.muye.base.service;
 
 
+import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import com.mpush.api.Client;
 import edu.wpi.rail.jrosbridge.Ros;
 
 public interface ScheduledHandleService {
-
-    void sendMessage();
 
     void receiveMessage();
 
@@ -15,11 +14,11 @@ public interface ScheduledHandleService {
 
     void downloadResource();
 
-    void downloadResource(Ros ros, Client client, MessageInfo messageInfo);
+    AjaxResult downloadResource(Ros ros, MessageInfo messageInfo);
 
     void publishMessage();
 
-    void publishMessage(Ros ros, Client client, MessageInfo messageInfo);
+    AjaxResult publishMessage(Ros ros, MessageInfo messageInfo);
 
     void executeTwentyThreeAtNightPerDay();
 
