@@ -2,7 +2,6 @@ package cn.muye.dispatch.controller;
 
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.utils.WhereRequest;
-import cn.mrobot.utils.ajax.AjaxResponse;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.dispatch.service.*;
 import com.alibaba.fastjson.JSON;
@@ -34,56 +33,57 @@ public class MissionController {
 	private MissionListService missionListService;
 
 	//missionItem-----------------------------------------------------------------------
-	@RequestMapping(value = {"dispatch/mission/node"}, method = {RequestMethod.POST, RequestMethod.PUT})
+	@RequestMapping(value = {"dispatch/missionItem"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_u')")
-	public AjaxResponse saveOrUpdateMissionNode(@RequestBody MissionItem missionItem, HttpServletRequest request) throws Exception {
+//	@PreAuthorize("hasAuthority('mrc_missionitem_u')")
+	public AjaxResult saveOrUpdateMissionItem(@RequestBody MissionItem missionItem, HttpServletRequest request) throws Exception {
 		try {
-			String missionNodeName = missionItem.getName();
-			MissionItem missionItemDB = missionItemService.findByName(missionNodeName);
+			String missionItemName = missionItem.getName();
+			MissionItem missionItemDB = missionItemService.findByName(missionItemName);
 			if (missionItemDB != null && !missionItemDB.getId().equals(missionItem.getId())) {
-				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "已存在相同名称的任务节点！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务节点！");
 			}
 
 			if (missionItem.getId() != null) {
 				missionItem.setUpdateTime(new Date());
 				missionItemService.update(missionItem);
 			} else {
+				missionItem.setCreateTime(new Date());
 				missionItemService.save(missionItem);
 			}
-			return AjaxResponse.success();
+			return AjaxResult.success(missionItem,"成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/node/{id}"}, method = RequestMethod.DELETE)
+	@RequestMapping(value = {"dispatch/missionItem/{id}"}, method = RequestMethod.DELETE)
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_d')")
-	public AjaxResponse deleteMissionNode(@PathVariable Long id, HttpServletRequest request) throws Exception {
-		AjaxResponse resp;
+//	@PreAuthorize("hasAuthority('mrc_missionitem_d')")
+	public AjaxResult deleteMissionItem(@PathVariable Long id, HttpServletRequest request) throws Exception {
+		AjaxResult resp;
 		try {
 			if (id == null) {
-				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "参数错误");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
 			}
 			MissionItem missionItemDB = missionItemService.get(id);
 			if (missionItemDB == null) {
-				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "要删除的对象不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
 			}
 
 			missionItemService.delete(missionItemDB);
-			return AjaxResponse.success();
+			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "可能在其他地方被使用");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "可能在其他地方被使用");
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/node"}, method = RequestMethod.GET)
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
+	@RequestMapping(value = {"dispatch/missionItem"}, method = RequestMethod.GET)
+//	@PreAuthorize("hasAuthority('mrc_missionitem_r')")
 	@ResponseBody
-	public AjaxResult pageMissionNode(HttpServletRequest request, WhereRequest whereRequest) {
+	public AjaxResult pageMissionItem(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
 			List<MissionItem> missionItemList = missionItemService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
@@ -104,9 +104,9 @@ public class MissionController {
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/node/list"}, method = RequestMethod.GET)
+	@RequestMapping(value = {"dispatch/missionItem/list"}, method = RequestMethod.GET)
 	@ResponseBody
-	public List listMissionNode(HttpServletRequest request) {
+	public List listMissionItem(HttpServletRequest request) {
 		try {
 			return missionItemService.list();
 		} catch (Exception e) {
@@ -116,80 +116,85 @@ public class MissionController {
 	}
 
 	//mission-----------------------------------------------------------------------
-	@RequestMapping(value = {"dispatch/mission/chain"}, method = {RequestMethod.POST, RequestMethod.PUT})
+	@RequestMapping(value = {"dispatch/mission"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionchain_u')")
-	public AjaxResponse saveOrUpdateMissionChain(@RequestBody Mission mission, HttpServletRequest request) throws Exception {
-		AjaxResponse resp;
+//	@PreAuthorize("hasAuthority('mrc_mission_u')")
+	public AjaxResult saveOrUpdateMission(@RequestBody Mission mission, HttpServletRequest request) throws Exception {
+		AjaxResult resp;
 		try {
-			String missionChainName = mission.getName();
-			Mission missionDB = missionService.findByName(missionChainName);
+			String missionName = mission.getName();
+			Mission missionDB = missionService.findByName(missionName);
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
-				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "已存在相同名称的任务串！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
 
+			String msg = "";
 			if (mission.getId() != null) {
 				mission.setUpdateTime(new Date());
 				missionService.update(mission);
+				msg = "修改成功";
 			} else {
+				mission.setCreateTime(new Date());
 				missionService.save(mission);
+				msg = "新增成功";
 			}
-			resp = AjaxResponse.success();
+			resp = AjaxResult.success(mission,msg);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 		return resp;
 	}
 
-	@RequestMapping(value = {"dispatch/mission/chain/bindNode"}, method = RequestMethod.POST)
+	@RequestMapping(value = {"dispatch/mission/bindItem"}, method = RequestMethod.POST)
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionchain_u')")
-	public AjaxResponse bindMissionNode(@RequestParam("missionChainId") Long missionChainId,
-										@RequestParam("bingString") String bingString,
+//	@PreAuthorize("hasAuthority('mrc_mission_u')")
+	public AjaxResult bindMissionItem(@RequestParam("missionId") Long missionId,
+										@RequestParam("bindString") String bindString,
+//										@RequestParam(value = "missionItems", required = false) List<MissionItem> missionItems,
 										HttpServletRequest request) throws Exception {
-		AjaxResponse resp;
+		AjaxResult resp;
 		try {
-			Mission missionDB = missionService.get(missionChainId);
+			Mission missionDB = missionService.get(missionId);
 			if (missionDB == null) {
-				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "任务串不存在！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "任务串不存在！");
 			}
 
-			List<Long> bindList = JSON.parseArray(bingString, Long.class);
-
+			List<Long> bindList = JSON.parseArray(bindString, Long.class);
 			missionDB.setUpdateTime(new Date());
 			missionService.update(missionDB, bindList);
-			resp = AjaxResponse.success();
+//			missionService.update(missionDB, missionItems);
+			resp = AjaxResult.success("成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 		return resp;
 	}
 
-	@RequestMapping(value = {"dispatch/mission/chain/{id}"}, method = RequestMethod.DELETE)
+	@RequestMapping(value = {"dispatch/mission/{id}"}, method = RequestMethod.DELETE)
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionchain_d')")
-	public AjaxResponse deleteMissionChain(@PathVariable long id, HttpServletRequest request) throws Exception {
-		AjaxResponse resp;
+//	@PreAuthorize("hasAuthority('mrc_mission_d')")
+	public AjaxResult deleteMission(@PathVariable long id, HttpServletRequest request) throws Exception {
+		AjaxResult resp;
 		try {
 			Mission missionDB = missionService.get(id);
 			if (missionDB == null) {
-				return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "要删除的对象不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
 			}
 
 			missionService.delete(missionDB);
-			return AjaxResponse.success();
+			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "可能在其他地方被使用");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "可能在其他地方被使用");
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/chain"}, method = RequestMethod.GET)
+	@RequestMapping(value = {"dispatch/mission"}, method = RequestMethod.GET)
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionchain_r')")
-	public AjaxResult pageMissionChain(HttpServletRequest request, WhereRequest whereRequest) {
+//	@PreAuthorize("hasAuthority('mrc_mission_r')")
+	public AjaxResult pageMission(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
 			List<Mission> missionList = missionService.list(whereRequest);
 
@@ -208,9 +213,9 @@ public class MissionController {
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/chain/list"}, method = RequestMethod.GET)
+	@RequestMapping(value = {"dispatch/mission/list"}, method = RequestMethod.GET)
 	@ResponseBody
-	public List listMissionChain(HttpServletRequest request) {
+	public List listMission(HttpServletRequest request) {
 		try {
 			List<Mission> missionList = missionService.list();
 			return missionList;
@@ -221,53 +226,57 @@ public class MissionController {
 	}
 
 	//missionList-----------------------------------------------------------------------
-	@RequestMapping(value = {"dispatch/mission/main"}, method = {RequestMethod.POST, RequestMethod.PUT})
+	@RequestMapping(value = {"dispatch/missionList"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionmain_u')")
-	public AjaxResult saveOrUpdateMissionMain(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
+//	@PreAuthorize("hasAuthority('mrc_missionList_u')")
+	public AjaxResult saveOrUpdateMissionList(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
 		try {
-			String missionMainName = missionList.getName();
-			MissionList missionListDB = missionListService.findByName(missionMainName);
+			String missionListName = missionList.getName();
+			MissionList missionListDB = missionListService.findByName(missionListName);
 			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
-				return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "已存在相同名称的任务串！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
 
+			String msg = "";
 			if (missionList.getId() != null) {
 				missionList.setUpdateTime(new Date());
 				missionListService.update(missionList);
+				msg = "修改成功";
 			} else {
+				missionList.setCreateTime(new Date());
 				missionListService.save(missionList);
+				msg = "新建成功";
 			}
-			return AjaxResult.success();
+			return AjaxResult.success(msg);
 
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/main/{id}"}, method = RequestMethod.DELETE)
+	@RequestMapping(value = {"dispatch/missionList/{id}"}, method = RequestMethod.DELETE)
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionmain_d')")
-	public AjaxResult deleteMissionMain(@PathVariable long id, HttpServletRequest request) throws Exception {
+//	@PreAuthorize("hasAuthority('mrc_missionList_d')")
+	public AjaxResult deleteMissionList(@PathVariable long id, HttpServletRequest request) throws Exception {
 		try {
 			MissionList missionListDB = missionListService.get(id);
 			if (missionListDB == null) {
-				return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "要删除的对象不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
 			}
 
 			missionListService.delete(missionListDB);
-			return AjaxResult.success();
+			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "可能在其他地方被使用");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "可能在其他地方被使用");
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/main/test"}, method = RequestMethod.POST)
+	@RequestMapping(value = {"dispatch/missionList"}, method = RequestMethod.GET)
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionmain_r')")
-	public AjaxResult pageMissionMain(HttpServletRequest request, WhereRequest whereRequest) {
+//	@PreAuthorize("hasAuthority('mrc_missionList_r')")
+	public AjaxResult pageMissionList(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
 			List<MissionList> missionListList = missionListService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
@@ -284,55 +293,57 @@ public class MissionController {
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/main/list"}, method = RequestMethod.GET)
+	@RequestMapping(value = {"dispatch/missionList/list"}, method = RequestMethod.GET)
 	@ResponseBody
-	public AjaxResult listMissionMain(HttpServletRequest request) {
+	public AjaxResult listMissionList(HttpServletRequest request) {
 		try {
 			List<MissionList> missionListList = missionListService.list();
 			return AjaxResult.success(missionListList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(-1, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 	}
 
-	@RequestMapping(value = {"dispatch/mission/main/bindChain"}, method = RequestMethod.POST)
+	@RequestMapping(value = {"dispatch/missionList/bindMission"}, method = RequestMethod.POST)
 	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionchain_u')")
-	public AjaxResult bindMissionChain(@RequestParam("missionMainId") Long missionMainId,
-									   @RequestParam("bingString") String bingString,
+//	@PreAuthorize("hasAuthority('mrc_mission_u')")
+	public AjaxResult bindMission(@RequestParam("missionListId") Long missionListId,
+									   @RequestParam("bindString") String bindString,
+//									   @RequestParam("missions") List<Mission> missions,
 									   HttpServletRequest request) throws Exception {
 		try {
-			MissionList missionListDB = missionListService.get(missionMainId);
+			MissionList missionListDB = missionListService.get(missionListId);
 			if (missionListDB == null) {
-				return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "总任务不存在！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "总任务不存在！");
 			}
 
-			List<Long> bindList = JSON.parseArray(bingString, Long.class);
+			List<Long> bindList = JSON.parseArray(bindString, Long.class);
 
 			missionListDB.setUpdateTime(new Date());
 			missionListService.update(missionListDB, bindList);
-			return AjaxResult.success();
+//			missionListService.update(missionListDB, missions);
+			return AjaxResult.success("成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResponse.RESPONSE_STATUS_FAIURE, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 	}
 
 //	//把类转换成entry返回给前端，解耦和
-//	private Map objectToEntry(MissionItem missionNode) {
+//	private Map objectToEntry(MissionItem missionItem) {
 //		Map entry = new HashMap();
-//		entry.put("id", missionNode.getId());
-//		entry.put("name", missionNode.getName());
-//		entry.put("description", missionNode.getDescription());
-//		entry.put("featureItem", objectToEntry(missionNode.getFeatureItem()));
-//		entry.put("featureItemType", objectToEntry(missionNode.getFeatureItemType()));
-//		entry.put("repeatCount", missionNode.getRepeatCount());
-//		entry.put("intervalTime", missionNode.getIntervalTime());
-//		entry.put("createTime", missionNode.getCreateTime());
-//		entry.put("updateTime", missionNode.getUpdateTime());
-//		entry.put("priority", missionNode.getPriority());
-//		entry.put("data", missionNode.getData());
+//		entry.put("id", missionItem.getId());
+//		entry.put("name", missionItem.getName());
+//		entry.put("description", missionItem.getDescription());
+//		entry.put("featureItem", objectToEntry(missionItem.getFeatureItem()));
+//		entry.put("featureItemType", objectToEntry(missionItem.getFeatureItemType()));
+//		entry.put("repeatCount", missionItem.getRepeatCount());
+//		entry.put("intervalTime", missionItem.getIntervalTime());
+//		entry.put("createTime", missionItem.getCreateTime());
+//		entry.put("updateTime", missionItem.getUpdateTime());
+//		entry.put("priority", missionItem.getPriority());
+//		entry.put("data", missionItem.getData());
 //		return entry;
 //	}
 //
