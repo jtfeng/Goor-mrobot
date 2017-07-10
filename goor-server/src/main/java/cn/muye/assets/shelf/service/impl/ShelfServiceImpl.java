@@ -8,6 +8,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.BaseService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
     private ShelfMapper shelfMapper;
 
     public List<Shelf> listPageByStoreIdAndOrder(int page, int pageSize, String queryObj, Class<Shelf> clazz, String order) {
+        PageHelper.startPage(page, pageSize);
         Example example = new Example(Shelf.class);
         Example.Criteria criteria = example.createCriteria();
         if (queryObj != null) {
