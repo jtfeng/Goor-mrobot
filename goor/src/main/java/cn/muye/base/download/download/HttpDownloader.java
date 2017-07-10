@@ -1,11 +1,11 @@
 package cn.muye.base.download.download;
 
+import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.FileValidCreateUtil;
-import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.file.FileHelper;

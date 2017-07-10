@@ -39,6 +39,7 @@ public class RabbitMQExampleController {
         info.setUuId(UUID.randomUUID().toString().replace("-", ""));
         info.setSendTime(new Date());
         info.setSenderId("goor-server");
+        info.setReceiverId("SNabc0010");
         info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
 //        info.setMessageType(MessageType.EXECUTOR_RESOURCE);//TODO 如果发送资源,将此行注释去掉，注释此行上面第一行
 //        info.setMessageType(MessageType.EXECUTOR_LOG);//TODO 针对 x86 agent 业务逻辑,不接收发送到ros的信息，如：发送命令要求上传log等

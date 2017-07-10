@@ -1,9 +1,8 @@
-package cn.muye.base.bean;
+package cn.mrobot.bean.base;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 
@@ -11,9 +10,8 @@ import java.io.Serializable;
  * 通用文件下载bean
  * Created by enva on 2017/5/9.
  */
-@NoArgsConstructor
 @AllArgsConstructor
-@Slf4j
+@NoArgsConstructor
 @Data
 public class CommonInfo implements Serializable {
 
