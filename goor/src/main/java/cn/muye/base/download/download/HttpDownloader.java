@@ -84,7 +84,7 @@ public class HttpDownloader extends Thread {
 					}
 				}
 				if(isDone && MessageType.EXECUTOR_UPGRADE.equals(messageInfo.getMessageType())){//升级下载
-					fileCheck();
+					this.fileCheck();
 				}
 				if(isDone && !MessageType.EXECUTOR_UPGRADE.equals(messageInfo.getMessageType())){//普通资源下载
 //					if(messageInfo.isFailResend()){//检查是否

@@ -25,7 +25,7 @@ public class MessageInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private String UUID;//uuid
+    private String uuId;//uuid
 
     private String senderId;//发送ID或机器序列号
 
