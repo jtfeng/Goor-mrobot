@@ -76,8 +76,8 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 	@Override
 	public Station findById(long id, long storeId) {
 		Example example = new Example(Station.class);
-		example.createCriteria().andCondition("ID =", id);
-		example.createCriteria().andCondition("STORE_ID =", storeId);
+		example.createCriteria().andCondition("ID =", id)
+				.andCondition("STORE_ID =", storeId);
 		example.setOrderByClause("ID DESC");
 		List<Station> temp = myMapper.selectByExample(example);
 		if(temp == null || temp.size() <= 0) {
@@ -115,8 +115,8 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 
 			//方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
 			Example example = new Example(Station.class);
-			example.createCriteria().andCondition("NAME like", "%" + name + "%");
-			example.createCriteria().andCondition("STORE_ID =", storeId);
+			example.createCriteria().andCondition("NAME like", "%" + name + "%")
+					.andCondition("STORE_ID =", storeId);
 			example.setOrderByClause("ID DESC");
 			stationList = myMapper.selectByExample(example);
 		}else {
