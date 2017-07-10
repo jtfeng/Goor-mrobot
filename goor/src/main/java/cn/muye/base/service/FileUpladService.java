@@ -38,7 +38,7 @@ public class FileUpladService {
 
     private final Lock lock = new ReentrantLock();
 
-    @Value("${server.deviceId}")
+    @Value("${local.robot.SN}")
     private String deviceId;
 
     @Value("${server.mapPath}")
