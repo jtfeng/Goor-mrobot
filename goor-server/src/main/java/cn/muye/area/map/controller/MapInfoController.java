@@ -31,8 +31,9 @@ public class MapInfoController {
     @RequestMapping(value = "area/mapinfo", method = {RequestMethod.POST})
     @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-    public AjaxResult setMapAlias(@RequestParam("id") Long id, @RequestParam("mapAlias") String mapAlias) {
+    public AjaxResult setMapAlias(@RequestBody MapInfo mapInfo) {
         try {
+            Long id = mapInfo.getId();
             if(null == id){
                 return AjaxResult.failed("地图的主键ID不能为空");
             }
@@ -40,7 +41,7 @@ public class MapInfoController {
             if(null == mapInfoDB){
                 return AjaxResult.failed("地图数据不存在");
             }
-            mapInfoDB.setMapAlias(mapAlias);
+            mapInfoDB.setMapAlias(mapInfo.getMapAlias());
             mapInfoService.update(mapInfoDB);
             return AjaxResult.success(mapInfoDB);
         } catch (Exception e) {
