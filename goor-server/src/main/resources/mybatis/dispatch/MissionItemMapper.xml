@@ -6,14 +6,14 @@
         <result property="id" column="ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
-        <result property="repeatCount" column="REPEAT_COUNT"/>
-        <result property="intervalTime" column="INTERVAL_TIME"/>
+        <!--<result property="repeatCount" column="REPEAT_COUNT"/>-->
+        <!--<result property="intervalTime" column="INTERVAL_TIME"/>-->
         <result property="data" column="DATA"/>
         <result property="createTime" column="CREATE_TIME"/>
         <result property="updateTime" column="UPDATE_TIME"/>
-        <result property="priority" column="PRIORITY"/>
+        <!--<result property="priority" column="PRIORITY"/>-->
         <result property="featureItemId" column="FEATURE_ITEM_ID"/>
-        <result property="missionChainId" column="MISSION_CHAIN_ID"/>
+        <!--<result propermissionIdinId" column="MISSION_CHAIN_ID"/>-->
         <association property="featureItem"
                      javaType="cn.mrobot.bean.mission.FeatureItem"
                      column="FEATURE_ITEM_ID"
@@ -24,76 +24,76 @@
         ID,
         NAME,
         DESCRIPTION,
-        REPEAT_COUNT,
-        INTERVAL_TIME,
-        DATA,
-        CREATE_TIME,
-        UPDATE_TIME,
-        PRIORITY,
-        MISSION_CHAIN_ID,
-        FEATURE_ITEM_ID
-    </sql>
+        <!--         REPEAT_COUNT,
+                 INTERVAL_TIME, -->
+                DATA,
+                CREATE_TIME,
+                UPDATE_TIME,
+        <!--         PRIORITY,
+                 MISSION_CHAIN_ID,-->
+                FEATURE_ITEM_ID
+            </sql>
 
-    <insert id="save" parameterType="cn.mrobot.bean.mission.MissionItem" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO D_MISSION_NODE(
-        ID,
-        NAME,
-        DESCRIPTION,
-        REPEAT_COUNT,
-        INTERVAL_TIME,
-        DATA,
-        CREATE_TIME,
-        UPDATE_TIME,
-        PRIORITY,
-        MISSION_CHAIN_ID,
-        FEATURE_ITEM_ID
-        ) values (
-        #{id},
-        #{name},
-        #{description},
-        #{repeatCount},
-        #{intervalTime},
-        #{data},
-        #{createTime},
-        #{updateTime},
-        #{priority},
-        #{missionChainId},
-        #{featureItemId},
-        );
-        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
-            SELECT LAST_INSERT_ID() AS ID
-        </selectKey>
-    </insert>
+            <insert id="save" parameterType="cn.mrobot.bean.mission.MissionItem" useGeneratedKeys="true" keyProperty="id">
+                INSERT INTO D_MISSION_ITEM(
+                ID,
+                NAME,
+                DESCRIPTION,
+                <!--         REPEAT_COUNT,
+                         INTERVAL_TIME,-->
+                        DATA,
+                        CREATE_TIME,
+                        UPDATE_TIME,
+                <!--         PRIORITY,
+                         MISSION_CHAIN_ID,-->
+                        FEATURE_ITEM_ID
+                        ) values (
+                        #{id},
+                        #{name},
+                        #{description},
+                <!--         #{repeatCount},
+                         #{intervalTime},-->
+                        #{data},
+                        #{createTime},
+                        #{updateTime},
+                <!--         #{priority},
+                       missionIdinId},-->
+                        #{featureItemId}
+                        );
+                        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+                            SELECT LAST_INSERT_ID() AS ID
+                        </selectKey>
+                    </insert>
 
-    <select id="findByName" resultMap="missionItem">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM D_MISSION_NODE
-        WHERE NAME = #{name}
-    </select>
+                    <select id="findByName" resultMap="missionItem">
+                        SELECT
+                        <include refid="Base_Column_List"/>
+                        FROM D_MISSION_ITEM
+                        WHERE NAME = #{name}
+                    </select>
 
-    <select id="get" resultMap="missionItem">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM D_MISSION_NODE
-        WHERE ID = #{id}
-    </select>
+                    <select id="get" resultMap="missionItem">
+                        SELECT
+                        <include refid="Base_Column_List"/>
+                        FROM D_MISSION_ITEM
+                        WHERE ID = #{id}
+                    </select>
 
-    <update id="update">
-        UPDATE D_MISSION_NODE
-        <trim prefix="set" suffixOverrides=",">
-            <if test="description != null">
-                DESCRIPTION = #{description},
-            </if>
-            <if test="repeatCount != null">
-                REPEAT_COUNT = #{repeatCount},
-            </if>
-            <if test="intervalTime != null">
-                INTERVAL_TIME = #{intervalTime},
-            </if>
-            <if test="intervalTime != null">
-                MISSION_CHAIN_ID = #{missionChainId},
-            </if>
+                    <update id="update">
+                        UPDATE D_MISSION_ITEM
+                        <trim prefix="set" suffixOverrides=",">
+                            <if test="description != null">
+                                DESCRIPTION = #{description},
+                            </if>
+                            <!--<if test="repeatCount != null">-->
+                <!--REPEAT_COUNT = #{repeatCount},-->
+            <!--</if>-->
+            <!--<if test="intervalTime != null">-->
+                <!--INTERVAL_TIME = #{intervalTime},-->
+            <!--</if>-->
+            <!--<if test="intervalTime != null">-->
+                <!--MISSION_CHAIN_ID missionIdinId},-->
+            <!--</if>-->
             <if test="data != null">
                 DATA = #{data},
             </if>
@@ -110,23 +110,23 @@
     <select id="list" resultMap="missionItem">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_NODE d
+        FROM D_MISSION_ITEM d
         <where>
             <if test="name != null">
                 AND d.NAME like CONCAT('%',#{name},'%')
             </if>
-            <if test="missionChainId != null">
-                AND d.MISSION_CHAIN_ID = #{missionChainId}
-            </if>
+            <!--<if temissionIdinId != null">-->
+                <!--AND d.MISSION_CHAIN_ID missionIdinId}-->
+            <!--</if>-->
             <if test="beginDate != null ">
                 AND d.CREATE_TIME &gt;= #{beginDate}
             </if>
             <if test="endDate != null">
                 AND d.CREATE_TIME &lt; #{endDate}
             </if>
-            <if test="priority != null">
-                AND d.PRIORITY = #{priority}
-            </if>
+            <!--<if test="priority != null">-->
+                <!--AND d.PRIORITY = #{priority}-->
+            <!--</if>-->
         </where>
         ORDER BY NAME
     </select>
@@ -134,12 +134,12 @@
     <select id="listAll" resultMap="missionItem">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_NODE d
+        FROM D_MISSION_ITEM d
         ORDER BY NAME
     </select>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM D_MISSION_NODE WHERE ID = #{id}
+        DELETE FROM D_MISSION_ITEM WHERE ID = #{id}
     </delete>
 
 </mapper>

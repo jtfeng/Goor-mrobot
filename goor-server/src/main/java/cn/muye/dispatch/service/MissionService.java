@@ -1,6 +1,7 @@
 package cn.muye.dispatch.service;
 
 import cn.mrobot.bean.mission.Mission;
+import cn.mrobot.bean.mission.MissionItem;
 import cn.mrobot.utils.WhereRequest;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public interface MissionService {
 	void update(Mission mission);
 
 	void update(Mission mission, List<Long> nodeIdList);
+
+//	void update(Mission mission, List<MissionItem> missionItems);
 
     Mission get(long id);
 

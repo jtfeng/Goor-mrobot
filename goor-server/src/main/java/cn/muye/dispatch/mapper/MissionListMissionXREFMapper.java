@@ -19,7 +19,7 @@ public interface MissionListMissionXREFMapper {
 
 	void delete(long id);
 
-	void deleteByMainId(long missionMainId);
+	void deleteByListId(long missionListId);
 
-	List<MissionListMissionXREF> findByMainId(long missionMainId);
+	List<MissionListMissionXREF> findByListId(long missionListId);
 }

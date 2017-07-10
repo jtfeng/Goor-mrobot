@@ -4,10 +4,8 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamResponseBody;
-import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.mapper.PointMapper;
 import cn.muye.area.point.service.PointService;
@@ -23,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Condition;
 import tk.mybatis.mapper.entity.Example;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,9 +59,9 @@ public class PointServiceImpl implements PointService {
     @Override
     public void delete(String sceneName, String mapName, long storeId) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("MAP_NAME = '" + mapName + "'")
-                .andCondition("SCENE_NAME = '" + sceneName + "'")
-                .andCondition("STORE_ID = " + storeId);
+        condition.createCriteria().andCondition("MAP_NAME = ", "'" + mapName + "'")
+                .andCondition("SCENE_NAME =", "'" + sceneName + "'")
+                .andCondition("STORE_ID =", storeId);
         pointMapper.deleteByExample(condition);
     }
 
@@ -81,10 +78,10 @@ public class PointServiceImpl implements PointService {
     @Override
     public List<MapPoint> findByName(String pointName, String sceneName, String mapName, long storeId) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("POINT_NAME = '" + pointName + "'")
-                .andCondition("SCENE_NAME = '" + sceneName + "'")
-                .andCondition("MAP_NAME = '" + mapName + "'")
-                .andCondition("STORE_ID = " + storeId);
+        condition.createCriteria().andCondition("POINT_NAME =", "'" + pointName + "'")
+                .andCondition("SCENE_NAME = ", "'" + sceneName + "'")
+                .andCondition("MAP_NAME = ", "'" + mapName + "'")
+                .andCondition("STORE_ID = ", storeId);
         condition.setOrderByClause("POINT_NAME desc");
         return pointMapper.selectByExample(condition);
     }
@@ -100,19 +97,19 @@ public class PointServiceImpl implements PointService {
             Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
             Object mapPointTypeId = jsonObject.get(SearchConstants.SEARCH_MAP_POINT_TYPE_ID);
             if (pointName != null) {
-                criteria.andCondition("POINT_NAME like '%" + pointName + "%'");
+                criteria.andCondition("POINT_NAME like ", "%" + pointName + "%");
             }
             if (pointAlias != null) {
-                criteria.andCondition("POINT_ALIAS like '%" + pointAlias + "%'");
+                criteria.andCondition("POINT_ALIAS like ", "%" + pointAlias + "%");
             }
             if (sceneName != null) {
-                criteria.andCondition("SCENE_NAME like '%" + sceneName + "%'");
+                criteria.andCondition("SCENE_NAME like", "%" + sceneName + "%");
             }
             if (mapPointTypeId != null) {
-                criteria.andCondition("MAP_POINT_TYPE_ID =" + mapPointTypeId);
+                criteria.andCondition("MAP_POINT_TYPE_ID =", mapPointTypeId);
             }
         }
-        criteria.andCondition("STORE_ID = " + storeId);
+        criteria.andCondition("STORE_ID = " , storeId);
         condition.setOrderByClause("ID DESC");
 
         List<MapPoint> mapPointList = pointMapper.selectByExample(condition);
@@ -130,7 +127,7 @@ public class PointServiceImpl implements PointService {
     @Override
     public List<MapPoint> findBySceneName(String sceneName) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("SCENE_NAME = '" + sceneName + "'");
+        condition.createCriteria().andCondition("SCENE_NAME = ", "'" + sceneName + "'");
         condition.setOrderByClause("SCENE_NAME desc");
         return pointMapper.selectByExample(condition);
     }

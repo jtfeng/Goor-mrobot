@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
 
 import java.io.Serializable;
@@ -16,8 +17,9 @@ import java.io.Serializable;
  * 通用文件下载bean
  * Created by enva on 2017/5/9.
  */
+@Slf4j
 public class TopicSubscribeInfo implements Serializable {
-	private static Logger logger = Logger.getLogger(TopicSubscribeInfo.class);
+//	private static Logger logger = Logger.getLogger(TopicSubscribeInfo.class);
 	//当网络断开时从新订阅
 	public static void reSubScribeTopic(Ros ros){
 
@@ -49,7 +51,7 @@ public class TopicSubscribeInfo implements Serializable {
 		JSONObject jsonObjectData = JSON.parseObject(data);
 		String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
 		if(CacheInfoManager.getNameSubCache(messageName)){
-			logger.info(" ====== message.toString()===" + message);
+			log.info(" ====== message.toString()===" + message);
 			return true;
 		}
 		return false;
@@ -61,7 +63,7 @@ public class TopicSubscribeInfo implements Serializable {
 		JSONObject jsonObjectData = JSON.parseObject(data);
 		String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
 		if(CacheInfoManager.getNameSubCache(messageName)){
-			logger.info(" ====== message.toString()===" + message);
+			log.info(" ====== message.toString()===" + message);
 			return true;
 		}
 		return false;
