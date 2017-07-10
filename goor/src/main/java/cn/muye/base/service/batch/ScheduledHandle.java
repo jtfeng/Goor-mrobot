@@ -15,30 +15,11 @@ public class ScheduledHandle {
 
     public ScheduledHandle(ScheduledExecutorService scheduledExecutor){
         this.scheduledExecutor = scheduledExecutor;
-        this.sendMessageScheduled();
         this.replyMessageScheduled();
         this.rosHealthCheckScheduled();
         this.downloadResourceScheduled();
         this.publishRosScheduled();
         this.executeTwentyThreeAtNightPerDay();
-    }
-
-    /**
-     * 发送消息
-     */
-    public void sendMessageScheduled() {
-        scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                try {
-//                    logger.info("schedule sendMessageScheduled start");
-                    ScheduledHandleService service = new ScheduledHandleServiceImp();
-                    service.sendMessage();
-                } catch (Exception e) {
-                    logger.error("schedule sendMessageScheduled exception", e);
-                }
-            }
-        }, 5, 10, TimeUnit.SECONDS);
     }
 
 
