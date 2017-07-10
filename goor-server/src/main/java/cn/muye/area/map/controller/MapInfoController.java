@@ -43,7 +43,7 @@ public class MapInfoController {
             }
             mapInfoDB.setMapAlias(mapInfo.getMapAlias());
             mapInfoService.update(mapInfoDB);
-            return AjaxResult.success(mapInfoDB);
+            return AjaxResult.success(mapInfoDB,"修改成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统错误");
@@ -56,7 +56,7 @@ public class MapInfoController {
     public AjaxResult getMapInfo(WhereRequest whereRequest) {
         try {
             List<MapInfo> mapZipList = mapInfoService.getMapInfo(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            return AjaxResult.success(mapZipList);
+            return AjaxResult.success(mapZipList,"查询成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统错误");
@@ -67,7 +67,7 @@ public class MapInfoController {
     @ResponseBody
     public AjaxResult testRabbitMQ(HttpServletRequest request, @RequestParam("deviceId") String deviceId) {
         try {
-            return AjaxResult.success(CacheInfoManager.getMessageCache(deviceId));
+            return AjaxResult.success(CacheInfoManager.getMessageCache(deviceId),"获取当前位置信息成功");
         } catch (Exception e) {
             LOGGER.error("getPosition exception", e);
             return AjaxResult.failed();
