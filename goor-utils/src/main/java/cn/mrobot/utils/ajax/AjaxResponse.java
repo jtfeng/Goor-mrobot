@@ -8,6 +8,8 @@ import java.util.Map;
 
 public class AjaxResponse implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     public final static int RESPONSE_STATUS_SUCCESS           = 0;
     public final static int RESPONSE_STATUS_FAIURE            = -1;
     public final static int RESPONSE_STATUS_VALIDATION_FAILED = -2;

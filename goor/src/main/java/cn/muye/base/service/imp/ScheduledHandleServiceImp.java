@@ -161,7 +161,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             try {
                 logger.info("-->> parameter publishMessage start");
                 CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
-                if(StringUtil.isEmpty(commonInfo.getTopicName())
+                if(StringUtil.isEmpty(commonInfo)
+                        || StringUtil.isEmpty(commonInfo.getTopicName())
                         || StringUtil.isEmpty(commonInfo.getTopicType())
                         || StringUtil.isEmpty(commonInfo.getPublishMessage())){
                     logger.warn("-->> publishMessage commonInfo is null");

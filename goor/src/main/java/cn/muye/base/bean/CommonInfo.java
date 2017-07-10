@@ -17,6 +17,8 @@ import java.io.Serializable;
 @Data
 public class CommonInfo implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private String MD5;//md5,有文件时，必须字段
 
     private String remoteFileUrl;//下载路径,有文件时，必须字段
