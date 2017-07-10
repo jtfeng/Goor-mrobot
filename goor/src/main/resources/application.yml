@@ -19,6 +19,9 @@ spring:
 #本服务器端口号
 server:
   port: 8070
+  mapPath: E:\share\map_server\maps
+# mapPath: /home/robot/catkin_ws/install/share/map_server/maps/
+
 
 #ros配置
 ros:
