@@ -57,10 +57,10 @@ public class MapZipController {
             }
             if (mapZip.getId() != null && mapZip.getId() > 0) {
                 mapZipService.update(mapZip);
-                return AjaxResult.success(mapZip);
+                return AjaxResult.success(mapZip, "修改成功");
             } else {
                 mapZipService.save(mapZip);
-                return AjaxResult.success(mapZip);
+                return AjaxResult.success(mapZip, "保存成功");
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -80,7 +80,7 @@ public class MapZipController {
 
             PageHelper.startPage(pageNo, pageSize);
             PageInfo<MapZip> page = new PageInfo<>(mapZipList);
-            return AjaxResult.success(page);
+            return AjaxResult.success(page, "查询成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统错误");
@@ -93,7 +93,7 @@ public class MapZipController {
     public AjaxResult deleteMapZip(@PathVariable Long id) {
         try {
             if (null == id) {
-                return AjaxResult.failed(2, "参数错误");
+                return AjaxResult.failed(2, "参数错误(id不能为空)");
             }
 
             MapZip mapZip = mapZipService.getMapZip(id);
@@ -138,7 +138,7 @@ public class MapZipController {
             } else {
                 result = mapSyncService.syncMap(mapZip, robotList);
             }
-            return AjaxResult.success(result);
+            return AjaxResult.success(result,"地图同步请求发送成功");
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
             return AjaxResult.failed("系统错误");

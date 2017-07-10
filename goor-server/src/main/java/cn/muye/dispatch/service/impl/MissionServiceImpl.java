@@ -53,20 +53,43 @@ public class MissionServiceImpl implements MissionService {
 	}
 
 	@Override
-	public void update(Mission mission, List<Long> nodeIdList) {
-		Long missionChainId = mission.getId();
-		MissionMissionItemXREF missionMissionItemXREF = new MissionMissionItemXREF();
-		missionMissionItemXREF.setMissionChainId(missionChainId);
-		//添加关联关系
-		List<MissionMissionItemXREF> missionMissionItemXREFList = missionMissionItemXREFMapper.findByChainId(missionChainId);
-		for (int i = 0; i < nodeIdList.size(); i++) {
-			missionMissionItemXREF.setMissionNodeId(nodeIdList.get(i));
-			if (! missionMissionItemXREFList.contains(missionMissionItemXREF)) {
-				missionMissionItemXREFMapper.save(missionMissionItemXREF);
+	public void update(Mission mission, List<Long> missionItemIdList) {
+		Long missionId = mission.getId();
+
+		//添加关联关系,先全部删除，然后再关联
+		missionMissionItemXREFMapper.deleteByMissionId(missionId);
+		for (Long id : missionItemIdList) {
+			//判断missionItem是否存在
+			MissionItem missionItem = missionItemMapper.get(id);
+			if(missionItem == null) {
+				continue;
 			}
+			MissionMissionItemXREF missionMissionItemXREF = new MissionMissionItemXREF();
+			missionMissionItemXREF.setMissionId(missionId);
+			missionMissionItemXREF.setMissionItemId(id);
+			missionMissionItemXREFMapper.save(missionMissionItemXREF);
 		}
+
 		missionMapper.update(mission);
 	}
+
+//	@Override
+//	public void update(Mission mission, List<MissionItem> missionItems) {
+//		Long missionChainId = mission.getId();
+//		MissionMissionItemXREF missionMissionItemXREF = new MissionMissionItemXREF();
+//		missionMissionItemXREF.setMissionId(missionChainId);
+//		//添加关联关系
+//		List<MissionMissionItemXREF> missionMissionItemXREFList = missionMissionItemXREFMapper.findByMissionId(missionChainId);
+//		if(missionItems != null && missionItems.size() > 0) {
+//			for (int i = 0; i < missionItems.size(); i++) {
+//				missionMissionItemXREF.setMissionItemId(missionItems.get(i).getId());
+//				if (! missionMissionItemXREFList.contains(missionMissionItemXREF)) {
+//					missionMissionItemXREFMapper.save(missionMissionItemXREF);
+//				}
+//			}
+//		}
+//		missionMapper.update(mission);
+//	}
 
 	@Override
 	public Mission get(long id) {
@@ -75,7 +98,7 @@ public class MissionServiceImpl implements MissionService {
 
 	@Override
 	public void delete(Mission mission) {
-		missionMissionItemXREFMapper.deleteByChainId(mission.getId());//删除关联关系
+		missionMissionItemXREFMapper.deleteByMissionId(mission.getId());//删除关联关系
 		missionMapper.delete(mission.getId());
 	}
 
@@ -89,13 +112,13 @@ public class MissionServiceImpl implements MissionService {
 		List<Mission> missionList = new ArrayList<>();
 		if (whereRequest.getQueryObj() != null) {
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
-			Object missionMainId = map.get(SearchConstants.SEARCH_MISSION_MAIN_ID);
+//			Object missionMainId = map.get(SearchConstants.SEARCH_MISSION_MAIN_ID);
 			Object name = map.get(SearchConstants.SEARCH_NAME);
 			Object beginDate = map.get(SearchConstants.SEARCH_BEGIN_DATE);
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
-			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
+//			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionList = missionMapper.list(missionMainId, name, beginDate, endDate, priority);
+			missionList = missionMapper.list(/*missionMainId, */name, beginDate, endDate/*, priority*/);
 		}else {
 			missionList = missionMapper.listAll();
 		}
@@ -115,7 +138,7 @@ public class MissionServiceImpl implements MissionService {
 		for (int i = 0; i < missionList.size(); i++) {
 			Set<MissionItem> missionItemList = new HashSet<>();
 			mission = missionList.get(i);
-			List<MissionMissionItemXREF> missionMissionItemXREFList = missionMissionItemXREFMapper.findByChainId(mission.getId());
+			List<MissionMissionItemXREF> missionMissionItemXREFList = missionMissionItemXREFMapper.findByMissionId(mission.getId());
 			for (int j = 0; j < missionMissionItemXREFList.size(); j++) {
 				missionItemList.add(missionMissionItemXREFList.get(j).getMissionItem());
 			}

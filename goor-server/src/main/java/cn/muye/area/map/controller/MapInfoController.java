@@ -31,8 +31,9 @@ public class MapInfoController {
     @RequestMapping(value = "area/mapinfo", method = {RequestMethod.POST})
     @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-    public AjaxResult setMapAlias(@RequestParam("id") Long id, @RequestParam("mapAlias") String mapAlias) {
+    public AjaxResult setMapAlias(@RequestBody MapInfo mapInfo) {
         try {
+            Long id = mapInfo.getId();
             if(null == id){
                 return AjaxResult.failed("地图的主键ID不能为空");
             }
@@ -40,9 +41,9 @@ public class MapInfoController {
             if(null == mapInfoDB){
                 return AjaxResult.failed("地图数据不存在");
             }
-            mapInfoDB.setMapAlias(mapAlias);
+            mapInfoDB.setMapAlias(mapInfo.getMapAlias());
             mapInfoService.update(mapInfoDB);
-            return AjaxResult.success(mapInfoDB);
+            return AjaxResult.success(mapInfoDB,"修改成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统错误");
@@ -55,7 +56,7 @@ public class MapInfoController {
     public AjaxResult getMapInfo(WhereRequest whereRequest) {
         try {
             List<MapInfo> mapZipList = mapInfoService.getMapInfo(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            return AjaxResult.success(mapZipList);
+            return AjaxResult.success(mapZipList,"查询成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统错误");
@@ -66,7 +67,7 @@ public class MapInfoController {
     @ResponseBody
     public AjaxResult testRabbitMQ(HttpServletRequest request, @RequestParam("deviceId") String deviceId) {
         try {
-            return AjaxResult.success(CacheInfoManager.getMessageCache(deviceId));
+            return AjaxResult.success(CacheInfoManager.getMessageCache(deviceId),"获取当前位置信息成功");
         } catch (Exception e) {
             LOGGER.error("getPosition exception", e);
             return AjaxResult.failed();
