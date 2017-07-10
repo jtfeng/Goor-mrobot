@@ -3,15 +3,16 @@ package cn.muye.base.consumer;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
-import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,9 @@ public class ConsumerCommon {
 
 //    @Autowired
 //    private ReceiveMessageService receiveMessageService;
+
+      @Autowired
+      private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private OffLineMessageService offLineMessageService;
@@ -126,22 +130,64 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT)
     public void directCommandReport(@Payload MessageInfo messageInfo) {
         try {
+            if (MessageType.TIME_SYNCHRONIZED.equals(messageInfo.getMessageType())) {
+                clientTimeSynchronized(messageInfo);
+                return;
+            }
+
             sendMessageSave(messageInfo);
         }catch (Exception e){
             logger.error("consumer directCommandReport exception",e);
         }
     }
 
+    /**
+     * x86 请求与云端时间同步
+     * @param messageInfo
+     */
+    private void clientTimeSynchronized(MessageInfo messageInfo){
+        //监听上行X86时间同步消息，获得X86时间，与服务器时间比较，如果差值大于10s（默认），进行时间同步，否则不处理
+        Date date = new Date();
+        long upTime = messageInfo.getSendTime().getTime();
+        long downTime = date.getTime();
+        if ((downTime - upTime) < 10) {
+            return;
+        } else {
+            //发送带响应同步消息，获得10次时间平均延迟
+            int sum = 0;
 
+            try {
+                //todo:rabbitmq响应超时问题，
+                MessageInfo sendMessageInfo = new MessageInfo();
+                for (int i = 0; i < 10; i++) {
+                    long startTime = System.currentTimeMillis();
+                    sendMessageInfo.setMessageType(MessageType.TIME_SYNCHRONIZED);
+                    AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);//后期带上机器编码进行区分
+                    System.out.println("the delay time :" + result.toString());
+                    long endTime = System.currentTimeMillis();
+                    sum += (endTime - startTime);
+                }
+
+                long avg = sum / 20; //只需要考虑单向时间误差
+
+                //给指定X86发送时间同步消息
+                sendMessageInfo.setMessageText(String.valueOf(new Date().getTime() + avg));
+                AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);
+                System.out.println("the time synchronized result :" + result);
+            } catch (Exception e){
+                logger.error("time synchronized failure : " +e.toString());
+            }
+        }
+        return;
+    }
 
     private boolean sendMessageSave(MessageInfo messageInfo) throws Exception{
         if(messageInfo == null
                 || StringUtil.isEmpty(messageInfo.getUUID() + "")){
             return false;
         }
-        if(MessageType.EXECUTOR_LOG.equals(messageInfo.getMessageType())){
+        if(MessageType.EXECUTOR_LOG.equals(messageInfo.getMessageType())) {
             //TODO 此处可以添加日志及状态上报存储
-
 
         }else if(MessageType.REPLY.equals(messageInfo.getMessageType())){
             OffLineMessage message = new OffLineMessage();

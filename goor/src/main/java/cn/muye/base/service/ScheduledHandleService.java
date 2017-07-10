@@ -3,7 +3,6 @@ package cn.muye.base.service;
 
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
-import com.mpush.api.Client;
 import edu.wpi.rail.jrosbridge.Ros;
 
 public interface ScheduledHandleService {
@@ -22,4 +21,5 @@ public interface ScheduledHandleService {
 
     void executeTwentyThreeAtNightPerDay();
 
+    void timeSynchronized(String localRobotSN);
 }

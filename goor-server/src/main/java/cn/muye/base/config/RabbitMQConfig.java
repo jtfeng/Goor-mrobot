@@ -58,19 +58,6 @@ public class RabbitMQConfig {
         return new Queue(TopicConstants.DIRECT_COMMAND_REPORT,false,false,true);
     }
 
-    /**
-     * X86与云端时间同步队列
-     */
-    @Bean
-    public Queue timeSynchronizedUp() {
-        return new Queue("time.synchronized.up", false);
-    }
-
-    @Bean
-    public Queue timeSynchronizedDown() {
-        return new Queue("time.synchronized.down", false);
-    }
-
     @Bean
     public Queue directAppSub() {
         return new Queue(TopicConstants.DIRECT_APP_SUB,false,false,true);

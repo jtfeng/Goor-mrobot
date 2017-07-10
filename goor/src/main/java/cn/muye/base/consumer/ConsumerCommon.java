@@ -1,6 +1,7 @@
 package cn.muye.base.consumer;
 
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
@@ -9,13 +10,19 @@ import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import edu.wpi.rail.jrosbridge.Ros;
+import edu.wpi.rail.jrosbridge.Service;
+import edu.wpi.rail.jrosbridge.callback.ServiceCallback;
+import edu.wpi.rail.jrosbridge.services.ServiceRequest;
+import edu.wpi.rail.jrosbridge.services.ServiceResponse;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -56,6 +63,12 @@ public class ConsumerCommon {
         try {
             if (messageInfo != null) {
                 logger.info("topicCommandAndReceiveMessage=========" + messageInfo);
+
+                //x86 开机定时时间同步
+                if(MessageType.TIME_SYNCHRONIZED.equals(messageInfo.getMessageType())){
+                    return clientTimeSynchronized(messageInfo);
+                }
+
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 return service.publishMessage(ros, messageInfo);
             }
@@ -63,6 +76,39 @@ public class ConsumerCommon {
             logger.error("topicCommandAndReceiveMessage Exception", e);
         }
         return AjaxResult.failed();
+    }
+
+    /**
+     * x86 agent 开机启动后（默认10分钟）请求云端时间同步
+     * @param messageInfo
+     * @return
+     */
+    private AjaxResult clientTimeSynchronized(MessageInfo messageInfo){
+        if (StringUtils.isEmpty(messageInfo.getMessageText())) {
+            return AjaxResult.success();
+        }
+
+        System.out.println("receive server message,currentTime: " + messageInfo.getSendTime());
+        //调用ros service进行时间同步
+        Date date = new Date();
+        long synchronizedTime = date.getTime() / 1000;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        System.out.println(sdf.format(synchronizedTime));
+
+        Service syncTime = new Service(ros, "/sync_system_time", "sync_system_time/UpdateTime");
+
+        String jsonString = "{\"sync_time\": " + synchronizedTime + "}";
+        System.out.println("********************" + jsonString);
+        ServiceRequest request = new ServiceRequest(jsonString, "sync_system_time/UpdateTime");
+
+        syncTime.callService(request, new ServiceCallback() {
+            @Override
+            public void handleServiceResponse(ServiceResponse response) {
+                System.out.println("the result of calling service " + response.toString());
+            }
+        });
+        return AjaxResult.success();
     }
 
     /**

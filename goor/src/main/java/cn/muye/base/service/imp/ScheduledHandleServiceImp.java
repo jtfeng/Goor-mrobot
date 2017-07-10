@@ -2,16 +2,17 @@ package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.base.bean.*;
+import cn.muye.base.bean.AjaxResult;
+import cn.muye.base.bean.CommonInfo;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.download.DownloadHandle;
-import cn.muye.base.listener.*;
-import cn.muye.base.model.message.OffLineMessage;
+import cn.muye.base.listener.CheckHeartSubListenerImpl;
 import cn.muye.base.model.message.ReceiveMessage;
-import cn.muye.base.producer.ProducerCommon;
 import cn.muye.base.service.ScheduledHandleService;
-import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -27,8 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class ScheduledHandleServiceImp implements ScheduledHandleService, ApplicationContextAware {
@@ -212,5 +211,21 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         ScheduledHandleServiceImp.applicationContext = applicationContext;
+    }
+
+    @Override
+    public void timeSynchronized(String localRobotSN) {
+        try {
+            logger.info("Scheduled time synchronized start");
+            rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setSendTime(new Date());
+            messageInfo.setSenderId(localRobotSN);
+            messageInfo.setMessageType(MessageType.TIME_SYNCHRONIZED);
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_REPORT, messageInfo);
+        } catch (final Exception e) {
+            logger.error("Scheduled time synchronized exception", e);
+        }
+        System.out.println("*********** x86 time synchronized request ***************");
     }
 }

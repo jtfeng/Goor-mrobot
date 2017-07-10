@@ -8,5 +8,6 @@ public enum MessageType {
     EXECUTOR_COMMAND,//命令消息
     EXECUTOR_UPGRADE,//升级消息
     EXECUTOR_RESOURCE,//资源消息
+    TIME_SYNCHRONIZED,//时间同步请求消息
     REPLY;//回执消息
 }
