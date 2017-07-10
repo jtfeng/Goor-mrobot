@@ -10,8 +10,8 @@
         <result property="updateTime" column="UPDATE_TIME"/>
         <result property="repeatCount" column="REPEAT_COUNT"/>
         <result property="intervalTime" column="INTERVAL_TIME"/>
-        <result property="missionMainId" column="MISSION_MAIN_ID"/>
-        <result property="priority" column="PRIORITY"/>
+        <!--<result propermissionListIdinId" column="MISSION_MAIN_ID"/>-->
+        <!--<result property="priority" column="PRIORITY"/>-->
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -21,22 +21,22 @@
         CREATE_TIME,
         UPDATE_TIME,
         REPEAT_COUNT,
-        MISSION_MAIN_ID,
-        INTERVAL_TIME,
-        PRIORITY
+        INTERVAL_TIME
+<!--      ,   MISSION_MAIN_ID,
+        PRIORITY-->
     </sql>
 
     <insert id="save" parameterType="cn.mrobot.bean.mission.MissionList" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO D_MISSION_CHAIN(
+        INSERT INTO D_MISSION(
             ID,
             NAME,
             DESCRIPTION,
             CREATE_TIME,
             UPDATE_TIME,
             REPEAT_COUNT,
-            MISSION_MAIN_ID,
-            INTERVAL_TIME,
-            PRIORITY
+            INTERVAL_TIME
+            <!--,MISSION_MAIN_ID,
+            PRIORITY-->
         ) values (
             #{id},
             #{name},
@@ -44,9 +44,9 @@
             #{createTime},
             #{updateTime},
             #{repeatCount},
-            #{missionMainId},
-            #{intervalTime},
-            #{priority}
+            #{intervalTime}
+<!--           missionListIdinId},
+             #{priority}-->
         );
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS ID
@@ -54,7 +54,7 @@
     </insert>
 
     <update id="update">
-        UPDATE D_MISSION_CHAIN
+        UPDATE D_MISSION
         <trim prefix="set" suffixOverrides=",">
             <if test="name != null">
                 NAME = #{name},
@@ -71,12 +71,12 @@
             <if test="intervalTime != null">
                 INTERVAL_TIME = #{intervalTime},
             </if>
-            <if test="missionMainId != null">
-                MISSION_MAIN_ID = #{missionMainId},
-            </if>
-            <if test="priority != null">
-                PRIORITY = #{priority},
-            </if>
+            <!--<if temissionListIdinId != null">-->
+                <!--MISSION_MAIN_ID missionListIdinId},-->
+            <!--</if>-->
+            <!--<if test="priority != null">-->
+                <!--PRIORITY = #{priority},-->
+            <!--</if>-->
         </trim>
         WHERE
         ID = #{id}
@@ -85,44 +85,44 @@
     <select id="get" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_CHAIN
+        FROM D_MISSION
         WHERE ID = #{id}
     </select>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM D_MISSION_CHAIN WHERE ID = #{id}
+        DELETE FROM D_MISSION WHERE ID = #{id}
     </delete>
 
     <select id="findByName" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_CHAIN
+        FROM D_MISSION
         WHERE NAME = #{name}
     </select>
 
     <select id="list" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_CHAIN d
+        FROM D_MISSION d
         <where>
-            <if test="missionMainId != null">
-                AND d.MISSION_MAIN_ID = #{missionMainId}
-            </if>
+            <!--<if temissionListIdinId != null">-->
+                <!--AND d.MISSION_MAIN_ID missionListIdinId}-->
+            <!--</if>-->
             <if test="name != null">
                 AND d.NAME like CONCAT('%',#{name},'%')
             </if>
-            <if test="deviceId != null">
-                AND d.DEVICE_ID = #{deviceId}
-            </if>
+            <!--<if test="deviceId != null">-->
+                <!--AND d.DEVICE_ID = #{deviceId}-->
+            <!--</if>-->
             <if test="beginDate != null ">
                 AND d.CREATE_TIME &gt;= #{beginDate}
             </if>
             <if test="endDate != null">
                 AND d.CREATE_TIME &lt; #{endDate}
             </if>
-            <if test="priority != null">
-                AND d.PRIORITY = #{priority}
-            </if>
+            <!--<if test="priority != null">-->
+                <!--AND d.PRIORITY = #{priority}-->
+            <!--</if>-->
         </where>
         ORDER BY NAME
     </select>
@@ -130,7 +130,7 @@
     <select id="listAll" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_CHAIN d
+        FROM D_MISSION d
         ORDER BY NAME
     </select>
 </mapper>

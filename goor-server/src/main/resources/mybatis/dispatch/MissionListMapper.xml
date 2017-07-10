@@ -2,11 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.muye.dispatch.mapper.MissionListMapper">
 
-    <resultMap id="missionDTOList" type="cn.mrobot.bean.mission.MissionList">
+    <resultMap id="missionList" type="cn.mrobot.bean.mission.MissionList">
         <result property="id" column="ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
-        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="missionListType" column="MISSION_LIST_TYPE"/>
         <result property="createTime" column="CREATE_TIME"/>
         <result property="updateTime" column="UPDATE_TIME"/>
         <result property="intervalTime" column="INTERVAL_TIME"/>
@@ -19,7 +19,7 @@
         ID,
         NAME,
         DESCRIPTION,
-        DEVICE_ID,
+        MISSION_LIST_TYPE,
         CREATE_TIME,
         UPDATE_TIME,
         REPEAT_COUNT,
@@ -29,11 +29,11 @@
     </sql>
 
     <insert id="save" parameterType="cn.mrobot.bean.mission.MissionList" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO D_MISSION_MAIN(
+        INSERT INTO D_MISSION_LIST(
         ID,
         NAME,
         DESCRIPTION,
-        DEVICE_ID,
+        MISSION_LIST_TYPE,
         CREATE_TIME,
         UPDATE_TIME,
         REPEAT_COUNT,
@@ -44,7 +44,7 @@
         #{id},
         #{name},
         #{description},
-        #{deviceId},
+        #{missionListType},
         #{createTime},
         #{updateTime},
         #{repeatCount},
@@ -58,13 +58,16 @@
     </insert>
 
     <update id="update">
-        UPDATE D_MISSION_MAIN
+        UPDATE D_MISSION_LIST
         <trim prefix="set" suffixOverrides=",">
             <if test="name != null">
                 NAME = #{name},
             </if>
             <if test="description != null">
                 DESCRIPTION = #{description},
+            </if>
+            <if test="missionListType != null">
+                MISSION_LIST_TYPE = #{missionListType},
             </if>
             <if test="createTime != null">
                 CREATE_TIME = #{createTime},
@@ -89,35 +92,35 @@
         ID = #{id}
     </update>
 
-    <select id="get" resultMap="missionDTOList">
+    <select id="get" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_MAIN
+        FROM D_MISSION_LIST
         WHERE ID = #{id}
     </select>
 
-    <select id="findByName" resultMap="missionDTOList">
+    <select id="findByName" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_MAIN
+        FROM D_MISSION_LIST
         WHERE NAME = #{name}
     </select>
 
     <delete id="delete" parameterType="long">
-        delete from D_MISSION_MAIN where ID = #{id}
+        delete from D_MISSION_LIST where ID = #{id}
     </delete>
 
-    <select id="list" resultMap="missionDTOList">
+    <select id="list" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_MAIN d
+        FROM D_MISSION_LIST d
         <where>
             <if test="name != null">
                 AND d.NAME like CONCAT('%',#{name},'%')
             </if>
-            <if test="deviceId != null">
+            <!--<if test="deviceId != null">
                 AND d.DEVICE_ID = #{deviceId}
-            </if>
+            </if>-->
             <if test="beginDate != null ">
                 AND d.CREATE_TIME &gt;= #{beginDate}
             </if>
@@ -131,10 +134,10 @@
         ORDER BY NAME
     </select>
 
-    <select id="listAll" resultMap="missionDTOList">
+    <select id="listAll" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_MAIN d
+        FROM D_MISSION_LIST d
         ORDER BY NAME
     </select>
 

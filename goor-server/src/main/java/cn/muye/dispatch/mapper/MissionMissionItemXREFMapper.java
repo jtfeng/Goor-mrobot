@@ -19,7 +19,7 @@ public interface MissionMissionItemXREFMapper {
 
 	void delete(long  id);
 
-	void deleteByChainId(long  missionChainId);
+	void deleteByMissionId(long  missionId);
 
-	List<MissionMissionItemXREF> findByChainId(long  missionChainId);
+	List<MissionMissionItemXREF> findByMissionId(long  missionChainId);
 }

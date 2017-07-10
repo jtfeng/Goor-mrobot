@@ -30,7 +30,7 @@ public interface MissionListMapper {
 	List<MissionList> listAll();
 
 	List<MissionList> list(@Param("name") Object name,
-                           @Param("deviceId") Object deviceId,
+                           /*@Param("deviceId") Object deviceId,*/
                            @Param("beginDate") Object beginDate,
                            @Param("endDate") Object endDate,
                            @Param("priority") Object priority);
