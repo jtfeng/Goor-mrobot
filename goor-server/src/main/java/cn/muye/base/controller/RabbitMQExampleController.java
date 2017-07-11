@@ -46,7 +46,7 @@ public class RabbitMQExampleController {
         commonInfo.setTopicType("rosTopicType");
         commonInfo.setPublishMessage("sendToRosJsonMessage");
         //如：
-//        commonInfo.setPublishMessage(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE);
+//        commonInfo.setPublishMessage(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE);//发送到ros的json数据
 
         MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
         info.setUuId(UUID.randomUUID().toString().replace("-", ""));
@@ -93,7 +93,7 @@ public class RabbitMQExampleController {
         AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, info);
 
         //全部机器x86 agent发送,仅供x86 agent 处理业务逻辑，不发ros消息
-        rabbitTemplate.convertAndSend(TopicConstants.FANOUT_RESOURCE_EXCHANGE, "", info);
+        rabbitTemplate.convertAndSend(TopicConstants.FANOUT_CLIENT_EXCHANGE, "", info);
 
         return ajaxCommandResult;
 //        return ajaxResourceResult;
