@@ -1,7 +1,7 @@
 package cn.mrobot.bean.order;
 
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.assets.good.GoodType;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.base.BaseBean;
 
 /**
@@ -17,7 +17,7 @@ public class OrderSetting extends BaseBean{
 
     private MapPoint endPoint; //货架回收点
 
-    private GoodType goodType; //货物类型
+    private GoodsType goodsType; //货物类型
 
     private Integer packageType; //装货方式 0为手动  1为自动
 
@@ -48,12 +48,12 @@ public class OrderSetting extends BaseBean{
         this.nickName = nickName;
     }
 
-    public GoodType getGoodType() {
-        return goodType;
+    public GoodsType getGoodsType() {
+        return goodsType;
     }
 
-    public void setGoodType(GoodType goodType) {
-        this.goodType = goodType;
+    public void setGoodsType(GoodsType goodsType) {
+        this.goodsType = goodsType;
     }
 
     public MapPoint getEndPoint() {

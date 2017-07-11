@@ -12,7 +12,6 @@ import cn.muye.base.download.file.FileHelper;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
-import com.mpush.api.Client;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.messages.Message;
@@ -36,7 +35,6 @@ public class HttpDownloader extends Thread {
 	private IDownloadInfo info;
 	private int maxRetry = 5;
 	private Ros ros;
-	private Client client;
 	private MessageInfo messageInfo;
 	private CommonInfo commonInfo;
 	private ReceiveMessageService receiveMessageService;

@@ -2,7 +2,7 @@ package cn.muye.log.charge.mapper;
 
 
 import java.util.List;
-import cn.muye.log.charge.bean.ChargeInfo;
+import cn.mrobot.bean.charge.ChargeInfo;
 /**
  * Created with IntelliJ IDEA.
  * Project Name : goor-server

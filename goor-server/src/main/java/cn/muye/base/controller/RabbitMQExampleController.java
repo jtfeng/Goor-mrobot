@@ -1,9 +1,11 @@
 package cn.muye.base.controller;
 
+import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.muye.base.bean.*;
 import cn.muye.base.cache.CacheInfoManager;
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -35,6 +37,17 @@ public class RabbitMQExampleController {
     @RequestMapping(value = "testRabbitMQ", method= RequestMethod.POST)
     @ResponseBody
     public AjaxResult testRabbitMQ(HttpServletRequest request) {
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setLocalFileName("robotFileName");
+        commonInfo.setLocalPath("robotFilePath");
+        commonInfo.setMD5("sendFileMD5");
+        commonInfo.setRemoteFileUrl("remoteServerFileDownloadUrl");
+        commonInfo.setTopicName("rosTopicName");
+        commonInfo.setTopicType("rosTopicType");
+        commonInfo.setPublishMessage("sendToRosJsonMessage");
+        //如：
+//        commonInfo.setPublishMessage(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE);
+
         MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
         info.setUuId(UUID.randomUUID().toString().replace("-", ""));
         info.setSendTime(new Date());
@@ -43,6 +56,7 @@ public class RabbitMQExampleController {
         info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
 //        info.setMessageType(MessageType.EXECUTOR_RESOURCE);//TODO 如果发送资源,将此行注释去掉，注释此行上面第一行
 //        info.setMessageType(MessageType.EXECUTOR_LOG);//TODO 针对 x86 agent 业务逻辑,不接收发送到ros的信息，如：发送命令要求上传log等
+        info.setMessageText(JSON.toJSONString(commonInfo));//TODO 发送资源及rostopic命令
 
         //获取当前需要发送的的routingKey,其中"SNabc001"为机器人SN号
         String noResultCommandRoutingKey = RabbitMqBean.getRoutingKey("SNabc0010",false, MessageType.EXECUTOR_COMMAND.name());

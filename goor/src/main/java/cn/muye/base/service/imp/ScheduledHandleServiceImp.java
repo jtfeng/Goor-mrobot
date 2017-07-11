@@ -25,6 +25,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -42,6 +43,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private Ros ros;
 
+    private String localRobotSN;
+
     public ScheduledHandleServiceImp(){
 
     }
@@ -51,9 +54,11 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             try {
                 rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
                 receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
+                getLocalRobotSN();
                 List<ReceiveMessage> list = receiveMessageService.listByIsSuccess(new ReceiveMessage(false));//多次回执，未成功和未publish的消息都回执,限制发送超过200次的，不再发送
                 for (ReceiveMessage message : list) {
                     MessageInfo info = new MessageInfo(message);
+                    info.setSenderId(localRobotSN);
                     rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_REPORT, info);
                     message.setSuccess(true);
                     message.setSendCount(message.getSendCount()+1);
@@ -208,6 +213,19 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         } catch (Exception e) {
             logger.error("update receiveMessage Exception", e);
         }
+    }
+
+    private boolean getLocalRobotSN(){
+        if(null == applicationContext){
+            logger.error("sendGoorMessage applicationContext is null error");
+            return false;
+        }
+        localRobotSN = (String) applicationContext.getBean("localRobotSN");
+        if(StringUtils.isEmpty(localRobotSN)){
+            logger.error("sendGoorMessage localRobotSN is null error ");
+            return false;
+        }
+        return true;
     }
 
     @Override
