@@ -1,15 +1,16 @@
 package cn.mrobot.bean.order;
 
-import cn.mrobot.bean.base.BaseBean;
-
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * Created by Selim on 2017/7/6.
  */
 @Table(name = "OR_GOODS_INFO")
-public class GoodsInfo extends BaseBean{
+public class GoodsInfo{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private Long orderDetailId; //关联下单的id
 
@@ -19,6 +20,14 @@ public class GoodsInfo extends BaseBean{
 
     @Transient
     private Goods goods; //对应物品
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getGoodsId() {
         return goodsId;

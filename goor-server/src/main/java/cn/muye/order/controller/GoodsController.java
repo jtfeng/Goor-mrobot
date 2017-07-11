@@ -1,12 +1,16 @@
 package cn.muye.order.controller;
 
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.order.Goods;
+import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Created by Selim on 2017/7/7.
@@ -18,6 +22,8 @@ public class GoodsController extends BaseController {
 
     @Autowired
     private GoodsService goodsService;
+    @Autowired
+    private GoodsTypeService goodsTypeService;
 
     /**
      * 获取货物 id
@@ -30,6 +36,39 @@ public class GoodsController extends BaseController {
         try {
             Goods goods = goodsService.findById(id);
             return AjaxResult.success(goods, "获取货物成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("获取货物出错");
+        }
+    }
+
+    /**
+     * 获取货物类型的list
+     * @return
+     */
+    @RequestMapping(value = "listGoodsType",method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listGoodsType(){
+        try {
+            List<GoodsType> goodsTypeList = goodsTypeService.listAll();
+            goodsTypeList.forEach(goodsType -> goodsType.setGoodsList(goodsService.listGoodsByType(goodsType.getId())));
+            return AjaxResult.success(goodsTypeList,"获取货物类型成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("获取货物类型出错");
+        }
+    }
+
+    /**
+     * 获取货物类型的list
+     * @return
+     */
+    @RequestMapping(value = "listGoodsByType",method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listGoodsByType(@RequestParam("type") Long type){
+        try {
+            List<Goods> goodsList = goodsService.listGoodsByType(type);
+            return AjaxResult.success(goodsList,"获取货物成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("获取货物出错");
