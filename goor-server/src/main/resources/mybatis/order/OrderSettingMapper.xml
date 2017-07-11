@@ -25,7 +25,7 @@
             <result column="endSceneName" property="sceneName"/>
             <result column="endMapName" property="mapName"/>
         </association>
-        <association property="goodType" javaType="cn.mrobot.bean.assets.good.GoodType">
+        <association property="goodsType" javaType="cn.mrobot.bean.assets.good.GoodsType">
             <id column="id" property="id"/>
             <result column="typeName" property="name"/>
         </association>
@@ -57,7 +57,7 @@
     <sql id = "orderSettingJoin">
         LEFT JOIN A_MAP_POINT ps ON os.start_point_id = ps.id
         LEFT JOIN A_MAP_POINT pe ON os.end_point_id = pe.id
-        LEFT JOIN AS_GOOD_TYPE t ON os.good_type_id = t.id
+        LEFT JOIN AS_GOODS_TYPE t ON os.goods_type_id = t.id
     </sql>
 
     <select id="getById" resultMap="orderSettingResult">
@@ -74,7 +74,7 @@
         station_id,
         start_point_id,
         end_point_id,
-        good_type_id,
+        goods_type_id,
         package_type,
         default_setting,
         delete_status,
@@ -86,7 +86,7 @@
         #{stationId},
         #{startPoint.id},
         #{endPoint.id},
-        #{goodType.id},
+        #{goodsType.id},
         #{packageType},
         #{defaultSetting},
         #{deleteStatus},
@@ -111,8 +111,8 @@
             <if test="endPoint != null and endPoint.id != null and endPoint.id != ''" >
                 end_point_id = #{endPoint.id},
             </if>
-            <if test="goodType != null and goodType.id != null and goodType.id != ''" >
-                good_type_id = #{goodType.id},
+            <if test="goodsType != null and goodsType.id != null and goodsType.id != ''" >
+                goods_type_id = #{goodsType.id},
             </if>
             <if test="packageType != null" >
                 package_type = #{packageType},

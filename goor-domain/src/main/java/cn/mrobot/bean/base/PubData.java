@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class PubData {
+
+    private static final long serialVersionUID = 1L;
+
     private String data;
 
 }

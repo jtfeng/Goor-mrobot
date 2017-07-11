@@ -27,6 +27,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public FanoutExchange fanoutClientExchange() {
+        return new FanoutExchange(TopicConstants.FANOUT_CLIENT_EXCHANGE,false,true);
+    }
+
+    @Bean
     public Binding bindingFanoutCommandExchange(Queue fanoutCommon, FanoutExchange fanoutCommandExchange) {
         return BindingBuilder.bind(fanoutCommon).to(fanoutCommandExchange);
     }
@@ -34,6 +39,11 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindingFanoutResourceExchange(Queue fanoutCommon, FanoutExchange fanoutResourceExchange) {
         return BindingBuilder.bind(fanoutCommon).to(fanoutResourceExchange);
+    }
+
+    @Bean
+    public Binding bindingFanoutClientExchange(Queue fanoutCommon, FanoutExchange fanoutClientExchange) {
+        return BindingBuilder.bind(fanoutCommon).to(fanoutClientExchange);
     }
 
     //以下为服务器一对一发送
@@ -56,6 +66,11 @@ public class RabbitMQConfig {
     @Bean
     public Queue directCommandReport() {
         return new Queue(TopicConstants.DIRECT_COMMAND_REPORT,false,false,true);
+    }
+
+    @Bean
+    public Queue directCommandReportAndReceive() {
+        return new Queue(TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE,false,false,true);
     }
 
     @Bean

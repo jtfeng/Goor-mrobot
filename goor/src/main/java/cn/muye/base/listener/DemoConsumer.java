@@ -66,14 +66,14 @@ public class DemoConsumer {
 //        return request;
     }
 
-    @RabbitListener(queues = TopicConstants.TOPIC_COMMAND )
+//    @RabbitListener(queues = TopicConstants.TOPIC_COMMAND )
     public  void  processTopicMessageCommand(@Payload String request) {
         if(request != null){
             System.out.println("processTopicMessagecommand========="+request);
         }
     }
 
-    @RabbitListener(queues = TopicConstants.FANOUT_COMMAND )
+//    @RabbitListener(queues = TopicConstants.FANOUT_COMMAND )
     public  void  processFanoutMessageCommand(@Payload String request) {
         if(request != null){
             System.out.println("processFanoutMessagecommand========="+request);

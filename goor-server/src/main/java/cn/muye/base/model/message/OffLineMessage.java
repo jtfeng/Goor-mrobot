@@ -19,7 +19,7 @@ import java.util.Date;
 @Data
 public class OffLineMessage implements Serializable {
 
-    private String UUID;//
+    private String uuId;//
 
     private String senderId;//发送者ID
 
@@ -38,11 +38,11 @@ public class OffLineMessage implements Serializable {
     private byte[] messageBinary;//二进制消息
 
     private Integer sendCount;//发送次数
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS",timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date sendTime;//发送时间
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS",timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date updateTime;//接收时间
 
     private boolean success;//是否发送成功

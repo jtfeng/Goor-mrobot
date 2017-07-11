@@ -14,6 +14,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class PubBean implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private String pub_name;
 
 }

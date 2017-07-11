@@ -4,6 +4,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.muye.base.bean.*;
 import cn.muye.base.cache.CacheInfoManager;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +13,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Date;
+import java.util.UUID;
 
 @CrossOrigin
 @Controller
+@Slf4j
 public class RabbitMQExampleController {
     private Logger logger = Logger.getLogger(RabbitMQExampleController.class);
 
@@ -30,33 +34,56 @@ public class RabbitMQExampleController {
      */
     @RequestMapping(value = "testRabbitMQ", method= RequestMethod.POST)
     @ResponseBody
-    public void testRabbitMQ(HttpServletRequest request) {
+    public AjaxResult testRabbitMQ(HttpServletRequest request) {
         MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+        info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        info.setSendTime(new Date());
+        info.setSenderId("goor-server");
+        info.setReceiverId("SNabc0010");
         info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
 //        info.setMessageType(MessageType.EXECUTOR_RESOURCE);//TODO 如果发送资源,将此行注释去掉，注释此行上面第一行
+//        info.setMessageType(MessageType.EXECUTOR_LOG);//TODO 针对 x86 agent 业务逻辑,不接收发送到ros的信息，如：发送命令要求上传log等
 
         //获取当前需要发送的的routingKey,其中"SNabc001"为机器人SN号
-        String noResultRoutingKey = RabbitMqBean.getRoutingKey("SNabc001",false, info);
-        String backResultRoutingKey = RabbitMqBean.getRoutingKey("SNabc001",true, info);
+        String noResultCommandRoutingKey = RabbitMqBean.getRoutingKey("SNabc0010",false, MessageType.EXECUTOR_COMMAND.name());
+        String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey("SNabc0010",true, MessageType.EXECUTOR_COMMAND.name());
+
+        String noResultResourceRoutingKey = RabbitMqBean.getRoutingKey("SNabc0010",false, MessageType.EXECUTOR_RESOURCE.name());
+        String backResultResourceRoutingKey = RabbitMqBean.getRoutingKey("SNabc0010",true, MessageType.EXECUTOR_RESOURCE.name());
+
+        String noResultClientRoutingKey = RabbitMqBean.getRoutingKey("SNabc0010",false, MessageType.EXECUTOR_CLIENT.name());
+        String backResultClientRoutingKey = RabbitMqBean.getRoutingKey("SNabc0010",true, MessageType.EXECUTOR_CLIENT.name());
 
         //单机器命令发送（不带回执）
-        rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, noResultRoutingKey, info);
+        rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, noResultCommandRoutingKey, info);
 
         //单机器命令发送（带回执）
-        AjaxResult ajaxResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultRoutingKey, info);
+        AjaxResult ajaxCommandResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultCommandRoutingKey, info);
 
         //全部机器命令发送
         rabbitTemplate.convertAndSend(TopicConstants.FANOUT_COMMAND_EXCHANGE, "", info);
 
         //单机器资源发送（不带回执）
-        rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, noResultRoutingKey, info);
+        rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, noResultResourceRoutingKey, info);
 
         //单机器资源发送（带回执）
-        AjaxResult ajaxResourceResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultRoutingKey, info);
+        AjaxResult ajaxResourceResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultResourceRoutingKey, info);
 
         //全部机器资源发送
         rabbitTemplate.convertAndSend(TopicConstants.FANOUT_RESOURCE_EXCHANGE, "", info);
 
+        //单机器发送，仅供x86 agent 处理业务逻辑，不发ros消息（不带回执）
+        rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, noResultClientRoutingKey, info);
+
+        //单机器发送，仅供x86 agent 处理业务逻辑，不发ros消息（带回执）
+        AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, info);
+
+        //全部机器x86 agent发送,仅供x86 agent 处理业务逻辑，不发ros消息
+        rabbitTemplate.convertAndSend(TopicConstants.FANOUT_RESOURCE_EXCHANGE, "", info);
+
+        return ajaxCommandResult;
+//        return ajaxResourceResult;
+//        return ajaxClientResult;
     }
 
     @RequestMapping(value = "getPosition", method= RequestMethod.GET)

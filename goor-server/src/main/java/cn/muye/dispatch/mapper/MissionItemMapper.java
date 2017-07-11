@@ -27,11 +27,15 @@ public interface MissionItemMapper {
 
 	MissionItem get(long id);
 
-	List<MissionItem> list(@Param("missionChainId") Object missionChainId,
+	/*List<MissionItem> list(@Param("missionChainId") Object missionChainId,
 						   @Param("name") Object name,
 						   @Param("beginDate") Object beginDate,
 						   @Param("endDate") Object endDate,
-						   @Param("priority") Object priority);
+						   @Param("priority") Object priority);*/
+
+	List<MissionItem> list(@Param("name") Object name,
+						   @Param("beginDate") Object beginDate,
+						   @Param("endDate") Object endDate);
 
 	List<MissionItem> listAll();
 }

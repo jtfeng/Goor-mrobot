@@ -61,13 +61,13 @@ public class MissionItemServiceImpl implements MissionItemService {
 		List<MissionItem> missionChainList = new ArrayList<>();
 		if (whereRequest.getQueryObj() != null) {
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
-			Object missionChainId = map.get(SearchConstants.SEARCH_MISSION_CHAIN_ID);
+//			Object missionChainId = map.get(SearchConstants.SEARCH_MISSION_CHAIN_ID);
 			Object name = map.get(SearchConstants.SEARCH_NAME);
 			Object beginDate = map.get(SearchConstants.SEARCH_BEGIN_DATE);
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
-			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
+//			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionChainList = missionItemMapper.list(name, missionChainId, beginDate, endDate, priority);
+			missionChainList = missionItemMapper.list(name, /*missionChainId,*/ beginDate, endDate/*, priority*/);
 		}else {
 			missionChainList = missionItemMapper.listAll();
 		}

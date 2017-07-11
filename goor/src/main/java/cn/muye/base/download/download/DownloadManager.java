@@ -3,7 +3,7 @@ package cn.muye.base.download.download;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import cn.muye.base.bean.CommonInfo;
+import cn.mrobot.bean.base.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.download.file.FileHelper;
 import cn.muye.base.download.file.IDataLineProcesser;

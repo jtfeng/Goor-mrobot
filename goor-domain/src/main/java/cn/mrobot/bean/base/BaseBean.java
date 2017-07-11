@@ -9,6 +9,9 @@ import java.io.Serializable;
 import java.util.Date;
 
 public abstract class BaseBean implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id; //id提取

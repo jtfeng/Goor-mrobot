@@ -10,7 +10,7 @@
         o.status AS "status",
         o.store_id AS "storeId",
         o.created_by AS "createdBy",
-        o.create_time AS "createTime",
+        o.create_time AS "createTime"
     </sql>
 
     <sql id = "orderJoin">
@@ -20,7 +20,7 @@
         select
         <include refid="orderColumn" />
         from OR_ORDER o
-        where os.id = #{id};
+        where o.id = #{id};
     </select>
 
     <insert id="saveOrder" parameterType="cn.mrobot.bean.order.Order" useGeneratedKeys="true" keyProperty="id">
@@ -30,7 +30,7 @@
         start_station_id,
         status,
         store_id,
-        create_by,
+        created_by,
         create_time
         ) values (
         #{orderSetting.id},

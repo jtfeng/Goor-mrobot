@@ -27,11 +27,11 @@ public interface MissionMapper {
 
 	Mission findByName(String name);
 
-	List<Mission> list(@Param("missionMainId") Object missionMainId,
+	List<Mission> list(/*@Param("missionMainId") Object missionMainId,*/
                        @Param("name") Object name,
                        @Param("beginDate") Object beginDate,
-                       @Param("endDate") Object endDate,
-                       @Param("priority") Object priority);
+                       @Param("endDate") Object endDate/*,
+                       @Param("priority") Object priority*/);
 
 	List<Mission> listAll();
 }

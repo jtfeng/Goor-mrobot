@@ -30,7 +30,7 @@ public class ConsumerCommon {
     private ReceiveMessageService receiveMessageService;
 
     /**
-     * 仅发送的命令消息
+     * 接收命令消息（无回执）
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.TOPIC_COMMAND )
@@ -47,7 +47,7 @@ public class ConsumerCommon {
     }
 
     /**
-     * 带回执的命令消息
+     * 接收命令消息（有回执）
      * @param messageInfo
      * @return
      */
@@ -66,7 +66,7 @@ public class ConsumerCommon {
     }
 
     /**
-     * 群发命令消息
+     * 接收群发命令消息（无回执）
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.FANOUT_COMMAND )
@@ -83,7 +83,7 @@ public class ConsumerCommon {
     }
 
     /**
-     * 仅发送的资源消息
+     * 接收资源消息（无回执）
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.TOPIC_RESOURCE )
@@ -100,7 +100,7 @@ public class ConsumerCommon {
     }
 
     /**
-     * 带回执的资源消息
+     * 接收资源消息（有回执）
      * @param messageInfo
      * @return
      */
@@ -119,7 +119,7 @@ public class ConsumerCommon {
     }
 
     /**
-     * 群发资源消息
+     * 接收群发资源消息（无回执）
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.FANOUT_RESOURCE )
@@ -133,6 +133,56 @@ public class ConsumerCommon {
             }
         }catch (Exception e){
             logger.error("fanoutResourceMessage Exception", e);
+        }
+    }
+
+    /**
+     * 接收云端发送至x86消息，不往ros发送消息，只处理agent业务（无回执）
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.TOPIC_CLIENT )
+    public void topicClientMessage(@Payload MessageInfo messageInfo) {
+        try {
+            if (messageInfo != null) {
+                logger.info("topicClientMessage=========" + messageInfo);
+                //TODO 业务需求,请调用各自的处理类
+            }
+        }catch (Exception e){
+            logger.error("topicClientMessage Exception", e);
+        }
+    }
+
+    /**
+     * 接收云端发送至x86消息，不往ros发送消息，只处理agent业务（有回执）
+     * @param messageInfo
+     * @return
+     */
+    @RabbitListener(queues = TopicConstants.TOPIC_RECEIVE_CLIENT )
+    public AjaxResult topicClientAndReceiveMessage(@Payload MessageInfo messageInfo) {
+        try {
+            if (messageInfo != null) {
+                logger.info("topicClientAndReceiveMessage=========" + messageInfo);
+                //TODO 业务需求,请调用各自的处理类
+            }
+        }catch (Exception e){
+            logger.error("topicClientAndReceiveMessage Exception", e);
+        }
+        return AjaxResult.failed();
+    }
+
+    /**
+     * 接收云端群发至x86消息，不往ros发送消息，只处理agent业务（无回执）
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.FANOUT_CLIENT )
+    public void fanoutClientMessage(@Payload MessageInfo messageInfo) {
+        try {
+            if (messageInfo != null) {
+                logger.info("fanoutClientMessage=========" + messageInfo);
+                //TODO 业务需求,请调用各自的处理类
+            }
+        }catch (Exception e){
+            logger.error("fanoutClientMessage Exception", e);
         }
     }
 

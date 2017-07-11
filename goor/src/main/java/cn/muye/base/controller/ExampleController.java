@@ -1,9 +1,8 @@
 package cn.muye.base.controller;
 
+import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.utils.Base64;
 import cn.muye.base.bean.AjaxResult;
-import cn.muye.base.bean.CommonInfo;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
@@ -173,15 +172,4 @@ public class ExampleController {
 		}
 	}
 
-	@RequestMapping(value = "testRabbitMq", method= RequestMethod.POST)
-	@ResponseBody
-	public AjaxResult testRabbitMq(@RequestParam("aa")String aa) {
-		MessageInfo info = new MessageInfo();
-		info.setUuId(UUID.randomUUID().toString().replace("-", ""));
-		info.setSendTime(new Date());
-//		String jsonString = JSON.toJSONString(info);
-//		String content = Base64.encode(jsonString);
-		rabbitTemplate.convertAndSend("topicExchange1","topic.SNabc001",info);
-		return AjaxResult.success();
-	}
 }

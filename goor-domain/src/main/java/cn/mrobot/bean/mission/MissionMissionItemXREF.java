@@ -11,38 +11,38 @@ package cn.mrobot.bean.mission;
  */
 public class MissionMissionItemXREF {
 
-	private Long id;
+//	private Long id;
 
 	private Mission mission;
 
-	private Long missionChainId;
+	private Long missionId;
 
 	private MissionItem missionItem;
 
-	private Long missionNodeId;
+	private Long missionItemId;
 
-	public Long getId() {
-		return id;
+//	public Long getId() {
+//		return id;
+//	}
+//
+//	public void setId(Long id) {
+//		this.id = id;
+//	}
+
+	public Long getMissionId() {
+		return missionId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setMissionId(Long missionId) {
+		this.missionId = missionId;
 	}
 
-	public Long getMissionChainId() {
-		return missionChainId;
+	public Long getMissionItemId() {
+		return missionItemId;
 	}
 
-	public void setMissionChainId(Long missionChainId) {
-		this.missionChainId = missionChainId;
-	}
-
-	public Long getMissionNodeId() {
-		return missionNodeId;
-	}
-
-	public void setMissionNodeId(Long missionNodeId) {
-		this.missionNodeId = missionNodeId;
+	public void setMissionItemId(Long missionItemId) {
+		this.missionItemId = missionItemId;
 	}
 
 	public Mission getMission() {
@@ -68,17 +68,17 @@ public class MissionMissionItemXREF {
 
 		MissionMissionItemXREF that = (MissionMissionItemXREF) o;
 
-		if (missionNodeId != null && missionChainId != null){
-			return missionChainId.equals(that.missionChainId) && missionNodeId.equals(that.missionNodeId);
+		if (missionItemId != null && missionId != null){
+			return missionId.equals(that.missionId) && missionItemId.equals(that.missionItemId);
 		}
 		return false;
 	}
 
-	@Override
-	public int hashCode() {
-		int result = id != null ? id.hashCode() : 0;
-		result = 31 * result + missionChainId.hashCode();
-		result = 31 * result + missionNodeId.hashCode();
-		return result;
-	}
+//	@Override
+//	public int hashCode() {
+//		int result = id != null ? id.hashCode() : 0;
+//		result = 31 * result + missionId.hashCode();
+//		result = 31 * result + missionItemId.hashCode();
+//		return result;
+//	}
 }

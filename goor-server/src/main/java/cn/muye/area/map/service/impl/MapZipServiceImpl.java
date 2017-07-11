@@ -1,7 +1,6 @@
 package cn.muye.area.map.service.impl;
 
 import cn.mrobot.bean.area.map.MapZip;
-import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapZipService;
@@ -45,7 +44,7 @@ public class MapZipServiceImpl implements MapZipService {
     @Override
     public MapZip getMapZip(long id) {
         MapZip mapZip = mapZipMapper.selectByPrimaryKey(id);
-        if(mapZip != null){
+        if (mapZip != null) {
             mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
             return mapZip;
         }
@@ -76,28 +75,28 @@ public class MapZipServiceImpl implements MapZipService {
 
     @Override
     public List<MapZip> list(WhereRequest whereRequest, long storeId) {
-        Condition condition = new Condition(MapPoint.class);
-        Example.Criteria criteria = condition.createCriteria();
+        Example example = new Example(MapZip.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("STORE_ID =", storeId);
         if (whereRequest.getQueryObj() != null) {
             JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
             Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
             Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
             if (mapName != null) {
-                criteria.andCondition("MAP_NAME like '%" + mapName + "%'");
+                criteria.andCondition("MAP_NAME like ", "%" + mapName + "%");
             }
             if (sceneName != null) {
-                criteria.andCondition("SCENE_NAME like '%" + sceneName + "%'");
+                criteria.andCondition("SCENE_NAME like ", "%" + sceneName + "%");
             }
         }
-        criteria.andCondition("STORE_ID =" + storeId);
-        condition.setOrderByClause("CREATE_TIME desc");
-        List<MapZip> mapZipList = mapZipMapper.selectByExample(condition);
+        example.setOrderByClause("CREATE_TIME DESC");
+        List<MapZip> mapZipList = mapZipMapper.selectByExample(example);
         return parseLocalPath(mapZipList);
     }
 
     @Override
     public MapZip latestZip(Long storeId) {
-        Condition condition = new Condition(MapPoint.class);
+        Condition condition = new Condition(MapZip.class);
         Example.Criteria criteria = condition.createCriteria();
         if (storeId != null) {
             criteria.andCondition("storeId=" + storeId);
@@ -116,7 +115,7 @@ public class MapZipServiceImpl implements MapZipService {
         List<MapZip> resultList = new ArrayList<>();
         for (int i = 0; i < mapZipList.size(); i++) {
             MapZip mapZip = mapZipList.get(i);
-            if(mapZip != null){
+            if (mapZip != null) {
                 mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
                 resultList.add(mapZip);
             }
@@ -126,8 +125,9 @@ public class MapZipServiceImpl implements MapZipService {
 
     private String parseLocalPath(String localPath) {
         //将文件路径封装成http路径
+        localPath = localPath.replaceAll("\\\\","/");
         int index = localPath.indexOf(SearchConstants.FAKE_MERCHANT_STORE_ID + "");
-        if(index >= 0){
+        if (index >= 0) {
             return DOWNLOAD_HTTP + localPath.substring(index);
         }
         return "";

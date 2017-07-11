@@ -3,6 +3,7 @@ package cn.muye.base.consumer;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
@@ -29,6 +30,10 @@ public class ConsumerCommon {
     @Autowired
     private OffLineMessageService offLineMessageService;
 
+    /**
+     * 透传ros发布的topic：agent_pub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_AGENT_PUB)
     public void directAgentPub(@Payload MessageInfo messageInfo) {
         try {
@@ -50,6 +55,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：agent_sub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_AGENT_SUB)
     public void directAgentSub(@Payload MessageInfo messageInfo) {
         try {
@@ -71,6 +80,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：app_pub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_APP_PUB)
     public void directAppPub(@Payload MessageInfo messageInfo) {
         try {
@@ -93,6 +106,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：app_sub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_APP_SUB)
     public void directAppSub(@Payload MessageInfo messageInfo) {
         try {
@@ -114,6 +131,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：current_pose
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_CURRENT_POSE)
     public void directCurrentPose(@Payload MessageInfo messageInfo) {
         try {
@@ -123,6 +144,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 接收 x86 agent 发布过来的消息，理论不接收ros消息，牵涉到ros消息的，请使用topic透传，只和agent通信（无回执）
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT)
     public void directCommandReport(@Payload MessageInfo messageInfo) {
         try {
@@ -132,11 +157,25 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 接收 x86 agent 发布过来的消息，理论不接收ros消息，牵涉到ros消息的，请使用topic透传，只和agent通信（无回执）
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE)
+    public AjaxResult directCommandReportAndReceive(@Payload MessageInfo messageInfo) {
+        try {
+            sendMessageSave(messageInfo);
+        }catch (Exception e){
+            logger.error("consumer directCommandReport exception",e);
+        }
+        return AjaxResult.success();
+    }
+
 
 
     private boolean sendMessageSave(MessageInfo messageInfo) throws Exception{
         if(messageInfo == null
-                || StringUtil.isEmpty(messageInfo.getUUID() + "")){
+                || StringUtil.isEmpty(messageInfo.getUuId() + "")){
             return false;
         }
         if(MessageType.EXECUTOR_LOG.equals(messageInfo.getMessageType())){
@@ -148,7 +187,7 @@ public class ConsumerCommon {
             message.setMessageStatusType(messageInfo.getMessageStatusType().getIndex());//如果是回执，将对方传过来的信息带上
             message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
             message.setSuccess(true);//接收到回执，发送消息成功
-            message.setUUID(messageInfo.getUUID());//更新的主键
+            message.setUuId(messageInfo.getUuId());//更新的主键
             message.setUpdateTime(new Date());//更新时间
             offLineMessageService.update(message);//更新发送的消息
         }

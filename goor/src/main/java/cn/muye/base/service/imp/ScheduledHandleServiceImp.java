@@ -1,5 +1,6 @@
 package cn.muye.base.service.imp;
 
+import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.utils.StringUtil;
@@ -161,7 +162,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             try {
                 logger.info("-->> parameter publishMessage start");
                 CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
-                if(StringUtil.isEmpty(commonInfo.getTopicName())
+                if(StringUtil.isEmpty(commonInfo)
+                        || StringUtil.isEmpty(commonInfo.getTopicName())
                         || StringUtil.isEmpty(commonInfo.getTopicType())
                         || StringUtil.isEmpty(commonInfo.getPublishMessage())){
                     logger.warn("-->> publishMessage commonInfo is null");

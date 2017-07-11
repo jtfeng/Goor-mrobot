@@ -3,6 +3,9 @@ package cn.muye.base.bean;
 import java.io.Serializable;
 
 public class AjaxResult implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
 	public static final int CODE_SUCCESS = 0;
 	public static final int CODE_FAILED = 1;
 	public static final int CODE_PARAM_ERROR = 2;

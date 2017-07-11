@@ -6,6 +6,8 @@ import cn.muye.order.service.GoodsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Created by Selim on 2017/7/7.
  */
@@ -17,5 +19,13 @@ public class GoodsServiceImpl extends BaseServiceImpl<Goods> implements GoodsSer
         Goods goods = new Goods(id);
         goods.setDeleteStatus(Boolean.TRUE);
         super.updateSelectiveByStoreId(goods);
+    }
+
+    @Override
+    public List<Goods> listGoodsByType(Long type) {
+        Goods goods = new Goods();
+        goods.setDeleteStatus(Boolean.FALSE);
+        goods.setGoodTypeId(type);
+        return myMapper.select(goods);
     }
 }

@@ -23,7 +23,9 @@ import java.util.Date;
 @Data
 public class MessageInfo implements Serializable {
 
-    private String UUID;//uuid
+    private static final long serialVersionUID = 1L;
+
+    private String uuId;//uuid
 
     private String senderId;//发送ID或机器序列号
 

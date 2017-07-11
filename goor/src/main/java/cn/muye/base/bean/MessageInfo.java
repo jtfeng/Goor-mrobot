@@ -6,6 +6,10 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -15,8 +19,13 @@ import java.util.Date;
 /**
  * Created by enva on 2017/5/9.
  */
-
+@NoArgsConstructor
+@AllArgsConstructor
+@Slf4j
+@Data
 public class MessageInfo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private String uuId;//uuid
 
@@ -37,18 +46,14 @@ public class MessageInfo implements Serializable {
     private byte[] messageBinary;//二进制消息
 
     private Integer sendCount;//发送次数
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS",timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date sendTime;//发送时间
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS",timezone = "GMT+8")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
     private Date updateTime;//接收时间
 
     private boolean success;//是否发送成功
-
-    public MessageInfo(){
-
-    }
 
     public MessageInfo(OffLineMessage message){
         BeanUtils.copyProperties(message, this);
@@ -74,107 +79,4 @@ public class MessageInfo implements Serializable {
         }
     }
 
-    public String getUuId() {
-        return uuId;
-    }
-
-    public void setUuId(String uuId) {
-        this.uuId = uuId;
-    }
-
-    public String getSenderId() {
-        return senderId;
-    }
-
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
-    }
-
-    public String getReceiverId() {
-        return receiverId;
-    }
-
-    public void setReceiverId(String receiverId) {
-        this.receiverId = receiverId;
-    }
-
-    public Integer getMessageKind() {
-        return messageKind;
-    }
-
-    public void setMessageKind(Integer messageKind) {
-        this.messageKind = messageKind;
-    }
-
-    public MessageType getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(MessageType messageType) {
-        this.messageType = messageType;
-    }
-
-    public MessageStatusType getMessageStatusType() {
-        return messageStatusType;
-    }
-
-    public void setMessageStatusType(MessageStatusType messageStatusType) {
-        this.messageStatusType = messageStatusType;
-    }
-
-    public String getRelyMessage() {
-        return relyMessage;
-    }
-
-    public void setRelyMessage(String relyMessage) {
-        this.relyMessage = relyMessage;
-    }
-
-    public String getMessageText() {
-        return messageText;
-    }
-
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
-    }
-
-    public byte[] getMessageBinary() {
-        return messageBinary;
-    }
-
-    public void setMessageBinary(byte[] messageBinary) {
-        this.messageBinary = messageBinary;
-    }
-
-    public Integer getSendCount() {
-        return sendCount;
-    }
-
-    public void setSendCount(Integer sendCount) {
-        this.sendCount = sendCount;
-    }
-
-    public Date getSendTime() {
-        return sendTime;
-    }
-
-    public void setSendTime(Date sendTime) {
-        this.sendTime = sendTime;
-    }
-
-    public Date getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
 }

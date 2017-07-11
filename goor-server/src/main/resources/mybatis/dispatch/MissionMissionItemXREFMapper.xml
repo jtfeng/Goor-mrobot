@@ -3,52 +3,49 @@
 <mapper namespace="cn.muye.dispatch.mapper.MissionMissionItemXREFMapper">
 
     <resultMap id="missionMissionItemXREF" type="cn.mrobot.bean.mission.MissionMissionItemXREF">
-        <result property="id" column="ID"/>
-        <result property="missionChainId" column="MISSION_CHAIN_ID"/>
-        <result property="missionNodeId" column="MISSION_NODE_ID"/>
+        <!--<result property="id" column="ID"/>-->
+        <result property="missionId" column="MISSION_ID"/>
+        <result property="missionItemId" column="MISSION_ITEM_ID"/>
         <association property="mission"
                      javaType="cn.mrobot.bean.mission.Mission"
-                     column="MISSION_CHAIN_ID"
+                     column="MISSION_ID"
                      select="cn.muye.dispatch.mapper.MissionMapper.get"/>
         <association property="missionItem"
                      javaType="cn.mrobot.bean.mission.MissionItem"
-                     column="MISSION_NODE_ID"
+                     column="MISSION_ITEM_ID"
                      select="cn.muye.dispatch.mapper.MissionItemMapper.get"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        ID,
-        MISSION_CHAIN_ID,
-        MISSION_NODE_ID
+        MISSION_ID,
+        MISSION_ITEM_ID
     </sql>
 
     <insert id="save" parameterType="cn.mrobot.bean.mission.MissionMissionItemXREF" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO D_MISSION_NODE_CHAIN_XREF(
-        ID,
-        MISSION_CHAIN_ID,
-        MISSION_NODE_ID
+        INSERT INTO D_MISSION_MISSION_ITEM_XREF(
+        MISSION_ID,
+        MISSION_ITEM_ID
         ) values (
-        #{id},
-        #{missionChainId},
-        #{missionNodeId}
+        #{missionId},
+        #{missionItemId}
         );
-        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
-            SELECT LAST_INSERT_ID() AS ID
-        </selectKey>
+        <!--<selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">-->
+            <!--SELECT LAST_INSERT_ID() AS ID-->
+        <!--</selectKey>-->
     </insert>
 
-    <delete id="delete" parameterType="long">
-        delete from D_MISSION_NODE_CHAIN_XREF where ID = #{id}
+    <!--<delete id="delete" parameterType="long">-->
+        <!--delete from D_MISSION_MISSION_ITEM_XREF where ID = #{id}-->
+    <!--</delete>-->
+
+    <delete id="deleteByMissionId" parameterType="long">
+        delete from D_MISSION_MISSION_ITEM_XREF where MISSION_ID = #{missionId}
     </delete>
 
-    <delete id="deleteByChainId" parameterType="long">
-        delete from D_MISSION_NODE_CHAIN_XREF where MISSION_CHAIN_ID = #{missionChainId}
-    </delete>
-
-    <select id="findByChainId" resultMap="missionMissionItemXREF">
+    <select id="findByMissionId" resultMap="missionMissionItemXREF">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_NODE_CHAIN_XREF
-        WHERE MISSION_CHAIN_ID = #{missionChainId}
+        FROM D_MISSION_MISSION_ITEM_XREF
+        WHERE MISSION_ID = #{missionId}
     </select>
 </mapper>

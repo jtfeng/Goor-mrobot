@@ -3,7 +3,7 @@
 <mapper namespace="cn.muye.base.mapper.message.ReceiveMessageMapper">
 
   <resultMap id="receiveMessageResult" type="cn.muye.base.model.message.ReceiveMessage">
-    <result property="UUID" column="UUID"/>
+    <result property="uuId" column="UUID"/>
     <result property="senderId" column="SENDER_ID"/>
     <result property="receiverId" column="RECEIVER_ID"/>
     <result property="messageKind" column="MESSAGE_KIND"/>
@@ -38,7 +38,7 @@
     SELECT
     <include refid="Base_Column_List" />
     FROM RECEIVE_MESSAGE o
-    WHERE o.UUID = #{UUID};
+    WHERE o.UUID = #{uuId};
   </select>
 
   <select id="getByIsSuccess" resultMap="receiveMessageResult">
@@ -73,7 +73,7 @@
     SELECT
     <include refid="Base_Column_List" />
     FROM RECEIVE_MESSAGE o
-    WHERE o.UUID = #{UUID};
+    WHERE o.UUID = #{uuId};
   </select>
 
   <insert id="save" parameterType="cn.muye.base.model.message.ReceiveMessage">
@@ -92,7 +92,7 @@
     UPDATE_TIME,
     SUCCESS
     ) values (
-    #{UUID},
+    #{uuId},
     #{senderId},
     #{receiverId},
     #{messageKind},
@@ -146,12 +146,12 @@
     </if>
     UPDATE_TIME = #{updateTime}
     WHERE
-    UUID = #{UUID}
+    UUID = #{uuId}
   </update>
 
   <delete id="delete">
     delete from RECEIVE_MESSAGE
-    where SUCCESS = TRUE AND UUID = #{UUID}
+    where SUCCESS = TRUE AND UUID = #{uuId}
   </delete>
 
   <delete id="deleteBySendTime">

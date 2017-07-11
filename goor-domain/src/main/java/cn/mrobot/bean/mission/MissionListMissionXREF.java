@@ -11,23 +11,23 @@ package cn.mrobot.bean.mission;
  */
 public class MissionListMissionXREF {
 
-	private Long id;
+//	private Long id;
 
 	private MissionList missionList;
 
-	private Long missionMainId;
+	private Long missionListId;
 
 	private Mission mission;
 
-	private Long missionChainId;
+	private Long missionId;
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
+//	public Long getId() {
+//		return id;
+//	}
+//
+//	public void setId(Long id) {
+//		this.id = id;
+//	}
 
 	public MissionList getMissionList() {
 		return missionList;
@@ -37,12 +37,12 @@ public class MissionListMissionXREF {
 		this.missionList = missionList;
 	}
 
-	public Long getMissionMainId() {
-		return missionMainId;
+	public Long getMissionListId() {
+		return missionListId;
 	}
 
-	public void setMissionMainId(Long missionMainId) {
-		this.missionMainId = missionMainId;
+	public void setMissionListId(Long missionListId) {
+		this.missionListId = missionListId;
 	}
 
 	public Mission getMission() {
@@ -53,12 +53,12 @@ public class MissionListMissionXREF {
 		this.mission = mission;
 	}
 
-	public Long getMissionChainId() {
-		return missionChainId;
+	public Long getMissionId() {
+		return missionId;
 	}
 
-	public void setMissionChainId(Long missionChainId) {
-		this.missionChainId = missionChainId;
+	public void setMissionId(Long missionId) {
+		this.missionId = missionId;
 	}
 
 
@@ -69,17 +69,17 @@ public class MissionListMissionXREF {
 
 		MissionListMissionXREF that = (MissionListMissionXREF) o;
 
-		if (missionMainId != null && missionChainId != null){
-			return missionChainId.equals(that.getMissionChainId()) && missionMainId.equals(that.getMissionMainId());
+		if (missionListId != null && missionId != null){
+			return missionId.equals(that.getMissionId()) && missionListId.equals(that.getMissionListId());
 		}
 		return false;
 	}
 
-	@Override
-	public int hashCode() {
-		int result = id != null ? id.hashCode() : 0;
-		result = 31 * result + (missionMainId != null ? missionMainId.hashCode() : 0);
-		result = 31 * result + (missionChainId != null ? missionChainId.hashCode() : 0);
-		return result;
-	}
+//	@Override
+//	public int hashCode() {
+//		int result = id != null ? id.hashCode() : 0;
+//		result = 31 * result + (missionListId != null ? missionListId.hashCode() : 0);
+//		result = 31 * result + (missionId != null ? missionId.hashCode() : 0);
+//		return result;
+//	}
 }

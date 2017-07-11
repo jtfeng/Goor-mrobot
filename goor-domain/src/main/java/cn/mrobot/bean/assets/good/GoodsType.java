@@ -1,21 +1,32 @@
 package cn.mrobot.bean.assets.good;
 
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.order.Goods;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.List;
 
 /**
  * Created by Ray.Fu on 2017/7/6.
  */
 @Table(name = "AS_GOODS_TYPE")
-public class GoodType extends BaseBean{
+public class GoodsType extends BaseBean{
 
     private String name;
 
     private String description;
+
+    @Transient
+    private List<Goods> goodsList;
+
+    public List<Goods> getGoodsList() {
+        return goodsList;
+    }
+
+    public void setGoodsList(List<Goods> goodsList) {
+        this.goodsList = goodsList;
+    }
 
     public String getName() {
         return name;
