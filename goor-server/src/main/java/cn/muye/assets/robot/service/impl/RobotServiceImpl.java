@@ -1,10 +1,12 @@
 package cn.muye.assets.robot.service.impl;
 
+import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
@@ -33,15 +35,47 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Autowired
     private RobotConfigService robotConfigService;
 
+    @Autowired
+    private StationRobotXREFService stationRobotXREFService;
+
+    @Autowired
+    private RobotService robotService;
+
+    /**
+     * 更新机器人
+     * @param robot
+     */
     public void updateRobot(Robot robot) {
         //更新机器人信息
         updateByStoreId(robot);
         //更新机器人配置信息
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
-        if (robotConfig != null) {
+        if (robotConfig != null && robot.getBatteryThreshold() != null) {
             robotConfig.setBatteryThreshold(robot.getBatteryThreshold());
+            robotConfigService.update(robotConfig);
         }
-        robotConfigService.update(robotConfig);
+    }
+
+    /**
+     * 由站点ID查询可用的机器人
+     * @param stationId
+     * @return
+     */
+    @Override
+    public Robot getAvailableRobotByStationId(Long stationId) {
+        List<StationRobotXREF> list = stationRobotXREFService.getByStationId(stationId);
+        Robot availableRobot = null;
+        if (list != null && list.size() > 0) {
+            for (StationRobotXREF xref : list) {
+                Long robotId = xref.getRobotId();
+                Robot robotDb = robotService.getById(robotId);
+                if (robotDb != null && robotDb.getStatus() == true) {
+                    availableRobot = robotDb;
+                    break;
+                }
+            }
+        }
+        return availableRobot;
     }
 
     private List<Robot> listPageByStoreIdAndOrder(int page, int pageSize, String name, Integer type, Class<Robot> clazz, String order) {

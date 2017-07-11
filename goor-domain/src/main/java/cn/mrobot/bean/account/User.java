@@ -24,6 +24,7 @@ public class User extends BaseBean{
     @Transient
     private Long roleId; //用户类型(1- 超级管理员， 2- 医院管理员, 3-站管理员)
 
+//    todo 以后还是要做切换站功能，暂时每个用户只能绑一个站，字段预留
     @Transient
     private List<StationDTO4User> stationList; //绑定的站List
 

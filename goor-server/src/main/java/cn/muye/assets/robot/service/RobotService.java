@@ -26,4 +26,6 @@ public interface RobotService extends BaseService<Robot>{
     Robot getByCode(String code);
 
     void updateRobot(Robot robot);
+
+    Robot getAvailableRobotByStationId(Long stationId);
 }

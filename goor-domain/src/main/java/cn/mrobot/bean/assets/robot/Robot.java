@@ -29,6 +29,8 @@ public class Robot extends BaseBean {
     @JSONField(format = "yyyy-MM-dd")
     private Date updateTime; //修改时间
 
+    private Boolean status = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
+
     @Transient
     private List<RobotPassword> passwords;
 
@@ -103,5 +105,13 @@ public class Robot extends BaseBean {
 
     public void setBatteryThreshold(Integer batteryThreshold) {
         this.batteryThreshold = batteryThreshold;
+    }
+
+    public Boolean getStatus() {
+        return status;
+    }
+
+    public void setStatus(Boolean status) {
+        this.status = status;
     }
 }
