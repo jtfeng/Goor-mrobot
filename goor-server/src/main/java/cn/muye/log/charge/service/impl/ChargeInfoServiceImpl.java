@@ -1,6 +1,6 @@
 package cn.muye.log.charge.service.impl;
 
-import cn.muye.log.charge.bean.ChargeInfo;
+import cn.mrobot.bean.charge.ChargeInfo;
 import cn.muye.log.charge.mapper.ChargeInfoMapper;
 import cn.muye.log.charge.service.ChargeInfoService;
 import org.springframework.beans.factory.annotation.Autowired;

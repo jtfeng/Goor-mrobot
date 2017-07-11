@@ -1,4 +1,4 @@
-package cn.muye.log.charge.bean;
+package cn.mrobot.bean.charge;
 
 import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
