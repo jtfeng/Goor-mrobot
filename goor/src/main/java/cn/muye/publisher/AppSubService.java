@@ -1,14 +1,11 @@
 package cn.muye.publisher;
 
-import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamRequestBody;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
-import edu.wpi.rail.jrosbridge.callback.TopicCallback;
 import edu.wpi.rail.jrosbridge.messages.Message;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
