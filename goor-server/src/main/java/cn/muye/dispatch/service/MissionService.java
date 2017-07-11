@@ -1,7 +1,6 @@
 package cn.muye.dispatch.service;
 
 import cn.mrobot.bean.mission.Mission;
-import cn.mrobot.bean.mission.MissionItem;
 import cn.mrobot.utils.WhereRequest;
 
 import java.util.List;
@@ -20,6 +19,8 @@ public interface MissionService {
 	long save(Mission mission);
 
 	void update(Mission mission);
+
+	void updateFull(Mission mission, Mission missionDB);
 
 	void update(Mission mission, List<Long> nodeIdList);
 
