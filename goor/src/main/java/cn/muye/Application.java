@@ -39,6 +39,9 @@ public class Application {
 	@Value("${sub.name}")
 	private String subName;
 
+	@Value("${local.robot.SN}")
+	private String localRobotSN;
+
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
 	public DataSource dataSource() {
@@ -75,6 +78,11 @@ public class Application {
 			CacheInfoManager.setNameSubCache(subName);
 		}
 		return subName;
+	}
+
+	@Bean
+	public String localRobotSN(){
+		return localRobotSN;
 	}
 
 	@Bean
