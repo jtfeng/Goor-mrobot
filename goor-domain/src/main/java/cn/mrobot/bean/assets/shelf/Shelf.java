@@ -1,6 +1,5 @@
 package cn.mrobot.bean.assets.shelf;
 
-import cn.mrobot.bean.assets.good.GoodType;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.base.BaseBean;
 

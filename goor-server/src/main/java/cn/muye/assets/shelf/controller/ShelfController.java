@@ -1,6 +1,6 @@
 package cn.muye.assets.shelf.controller;
 
-import cn.mrobot.bean.assets.good.GoodType;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
