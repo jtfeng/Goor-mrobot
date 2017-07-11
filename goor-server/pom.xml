@@ -12,6 +12,7 @@
     <groupId>cn.7player.framework</groupId>
     <artifactId>goor-server</artifactId>
     <version>1.0</version>
+    <packaging>jar</packaging>
 
     <name>goor-server</name>
     <description>goor server project for Spring Boot</description>

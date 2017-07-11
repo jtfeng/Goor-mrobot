@@ -20,7 +20,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `A_MAP_POINT`;
 CREATE TABLE `A_MAP_POINT` (
-  ID BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL COMMENT '主键',
+  ID BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
   STORE_ID BIGINT COMMENT '店铺ID',
   CREATED_BY BIGINT COMMENT '创建人',
   CREATE_TIME datetime COMMENT '创建时间' DEFAULT NOW(),
@@ -39,15 +39,15 @@ CREATE TABLE `A_MAP_POINT` (
 -- ----------------------------
 -- Records of A_MAP_POINT
 -- ----------------------------
-INSERT INTO `A_MAP_POINT` VALUES ('10', 'G1', '2', 'example', 'F001', '2.000', '3.000', '2.000', '2', null);
-INSERT INTO `A_MAP_POINT` VALUES ('11', 'G2', '2', 'example', 'F001', '2.000', '3.000', '2.000', '2', null);
-INSERT INTO `A_MAP_POINT` VALUES ('13', '测试as', '别名ad', 'asdfasdf', 'asdfasdf', '1.200', '2.600', '12.000', '4', null);
-INSERT INTO `A_MAP_POINT` VALUES ('14', 'sadfasdfqwe', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '5', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('15', 'sadfasdfqwe撒地方', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '6', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('16', '爱迪生 qwe撒地方', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '7', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('17', '爱迪asd生 asd', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '8', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('18', 'asasdasdasd', '撒的发生asd', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '1', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('19', '爱迪asdasdasd生 asdasd', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '8', '0');
+-- INSERT INTO `A_MAP_POINT` VALUES ('10', 'G1', '2', 'example', 'F001', '2.000', '3.000', '2.000', '2', null);
+-- INSERT INTO `A_MAP_POINT` VALUES ('11', 'G2', '2', 'example', 'F001', '2.000', '3.000', '2.000', '2', null);
+-- INSERT INTO `A_MAP_POINT` VALUES ('13', '测试as', '别名ad', 'asdfasdf', 'asdfasdf', '1.200', '2.600', '12.000', '4', null);
+-- INSERT INTO `A_MAP_POINT` VALUES ('14', 'sadfasdfqwe', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '5', '0');
+-- INSERT INTO `A_MAP_POINT` VALUES ('15', 'sadfasdfqwe撒地方', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '6', '0');
+-- INSERT INTO `A_MAP_POINT` VALUES ('16', '爱迪生 qwe撒地方', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '7', '0');
+-- INSERT INTO `A_MAP_POINT` VALUES ('17', '爱迪asd生 asd', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '8', '0');
+-- INSERT INTO `A_MAP_POINT` VALUES ('18', 'asasdasdasd', '撒的发生asd', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '1', '0');
+-- INSERT INTO `A_MAP_POINT` VALUES ('19', '爱迪asdasdasd生 asdasd', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '8', '0');
 
 -- ----------------------------
 -- Table structure for A_STATION
