@@ -1,6 +1,6 @@
 package cn.muye.assets.shelf.mapper;
 
-import cn.mrobot.bean.assets.good.GoodType;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.muye.util.MyMapper;
 
@@ -24,7 +24,7 @@ public interface ShelfMapper extends MyMapper<Shelf> {
      * @param shelfId
      * @return
      */
-    List<GoodType> findGoodsTypeByShelfId(Long shelfId);
+    List<GoodsType> findGoodsTypeByShelfId(Long shelfId);
 
     /**
      * 根据货架编号删除旧的多对多对应关系

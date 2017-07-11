@@ -1,6 +1,6 @@
 package cn.muye.assets.shelf.service.impl;
 
-import cn.mrobot.bean.assets.good.GoodType;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.shelf.mapper.ShelfMapper;
@@ -70,7 +70,7 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
         int count =  shelfMapper.insert(shelf);
         if (shelf.getGoodTypes() != null && shelf.getGoodTypes().size() != 0) {
             //当存在对应绑定的货物类型的时候，保存类型对应关系
-            for (GoodType goodType : shelf.getGoodTypes()) {
+            for (GoodsType goodType : shelf.getGoodTypes()) {
                 goodsTypeIds.add(goodType.getId());
             }
             //保存货架与货物类型之间的多对多关系
@@ -103,7 +103,7 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
         if (entity.getGoodTypes() != null && entity.getGoodTypes().size() != 0) {
             List<Long> goodsTypeIds = new ArrayList<>();
             //当存在对应绑定的货物类型的时候，保存类型对应关系
-            for (GoodType goodType : entity.getGoodTypes()) {
+            for (GoodsType goodType : entity.getGoodTypes()) {
                 goodsTypeIds.add(goodType.getId());
             }
             //保存货架与货物类型之间的多对多关系

@@ -1,6 +1,7 @@
 package cn.mrobot.bean.assets.shelf;
 
 import cn.mrobot.bean.assets.good.GoodType;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.*;
@@ -23,7 +24,7 @@ public class Shelf extends BaseBean {
     private String description; //货架备注
 
     @Transient
-    private List<GoodType> goodTypes;//可装配的货物类型
+    private List<GoodsType> goodTypes;//可装配的货物类型
 
     public Long getId() {
         return id;
@@ -73,11 +74,11 @@ public class Shelf extends BaseBean {
         this.description = description;
     }
 
-    public List<GoodType> getGoodTypes() {
+    public List<GoodsType> getGoodTypes() {
         return goodTypes;
     }
 
-    public void setGoodTypes(List<GoodType> goodTypes) {
+    public void setGoodTypes(List<GoodsType> goodTypes) {
         this.goodTypes = goodTypes;
     }
 }
