@@ -55,6 +55,10 @@ public class MessageInfo implements Serializable {
 
     private boolean success;//是否发送成功
 
+    public MessageInfo(String senderId, Date updateTime, String messageText){
+
+    }
+
     public MessageInfo(OffLineMessage message){
         BeanUtils.copyProperties(message, this);
         if(message != null){

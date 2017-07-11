@@ -2,21 +2,28 @@ package cn.muye.base.producer;
 
 import cn.mrobot.bean.constant.TopicConstants;
 
+import cn.muye.base.bean.MessageInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.StringUtils;
+
+import java.util.Date;
 
 /**
  * Created by enva on 2017/6/22.
  */
 @Component
+@Slf4j
 public class ProducerCommon implements ApplicationContextAware {
-    private static Logger logger = Logger.getLogger(ProducerCommon.class);
+//    private static Logger logger = Logger.getLogger(ProducerCommon.class);
     private static ApplicationContext applicationContext;
     private RabbitTemplate rabbitTemplate;
+    private String localRobotSN;
 
     /**
      * 发布当前位置
@@ -24,11 +31,17 @@ public class ProducerCommon implements ApplicationContextAware {
      */
     public void sendCurrentPoseMessage(String text){
         try {
-            if(getRabbitTemplate()){
-                rabbitTemplate.convertAndSend(TopicConstants.DIRECT_CURRENT_POSE, text);
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
             }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_CURRENT_POSE, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
-            logger.error("sendCurrentPoseMessage error",e);
+            log.error("sendCurrentPoseMessage error",e);
         }
     }
 
@@ -38,11 +51,17 @@ public class ProducerCommon implements ApplicationContextAware {
      */
     public void sendAppSubMessage(String text){
         try {
-            if(getRabbitTemplate()){
-                rabbitTemplate.convertAndSend(TopicConstants.DIRECT_APP_SUB, text);
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
             }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_APP_SUB, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
-            logger.error("sendAppSubMessage error",e);
+            log.error("sendAppSubMessage error",e);
         }
     }
 
@@ -52,11 +71,17 @@ public class ProducerCommon implements ApplicationContextAware {
      */
     public void sendAppPubMessage(String text){
         try {
-            if(getRabbitTemplate()){
-                rabbitTemplate.convertAndSend(TopicConstants.DIRECT_APP_PUB, text);
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
             }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_APP_PUB, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
-            logger.error("sendAppPubMessage error",e);
+            log.error("sendAppPubMessage error",e);
         }
     }
 
@@ -66,11 +91,17 @@ public class ProducerCommon implements ApplicationContextAware {
      */
     public void sendAgentSubMessage(String text){
         try {
-            if(getRabbitTemplate()){
-                rabbitTemplate.convertAndSend(TopicConstants.DIRECT_AGENT_SUB, text);
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
             }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_AGENT_SUB, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
-            logger.error("sendAgentSubMessage error",e);
+            log.error("sendAgentSubMessage error",e);
         }
     }
 
@@ -80,37 +111,41 @@ public class ProducerCommon implements ApplicationContextAware {
      */
     public void sendAgentPubMessage(String text){
         try {
-            if(getRabbitTemplate()){
-                rabbitTemplate.convertAndSend(TopicConstants.DIRECT_AGENT_PUB, text);
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
             }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_AGENT_PUB, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
-            logger.error("sendAgentPubMessage error",e);
+            log.error("sendAgentPubMessage error",e);
         }
     }
 
-//    public void sendCurrentMapMessage(String text){
-//        try {
-//            if(null == applicationContext){
-//                return;
-//            }
-//            rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
-//            if(null == rabbitTemplate){
-//                return;
-//            }
-//            rabbitTemplate.convertAndSend("direct.current_map", text);
-//        }catch (Exception e){
-//            logger.error("SendMessage sendCurrentPoseMessage error",e);
-//        }
-//    }
-
     private boolean getRabbitTemplate(){
         if(null == applicationContext){
-            logger.error("sendGoorMessage applicationContext is null error");
+            log.error("sendGoorMessage applicationContext is null error");
             return false;
         }
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
         if(null == rabbitTemplate){
-            logger.error("sendGoorMessage rabbitTemplate is null error ");
+            log.error("sendGoorMessage rabbitTemplate is null error ");
+            return false;
+        }
+        return true;
+    }
+
+    private boolean getLocalRobotSN(){
+        if(null == applicationContext){
+            log.error("sendGoorMessage applicationContext is null error");
+            return false;
+        }
+        localRobotSN = (String) applicationContext.getBean("localRobotSN");
+        if(StringUtils.isEmpty(localRobotSN)){
+            log.error("sendGoorMessage localRobotSN is null error ");
             return false;
         }
         return true;
