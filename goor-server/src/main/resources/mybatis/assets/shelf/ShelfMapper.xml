@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.assets.shelf.mapper.ShelfMapper">
+
+    <resultMap id="ShelfMap" type="cn.mrobot.bean.assets.shelf.Shelf">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="code" property="code" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="rfid" property="rfid" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="store_id" property="storeId" jdbcType="BIGINT"/>
+        <result column="created_by" property="createdBy" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <resultMap id="GoodTypeMap" type="cn.mrobot.bean.assets.good.GoodType">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="store_d" property="storeId" jdbcType="BIGINT"/>
+        <result column="created_by" property="createdBy" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="ShelfGoodsTypeMap" type="cn.mrobot.bean.assets.shelf.Shelf" extends="ShelfMap">
+        <collection property="goodTypes" ofType="cn.mrobot.bean.assets.good.GoodType">
+            <id column="type_id" property="id" jdbcType="BIGINT"/>
+            <result column="type_store_id" property="storeId" jdbcType="BIGINT"/>
+            <result column="type_created_by" property="createdBy" jdbcType="BIGINT"/>
+            <result column="type_create_time" property="createTime" jdbcType="TIMESTAMP"/>
+            <result column="type_description" property="description" jdbcType="VARCHAR"/>
+            <result column="type_name" property="name" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <!--根据 ID 编号获取货架的详细信息-->
+    <select id="findShelfDetailById" resultMap="ShelfGoodsTypeMap" parameterType="java.lang.Long">
+        SELECT s.STORE_ID,s.NAME,s.ID,s.DESCRIPTION,s.CREATED_BY,s.CREATE_TIME,s.CODE,s.RFID,s.TYPE,t.ID AS type_id
+        FROM AS_SHELF s LEFT JOIN SHELFS_GOOD_TYPES_RELATIONS r ON s.ID = r.SHELF_ID
+        LEFT JOIN AS_GOODS_TYPE t ON r.GOOD_TYPEID = t.ID WHERE s.ID = #{0}
+    </select>
+
+    <!--插入多对多的关联关系-->
+    <insert id="insertShelfAndGoodsTypeRelations">
+        INSERT INTO SHELFS_GOOD_TYPES_RELATIONS
+        (SHELF_ID,GOOD_TYPEID)
+        VALUES
+        <foreach collection="param2" item="id" separator=",">
+            (#{param1}, #{id})
+        </foreach>
+    </insert>
+
+    <select id="findGoodsTypeByShelfId" resultMap="GoodTypeMap" parameterType="java.lang.Long">
+        SELECT g.CREATE_TIME,g.CREATED_BY,g.DESCRIPTION,g.ID,g.NAME,g.STORE_ID FROM AS_GOODS_TYPE g
+        LEFT JOIN SHELFS_GOOD_TYPES_RELATIONS s
+        ON g.ID = s.GOOD_TYPEID
+        WHERE s.SHELF_ID = #{0}
+    </select>
+
+    <!-- 修改货架与可装配货物类型的多对多关系之前，先删除旧的关系 -->
+    <delete id="deleteHistoryRelations" parameterType="java.lang.Long">
+        DELETE FROM SHELFS_GOOD_TYPES_RELATIONS WHERE SHELF_ID = #{0}
+    </delete>
+
+</mapper>

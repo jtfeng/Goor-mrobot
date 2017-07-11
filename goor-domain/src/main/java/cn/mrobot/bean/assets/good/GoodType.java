@@ -10,7 +10,7 @@ import javax.persistence.Table;
 /**
  * Created by Ray.Fu on 2017/7/6.
  */
-@Table(name = "AS_GOOD_TYPE")
+@Table(name = "AS_GOODS_TYPE")
 public class GoodType extends BaseBean{
 
     private String name;

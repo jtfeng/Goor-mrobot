@@ -1,11 +1,10 @@
 package cn.mrobot.bean.assets.shelf;
 
+import cn.mrobot.bean.assets.good.GoodType;
 import cn.mrobot.bean.base.BaseBean;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 /**
  * Created by Ray.Fu on 2017/6/19.
@@ -22,6 +21,9 @@ public class Shelf extends BaseBean {
     private String name; //货架名称
 
     private String description; //货架备注
+
+    @Transient
+    private List<GoodType> goodTypes;//可装配的货物类型
 
     public Long getId() {
         return id;
@@ -69,5 +71,13 @@ public class Shelf extends BaseBean {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<GoodType> getGoodTypes() {
+        return goodTypes;
+    }
+
+    public void setGoodTypes(List<GoodType> goodTypes) {
+        this.goodTypes = goodTypes;
     }
 }
