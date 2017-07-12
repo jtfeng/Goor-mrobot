@@ -3,8 +3,7 @@ package cn.mrobot.bean.charge;
 import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import java.io.Serializable;
-import java.util.Date;
+import javax.persistence.Table;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,6 +14,7 @@ import java.util.Date;
  * Describe: 充电状态实体
  * Version:1.0
  */
+@Table(name = "CHARGE_INFO")
 public class ChargeInfo extends BaseBean{
 
 	@JSONField(name = "device_id")

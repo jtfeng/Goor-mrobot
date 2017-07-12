@@ -31,6 +31,10 @@ public class MapInfo extends BaseBean {
 
 	private String ros;
 
+	private String deviceId;
+
+	private String overlayMap;
+
 	public String getMapName() {
 		return mapName;
 	}
@@ -77,5 +81,21 @@ public class MapInfo extends BaseBean {
 
 	public void setRos(String ros) {
 		this.ros = ros;
+	}
+
+	public String getDeviceId() {
+		return deviceId;
+	}
+
+	public void setDeviceId(String deviceId) {
+		this.deviceId = deviceId;
+	}
+
+	public String getOverlayMap() {
+		return overlayMap;
+	}
+
+	public void setOverlayMap(String overlayMap) {
+		this.overlayMap = overlayMap;
 	}
 }
