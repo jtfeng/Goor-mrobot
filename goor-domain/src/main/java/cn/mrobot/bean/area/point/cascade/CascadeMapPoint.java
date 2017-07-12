@@ -13,26 +13,28 @@ import java.util.List;
  */
 public class CascadeMapPoint {
 
-	private int id;
+	//id
+	private int value;
 
-	private String mapName;
+	//name
+	private String label;
 
 	private List<CascadeMapPointType> children;
 
-	public int getId() {
-		return id;
+	public int getValue() {
+		return value;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setValue(int value) {
+		this.value = value;
 	}
 
-	public String getMapName() {
-		return mapName;
+	public String getLabel() {
+		return label;
 	}
 
-	public void setMapName(String mapName) {
-		this.mapName = mapName;
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 	public List<CascadeMapPointType> getChildren() {

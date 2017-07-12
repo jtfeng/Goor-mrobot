@@ -15,33 +15,34 @@ import java.util.List;
  */
 public class CascadeMapPointType {
 
-	private int id;
+    //id
+    private int value;
+    //name
+    private String label;
 
-	private String name;
+    private List<MapPoint> children;
 
-	private List<MapPoint> children;
+    public int getValue() {
+        return value;
+    }
 
-	public int getId() {
-		return id;
-	}
+    public void setValue(int value) {
+        this.value = value;
+    }
 
-	public void setId(int id) {
-		this.id = id;
-	}
+    public String getLabel() {
+        return label;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setLabel(String label) {
+        this.label = label;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public List<MapPoint> getChildren() {
+        return children;
+    }
 
-	public List<MapPoint> getChildren() {
-		return children;
-	}
-
-	public void setChildren(List<MapPoint> children) {
-		this.children = children;
-	}
+    public void setChildren(List<MapPoint> children) {
+        this.children = children;
+    }
 }

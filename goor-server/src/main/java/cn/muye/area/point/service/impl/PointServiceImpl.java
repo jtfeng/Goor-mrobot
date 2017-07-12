@@ -175,14 +175,14 @@ public class PointServiceImpl implements PointService {
                 CascadeMapPointType cascadeMapPointType = new CascadeMapPointType();
                 pointTypeId = pointTypeIdList.get(j);
                 List<MapPoint> mapPointList = pointMapper.selectPointByPointTypeMapName(mapName, pointTypeId);
-                cascadeMapPointType.setId(pointTypeId);
-                cascadeMapPointType.setName(MapPointType.getValue(pointTypeId));
+                cascadeMapPointType.setValue(pointTypeId);
+                cascadeMapPointType.setLabel(MapPointType.getValue(pointTypeId));
                 cascadeMapPointType.setChildren(mapPointList);
                 cascadeMapPointTypeList.add(cascadeMapPointType);
             }
 
-            cascadeMapPoint.setId(0);
-            cascadeMapPoint.setMapName(mapName);
+            cascadeMapPoint.setValue(0);
+            cascadeMapPoint.setLabel(mapName);
             cascadeMapPoint.setChildren(cascadeMapPointTypeList);
             cascadeMapPointList.add(cascadeMapPoint);
         }
