@@ -17,7 +17,7 @@ public class CascadeMapPoint {
 
 	private String mapName;
 
-	private List<CascadeMapPointType> child;
+	private List<CascadeMapPointType> children;
 
 	public int getId() {
 		return id;
@@ -35,11 +35,11 @@ public class CascadeMapPoint {
 		this.mapName = mapName;
 	}
 
-	public List<CascadeMapPointType> getChild() {
-		return child;
+	public List<CascadeMapPointType> getChildren() {
+		return children;
 	}
 
-	public void setChild(List<CascadeMapPointType> child) {
-		this.child = child;
+	public void setChildren(List<CascadeMapPointType> children) {
+		this.children = children;
 	}
 }
