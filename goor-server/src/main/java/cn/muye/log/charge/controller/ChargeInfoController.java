@@ -65,12 +65,12 @@ public class ChargeInfoController implements ApplicationContextAware {
             }
             List<ChargeInfo> chargeInfoList = chargeInfoService.getByDeviceId(code);
             if (chargeInfoList.size() <= 0) {
-                return AjaxResult.failed("无当前机器人（" + code + "）电量信息");
+                return AjaxResult.failed("无当前机器人（" + code + "）信息");
             }
 
             return AjaxResult.success(toEntity(new HashMap(),chargeInfoList.get(0)));
         } catch (Exception e) {
-            LOGGER.error("获取电量信息出错", e);
+            LOGGER.error("获取信息出错", e);
             return AjaxResult.failed("系统错误");
         }
     }
