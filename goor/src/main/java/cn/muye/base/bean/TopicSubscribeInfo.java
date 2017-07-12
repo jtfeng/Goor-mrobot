@@ -9,7 +9,6 @@ import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.log4j.Logger;
 
 import java.io.Serializable;
 
@@ -52,6 +51,17 @@ public class TopicSubscribeInfo implements Serializable {
 		String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
 		if(CacheInfoManager.getNameSubCache(messageName)){
 			log.info(" ====== message.toString()===" + message);
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean checkLocalSubNameNoNeedConsumer(String message){
+		JSONObject jsonObject = JSON.parseObject(message);
+		String data = jsonObject.getString(TopicConstants.DATA);
+		JSONObject jsonObjectData = JSON.parseObject(data);
+		String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
+		if(CacheInfoManager.getNameLSubCache(messageName)){
 			return true;
 		}
 		return false;

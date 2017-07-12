@@ -1,16 +1,22 @@
 package cn.muye.publisher;
 
+import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.slam.SlamRequestBody;
+import cn.muye.charge.service.ChargeInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.messages.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -24,116 +30,83 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppSubService implements ApplicationContextAware {
 
-	private static ApplicationContext applicationContext;
-	private Ros ros;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppSubService.class);
+    private static ApplicationContext applicationContext;
+    private Ros ros;
 
-	public void publishMessage() {
-		getRos();
-		publishChargeMessage();
-		publishMotionMessage();
+    @Value("${local.robot.SN}")
+    private String deviceId;
 
-	}
+    /**
+     * 向agent_pub发送消息，获取信息
+     * @param pubName
+     * @param topicType
+     */
+    public void sendAgentPubTopic(String pubName, String topicType) {
+        getRos();
+        if (null == ros) {
+            LOGGER.error("-->> ros is not connect");
+            return;
+        }
+        Topic echo = new Topic(ros, TopicConstants.AGENT_PUB, topicType);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(TopicConstants.PUB_NAME, pubName);
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+        Message toSend = new Message(JSON.toJSONString(messageObject));
+        echo.publish(toSend);
+    }
 
-	public void publishChargeMessage() {
-		getRos();
-		Topic echo = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put(TopicConstants.PUB_NAME, TopicConstants.CHARGING_STATUS_INQUIRY);
-		JSONObject messageObject = new JSONObject();
-		messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
-		Message toSend = new Message(JSON.toJSONString(messageObject));
-		echo.publish(toSend);
+    /**
+     * 向app_pub发送消息，获取信息
+     * @param pubName
+     * @param topicType
+     */
+    public void sendAppPubTopic(String pubName, String topicType) {
+        getRos();
+        if (null == ros) {
+            LOGGER.error("-->> ros is not connect");
+            return;
+        }
+        Topic echo = new Topic(ros, TopicConstants.APP_PUB, topicType);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(TopicConstants.PUB_NAME, pubName);
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+        Message toSend = new Message(JSON.toJSONString(messageObject));
+        echo.publish(toSend);
+    }
 
-	}
+    public void handleLocalTopic(Message message){
+        JSONObject jsonObject = JSON.parseObject(message.toString());
+        String data = jsonObject.getString(TopicConstants.DATA);
+        JSONObject jsonObjectData = JSON.parseObject(data);
+        String subName = jsonObjectData.getString(TopicConstants.SUB_NAME);
+        String subNameData = jsonObjectData.getString(TopicConstants.DATA);
+        switch (subName){
+            case TopicConstants.CHARGING_STATUS_INQUIRY:
+                saveChargeInfo(subNameData);
+                break;
+            default:
+                break;
+        }
+    }
 
-	public void publishPointMessage() {
-		getRos();
-		Topic echo = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
+    private void saveChargeInfo(String subNameData){
+        ChargeInfo chargeInfo = JSON.parseObject(subNameData, ChargeInfo.class);
+        chargeInfo.setCreateTime(new Date());
+        chargeInfo.setDeviceId(deviceId);
+        ChargeInfoService chargeInfoService = applicationContext.getBean(ChargeInfoService.class);
+        chargeInfoService.delete(); //删除h2中的数据。h2数据库数据库中只存最新的一条记录
+        chargeInfoService.save(chargeInfo);
+    }
 
-		//目标点载入
-		JSONObject pointDataJsonObject = new JSONObject();
-		pointDataJsonObject.put(TopicConstants.SCENE_NAME, "example");
-		pointDataJsonObject.put(TopicConstants.MAP_NAME, "F001");
+    private void getRos() {
+        ros = applicationContext.getBean(Ros.class);
+    }
 
-		SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.POINT_LOAD);
-		slamRequestBody.setData(pointDataJsonObject);
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put(TopicConstants.DATA, JSON.toJSONString(slamRequestBody));
-		Message toSend = new Message(JSON.toJSONString(jsonObject));
-
-		//导航点添加
-//		MapPoint mapPoint = new MapPoint();
-//		mapPoint.setSceneName("example");
-//		mapPoint.setMapName("F001");
-//		mapPoint.setPointName("name0");
-//		mapPoint.setPointAlias("test");
-//		mapPoint.setMapPointTypeId(0);
-//		mapPoint.setX(1.0);
-//		mapPoint.setY(2.0);
-//		mapPoint.setTh(2.0);
-//		SlamRequestBody slamRequestBody = new SlamRequestBody("point_add");
-//		slamRequestBody.setData(JSON.toJSONString(mapPoint));
-//		JSONObject jsonObject = new JSONObject();
-//		jsonObject.put(TopicConstants.DATA, JSON.toJSONString(slamRequestBody));
-//		Message toSend = new Message(JSON.toJSONString(jsonObject));
-
-		//目标点删除
-//		SlamRequestBody slamRequestBody = new SlamRequestBody("point_delete");
-//		JSONObject dataJsonObject = new JSONObject();
-//		dataJsonObject.put("scene_name", "asdfs");
-//		dataJsonObject.put("map_name","sadf");
-//		dataJsonObject.put("point_name","name0");
-//		slamRequestBody.setData(dataJsonObject);
-//		JSONObject jsonObject = new JSONObject();
-//		jsonObject.put(TopicConstants.DATA, JSON.toJSONString(slamRequestBody));
-//		Message toSend = new Message(JSON.toJSONString(jsonObject));
-
-		//设置建图方式
-//		SlamRequestBody slamRequestBody = new SlamRequestBody("map_module_set");
-//		JSONObject dataJsonObject = new JSONObject();
-//		dataJsonObject.put("map_use", "gmapping");
-//		slamRequestBody.setData(dataJsonObject);
-//		JSONObject jsonObject = new JSONObject();
-//		jsonObject.put(TopicConstants.DATA, JSON.toJSONString(slamRequestBody));
-//		Message toSend = new Message(JSON.toJSONString(jsonObject));
-
-		//获取所有建图方式
-//		SlamRequestBody slamRequestBody = new SlamRequestBody("map_modules_get");
-//		JSONObject jsonObject = new JSONObject();
-//		jsonObject.put(TopicConstants.DATA, JSON.toJSONString(slamRequestBody));
-//		Message toSend = new Message(JSON.toJSONString(jsonObject));
-
-		echo.publish(toSend);
-	}
-
-	public void publishMapUploadMessage() {
-		getRos();
-		Topic echo = new Topic(ros, "agent_pub", TopicConstants.TOPIC_TYPE_STRING);
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put(TopicConstants.PUB_NAME, "agent_local_map_upload");
-		JSONObject messageObject = new JSONObject();
-		messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
-		Message toSend = new Message(JSON.toJSONString(messageObject));
-		echo.publish(toSend);
-
-	}
-
-	public void publishMotionMessage() {
-		Topic echo = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put(TopicConstants.PUB_NAME, TopicConstants.MOTION_PLANNER_MOTION_STATUS);
-		JSONObject messageObject = new JSONObject();
-		messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
-		Message toSend = new Message(JSON.toJSONString(messageObject));
-		echo.publish(toSend);
-	}
-
-	private void getRos() {
-		ros = applicationContext.getBean(Ros.class);
-	}
-
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		AppSubService.applicationContext = applicationContext;
-	}
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        AppSubService.applicationContext = applicationContext;
+    }
 }

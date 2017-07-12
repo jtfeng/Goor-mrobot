@@ -36,7 +36,7 @@
 
     <select id="selectMapName" resultType="String">
         SELECT DISTINCT MAP_NAME
-        FROM A_MAP_POINT;
+        FROM A_MAP_POINT
     </select>
 
     <select id="selectPointTypeByMapName" resultType="int">

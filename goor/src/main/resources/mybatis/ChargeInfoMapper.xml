@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.charge.mapper.ChargeInfoMapper">
+
+    <resultMap id="chargeInfo" type="cn.mrobot.bean.charge.ChargeInfo">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="chargingStatus" column="CHARGING_STATUS"/>
+        <result property="pluginStatus" column="PLUGIN_STATUS"/>
+        <result property="powerPercent" column="POWER_PERCENT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+    ID,
+    STORE_ID,
+    CREATED_BY,
+    CREATE_TIME,
+    DEVICE_ID,
+    CHARGING_STATUS,
+    PLUGIN_STATUS,
+    POWER_PERCENT
+  </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.charge.ChargeInfo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO CHARGING_INFO(
+        ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
+        DEVICE_ID,
+        CHARGING_STATUS,
+        PLUGIN_STATUS,
+        POWER_PERCENT
+        ) values (
+        #{id},
+        #{storeId},
+        #{createdBy},
+        #{createTime},
+        #{deviceId},
+        #{chargingStatus},
+        #{pluginStatus},
+        #{powerPercent}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <select id="list" resultMap="chargeInfo">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM CHARGING_INFO
+        ORDER BY ID DESC
+    </select>
+
+    <delete id="delete">
+        delete from CHARGING_INFO
+    </delete>
+
+</mapper>
