@@ -7,6 +7,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.StringUtils;
 
 @Component
 public class CacheInfoManager implements ApplicationContextAware {
@@ -46,6 +47,9 @@ public class CacheInfoManager implements ApplicationContextAware {
 	}
 
 	public static boolean getNameSubCache(String nameSub){
+		if(StringUtils.isEmpty(nameSub)){
+			return false;
+		}
 		if(nameSubCache.get(nameSub) > 0){
 			return true;
 		}

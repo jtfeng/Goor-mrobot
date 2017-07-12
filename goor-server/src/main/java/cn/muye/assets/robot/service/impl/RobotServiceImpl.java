@@ -69,12 +69,14 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
                 Robot robotDb = robotService.getById(robotId);
-                if (robotDb != null && robotDb.getStatus() == true) {
+                if (robotDb != null && robotDb.getIsBusy() == false) {
                     availableRobot = robotDb;
                     break;
                 }
             }
         }
+        availableRobot.setIsBusy(true);
+        updateRobot(availableRobot);
         return availableRobot;
     }
 
