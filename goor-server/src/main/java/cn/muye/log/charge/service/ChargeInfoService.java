@@ -19,7 +19,7 @@ public interface ChargeInfoService {
 
 	ChargeInfo get(Long id);
 
-	ChargeInfo getByDeviceId(String deviceId);
+	List<ChargeInfo> getByDeviceId(String deviceId);
 
 	List<ChargeInfo> lists();
 }
