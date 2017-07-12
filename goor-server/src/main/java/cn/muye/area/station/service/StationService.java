@@ -29,5 +29,7 @@ public interface StationService extends BaseService<Station>{
 	List<Station> listByName(String name);
 
 	int delete(Station station);
+
+	void bindRobots(Station station);
 }
 

@@ -1,19 +1,14 @@
 package cn.muye.log.charge.controller;
 
+import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.DeviceType;
-import cn.mrobot.bean.enums.MessageStatusType;
-import cn.mrobot.bean.enums.MessageType;
 import cn.muye.base.bean.AjaxResult;
-import cn.muye.base.bean.CommonInfo;
-import cn.muye.base.bean.MessageInfo;
-import cn.muye.log.charge.bean.ChargeInfo;
+import cn.mrobot.bean.charge.ChargeInfo;
 import cn.muye.log.charge.service.ChargeInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
@@ -22,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Date;
 import java.util.List;
 
 /**

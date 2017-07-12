@@ -1,5 +1,6 @@
 package cn.muye.assets.shelf.controller;
 
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -56,6 +58,7 @@ public class ShelfController {
             return AjaxResult.success(shelf, "新增成功");
         } else {
             Shelf shelfDb = shelfService.getById(id);
+            shelfDb.setGoodTypes(shelf.getGoodTypes());
             shelfDb.setName(shelf.getName());
             shelfDb.setCode(shelf.getCode());
             shelfDb.setRfid(shelf.getRfid());

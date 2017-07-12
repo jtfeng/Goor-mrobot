@@ -12,6 +12,13 @@ import javax.persistence.*;
 @Table(name = "A_MAP_POINT")
 public class MapPoint extends BaseBean {
 
+    //id
+    @Transient
+    private int value;
+    //name
+    @Transient
+    private String label;
+
     /**
      * 点名：唯一标识符
      */
@@ -153,7 +160,23 @@ public class MapPoint extends BaseBean {
 		this.pointLevel = pointLevel;
 	}
 
-	@Override
+    public int getValue() {
+        return  new Long(id).intValue();
+    }
+
+    public void setValue(int value) {
+        this.value = new Long(id).intValue();
+    }
+
+    public String getLabel() {
+        return pointName;
+    }
+
+    public void setLabel(String label) {
+        this.label = pointName;
+    }
+
+    @Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;

@@ -8,11 +8,11 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -27,12 +27,13 @@ public class ConsumerCommon {
 //    @Autowired
 //    private ReceiveMessageService receiveMessageService;
 
-      @Autowired
-      private RabbitTemplate rabbitTemplate;
-
     @Autowired
     private OffLineMessageService offLineMessageService;
 
+    /**
+     * 透传ros发布的topic：agent_pub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_AGENT_PUB)
     public void directAgentPub(@Payload MessageInfo messageInfo) {
         try {
@@ -54,6 +55,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：agent_sub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_AGENT_SUB)
     public void directAgentSub(@Payload MessageInfo messageInfo) {
         try {
@@ -75,6 +80,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：app_pub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_APP_PUB)
     public void directAppPub(@Payload MessageInfo messageInfo) {
         try {
@@ -97,6 +106,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：app_sub
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_APP_SUB)
     public void directAppSub(@Payload MessageInfo messageInfo) {
         try {
@@ -118,6 +131,10 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 透传ros发布的topic：current_pose
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_CURRENT_POSE)
     public void directCurrentPose(@Payload MessageInfo messageInfo) {
         try {
@@ -127,14 +144,13 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 接收 x86 agent 发布过来的消息，理论不接收ros消息，牵涉到ros消息的，请使用topic透传，只和agent通信（无回执）
+     * @param messageInfo
+     */
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT)
     public void directCommandReport(@Payload MessageInfo messageInfo) {
         try {
-            if (MessageType.TIME_SYNCHRONIZED.equals(messageInfo.getMessageType())) {
-                clientTimeSynchronized(messageInfo);
-                return;
-            }
-
             sendMessageSave(messageInfo);
         }catch (Exception e){
             logger.error("consumer directCommandReport exception",e);
@@ -142,59 +158,36 @@ public class ConsumerCommon {
     }
 
     /**
-     * x86 请求与云端时间同步
+     * 接收 x86 agent 发布过来的消息，理论不接收ros消息，牵涉到ros消息的，请使用topic透传，只和agent通信（无回执）
      * @param messageInfo
      */
-    private void clientTimeSynchronized(MessageInfo messageInfo){
-        //监听上行X86时间同步消息，获得X86时间，与服务器时间比较，如果差值大于10s（默认），进行时间同步，否则不处理
-        Date date = new Date();
-        long upTime = messageInfo.getSendTime().getTime();
-        long downTime = date.getTime();
-        if ((downTime - upTime) < 10) {
-            return;
-        } else {
-            //发送带响应同步消息，获得10次时间平均延迟
-            int sum = 0;
-
-            try {
-                //todo:rabbitmq响应超时问题，
-                MessageInfo sendMessageInfo = new MessageInfo();
-                for (int i = 0; i < 10; i++) {
-                    long startTime = System.currentTimeMillis();
-                    sendMessageInfo.setMessageType(MessageType.TIME_SYNCHRONIZED);
-                    AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);//后期带上机器编码进行区分
-                    System.out.println("the delay time :" + result.toString());
-                    long endTime = System.currentTimeMillis();
-                    sum += (endTime - startTime);
-                }
-
-                long avg = sum / 20; //只需要考虑单向时间误差
-
-                //给指定X86发送时间同步消息
-                sendMessageInfo.setMessageText(String.valueOf(new Date().getTime() + avg));
-                AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);
-                System.out.println("the time synchronized result :" + result);
-            } catch (Exception e){
-                logger.error("time synchronized failure : " +e.toString());
-            }
+    @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE)
+    public AjaxResult directCommandReportAndReceive(@Payload MessageInfo messageInfo) {
+        try {
+            sendMessageSave(messageInfo);
+        }catch (Exception e){
+            logger.error("consumer directCommandReport exception",e);
         }
-        return;
+        return AjaxResult.success();
     }
+
+
 
     private boolean sendMessageSave(MessageInfo messageInfo) throws Exception{
         if(messageInfo == null
-                || StringUtil.isEmpty(messageInfo.getUUID() + "")){
+                || StringUtil.isEmpty(messageInfo.getUuId() + "")){
             return false;
         }
-        if(MessageType.EXECUTOR_LOG.equals(messageInfo.getMessageType())) {
+        if(MessageType.EXECUTOR_LOG.equals(messageInfo.getMessageType())){
             //TODO 此处可以添加日志及状态上报存储
+
 
         }else if(MessageType.REPLY.equals(messageInfo.getMessageType())){
             OffLineMessage message = new OffLineMessage();
             message.setMessageStatusType(messageInfo.getMessageStatusType().getIndex());//如果是回执，将对方传过来的信息带上
             message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
             message.setSuccess(true);//接收到回执，发送消息成功
-            message.setUUID(messageInfo.getUUID());//更新的主键
+            message.setUuId(messageInfo.getUuId());//更新的主键
             message.setUpdateTime(new Date());//更新时间
             offLineMessageService.update(message);//更新发送的消息
         }

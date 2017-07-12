@@ -29,6 +29,14 @@ public interface ShelfService extends BaseService<Shelf> {
     int update(Shelf shelfDb);
 
     int deleteById(Long id);
+
+    /**
+     * 货架和可装配的货物类型是多对多的关系，保存这个映射关系
+     * @param shelfId
+     * @param goodsTypeIds
+     * @return
+     */
+    int insertShelfAndGoodsTypeRelations(Long shelfId, List<Long> goodsTypeIds);
 }
 
 

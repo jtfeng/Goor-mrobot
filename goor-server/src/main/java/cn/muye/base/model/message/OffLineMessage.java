@@ -19,7 +19,7 @@ import java.util.Date;
 @Data
 public class OffLineMessage implements Serializable {
 
-    private String UUID;//
+    private String uuId;//
 
     private String senderId;//发送者ID
 

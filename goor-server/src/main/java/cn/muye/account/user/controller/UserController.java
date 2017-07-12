@@ -87,49 +87,61 @@ public class UserController {
     @ApiOperation(value = "新增修改用户接口", httpMethod = "POST", notes = "新增修改用户接口")
     @ResponseBody
     public AjaxResult addOrUpdateUser(@RequestBody User user) {
+        List<StationDTO4User> stationList = user.getStationList();
+        Long roleId = user.getRoleId();
+        String userName = user.getUserName();
+        Long userId = user.getId();
+        Integer directLoginKey = user.getDirectLoginKey();
         try {
             if (user == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
             }
-            if (user.getId() == null && StringUtil.isNullOrEmpty(user.getUserName())) {
+            if (userId == null && StringUtil.isNullOrEmpty(userName)) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
             }
-            if (user.getRoleId() == null) {
+            if (roleId == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
             }
+            /*
             if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null && user.getStationList().size() > 0) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
             }
             if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (user.getStationList() == null || user.getStationList().size() == 0)) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
+            }*/
+            if (roleId != null && (stationList == null || (stationList != null && (stationList.size() > 1 || stationList.size() == 0)))) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空或者不能绑定多个站");
             }
-            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+            if (roleId != null && roleId.equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
             }
-            if (user.getDirectLoginKey() != null && user.getDirectLoginKey() > 9999 && user.getDirectLoginKey() < 1000) {
+            if (directLoginKey != null && directLoginKey > 9999 && directLoginKey < 1000) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "快捷密码必须是4位数");
             }
-            User userDb = userService.getByUserName(user.getUserName());
-            if (userDb != null && userDb.getUserName().equals(user.getUserName()) && !userDb.getId().equals(user.getId())) {
+            User userDb = userService.getByUserName(userName);
+            if (userDb != null && userDb.getUserName().equals(userName) && !userDb.getId().equals(user.getId())) {
                 return AjaxResult.failed("用户名重复");
             }
             //todo StoreId暂时用100去代替，以后用session里获取
-            User userDbByDirectKey = userService.getUserByDirectKey(user.getDirectLoginKey(), SearchConstants.FAKE_MERCHANT_STORE_ID);
-            if (userDbByDirectKey != null && userDbByDirectKey.getDirectLoginKey() != null && userDbByDirectKey.getDirectLoginKey().equals(user.getDirectLoginKey()) && !userDbByDirectKey.getId().equals(user.getId())) {
-                return AjaxResult.failed("4位快捷码重复");
+            if (directLoginKey != null) {
+                User userDbByDirectKey = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                Long userDbByDirectKeyId = userDbByDirectKey.getId();
+                Integer directLoginKeyDb = userDbByDirectKey.getDirectLoginKey();
+                if (userDbByDirectKey != null && directLoginKey != null && directLoginKeyDb.equals(directLoginKey) && !userDbByDirectKeyId.equals(userId)) {
+                    return AjaxResult.failed("4位快捷码重复");
+                }
             }
-            Long id = user.getId();
-            if (id == null) {
+            if (userId == null) {
                 userService.addUser(user);
                 return AjaxResult.success(entityToDto(user, SOURCE_TYPE_OTHER), "新增成功");
             } else {
-                User userDbById = userService.getById(id);
+                User userDbById = userService.getById(userId);
                 if (userDbById != null) {
                     if (!StringUtil.isNullOrEmpty(user.getPassword())) {
                         userDbById.setPassword(user.getPassword());
                     }
                     userDbById.setRoleId(user.getRoleId());
-                    userDbById.setStationList(user.getStationList());
+                    userDbById.setStationList(user.getStationList()); //todo 以后做切换站功能需要
                     if (user.getActivated() != null) {
                         userDbById.setActivated(user.getActivated());
                     }
@@ -252,12 +264,15 @@ public class UserController {
 
     private AjaxResult doCheckLogin(Map map) {
         UserDTO userDTO = (UserDTO) map.get("user");
-        if (userDTO != null) {
+        List<StationDTO4User> stationList = (List<StationDTO4User>) map.get("stationList");
+        if (userDTO != null && stationList != null) {
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
             return AjaxResult.success(map, "登录成功");
+        } else if (userDTO != null && stationList == null){
+            return AjaxResult.failed("账号异常，请联系客服");
         } else {
-            return AjaxResult.failed("登录失败");
+            return AjaxResult.failed("用户名或密码错误");
         }
     }
 
@@ -322,11 +337,14 @@ public class UserController {
                 List<User> list = userService.getUser(userName, password);
                 if (list != null) {
                     user = list.get(0);
+                    List<StationDTO4User> stationList = user.getStationList();
                     map.put("user", entityToDto(user, SOURCE_TYPE_OTHER));
                     map.put("access_token", accessToken);
+                    if (stationList != null && stationList.size() > 0) {
+                        session.setAttribute("stationId", user.getStationList().get(0).getId());
+                        map.put("stationList", stationList);
+                    }
                     return map;
-                } else {
-                    return null;
                 }
             }
         } catch (Exception e) {

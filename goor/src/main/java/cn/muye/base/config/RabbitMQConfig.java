@@ -34,6 +34,18 @@ public class RabbitMQConfig {
     @Value(TopicConstants.TOPIC_RECEIVE_RESOURCE)
     private String topicResourceAndReceiveSN;
 
+    /**
+     *只到x86机器人上,不处理ros通信之类，只和x86客户端通信
+     */
+    @Value(TopicConstants.FANOUT_CLIENT)
+    private String fanoutClientSN;
+
+    @Value(TopicConstants.TOPIC_CLIENT)
+    private String topicClientSN;
+
+    @Value(TopicConstants.TOPIC_RECEIVE_CLIENT)
+    private String topicClientAndReceiveSN;
+
 
     //从服务端发送到客户端命令队列
     //以下为服务器一对多发送
@@ -48,6 +60,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue fanoutClient() {
+        return new Queue(fanoutClientSN,false,false,true);
+    }
+
+    @Bean
     public FanoutExchange fanoutCommandExchange() {
         return new FanoutExchange(TopicConstants.FANOUT_COMMAND_EXCHANGE,false,true);
     }
@@ -58,6 +75,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public FanoutExchange fanoutClientExchange() {
+        return new FanoutExchange(TopicConstants.FANOUT_CLIENT_EXCHANGE,false,true);
+    }
+
+    @Bean
     public Binding bindingFanoutCommandExchange(Queue fanoutCommand, FanoutExchange fanoutCommandExchange) {
         return BindingBuilder.bind(fanoutCommand).to(fanoutCommandExchange);
     }
@@ -65,6 +87,11 @@ public class RabbitMQConfig {
     @Bean
     public Binding bindingFanoutResourceExchange(Queue fanoutResource, FanoutExchange fanoutResourceExchange) {
         return BindingBuilder.bind(fanoutResource).to(fanoutResourceExchange);
+    }
+
+    @Bean
+    public Binding bindingFanoutClientExchange(Queue fanoutClient, FanoutExchange fanoutClientExchange) {
+        return BindingBuilder.bind(fanoutClient).to(fanoutClientExchange);
     }
 
     //以下为服务器一对一发送
@@ -89,6 +116,16 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue topicClient() {
+        return new Queue(topicClientSN, false, false, true);
+    }
+
+    @Bean
+    public Queue topicClientAndReceive() {
+        return new Queue(topicClientAndReceiveSN, false, false, true);
+    }
+
+    @Bean
     public TopicExchange topicExchange() {
         return new TopicExchange(TopicConstants.TOPIC_EXCHANGE, false, true);
     }
@@ -104,19 +141,34 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding bindingTopicExchangeMessages(Queue topicResource, TopicExchange topicExchange) {
+    public Binding bindingTopicResourceExchangeMessages(Queue topicResource, TopicExchange topicExchange) {
         return BindingBuilder.bind(topicResource).to(topicExchange).with(topicResourceSN);
     }
 
     @Bean
-    public Binding bindingTopicExchangeReceiveMessages(Queue topicResourceAndReceive, TopicExchange topicExchange) {
+    public Binding bindingTopicResourceExchangeReceiveMessages(Queue topicResourceAndReceive, TopicExchange topicExchange) {
         return BindingBuilder.bind(topicResourceAndReceive).to(topicExchange).with(topicResourceAndReceiveSN);
+    }
+
+    @Bean
+    public Binding bindingTopicClientExchangeMessages(Queue topicClient, TopicExchange topicExchange) {
+        return BindingBuilder.bind(topicClient).to(topicExchange).with(topicClientSN);
+    }
+
+    @Bean
+    public Binding bindingTopicClientExchangeReceiveMessages(Queue topicClientAndReceive, TopicExchange topicExchange) {
+        return BindingBuilder.bind(topicClientAndReceive).to(topicExchange).with(topicClientAndReceiveSN);
     }
 
     //以下为goor客户端上报到goor-server端上报队列
     @Bean
     public Queue directCommandReport() {
         return new Queue(TopicConstants.DIRECT_COMMAND_REPORT,false,false,true);
+    }
+
+    @Bean
+    public Queue directCommandReportAndReceive() {
+        return new Queue(TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE,false,false,true);
     }
 
     @Bean

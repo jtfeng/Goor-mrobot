@@ -89,21 +89,31 @@ public class TopicConstants {
 
 
 	//定义Queue
+	//客户端上报队列
 	public static final String DIRECT_CURRENT_POSE = "direct.current_pose";
 	public static final String DIRECT_APP_PUB = "direct.app_pub";
 	public static final String DIRECT_APP_SUB = "direct.app_sub";
 	public static final String DIRECT_AGENT_PUB = "direct.agent_pub";
 	public static final String DIRECT_AGENT_SUB = "direct.agent_sub";
 	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";
+	public static final String DIRECT_COMMAND_REPORT_RECEIVE = "direct.command_report_receive";
 
+	//服务端下发队列，命令队列
 	public static final String TOPIC_COMMAND = "#{'topic.command.'+'${local.robot.SN}'}";
 	public static final String TOPIC_RECEIVE_COMMAND = "#{'topic.command.receive.'+'${local.robot.SN}'}";
 	public static final String FANOUT_COMMAND = "#{'fanout.command.'+'${local.robot.SN}'}";
 
+	//服务端下发队列，资源队列
 	public static final String TOPIC_RESOURCE = "#{'topic.resource.'+'${local.robot.SN}'}";
 	public static final String TOPIC_RECEIVE_RESOURCE = "#{'topic.resource.receive.'+'${local.robot.SN}'}";
 	public static final String FANOUT_RESOURCE = "#{'fanout.resource.'+'${local.robot.SN}'}";
 
+	//服务端下发队列，处理x86agent自己事物队列
+	public static final String TOPIC_CLIENT = "#{'topic.client.'+'${local.robot.SN}'}";
+	public static final String TOPIC_RECEIVE_CLIENT = "#{'topic.client.receive.'+'${local.robot.SN}'}";
+	public static final String FANOUT_CLIENT = "#{'fanout.client.'+'${local.robot.SN}'}";
+
+	//服务端绑定的队列
 	public static final String FANOUT_SERVER_COMMAND = "fanout.server";
 	public static final String TOPIC_SERVER_COMMAND = "topic.server";
 
@@ -111,6 +121,8 @@ public class TopicConstants {
 	public static final String TOPIC_COMMAND_RECEIVE_ROUTING_KEY = "topic.command.receive.";
 	public static final String TOPIC_RESOURCE_ROUTING_KEY = "topic.resource.";
 	public static final String TOPIC_RESOURCE_RECEIVE_ROUTING_KEY = "topic.resource.receive.";
+	public static final String TOPIC_CLIENT_ROUTING_KEY = "topic.client.";
+	public static final String TOPIC_CLIENT_RECEIVE_ROUTING_KEY = "topic.client.receive.";
 
 	//定义server routingKey
 	public static final String TOPIC_SERVER_ROUTING_KEY = "topic.#";
@@ -118,6 +130,7 @@ public class TopicConstants {
 	//定义Exchange
 	public static final String FANOUT_COMMAND_EXCHANGE = "fanoutCommandExchange";
 	public static final String FANOUT_RESOURCE_EXCHANGE = "fanoutResourceExchange";
+	public static final String FANOUT_CLIENT_EXCHANGE = "fanoutClientExchange";
 	public static final String TOPIC_EXCHANGE = "topicExchange1";
 
 	//pub to ros message

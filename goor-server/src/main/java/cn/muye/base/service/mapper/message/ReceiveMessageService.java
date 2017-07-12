@@ -35,7 +35,7 @@ public class ReceiveMessageService {
     }
 
     public long save(ReceiveMessage message)  throws Exception{
-        if(null != message && StringUtils.isEmpty(message.getUUID())){
+        if(null != message && StringUtils.isEmpty(message.getUuId())){
             return 0L;
         }
         AppConfig config = appConfigMapper.get(1);

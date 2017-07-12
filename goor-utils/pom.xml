@@ -12,6 +12,7 @@
     <groupId>cn.mrobot</groupId>
     <artifactId>goor-utils</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -72,6 +73,20 @@
             <version>2.8.4</version>
         </dependency>
         <!-- Jackson json data bind -->
+
+        <!--swagger-->
+        <!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.6.1</version>
+        </dependency>
+        <!--swagger-->
 
     </dependencies>
 </project>

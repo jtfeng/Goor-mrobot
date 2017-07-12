@@ -8,6 +8,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.MissionMapper;
 import cn.muye.dispatch.mapper.MissionMissionItemXREFMapper;
 import cn.muye.dispatch.mapper.MissionItemMapper;
+import cn.muye.dispatch.service.MissionItemService;
 import cn.muye.dispatch.service.MissionService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -15,10 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,6 +40,9 @@ public class MissionServiceImpl implements MissionService {
 	@Autowired
 	protected MissionItemMapper missionItemMapper;
 
+	@Autowired
+	protected MissionItemService missionItemService;
+
 	@Override
 	public long save(Mission mission) {
 		return missionMapper.save(mission);
@@ -53,11 +54,51 @@ public class MissionServiceImpl implements MissionService {
 	}
 
 	@Override
+	public void updateFull(Mission mission, Mission missionDB) {
+		Date now = new Date();
+		if(missionDB == null) {
+			mission.setCreateTime(now);
+		}
+		//新建关联子任务，并更新关联关系
+		Set<MissionItem> missionItemSet = mission.getMissionItemSet();
+		List<Long> bindList = new ArrayList<Long>();
+		if(missionItemSet != null && missionItemSet.size() > 0) {
+			for(MissionItem missionItem : missionItemSet) {
+				missionItem.setName(missionItem.getName() + now.getTime());
+				if (missionItem.getId() != null) {
+					MissionItem missionItemDB = missionItemService.get(missionItem.getId());
+					//有id且数据库不存在的子任务不做处理
+					if(missionItemDB == null) {
+						continue;
+					}
+					missionItem.setUpdateTime(new Date());
+					missionItemService.update(missionItem);
+				} else {
+					missionItem.setCreateTime(new Date());
+					missionItemService.save(missionItem);
+				}
+				bindList.add(missionItem.getId());
+			}
+			mission.setUpdateTime(now);
+		}
+
+		update(mission, bindList);
+	}
+
+	@Override
 	public void update(Mission mission, List<Long> missionItemIdList) {
 		Long missionId = mission.getId();
 
 		//添加关联关系,先全部删除，然后再关联
-		missionMissionItemXREFMapper.deleteByMissionId(missionId);
+		if(missionId == null) {
+			missionMapper.save(mission);
+			missionId = mission.getId();
+		}
+		else {
+			missionMapper.update(mission);
+			missionMissionItemXREFMapper.deleteByMissionId(missionId);
+		}
+
 		for (Long id : missionItemIdList) {
 			//判断missionItem是否存在
 			MissionItem missionItem = missionItemMapper.get(id);
@@ -69,8 +110,6 @@ public class MissionServiceImpl implements MissionService {
 			missionMissionItemXREF.setMissionItemId(id);
 			missionMissionItemXREFMapper.save(missionMissionItemXREF);
 		}
-
-		missionMapper.update(mission);
 	}
 
 //	@Override

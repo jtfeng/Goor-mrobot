@@ -14,8 +14,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by Jelynn on 2017/6/14.
@@ -136,6 +138,42 @@ public class MissionController {
 			} else {
 				mission.setCreateTime(new Date());
 				missionService.save(mission);
+				msg = "新增成功";
+			}
+			resp = AjaxResult.success(mission,msg);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+		}
+		return resp;
+	}
+
+	/**
+	 *创建任务，同时创建并关联子任务
+	 * @param mission
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = {"dispatch/mission/full"}, method = {RequestMethod.POST, RequestMethod.PUT})
+	@ResponseBody
+//	@PreAuthorize("hasAuthority('mrc_mission_u')")
+	public AjaxResult saveOrUpdateMissionFull(@RequestBody Mission mission, HttpServletRequest request) throws Exception {
+		AjaxResult resp;
+		try {
+			String missionName = mission.getName();
+			Mission missionDB = missionService.findByName(missionName);
+			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
+			}
+
+			String msg = "";
+
+			if (mission.getId() != null) {
+				missionService.updateFull(mission,missionDB);
+				msg = "修改成功";
+			} else {
+				missionService.updateFull(mission,missionDB);
 				msg = "新增成功";
 			}
 			resp = AjaxResult.success(mission,msg);

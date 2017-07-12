@@ -96,6 +96,7 @@ public class MapInfoServiceImpl implements MapInfoService {
 
     private String parseLocalPath(String localPath) {
         //将文件路径封装成http路径
+        localPath = localPath.replaceAll("\\\\","/");
         int index = localPath.indexOf(SearchConstants.FAKE_MERCHANT_STORE_ID + "");
         if(index >= 0){
             return DOWNLOAD_HTTP + localPath.substring(index);

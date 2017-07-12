@@ -93,12 +93,16 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Role roleDb = roleService.getById(user.getRoleId());
         user.setRoleName(roleDb.getCnName());
         //如果角色是站管理员
-        if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+        /*if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
             //删掉之前的user绑定station
             userStationXrefService.deleteByUserId(userId);
             List<StationDTO4User> stationIdList = user.getStationList();
             saveUserStationXref(stationIdList, userId);
-        }
+        }*/
+        //todo 这段保存用户站点关系的代码暂时启用，以后用户还是可以绑定多个站的
+        userStationXrefService.deleteByUserId(userId);
+        List<StationDTO4User> stationIdList = user.getStationList();
+        saveUserStationXref(stationIdList, userId);
     }
 
     /**
@@ -115,7 +119,10 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         List<StationDTO4User> stationList = user.getStationList();
         Role roleDb = roleService.getById(roleId);
         user.setRoleName(roleDb.getCnName());
-        if (userRoleXrefDb != null) {
+        //todo 暂时先删除用户站关联
+        userStationXrefService.deleteByUserId(userId);
+        saveUserStationXref(stationList, userId);
+        /*if (userRoleXrefDb != null) {
             ////如果原来角色是3，变更角色是2就需要把user_station_xref的记录删掉
             if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
                 userStationXrefService.deleteByUserId(userId);
@@ -138,7 +145,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
             if (roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
                 saveUserStationXref(stationList, userId);
             }
-        }
+        }*/
     }
 
     /**

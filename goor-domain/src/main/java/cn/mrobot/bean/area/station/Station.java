@@ -1,8 +1,8 @@
 package cn.mrobot.bean.area.station;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.BaseBean;
-import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -38,6 +38,9 @@ public class Station extends BaseBean{
      * */
     @Transient
     private List<MapPoint> mapPoints;
+
+    @Transient
+    private List<Robot> robotList;
 
     public String getName() {
         return name;
@@ -77,5 +80,13 @@ public class Station extends BaseBean{
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<Robot> getRobotList() {
+        return robotList;
+    }
+
+    public void setRobotList(List<Robot> robotList) {
+        this.robotList = robotList;
     }
 }

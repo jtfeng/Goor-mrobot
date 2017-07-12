@@ -20,7 +20,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `A_MAP_POINT`;
 CREATE TABLE `A_MAP_POINT` (
-  ID BIGINT AUTO_INCREMENT PRIMARY KEY NOT NULL COMMENT '主键',
+  ID BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键',
   STORE_ID BIGINT COMMENT '店铺ID',
   CREATED_BY BIGINT COMMENT '创建人',
   CREATE_TIME datetime COMMENT '创建时间' DEFAULT NOW(),
@@ -39,15 +39,6 @@ CREATE TABLE `A_MAP_POINT` (
 -- ----------------------------
 -- Records of A_MAP_POINT
 -- ----------------------------
-INSERT INTO `A_MAP_POINT` VALUES ('10', 'G1', '2', 'example', 'F001', '2.000', '3.000', '2.000', '2', null);
-INSERT INTO `A_MAP_POINT` VALUES ('11', 'G2', '2', 'example', 'F001', '2.000', '3.000', '2.000', '2', null);
-INSERT INTO `A_MAP_POINT` VALUES ('13', '测试as', '别名ad', 'asdfasdf', 'asdfasdf', '1.200', '2.600', '12.000', '4', null);
-INSERT INTO `A_MAP_POINT` VALUES ('14', 'sadfasdfqwe', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '5', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('15', 'sadfasdfqwe撒地方', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '6', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('16', '爱迪生 qwe撒地方', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '7', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('17', '爱迪asd生 asd', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '8', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('18', 'asasdasdasd', '撒的发生asd', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '1', '0');
-INSERT INTO `A_MAP_POINT` VALUES ('19', '爱迪asdasdasd生 asdasd', '撒的发生', 'asdfasd', 'asdfasdfasdf', '10.200', '15.200', '15.800', '8', '0');
 
 -- ----------------------------
 -- Table structure for A_STATION
@@ -550,11 +541,6 @@ CREATE TABLE `C_FILE_UPLOAD` (
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Records of C_FILE_UPLOAD
--- ----------------------------
-INSERT INTO `C_FILE_UPLOAD` VALUES ('1', 'upload_2017-06-23.zip', '1234632', 'e:\\download_home\\upload\\upload_2017-06-23.zip', null, '0', '2017-06-23 17:29:47', '2017-06-23 17:29:47');
-
--- ----------------------------
 -- Table structure for CHARGING_INFO
 -- ----------------------------
 DROP TABLE IF EXISTS `CHARGING_INFO`;
@@ -569,12 +555,6 @@ CREATE TABLE `CHARGING_INFO` (
 ) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Records of CHARGING_INFO
--- ----------------------------
-INSERT INTO `CHARGING_INFO` VALUES ('46', 'cookyPlus1301_jelynn', '\0', '\0', '62', '2017-06-19 09:55:30');
-INSERT INTO `CHARGING_INFO` VALUES ('47', 'cookyPlus1301_jelynn', '\0', '\0', '60', '2017-06-19 10:00:37');
-
--- ----------------------------
 -- Table structure for D_FEATURE_ITEM
 -- ----------------------------
 DROP TABLE IF EXISTS `D_FEATURE_ITEM`;
@@ -585,16 +565,6 @@ CREATE TABLE `D_FEATURE_ITEM` (
   `DESCRIPTION` varchar(256) DEFAULT NULL COMMENT '描述',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of D_FEATURE_ITEM
--- ----------------------------
-INSERT INTO `D_FEATURE_ITEM` VALUES ('1', '测试', 'hahahah', '你猜啊');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('2', '测试', 'hahahah', '你猜啊');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('3', '测试', 'hahahah', '你猜啊');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('4', '测试', 'hahahah', '你猜啊');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('5', '测试1', 'hahahah啊', '你猜啊1');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('6', '测试13', 'hahahah啊3', '你猜啊1');
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
@@ -609,12 +579,6 @@ CREATE TABLE `D_FEATURE_ITEM_TYPE` (
   `FEATURE_ITEM_ID` bigint(20) DEFAULT NULL COMMENT '功能ID',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of D_FEATURE_ITEM_TYPE
--- ----------------------------
-INSERT INTO `D_FEATURE_ITEM_TYPE` VALUES ('1', '测试1', 'hahahah啊', '你猜啊1', 'sadfsdf', '1');
-INSERT INTO `D_FEATURE_ITEM_TYPE` VALUES ('2', '测试12', 'hahahah312', '你猜啊1', 'sadfsdf', '1');
 
 -- ----------------------------
 -- Table structure for D_MISSION_CHAIN
@@ -632,11 +596,6 @@ CREATE TABLE `D_MISSION_CHAIN` (
   `PRIORITY` int(11) DEFAULT NULL COMMENT '优先等级',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of D_MISSION_CHAIN
--- ----------------------------
-INSERT INTO `D_MISSION_CHAIN` VALUES ('2', 'asdasdfasdjkl', 'asdfasdfasdf', '2016-06-14 18:52:45', null, '8', '4545748', null, '1');
 
 -- ----------------------------
 -- Table structure for D_MISSION_MAIN
@@ -657,11 +616,6 @@ CREATE TABLE `D_MISSION_MAIN` (
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Records of D_MISSION_MAIN
--- ----------------------------
-INSERT INTO `D_MISSION_MAIN` VALUES ('9', 'afasdf', 'aasdfasdf', 'sdfa', '2017-08-01 15:22:20', '2017-06-14 13:43:58', '545455', '45', '165124502452', '5');
-
--- ----------------------------
 -- Table structure for D_MISSION_MAIN_CHAIN_XREF
 -- ----------------------------
 DROP TABLE IF EXISTS `D_MISSION_MAIN_CHAIN_XREF`;
@@ -671,11 +625,6 @@ CREATE TABLE `D_MISSION_MAIN_CHAIN_XREF` (
   `MISSION_CHAIN_ID` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of D_MISSION_MAIN_CHAIN_XREF
--- ----------------------------
-INSERT INTO `D_MISSION_MAIN_CHAIN_XREF` VALUES ('1', '9', '2');
 
 -- ----------------------------
 -- Table structure for D_MISSION_NODE
@@ -698,11 +647,6 @@ CREATE TABLE `D_MISSION_NODE` (
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Records of D_MISSION_NODE
--- ----------------------------
-INSERT INTO `D_MISSION_NODE` VALUES ('3', '测试43', 'hahaha', '2', '152458452121', 'sadfasdfas', '2016-06-14 09:12:58', null, '1', null, null, null);
-
--- ----------------------------
 -- Table structure for D_MISSION_NODE_CHAIN_XREF
 -- ----------------------------
 DROP TABLE IF EXISTS `D_MISSION_NODE_CHAIN_XREF`;
@@ -712,10 +656,6 @@ CREATE TABLE `D_MISSION_NODE_CHAIN_XREF` (
   `MISSION_NODE_ID` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of D_MISSION_NODE_CHAIN_XREF
--- ----------------------------
 
 -- ----------------------------
 -- Table structure for LOG_INFO
@@ -732,14 +672,6 @@ CREATE TABLE `LOG_INFO` (
   `HANDLE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of LOG_INFO
--- ----------------------------
-INSERT INTO `LOG_INFO` VALUES ('7', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
-INSERT INTO `LOG_INFO` VALUES ('8', 'dasdf', 'asdfasdf', 'WARNING', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
-INSERT INTO `LOG_INFO` VALUES ('9', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
-INSERT INTO `LOG_INFO` VALUES ('10', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-09 15:44:20', 'null', '2017-06-20 14:23:37');
 
 -- ----------------------------
 -- Table structure for LOG_MISSION
