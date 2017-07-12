@@ -15,6 +15,10 @@ public class PickUpPswdVerifyBean implements Serializable {
     public static final String RET_CODE_ERROR_NO_RECORD = "error_no_record";//没有查询到对应的密码记录，验证失败
 
     /**
+     * 消息的唯一id
+     */
+    private String uuid;
+    /**
      * 机器人主板编号
      */
     private String robotCode;
@@ -33,6 +37,14 @@ public class PickUpPswdVerifyBean implements Serializable {
      * 返回验证结果代码
      */
     private String retCode;
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getRobotCode() {
         return robotCode;
