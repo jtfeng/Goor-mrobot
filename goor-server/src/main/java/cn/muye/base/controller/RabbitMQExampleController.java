@@ -46,7 +46,7 @@ public class RabbitMQExampleController {
         commonInfo.setTopicType("rosTopicType");
         commonInfo.setPublishMessage("sendToRosJsonMessage");
         //如：
-//        commonInfo.setPublishMessage(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE);//发送到ros的json数据
+        commonInfo.setPublishMessage(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE);//发送到ros的json数据
 
         MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
         info.setUuId(UUID.randomUUID().toString().replace("-", ""));
