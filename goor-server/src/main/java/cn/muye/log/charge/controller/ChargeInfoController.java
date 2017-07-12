@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class ChargeInfoController implements ApplicationContextAware {
      *
      * @return
      */
-    @RequestMapping(value = "charge/status", method = RequestMethod.POST)
+    @RequestMapping(value = "charge/status", method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult ChargeStatus(@RequestParam("code") String code) {
         try {
@@ -66,7 +67,8 @@ public class ChargeInfoController implements ApplicationContextAware {
             if (chargeInfoList.size() <= 0) {
                 return AjaxResult.failed("无当前机器人（" + code + "）电量信息");
             }
-            return AjaxResult.success(chargeInfoList.get(0));
+
+            return AjaxResult.success(toEntity(new HashMap(),chargeInfoList.get(0)));
         } catch (Exception e) {
             LOGGER.error("获取电量信息出错", e);
             return AjaxResult.failed("系统错误");
@@ -99,6 +101,7 @@ public class ChargeInfoController implements ApplicationContextAware {
         map.put("chargingStatus", chargeInfo.getChargingStatus());
         map.put("pluginStatus", chargeInfo.getPluginStatus());
         map.put("powerPercent", chargeInfo.getPowerPercent());
+        map.put("storeId", chargeInfo.getStoreId());
         return map;
     }
 
