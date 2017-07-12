@@ -1,9 +1,11 @@
 package cn.muye.base.service.batch;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.publisher.AppSubService;
 import edu.wpi.rail.jrosbridge.Ros;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,9 @@ public class ScheduleTasks {
 
     @Autowired
     private Ros ros;
+
+    @Autowired
+    private AppSubService appSubService;
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -94,6 +99,16 @@ public class ScheduleTasks {
         }
     }
 
+
+    //每30秒触发  获取电量信息，存入数据库
+    @Scheduled(cron = "*/30 * * * * *") //test cron
+    public void getChargeAndPosition() {
+        try {
+            appSubService.sendAppPubTopic(TopicConstants.CHARGING_STATUS_INQUIRY, TopicConstants.TOPIC_TYPE_STRING);
+        } catch (Exception e) {
+            logger.error("获取电量信息或当前位置信息出错", e);
+        }
+    }
 
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
