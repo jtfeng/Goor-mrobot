@@ -6,6 +6,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.consumer.service.PickUpPswdVerifyService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
@@ -30,6 +31,9 @@ public class ConsumerCommon {
     @Autowired
     private OffLineMessageService offLineMessageService;
 
+    @Autowired
+    PickUpPswdVerifyService pickUpPswdVerifyService;
+
     /**
      * 透传ros发布的topic：agent_pub
      * @param messageInfo
@@ -49,6 +53,16 @@ public class ConsumerCommon {
 //                else if(){
 //
 //                }
+                if (!StringUtil.isEmpty(messageName)){
+                    switch (messageName){
+                        case TopicConstants.PICK_UP_PSWD_VERIFY:
+                            /* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
+                            pickUpPswdVerifyService.handlePickUpPswdVerify(messageInfo);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
         }catch (Exception e){
             logger.error("consumer directAgentPub exception",e);
