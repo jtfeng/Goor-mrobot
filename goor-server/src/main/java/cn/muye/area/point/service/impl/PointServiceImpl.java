@@ -181,7 +181,7 @@ public class PointServiceImpl implements PointService {
                 cascadeMapPointTypeList.add(cascadeMapPointType);
             }
 
-            cascadeMapPoint.setValue(0);
+            cascadeMapPoint.setValue(i);
             cascadeMapPoint.setLabel(mapName);
             cascadeMapPoint.setChildren(cascadeMapPointTypeList);
             cascadeMapPointList.add(cascadeMapPoint);
