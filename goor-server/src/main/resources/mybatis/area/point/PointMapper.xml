@@ -35,8 +35,10 @@
     </sql>
 
     <select id="selectMapName" resultType="String">
-        SELECT DISTINCT MAP_NAME
+        SELECT MAP_NAME
         FROM A_MAP_POINT
+        WHERE STORE_ID = #{storeId}
+        GROUP BY MAP_NAME
     </select>
 
     <select id="selectPointTypeByMapName" resultType="int">
