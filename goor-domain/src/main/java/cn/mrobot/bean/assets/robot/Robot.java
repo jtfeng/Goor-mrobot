@@ -1,5 +1,6 @@
 package cn.mrobot.bean.assets.robot;
 
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -33,6 +34,9 @@ public class Robot extends BaseBean {
 
     @Transient
     private List<RobotPassword> passwords;
+
+    @Transient
+    private List<MapPoint> chargerMapPointList; //充电桩点LIST
 
     public List<RobotPassword> getPasswords() {
         return passwords;
@@ -107,11 +111,19 @@ public class Robot extends BaseBean {
         this.batteryThreshold = batteryThreshold;
     }
 
-    public Boolean getIsBusy() {
+    public Boolean getBusy() {
         return isBusy;
     }
 
-    public void setIsBusy(Boolean isBusy) {
-        this.isBusy = isBusy;
+    public void setBusy(Boolean busy) {
+        isBusy = busy;
+    }
+
+    public List<MapPoint> getChargerMapPointList() {
+        return chargerMapPointList;
+    }
+
+    public void setChargerMapPointList(List<MapPoint> chargerMapPointList) {
+        this.chargerMapPointList = chargerMapPointList;
     }
 }

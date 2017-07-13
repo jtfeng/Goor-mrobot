@@ -1,12 +1,16 @@
 package cn.muye.assets.robot.service.impl;
 
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotChargerMapPointXREF;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationRobotXREFService;
+import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
@@ -14,6 +18,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +45,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     @Autowired
     private RobotService robotService;
+
+    @Autowired
+    private RobotChargerMapPointXREFService robotChargerMapPointXREFService;
+
+    @Autowired
+    private PointService pointService;
 
     /**
      * 更新机器人
@@ -69,15 +80,30 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
                 Robot robotDb = robotService.getById(robotId);
-                if (robotDb != null && robotDb.getIsBusy() == false) {
+                if (robotDb != null && robotDb.getBusy() == false) {
                     availableRobot = robotDb;
                     break;
                 }
             }
         }
-        availableRobot.setIsBusy(true);
+        availableRobot.setBusy(true);
         updateRobot(availableRobot);
         return availableRobot;
+    }
+
+    @Override
+    public void bindChargerMapPoint(Long robotId, List<MapPoint> list) {
+        if (robotId != null) {
+            robotChargerMapPointXREFService.deleteByRobotId(robotId);
+            if (list != null && list.size() > 0) {
+                for (MapPoint mapPoint : list) {
+                    RobotChargerMapPointXREF xref = new RobotChargerMapPointXREF();
+                    xref.setRobotId(robotId);
+                    xref.setChargerMapPointId(mapPoint.getId());
+                    robotChargerMapPointXREFService.save(xref);
+                }
+            }
+        }
     }
 
     private List<Robot> listPageByStoreIdAndOrder(int page, int pageSize, String name, Integer type, Class<Robot> clazz, String order) {
@@ -110,6 +136,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         list.forEach(robot -> {
             robot.setBatteryThreshold(robotConfigService.getByRobotId(robot.getId()).getBatteryThreshold());
             robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
+            List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robot.getId());
+            List<MapPoint> mapPointList = Lists.newArrayList();
+            xrefList.forEach(xref -> {
+                MapPoint mapPoint = pointService.findById(xref.getChargerMapPointId());
+                mapPointList.add(mapPoint);
+            });
+            robot.setChargerMapPointList(mapPointList);
         });
         return list;
     }
