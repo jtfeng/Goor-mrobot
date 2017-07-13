@@ -3,7 +3,7 @@ package cn.muye.base.controller;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.AjaxResult;
-import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.service.FileUpladService;
 import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -14,13 +14,9 @@ import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.UUID;
+import java.io.File;
 
 @Controller
 public class ExampleController {
@@ -30,11 +26,10 @@ public class ExampleController {
     private Ros ros;
 
 	@Autowired
-	private AppSubService logPublishService;
-
-	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
+	@Autowired
+	private FileUpladService fileUpladService;
 
     @RequestMapping(value = "test1", method= RequestMethod.POST)
     @ResponseBody
@@ -132,44 +127,23 @@ public class ExampleController {
         return AjaxResult.success();
     }
 
-	/**
-	 * 向机器人发送指令
-	 * 载入地图和场景的导航点
-	 *
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "area/point/load", method = RequestMethod.GET)
-	@ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult loadMapPoint() throws Exception {
-		try {
-//			logPublishService.publishChargeMessage();
-			logPublishService.publishPointMessage();
-			return AjaxResult.success();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return AjaxResult.failed();
-		}
-	}
-
-	/**
-	 * 向机器人发送指令
-	 * 载入地图和场景的导航点
-	 *
-	 * @return
-	 * @throws Exception
-	 */
-	@RequestMapping(value = "area/map/upload", method = RequestMethod.GET)
-	@ResponseBody
-	public AjaxResult uploadMap() throws Exception {
-		try {
-			logPublishService.publishMapUploadMessage();
-			return AjaxResult.success();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return AjaxResult.failed();
-		}
-	}
+    /**
+     * 向机器人发送指令
+     * 载入地图和场景的导航点
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "area/map/upload", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult mapUpload() throws Exception {
+        try {
+            fileUpladService.uploadMapFile();
+            return AjaxResult.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed();
+        }
+    }
 
 }

@@ -162,7 +162,7 @@ public class PointServiceImpl implements PointService {
     @Override
     public List<CascadeMapPoint> cascadeMapPoint() {
         List<CascadeMapPoint> cascadeMapPointList = new ArrayList<>();
-        List<String> mapNameList = pointMapper.selectMapName();
+        List<String> mapNameList = pointMapper.selectMapName(SearchConstants.FAKE_MERCHANT_STORE_ID);
         String mapName;
         int pointTypeId;
         for (int i = 0; i < mapNameList.size(); i++) {

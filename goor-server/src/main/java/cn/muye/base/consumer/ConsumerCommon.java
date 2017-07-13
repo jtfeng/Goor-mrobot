@@ -1,14 +1,17 @@
 package cn.muye.base.consumer;
 
+import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.consumer.service.PickUpPswdVerifyService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
-import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.log.charge.service.ChargeInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
@@ -30,70 +33,89 @@ public class ConsumerCommon {
     @Autowired
     private OffLineMessageService offLineMessageService;
 
+    @Autowired
+    PickUpPswdVerifyService pickUpPswdVerifyService;
+
+    @Autowired
+    private ChargeInfoService chargeInfoService;
+
     /**
      * 透传ros发布的topic：agent_pub
+     *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.DIRECT_AGENT_PUB)
     public void directAgentPub(@Payload MessageInfo messageInfo) {
         try {
-            if(null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())){
+            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
                 String data = jsonObject.getString(TopicConstants.DATA);
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-                if(!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")){
+                if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
 //                else if(){
 //
 //                }
+                if (!StringUtil.isEmpty(messageName)) {
+                    switch (messageName) {
+                        case TopicConstants.PICK_UP_PSWD_VERIFY:
+                            /* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
+                            pickUpPswdVerifyService.handlePickUpPswdVerify(messageInfo);
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
-        }catch (Exception e){
-            logger.error("consumer directAgentPub exception",e);
+        } catch (Exception e) {
+            logger.error("consumer directAgentPub exception", e);
         }
     }
 
     /**
      * 透传ros发布的topic：agent_sub
+     *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.DIRECT_AGENT_SUB)
     public void directAgentSub(@Payload MessageInfo messageInfo) {
         try {
-            if(null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())){
+            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
                 String data = jsonObject.getString(TopicConstants.DATA);
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-                if(!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")){
+                if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
 //                else if(){
 //
 //                }
             }
-        }catch (Exception e){
-            logger.error("consumer directAgentSub exception",e);
+        } catch (Exception e) {
+            logger.error("consumer directAgentSub exception", e);
         }
     }
 
     /**
      * 透传ros发布的topic：app_pub
+     *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.DIRECT_APP_PUB)
     public void directAppPub(@Payload MessageInfo messageInfo) {
         try {
-            if(null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())){
+            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
                 String data = jsonObject.getString(TopicConstants.DATA);
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-                if(!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")){
+                if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
 
@@ -101,88 +123,95 @@ public class ConsumerCommon {
 //
 //                }
             }
-        }catch (Exception e){
-            logger.error("consumer directAppPub exception",e);
+        } catch (Exception e) {
+            logger.error("consumer directAppPub exception", e);
         }
     }
 
     /**
      * 透传ros发布的topic：app_sub
+     *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.DIRECT_APP_SUB)
     public void directAppSub(@Payload MessageInfo messageInfo) {
         try {
-            if(null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())){
+            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
                 String data = jsonObject.getString(TopicConstants.DATA);
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
+                String messageData = jsonObjectData.getString(TopicConstants.DATA);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-                if(!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")){
+                if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
+                    ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
+                    chargeInfo.setDeviceId(messageInfo.getSenderId());
+                    chargeInfo.setCreateTime(messageInfo.getSendTime());
+                    chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    chargeInfoService.save(chargeInfo);
                 }
-//                else if(){
-//
-//                }
             }
-        }catch (Exception e){
-            logger.error("consumer directAppSub exception",e);
+        } catch (Exception e) {
+            logger.error("consumer directAppSub exception", e);
         }
     }
 
     /**
      * 透传ros发布的topic：current_pose
+     *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.DIRECT_CURRENT_POSE)
     public void directCurrentPose(@Payload MessageInfo messageInfo) {
         try {
             CacheInfoManager.setMessageCache(messageInfo);
-        }catch (Exception e){
-            logger.error("consumer directCurrentPose exception",e);
+        } catch (Exception e) {
+            logger.error("consumer directCurrentPose exception", e);
         }
     }
 
     /**
      * 接收 x86 agent 发布过来的消息，理论不接收ros消息，牵涉到ros消息的，请使用topic透传，只和agent通信（无回执）
+     *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT)
     public void directCommandReport(@Payload MessageInfo messageInfo) {
         try {
             sendMessageSave(messageInfo);
-        }catch (Exception e){
-            logger.error("consumer directCommandReport exception",e);
+        } catch (Exception e) {
+            logger.error("consumer directCommandReport exception", e);
         }
     }
 
     /**
      * 接收 x86 agent 发布过来的消息，理论不接收ros消息，牵涉到ros消息的，请使用topic透传，只和agent通信（无回执）
+     *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE)
     public AjaxResult directCommandReportAndReceive(@Payload MessageInfo messageInfo) {
         try {
             sendMessageSave(messageInfo);
-        }catch (Exception e){
-            logger.error("consumer directCommandReport exception",e);
+        } catch (Exception e) {
+            logger.error("consumer directCommandReport exception", e);
         }
         return AjaxResult.success();
     }
 
 
-
-    private boolean sendMessageSave(MessageInfo messageInfo) throws Exception{
-        if(messageInfo == null
-                || StringUtil.isEmpty(messageInfo.getUuId() + "")){
+    private boolean sendMessageSave(MessageInfo messageInfo) throws Exception {
+        if (messageInfo == null
+                || StringUtil.isEmpty(messageInfo.getUuId() + "")) {
             return false;
         }
-        if(MessageType.EXECUTOR_LOG.equals(messageInfo.getMessageType())){
+        if (MessageType.EXECUTOR_LOG.equals(messageInfo.getMessageType())) {
             //TODO 此处可以添加日志及状态上报存储
 
 
-        }else if(MessageType.REPLY.equals(messageInfo.getMessageType())){
+        } else if (MessageType.REPLY.equals(messageInfo.getMessageType())) {
             OffLineMessage message = new OffLineMessage();
             message.setMessageStatusType(messageInfo.getMessageStatusType().getIndex());//如果是回执，将对方传过来的信息带上
             message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库

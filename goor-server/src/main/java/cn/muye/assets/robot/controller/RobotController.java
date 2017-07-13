@@ -1,5 +1,6 @@
 package cn.muye.assets.robot.controller;
 
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
@@ -173,6 +174,20 @@ public class RobotController {
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("修改密码出错");
+        }
+    }
+
+    @RequestMapping(value = {"assets/robot/bindChargerMapPoint"}, method = RequestMethod.POST)
+    @ApiOperation(value = "机器人绑充电桩", httpMethod = "POST", notes = "机器人绑充电桩")
+    @ResponseBody
+    public AjaxResult bindChargerMapPoint(@RequestBody Robot robot) {
+        List<MapPoint> list = robot.getChargerMapPointList();
+        Long robotId = robot.getId();
+        if (list != null && list.size() == 1 && robotId != null) {
+            robotService.bindChargerMapPoint(robotId, list);
+            return AjaxResult.success(robot,"绑定成功");
+        } else {
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
         }
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.muye.log.charge.mapper.ChargeInfoMapper">
+<mapper namespace="cn.muye.charge.mapper.ChargeInfoMapper">
 
     <resultMap id="chargeInfo" type="cn.mrobot.bean.charge.ChargeInfo">
         <result property="id" column="ID"/>
@@ -11,7 +11,6 @@
         <result property="chargingStatus" column="CHARGING_STATUS"/>
         <result property="pluginStatus" column="PLUGIN_STATUS"/>
         <result property="powerPercent" column="POWER_PERCENT"/>
-        <result property="createDate" column="CREATE_DATE"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -22,8 +21,7 @@
     DEVICE_ID,
     CHARGING_STATUS,
     PLUGIN_STATUS,
-    POWER_PERCENT,
-    CREATE_DATE
+    POWER_PERCENT
   </sql>
 
     <insert id="save" parameterType="cn.mrobot.bean.charge.ChargeInfo" useGeneratedKeys="true" keyProperty="id">
@@ -35,8 +33,7 @@
         DEVICE_ID,
         CHARGING_STATUS,
         PLUGIN_STATUS,
-        POWER_PERCENT,
-        CREATE_DATE
+        POWER_PERCENT
         ) values (
         #{id},
         #{storeId},
@@ -45,32 +42,22 @@
         #{deviceId},
         #{chargingStatus},
         #{pluginStatus},
-        #{powerPercent},
-        #{createDate}
+        #{powerPercent}
         );
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS ID
         </selectKey>
     </insert>
 
-    <select id="get" resultMap="chargeInfo">
+    <select id="list" resultMap="chargeInfo">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM CHARGING_INFO c
-        WHERE c.ID = #{id}
+        FROM CHARGING_INFO
+        ORDER BY ID DESC
     </select>
 
-    <select id="getByDeviceId" resultMap="chargeInfo">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM CHARGING_INFO c
-        WHERE c.DEVICE_ID = #{deviceId}
-    </select>
-
-    <select id="lists" resultMap="chargeInfo">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM CHARGING_INFO c
-    </select>
+    <delete id="delete">
+        delete from CHARGING_INFO
+    </delete>
 
 </mapper>

@@ -1,7 +1,10 @@
 package cn.muye.log.charge.controller;
 
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.utils.StringUtil;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.muye.log.charge.service.ChargeInfoService;
@@ -9,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
@@ -17,7 +21,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,65 +37,76 @@ import java.util.List;
 @Controller
 public class ChargeInfoController implements ApplicationContextAware {
 
-	private static ApplicationContext applicationContext;
+    private static ApplicationContext applicationContext;
 
-	private Logger logger = Logger.getLogger(ChargeInfoController.class);
+    private static Logger LOGGER = Logger.getLogger(ChargeInfoController.class);
 
-	private ChargeInfoService chargeInfoService;
+    @Autowired
+    private ChargeInfoService chargeInfoService;
+    @Autowired
+    private RobotService robotService;
 
-	/**
-	 * 实时获取电量信息
-	 *
-	 * @return
-	 */
-	@RequestMapping(value = "charge/status", method = RequestMethod.POST)
-	@ResponseBody
-	public AjaxResult ChargeStatus(@RequestParam("deviceId") String deviceId) {
+    /**
+     * 实时获取电量信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "charge/status", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult ChargeStatus(@RequestParam("code") String code) {
+        try {
+            if (StringUtil.isNullOrEmpty(code)) {
+                return AjaxResult.failed("设备编号不能为空");
+            }
 
-		//封装数据
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put(TopicConstants.PUB_NAME, TopicConstants.CHARGING_STATUS_INQUIRY);
-		JSONObject messageObject = new JSONObject();
-		messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+            Robot robot = robotService.getByCode(code);
+            if (null == robot) {
+                return AjaxResult.failed("机器人编号（" + code + "）不存在");
+            }
+            List<ChargeInfo> chargeInfoList = chargeInfoService.getByDeviceId(code);
+            if (chargeInfoList.size() <= 0) {
+                return AjaxResult.failed("无当前机器人（" + code + "）信息");
+            }
 
-		CommonInfo commonInfo = new CommonInfo();
-		commonInfo.setTopicName(TopicConstants.APP_PUB);
-		commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-		commonInfo.setPublishMessage(JSON.toJSONString(messageObject));
+            return AjaxResult.success(toEntity(new HashMap(),chargeInfoList.get(0)));
+        } catch (Exception e) {
+            LOGGER.error("获取信息出错", e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
 
-		String text = JSON.toJSONString(commonInfo);
-		byte[] b = text.getBytes();
-//		MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
-//		info.setMessageStatusType(MessageStatusType.INIT);
-////		info.setReceiptWebSocket(true);
-////		info.setWebSocketId("user-9");
-//		info.setSendDeviceType(DeviceType.GOOR_SERVER);
-//		info.setReceiverDeviceType(DeviceType.GOOR);
-//		info.setMessageKind(0);
-//		info.setSendTime(new Date());
-//		info.setUpdateTime(new Date());
-//		info.setSendCount(0);
-//
-//		messageSendService.sendNoStatusMessage(deviceId, info);
-		return AjaxResult.success();
-	}
+    /**
+     * 实时获取电量信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "charge/lists", method = RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult lists() {
+        //TODO
+        ChargeInfoService chargeInfoService = applicationContext.getBean(ChargeInfoService.class);
+        List<ChargeInfo> list = chargeInfoService.lists();
+        return AjaxResult.success();
+    }
 
-	/**
-	 * 实时获取电量信息
-	 *
-	 * @return
-	 */
-	@RequestMapping(value = "charge/lists", method = RequestMethod.POST)
-	@ResponseBody
-	public AjaxResult lists() {
-		//TODO
-		ChargeInfoService chargeInfoService = applicationContext.getBean(ChargeInfoService.class);
-		List<ChargeInfo> list = chargeInfoService.lists();
-		return AjaxResult.success();
-	}
 
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		ChargeInfoController.applicationContext = applicationContext;
-	}
+    /**
+     * 转化成前端entity
+     * append
+     * @param map
+     * @return
+     */
+    public Map toEntity(Map map, ChargeInfo chargeInfo) {
+        map.put("deviceId", chargeInfo.getDeviceId());
+        map.put("chargingStatus", chargeInfo.getChargingStatus());
+        map.put("pluginStatus", chargeInfo.getPluginStatus());
+        map.put("powerPercent", chargeInfo.getPowerPercent());
+        map.put("storeId", chargeInfo.getStoreId());
+        return map;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        ChargeInfoController.applicationContext = applicationContext;
+    }
 }

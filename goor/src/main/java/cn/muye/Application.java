@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadFactory;
 @ComponentScan
 @EnableScheduling
 @EnableTransactionManagement
-@MapperScan("cn.muye.base.mapper")
+@MapperScan("cn.muye.**.mapper")
 public class Application {
 	private static Logger logger = Logger.getLogger(Application.class);
 
@@ -41,6 +41,9 @@ public class Application {
 
 	@Value("${local.robot.SN}")
 	private String localRobotSN;
+
+	@Value("${lsub.name}")
+	private String lSubName;
 
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
@@ -78,6 +81,15 @@ public class Application {
 			CacheInfoManager.setNameSubCache(subName);
 		}
 		return subName;
+	}
+
+	@Bean
+	public String lSubName(){
+		String[] arraySubName = lSubName.split(",");
+		for(String subName : arraySubName){
+			CacheInfoManager.setNameLSubCache(subName);
+		}
+		return lSubName;
 	}
 
 	@Bean

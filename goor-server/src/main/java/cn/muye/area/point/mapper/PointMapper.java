@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface PointMapper extends MyMapper<MapPoint>{
 
-	List<String> selectMapName();
+	List<String> selectMapName(long storeId);
 
 	List<Integer> selectPointTypeByMapName(String mapName);
 

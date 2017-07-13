@@ -1,5 +1,6 @@
 package cn.muye.assets.robot.service;
 
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
@@ -28,4 +29,6 @@ public interface RobotService extends BaseService<Robot>{
     void updateRobot(Robot robot);
 
     Robot getAvailableRobotByStationId(Long stationId);
+
+    void bindChargerMapPoint(Long robotId, List<MapPoint> list);
 }

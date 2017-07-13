@@ -6,6 +6,7 @@ import cn.muye.log.charge.service.ChargeInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -26,18 +27,21 @@ public class ChargeInfoServiceImpl  implements ChargeInfoService {
 	private ChargeInfoMapper chargingInfoMapper;
 
 	public void save(ChargeInfo chargeInfo){
-		chargingInfoMapper.save(chargeInfo);
+		chargingInfoMapper.insert(chargeInfo);
 	}
 
 	public ChargeInfo get(Long id){
-		return chargingInfoMapper.get(id);
+		return chargingInfoMapper.selectByPrimaryKey(id);
 	}
 
-	public ChargeInfo getByDeviceId(String deviceId){
-		return chargingInfoMapper.getByDeviceId(deviceId);
+	public List<ChargeInfo> getByDeviceId(String deviceId){
+		Example example = new Example(ChargeInfo.class);
+		example.createCriteria().andCondition("DEVICE_ID=",deviceId);
+		example.setOrderByClause("CREATE_TIME DESC");
+		return chargingInfoMapper.selectByExample(example);
 	}
 
 	public List<ChargeInfo> lists(){
-		return chargingInfoMapper.lists();
+		return chargingInfoMapper.selectAll();
 	}
 }
