@@ -185,7 +185,7 @@ public class RobotController {
         Long robotId = robot.getId();
         if (list != null && list.size() == 1 && robotId != null) {
             robotService.bindChargerMapPoint(robotId, list);
-            return AjaxResult.success("绑定成功");
+            return AjaxResult.success(robot,"绑定成功");
         } else {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
         }
