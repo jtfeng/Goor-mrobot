@@ -41,10 +41,41 @@
         GROUP BY MAP_NAME
     </select>
 
+    <select id="selectSceneName" resultType="String">
+        SELECT SCENE_NAME
+        FROM A_MAP_POINT
+        WHERE STORE_ID = #{storeId}
+        GROUP BY SCENE_NAME
+    </select>
+
+    <select id="selectMapNameBySceneName" resultType="String">
+        SELECT MAP_NAME
+        FROM A_MAP_POINT a
+        <where>
+            <if test = "sceneName != null">
+                AND a.SCENE_NAME = #{sceneName}
+            </if>
+            <if test = "storeId != null">
+                AND a.STORE_ID = #{storeId}
+            </if>
+        </where>
+        GROUP BY MAP_NAME
+    </select>
+
     <select id="selectPointTypeByMapName" resultType="int">
         SELECT DISTINCT MAP_POINT_TYPE_ID
         FROM A_MAP_POINT a
-        WHERE a.MAP_NAME = #{mapName};
+        <where>
+            <if test = "sceneName != null">
+                AND a.SCENE_NAME = #{sceneName}
+            </if>
+            <if test = "mapName != null">
+                AND  a.MAP_NAME = #{mapName}
+            </if>
+            <if test = "storeId != null">
+                AND a.STORE_ID = #{storeId}
+            </if>
+        </where>
     </select>
 
     <select id="selectPointByPointTypeMapName" resultMap="mapPoint">
@@ -53,11 +84,17 @@
         FROM A_MAP_POINT a
         <where>
             <trim>
+                <if test = "sceneName != null">
+                    AND a.SCENE_NAME = #{sceneName}
+                </if>
                 <if test = "mapName != null">
                     and a.MAP_NAME = #{mapName}
                 </if>
                 <if test="mapPointTypeId != null">
                     and a.MAP_POINT_TYPE_ID = #{mapPointTypeId}
+                </if>
+                <if test = "storeId != null">
+                    AND a.STORE_ID = #{storeId}
                 </if>
             </trim>
         </where>

@@ -16,12 +16,21 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-public interface PointMapper extends MyMapper<MapPoint>{
+public interface PointMapper extends MyMapper<MapPoint> {
 
-	List<String> selectMapName(long storeId);
+    List<String> selectMapName(long storeId);
 
-	List<Integer> selectPointTypeByMapName(String mapName);
+    List<String> selectSceneName(long storeId);
 
-	List<MapPoint> selectPointByPointTypeMapName(@Param("mapName")String mapName,
-												 @Param("mapPointTypeId") int mapPointTypeId);
+    List<String> selectMapNameBySceneName(@Param("sceneName") String sceneName,
+                                          @Param("storeId") long storeId);
+
+    List<Integer> selectPointTypeByMapName(@Param("sceneName") String sceneName,
+                                           @Param("mapName") String mapName,
+                                           @Param("storeId") long storeId);
+
+    List<MapPoint> selectPointByPointTypeMapName(@Param("sceneName") String sceneName,
+                                                 @Param("mapName") String mapName,
+                                                 @Param("mapPointTypeId") int mapPointTypeId,
+                                                 @Param("storeId") long storeId);
 }

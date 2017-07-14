@@ -17,7 +17,7 @@ public class CascadeMapPointType {
 
     //id
     private int value;
-    //name
+    //sceneName
     private String label;
 
     private List<MapPoint> children;

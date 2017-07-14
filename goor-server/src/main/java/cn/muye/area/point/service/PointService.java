@@ -2,6 +2,7 @@ package cn.muye.area.point.service;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
+import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.WhereRequest;
 import com.alibaba.fastjson.JSONArray;
@@ -43,5 +44,5 @@ public interface PointService {
 	@Deprecated
 	void handle(SlamResponseBody slamResponseBody);
 
-	List<CascadeMapPoint>  cascadeMapPoint();
+	List<CascadePoint> cascadeMapPoint();
 }

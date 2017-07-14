@@ -4,6 +4,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
+import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.WhereRequest;
@@ -109,7 +110,7 @@ public class PointServiceImpl implements PointService {
                 criteria.andCondition("MAP_POINT_TYPE_ID =", mapPointTypeId);
             }
         }
-        criteria.andCondition("STORE_ID = " , storeId);
+        criteria.andCondition("STORE_ID = ", storeId);
         condition.setOrderByClause("ID DESC");
 
         List<MapPoint> mapPointList = pointMapper.selectByExample(condition);
@@ -160,32 +161,47 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<CascadeMapPoint> cascadeMapPoint() {
-        List<CascadeMapPoint> cascadeMapPointList = new ArrayList<>();
-        List<String> mapNameList = pointMapper.selectMapName(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        String mapName;
-        int pointTypeId;
-        for (int i = 0; i < mapNameList.size(); i++) {
-            CascadeMapPoint cascadeMapPoint = new CascadeMapPoint();
-            mapName = mapNameList.get(i);
-            List<Integer> pointTypeIdList = pointMapper.selectPointTypeByMapName(mapName);
-            List<CascadeMapPointType> cascadeMapPointTypeList = new ArrayList<>();
+    public List<CascadePoint> cascadeMapPoint() {
+        List<CascadePoint> cascadePointList = new ArrayList<>();
+        //获取场景名
+        List<String> sceneNameList = pointMapper.selectSceneName(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        for (int a = 0; a < sceneNameList.size(); a++) {
+            CascadePoint cascadePoint = new CascadePoint();
+            //根据场景名获取地图名
+            String sceneName = sceneNameList.get(a);
+            List<String> mapNameList = pointMapper.selectMapNameBySceneName(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            List<CascadeMapPoint> cascadeMapPointList = new ArrayList<>();
+            String mapName;
+            int pointTypeId;
+            for (int i = 0; i < mapNameList.size(); i++) {
+                CascadeMapPoint cascadeMapPoint = new CascadeMapPoint();
+                mapName = mapNameList.get(i);
+                //根据场景名,地图名 获取点类型
+                List<Integer> pointTypeIdList = pointMapper.selectPointTypeByMapName(sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                List<CascadeMapPointType> cascadeMapPointTypeList = new ArrayList<>();
 
-            for (int j = 0; j < pointTypeIdList.size(); j++) {
-                CascadeMapPointType cascadeMapPointType = new CascadeMapPointType();
-                pointTypeId = pointTypeIdList.get(j);
-                List<MapPoint> mapPointList = pointMapper.selectPointByPointTypeMapName(mapName, pointTypeId);
-                cascadeMapPointType.setValue(pointTypeId);
-                cascadeMapPointType.setLabel(MapPointType.getValue(pointTypeId));
-                cascadeMapPointType.setChildren(mapPointList);
-                cascadeMapPointTypeList.add(cascadeMapPointType);
+                for (int j = 0; j < pointTypeIdList.size(); j++) {
+                    CascadeMapPointType cascadeMapPointType = new CascadeMapPointType();
+                    pointTypeId = pointTypeIdList.get(j);
+                    //根据场景名,地图名 ，点类型 获取点列表
+                    List<MapPoint> mapPointList = pointMapper.selectPointByPointTypeMapName(sceneName, mapName, pointTypeId,SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    cascadeMapPointType.setValue(pointTypeId);
+                    cascadeMapPointType.setLabel(MapPointType.getValue(pointTypeId));
+                    cascadeMapPointType.setChildren(mapPointList);
+                    cascadeMapPointTypeList.add(cascadeMapPointType);
+                }
+
+                cascadeMapPoint.setValue(i);
+                cascadeMapPoint.setLabel(mapName);
+                cascadeMapPoint.setChildren(cascadeMapPointTypeList);
+                cascadeMapPointList.add(cascadeMapPoint);
             }
-
-            cascadeMapPoint.setValue(i);
-            cascadeMapPoint.setLabel(mapName);
-            cascadeMapPoint.setChildren(cascadeMapPointTypeList);
-            cascadeMapPointList.add(cascadeMapPoint);
+            cascadePoint.setValue(a);
+            cascadePoint.setLabel(sceneName);
+            cascadePoint.setChildren(cascadeMapPointList);
+            cascadePointList.add(cascadePoint);
         }
-        return cascadeMapPointList;
+
+        return cascadePointList;
     }
 }
