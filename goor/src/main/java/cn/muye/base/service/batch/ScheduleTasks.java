@@ -3,6 +3,8 @@ package cn.muye.base.service.batch;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
+import cn.muye.base.service.ScheduledHandleService;
+import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import cn.muye.publisher.AppSubService;
@@ -10,6 +12,7 @@ import edu.wpi.rail.jrosbridge.Ros;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +39,9 @@ public class ScheduleTasks {
 
     @Autowired
     private AppSubService appSubService;
+
+    @Value("${local.robot.SN}")
+    private String localRobotSN;
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -110,7 +116,21 @@ public class ScheduleTasks {
         }
     }
 
+    //默认开机10分钟后请求时间同步，不关机情况下每天同步一次
+    @Scheduled(initialDelay = 600000, fixedRate = 24 * 60 * 60 * 1000)
+    public void timeSynchronized() {
+        logger.info("Scheduled clear message start");
+        try {
+            ScheduledHandleService service = new ScheduledHandleServiceImp();
+            service.timeSynchronized(localRobotSN);
+            logger.info("schedule rosHealthCheckScheduled");
+        } catch (Exception e) {
+            logger.error("Scheduled clear message error", e);
+        }
+    }
+    
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
+
 
 
 
