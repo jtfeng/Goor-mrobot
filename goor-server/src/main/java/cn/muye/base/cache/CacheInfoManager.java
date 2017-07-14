@@ -21,12 +21,15 @@ public class CacheInfoManager implements ApplicationContextAware {
 	/** AppConfig 的缓存 */
 	private static ConcurrentHashMapCache<Long, AppConfig> appConfigCache = new ConcurrentHashMapCache<Long, AppConfig>();
 	private static ConcurrentHashMapCache<String, MessageInfo> messageCache = new ConcurrentHashMapCache<String, MessageInfo>();
+	//机器人当前加载地图的缓存
+	private static ConcurrentHashMapCache<String, MessageInfo> mapCurrentCache = new ConcurrentHashMapCache<String, MessageInfo>();
 
 	static {
 
 		// AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
 		appConfigCache.setMaxLifeTime(0);
 		messageCache.setMaxLifeTime(0);
+		mapCurrentCache.setMaxLifeTime(0);
 	}
 
 	private CacheInfoManager() {
@@ -60,6 +63,15 @@ public class CacheInfoManager implements ApplicationContextAware {
 			return appConfig;
 		}
 		return appConfigInfo;
+	}
+
+
+	public static void setMapCurrentCache( MessageInfo messageInfo) {
+		mapCurrentCache.put(messageInfo.getSenderId(), messageInfo);
+	}
+
+	public static MessageInfo getMapCurrentCache(String deviceCode) {
+		return mapCurrentCache.get(deviceCode);
 	}
 
 	@Override

@@ -300,14 +300,14 @@ public class FilesController {
 				ZipUtils.unzip(mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
 				LOGGER.info("地图文件解压成功，保存地址 path=" + saveFile.getAbsolutePath());
 				//解析地图文件
-				analysisFile(saveFile);
+				analysisFile(saveFile, mapZip.getDeviceId());
 			} catch (Exception e) {
 				LOGGER.error("地图文件解压失败", e);
 			}
 		}
 	}
 
-	public void analysisFile(File mapFilePath) {
+	public void analysisFile(File mapFilePath, String deviceId) {
 		LOGGER.info("解析导航目标点文件，地图文件地址=" + mapFilePath);
 		if (!mapFilePath.exists()) {
 			return;
@@ -319,7 +319,7 @@ public class FilesController {
 			String sceneName = sceneDir.getName();
 			try {
 				//解析地图文件
-				analysisMapFile(sceneName, sceneDir.getAbsolutePath());
+				analysisMapFile(sceneName, sceneDir.getAbsolutePath(), deviceId);
 				//解析导航点文件
 //				analysisPointFile(sceneName, sceneDir.getAbsolutePath());
 			} catch (IllegalAccessException e) {
@@ -329,7 +329,7 @@ public class FilesController {
 	}
 
 	//解析地图文件
-	private void analysisMapFile(String sceneName, String sceneDir) throws IllegalAccessException {
+	private void analysisMapFile(String sceneName, String sceneDir, String deviceId) throws IllegalAccessException {
 		File mapFilePath = FileUtils.getFile(sceneDir, Constant.MAP_FILE_PATH);
 		if (!mapFilePath.exists()) {
 			LOGGER.info("地图文件夹不存在。sceneName=" + sceneName + ", sceneDir=" + sceneDir);
@@ -349,10 +349,12 @@ public class FilesController {
 			MapInfo mapInfo = new MapInfo();
 			mapInfo.setMapName(mapName);
 			mapInfo.setSceneName(sceneName);
+			mapInfo.setDeviceId(deviceId);
+			mapInfo.setCreateTime(new Date());
 			//TODO 删除原数据库中的地图数据
-			List<MapInfo> mapInfoList = mapInfoService.getMapInfo(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID);
-			for(int j =0; j < mapInfoList.size(); j ++){
-				mapInfoService.delete(mapInfoList.get(j));
+			MapInfo mapInfoDB = mapInfoService.getMapInfo(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID);
+			if(mapInfoDB != null){
+				mapInfoService.delete(mapInfoDB);
 			}
 			mapInfo.setRos(JSON.toJSONString(map));
 

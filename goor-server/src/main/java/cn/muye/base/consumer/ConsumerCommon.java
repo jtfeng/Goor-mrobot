@@ -1,10 +1,10 @@
 package cn.muye.base.consumer;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
@@ -148,8 +148,10 @@ public class ConsumerCommon {
                 String messageData = jsonObjectData.getString(TopicConstants.DATA);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
-                    logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
+                    //将当前加载的地图信息存入缓存
+                    CacheInfoManager.setMapCurrentCache(messageInfo);
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
+                    //保存电量信息
                     ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
                     chargeInfo.setDeviceId(messageInfo.getSenderId());
                     chargeInfo.setCreateTime(messageInfo.getSendTime());

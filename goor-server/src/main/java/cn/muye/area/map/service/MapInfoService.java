@@ -20,7 +20,7 @@ public interface MapInfoService {
 
     MapInfo getMapInfo(long id);
 
-    List<MapInfo> getMapInfo(String name, String sceneName, long storeId);
+    MapInfo getMapInfo(String name, String sceneName, long storeId);
 
     void delete(MapInfo mapInfo);
 

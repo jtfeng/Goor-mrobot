@@ -38,6 +38,8 @@ public class TopicConstants {
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
 	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
+	public static final String STATE_COLLECTORS = "state_collectors"; //状态机返回状态的topic
+	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
 	public static final String ROBOT_CODE = "robot_code";//机器人主板编号
