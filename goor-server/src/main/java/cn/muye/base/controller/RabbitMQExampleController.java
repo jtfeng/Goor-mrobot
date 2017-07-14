@@ -4,11 +4,17 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.*;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.model.message.OffLineMessage;
+import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
+import org.redisson.RedissonBlockingQueue;
+import org.redisson.api.RMap;
+import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -16,8 +22,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @CrossOrigin
 @Controller
@@ -27,6 +36,12 @@ public class RabbitMQExampleController {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    RedissonClient redissonClient;
+
+    @Autowired
+    private OffLineMessageService offLineMessageService;
 
 //    @Autowired
 //    private SimpMessagingTemplate messagingTemplate;
@@ -96,9 +111,26 @@ public class RabbitMQExampleController {
         //全部机器x86 agent发送,仅供x86 agent 处理业务逻辑，不发ros消息
         rabbitTemplate.convertAndSend(TopicConstants.FANOUT_CLIENT_EXCHANGE, "", info);
 
+        try {
+            this.messageSave(info);
+        } catch (Exception e) {
+            log.error("save message error", e);
+        }
+
         return ajaxCommandResult;
 //        return ajaxResourceResult;
 //        return ajaxClientResult;
+
+    }
+
+    private boolean messageSave(MessageInfo messageInfo) throws Exception {
+        if (messageInfo == null
+                || StringUtil.isEmpty(messageInfo.getUuId() + "")) {
+            return false;
+        }
+        OffLineMessage message = new OffLineMessage(messageInfo);
+        offLineMessageService.save(message);//更新发送的消息
+        return true;
     }
 
     @RequestMapping(value = "getPosition", method= RequestMethod.GET)
@@ -109,6 +141,48 @@ public class RabbitMQExampleController {
             if(null != info){
                 return AjaxResult.success(info.getMessageText(), info.getSendTime().getTime()+"");
             }
+        } catch (Exception e) {
+            logger.error("getPosition exception",e);
+        }
+        return AjaxResult.failed();
+    }
+
+    @RequestMapping(value = "testRedisson", method= RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult testRedisson(HttpServletRequest request,@RequestParam("num")String num) {
+        try {
+            RMap<Integer, String> users = redissonClient.<Integer, String>getMap("users");
+            users.put(1, "linux_china");
+            System.out.println(users.get(1));
+            users.remove(1);
+
+//            RMap<String, MessageInfo> messageInfoRMap = redissonClient.getMap("messageInfo");
+//            MessageInfo messageInfo = new MessageInfo();
+//            messageInfo.setMessageText("testEnva");
+//            messageInfo.setSenderId("ssssssssssssssssss");
+//            messageInfo.setSendTime(new Date());
+//            messageInfoRMap.put("testenva",messageInfo);
+//            System.out.println(messageInfoRMap.get("testenva"));
+//            messageInfoRMap.remove("testenva");
+
+            RMap<String, List<MessageInfo>> messageInfoRMapList = redissonClient.getMap("messageInfoList");
+            MessageInfo messageInfo1 = new MessageInfo();
+            messageInfo1.setMessageText("testEnva");
+            messageInfo1.setSenderId("ssssssssssssssssss");
+            messageInfo1.setSendTime(new Date());
+
+            MessageInfo messageInfo2 = new MessageInfo();
+            messageInfo2.setMessageText("testEnva1");
+            messageInfo2.setSenderId("ssssssssssssssssss1");
+            messageInfo2.setSendTime(new Date());
+
+            List<MessageInfo> messageInfos  = new ArrayList<>();
+            messageInfos.add(messageInfo1);
+            messageInfos.add(messageInfo2);
+            messageInfoRMapList.put("testenva",messageInfos);
+            System.out.println(messageInfoRMapList.get("testenva"));
+            messageInfoRMapList.remove("testenva");
+
         } catch (Exception e) {
             logger.error("getPosition exception",e);
         }

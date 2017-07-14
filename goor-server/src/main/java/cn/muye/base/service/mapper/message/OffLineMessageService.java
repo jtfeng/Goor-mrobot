@@ -22,9 +22,6 @@ public class OffLineMessageService {
     @Autowired
     private OffLineMessageMapper offLineMessageMapper;
 
-    @Autowired
-    private AppConfigMapper appConfigMapper;
-
     public OffLineMessage get(Long id){
         return offLineMessageMapper.get(id);
     }
@@ -34,15 +31,11 @@ public class OffLineMessageService {
     }
 
     public long save(OffLineMessage message) throws Exception {
-        AppConfig config = appConfigMapper.get(1);
-        message.setSenderId(config.getMpushUserId());
         message.setSendTime(new Date());
         return offLineMessageMapper.save(message);
     }
 
     public void update(OffLineMessage message) throws Exception {
-        AppConfig config = appConfigMapper.get(1);
-        message.setSenderId(config.getMpushUserId());
         message.setUpdateTime(new Date());
         offLineMessageMapper.update(message);
     }
