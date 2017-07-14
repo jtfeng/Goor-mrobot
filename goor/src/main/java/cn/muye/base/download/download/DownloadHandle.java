@@ -28,10 +28,7 @@ public class DownloadHandle {
 				|| StringUtil.isNullOrEmpty(commonInfo.getRemoteFileUrl())
 				|| StringUtil.isNullOrEmpty(commonInfo.getLocalPath())
 				|| StringUtil.isNullOrEmpty(commonInfo.getLocalFileName())
-				|| StringUtil.isNullOrEmpty(commonInfo.getMD5())
-				|| StringUtil.isNullOrEmpty(commonInfo.getTopicType())
-				|| StringUtil.isNullOrEmpty(commonInfo.getPublishMessage())
-				|| StringUtil.isNullOrEmpty(commonInfo.getTopicName())){
+				|| StringUtil.isNullOrEmpty(commonInfo.getMD5())){
 			logger.error("commonInfo field is null");
 			reSendRelyMessage(messageInfo, receiveMessageService);
 			return AjaxResult.failed(MessageStatusType.PARAMETER_ERROR.getName());

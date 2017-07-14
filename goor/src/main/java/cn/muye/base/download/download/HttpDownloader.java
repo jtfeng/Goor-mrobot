@@ -17,6 +17,7 @@ import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.messages.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thymeleaf.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -141,7 +142,10 @@ public class HttpDownloader extends Thread {
 				return;
 			}
 			this.updateReplyMessage();
-			noticeRos();//发布一次
+			//需要发ros的时候，publish to ros
+			if(!StringUtils.isEmpty(commonInfo.getTopicName())){
+				noticeRos();
+			}
 		} catch (IOException e) {
 			logger.error("-->> fileCheck error", e);
 		}
@@ -155,7 +159,7 @@ public class HttpDownloader extends Thread {
 			ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
 			receiveMessageService.update(receiveMessage);
 		}catch (Exception e){
-			logger.error("-->> sendReplyAndNoticeRos Exception", e);
+			logger.error("-->> updateReplyMessage Exception", e);
 		}
 	}
 

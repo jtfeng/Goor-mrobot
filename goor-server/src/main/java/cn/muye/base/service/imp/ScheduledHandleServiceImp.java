@@ -6,7 +6,6 @@ import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
-import com.mpush.api.Client;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -27,8 +26,6 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     private OffLineMessageService offLineMessageService;
 
     private ReceiveMessageService receiveMessageService;
-
-    private Client client;
 
     public ScheduledHandleServiceImp(){
 

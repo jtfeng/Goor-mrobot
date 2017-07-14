@@ -106,6 +106,13 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 List<ReceiveMessage> list = receiveMessageService.listByMessageStatus(new ReceiveMessage(MessageStatusType.FILE_NOT_DOWNLOADED.getIndex()));//从接收的库查询出需要下载的资源
                 for (ReceiveMessage message : list) {
                     MessageInfo messageInfo = new MessageInfo(message);
+                    if(null != messageInfo){
+                        CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
+                        //忽略掉不需要发topic的资源
+                        if(null != commonInfo && StringUtils.isEmpty(commonInfo.getTopicName())){
+                            continue;
+                        }
+                    }
                     DownloadHandle.downloadCheck(ros, messageInfo, receiveMessageService);
                 }
                 logger.info("-->> Scheduled downloadResource end");

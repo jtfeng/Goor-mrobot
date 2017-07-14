@@ -5,9 +5,11 @@ import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
+import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Service;
@@ -103,6 +105,7 @@ public class ConsumerCommon {
     public void topicResourceMessage(@Payload MessageInfo messageInfo) {
         try {
             if (messageInfo != null) {
+                this.receiveMessageSave(messageInfo);
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 service.downloadResource(ros, messageInfo);
                 logger.info("topicResourceMessage=========" + messageInfo);
@@ -122,6 +125,7 @@ public class ConsumerCommon {
         try {
             if (messageInfo != null) {
                 logger.info("topicResourceAndReceiveMessage=========" + messageInfo);
+                this.receiveMessageSave(messageInfo);
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 return service.downloadResource(ros, messageInfo);
             }
@@ -139,7 +143,7 @@ public class ConsumerCommon {
     public void fanoutResourceMessage(@Payload MessageInfo messageInfo) {
         try {
             if (messageInfo != null) {
-                this.sendMessageSave(messageInfo);
+                this.receiveMessageSave(messageInfo);
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 service.downloadResource(ros, messageInfo);
                 logger.info("fanoutResourceMessage=========" + messageInfo);
@@ -199,34 +203,22 @@ public class ConsumerCommon {
         }
     }
 
-    private boolean sendMessageSave(MessageInfo messageInfo) throws Exception{
+    /**
+     * 保存需要保存的消息，如资源下载消息
+     * @param messageInfo
+     * @return
+     * @throws Exception
+     */
+    private boolean receiveMessageSave(MessageInfo messageInfo) throws Exception{
         //保存发送方消息至数据库，处理完业务后以便回执
         if(messageInfo == null
-                || StringUtil.isEmpty(messageInfo.getUuId() + "")){
+                || StringUtil.isEmpty(messageInfo.getUuId())){
             return false;
         }
-//        if(!MessageType.REPLY.equals(messageInfo.getMessageType())){
-            ReceiveMessage message = new ReceiveMessage(messageInfo);
-            List<ReceiveMessage> messages = receiveMessageService.listByUUID(message);//查询当前发送者有没有发送此记
-            if(messages.size() <= 0){
-                receiveMessageService.save(message);//未发送保存
-            }else{
-                ReceiveMessage messageUpdate = new ReceiveMessage();
-                messageUpdate.setSuccess(false);//说明发送方未收到回执，需要重新发送回执
-                messageUpdate.setUuId(message.getUuId());//更新的联合主键
-                messageUpdate.setSenderId(message.getSenderId());//更新的联合主键
-                messageUpdate.setUpdateTime(new Date());//更新时间
-                receiveMessageService.update(messageUpdate);//发送过了，又发送，说明没收到回执，需要重新发送回执
-            }
-//        }else if(MessageType.REPLY.equals(messageInfo.getMessageType())){
-//            OffLineMessage message = new OffLineMessage();
-//            message.setMessageStatusType(messageInfo.getMessageStatusType().getIndex());//如果是回执，将对方传过来的信息带上
-//            message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
-//            message.setSuccess(true);//接收到回执，发送消息成功
-//            message.setUuId(messageInfo.getUuId());//更新的主键
-//            message.setUpdateTime(new Date());//更新时间
-//            offLineMessageService.update(message);//更新发送的消息
-//        }
+        ReceiveMessage message = new ReceiveMessage(messageInfo);
+        message.setSuccess(false);
+        message.setSendTime(new Date());
+        receiveMessageService.save(message);//保存需要保存的发送消息，如资源下载之类的
         return true;
     }
 
