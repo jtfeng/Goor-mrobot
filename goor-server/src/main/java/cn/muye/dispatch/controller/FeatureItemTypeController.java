@@ -1,8 +1,8 @@
 package cn.muye.dispatch.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.mission.FeatureItemType;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.dispatch.service.FeatureItemService;
 import cn.muye.dispatch.service.FeatureItemTypeService;
 import org.slf4j.Logger;

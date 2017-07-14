@@ -1,5 +1,6 @@
 package cn.muye.area.map.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.StringUtil;
@@ -7,7 +8,6 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.MapZipService;
 import cn.muye.assets.robot.service.RobotService;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageHelper;

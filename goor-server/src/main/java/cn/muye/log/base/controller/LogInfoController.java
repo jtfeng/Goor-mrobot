@@ -1,10 +1,10 @@
 package cn.muye.log.base.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.log.base.service.LogInfoService;
 import com.alibaba.fastjson.JSON;

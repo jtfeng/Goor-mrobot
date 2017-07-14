@@ -1,11 +1,11 @@
 package cn.muye.area.point.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;

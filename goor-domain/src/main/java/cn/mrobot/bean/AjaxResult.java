@@ -1,4 +1,4 @@
-package cn.muye.base.bean;
+package cn.mrobot.bean;
 
 import java.io.Serializable;
 

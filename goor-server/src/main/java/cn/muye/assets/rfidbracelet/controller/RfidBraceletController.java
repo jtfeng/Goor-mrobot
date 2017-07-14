@@ -1,11 +1,11 @@
 package cn.muye.assets.rfidbracelet.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBracelet;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.rfidbracelet.mapper.RfidBraceletMapper;
 import cn.muye.assets.rfidbracelet.service.RfidBraceletService;
-import cn.muye.base.bean.AjaxResult;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
