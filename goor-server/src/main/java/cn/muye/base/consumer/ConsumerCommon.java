@@ -191,7 +191,7 @@ public class ConsumerCommon {
                 return;
             }
 
-            sendMessageSave(messageInfo);
+            messageSaveOrUpdate(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCommandReport exception", e);
         }
@@ -205,7 +205,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE)
     public AjaxResult directCommandReportAndReceive(@Payload MessageInfo messageInfo) {
         try {
-            sendMessageSave(messageInfo);
+            messageSaveOrUpdate(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCommandReport exception", e);
         }
@@ -213,7 +213,7 @@ public class ConsumerCommon {
     }
 
 
-    private boolean sendMessageSave(MessageInfo messageInfo) throws Exception {
+    private boolean messageSaveOrUpdate(MessageInfo messageInfo) throws Exception {
         if (messageInfo == null
                 || StringUtil.isEmpty(messageInfo.getUuId() + "")) {
             return false;

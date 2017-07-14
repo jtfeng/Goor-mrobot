@@ -57,6 +57,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 for (ReceiveMessage message : list) {
                     MessageInfo info = new MessageInfo(message);
                     info.setSenderId(localRobotSN);
+                    info.setMessageType(MessageType.REPLY);
                     rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_REPORT, info);
                     message.setSuccess(true);
                     message.setSendCount(message.getSendCount()+1);
