@@ -1,11 +1,11 @@
 package cn.muye.base.service.imp;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.cache.CacheInfoManager;
