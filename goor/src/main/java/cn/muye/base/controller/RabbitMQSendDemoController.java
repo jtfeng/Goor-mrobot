@@ -1,8 +1,8 @@
 package cn.muye.base.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.producer.ProducerCommon;

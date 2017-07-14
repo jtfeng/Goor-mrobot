@@ -1,7 +1,7 @@
 package cn.muye.base.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.message.data.PickUpPswdVerifyBean;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.consumer.service.PickUpPswdVerifyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

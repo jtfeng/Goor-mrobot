@@ -1,7 +1,7 @@
 package cn.muye.base.service;
 
 
-import cn.muye.base.bean.AjaxResult;
+import cn.mrobot.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import edu.wpi.rail.jrosbridge.Ros;
 
