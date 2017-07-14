@@ -23,9 +23,6 @@ public class SlamResponseBody<T> {
     @JSONField(name = "error_code")
     private String errorCode;
 
-    @JSONField(name = "device_code")
-    private Object deviceCode;
-
     public String getSubName() {
         return subName;
     }
@@ -56,14 +53,6 @@ public class SlamResponseBody<T> {
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
-    }
-
-    public Object getDeviceCode() {
-        return deviceCode;
-    }
-
-    public void setDeviceCode(Object deviceCode) {
-        this.deviceCode = deviceCode;
     }
 
     @Override

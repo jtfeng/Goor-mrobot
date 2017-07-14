@@ -1,10 +1,10 @@
 package cn.muye.assets.shelf.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageInfo;

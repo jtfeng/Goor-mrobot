@@ -1,11 +1,11 @@
 package cn.muye.log.charge.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.service.RobotService;
-import cn.muye.base.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.muye.log.charge.service.ChargeInfoService;
 import com.alibaba.fastjson.JSON;

@@ -1,5 +1,6 @@
 package cn.muye.assets.robot.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotPassword;
@@ -9,7 +10,6 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.util.aes.AES;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;

@@ -1,7 +1,7 @@
 package cn.muye.base.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.Constant;
-import cn.muye.base.bean.AjaxResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

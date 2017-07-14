@@ -1,10 +1,9 @@
 package cn.muye.base.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.service.FileUpladService;
-import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -15,8 +14,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.File;
 
 @Controller
 public class ExampleController {

@@ -1,9 +1,9 @@
 package cn.muye.resource.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.controller.BaseController;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;

@@ -1,7 +1,7 @@
 package cn.muye.order.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.order.Order;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;

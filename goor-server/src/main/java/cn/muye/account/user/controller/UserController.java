@@ -1,5 +1,6 @@
 package cn.muye.account.user.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.account.Role;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
@@ -17,7 +18,6 @@ import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
 import cn.muye.account.user.service.impl.UserServiceImpl;
 import cn.muye.area.station.service.StationService;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;

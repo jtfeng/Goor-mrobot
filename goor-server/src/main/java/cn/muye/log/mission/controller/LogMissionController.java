@@ -1,9 +1,9 @@
 package cn.muye.log.mission.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.log.mission.LogMission;
 import cn.mrobot.bean.log.mission.LogMission.MissionLogType;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.log.mission.service.LogMissionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

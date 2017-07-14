@@ -106,6 +106,34 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
     }
 
+    /**
+     * 由机器人编号获取绑定的充电桩List
+     * @author Ray.Fu
+     * @param robotCode
+     * @return
+     */
+    @Override
+    public List<MapPoint> getChargerMapPointByRobotCode(String robotCode) {
+        if (robotCode != null) {
+            Robot robotDb = robotService.getByCode(robotCode);
+            if (robotDb != null) {
+                Long robotId = robotDb.getId();
+                List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
+                List<MapPoint> mapPointList = Lists.newArrayList();
+                if (xrefList != null && xrefList.size() > 0) {
+                    for (RobotChargerMapPointXREF xref : xrefList) {
+                        MapPoint point = pointService.findById(xref.getChargerMapPointId());
+                        mapPointList.add(point);
+                    }
+                }
+                return mapPointList;
+            }
+        } else {
+            return null;
+        }
+        return null;
+    }
+
     private List<Robot> listPageByStoreIdAndOrder(int page, int pageSize, String name, Integer type, Class<Robot> clazz, String order) {
         PageHelper.startPage(page, pageSize);
         Example example = new Example(clazz);

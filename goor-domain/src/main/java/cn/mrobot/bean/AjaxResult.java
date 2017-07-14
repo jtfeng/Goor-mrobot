@@ -1,13 +1,18 @@
-package cn.muye.base.bean;
+package cn.mrobot.bean;
 
 import java.io.Serializable;
 
-public class AjaxResult implements Serializable{
+public class AjaxResult implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	public static final int CODE_SUCCESS = 0;
 	public static final int CODE_FAILED = 1;
+	public static final int CODE_PARAM_ERROR = 2;
+	public static final int CODE_NOT_AUTHORIZED_ERROR = 3; //未授权
+	public static final int CODE_NOT_LOGGED_ERROR = 4; //未登录
+	public static final int CODE_SYSTEM_ERROR = 5; //系统内部错误
+
 	private int code;
 	private String message;
 	private Object data;
@@ -15,7 +20,13 @@ public class AjaxResult implements Serializable{
 	public AjaxResult(int code, Object data, String message) {
 		this.code = code;
 		this.message = message;
-		this.data = data;
+		this.data = (data == null?new Object():data);
+	}
+
+	public AjaxResult(int code, String message) {
+		this.code = code;
+		this.message = message;
+		this.data = "";
 	}
 
 	public String getMessage() {
@@ -33,11 +44,15 @@ public class AjaxResult implements Serializable{
 	}
 
 	public static final AjaxResult success() {
-		return new AjaxResult(CODE_SUCCESS, null, null);
+		return new AjaxResult(CODE_SUCCESS, "", "");
 	}
 
 	public static final AjaxResult success(Object data) {
-		return new AjaxResult(CODE_SUCCESS, data, null);
+		return new AjaxResult(CODE_SUCCESS, data, "");
+	}
+
+	public static final AjaxResult success(String msg) {
+		return new AjaxResult(CODE_SUCCESS, "", msg);
 	}
 
 	public static final AjaxResult success(Object data, String message) {
@@ -45,15 +60,19 @@ public class AjaxResult implements Serializable{
 	}
 
 	public static final AjaxResult failed() {
-		return new AjaxResult(CODE_FAILED, null, null);
+		return new AjaxResult(CODE_FAILED, "", "");
 	}
 
 	public static final AjaxResult failed(String message) {
-		return new AjaxResult(CODE_FAILED, null, message);
+		return new AjaxResult(CODE_FAILED, "", message);
 	}
 
 	public static final AjaxResult failed(Object data, String message) {
 		return new AjaxResult(CODE_FAILED, data, message);
+	}
+
+	public static final AjaxResult failed(int code, String message) {
+		return new AjaxResult(code, message);
 	}
 	
 	public static final AjaxResult failed(Object data) {

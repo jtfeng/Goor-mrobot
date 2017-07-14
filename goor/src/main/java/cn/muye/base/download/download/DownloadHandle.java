@@ -1,10 +1,10 @@
 package cn.muye.base.download.download;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;

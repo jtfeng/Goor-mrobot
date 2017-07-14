@@ -1,5 +1,6 @@
 package cn.muye.base.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;

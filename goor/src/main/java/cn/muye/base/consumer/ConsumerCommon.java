@@ -1,12 +1,13 @@
 package cn.muye.base.consumer;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
+import cn.muye.base.service.MapService;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -22,7 +23,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
+import org.thymeleaf.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,6 +38,8 @@ public class ConsumerCommon {
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private ReceiveMessageService receiveMessageService;
+    @Autowired
+    private MapService mapService;
 
     /**
      * 接收命令消息（无回执）
@@ -176,15 +179,33 @@ public class ConsumerCommon {
      */
     @RabbitListener(queues = TopicConstants.TOPIC_RECEIVE_CLIENT )
     public AjaxResult topicClientAndReceiveMessage(@Payload MessageInfo messageInfo) {
-        try {
-            if (messageInfo != null) {
-                logger.info("topicClientAndReceiveMessage=========" + messageInfo);
-                //TODO 业务需求,请调用各自的处理类
-            }
-        }catch (Exception e){
-            logger.error("topicClientAndReceiveMessage Exception", e);
-        }
-        return AjaxResult.failed();
+//        try {
+//            if (StringUtils.isEmpty(messageInfo.getMessageText())) {
+                return AjaxResult.success("hahahah");
+//            }
+//            if(null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())){
+//                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+//                String data = jsonObject.getString(TopicConstants.DATA);
+//                String subName = jsonObject.getString(TopicConstants.SUB_NAME);
+//                //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
+//                if(!StringUtils.isEmpty(subName)){
+//                    switch (subName){
+//                        case TopicConstants.AGENT_LOCAL_MAP_UPLOAD:
+//                            mapService.downLoadAndUnzipMap(data);
+////                            break;
+//                        case TopicConstants.MAP_CURRENT_GET:
+//                            break;
+//                    }
+//                }
+//            }
+//            if (messageInfo != null) {
+//                logger.info("topicClientAndReceiveMessage=========" + messageInfo);
+//                //TODO 业务需求,请调用各自的处理类
+//            }
+//        }catch (Exception e){
+//            logger.error("topicClientAndReceiveMessage Exception", e);
+//        }
+//        return AjaxResult.failed();
     }
 
     /**

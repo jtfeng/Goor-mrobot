@@ -1,11 +1,11 @@
 package cn.muye.area.point.controller;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
-import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
+import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -123,7 +123,7 @@ public class PointController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
 	public AjaxResult cascadeMapPoint(){
 		try {
-			List<CascadeMapPoint> cascadeMapPointList = pointService.cascadeMapPoint();
+			List<CascadePoint> cascadeMapPointList = pointService.cascadeMapPoint();
 			return AjaxResult.success(cascadeMapPointList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);

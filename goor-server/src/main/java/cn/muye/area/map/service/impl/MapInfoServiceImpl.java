@@ -47,12 +47,18 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     @Override
-    public List<MapInfo> getMapInfo(String name, String sceneName, long storeId) {
+    public MapInfo getMapInfo(String name, String sceneName, long storeId) {
         Condition example = new Condition(MapInfo.class);
         example.createCriteria().andCondition("MAP_NAME = '" + name + "'")
                 .andCondition("SCENE_NAME = '" + sceneName + "'")
                 .andCondition("STORE_ID = " + storeId + "");
-        return parseLocalPath(mapInfoMapper.selectByExample(example));
+        List<MapInfo> mapInfoList = mapInfoMapper.selectByExample(example);
+        if (mapInfoList.size() > 0) {
+            MapInfo mapInfo = mapInfoList.get(0);
+            mapInfo.setPngImageHttpPath(parseLocalPath(mapInfo.getPngImageLocalPath()));
+            return mapInfo;
+        }
+        return null;
     }
 
     @Override
@@ -96,9 +102,9 @@ public class MapInfoServiceImpl implements MapInfoService {
 
     private String parseLocalPath(String localPath) {
         //将文件路径封装成http路径
-        localPath = localPath.replaceAll("\\\\","/");
+        localPath = localPath.replaceAll("\\\\", "/");
         int index = localPath.indexOf(SearchConstants.FAKE_MERCHANT_STORE_ID + "");
-        if(index >= 0){
+        if (index >= 0) {
             return DOWNLOAD_HTTP + localPath.substring(index);
         }
         return "";

@@ -1,7 +1,7 @@
 package cn.muye.base.consumer.service;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.muye.base.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
