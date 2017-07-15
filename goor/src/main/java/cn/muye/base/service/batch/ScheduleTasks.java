@@ -140,10 +140,11 @@ public class ScheduleTasks {
         try {
           File mapPathDir = new File(mapPath);
           if(mapPathDir.exists() && mapPathDir.isDirectory()){
-              File[] files = mapPathDir.listFiles();
+              File parentDir = new File(mapPathDir.getParent());
+              File[] files = parentDir.listFiles();
               for(int i=0; i < files.length; i ++){
                   File file = files[i];
-                  if(file.getName().lastIndexOf(".zip") >= 0 ){
+                  if(file.getName().lastIndexOf(".zip") >= 0 || file.getName().lastIndexOf(".flags") >= 0 ){
                       file.delete();
                   }
               }

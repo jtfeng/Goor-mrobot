@@ -5,6 +5,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.FileValidCreateUtil;
 import cn.mrobot.utils.ZipUtils;
 import cn.muye.base.bean.MessageInfo;
@@ -20,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,20 +135,28 @@ public class HttpDownloader extends Thread {
 
 
     private void unzipMapFile(){
-        String localPath = commonInfo.getLocalPath();
-        String zipFilePath = localPath + File.separator + commonInfo.getLocalFileName();
-        boolean unzipFlag = ZipUtils.unzip(zipFilePath, commonInfo.getLocalPath(), false);
-        if (unzipFlag) {
-            //更新数据库状态为解压完成
-            messageInfo.setRelyMessage("resource unzip success");
-            messageInfo.setMessageStatusType(MessageStatusType.FILE_UMZIP_COMPLETE);
-            messageInfo.setSuccess(false);//重新发送回执消息
-            ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
-            try {
-                receiveMessageService.update(receiveMessage);
-            } catch (Exception e) {
-                logger.info("更新数据库状态为解压失败 ", e);
+        try {
+            String localPath = commonInfo.getLocalPath();
+            String zipFilePath = localPath + File.separator + commonInfo.getLocalFileName();
+            //移动文件到上层目录，删除地图文件夹下所有文件
+            String moveFilePath = new File(localPath).getParent() + File.separator + commonInfo.getLocalFileName();
+            long copyTime = FileUtils.copyFile(new File(zipFilePath),new File(moveFilePath));
+            if(copyTime <= 0){
+                logger.info("移动文件出错 ");
             }
+            FileUtils.deleteDir(new File(localPath));
+
+            boolean unzipFlag = ZipUtils.unzip(moveFilePath, localPath, false);
+            if (unzipFlag) {
+                //更新数据库状态为解压完成
+                messageInfo.setRelyMessage("resource unzip success");
+                messageInfo.setMessageStatusType(MessageStatusType.FILE_UMZIP_COMPLETE);
+                messageInfo.setSuccess(false);//重新发送回执消息
+                ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
+                receiveMessageService.update(receiveMessage);
+            }
+        } catch (Exception e) {
+            logger.info("更新数据库状态为解压失败 ", e);
         }
     }
 

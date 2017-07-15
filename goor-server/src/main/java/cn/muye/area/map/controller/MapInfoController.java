@@ -3,6 +3,7 @@ package cn.muye.area.map.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.bean.CurrentPose;
 import cn.muye.area.map.service.MapInfoService;
@@ -100,7 +101,7 @@ public class MapInfoController {
             String mapName = mapDataObject.getString(TopicConstants.MAP_NAME);
             String sceneName = mapDataObject.getString(TopicConstants.SCENE_NAME);
 
-            MapInfo mapInfo = mapInfoService.getMapInfo(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            MapInfo mapInfo = CacheInfoManager.getMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID));
             if (mapInfo == null) {
                 return AjaxResult.failed("未找到地图信息 name=" + mapName + "，sceneName=" + sceneName);
             }

@@ -135,7 +135,13 @@ public class ExampleController {
     @ResponseBody
     public AjaxResult mapUpload() throws Exception {
         try {
-            fileUpladService.uploadMapFile();
+            Topic echo = new Topic(ros, TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING);
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.AGENT_LOCAL_MAP_UPLOAD);
+            JSONObject messageObject = new JSONObject();
+            messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+            Message toSend = new Message(JSON.toJSONString(messageObject));
+            echo.publish(toSend);
             return AjaxResult.success();
         } catch (Exception e) {
             e.printStackTrace();
