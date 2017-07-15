@@ -34,8 +34,6 @@ public class OffLineMessageService {
     }
 
     public long save(OffLineMessage message) throws Exception{
-        AppConfig config = appConfigMapper.get(1);
-        message.setSenderId(config.getMpushUserId());
         message.setSendTime(new Date());
         return offLineMessageMapper.save(message);
     }
