@@ -42,6 +42,23 @@ public class TopicSubscribeInfo implements Serializable {
 		Topic currentPoseTopic = new Topic(ros, TopicConstants.CURRENT_POSE, TopicConstants.TOPIC_NAV_MSGS);
 		TopicCallback currentPoseCallback = new CurrentPoseListenerImpl();
 		currentPoseTopic.subscribe(currentPoseCallback);
+
+		//当前任务队列数据响应
+		Topic queueResponseTopic = new Topic(ros, TopicConstants.X86_MISSION_QUEUE_RESPONSE, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback queueResponseCallback = new X86MissionQueueResponseListenerImpl();
+		queueResponseTopic.subscribe(queueResponseCallback);
+		//当前任务状态响应
+		Topic stateResponseTopic = new Topic(ros, TopicConstants.X86_MISSION_STATE_RESPONSE, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback stateResponseCallback = new X86MissionStateResponseListenerImpl();
+		stateResponseTopic.subscribe(stateResponseCallback);
+		//任务事件上报
+		Topic eventTopic = new Topic(ros, TopicConstants.X86_MISSION_EVENT, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback eventCallback = new X86MissionEventListenerImpl();
+		eventTopic.subscribe(eventCallback);
+		//云端下发任务回执
+		Topic receiveTopic = new Topic(ros, TopicConstants.X86_MISSION_RECEIVE, TopicConstants.TOPIC_TYPE_STRING);
+		TopicCallback receiveCallback = new X86MissionReceiveListenerImpl();
+		receiveTopic.subscribe(receiveCallback);
 	}
 
 	public static boolean checkSubNameIsNeedConsumer(String message){

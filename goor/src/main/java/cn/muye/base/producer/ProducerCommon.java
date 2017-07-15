@@ -125,6 +125,86 @@ public class ProducerCommon implements ApplicationContextAware {
         }
     }
 
+    /**
+     *当前任务队列数据响应topic
+     * @param text
+     */
+    public void sendX86MissionQueueResponseMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendX86MissionQueueResponseMessage error",e);
+        }
+    }
+
+    /**
+     *当前任务状态响应topic
+     * @param text
+     */
+    public void sendX86MissionStateResponseMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendX86MissionStateResponseMessage error",e);
+        }
+    }
+
+    /**
+     *任务事件上报topic
+     * @param text
+     */
+    public void sendX86MissionEventMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_MISSION_EVENT, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendX86MissionEventMessage error",e);
+        }
+    }
+
+    /**
+     *任务回执上报topic
+     * @param text
+     */
+    public void sendX86MissionReceiveMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_MISSION_RECEIVE, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendX86MissionReceiveMessage error",e);
+        }
+    }
+
     private boolean getRabbitTemplate(){
         if(null == applicationContext){
             log.error("sendGoorMessage applicationContext is null error");

@@ -179,33 +179,15 @@ public class ConsumerCommon {
      */
     @RabbitListener(queues = TopicConstants.TOPIC_RECEIVE_CLIENT )
     public AjaxResult topicClientAndReceiveMessage(@Payload MessageInfo messageInfo) {
-//        try {
-//            if (StringUtils.isEmpty(messageInfo.getMessageText())) {
-                return AjaxResult.success("hahahah");
-//            }
-//            if(null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())){
-//                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
-//                String data = jsonObject.getString(TopicConstants.DATA);
-//                String subName = jsonObject.getString(TopicConstants.SUB_NAME);
-//                //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-//                if(!StringUtils.isEmpty(subName)){
-//                    switch (subName){
-//                        case TopicConstants.AGENT_LOCAL_MAP_UPLOAD:
-//                            mapService.downLoadAndUnzipMap(data);
-////                            break;
-//                        case TopicConstants.MAP_CURRENT_GET:
-//                            break;
-//                    }
-//                }
-//            }
-//            if (messageInfo != null) {
-//                logger.info("topicClientAndReceiveMessage=========" + messageInfo);
-//                //TODO 业务需求,请调用各自的处理类
-//            }
-//        }catch (Exception e){
-//            logger.error("topicClientAndReceiveMessage Exception", e);
-//        }
-//        return AjaxResult.failed();
+        try {
+            if (messageInfo != null) {
+                logger.info("topicClientAndReceiveMessage=========" + messageInfo);
+                //TODO 业务需求,请调用各自的处理类
+            }
+        }catch (Exception e){
+            logger.error("topicClientAndReceiveMessage Exception", e);
+        }
+        return AjaxResult.failed();
     }
 
     /**

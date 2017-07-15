@@ -8,6 +8,7 @@ public enum MessageType {
     EXECUTOR_CLIENT,//Client(仅处理x86业务逻辑)消息
     EXECUTOR_COMMAND,//命令消息
     EXECUTOR_UPGRADE,//升级消息
+    EXECUTOR_MAP,//地图消息
     EXECUTOR_RESOURCE,//资源消息
     TIME_SYNCHRONIZED,//时间同步请求消息
     REPLY;//回执消息

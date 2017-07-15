@@ -97,4 +97,24 @@ public class RabbitMQConfig {
     public Queue directCurrentPosition() {
         return new Queue(TopicConstants.DIRECT_CURRENT_POSE,false,false,true);
     }
+
+    @Bean
+    public Queue directX86MissionQueueResponse() {
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE,false,false,true);
+    }
+
+    @Bean
+    public Queue directX86MissionStateResponse() {
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE,false,false,true);
+    }
+
+    @Bean
+    public Queue directX86MissionEvent() {
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_EVENT,false,false,true);
+    }
+
+    @Bean
+    public Queue directX86MissionReceive() {
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_RECEIVE,false,false,true);
+    }
 }
