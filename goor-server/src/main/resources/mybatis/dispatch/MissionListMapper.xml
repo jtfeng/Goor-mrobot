@@ -131,7 +131,7 @@
                 AND d.PRIORITY = #{priority}
             </if>
         </where>
-        ORDER BY NAME
+        ORDER BY NAME ASC
     </select>
 
     <select id="listAll" resultMap="missionList">

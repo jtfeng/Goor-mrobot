@@ -108,7 +108,7 @@ public class MissionListServiceImpl implements MissionListService {
 	@Override
     public List<MissionList> list(WhereRequest whereRequest) {
 		List<MissionList> missionListList = new ArrayList<>();
-		if(whereRequest.getQueryObj() != null){
+		if(whereRequest != null && whereRequest.getQueryObj() != null){
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 			Object name = map.get(SearchConstants.SEARCH_NAME);
 //			Object deviceId = map.get(SearchConstants.SEARCH_DEVICE_ID);
@@ -117,6 +117,8 @@ public class MissionListServiceImpl implements MissionListService {
 			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
 			missionListList = missionListMapper.list(name, /*deviceId,*/beginDate,endDate,priority);
+		}else {
+			missionListList = missionListMapper.listAll();
 		}
 
         return bindMission(missionListList);
@@ -128,12 +130,14 @@ public class MissionListServiceImpl implements MissionListService {
 	}
 
 	private List<MissionList> bindMission(List<MissionList> missionLists){
-		List<MissionList> result = new ArrayList<>();
 		for(MissionList missionList : missionLists){
 			List<Mission> missions = new ArrayList<Mission>();
 			List<MissionListMissionXREF> missionListMissionXREFList = missionListMissionXREFMapper.findByListId(missionList.getId());
 			for(MissionListMissionXREF missionListMissionXREF : missionListMissionXREFList){
 				Mission mission = missionListMissionXREF.getMission();
+				if(mission == null) {
+					continue;
+				}
 
 				Set<MissionItem> missionItems = new HashSet<MissionItem>();
 				List<MissionMissionItemXREF> missionMissionItemXREFList = missionMissionItemXREFMapper.findByMissionId(mission.getId());
@@ -144,9 +148,8 @@ public class MissionListServiceImpl implements MissionListService {
 				missions.add(mission);
 			}
 			missionList.setMissionList(missions);
-			result.add(missionList);
 		}
-		return result;
+		return missionLists;
 	}
 }
 

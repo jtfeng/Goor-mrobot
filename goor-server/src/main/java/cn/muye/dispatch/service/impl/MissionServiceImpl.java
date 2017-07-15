@@ -162,7 +162,6 @@ public class MissionServiceImpl implements MissionService {
 			missionList = missionMapper.listAll();
 		}
 		return bindMissionNodeList(missionList);
-
 	}
 
 	@Override
@@ -173,7 +172,6 @@ public class MissionServiceImpl implements MissionService {
 
 	private List<Mission> bindMissionNodeList(List<Mission> missionList) {
 		Mission mission;
-		List<Mission> result = new ArrayList<>();
 		for (int i = 0; i < missionList.size(); i++) {
 			Set<MissionItem> missionItemList = new HashSet<>();
 			mission = missionList.get(i);
@@ -182,9 +180,8 @@ public class MissionServiceImpl implements MissionService {
 				missionItemList.add(missionMissionItemXREFList.get(j).getMissionItem());
 			}
 			mission.setMissionItemSet(missionItemList);
-			result.add(mission);
 		}
-		return result;
+		return missionList;
 	}
 
 }

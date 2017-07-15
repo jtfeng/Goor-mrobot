@@ -14,10 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by Jelynn on 2017/6/14.
@@ -87,7 +84,6 @@ public class MissionController {
 	@ResponseBody
 	public AjaxResult pageMissionItem(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
-			List<MissionItem> missionItemList = missionItemService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
@@ -95,10 +91,9 @@ public class MissionController {
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
 
-			PageInfo<MissionItem> page = new PageInfo<MissionItem>();
-			PageHelper.startPage(pageNo, pageSize);
-			//用PageInfo对结果进行包装
-			page.setList(missionItemList);
+			List<MissionItem> missionItemList = missionItemService.list(whereRequest);
+			PageInfo<MissionItem> page = new PageInfo<MissionItem>(missionItemList);
+
 			return AjaxResult.success(page);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -234,14 +229,14 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_mission_r')")
 	public AjaxResult pageMission(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
-			List<Mission> missionList = missionService.list(whereRequest);
-
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
 			pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
+			List<Mission> missionList = missionService.list(whereRequest);
+
 			//用PageInfo对结果进行包装
 			PageInfo<Mission> page = new PageInfo<Mission>(missionList);
 			return AjaxResult.success(page);
@@ -316,13 +311,14 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionList_r')")
 	public AjaxResult pageMissionList(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
-			List<MissionList> missionListList = missionListService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
 			pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
+			List<MissionList> missionListList = missionListService.list(whereRequest);
+
 			PageInfo<MissionList> page = new PageInfo<>(missionListList);
 			return AjaxResult.success(page);
 		} catch (Exception e) {
@@ -367,6 +363,87 @@ public class MissionController {
 			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 	}
+
+	/**
+	 * 发送调度任务，由多个导航点组成
+	 * @param productUsedIdList
+	 * @param missionNodeIdList
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = {"dispatch/navigation/sendNavigation","api/dispatch/navigation/sendNavigation"}, method = RequestMethod.POST)
+	@ResponseBody
+//    @PreAuthorize("hasAuthority('mrc_navigation_u')")
+	public AjaxResult updateSendNavigation(
+			@RequestParam Long[] productUsedIdList,
+			@RequestParam Long[] missionNodeIdList,
+			HttpServletRequest request) {
+		AjaxResult resp = AjaxResult.success();
+//		try {
+//			if(productUsedIdList.length <= 0 || missionNodeIdList.length <= 0) {
+//				return AjaxResult.failed(-1,"参数错误");
+//			}
+//
+//			String[] productUsedCodeArray = getProductUsedCodeArrayByIdList(productUsedIdList);
+//			if(productUsedCodeArray == null) {
+//				return AjaxResult.failed(-1,"未找到设备组");
+//			}
+//
+//			String uuid = UUID.randomUUID().toString();
+//
+//			//从对照表找延迟时间
+//			Long delayTime = Constants.DEFAULT_DELAY_TIME;
+//			for(String[] filter : Constants.MRC_MISSION_ORDER_LIST) {
+//				if(MRCConstants.MRC_NAME_NAVIGATION.indexOf(filter[0]) > -1  ) {
+//					delayTime = Long.parseLong(filter[1]);
+//					break;
+//				}
+//			}
+//
+//			//获取语音的featureItem
+//			FeatureItem featureItem = featureItemService.findById(Constants.VOICE_FEATURE_ITEM_ID);
+//			FeatureItemType featureItemType = featureItemTypeService.findById(Constants.VOICE_FEATURE_ITEM_TYPE_ID);
+//
+//			//通过总任务ID列表得到总任务
+//			List<MissionNode> missionNodeList = new ArrayList<MissionNode>();
+//			for( Long id : missionNodeIdList ) {
+//				MissionNode missionNode = missionNodeService.findById(id);
+//				missionNodeList.add(missionNode);
+//
+//				//增加到站提示语node
+//				MissionNode missionNode1 = new MissionNode();
+//				missionNode1.setData("{\"voiceContent\":\"我已经到达"+ missionNode.getName() +"\"}");
+//				missionNode1.setFeatureItem(featureItem);
+//				missionNode1.setFeatureItemType(featureItemType);
+//				missionNodeList.add(missionNode1);
+//			}
+//
+//			if(missionNodeList.size() <= 0) {
+//				return AjaxResponse.failed(-1,"未找到任务节点");
+//			}
+//
+//			MissionChain missionChain = new MissionChain();
+//			missionChain.setMissionNodeList(missionNodeList);
+//			List<MissionChain> missionChainList = new ArrayList<MissionChain>();
+//			missionChainList.add(missionChain);
+//
+//			MissionMain missionMain = new MissionMain();
+//			missionMain.setMissionChainList(missionChainList);
+//
+//			//当前时间延后
+//			long startTime = new Date().getTime();
+//			startTime += delayTime;
+//			missionMain.setStartTime(new Date(startTime));
+//
+//			Map result = mrcSendOperationsService.sendMission(uuid,productUsedCodeArray,missionMain);
+//			resp.addDataEntry(result);
+//		} catch (Exception e) {
+//			LOGGER.error(e.getMessage(),e);
+//			resp = AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE,"出错");
+//		}
+		return resp;
+	}
+
 
 //	//把类转换成entry返回给前端，解耦和
 //	private Map objectToEntry(MissionItem missionItem) {
