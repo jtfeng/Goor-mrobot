@@ -11,11 +11,11 @@ public class X86MissionStateResponseListenerImpl implements TopicCallback{
 	@Override
 	public void handleMessage(Message message) {
 		try {
-			logger.info("From ROS ====== CurrentPose topic  " + message.toString());
+			logger.info("From ROS ====== X86MissionStateResponse topic  " + message.toString());
 			ProducerCommon msg = SingleFactory.getProducerCommon();
 			msg.sendX86MissionStateResponseMessage(message.toString());
 		}catch (Exception e){
-			logger.error("CurrentPoseListenerImpl error",e);
+			logger.error("X86MissionStateResponseListenerImpl error",e);
 		}
 	}
 
