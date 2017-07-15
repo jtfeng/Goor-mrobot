@@ -10,6 +10,8 @@
         <result property="updateTime" column="UPDATE_TIME"/>
         <result property="repeatCount" column="REPEAT_COUNT"/>
         <result property="intervalTime" column="INTERVAL_TIME"/>
+        <result property="sceneName" column="SCENE_NAME"/>
+        <result property="typeId" column="TYPE_ID"/>
         <!--<result propermissionListIdinId" column="MISSION_MAIN_ID"/>-->
         <!--<result property="priority" column="PRIORITY"/>-->
     </resultMap>
@@ -21,7 +23,9 @@
         CREATE_TIME,
         UPDATE_TIME,
         REPEAT_COUNT,
-        INTERVAL_TIME
+        INTERVAL_TIME,
+        SCENE_NAME,
+        TYPE_ID
 <!--      ,   MISSION_MAIN_ID,
         PRIORITY-->
     </sql>
@@ -34,7 +38,9 @@
             CREATE_TIME,
             UPDATE_TIME,
             REPEAT_COUNT,
-            INTERVAL_TIME
+            INTERVAL_TIME,
+            SCENE_NAME,
+            TYPE_ID
             <!--,MISSION_MAIN_ID,
             PRIORITY-->
         ) values (
@@ -44,7 +50,9 @@
             #{createTime},
             #{updateTime},
             #{repeatCount},
-            #{intervalTime}
+            #{intervalTime},
+            #{sceneName},
+            #{typeId}
 <!--           missionListIdinId},
              #{priority}-->
         );
@@ -70,6 +78,12 @@
             </if>
             <if test="intervalTime != null">
                 INTERVAL_TIME = #{intervalTime},
+            </if>
+            <if test="sceneName != null">
+                SCENE_NAME = #{sceneName},
+            </if>
+            <if test="TYPE_ID != null">
+                TYPE_ID = #{typeId}
             </if>
             <!--<if temissionListIdinId != null">-->
                 <!--MISSION_MAIN_ID missionListIdinId},-->
@@ -119,6 +133,12 @@
             </if>
             <if test="endDate != null">
                 AND d.CREATE_TIME &lt; #{endDate}
+            </if>
+            <if test="sceneName != null">
+                AND d.SCENE_NAME = #{sceneName}
+            </if>
+            <if test="typeId != null">
+                AND d.TYPE_ID = #{typeId}
             </if>
             <!--<if test="priority != null">-->
                 <!--AND d.PRIORITY = #{priority}-->

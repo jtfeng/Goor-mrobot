@@ -5,6 +5,7 @@ import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
+import javax.persistence.Transient;
 import java.util.*;
 
 /**
@@ -32,6 +33,13 @@ public class Mission extends BaseBean {
 	private Long intervalTime;
 
 	private Set<MissionItem> missionItemSet;
+
+	private String sceneName; //场景名
+
+	private Integer typeId; //任务类型ID
+
+	@Transient
+	private String typeName; //任务类型名称
 
 //	private Long missionMainId;
 
@@ -202,5 +210,29 @@ public class Mission extends BaseBean {
 
 	public void setMissionItemSet(Set<MissionItem> missionItemSet) {
 		this.missionItemSet = missionItemSet;
+	}
+
+	public String getSceneName() {
+		return sceneName;
+	}
+
+	public void setSceneName(String sceneName) {
+		this.sceneName = sceneName;
+	}
+
+	public Integer getTypeId() {
+		return typeId;
+	}
+
+	public void setTypeId(Integer typeId) {
+		this.typeId = typeId;
+	}
+
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public void setTypeName(String typeName) {
+		this.typeName = typeName;
 	}
 }
