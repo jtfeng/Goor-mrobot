@@ -2,7 +2,6 @@ package cn.muye.funcs.service;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
-import cn.mrobot.bean.mission.MissionList;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
@@ -11,6 +10,9 @@ import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.mission.service.MissionItemTaskService;
+import cn.muye.mission.service.MissionListTaskService;
+import cn.muye.mission.service.MissionTaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,14 +33,22 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Autowired
     RobotService robotService;
 
+    @Autowired
+    MissionListTaskService missionListTaskService;
+
+    @Autowired
+    MissionTaskService missionTaskService;
+
+    @Autowired
+    MissionItemTaskService missionItemTaskService;
+
     /**
      * 根据订单数据创建任务列表
      * @param order
      * @return
      */
     @Override
-    public boolean createMissionLists(Order order) {
-        boolean ret = false;
+    public MissionListTask createMissionLists(Order order) {
 
         //判断order
         if (order == null ||
@@ -46,7 +56,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 order.getRobot() == null ||
                 order.getOrderSetting().getStartPoint() == null ||
                 order.getOrderSetting().getEndPoint() == null){
-            return ret;
+            return null;
         }
 
         //定义地图点的集合
@@ -64,8 +74,50 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         initMissionListTask(missionListTask, order, mapPoints, mpAttrs);
 
         //任务列表实例化完成，将数据存储到数据库
+        saveMissionListTask(missionListTask);
 
-        return true;
+        return missionListTask;
+    }
+
+    /**
+     * 将任务列表存储到数据库
+     * @param missionListTask
+     */
+    private void saveMissionListTask(MissionListTask missionListTask) {
+        if (missionListTask == null){
+            return;
+        }
+
+        //保存任务列表
+        missionListTaskService.save(missionListTask);
+        if (missionListTask.getId() == null){
+            return;
+        }
+
+        if (missionListTask.getMissionTasks() != null){
+            for (MissionTask mt :
+                    missionListTask.getMissionTasks()) {
+                if (mt != null) {
+                    mt.setMissionListId(missionListTask.getId());
+                    //保存任务节点
+                    missionTaskService.save(mt);
+                    if (mt.getId() != null &&
+                            mt.getMissionItemTasks() != null){
+                        for (MissionItemTask mit :
+                                mt.getMissionItemTasks()) {
+                            if (mit != null) {
+                                mit.setMissionListId(mt.getMissionListId());
+                                mit.setMissionId(mt.getId());
+                                //保存任务item节点
+                                missionItemTaskService.save(mit);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 
     /**

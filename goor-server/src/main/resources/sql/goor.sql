@@ -1197,9 +1197,9 @@ CREATE TABLE `LOG_MISSION` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `ROBOT_CODE` varchar(50) DEFAULT NULL COMMENT '机器人编号',
   `MISSION_TYPE` int(11) NOT NULL COMMENT '任务日志类型：0-任务列表日志，1-任务日志，2-任务节点日志',
-  `MISSION_LIST_ID` int(11) NOT NULL COMMENT '任务列表ID',
-  `MISSION_ID` int(11) DEFAULT NULL COMMENT '任务ID',
-  `MISSION_ITEM_ID` int(11) DEFAULT NULL COMMENT '任务节点ID',
+  `MISSION_LIST_ID` bigint(20) NOT NULL COMMENT '任务列表ID',
+  `MISSION_ID` bigint(20) DEFAULT NULL COMMENT '任务ID',
+  `MISSION_ITEM_ID` bigint(20) DEFAULT NULL COMMENT '任务节点ID',
   `MISSION_LIST_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务列表重复',
   `MISSION_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务重复',
   `MISSION_EVENT` varchar(255) NOT NULL COMMENT 'event 目前包括（后续可能增加）：\r\n    start_success：开始成功\r\n    start_fail：开始失败\r\n    pause_success：暂停成功\r\n    pause_fail：暂停失败\r\n    resume_success：恢复成功\r\n    resume_fail：恢复失败\r\n    cancel_success：取消成功\r\n    cancel_fail：取消失败\r\n    finish：完成',
@@ -1216,6 +1216,82 @@ CREATE TABLE `LOG_MISSION` (
 
 -- ----------------------------
 -- Records of LOG_MISSION
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for TASK_MISSION_LIST
+-- ----------------------------
+DROP TABLE IF EXISTS `TASK_MISSION_LIST`;
+CREATE TABLE `TASK_MISSION_LIST` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `STATE` varchar(50) DEFAULT NULL COMMENT '任务执行状态',
+  `REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '重复执行次数',
+  `REPEAT_TIMES_REAL` int(11) DEFAULT NULL COMMENT '重复执行次数实时状态，查询状态时候的repeat_times值放到该字段',
+  `ROBOT_CODE` varchar(50) DEFAULT NULL COMMENT '机器人编号',
+  `ORDER_ID` bigint(20) NOT NULL COMMENT '订单编号',
+  `NAME` varchar(255) NOT NULL COMMENT '名称',
+  `DESCRIPTION` varchar(255) NOT NULL COMMENT '描述',
+  `MISSION_LIST_TYPE` varchar(255) NOT NULL COMMENT '任务类型',
+  `INTERVAL_TIME` bigint(20) NOT NULL COMMENT '间隔时间',
+  `START_TIME` bigint(20) NOT NULL COMMENT '开始时间',
+  `STOP_TIME` bigint(20) NOT NULL COMMENT '结束时间',
+  `PRIORITY` int(11) NOT NULL COMMENT '优先级',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of TASK_MISSION_LIST
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for TASK_MISSION
+-- ----------------------------
+DROP TABLE IF EXISTS `TASK_MISSION`;
+CREATE TABLE `TASK_MISSION` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `MISSION_LIST_ID` bigint(20) NOT NULL COMMENT '任务列表ID',
+  `STATE` varchar(50) DEFAULT NULL COMMENT '任务执行状态',
+  `REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '重复执行次数',
+  `REPEAT_TIMES_REAL` int(11) DEFAULT NULL COMMENT '重复执行次数实时状态，查询状态时候的repeat_times值放到该字段',
+  `PRESET_MISSION_CODE` varchar(255) DEFAULT NULL COMMENT '预置任务编号',
+  `ORDER_DETAIL_MISSION` varchar(255) DEFAULT NULL COMMENT '是否是order detail对应的任务，1:是; 0:不是',
+  `NAME` varchar(255) NOT NULL COMMENT '名称',
+  `DESCRIPTION` varchar(255) NOT NULL COMMENT '描述',
+  `INTERVAL_TIME` bigint(20) NOT NULL COMMENT '间隔时间',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of TASK_MISSION
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for TASK_MISSION_ITEM
+-- ----------------------------
+DROP TABLE IF EXISTS `TASK_MISSION_ITEM`;
+CREATE TABLE `TASK_MISSION_ITEM` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `MISSION_LIST_ID` bigint(20) NOT NULL COMMENT '任务列表ID',
+  `MISSION_ID` bigint(20) NOT NULL COMMENT '任务ID',
+  `STATE` varchar(50) DEFAULT NULL COMMENT '任务执行状态',
+  `NAME` varchar(255) NOT NULL COMMENT '名称',
+  `DESCRIPTION` varchar(255) NOT NULL COMMENT '描述',
+  `DATA` text NOT NULL COMMENT '任务详细/功能数据',
+  `FEATURE_VALUE` varchar(255) NOT NULL COMMENT 'data对应子功能的唯一命令字串',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of TASK_MISSION_ITEM
 -- ----------------------------
 
 -- ----------------------------

@@ -1,5 +1,6 @@
 package cn.muye.funcs.service;
 
+import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.order.Order;
 
 /**
@@ -12,5 +13,5 @@ public interface MissionFuncsService {
      * @param order
      * @return
      */
-    boolean createMissionLists(Order order);
+    MissionListTask createMissionLists(Order order);
 }

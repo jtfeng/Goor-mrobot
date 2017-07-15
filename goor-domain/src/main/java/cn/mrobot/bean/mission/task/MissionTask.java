@@ -2,12 +2,14 @@ package cn.mrobot.bean.mission.task;
 
 import cn.mrobot.bean.base.BaseBean;
 
-import java.beans.Transient;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.List;
 
 /**
  * Created by abel on 17-7-8.
  */
+@Table(name = "TASK_MISSION")
 public class MissionTask extends BaseBean {
     private static final long serialVersionUID = 3913238395538242407L;
 
@@ -15,10 +17,6 @@ public class MissionTask extends BaseBean {
      *任务列表ID
      */
     private Long missionListId;
-    /**
-     *任务ID
-     */
-    private Long missionId;
     /**
      * 任务执行状态
      */
@@ -38,6 +36,8 @@ public class MissionTask extends BaseBean {
     /**
      * 任务item列表，并行任务，不分顺序
      */
+
+    @Transient
     private List<MissionItemTask> missionItemTasks;
     /**
      * 是否是order detail对应的任务，1:是; 0:不是
@@ -49,7 +49,6 @@ public class MissionTask extends BaseBean {
     private String description; //描述
     private Long intervalTime;
 
-    @Transient
     public List<MissionItemTask> getMissionItemTasks() {
         return missionItemTasks;
     }
@@ -72,14 +71,6 @@ public class MissionTask extends BaseBean {
 
     public void setMissionListId(Long missionListId) {
         this.missionListId = missionListId;
-    }
-
-    public Long getMissionId() {
-        return missionId;
-    }
-
-    public void setMissionId(Long missionId) {
-        this.missionId = missionId;
     }
 
     public String getState() {

@@ -2,9 +2,12 @@ package cn.mrobot.bean.mission.task;
 
 import cn.mrobot.bean.base.BaseBean;
 
+import javax.persistence.Table;
+
 /**
  * Created by abel on 17-7-8.
  */
+@Table(name = "TASK_MISSION_ITEM")
 public class MissionItemTask extends BaseBean {
 
     private static final long serialVersionUID = 8828205395122968816L;
@@ -16,10 +19,6 @@ public class MissionItemTask extends BaseBean {
      *任务ID
      */
     private Long missionId;
-    /**
-     *任务节点ID
-     */
-    private Long missionItemId;
     /**
      * 任务执行状态
      */
@@ -45,14 +44,6 @@ public class MissionItemTask extends BaseBean {
 
     public void setMissionId(Long missionId) {
         this.missionId = missionId;
-    }
-
-    public Long getMissionItemId() {
-        return missionItemId;
-    }
-
-    public void setMissionItemId(Long missionItemId) {
-        this.missionItemId = missionItemId;
     }
 
     public String getState() {
