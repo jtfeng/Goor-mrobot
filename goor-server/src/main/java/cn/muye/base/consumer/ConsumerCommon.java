@@ -3,6 +3,7 @@ package cn.muye.base.consumer;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
@@ -175,6 +176,80 @@ public class ConsumerCommon {
             CacheInfoManager.setMessageCache(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCurrentPose exception", e);
+        }
+    }
+
+    /**
+     * 透传ros发布的topic：x86_mission_queue_response
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE)
+    public void directX86MissionQueueResponse(@Payload MessageInfo messageInfo) {
+        try {
+
+        } catch (Exception e) {
+            logger.error("consumer directX86MissionQueueResponse exception", e);
+        }
+    }
+
+    /**
+     * 透传ros发布的topic：x86_mission_state_response
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE)
+    public void directX86MissionStateResponse(@Payload MessageInfo messageInfo) {
+        try {
+
+        } catch (Exception e) {
+            logger.error("consumer directX86MissionStateResponse exception", e);
+        }
+    }
+
+    /**
+     * 透传ros发布的topic：x86_mission_event
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_EVENT)
+    public void directX86MissionEvent(@Payload MessageInfo messageInfo) {
+        try {
+
+        } catch (Exception e) {
+            logger.error("consumer directX86MissionEvent exception", e);
+        }
+    }
+
+    /**
+     * 透传ros发布的topic：x86_mission_receive，收到回执消息更新数据库
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_RECEIVE)
+    public void directX86MissionReceive(@Payload MessageInfo messageInfo) {
+        try {
+            if(null != messageInfo){
+                return;
+            }
+            JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+            String data = jsonObject.getString(TopicConstants.DATA);
+            JSONObject jsonObjectData = JSON.parseObject(data);
+            String uuId = jsonObjectData.getString(TopicConstants.UUID);
+            String code = jsonObjectData.getString(TopicConstants.CODE);
+            if(StringUtils.isEmpty(uuId)){
+                return;
+            }
+            OffLineMessage message = new OffLineMessage();
+            message.setMessageStatusType("0".equals(code) ? MessageStatusType.ROBOT_RECEIVE_SUCCESS.getIndex() : MessageStatusType.ROBOT_RECEIVE_FAIL.getIndex());//如果是回执，将对方传过来的信息带上
+            message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
+            message.setSuccess(true);//接收到回执，发送消息成功
+            message.setUuId(uuId);//更新的主键
+            message.setReceiverId(messageInfo.getSenderId());
+            message.setUpdateTime(messageInfo.getSendTime());//更新时间
+            offLineMessageService.update(message);//更新发送的消息
+        } catch (Exception e) {
+            logger.error("consumer directX86MissionReceive exception", e);
         }
     }
 

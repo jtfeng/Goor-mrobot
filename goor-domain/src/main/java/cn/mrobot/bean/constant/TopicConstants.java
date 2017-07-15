@@ -28,19 +28,19 @@ public class TopicConstants {
 	public static final String PUB_NAME = "pub_name";
 	public static final String SUB_NAME = "sub_name";
 
+	public static final String UUID = "uuId";
+	public static final String CODE = "code";
+
 	//工控topic
 	public static final String APP_PUB = "/app_pub";
 	public static final String APP_SUB = "/app_sub";
 	public static final String AGENT_PUB = "/agent_pub";
 	public static final String AGENT_SUB = "/agent_sub";
 	public static final String CURRENT_POSE = "/current_pose";
-	public static final String X86_MISSION_DISPATCH = "/x86_mission_dispatch";//任务下发topic
-	public static final String X86_MISSION_QUEUE_CANCEL = "/x86_mission_queue_cancel";//取消任务队列中某些任务列表topic
-	public static final String X86_MISSION_INSTANT_CONTROL = "/x86_mission_instant_control";//对当前任务控制topic
-	public static final String X86_MISSION_COMMON_REQUEST = "/x86_mission_common_request";//任务数据请求topic
 	public static final String X86_MISSION_QUEUE_RESPONSE = "/x86_mission_queue_response";//当前任务队列数据响应topic
 	public static final String X86_MISSION_STATE_RESPONSE = "/x86_mission_state_response";//当前任务状态响应topic
 	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
+	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
@@ -104,6 +104,11 @@ public class TopicConstants {
 	public static final String DIRECT_APP_SUB = "direct.app_sub";
 	public static final String DIRECT_AGENT_PUB = "direct.agent_pub";
 	public static final String DIRECT_AGENT_SUB = "direct.agent_sub";
+	public static final String DIRECT_X86_MISSION_QUEUE_RESPONSE = "direct.x86_mission_queue_response";//当前任务队列数据响应topic
+	public static final String DIRECT_X86_MISSION_STATE_RESPONSE = "direct.x86_mission_state_response";//当前任务状态响应topic
+	public static final String DIRECT_X86_MISSION_EVENT = "direct.x86_mission_event";//任务事件上报topic
+	public static final String DIRECT_X86_MISSION_RECEIVE = "direct.x86_mission_receive";//任务回执上报topic
+
 	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";
 	public static final String DIRECT_COMMAND_REPORT_RECEIVE = "direct.command_report_receive";
 
