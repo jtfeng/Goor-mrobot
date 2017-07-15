@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * Created by Selim on 2017/7/6.
  */
@@ -39,5 +41,21 @@ public class OrderSettingServiceImpl extends BasePreInject<OrderSetting> impleme
         OrderSetting orderSetting = new OrderSetting(id);
         orderSetting.setDeleteStatus(Boolean.TRUE);
         return orderSettingMapper.updateOrderSetting(orderSetting);
+    }
+
+    @Override
+    public List<OrderSetting> listAvailableOrderSettingByStationId(Long stationId) {
+        return orderSettingMapper.listAvailableOrderSettingByStationId(stationId);
+    }
+
+    @Override
+    public boolean hasDefaultSetting(Long stationId) {
+        int count = orderSettingMapper.countDefaultSetting(stationId);
+        return count == 1 ? true : false;
+    }
+
+    @Override
+    public OrderSetting getDefaultSetting(Long stationId) {
+        return orderSettingMapper.getDefaultSetting(stationId);
     }
 }

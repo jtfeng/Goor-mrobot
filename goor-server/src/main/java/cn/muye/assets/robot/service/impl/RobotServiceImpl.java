@@ -86,8 +86,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
             }
         }
-        availableRobot.setBusy(true);
-        updateRobot(availableRobot);
+        if(availableRobot != null){
+            availableRobot.setBusy(true);
+            updateRobot(availableRobot);
+        }
         return availableRobot;
     }
 

@@ -2,6 +2,7 @@ package cn.mrobot.bean.order;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.good.GoodsType;
+import cn.mrobot.bean.assets.robot.RobotType;
 import cn.mrobot.bean.base.BaseBean;
 
 /**
@@ -21,6 +22,10 @@ public class OrderSetting extends BaseBean{
 
     private Integer packageType; //装货方式 0为手动  1为自动
 
+    private RobotType robotType;  //机器人类型
+
+    private Boolean needSign = Boolean.FALSE;  //是否需要签收 false 不需要 true 需要
+
     private Boolean defaultSetting = Boolean.FALSE; //是否为默认设置
 
     private Boolean deleteStatus = Boolean.FALSE; //是否已删除 默认初始不删除
@@ -30,6 +35,22 @@ public class OrderSetting extends BaseBean{
 
     public OrderSetting(Long id) {
         super(id);
+    }
+
+    public RobotType getRobotType() {
+        return robotType;
+    }
+
+    public void setRobotType(RobotType robotType) {
+        this.robotType = robotType;
+    }
+
+    public Boolean getNeedSign() {
+        return needSign;
+    }
+
+    public void setNeedSign(Boolean needSign) {
+        this.needSign = needSign;
     }
 
     public Boolean getDeleteStatus() {

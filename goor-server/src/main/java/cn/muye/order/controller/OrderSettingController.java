@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+import java.util.List;
+
 /**
  * Created by Selim on 2017/7/6.
  */
@@ -23,9 +26,9 @@ public class OrderSettingController extends BaseController{
      * @param id
      * @return
      */
-    @RequestMapping(method = RequestMethod.GET)
-    @ResponseBody
-    public AjaxResult getOrderSetting(@RequestParam("id") Long id){
+     @RequestMapping(method = RequestMethod.GET)
+     @ResponseBody
+     public AjaxResult getOrderSetting(@RequestParam("id") Long id){
         try {
             OrderSetting orderSetting = orderSettingService.getById(id);
             return AjaxResult.success(orderSetting);
@@ -36,16 +39,38 @@ public class OrderSettingController extends BaseController{
     }
 
     /**
+     * 获取该站 可用配置
+     * @return
+     */
+    @RequestMapping(value = "list", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listAvailableOrderSetting(HttpSession session){
+        try {
+            Long stationId = (Long)session.getAttribute("stationId");
+            List<OrderSetting> orderSetting = orderSettingService.listAvailableOrderSettingByStationId(stationId);
+            return AjaxResult.success(orderSetting);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("查询配置列表内部出错");
+        }
+    }
+
+    /**
      * 添加 订单配置
      * @param orderSetting
      * @return
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting){
+    public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting,HttpSession session){
         try {
+            Long stationId = (Long)session.getAttribute("stationId");
+            boolean hasDefaultSetting = orderSettingService.hasDefaultSetting(stationId);
+            if(!hasDefaultSetting){
+                orderSetting.setDefaultSetting(Boolean.TRUE);
+            }
             orderSettingService.saveOrderSetting(orderSetting);
-            return AjaxResult.success(orderSetting);
+            return AjaxResult.success("添加配置成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("添加配置内部出错");
@@ -61,8 +86,11 @@ public class OrderSettingController extends BaseController{
     @ResponseBody
     public AjaxResult updateOrderSetting(@RequestBody OrderSetting orderSetting){
         try {
+            if(orderSetting.getId() == null){
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "修改订单必须带有id");
+            }
             orderSettingService.updateOrderSetting(orderSetting);
-            return AjaxResult.success(orderSetting);
+            return AjaxResult.success("修改配置成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("修改配置内部出错");
@@ -80,7 +108,7 @@ public class OrderSettingController extends BaseController{
     public AjaxResult deleteOrderSetting(@RequestParam("id") Long id){
         try {
             orderSettingService.deleteOrderSetting(id);
-            return AjaxResult.success();
+            return AjaxResult.success("删除配置成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("删除配置内部出错");

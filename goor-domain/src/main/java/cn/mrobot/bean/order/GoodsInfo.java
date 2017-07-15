@@ -18,8 +18,18 @@ public class GoodsInfo{
 
     private Integer num; //数量
 
+    private Integer boxNum; // 存放箱位 （若有货架 默认为null）
+
     @Transient
     private Goods goods; //对应物品
+
+    public Integer getBoxNum() {
+        return boxNum;
+    }
+
+    public void setBoxNum(Integer boxNum) {
+        this.boxNum = boxNum;
+    }
 
     public Long getId() {
         return id;

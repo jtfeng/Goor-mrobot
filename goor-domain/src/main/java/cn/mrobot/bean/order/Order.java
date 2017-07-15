@@ -2,6 +2,7 @@ package cn.mrobot.bean.order;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.base.BaseBean;
 
 import java.util.List;
@@ -19,7 +20,34 @@ public class Order extends BaseBean{
 
     private List<OrderDetail> detailList;  //下单配送详情
 
-    private Integer status; //订单状态
+    private Boolean needShelf = Boolean.FALSE;  //默认不需要货架
+
+    private Shelf shelf;  //货架编号 若需要货架
+
+    private Integer status; //订单状态 0未完成 1完成
+
+    public Order() {
+    }
+
+    public Shelf getShelf() {
+        return shelf;
+    }
+
+    public void setShelf(Shelf shelf) {
+        this.shelf = shelf;
+    }
+
+    public Boolean getNeedShelf() {
+        return needShelf;
+    }
+
+    public void setNeedShelf(Boolean needShelf) {
+        this.needShelf = needShelf;
+    }
+
+    public Order(Long id) {
+        super(id);
+    }
 
     public OrderSetting getOrderSetting() {
         return orderSetting;
