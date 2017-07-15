@@ -1044,6 +1044,7 @@ INSERT INTO `D_FEATURE_ITEM_TYPE` VALUES ('2', '测试12', 'hahahah312', '你猜
 -- ----------------------------
 -- Table structure for D_MISSION
 -- ----------------------------
+
 DROP TABLE IF EXISTS `D_MISSION`;
 CREATE TABLE `D_MISSION` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -1053,8 +1054,10 @@ CREATE TABLE `D_MISSION` (
   `UPDATE_TIME` datetime DEFAULT NULL COMMENT '更新时间',
   `REPEAT_COUNT` int(11) DEFAULT NULL COMMENT '重复次数',
   `INTERVAL_TIME` bigint(20) DEFAULT NULL COMMENT '间隔时间',
+  `SCENE_NAME` varchar(255) DEFAULT NULL COMMENT '场景名',
+  `TYPE_ID` int(2) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of D_MISSION
