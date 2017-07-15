@@ -12,7 +12,8 @@ public enum MessageStatusType {
     PROCESSING_MESSAGE("消息正在处理", 8),//消息处理中
     ROS_OFF_LINE("机器人不在线", 9),//ros不在线
     ROBOT_RECEIVE_SUCCESS("任务处理成功", 10),//机器人回执成功
-    ROBOT_RECEIVE_FAIL("任务处理失败", 11);//机器人回执失败
+    ROBOT_RECEIVE_FAIL("任务处理失败", 11),//机器人回执失败
+    FILE_UMZIP_COMPLETE("文件解压完成", 12);
 
     // 成员变量
     private String name;
