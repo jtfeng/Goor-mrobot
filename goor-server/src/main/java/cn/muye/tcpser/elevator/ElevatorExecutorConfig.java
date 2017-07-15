@@ -1,5 +1,8 @@
 package cn.muye.tcpser.elevator;
 
+import cn.muye.log.elevator.service.LogElevatorService;
+import cn.muye.log.elevator.service.LogElevatorServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -51,9 +54,14 @@ public class ElevatorExecutorConfig {
         return executor;
     }
 
+    @Autowired
+    LogElevatorService elevatorService;
+
     @Bean
-    public ElevatorClientAsyncTask elevatorClientAsyncTask(){
-        return new ElevatorClientAsyncTask();
+    public ElevatorClientAsyncTask elevatorClientAsyncTask(
+            LogElevatorService elevatorService
+    ){
+        return new ElevatorClientAsyncTask(elevatorService);
     }
 
     @Bean

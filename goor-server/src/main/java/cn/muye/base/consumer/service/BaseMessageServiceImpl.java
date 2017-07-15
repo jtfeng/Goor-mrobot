@@ -172,4 +172,37 @@ public class BaseMessageServiceImpl implements BaseMessageService {
 
     }
 
+    @Override
+    public void sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody) {
+        if (slamResponseBody == null){
+            return;
+        }
+
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(slamResponseBody));
+
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(topic);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(messageObject.toJSONString());
+
+        MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+        info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        info.setSendTime(new Date());
+        info.setSenderId("goor-server");
+        info.setReceiverId(robotCode);
+        info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
+        info.setMessageText(JSON.toJSONString(commonInfo));//TODO 发送资源及rostopic命令
+
+        String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(
+                robotCode,true, MessageType.EXECUTOR_COMMAND.name());
+
+        //单机器命令发送（带回执）
+        try {
+            msgSendAsyncTask.taskMsgSend(backResultCommandRoutingKey, info);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -16,6 +16,11 @@ public class UserUtil {
     private UserService userService;
 
     public  User getCurrentUser(){
+        if (SecurityContextHolder.getContext() == null ||
+                SecurityContextHolder.getContext().getAuthentication() == null ||
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null){
+            return null;
+        }
         Object object =  SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userService.getByUserName(object.toString());
         return user == null ? null : user;
