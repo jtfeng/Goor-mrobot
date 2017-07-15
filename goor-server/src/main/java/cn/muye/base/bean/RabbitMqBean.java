@@ -21,7 +21,8 @@ public class RabbitMqBean {
             }
         }
         if(MessageType.EXECUTOR_RESOURCE.name().equals(messageType)
-                || MessageType.EXECUTOR_UPGRADE.name().equals(messageType)){
+                || MessageType.EXECUTOR_UPGRADE.name().equals(messageType)
+                || MessageType.EXECUTOR_MAP.name().equals(messageType)){
             if(isReceive){
                 return TopicConstants.TOPIC_RESOURCE_RECEIVE_ROUTING_KEY+robotSN;
             }else{
