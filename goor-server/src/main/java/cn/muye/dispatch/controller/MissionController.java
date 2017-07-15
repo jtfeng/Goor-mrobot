@@ -3,6 +3,8 @@ package cn.muye.dispatch.controller;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
@@ -10,6 +12,7 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.area.point.service.PointService;
 import cn.muye.dispatch.service.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -40,6 +43,8 @@ public class MissionController {
 	private MissionService missionService;
 	@Autowired
 	private MissionListService missionListService;
+	@Autowired
+	private PointService pointService;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
@@ -158,8 +163,6 @@ public class MissionController {
 		return resp;
 	}
 
-
-
 	/**
 	 *创建任务，同时创建并关联子任务
 	 * @param mission
@@ -177,6 +180,29 @@ public class MissionController {
 			Mission missionDB = missionService.findByName(missionName);
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
+			}
+
+			//校验点是否存在
+			Set<MissionItem> missionItemSet = mission.getMissionItemSet();
+			if(missionItemSet == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能创建空任务！");
+			}
+			for(MissionItem missionItem : missionItemSet) {
+				//跟点相关的指令，需要校验点是否存在
+				if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(missionItem.getFeatureItemId())) {
+					String data = missionItem.getData();
+					try {
+						Long pointId = JSON.parseObject(data).getLong(Constant.ID);
+						MapPoint mapPoint = pointService.findById(pointId);
+						if(mapPoint == null) {
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
+						}
+						missionItem.setData(JSON.toJSONString(mapPoint));
+					}
+					catch (Exception e) {
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
+					}
+				}
 			}
 			String msg = "";
 			if (mission.getId() != null) {
@@ -244,13 +270,14 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_mission_r')")
 	public AjaxResult pageMission(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
-			List<Mission> missionList = missionService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
 			pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
+			List<Mission> missionList = missionService.list(whereRequest);
+
 			//用PageInfo对结果进行包装
 			PageInfo<Mission> page = new PageInfo<Mission>(missionList);
 			return AjaxResult.success(page);
