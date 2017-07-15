@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public enum MissionListType {
 
-	IMMEDIATE("normal", "普通任务"),
+	NORMAL("normal", "普通任务"),
 	PLAN("plan", "计划任务");
 
 	private String value;
