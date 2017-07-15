@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
 import java.util.Date;
 
 /**
@@ -42,6 +43,9 @@ public class ScheduleTasks {
 
     @Value("${local.robot.SN}")
     private String localRobotSN;
+
+    @Value("${server.mapPath")
+    private String mapPath;
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -128,7 +132,27 @@ public class ScheduleTasks {
             logger.error("Scheduled clear message error", e);
         }
     }
-    
+
+    //每天检查一次地图文件夹下是否有zip文件，有就删掉
+    @Scheduled(cron = "0 0 12 * * *") //test cron
+    public void deleteZipMapFile() {
+        logger.info("Scheduled delete Zip map file");
+        try {
+          File mapPathDir = new File(mapPath);
+          if(mapPathDir.exists() && mapPathDir.isDirectory()){
+              File[] files = mapPathDir.listFiles();
+              for(int i=0; i < files.length; i ++){
+                  File file = files[i];
+                  if(file.getName().lastIndexOf(".zip") >= 0 ){
+                      file.delete();
+                  }
+              }
+          }
+        } catch (Exception e) {
+            logger.error("Scheduled clear message error", e);
+        }
+    }
+
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
 

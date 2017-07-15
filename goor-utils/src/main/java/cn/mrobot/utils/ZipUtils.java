@@ -18,7 +18,7 @@ import java.util.zip.*;
  */
 public class ZipUtils {
 
-   private static final Logger LOGGER = LoggerFactory.getLogger(ZipUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZipUtils.class);
 
     /**
      * 递归压缩文件夹
@@ -64,9 +64,9 @@ public class ZipUtils {
             }
             zos.flush();
         } catch (Exception e) {
-			e.printStackTrace();
-			LOGGER.error("文件压缩出错", e);
-		}
+            e.printStackTrace();
+            LOGGER.error("文件压缩出错", e);
+        }
     }
 
     /**
@@ -79,7 +79,7 @@ public class ZipUtils {
      */
     public static boolean zip(String zipPath, String savePath, String zipFileName) throws Exception {
         if (StringUtil.isNullOrEmpty(savePath) || StringUtil.isNullOrEmpty(zipPath) || StringUtil.isNullOrEmpty(zipFileName)) {
-			LOGGER.error("参数不能为空");
+            LOGGER.error("参数不能为空");
             return false;
         }
         CheckedOutputStream cos = null;
@@ -89,7 +89,7 @@ public class ZipUtils {
             String dir = srcFile.getParentFile().getAbsolutePath();
             //判断压缩文件保存的路径是否为源文件路径的子文件夹，如果是，则抛出异常（防止无限递归压缩的发生）
             if (srcFile.isDirectory() && savePath.indexOf(zipPath) != -1) {
-				LOGGER.error("savePath must not be the child directory of zipPath");
+                LOGGER.error("savePath must not be the child directory of zipPath");
                 return false;
             }
 
@@ -122,13 +122,13 @@ public class ZipUtils {
             zip(srcRootDir, srcFile, zos);
             return true;
         } catch (Exception e) {
-			LOGGER.error("压缩文件出错", e);
-        }finally {
-			if(null != zos){
-				zos.close();
-			}
-		}
-		return false;
+            LOGGER.error("压缩文件出错", e);
+        } finally {
+            if (null != zos) {
+                zos.close();
+            }
+        }
+        return false;
     }
 
     /**
@@ -139,68 +139,86 @@ public class ZipUtils {
      * @param includeZipFileName 解压后的文件保存的路径是否包含压缩文件的文件名。true-包含；false-不包含
      */
     @SuppressWarnings("unchecked")
-    public static boolean unzip(String zipFilePath, String unzipFilePath, boolean includeZipFileName) throws Exception {
-        if (StringUtil.isNullOrEmpty(zipFilePath) || StringUtil.isNullOrEmpty(unzipFilePath)) {
-			LOGGER.error("参数不能为空");
-        }
-        File zipFile = new File(zipFilePath);
-        //如果解压后的文件保存路径包含压缩文件的文件名，则追加该文件名到解压路径
-        if (includeZipFileName) {
-            String fileName = zipFile.getName();
-            if (!StringUtil.isNullOrEmpty(fileName)) {
-                fileName = fileName.substring(0, fileName.lastIndexOf("."));
-            }
-            unzipFilePath = unzipFilePath + File.separator + fileName;
-        }
-
-        //开始解压
-        ZipEntry entry = null;
-        String entryFilePath = null, entryDirPath = null;
-        File entryFile = null, entryDir = null;
-        int index = 0, count = 0, bufferSize = 1024 * 2;
-        byte[] buffer = new byte[bufferSize];
+    public static boolean unzip(String zipFilePath, String unzipFilePath, boolean includeZipFileName) {
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
-        ZipFile zip = new ZipFile(zipFile);
-        Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
-        //循环对压缩包里的每一个文件进行解压
-        while (entries.hasMoreElements()) {
-            entry = entries.nextElement();
-            //构建压缩包中一个文件解压后保存的文件全路径
-            entryFilePath = unzipFilePath + File.separator + entry.getName();
-            //构建解压后保存的文件夹路径
-            index = entryFilePath.lastIndexOf(File.separator);
-            if (index != -1) {
-                entryDirPath = entryFilePath.substring(0, index);
-            } else {
-                entryDirPath = "";
+        ZipFile zip = null;
+        try {
+            if (StringUtil.isNullOrEmpty(zipFilePath) || StringUtil.isNullOrEmpty(unzipFilePath)) {
+                LOGGER.error("参数不能为空");
             }
-            entryDir = new File(entryDirPath);
-            //如果文件夹路径不存在，则创建文件夹
-            if (!entryDir.exists() || !entryDir.isDirectory()) {
-                entryDir.mkdirs();
+            File dir = new File(unzipFilePath);
+            if (!dir.exists()) {
+                dir.mkdirs();
             }
-
-            //创建解压文件
-            entryFile = new File(entryFilePath);
-            if (entryFile.exists()) {
-//                //检测文件是否允许删除，如果不允许删除，将会抛出SecurityException
-//                SecurityManager securityManager = new SecurityManager();
-//                securityManager.checkDelete(entryFilePath);
-                //删除已存在的目标文件
-                entryFile.delete();
+            File zipFile = new File(zipFilePath);
+            //如果解压后的文件保存路径包含压缩文件的文件名，则追加该文件名到解压路径
+            if (includeZipFileName) {
+                String fileName = zipFile.getName();
+                if (!StringUtil.isNullOrEmpty(fileName)) {
+                    fileName = fileName.substring(0, fileName.lastIndexOf("."));
+                }
+                unzipFilePath = unzipFilePath + File.separator + fileName;
             }
 
-            //写入文件
-            bos = new BufferedOutputStream(new FileOutputStream(entryFile));
-            bis = new BufferedInputStream(zip.getInputStream(entry));
-            while ((count = bis.read(buffer, 0, bufferSize)) != -1) {
-                bos.write(buffer, 0, count);
+            //开始解压
+            ZipEntry entry = null;
+            String entryFilePath = null, entryDirPath = null;
+            File entryFile = null, entryDir = null;
+            int index = 0, count = 0, bufferSize = 1024 * 2;
+            byte[] buffer = new byte[bufferSize];
+            zip = new ZipFile(zipFile);
+            Enumeration<ZipEntry> entries = (Enumeration<ZipEntry>) zip.entries();
+            //循环对压缩包里的每一个文件进行解压
+            while (entries.hasMoreElements()) {
+                entry = entries.nextElement();
+                //构建压缩包中一个文件解压后保存的文件全路径
+                entryFilePath = unzipFilePath + File.separator + entry.getName();
+                //构建解压后保存的文件夹路径
+                index = entryFilePath.lastIndexOf(File.separator);
+                if (index != -1) {
+                    entryDirPath = entryFilePath.substring(0, index);
+                } else {
+                    entryDirPath = "";
+                }
+                entryDir = new File(entryDirPath);
+                //如果文件夹路径不存在，则创建文件夹
+                if (!entryDir.exists() || !entryDir.isDirectory()) {
+                    entryDir.mkdirs();
+                }
+                //创建解压文件
+                entryFile = new File(entryFilePath);
+                if (entryFile.exists()) {
+                    //删除已存在的目标文件
+                    entryFile.delete();
+                }
+                //写入文件
+                bos = new BufferedOutputStream(new FileOutputStream(entryFile));
+                bis = new BufferedInputStream(zip.getInputStream(entry));
+                while ((count = bis.read(buffer, 0, bufferSize)) != -1) {
+                    bos.write(buffer, 0, count);
+                }
+                bos.flush();
             }
-            bos.flush();
-            bos.close();
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("解压文件出错，zipFilePath = " + zipFilePath, e);
+            return false;
+        } finally {
+            try {
+                if (null != bos) {
+                    bos.close();
+                }
+                if (null != bis) {
+                    bis.close();
+                }
+                if (null != zip) {
+                    zip.close();
+                }
+            } catch (IOException e) {
+                LOGGER.error("解压文件出错，zipFilePath = " + zipFilePath, e);
+            }
         }
-        return true;
     }
 
     public static void main(String[] args) {
