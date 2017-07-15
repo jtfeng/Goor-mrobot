@@ -10,7 +10,9 @@ public enum MessageStatusType {
     SUCCESS_MESSAGE("消息发送成功,正在载入,请稍后邮箱查看是否处理成功!", 6),//成功消息
     PARAMETER_ERROR("参数传入错误", 7),//参数错误
     PROCESSING_MESSAGE("消息正在处理", 8),//消息处理中
-    ROS_OFF_LINE("机器人不在线", 9);//ros不在线
+    ROS_OFF_LINE("机器人不在线", 9),//ros不在线
+    ROBOT_RECEIVE_SUCCESS("任务处理成功", 10),//机器人回执成功
+    ROBOT_RECEIVE_FAIL("任务处理失败", 11);//机器人回执失败
 
     // 成员变量
     private String name;
