@@ -34,6 +34,13 @@ public class TopicConstants {
 	public static final String AGENT_PUB = "/agent_pub";
 	public static final String AGENT_SUB = "/agent_sub";
 	public static final String CURRENT_POSE = "/current_pose";
+	public static final String X86_MISSION_DISPATCH = "/x86_mission_dispatch";//任务下发topic
+	public static final String X86_MISSION_QUEUE_CANCEL = "/x86_mission_queue_cancel";//取消任务队列中某些任务列表topic
+	public static final String X86_MISSION_INSTANT_CONTROL = "/x86_mission_instant_control";//对当前任务控制topic
+	public static final String X86_MISSION_COMMON_REQUEST = "/x86_mission_common_request";//任务数据请求topic
+	public static final String X86_MISSION_QUEUE_RESPONSE = "/x86_mission_queue_response";//当前任务队列数据响应topic
+	public static final String X86_MISSION_STATE_RESPONSE = "/x86_mission_state_response";//当前任务状态响应topic
+	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";

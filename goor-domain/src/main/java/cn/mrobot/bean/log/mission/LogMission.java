@@ -37,15 +37,15 @@ public class LogMission extends BaseBean {
     /**
      *任务列表ID
      */
-    private Integer missionListId;
+    private Long missionListId;
     /**
      *任务ID
      */
-    private Integer missionId;
+    private Long missionId;
     /**
      *任务节点ID
      */
-    private Integer missionItemId;
+    private Long missionItemId;
     /**
      *任务列表重复
      */
@@ -96,27 +96,27 @@ public class LogMission extends BaseBean {
         this.missionType = missionType;
     }
 
-    public Integer getMissionListId() {
+    public Long getMissionListId() {
         return missionListId;
     }
 
-    public void setMissionListId(Integer missionListId) {
+    public void setMissionListId(Long missionListId) {
         this.missionListId = missionListId;
     }
 
-    public Integer getMissionId() {
+    public Long getMissionId() {
         return missionId;
     }
 
-    public void setMissionId(Integer missionId) {
+    public void setMissionId(Long missionId) {
         this.missionId = missionId;
     }
 
-    public Integer getMissionItemId() {
+    public Long getMissionItemId() {
         return missionItemId;
     }
 
-    public void setMissionItemId(Integer missionItemId) {
+    public void setMissionItemId(Long missionItemId) {
         this.missionItemId = missionItemId;
     }
 
