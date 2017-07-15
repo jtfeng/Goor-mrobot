@@ -38,8 +38,8 @@ public class Mission extends BaseBean {
 
 	private Integer typeId; //任务类型ID
 
-	@Transient
-	private String typeName; //任务类型名称
+//	@Transient
+//	private String typeName; //任务类型名称 todo 前端直接用登陆后常量代替了
 
 //	private Long missionMainId;
 
@@ -228,11 +228,4 @@ public class Mission extends BaseBean {
 		this.typeId = typeId;
 	}
 
-	public String getTypeName() {
-		return typeName;
-	}
-
-	public void setTypeName(String typeName) {
-		this.typeName = typeName;
-	}
 }

@@ -73,14 +73,14 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public Robot getAvailableRobotByStationId(Long stationId) {
+    public Robot getAvailableRobotByStationId(Long stationId, Integer typeId) {
         List<StationRobotXREF> list = stationRobotXREFService.getByStationId(stationId);
         Robot availableRobot = null;
         if (list != null && list.size() > 0) {
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
                 Robot robotDb = robotService.getById(robotId);
-                if (robotDb != null && robotDb.getBusy() == false) {
+                if (robotDb != null && robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId)) {
                     availableRobot = robotDb;
                     break;
                 }

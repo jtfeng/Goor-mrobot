@@ -1,14 +1,24 @@
 package cn.muye.dispatch.controller;
 
+import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.RabbitMqBean;
+import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dispatch.service.*;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +40,11 @@ public class MissionController {
 	private MissionService missionService;
 	@Autowired
 	private MissionListService missionListService;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	private int TWO_MINUTES_MILLISECOND = 120000;
 
 	//missionItem-----------------------------------------------------------------------
 	@RequestMapping(value = {"dispatch/missionItem"}, method = {RequestMethod.POST, RequestMethod.PUT})
@@ -143,6 +158,8 @@ public class MissionController {
 		return resp;
 	}
 
+
+
 	/**
 	 *创建任务，同时创建并关联子任务
 	 * @param mission
@@ -161,9 +178,7 @@ public class MissionController {
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
-
 			String msg = "";
-
 			if (mission.getId() != null) {
 				missionService.updateFull(mission,missionDB);
 				msg = "修改成功";
@@ -229,14 +244,13 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_mission_r')")
 	public AjaxResult pageMission(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
+			List<Mission> missionList = missionService.list(whereRequest);
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
 			pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
-			List<Mission> missionList = missionService.list(whereRequest);
-
 			//用PageInfo对结果进行包装
 			PageInfo<Mission> page = new PageInfo<Mission>(missionList);
 			return AjaxResult.success(page);
@@ -482,5 +496,93 @@ public class MissionController {
 //		entry.put("dataModel", featureItemType.getDataModel());
 //		return entry;
 //	}
+
+	/**
+	 * 根据机器人code去Redis查询最后一条机器人位置信息，查出场景名：
+	 * 如果该信息超过2分钟，则提示“机器人已经离线太久，无法调度”；
+	 * 如果在2分钟内，则根据场景名去寻找可供调度的任务列表返回给前端展示。
+	 * @param robotCode
+	 * @return
+	 */
+	@RequestMapping(value = {"dispatch/mission/availableMissionList"}, method = RequestMethod.GET)
+	@ResponseBody
+	public AjaxResult getAvailableMissionList(@RequestParam(value = "robotCode") String robotCode) {
+		MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(robotCode);
+		if (currentMap != null) {
+			Long sendTimeMilSeconds = currentMap.getSendTime().getTime();
+			if (new Date().getTime() - sendTimeMilSeconds > TWO_MINUTES_MILLISECOND) {
+				return AjaxResult.failed("机器人已经离线太久，无法调度");
+			} else {
+				JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
+				String data = jsonObject.getString(TopicConstants.DATA);
+				JSONObject object = JSON.parseObject(data);
+				String mapData = object.getString(TopicConstants.DATA);
+				JSONObject mapDataObject = JSON.parseObject(mapData);
+				String sceneName = mapDataObject.getString(TopicConstants.SCENE_NAME);
+				WhereRequest whereRequest = new WhereRequest();
+				String queryObj = "{\"" + SearchConstants.SEARCH_MISSION_SCENE_NAME + "\": \""+ sceneName +"\"}" ;
+				whereRequest.setQueryObj(queryObj);
+				List<Mission> missionList = missionService.list(whereRequest);
+				return AjaxResult.success(missionList, "查询成功");
+			}
+		} else {
+			return AjaxResult.failed("机器人已经离线太久，无法调度");
+		}
+	}
+
+
+	/**
+	 * 暂停，回复，取消当前任务，取消所有任务实时接口
+	 * @param command
+	 * @return
+	 */
+	@RequestMapping(value = {"dispatch/command"}, method = RequestMethod.GET)
+	@ResponseBody
+	public AjaxResult sendCommand(String command) {
+		boolean flag = false;
+		switch (command) {
+			case "pause":
+				flag = sendMissionCommand("pause");
+				break;
+			case "resume":
+				flag = sendMissionCommand("resume");
+				break;
+			case "skip":
+				flag = sendMissionCommand("skip");
+				break;
+			case "cancel":
+				flag = sendMissionCommand("cancel");
+				break;
+			case "default":
+				break;
+		}
+		if (flag == true) {
+			return AjaxResult.success();
+		} else {
+			return AjaxResult.failed();
+		}
+	}
+
+	private boolean sendMissionCommand(String command) {
+		boolean flag = false;
+		MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+		info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+		info.setSendTime(new Date());
+		info.setSenderId("goor-server");
+		info.setReceiverId("daBit");
+		info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
+//        info.setMessageType(MessageType.EXECUTOR_RESOURCE);//TODO 如果发送资源,将此行注释去掉，注释此行上面第一行
+//        info.setMessageType(MessageType.EXECUTOR_LOG);//TODO 针对 x86 agent 业务逻辑,不接收发送到ros的信息，如：发送命令要求上传log等
+//                info.setMessageText(JSON.toJSONString(robotDb));//TODO 发送资源及rostopic命令
+		info.setMessageText("{\"topicName\":\""+ command + "\",\"topicType\":\"std_msgs/String\",\"publishMessage\":{\"command\":\"pause\",\"sendTime\":\"2017-07-14 11:50:53\"}}");//TODO 发送资源及rostopic命令
+
+		String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey("daBit",true, MessageType.EXECUTOR_COMMAND.name());
+		//单机器命令发送（带回执）
+		AjaxResult ajaxCommandResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultCommandRoutingKey, info);
+		if (ajaxCommandResult.isSuccess()) {
+			return true;
+		}
+		return flag;
+	}
 
 }

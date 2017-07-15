@@ -9,6 +9,7 @@ import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
+import cn.mrobot.bean.mission.MissionTypeEnum;
 import cn.mrobot.dto.account.RoleDTO;
 import cn.mrobot.dto.account.UserDTO;
 import cn.mrobot.dto.area.station.StationDTO4User;
@@ -445,6 +446,7 @@ public class UserController {
         map.put("stationType", StationType.list());
         map.put("roleType", RoleTypeEnum.list());
         map.put("robotType", RobotTypeEnum.list());
+        map.put("missionType", MissionTypeEnum.list());
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {

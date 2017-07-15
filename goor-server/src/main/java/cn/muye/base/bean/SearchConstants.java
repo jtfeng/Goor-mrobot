@@ -29,6 +29,8 @@ public class SearchConstants {
 
 	public static String SEARCH_MISSION_MAIN_ID = "missionMainId";
 	public static String SEARCH_MISSION_CHAIN_ID = "missionChainId";
+	public static String SEARCH_MISSION_SCENE_NAME = "missionSceneName";
+	public static String SEARCH_MISSION_TYPE_ID = "missionTypeId";
 	public static String SEARCH_PRIORITY = "priority";
 	public static String SEARCH_FEATURE_ITEM_TYPE_ID = "featureItemTypeId";
 	public static String SEARCH_FEATURE_ITEM_ID = "featureItemId";
