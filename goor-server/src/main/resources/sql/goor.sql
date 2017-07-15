@@ -1222,6 +1222,24 @@ CREATE TABLE `LOG_MISSION` (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for LOG_ELEVATOR
+-- ----------------------------
+DROP TABLE IF EXISTS `LOG_ELEVATOR`;
+CREATE TABLE `LOG_ELEVATOR` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `ADDR` varchar(255) NOT NULL COMMENT '远程电梯地址',
+  `VALUE` varchar(255) NOT NULL COMMENT '消息值',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of LOG_ELEVATOR
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for TASK_MISSION_LIST
 -- ----------------------------
 DROP TABLE IF EXISTS `TASK_MISSION_LIST`;

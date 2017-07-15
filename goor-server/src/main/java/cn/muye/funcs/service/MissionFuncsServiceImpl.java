@@ -323,9 +323,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             MPointAtts mPointAtts) {
         //单点路径导航任务，当前路径导航到充电点
+        MissionTask sigleNavTask = getSigleNavTask(order, mp);
+        missionListTask.getMissionTasks().add(sigleNavTask);
 
         //自动充电任务
-
+        MissionTask gotochargeTask = getGotoChargeTask(order, mp);
+        missionListTask.getMissionTasks().add(gotochargeTask);
     }
 
     /**
@@ -341,10 +344,18 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             MPointAtts mPointAtts) {
         //单点导航任务，回到下货点
+        MissionTask sigleNavTask = getSigleNavTask(order, mp);
+        missionListTask.getMissionTasks().add(sigleNavTask);
 
         //等待任务，等待货架取下（同时语音提示我回来了，请取下货箱？）
+        MissionTask waitingTask = getWaitingTask(order, mp);
+        waitingTask.getMissionItemTasks().add(getVoiceItemTask(order, mp));
+
+        missionListTask.getMissionTasks().add(waitingTask);
 
         //语音任务，感谢使用，我要回去充电了？
+        MissionTask voiceTask = getVoiceTask(order, mp);
+        missionListTask.getMissionTasks().add(voiceTask);
 
     }
 
@@ -361,13 +372,23 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             MPointAtts mPointAtts) {
-        //首先，添加单点导航任务
+        //离开充电任务
+        MissionTask leavechargeTask = getLeaveChargeTask(order, mp);
+        missionListTask.getMissionTasks().add(leavechargeTask);
+
+        //添加单点导航任务,导航到取货点
         MissionTask sigleNavTask = getSigleNavTask(order, mp);
         missionListTask.getMissionTasks().add(sigleNavTask);
+
         //到达，等待任务（同时语音播报，请放上货箱？）
+        MissionTask waitingTask = getWaitingTask(order, mp);
+        waitingTask.getMissionItemTasks().add(getVoiceItemTask(order, mp));
+
+        missionListTask.getMissionTasks().add(waitingTask);
 
         //语音任务，我要出发了？
-
+        MissionTask voiceTask = getVoiceTask(order, mp);
+        missionListTask.getMissionTasks().add(voiceTask);
 
     }
 
@@ -386,11 +407,18 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             MPointAtts mPointAtts) {
         //单点导航任务，导航到目标送货点
+        MissionTask sigleNavTask = getSigleNavTask(order, mp);
+        missionListTask.getMissionTasks().add(sigleNavTask);
 
         //等待任务（同时语音提示，物品已经送达，请查收）
+        MissionTask waitingTask = getWaitingTask(order, mp);
+        waitingTask.getMissionItemTasks().add(getVoiceItemTask(order, mp));
+
+        missionListTask.getMissionTasks().add(waitingTask);
 
         //语音任务，感谢使用，我要出发了，再见？
-
+        MissionTask voiceTask = getVoiceTask(order, mp);
+        missionListTask.getMissionTasks().add(voiceTask);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -433,14 +461,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionItemTask getSigleNavItemTask(Order order, MapPoint mp) {
         MissionItemTask itemTask = new MissionItemTask();
         itemTask.setDescription("单点导航");
-        itemTask.setName(itemTask.getDescription());
+        itemTask.setName(MissionItemName_nav);
         //这里就是单点导航的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
         itemTask.setCreatedBy(System.currentTimeMillis());
         itemTask.setCreateTime(new Date());
         itemTask.setStoreId(order.getStoreId());
-        itemTask.setFeatureValue(FeatureValue_sigle_nav);
+        itemTask.setFeatureValue(FeatureValue_nav);
 
         return itemTask;
     }
@@ -479,7 +507,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionItemTask getWaitingItemTask(Order order, MapPoint mp) {
         MissionItemTask itemTask = new MissionItemTask();
         itemTask.setDescription("等待任务");
-        itemTask.setName(itemTask.getDescription());
+        itemTask.setName(MissionItemName_waiting);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
@@ -524,18 +552,109 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionItemTask getVoiceItemTask(Order order, MapPoint mp) {
         MissionItemTask itemTask = new MissionItemTask();
         itemTask.setDescription("语音任务");
-        itemTask.setName(itemTask.getDescription());
+        itemTask.setName(MissionItemName_mp3);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
         itemTask.setCreatedBy(System.currentTimeMillis());
         itemTask.setCreateTime(new Date());
         itemTask.setStoreId(order.getStoreId());
-        itemTask.setFeatureValue(FeatureValue_waiting);
+        itemTask.setFeatureValue(FeatureValue_mp3);
 
         return itemTask;
     }
 
+    /**
+     * 获取进入充电任务
+     * @param mp
+     * @return
+     */
+    private MissionTask getGotoChargeTask(Order order, MapPoint mp) {
+        MissionTask missionTask = new MissionTask();
+        missionTask.setDescription("进入充电任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState("");
+        missionTask.setPresetMissionCode("");
+        missionTask.setCreatedBy(System.currentTimeMillis());
+        missionTask.setCreateTime(new Date());
+        missionTask.setStoreId(order.getStoreId());
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getVoiceItemTask(order, mp));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取进入充电ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getGotoChargeItemTask(Order order, MapPoint mp) {
+        MissionItemTask itemTask = new MissionItemTask();
+        itemTask.setDescription("进入充电任务");
+        itemTask.setName(MissionItemName_gotocharge);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData("");
+        itemTask.setState("");
+        itemTask.setCreatedBy(System.currentTimeMillis());
+        itemTask.setCreateTime(new Date());
+        itemTask.setStoreId(order.getStoreId());
+        itemTask.setFeatureValue(FeatureValue_gotocharge);
+
+        return itemTask;
+    }
+
+    /**
+     * 获取离开充电任务
+     * @param mp
+     * @return
+     */
+    private MissionTask getLeaveChargeTask(Order order, MapPoint mp) {
+        MissionTask missionTask = new MissionTask();
+        missionTask.setDescription("离开充电任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState("");
+        missionTask.setPresetMissionCode("");
+        missionTask.setCreatedBy(System.currentTimeMillis());
+        missionTask.setCreateTime(new Date());
+        missionTask.setStoreId(order.getStoreId());
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getVoiceItemTask(order, mp));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取离开充电ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getLeaveChargeItemTask(Order order, MapPoint mp) {
+        MissionItemTask itemTask = new MissionItemTask();
+        itemTask.setDescription("离开充电任务");
+        itemTask.setName(MissionItemName_leavecharge);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData("");
+        itemTask.setState("");
+        itemTask.setCreatedBy(System.currentTimeMillis());
+        itemTask.setCreateTime(new Date());
+        itemTask.setStoreId(order.getStoreId());
+        itemTask.setFeatureValue(FeatureValue_leavecharge);
+
+        return itemTask;
+    }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////
@@ -551,8 +670,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MPointType_SONGHUO = "songhuo";//中间的送货点，order detail station point
     public static final String MPointType_CHONGDIAN = "chongdian";//充电点
 
-    public static final String FeatureValue_sigle_nav = "sigle_nav";//单点导航命令
+    public static final String FeatureValue_nav = "nav";//单点导航命令
     public static final String FeatureValue_waiting = "waiting";//等待命令
+    public static final String FeatureValue_gotocharge = "gotocharge";//进入充电命令
+    public static final String FeatureValue_leavecharge = "leavecharge";//离开充电命令
+    public static final String FeatureValue_mp3 = "mp3";//语音命令
+
+    public static final String MissionItemName_nav = "laserNavigation";
+    public static final String MissionItemName_gotocharge = "gotoCharge";
+    public static final String MissionItemName_leavecharge = "leaveCharge";
+    public static final String MissionItemName_mp3 = "mp3";
+    public static final String MissionItemName_waiting = "waiting";
 
     /**
      * 地图点的属性类

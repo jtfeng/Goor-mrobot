@@ -12,4 +12,5 @@ public interface BaseMessageService {
     String getMessageName(MessageInfo messageInfo);
     String getSenderId(MessageInfo messageInfo);
     void sendRobotMessage(String robotCode, SlamResponseBody slamResponseBody);
+    void sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody);
 }

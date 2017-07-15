@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+<meta charset="UTF-8" />
+<head>
+    <title>电梯最新日志展示</title>
+</head>
+<body>
+<p th:if="!${list}"><h1>暂时无日志记录</h1></p>
+<p th:if="${list}">
+    <table>
+        <tr>
+            <td>记录时间</td>
+            <td>远程电梯地址</td>
+            <td>日志数据</td>
+        </tr>
+        <tr th:each="elevator:${list}">
+            <td th:text="${elevator.createTime}">
+
+            </td>
+            <td th:text="${elevator.addr}">
+
+            </td>
+            <td th:text="${elevator.value}">
+
+            </td>
+        </tr>
+    </table>
+</p>
+
+</body>
+</html>

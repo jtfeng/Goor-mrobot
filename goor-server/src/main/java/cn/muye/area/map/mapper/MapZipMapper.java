@@ -2,6 +2,7 @@ package cn.muye.area.map.mapper;
 
 import cn.mrobot.bean.area.map.MapZip;
 import cn.muye.util.MyMapper;
+import org.springframework.stereotype.Component;
 
 /**
  * Created with IntelliJ IDEA.
@@ -12,5 +13,6 @@ import cn.muye.util.MyMapper;
  * Describe:
  * Version:1.0
  */
+@Component
 public interface MapZipMapper extends MyMapper<MapZip> {
 }
