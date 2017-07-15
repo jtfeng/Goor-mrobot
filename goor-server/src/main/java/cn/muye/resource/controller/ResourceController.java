@@ -2,13 +2,13 @@ package cn.muye.resource.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.resource.Resource;
+import cn.mrobot.utils.MD5Utils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.controller.BaseController;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
 import com.github.pagehelper.PageInfo;
-import com.mpush.util.crypto.MD5Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
