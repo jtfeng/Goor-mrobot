@@ -82,8 +82,8 @@
             <if test="sceneName != null">
                 SCENE_NAME = #{sceneName},
             </if>
-            <if test="TYPE_ID != null">
-                TYPE_ID = #{typeId}
+            <if test="typeId != null">
+                TYPE_ID = #{typeId},
             </if>
             <!--<if temissionListIdinId != null">-->
                 <!--MISSION_MAIN_ID missionListIdinId},-->

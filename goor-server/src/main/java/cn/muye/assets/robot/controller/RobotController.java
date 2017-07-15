@@ -136,7 +136,7 @@ public class RobotController {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
             }
             robotService.saveRobot(robotNew);
-            return AjaxResult.success("注册成功");
+            return AjaxResult.success(robotNew,"注册成功");
         } catch (Exception e) {
             LOGGER.error("注册失败, 错误日志 >>>> {}", e.getMessage());
             return AjaxResult.failed("注册失败");

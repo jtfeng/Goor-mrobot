@@ -30,7 +30,9 @@ public interface MissionMapper {
 	List<Mission> list(/*@Param("missionMainId") Object missionMainId,*/
                        @Param("name") Object name,
                        @Param("beginDate") Object beginDate,
-                       @Param("endDate") Object endDate/*,
+                       @Param("endDate") Object endDate,
+					   @Param("sceneName") Object sceneName,
+					   @Param("typeId") Object typeId/*,
                        @Param("priority") Object priority*/);
 
 	List<Mission> listAll();

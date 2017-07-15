@@ -29,10 +29,10 @@
     </properties>
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.myee.mpush</groupId>
             <artifactId>mpush-client-java</artifactId>
-        </dependency>
+        </dependency>-->
 
         <dependency>
             <groupId>cn.mrobot</groupId>
