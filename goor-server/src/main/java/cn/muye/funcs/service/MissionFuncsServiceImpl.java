@@ -7,19 +7,22 @@ import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
+import cn.mrobot.dto.mission.MissionDTO;
+import cn.mrobot.dto.mission.MissionItemDTO;
+import cn.mrobot.dto.mission.MissionListDTO;
+import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.consumer.service.X86MissionDispatchService;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by abel on 17-7-13.
@@ -42,13 +45,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Autowired
     MissionItemTaskService missionItemTaskService;
 
+    @Autowired
+    X86MissionDispatchService x86MissionDispatchService;
+
     /**
      * 根据订单数据创建任务列表
      * @param order
      * @return
      */
     @Override
-    public MissionListTask createMissionLists(Order order) {
+    public boolean createMissionLists(Order order) {
+        boolean ret = false;
 
         //判断order
         if (order == null ||
@@ -56,7 +63,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 order.getRobot() == null ||
                 order.getOrderSetting().getStartPoint() == null ||
                 order.getOrderSetting().getEndPoint() == null){
-            return null;
+            return ret;
         }
 
         //定义地图点的集合
@@ -76,7 +83,127 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //任务列表实例化完成，将数据存储到数据库
         saveMissionListTask(missionListTask);
 
-        return missionListTask;
+        //下发任务到机器人任务管理器
+        List<MissionListTask> listTasks =
+                new ArrayList<>();
+        listTasks.add(missionListTask);
+        x86MissionDispatchService.sendX86MissionDispatch(
+                order.getRobot().getCode(),
+                getGoorMissionMsg(listTasks)
+        );
+
+        return true;
+    }
+
+    @Override
+    public String getGoorMissionMsg(List<MissionListTask> listTasks) {
+        if (listTasks == null ||
+                listTasks.isEmpty()){
+            return "";
+        }
+        List<MissionListDTO> dtos = new ArrayList<>();
+        for (MissionListTask task :
+                listTasks) {
+            if (task != null) {
+                MissionListDTO missionListDTO =
+                        getGoorMissionList(task);
+                if (missionListDTO != null){
+                    dtos.add(missionListDTO);
+                }
+            }
+        }
+
+        return JsonUtils.toJson(dtos,
+                new TypeToken<MissionListDTO>(){}.getType());
+    }
+
+    /**
+     * 获取MissionListDTO对象
+     * @param task
+     * @return
+     */
+    private MissionListDTO getGoorMissionList(MissionListTask task) {
+        if (task != null){
+            MissionListDTO missionListDTO = new MissionListDTO();
+            missionListDTO.setId(task.getId());
+            missionListDTO.setIntervalTime(task.getIntervalTime());
+            missionListDTO.setMissionListType(task.getMissionListType());
+            missionListDTO.setPriority(task.getPriority());
+            missionListDTO.setRepeatCount(task.getRepeatTimes());
+            missionListDTO.setStartTime(task.getStartTime());
+            missionListDTO.setStopTime(task.getStopTime());
+
+            //进行mission task的解析
+            if (task.getMissionTasks() != null &&
+                    !task.getMissionTasks().isEmpty()){
+                List<MissionDTO> missionDTOS = new ArrayList<>();
+                for (MissionTask missionTask :
+                        task.getMissionTasks()) {
+                    if (missionTask != null) {
+                        MissionDTO missionDTO = getGoorMission(missionTask);
+                        if (missionDTO != null){
+                            //进行mission item task的解析
+                            if (missionTask.getMissionItemTasks() != null &&
+                                    !missionTask.getMissionItemTasks().isEmpty()){
+                                List<MissionItemDTO> missionItemDTOS =
+                                        new ArrayList<>();
+                                for (MissionItemTask mit :
+                                        missionTask.getMissionItemTasks()) {
+                                    if (mit != null) {
+                                        MissionItemDTO missionItemDTO =
+                                                getGoorMissionItem(mit);
+                                        if (missionItemDTO != null){
+                                            missionItemDTOS.add(missionItemDTO);
+                                        }
+                                    }
+                                }
+                                missionDTO.setMissionItemDTOSet(new HashSet<>(missionItemDTOS));
+                            }
+                            missionDTOS.add(missionDTO);
+                        }
+                    }
+                }
+                missionListDTO.setMissionDTOList(missionDTOS);
+            }
+
+            return missionListDTO;
+        }
+
+        return null;
+    }
+
+    /**
+     * 获取MissionItemDTO对象
+     * @param mit
+     * @return
+     */
+    private MissionItemDTO getGoorMissionItem(MissionItemTask mit) {
+        if (mit == null){
+            return null;
+        }
+        MissionItemDTO missionItemDTO =
+                new MissionItemDTO();
+        missionItemDTO.setId(mit.getId());
+        missionItemDTO.setName(mit.getName());
+        missionItemDTO.setData(mit.getData());
+        return missionItemDTO;
+    }
+
+    /**
+     * 获取MissionDTO对象
+     * @param missionTask
+     * @return
+     */
+    private MissionDTO getGoorMission(MissionTask missionTask) {
+        if (missionTask == null){
+            return null;
+        }
+        MissionDTO missionDTO =
+                new MissionDTO();
+        missionDTO.setId(missionTask.getId());
+        missionDTO.setIntervalTime(missionTask.getIntervalTime());
+        missionDTO.setRepeatCount(missionTask.getRepeatTimes());
+        return missionDTO;
     }
 
     /**

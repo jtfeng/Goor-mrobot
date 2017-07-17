@@ -1,6 +1,6 @@
 package cn.muye.base.consumer.service;
 
-import cn.mrobot.bean.mission.task.MissionListTask;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,13 +10,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class X86MissionDispatchServiceImpl implements X86MissionDispatchService {
 
+    private Logger logger = Logger.getLogger(X86MissionDispatchServiceImpl.class);
+
     @Autowired
     BaseMessageService baseMessageService;
 
     @Override
     public void sendX86MissionDispatch(
             String robotCode,
-            MissionListTask missionListTask) {
-
+            String missionListData) {
+        baseMessageService.sendRobotMessage(robotCode, missionListData);
     }
 }
