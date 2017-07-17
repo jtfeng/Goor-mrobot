@@ -21,15 +21,13 @@ public class TopicConstants {
 
 	public static final String TOPIC_TYPE_STRING = "std_msgs/String";//publish的数据类型
 	public static final String TOPIC_TYPE_UINT8_ARRAY = "std_msgs/UInt8MultiArray";
-	//订阅topic
-	public static final String DEMO = "/demo";
 
 	//
 	public static final String PUB_NAME = "pub_name";
 	public static final String SUB_NAME = "sub_name";
 
-	public static final String UUID = "uuId";
-	public static final String CODE = "code";
+	public static final String UUID = "uuid";//与ros通信的uuid
+	public static final String CODE = "code";//与ros通信的code
 
 	//工控topic
 	public static final String APP_PUB = "/app_pub";

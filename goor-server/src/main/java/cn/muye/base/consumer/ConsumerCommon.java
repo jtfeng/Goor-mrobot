@@ -240,6 +240,7 @@ public class ConsumerCommon {
             if(StringUtils.isEmpty(uuId)){
                 return;
             }
+            //入库，方便查看
             OffLineMessage message = new OffLineMessage();
             message.setMessageStatusType("0".equals(code) ? MessageStatusType.ROBOT_RECEIVE_SUCCESS.getIndex() : MessageStatusType.ROBOT_RECEIVE_FAIL.getIndex());//如果是回执，将对方传过来的信息带上
             message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
@@ -248,6 +249,12 @@ public class ConsumerCommon {
             message.setReceiverId(messageInfo.getSenderId());
             message.setUpdateTime(messageInfo.getSendTime());//更新时间
             offLineMessageService.update(message);//更新发送的消息
+            //接收消息，设置缓存
+            MessageInfo cacheInfo = new MessageInfo();
+            cacheInfo.setUuId(uuId);
+            cacheInfo.setMessageStatusType("0".equals(code) ? MessageStatusType.ROBOT_RECEIVE_SUCCESS : MessageStatusType.ROBOT_RECEIVE_FAIL);
+            cacheInfo.setSuccess(true);
+            CacheInfoManager.setUUIDCache(uuId, cacheInfo);
         } catch (Exception e) {
             logger.error("consumer directX86MissionReceive exception", e);
         }
