@@ -51,6 +51,8 @@ public class Constant {
 
     public final static String AES_KEY = "trOmVF7Uaqd4h9AN"; //自助注册AES校验码
 
+    public final static String ROBOT_CACHE_KEY = "robotInfo"; //自动注册机器人缓存KEY
+
     //与地图点相关的指令列表
     public final static List<Long> ORDER_MAP_POINT_RELATE_LIST = Arrays.asList(
             1L,//单点导航

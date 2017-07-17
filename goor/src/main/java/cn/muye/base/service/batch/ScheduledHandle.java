@@ -13,13 +13,14 @@ public class ScheduledHandle {
 
     private final ScheduledExecutorService scheduledExecutor;
 
-    public ScheduledHandle(ScheduledExecutorService scheduledExecutor){
+    public ScheduledHandle(ScheduledExecutorService scheduledExecutor) {
         this.scheduledExecutor = scheduledExecutor;
-        this.replyMessageScheduled();
-        this.rosHealthCheckScheduled();
-        this.downloadResourceScheduled();
-        this.publishRosScheduled();
-        this.executeTwentyThreeAtNightPerDay();
+//        this.replyMessageScheduled();
+//        this.rosHealthCheckScheduled();
+//        this.downloadResourceScheduled();
+//        this.publishRosScheduled();
+//        this.executeTwentyThreeAtNightPerDay();
+        this.sendRobotInfo();
     }
 
 
@@ -41,6 +42,23 @@ public class ScheduledHandle {
         }, 6, 10, TimeUnit.SECONDS);
     }
 
+    /**
+     * 发送配置文件的机器人信息
+     */
+    public void sendRobotInfo() {
+        scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+//                    logger.info("schedule replyMessageScheduled start");
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.sendRobotInfo();
+                } catch (Exception e) {
+                    logger.error("schedule replyMessageScheduled exception", e);
+                }
+            }
+        }, 9, 10, TimeUnit.SECONDS);
+    }
 
     /**
      * 下载资源
@@ -103,20 +121,20 @@ public class ScheduledHandle {
      */
     public void executeTwentyThreeAtNightPerDay() {
         long oneDay = 24 * 60 * 60 * 1000;
-        long initDelay  = TimeUtil.getTimeMillis("23:00:00") - System.currentTimeMillis();
+        long initDelay = TimeUtil.getTimeMillis("23:00:00") - System.currentTimeMillis();
         initDelay = initDelay > 0 ? initDelay : oneDay + initDelay;
         scheduledExecutor.scheduleAtFixedRate(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ScheduledHandleService service = new ScheduledHandleServiceImp();
-                            service.executeTwentyThreeAtNightPerDay();
+                                                  @Override
+                                                  public void run() {
+                                                      try {
+                                                          ScheduledHandleService service = new ScheduledHandleServiceImp();
+                                                          service.executeTwentyThreeAtNightPerDay();
 //                            logger.info("schedule sendMessageWithLock");
-                        } catch (Exception e) {
-                            logger.error("schedule sendMessageWithLock exception", e);
-                        }
-                    }
-                },
+                                                      } catch (Exception e) {
+                                                          logger.error("schedule sendMessageWithLock exception", e);
+                                                      }
+                                                  }
+                                              },
                 initDelay,
                 oneDay,
                 TimeUnit.MILLISECONDS);

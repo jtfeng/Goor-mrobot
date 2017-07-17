@@ -1,5 +1,6 @@
 package cn.muye.assets.robot.service;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
@@ -19,6 +20,8 @@ public interface RobotService extends BaseService<Robot>{
     Robot getById(Long id);
 
     void saveRobot(Robot robot);
+
+    AjaxResult autoRegister(byte[] robot);
 
     void deleteRobotById(Long id);
 

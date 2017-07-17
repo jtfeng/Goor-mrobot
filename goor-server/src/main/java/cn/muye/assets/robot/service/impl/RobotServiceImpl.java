@@ -1,11 +1,10 @@
 package cn.muye.assets.robot.service.impl;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.StationRobotXREF;
-import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.assets.robot.RobotChargerMapPointXREF;
-import cn.mrobot.bean.assets.robot.RobotConfig;
-import cn.mrobot.bean.assets.robot.RobotPassword;
+import cn.mrobot.bean.assets.robot.*;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
@@ -16,6 +15,8 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.util.aes.AES;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
@@ -180,7 +181,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public List<Robot> listRobot(Long storeId) {
         Example example = new Example(Robot.class);
-       example.createCriteria().andCondition("STORE_ID =", storeId);
+        example.createCriteria().andCondition("STORE_ID =", storeId);
         return myMapper.selectByExample(example);
     }
 
@@ -199,6 +200,42 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotConfig.setCreatedBy(1L);
         robotConfigService.add(robotConfig);
         robotPasswordService.saveRobotPassword(robot);
+    }
+
+    @Override
+    public AjaxResult autoRegister(byte[] robot) {
+        try {
+            byte[] robotByte = AES.decrypt(robot, Constant.AES_KEY.getBytes());
+            Robot robotNew = JSON.parseObject(robotByte, Robot.class);
+            if (robotNew.getId() != null) {
+                return AjaxResult.failed("注册失败，配置文件有误");
+            }
+            if (robotNew.getTypeId() == null || robotNew.getTypeId() <= 0 || robotNew.getTypeId() > RobotTypeEnum.DRAWER.getCaption()) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
+            }
+            if (StringUtil.isNullOrEmpty(robotNew.getName()) || StringUtil.isNullOrEmpty(robotNew.getCode())) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
+            }
+            if (robotNew.getBatteryThreshold() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
+            }
+            //判断是否有重复的名称
+            Robot robotDbByName = robotService.getByName(robotNew.getName());
+            if (robotDbByName != null && !robotDbByName.getId().equals(robotNew.getId())) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
+            }
+            //判断是否有重复的编号
+            Robot robotDbByCode = robotService.getByCode(robotNew.getCode());
+            if (robotDbByCode != null && !robotDbByCode.getId().equals(robotNew.getId())) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
+            }
+            robotService.saveRobot(robotNew);
+            return AjaxResult.success(robotNew, "注册成功");
+        } catch (Exception e) {
+//            log.error("注册失败, 错误日志 >>>> {}", e.getMessage());
+            return AjaxResult.failed("注册失败");
+        } finally {
+        }
     }
 
     public void deleteRobotById(Long id) {

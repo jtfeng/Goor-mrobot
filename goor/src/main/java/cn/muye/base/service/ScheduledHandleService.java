@@ -22,4 +22,6 @@ public interface ScheduledHandleService {
     void executeTwentyThreeAtNightPerDay();
 
     void timeSynchronized(String localRobotSN);
+
+    void sendRobotInfo();
 }
