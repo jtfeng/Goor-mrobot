@@ -1184,6 +1184,7 @@ CREATE TABLE `LOG_MISSION` (
   `MISSION_LIST_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务列表重复',
   `MISSION_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务重复',
   `MISSION_EVENT` varchar(255) NOT NULL COMMENT 'event 目前包括（后续可能增加）：\r\n    start_success：开始成功\r\n    start_fail：开始失败\r\n    pause_success：暂停成功\r\n    pause_fail：暂停失败\r\n    resume_success：恢复成功\r\n    resume_fail：恢复失败\r\n    cancel_success：取消成功\r\n    cancel_fail：取消失败\r\n    finish：完成',
+  `MISSION_ITEM_NAME` varchar(255) DEFAULT NULL COMMENT '任务item名称',
   `MISSION_DESCRIPTION` text NOT NULL COMMENT '事件描述，对于特殊的事件加以说明，若无说明则为空字符串',
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
   `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
