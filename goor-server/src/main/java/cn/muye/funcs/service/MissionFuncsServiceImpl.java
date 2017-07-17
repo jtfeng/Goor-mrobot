@@ -114,7 +114,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         }
 
         return JsonUtils.toJson(dtos,
-                new TypeToken<MissionListDTO>(){}.getType());
+                new TypeToken<List<MissionListDTO>>(){}.getType());
     }
 
     /**
