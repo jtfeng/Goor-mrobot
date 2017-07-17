@@ -65,10 +65,9 @@ public class MissionListTaskController {
             orderDetails.add(orderDetail);
             order.setDetailList(orderDetails);
 
-            MissionListTask missionListTask =
+            boolean ret =
                     missionFuncsService.createMissionLists(order);
-            if (missionListTask != null &&
-                    missionListTask.getId() != null){
+            if (ret){
                 return AjaxResult.success("任务列表创建成功");
             }else{
                 throw new Exception("任务列表创建失败");
