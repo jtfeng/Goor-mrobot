@@ -28,7 +28,7 @@ public class TopicConstants {
 	public static final String PUB_NAME = "pub_name";
 	public static final String SUB_NAME = "sub_name";
 
-	public static final String UUID = "uuId";
+	public static final String UUID = "uuid";
 	public static final String CODE = "code";
 
 	//工控topic
