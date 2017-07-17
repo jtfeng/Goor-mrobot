@@ -230,8 +230,8 @@ public class ZipUtils {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
-//
-        String zipFilePath = "E:\\documents\\upload.zip";
+
+        String zipFilePath = "E:\\share\\map_server\\maps\\maps_2017-07-15_05-28-13.zip";
         String unzipFilePath = "E:\\ziptest\\unzipPath";
         try {
             unzip(zipFilePath, unzipFilePath, false);

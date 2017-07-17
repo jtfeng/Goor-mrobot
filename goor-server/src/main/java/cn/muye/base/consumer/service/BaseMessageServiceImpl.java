@@ -28,6 +28,27 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     private MsgSendAsyncTask msgSendAsyncTask;
 
     /**
+     * 获取data
+     * @param messageInfo
+     * @return
+     */
+    @Override
+    public String getData(MessageInfo messageInfo){
+        JSONObject requestDataObject =
+                JSON.parseObject(messageInfo.getMessageText());
+        if (requestDataObject == null){
+            return "";
+        }
+        String ret = null;
+        try {
+            ret = requestDataObject.getString(TopicConstants.DATA);
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return ret;
+    }
+
+    /**
      * 获取消息里的data
      * @param messageInfo
      * @return
@@ -170,6 +191,112 @@ public class BaseMessageServiceImpl implements BaseMessageService {
         //全部机器x86 agent发送,仅供x86 agent 处理业务逻辑，不发ros消息
 //        rabbitTemplate.convertAndSend(TopicConstants.FANOUT_RESOURCE_EXCHANGE, "", info);
 
+    }
+
+    @Override
+    public void sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody) {
+        if (slamResponseBody == null){
+            return;
+        }
+
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(slamResponseBody));
+
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(topic);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(messageObject.toJSONString());
+
+        MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+        info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        info.setSendTime(new Date());
+        info.setSenderId("goor-server");
+        info.setReceiverId(robotCode);
+        info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
+        info.setMessageText(JSON.toJSONString(commonInfo));//TODO 发送资源及rostopic命令
+
+        String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(
+                robotCode,true, MessageType.EXECUTOR_COMMAND.name());
+
+        //单机器命令发送（带回执）
+        try {
+            msgSendAsyncTask.taskMsgSend(backResultCommandRoutingKey, info);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 给指定机器人发送消息
+     * @param robotCode
+     * @param data
+     */
+    @Override
+    public void sendRobotMessage(String robotCode, String data){
+        if (data == null){
+            return;
+        }
+
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, data);
+
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_SUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(messageObject.toJSONString());
+
+        MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+        info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        info.setSendTime(new Date());
+        info.setSenderId("goor-server");
+        info.setReceiverId(robotCode);
+        info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
+        info.setMessageText(JSON.toJSONString(commonInfo));//TODO 发送资源及rostopic命令
+
+        //获取当前需要发送的的routingKey,其中"SNabc001"为机器人SN号
+        String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(
+                robotCode,true, MessageType.EXECUTOR_COMMAND.name());
+
+        //单机器命令发送（带回执）
+        try {
+            msgSendAsyncTask.taskMsgSend(backResultCommandRoutingKey, info);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    public void sendRobotMessage(String robotCode, String topic, String data) {
+        if (data == null){
+            return;
+        }
+
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, data);
+
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(topic);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(messageObject.toJSONString());
+
+        MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+        info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        info.setSendTime(new Date());
+        info.setSenderId("goor-server");
+        info.setReceiverId(robotCode);
+        info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
+        info.setMessageText(JSON.toJSONString(commonInfo));//TODO 发送资源及rostopic命令
+
+        String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(
+                robotCode,true, MessageType.EXECUTOR_COMMAND.name());
+
+        //单机器命令发送（带回执）
+        try {
+            msgSendAsyncTask.taskMsgSend(backResultCommandRoutingKey, info);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 }

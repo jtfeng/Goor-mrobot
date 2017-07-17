@@ -10,6 +10,7 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.consumer.service.PickUpPswdVerifyService;
+import cn.muye.base.consumer.service.X86MissionEventService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.charge.service.ChargeInfoService;
@@ -193,6 +194,9 @@ public class ConsumerCommon {
         }
     }
 
+    @Autowired
+    X86MissionEventService x86MissionEventService;
+
     /**
      * 透传ros发布的topic：x86_mission_state_response
      *
@@ -201,7 +205,8 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE)
     public void directX86MissionStateResponse(@Payload MessageInfo messageInfo) {
         try {
-
+            //直接service方法处理上报的数据
+            x86MissionEventService.handleX86MissionEvent(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directX86MissionStateResponse exception", e);
         }

@@ -1,13 +1,19 @@
 package cn.muye.resource.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.utils.MD5Utils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.controller.BaseController;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -18,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -119,31 +126,26 @@ public class ResourceController extends BaseController{
     private AjaxResult pushToAgent(@RequestBody ResourceToAgentBean resourceToAgentBean){
         try {
             Resource resource = resourceService.findById(resourceToAgentBean.getResourceId());
-            //暂时去除todo中
-            /*CommonInfo commonInfo = new CommonInfo();
+
+            CommonInfo commonInfo = new CommonInfo();
             commonInfo.setTopicName("/enva_test");
             commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
             commonInfo.setLocalFileName(resource.getOriginName());
             commonInfo.setLocalPath("/home");
-            commonInfo.setRemoteFileUrl(resource.getPath());
+            commonInfo.setRemoteFileUrl(DOWNLOAD_HTTP + resource.getPath());
             commonInfo.setMD5(resource.getMd5());
             commonInfo.setPublishMessage(JSON.toJSONString(commonInfo));
-            String text = JSON.toJSONString(commonInfo);
-            byte[] b = text.getBytes();
-            MessageInfo info = new MessageInfo(MessageType.EXECUTOR_RESOURCE, text, b);
-            info.setMessageStatusType(MessageStatusType.FILE_NOT_DOWNLOADED);
-            info.setReceiptWebSocket(true);
-            info.setWebSocketId("user-9");
-            info.setSendDeviceType(DeviceType.GOOR_SERVER);
-            info.setReceiverDeviceType(DeviceType.GOOR);
-            info.setMessageKind(0);
-            info.setMessageType(MessageType.EXECUTOR_RESOURCE);
-            info.setMessageStatusType(MessageStatusType.INIT);
+
+            MessageInfo info = new MessageInfo();
+            info.setUuId(UUID.randomUUID().toString().replace("-", ""));
             info.setSendTime(new Date());
-            info.setUpdateTime(info.getSendTime());
-            info.setSendCount(0);
-            return (AjaxResult)rabbitTemplate.convertSendAndReceive("directExchange", "direct.common", info);*/
-            return null;
+            info.setSenderId("goor-server");
+            info.setReceiverId("SNabc0010");
+            info.setMessageType(MessageType.EXECUTOR_RESOURCE);
+            info.setMessageText(JSON.toJSONString(commonInfo));
+
+            String backResultResourceRoutingKey = RabbitMqBean.getRoutingKey(info.getReceiverId(), true, MessageType.EXECUTOR_RESOURCE.name());
+            return (AjaxResult)rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultResourceRoutingKey, info);
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("系统内部出错");

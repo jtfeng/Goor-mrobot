@@ -60,6 +60,22 @@ public class GoodsController extends BaseController {
     }
 
     /**
+     * 获取货物类型的list（无查询具体货物）
+     * @return
+     */
+    @RequestMapping(value = "listJustGoodsType",method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listJustGoodsType(){
+        try {
+            List<GoodsType> goodsTypeList = goodsTypeService.listAll();
+            return AjaxResult.success(goodsTypeList,"获取货物类型成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("获取货物类型出错");
+        }
+    }
+
+    /**
      * 获取货物类型的list
      * @return
      */

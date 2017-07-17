@@ -4,8 +4,8 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.BaseBean;
 
-import javax.persistence.*;
-import java.util.Date;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.List;
 
 /**
@@ -33,9 +33,19 @@ public class Station extends BaseBean{
      * 描述
      */
     private String description;
+
+    public Station() {
+    }
+
+    public Station(Long id) {
+        super(id);
+    }
+
     /**
      * 关联点列表：卸货点、停车点、充电桩点、充电桩原点、装货点等
      * */
+
+
     @Transient
     private List<MapPoint> mapPoints;
 

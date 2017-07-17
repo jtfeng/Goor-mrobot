@@ -1062,12 +1062,6 @@ CREATE TABLE `D_MISSION` (
 -- ----------------------------
 -- Records of D_MISSION
 -- ----------------------------
-INSERT INTO `D_MISSION` VALUES ('2', 'asdasdfasdjkl', 'asdfasdfasdf', '2016-06-14 18:52:45', '2017-07-12 10:24:45', '8', '4545748');
-INSERT INTO `D_MISSION` VALUES ('4', '导航到B1', '', '2017-07-07 21:44:00', null, '0', '1000');
-INSERT INTO `D_MISSION` VALUES ('5', null, null, '2017-07-11 16:08:00', '2017-07-11 16:08:00', '0', null);
-INSERT INTO `D_MISSION` VALUES ('6', null, null, '2017-07-11 16:12:29', '2017-07-11 16:12:29', '0', null);
-INSERT INTO `D_MISSION` VALUES ('7', '导航到B3', '', '2017-07-11 16:17:36', '2017-07-11 17:16:22', '0', '1000');
-INSERT INTO `D_MISSION` VALUES ('8', '导航到B4', '', '2017-07-12 10:22:05', null, '0', '1000');
 
 -- ----------------------------
 -- Table structure for D_MISSION_ITEM
@@ -1087,21 +1081,6 @@ CREATE TABLE `D_MISSION_ITEM` (
 -- ----------------------------
 -- Records of D_MISSION_ITEM
 -- ----------------------------
-INSERT INTO `D_MISSION_ITEM` VALUES ('4', '导航到B', '', '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"agv\",\"mapName\":\"agv\"}', '2017-07-06 14:42:18', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('5', '导航到B1', '', '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"agv\",\"mapName\":\"agv\"}', '2017-07-06 16:09:11', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('6', '导航到B2', '', '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"agv\",\"mapName\":\"agv\"}', '2017-07-08 11:42:03', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('7', '语音Tue Jul 11 15:08:45 CST 2017', null, '{\"voiceContent\":\"要说的话\"}', '2017-07-11 15:08:46', null, '2');
-INSERT INTO `D_MISSION_ITEM` VALUES ('8', '导航Tue Jul 11 15:08:45 CST 2017', null, '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}', '2017-07-11 15:08:46', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('17', '导航Tue Jul 11 16:07:59 CST 2017', null, '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}', '2017-07-11 16:08:00', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('18', '语音Tue Jul 11 16:07:59 CST 2017', null, '{\"voiceContent\":\"要说的话\"}', '2017-07-11 16:08:00', null, '2');
-INSERT INTO `D_MISSION_ITEM` VALUES ('19', '导航Tue Jul 11 16:12:28 CST 2017', null, '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}', '2017-07-11 16:12:29', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('20', '语音Tue Jul 11 16:12:28 CST 2017', null, '{\"voiceContent\":\"要说的话\"}', '2017-07-11 16:12:29', null, '2');
-INSERT INTO `D_MISSION_ITEM` VALUES ('21', '导航Tue Jul 11 16:17:35 CST 2017', null, '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}', '2017-07-11 16:17:36', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('22', '语音Tue Jul 11 16:17:35 CST 2017', null, '{\"voiceContent\":\"要说的话\"}', '2017-07-11 16:17:36', null, '2');
-INSERT INTO `D_MISSION_ITEM` VALUES ('23', '语音1499764443394', null, '{\"voiceContent\":\"要说的话\"}', '2017-07-11 17:14:18', null, '2');
-INSERT INTO `D_MISSION_ITEM` VALUES ('24', '导航1499764443394', null, '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}', '2017-07-11 17:14:23', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('25', '导航1499764581930', null, '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}', '2017-07-11 17:16:23', null, '1');
-INSERT INTO `D_MISSION_ITEM` VALUES ('26', '语音1499764581930', null, '{\"voiceContent\":\"要说的话\"}', '2017-07-11 17:16:23', null, '2');
 
 -- ----------------------------
 -- Table structure for D_MISSION_LIST
@@ -1124,7 +1103,6 @@ CREATE TABLE `D_MISSION_LIST` (
 -- ----------------------------
 -- Records of D_MISSION_LIST
 -- ----------------------------
-INSERT INTO `D_MISSION_LIST` VALUES ('9', 'afasdf', 'aasdfasdf', 'df', '2017-08-01 15:22:20', '2017-07-10 10:59:11', '545455', '45', '165124502452', '5');
 
 -- ----------------------------
 -- Table structure for D_MISSION_LIST_MISSION_XREF
@@ -1206,6 +1184,7 @@ CREATE TABLE `LOG_MISSION` (
   `MISSION_LIST_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务列表重复',
   `MISSION_REPEAT_TIMES` int(11) DEFAULT NULL COMMENT '任务重复',
   `MISSION_EVENT` varchar(255) NOT NULL COMMENT 'event 目前包括（后续可能增加）：\r\n    start_success：开始成功\r\n    start_fail：开始失败\r\n    pause_success：暂停成功\r\n    pause_fail：暂停失败\r\n    resume_success：恢复成功\r\n    resume_fail：恢复失败\r\n    cancel_success：取消成功\r\n    cancel_fail：取消失败\r\n    finish：完成',
+  `MISSION_ITEM_NAME` varchar(255) DEFAULT NULL COMMENT '任务item名称',
   `MISSION_DESCRIPTION` text NOT NULL COMMENT '事件描述，对于特殊的事件加以说明，若无说明则为空字符串',
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
   `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
@@ -1219,6 +1198,24 @@ CREATE TABLE `LOG_MISSION` (
 
 -- ----------------------------
 -- Records of LOG_MISSION
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for LOG_ELEVATOR
+-- ----------------------------
+DROP TABLE IF EXISTS `LOG_ELEVATOR`;
+CREATE TABLE `LOG_ELEVATOR` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `ADDR` varchar(255) NOT NULL COMMENT '远程电梯地址',
+  `VALUE` varchar(255) NOT NULL COMMENT '消息值',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of LOG_ELEVATOR
 -- ----------------------------
 
 -- ----------------------------

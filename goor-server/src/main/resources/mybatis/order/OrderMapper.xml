@@ -7,7 +7,9 @@
         o.order_setting_id AS "orderSetting.id",
         o.robot_id AS "robot.id",
         o.start_station_id AS "startStation.id",
-        o.isBusy AS "isBusy",
+        o.need_shelf AS "needShelf",
+        o.shelf_id AS "shelf.id",
+        o.status AS "status",
         o.store_id AS "storeId",
         o.created_by AS "createdBy",
         o.create_time AS "createTime"
@@ -28,7 +30,9 @@
         order_setting_id,
         robot_id,
         start_station_id,
-        isBusy,
+        need_shelf,
+        shelf_id,
+        status,
         store_id,
         created_by,
         create_time
@@ -36,7 +40,9 @@
         #{orderSetting.id},
         #{robot.id},
         #{startStation.id},
-        #{isBusy},
+        #{needShelf},
+        #{shelf.id},
+        #{status},
         #{storeId},
         #{createdBy},
         #{createTime}
@@ -55,8 +61,14 @@
             <if test="startStation != null and startStation.id != null and startStation.id != ''" >
                 start_station_id = #{startStation.id},
             </if>
-            <if test="isBusy != null" >
-                isBusy = #{isBusy}
+            <if test="needShelf != null" >
+                need_shelf = #{needShelf},
+            </if>
+            <if test="shelf != null and shelf.id != null and shelf.id != ''" >
+                shelf_id = #{shelf.id},
+            </if>
+            <if test="status != null" >
+                status = #{status}
             </if>
         </set>
         WHERE id = #{id}

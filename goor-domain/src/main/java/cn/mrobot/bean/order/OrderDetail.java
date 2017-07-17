@@ -22,6 +22,13 @@ public class OrderDetail extends BaseBean{
 
     private Date finishDate; // 配送到确认时间
 
+    public OrderDetail() {
+    }
+
+    public OrderDetail(Long id) {
+        super(id);
+    }
+
     @Transient
     private List<GoodsInfo> goodsInfoList; //货物详情单
 

@@ -31,10 +31,16 @@ import java.util.concurrent.locks.ReentrantLock;
 public class FileUpladService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUpladService.class);
+    public final static String PREFIX = "http://"; //前缀
 
-    public final static String REMOTE_URL = "http://localhost:8060"; //正式服务器地址
-    public final static String UPLOAD_URL = "/services/public/files/largeUpload"; //上传大文件的接口地址
-    public final static String EXIST_URL = "/services/public/files/isExistFile"; //判断文件是否存在
+    @Value("${goor.server}")
+    public String ip; //正式服务器地址
+
+    @Value("${goor.server.upload.url}")
+    public String UPLOAD_URL; //上传大文件的接口地址
+
+    @Value("${goor.server.exist.url}")
+    public String EXIST_URL; //判断文件是否存在
 
     private final Lock lock = new ReentrantLock();
 
@@ -48,6 +54,7 @@ public class FileUpladService {
      * 打包上传地图文件
      */
     public void uploadMapFile() {
+        String REMOTE_URL = PREFIX + ip;
         if (lock.tryLock()) {
             try {
                 File uploadFile = new File(MAP_PATH);
@@ -92,7 +99,7 @@ public class FileUpladService {
                         }
                         //获取上传信息
                         JSONObject otherInfo = new JSONObject();
-                        otherInfo.put("robotPath", uploadFile.getParent());
+                        otherInfo.put("robotPath", MAP_PATH);
                         otherInfo.put("sceneName", getSceneName());
                         otherInfo.put("deviceId", deviceId);
                         String uri = REMOTE_URL + UPLOAD_URL + "?fileName=" + uploadFile.getName() + "&type=" + Constant.FILE_UPLOAD_TYPE_MAP;
@@ -119,17 +126,20 @@ public class FileUpladService {
         }
     }
 
-    private String getSceneName(){
+    private String getSceneName() {
         File file = new File(MAP_PATH);
-        if(!file.exists()){
+        if (!file.exists()) {
             return "";
         }
-        if(file.isFile()){
+        if (file.isFile()) {
             return file.getName();
         }
         File[] files = file.listFiles();
         StringBuffer sb = new StringBuffer();
-        for(int i = 0; i < files.length; i ++){
+        for (int i = 0; i < files.length; i++) {
+            String name = files[i].getName();
+            if(name.lastIndexOf(".zip") >= 0 || name.lastIndexOf(".flags") >= 0)
+                continue;
             sb.append(files[i].getName()).append(",");
         }
         return sb.toString();
