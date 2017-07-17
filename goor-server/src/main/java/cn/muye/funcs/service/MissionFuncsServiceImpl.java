@@ -117,6 +117,29 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 new TypeToken<List<MissionListDTO>>(){}.getType());
     }
 
+    @Override
+    public List<MissionTask> getMissionTaskStatus(String robotCode) {
+        if (StringUtil.isEmpty(robotCode)){
+            return null;
+        }
+        //查询是否有正在执行中的任务
+        List<MissionListTask> listTasks =
+                missionListTaskService.findByRobotCodeAndState(
+                        robotCode, "");
+        if (listTasks != null &&
+                !listTasks.isEmpty()){
+            for (MissionListTask mlt :
+                    listTasks) {
+                if (mlt != null) {
+                    return missionTaskService.findByListId(
+                            mlt.getId()
+                    );
+                }
+            }
+        }
+        return null;
+    }
+
     /**
      * 获取MissionListDTO对象
      * @param task
