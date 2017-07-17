@@ -117,6 +117,12 @@ public class RabbitMQExampleController {
             log.error("save message error", e);
         }
 
+        //从缓存中获取发送次消息是否收到ros返回消息
+        MessageInfo messageInfo = CacheInfoManager.getUUIDCache(info.getUuId());//获得ros返回的当前uuid值是否成功，
+        //messageInfo为null为不成功， messageInfo.isSuccess()为false也是不成功
+        messageInfo.getMessageStatusType().getName();//获取成功失败的提示语
+        messageInfo.isSuccess();//是否成功 true和false
+
         return ajaxCommandResult;
 //        return ajaxResourceResult;
 //        return ajaxClientResult;
