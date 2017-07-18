@@ -15,11 +15,11 @@ public class ScheduledHandle {
 
     public ScheduledHandle(ScheduledExecutorService scheduledExecutor) {
         this.scheduledExecutor = scheduledExecutor;
-//        this.replyMessageScheduled();
-//        this.rosHealthCheckScheduled();
-//        this.downloadResourceScheduled();
-//        this.publishRosScheduled();
-//        this.executeTwentyThreeAtNightPerDay();
+        this.replyMessageScheduled();
+        this.rosHealthCheckScheduled();
+        this.downloadResourceScheduled();
+        this.publishRosScheduled();
+        this.executeTwentyThreeAtNightPerDay();
         this.sendRobotInfo();
     }
 

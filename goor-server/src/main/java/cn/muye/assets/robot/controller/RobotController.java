@@ -82,14 +82,21 @@ public class RobotController {
         }
         if (robot.getId() != null) { //修改
             Robot robotDb = robotService.getById(robot.getId());
-            robotDb.setName(robot.getName());
-            robotDb.setCode(robot.getCode());
-            robotDb.setDescription(robot.getDescription());
-            robotDb.setUpdateTime(new Date());
-            robotDb.setBoxActivated(robot.getBoxActivated());
-            robotDb.setBatteryThreshold(robot.getBatteryThreshold());
-            robotService.updateRobot(robotDb);
-            return AjaxResult.success(robotDb, "修改成功");
+            if (robotDb != null && robot.getCode().equals(robotDb.getCode())) {
+                robotDb.setName(robot.getName());
+                robotDb.setDescription(robot.getDescription());
+                robotDb.setUpdateTime(new Date());
+                robotDb.setBoxActivated(robot.getBoxActivated());
+                robotDb.setBatteryThreshold(robot.getBatteryThreshold());
+                robotService.updateRobot(robotDb);
+                //同步配置文件中的机器人信息
+
+                return AjaxResult.success(robotDb, "修改成功");
+            } else if (robotDb != null && !robot.getCode().equals(robotDb.getCode())){
+                return AjaxResult.failed(robot, "不能修改机器人的编号");
+            } else {
+                return AjaxResult.failed("不存在的机器人");
+            }
         } else if (robot.getId() == null) {
             robot.setBoxActivated(true);
             robotService.saveRobot(robot);

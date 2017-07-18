@@ -265,7 +265,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         info.setMessageText(JSON.toJSONString(robot));
         info.setSendTime(new Date());
         info.setSenderId(localRobotSN);
-        info.setMessageType(MessageType.REPLY);
+        info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
         rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
     }
 }
