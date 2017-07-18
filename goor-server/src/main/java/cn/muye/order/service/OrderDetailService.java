@@ -17,4 +17,7 @@ public interface OrderDetailService extends BaseService<OrderDetail> {
 
     //护士站分页显示
     List<OrderDetail> listStationTasks(Long stationId, WhereRequest whereRequest);
+
+    //获取orderDetail 详细信息
+    OrderDetail getOrderDetailInfo(Long id);
 }

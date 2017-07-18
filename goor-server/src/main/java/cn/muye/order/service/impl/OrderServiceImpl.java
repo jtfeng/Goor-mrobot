@@ -6,6 +6,7 @@ import cn.mrobot.bean.order.OrderDetail;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.service.imp.BasePreInject;
+import cn.muye.funcs.service.MissionFuncsService;
 import cn.muye.order.mapper.GoodsInfoMapper;
 import cn.muye.order.mapper.OrderMapper;
 import cn.muye.order.service.OrderDetailService;
@@ -37,6 +38,8 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     private RobotService robotService;
     @Autowired
     private ShelfService shelfService;
+    @Autowired
+    private MissionFuncsService missionFuncsService;
 
     @Override
     public void saveOrder(Order order) {
@@ -56,7 +59,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
                 goodsInfoMapper.insert(goodsInfo);
             });
         });
-        //在这里调用任务生成器 todo
+        //在这里调用任务生成器
+        Order sqlOrder = getOrder(order.getId());
+        missionFuncsService.createMissionLists(sqlOrder);
     }
 
     @Override
@@ -66,6 +71,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             getOrder.setRobot(robotService.getById(getOrder.getRobot().getId()));
             getOrder.setDetailList(orderDetailService.listOrderDetailByOrderId(getOrder.getId()));
             getOrder.setOrderSetting(orderSettingService.getById(getOrder.getOrderSetting().getId()));
+            if(getOrder.getNeedShelf()){
+                getOrder.setShelf(shelfService.getById(getOrder.getShelf().getId()));
+            }
         }
         return getOrder;
     }

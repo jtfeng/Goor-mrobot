@@ -3,12 +3,15 @@ package cn.muye.order.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.order.GoodsInfo;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.bean.order.OrderSetting;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.controller.BaseController;
+import cn.muye.order.bean.GoodsInfoVO;
 import cn.muye.order.bean.OrderDetailVO;
 import cn.muye.order.service.OrderDetailService;
 import cn.muye.order.service.OrderService;
@@ -37,6 +40,8 @@ public class OrderController extends BaseController {
     private OrderSettingService orderSettingService;
     @Autowired
     private RobotService robotService;
+    @Autowired
+    private RobotPasswordService robotPasswordService;
 
 
     /**
@@ -67,22 +72,25 @@ public class OrderController extends BaseController {
         Robot arrangeRobot = null;
         try {
             Long stationId = (Long)session.getAttribute("stationId");
+            //现在orderSetting后台默认注入默认配置
+            if(order.getOrderSetting() == null){
+                OrderSetting orderSetting = orderSettingService.getDefaultSetting(stationId);
+                order.setOrderSetting(orderSetting);
+            }
             OrderSetting setting = orderSettingService.getById(order.getOrderSetting().getId());
             Integer robotTypeId = setting.getRobotType().getId();
-            //根据 站点id 和 机器人类型 自动选择机器人 todo
+            //根据 站点id 和 机器人类型 自动选择机器人
             arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
             if(arrangeRobot == null){
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"现在暂无可调用机器");
             }
+            //是否需要货架判定
+            if(order.getShelf()!= null && order.getShelf().getId() != null){
+                order.setNeedShelf(Boolean.TRUE);
+            }
             order.setRobot(arrangeRobot);
             order.setStartStation(new Station(stationId));
-
-            //现在orderSetting后台默认注入默认配置
-            OrderSetting orderSetting = orderSettingService.getDefaultSetting(stationId);
-            order.setOrderSetting(orderSetting);
-
             orderService.saveOrder(order);
-
             return AjaxResult.success("保存订单成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -119,15 +127,35 @@ public class OrderController extends BaseController {
     //转化为试图任务列表
     private OrderDetailVO generateOrderDetailVO(OrderDetail orderDetail){
         OrderDetailVO orderDetailVO = new OrderDetailVO();
-        orderDetailVO.setBeginDate(orderDetail.getCreateTime());
-        orderDetailVO.setFinishDate(orderDetail.getFinishDate());
-        orderDetailVO.setGoodsInfoList(orderDetail.getGoodsInfoList());
         Order findOrder = orderService.getOrder(orderDetail.getOrderId());
-        orderDetailVO.setNeedSign(findOrder.getOrderSetting().getNeedSign());
-        orderDetailVO.setRobot(findOrder.getRobot());
-        orderDetailVO.setStartStation(findOrder.getStartStation());
-        orderDetailVO.setStatus(orderDetail.getStatus());
+        if(findOrder!= null){
+            orderDetailVO.setNeedSign(findOrder.getOrderSetting().getNeedSign());
+            orderDetailVO.setRobot(findOrder.getRobot());
+            orderDetailVO.setStartStation(findOrder.getStartStation());
+        }
+        OrderDetail orderDetailInfo = orderDetailService.getOrderDetailInfo(orderDetail.getId());
+        if(orderDetailInfo!= null && orderDetailInfo.getGoodsInfoList()!=null){
+            List<GoodsInfoVO> goodsInfoVOList = orderDetailInfo.getGoodsInfoList().stream().map(goodsInfo -> generateGoodsInfoVO(goodsInfo, findOrder)).collect(Collectors.toList());
+            orderDetailVO.setGoodsInfoList(goodsInfoVOList);
+        }
+        orderDetailVO.setBeginDate(orderDetailInfo.getCreateTime());
+        orderDetailVO.setFinishDate(orderDetailInfo.getFinishDate());
+        orderDetailVO.setStatus(orderDetailInfo.getStatus());
         return orderDetailVO;
+    }
+
+
+    private GoodsInfoVO generateGoodsInfoVO(GoodsInfo goodsInfo, Order order){
+        GoodsInfoVO goodsInfoVO = new GoodsInfoVO();
+        goodsInfoVO.setBoxNum(goodsInfo.getBoxNum());
+        goodsInfoVO.setGoods(goodsInfo.getGoods());
+        goodsInfoVO.setNum(goodsInfo.getNum());
+        if(order.getNeedShelf()){
+            goodsInfoVO.setPassword(robotPasswordService.getPwdByRobotIdAndBoxNum(order.getRobot().getId(), goodsInfo.getBoxNum()));
+        }else {
+            goodsInfoVO.setPassword(robotPasswordService.getPwdByRobotId(order.getRobot().getId()));
+        }
+        return goodsInfoVO;
     }
 
 }

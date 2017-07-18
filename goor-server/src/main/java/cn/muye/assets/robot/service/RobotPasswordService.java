@@ -16,5 +16,9 @@ public interface RobotPasswordService extends BaseService<RobotPassword> {
 
     void batchUpdateRobotPwdList(List<RobotPassword> robotPasswordList);
 
-    RobotPassword findByRobotIdAndBoxNumAndPswd(RobotPassword robotPassword);
+    RobotPassword findByRobotIdAndBoxNumAndPwd(RobotPassword robotPassword);
+
+    String getPwdByRobotIdAndBoxNum(Long robotId, Integer boxNum);
+
+    String getPwdByRobotId(Long robotId);
 }

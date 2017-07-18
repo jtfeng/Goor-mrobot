@@ -65,10 +65,14 @@ public class OrderSettingController extends BaseController{
     public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting,HttpSession session){
         try {
             Long stationId = (Long)session.getAttribute("stationId");
+            if(stationId == null){
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "session内无法获取站id");
+            }
             boolean hasDefaultSetting = orderSettingService.hasDefaultSetting(stationId);
             if(!hasDefaultSetting){
                 orderSetting.setDefaultSetting(Boolean.TRUE);
             }
+            orderSetting.setStationId(stationId);
             orderSettingService.saveOrderSetting(orderSetting);
             return AjaxResult.success("添加配置成功");
         } catch (Exception e) {
@@ -94,6 +98,33 @@ public class OrderSettingController extends BaseController{
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("修改配置内部出错");
+        }
+    }
+
+
+    /**
+     * 修改 订单默认配置
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "updateDefault" , method = RequestMethod.PUT)
+    @ResponseBody
+    public AjaxResult updateDefaultOrderSetting(@RequestParam("id") Long id, HttpSession session){
+        try {
+            Long stationId = (Long)session.getAttribute("stationId");
+            List<OrderSetting> settingList = orderSettingService.listAvailableOrderSettingByStationId(stationId);
+            settingList.forEach(orderSetting -> {
+               if(orderSetting.getId() == id ){
+                   orderSetting.setDefaultSetting(Boolean.TRUE);
+               }else {
+                   orderSetting.setDefaultSetting(Boolean.FALSE);
+               }
+                orderSettingService.updateOrderSetting(orderSetting);
+            });
+            return AjaxResult.success("修改默认配置成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("修改默认配置内部出错");
         }
     }
 

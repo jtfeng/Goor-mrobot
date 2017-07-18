@@ -1421,28 +1421,15 @@ CREATE TABLE `OR_GOODS_INFO` (
   `ORDER_DETAIL_ID` bigint(12) DEFAULT NULL,
   `GOODS_ID` bigint(12) DEFAULT NULL,
   `NUM` int(12) DEFAULT NULL,
+  `BOX_NUM` int(12) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+
 
 -- ----------------------------
 -- Records of OR_GOODS_INFO
 -- ----------------------------
-INSERT INTO `OR_GOODS_INFO` VALUES ('1', '2', '2', '2');
-INSERT INTO `OR_GOODS_INFO` VALUES ('2', '2', '3', '3');
-INSERT INTO `OR_GOODS_INFO` VALUES ('3', '3', '1', '5');
-INSERT INTO `OR_GOODS_INFO` VALUES ('4', '3', '4', '10');
-INSERT INTO `OR_GOODS_INFO` VALUES ('5', '4', '2', '2');
-INSERT INTO `OR_GOODS_INFO` VALUES ('6', '4', '3', '3');
-INSERT INTO `OR_GOODS_INFO` VALUES ('7', '5', '1', '5');
-INSERT INTO `OR_GOODS_INFO` VALUES ('8', '5', '4', '10');
-INSERT INTO `OR_GOODS_INFO` VALUES ('9', '6', '2', '2');
-INSERT INTO `OR_GOODS_INFO` VALUES ('10', '6', '3', '3');
-INSERT INTO `OR_GOODS_INFO` VALUES ('11', '7', '1', '5');
-INSERT INTO `OR_GOODS_INFO` VALUES ('12', '7', '4', '10');
-INSERT INTO `OR_GOODS_INFO` VALUES ('13', '8', '2', '2');
-INSERT INTO `OR_GOODS_INFO` VALUES ('14', '8', '3', '3');
-INSERT INTO `OR_GOODS_INFO` VALUES ('15', '9', '1', '5');
-INSERT INTO `OR_GOODS_INFO` VALUES ('16', '9', '4', '10');
+
 
 -- ----------------------------
 -- Table structure for OR_ORDER
@@ -1453,20 +1440,19 @@ CREATE TABLE `OR_ORDER` (
   `ORDER_SETTING_ID` bigint(12) DEFAULT NULL COMMENT '关联基本设置',
   `ROBOT_ID` bigint(12) DEFAULT NULL COMMENT '启用机器人',
   `START_STATION_ID` bigint(12) DEFAULT NULL COMMENT '下单站',
+  `NEED_SHELF` tinyint(1) DEFAULT NULL,
+  `SHELF_ID` bigint(12) DEFAULT NULL,
   `STATUS` int(12) DEFAULT NULL COMMENT '状态',
   `STORE_ID` bigint(12) DEFAULT NULL,
   `CREATED_BY` bigint(12) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of OR_ORDER
 -- ----------------------------
-INSERT INTO `OR_ORDER` VALUES ('2', '1', '1', '1', null, '100', '53', '2017-07-10 14:41:13');
-INSERT INTO `OR_ORDER` VALUES ('3', '1', '1', '1', null, '100', '93', '2017-07-11 15:16:59');
-INSERT INTO `OR_ORDER` VALUES ('4', '7', null, null, null, '100', '93', '2017-07-11 19:47:54');
-INSERT INTO `OR_ORDER` VALUES ('5', '7', '318', '5', null, '100', '109', '2017-07-12 09:44:57');
+
 
 -- ----------------------------
 -- Table structure for OR_ORDER_DETAIL
@@ -1482,19 +1468,12 @@ CREATE TABLE `OR_ORDER_DETAIL` (
   `CREATED_BY` bigint(12) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of OR_ORDER_DETAIL
 -- ----------------------------
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('2', '2', '2', null, null, '100', '53', '2017-07-10 14:41:13');
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('3', '2', '3', null, null, '100', '53', '2017-07-10 14:41:14');
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('4', '3', '2', null, null, '100', '93', '2017-07-11 15:16:59');
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('5', '3', '3', null, null, '100', '93', '2017-07-11 15:16:59');
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('6', '4', '2', null, null, '100', '93', '2017-07-11 19:47:54');
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('7', '4', '3', null, null, '100', '93', '2017-07-11 19:47:54');
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('8', '5', '2', null, null, '100', '109', '2017-07-12 09:44:57');
-INSERT INTO `OR_ORDER_DETAIL` VALUES ('9', '5', '3', null, null, '100', '109', '2017-07-12 09:44:57');
+
 
 -- ----------------------------
 -- Table structure for OR_ORDER_SETTING
@@ -1506,28 +1485,20 @@ CREATE TABLE `OR_ORDER_SETTING` (
   `STATION_ID` bigint(12) DEFAULT NULL,
   `START_POINT_ID` bigint(12) DEFAULT NULL,
   `END_POINT_ID` bigint(12) DEFAULT NULL,
+  `NEED_SIGN` tinyint(1) DEFAULT NULL,
   `GOODS_TYPE_ID` bigint(20) DEFAULT NULL,
   `PACKAGE_TYPE` int(12) DEFAULT NULL,
+  `ROBOT_TYPE_ID` bigint(12) DEFAULT NULL,
   `DEFAULT_SETTING` tinyint(1) DEFAULT NULL,
   `DELETE_STATUS` tinyint(1) DEFAULT NULL,
   `STORE_ID` bigint(12) DEFAULT NULL,
   `CREATED_BY` bigint(12) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
-
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 -- ----------------------------
 -- Records of OR_ORDER_SETTING
 -- ----------------------------
-INSERT INTO `OR_ORDER_SETTING` VALUES ('1', '测试', '6', '21', '22', '1', null, '0', '1', null, null, null);
-INSERT INTO `OR_ORDER_SETTING` VALUES ('2', '测试2', '5', '21', '22', '1', null, '0', null, '100', '53', '2017-07-07 15:18:51');
-INSERT INTO `OR_ORDER_SETTING` VALUES ('3', '测试2', '5', '21', '22', '1', null, '0', '0', '100', '53', '2017-07-07 17:21:33');
-INSERT INTO `OR_ORDER_SETTING` VALUES ('4', '测试2', '5', '21', '22', '1', null, '0', '0', '100', '53', '2017-07-08 16:08:30');
-INSERT INTO `OR_ORDER_SETTING` VALUES ('5', '测试3', '5', '21', '22', null, '0', '0', '0', '100', '53', '2017-07-11 10:36:38');
-INSERT INTO `OR_ORDER_SETTING` VALUES ('6', '测试6', null, '21', '22', '2', '0', '0', '1', '100', '53', '2017-07-11 10:53:55');
-INSERT INTO `OR_ORDER_SETTING` VALUES ('7', '测试6', '5', '21', '22', '1', '0', '1', '0', '100', '93', '2017-07-11 17:25:59');
-INSERT INTO `OR_ORDER_SETTING` VALUES ('8', '测试6', null, '21', '22', '1', '0', '1', '0', '100', '93', '2017-07-11 17:26:25');
-INSERT INTO `OR_ORDER_SETTING` VALUES ('9', '测试6', null, '21', '22', '1', '0', '0', '0', '100', '93', '2017-07-11 17:26:49');
 
 -- ----------------------------
 -- Table structure for RE_RESOURCE

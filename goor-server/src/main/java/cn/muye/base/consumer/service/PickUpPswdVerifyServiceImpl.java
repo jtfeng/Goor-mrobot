@@ -84,7 +84,7 @@ public class PickUpPswdVerifyServiceImpl
         robotPassword.setBoxNum(bean.getBoxNum());
         robotPassword.setPassword(bean.getPswd());
         robotPassword.setRobotId(robot.getId());
-        robotPassword = robotPasswordService.findByRobotIdAndBoxNumAndPswd(robotPassword);
+        robotPassword = robotPasswordService.findByRobotIdAndBoxNumAndPwd(robotPassword);
         if (robotPassword == null){
             //没有查询到记录，验证失败
             bean.setRetCode(PickUpPswdVerifyBean.RET_CODE_ERROR_NO_RECORD);
