@@ -65,6 +65,8 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                         default:
                             break;
                 }
+                // TODO: 17-7-17 继续从缓存里面取电量等缓存值，放入日志
+
                 //保存日志
                 logMissionService.save(logMission);
                 if (logMission.getId() == null){

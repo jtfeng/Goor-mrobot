@@ -200,9 +200,6 @@ public class ConsumerCommon {
         }
     }
 
-    @Autowired
-    X86MissionEventService x86MissionEventService;
-
     /**
      * 透传ros发布的topic：x86_mission_state_response
      *
@@ -211,12 +208,14 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE)
     public void directX86MissionStateResponse(@Payload MessageInfo messageInfo) {
         try {
-            //直接service方法处理上报的数据
-            x86MissionEventService.handleX86MissionEvent(messageInfo);
+
         } catch (Exception e) {
             logger.error("consumer directX86MissionStateResponse exception", e);
         }
     }
+
+    @Autowired
+    X86MissionEventService x86MissionEventService;
 
     /**
      * 透传ros发布的topic：x86_mission_event
@@ -226,7 +225,8 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_EVENT)
     public void directX86MissionEvent(@Payload MessageInfo messageInfo) {
         try {
-
+            //直接service方法处理上报的数据
+            x86MissionEventService.handleX86MissionEvent(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directX86MissionEvent exception", e);
         }
