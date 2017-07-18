@@ -19,7 +19,7 @@ public interface OffLineMessageMapper {
 
     void update(OffLineMessage offLineMessage);
 
-    List<OffLineMessage> list();
+    List<OffLineMessage> pageList();
 
     List<OffLineMessage> listByIsSuccess(boolean isSuccess);
 

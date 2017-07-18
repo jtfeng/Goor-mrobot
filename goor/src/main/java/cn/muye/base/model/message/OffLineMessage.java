@@ -14,6 +14,8 @@ import java.util.Date;
 
 public class OffLineMessage implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private String uuId;//
 
     private String senderId;//发送者ID

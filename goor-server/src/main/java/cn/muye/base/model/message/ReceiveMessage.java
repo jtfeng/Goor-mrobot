@@ -19,6 +19,8 @@ import java.util.Date;
 @Data
 public class ReceiveMessage implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private String uuId;//
 
     private String senderId;//发送者ID
