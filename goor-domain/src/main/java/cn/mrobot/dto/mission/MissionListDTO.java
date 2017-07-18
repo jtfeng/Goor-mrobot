@@ -1,9 +1,6 @@
 package cn.mrobot.dto.mission;
 
-import cn.mrobot.bean.mission.Mission;
-
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,7 +16,7 @@ public class MissionListDTO implements Serializable{
 
 	private Long id;
 
-	private List<MissionDTO> missionDTOList;
+	private List<MissionDTO> missionList;
 
 	private String missionListType;
 	/**
@@ -54,12 +51,12 @@ public class MissionListDTO implements Serializable{
 		this.id = id;
 	}
 
-	public List<MissionDTO> getMissionDTOList() {
-		return missionDTOList;
+	public List<MissionDTO> getMissionList() {
+		return missionList;
 	}
 
-	public void setMissionDTOList(List<MissionDTO> missionDTOList) {
-		this.missionDTOList = missionDTOList;
+	public void setMissionList(List<MissionDTO> missionList) {
+		this.missionList = missionList;
 	}
 
 	public String getMissionListType() {
