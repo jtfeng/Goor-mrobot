@@ -35,6 +35,8 @@ public class MapInfo extends BaseBean {
 
 	private String overlayMap;
 
+	private Long mapZipId;
+
 	public String getMapName() {
 		return mapName;
 	}
@@ -97,5 +99,13 @@ public class MapInfo extends BaseBean {
 
 	public void setOverlayMap(String overlayMap) {
 		this.overlayMap = overlayMap;
+	}
+
+	public Long getMapZipId() {
+		return mapZipId;
+	}
+
+	public void setMapZipId(Long mapZipId) {
+		this.mapZipId = mapZipId;
 	}
 }

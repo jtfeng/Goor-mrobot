@@ -1,7 +1,5 @@
 package cn.mrobot.dto.mission;
 
-import cn.mrobot.bean.mission.MissionItem;
-
 import java.io.Serializable;
 import java.util.Set;
 
@@ -22,7 +20,7 @@ public class MissionDTO implements Serializable {
 
 	private Long intervalTime;
 
-	private Set<MissionItemDTO> missionItemDTOSet;
+	private Set<MissionItemDTO> missionItemSet;
 
 	public MissionDTO() {
 	}
@@ -51,11 +49,11 @@ public class MissionDTO implements Serializable {
 		this.intervalTime = intervalTime;
 	}
 
-	public Set<MissionItemDTO> getMissionItemDTOSet() {
-		return missionItemDTOSet;
+	public Set<MissionItemDTO> getMissionItemSet() {
+		return missionItemSet;
 	}
 
-	public void setMissionItemDTOSet(Set<MissionItemDTO> missionItemDTOSet) {
-		this.missionItemDTOSet = missionItemDTOSet;
+	public void setMissionItemSet(Set<MissionItemDTO> missionItemSet) {
+		this.missionItemSet = missionItemSet;
 	}
 }

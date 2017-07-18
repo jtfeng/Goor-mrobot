@@ -1,5 +1,6 @@
 package cn.muye.base.listener;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.producer.ProducerCommon;
@@ -20,8 +21,10 @@ public class AgentPubListenerImpl implements TopicCallback {
 	private static Logger logger = Logger.getLogger(AgentPubListenerImpl.class);
 	@Override
 	public void handleMessage(Message message) {
+        if (TopicConstants.DEBUG)
 		logger.info("From ROS ====== agent_pub topic  " + message.toString());
 		if(TopicSubscribeInfo.checkPubNameIsNeedConsumer(message.toString())){
+            if (TopicConstants.DEBUG)
 			logger.info(" ====== message.toString()===" + message.toString());
 			ProducerCommon msg = SingleFactory.getProducerCommon();
 			msg.sendAgentPubMessage(message.toString());

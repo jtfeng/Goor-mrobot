@@ -71,6 +71,7 @@ public class TopicSubscribeInfo implements Serializable {
 		JSONObject jsonObjectData = JSON.parseObject(data);
 		String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
 		if(CacheInfoManager.getNameSubCache(messageName)){
+		    if (TopicConstants.DEBUG)
 			log.info(" ====== message.toString()===" + message);
 			return true;
 		}
@@ -94,6 +95,7 @@ public class TopicSubscribeInfo implements Serializable {
 		JSONObject jsonObjectData = JSON.parseObject(data);
 		String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
 		if(CacheInfoManager.getNameSubCache(messageName)){
+            if (TopicConstants.DEBUG)
 			log.info(" ====== message.toString()===" + message);
 			return true;
 		}
