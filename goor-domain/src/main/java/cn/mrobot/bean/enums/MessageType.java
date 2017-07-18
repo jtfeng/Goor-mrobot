@@ -11,5 +11,6 @@ public enum MessageType {
     EXECUTOR_MAP,//地图消息
     EXECUTOR_RESOURCE,//资源消息
     TIME_SYNCHRONIZED,//时间同步请求消息
-    REPLY;//回执消息
+    REPLY,//回执消息
+    ROBOT_AUTO_REGISTER;//自动注册机器人信息消息
 }

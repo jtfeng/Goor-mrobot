@@ -21,15 +21,13 @@ public class TopicConstants {
 
 	public static final String TOPIC_TYPE_STRING = "std_msgs/String";//publish的数据类型
 	public static final String TOPIC_TYPE_UINT8_ARRAY = "std_msgs/UInt8MultiArray";
-	//订阅topic
-	public static final String DEMO = "/demo";
 
 	//
 	public static final String PUB_NAME = "pub_name";
 	public static final String SUB_NAME = "sub_name";
 
-	public static final String UUID = "uuid";
-	public static final String CODE = "code";
+	public static final String UUID = "uuid";//与ros通信的uuid
+	public static final String CODE = "code";//与ros通信的code
 
 	//工控topic
 	public static final String APP_PUB = "/app_pub";
@@ -111,6 +109,7 @@ public class TopicConstants {
 
 	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";
 	public static final String DIRECT_COMMAND_REPORT_RECEIVE = "direct.command_report_receive";
+	public static final String DIRECT_COMMAND_ROBOT_INFO = "direct.command_robot_info";
 
 	//服务端下发队列，命令队列
 	public static final String TOPIC_COMMAND = "#{'topic.command.'+'${local.robot.SN}'}";

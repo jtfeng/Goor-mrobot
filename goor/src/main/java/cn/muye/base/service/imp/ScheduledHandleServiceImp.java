@@ -1,6 +1,7 @@
 package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
@@ -22,6 +23,7 @@ import edu.wpi.rail.jrosbridge.messages.Message;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -49,77 +51,77 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public void receiveMessage() {
-            try {
-                rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
-                receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
-                getLocalRobotSN();
-                List<ReceiveMessage> list = receiveMessageService.listByIsSuccess(new ReceiveMessage(false));//多次回执，未成功和未publish的消息都回执,限制发送超过200次的，不再发送
-                for (ReceiveMessage message : list) {
-                    MessageInfo info = new MessageInfo(message);
-                    info.setSenderId(localRobotSN);
-                    info.setMessageType(MessageType.REPLY);
-                    rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_REPORT, info);
-                    message.setSuccess(true);
-                    message.setSendCount(message.getSendCount()+1);
-                    receiveMessageService.update(message);
-                }
-            } catch (final Exception e) {
-                logger.error("Scheduled receiveMessage exception", e);
+        try {
+            rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+            receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
+            getLocalRobotSN();
+            List<ReceiveMessage> list = receiveMessageService.listByIsSuccess(new ReceiveMessage(false));//多次回执，未成功和未publish的消息都回执,限制发送超过200次的，不再发送
+            for (ReceiveMessage message : list) {
+                MessageInfo info = new MessageInfo(message);
+                info.setSenderId(localRobotSN);
+                info.setMessageType(MessageType.REPLY);
+                rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_REPORT, info);
+                message.setSuccess(true);
+                message.setSendCount(message.getSendCount()+1);
+                receiveMessageService.update(message);
             }
+        } catch (final Exception e) {
+            logger.error("Scheduled receiveMessage exception", e);
+        }
     }
 
     @Override
     public void rosHealthCheck() {
         logger.info("-->> Scheduled rosHealthCheck start");
-            try {
-                ros = applicationContext.getBean(Ros.class);
-                if(null == ros){
-                    logger.error("-->> ros is not connect");
-                    return;
-                }
-                Topic topic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
-                topic.publish(new Message(TopicConstants.CHECK_HEART_MESSAGE));//如果已经订阅了，会自动执行订阅方法
-
-                //发布app_pub的获取当前地图消息
-                Topic mapCurrentPubTopic = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
-                mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
-
-                logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
-                if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX){
-                    ros.disconnect();
-                    ros.connect();
-                    TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
-                    topic.subscribe(checkHeartCallback);
-                    topic.publish(new Message(TopicConstants.CHECK_HEART_MESSAGE));
-					TopicSubscribeInfo.reSubScribeTopic(ros);//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
-                }
-            } catch (Exception e) {
-                logger.error("-->> Scheduled rosHealthCheck Exception", e);
+        try {
+            ros = applicationContext.getBean(Ros.class);
+            if(null == ros){
+                logger.error("-->> ros is not connect");
+                return;
             }
+            Topic topic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
+            topic.publish(new Message(TopicConstants.CHECK_HEART_MESSAGE));//如果已经订阅了，会自动执行订阅方法
+
+            //发布app_pub的获取当前地图消息
+            Topic mapCurrentPubTopic = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
+            mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
+
+            logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
+            if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX){
+                ros.disconnect();
+                ros.connect();
+                TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
+                topic.subscribe(checkHeartCallback);
+                topic.publish(new Message(TopicConstants.CHECK_HEART_MESSAGE));
+                TopicSubscribeInfo.reSubScribeTopic(ros);//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
+            }
+        } catch (Exception e) {
+            logger.error("-->> Scheduled rosHealthCheck Exception", e);
+        }
     }
 
     @Override
     public void downloadResource(){
-            try {
-                logger.info("-->> Scheduled downloadResource start");
-                receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
-                ros = applicationContext.getBean(Ros.class);
-                List<ReceiveMessage> list = receiveMessageService.listByMessageStatus(new ReceiveMessage(MessageStatusType.FILE_NOT_DOWNLOADED.getIndex()));//从接收的库查询出需要下载的资源
-                for (ReceiveMessage message : list) {
-                    MessageInfo messageInfo = new MessageInfo(message);
-                    if(null != messageInfo){
-                        CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
-                        //忽略掉不需要发topic的资源
-                        if(null != commonInfo && StringUtils.isEmpty(commonInfo.getTopicName())){
-                            continue;
-                        }
+        try {
+            logger.info("-->> Scheduled downloadResource start");
+            receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
+            ros = applicationContext.getBean(Ros.class);
+            List<ReceiveMessage> list = receiveMessageService.listByMessageStatus(new ReceiveMessage(MessageStatusType.FILE_NOT_DOWNLOADED.getIndex()));//从接收的库查询出需要下载的资源
+            for (ReceiveMessage message : list) {
+                MessageInfo messageInfo = new MessageInfo(message);
+                if(null != messageInfo){
+                    CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
+                    //忽略掉不需要发topic的资源
+                    if(null != commonInfo && StringUtils.isEmpty(commonInfo.getTopicName())){
+                        continue;
                     }
-                    DownloadHandle.downloadCheck(ros, messageInfo, receiveMessageService);
                 }
-                logger.info("-->> Scheduled downloadResource end");
-            } catch (final Exception e) {
-                logger.error("Scheduled downloadResource Exception", e);
+                DownloadHandle.downloadCheck(ros, messageInfo, receiveMessageService);
             }
+            logger.info("-->> Scheduled downloadResource end");
+        } catch (final Exception e) {
+            logger.error("Scheduled downloadResource Exception", e);
+        }
     }
 
     @Override
@@ -154,9 +156,9 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                     Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                     Message toSend = new Message(commonInfo.getPublishMessage());
                     echo.publish(toSend);
-					//更新发布状态，已经发送
+                    //更新发布状态，已经发送
                     message.setMessageStatusType(MessageStatusType.PUBLISH_ROS_MESSAGE.getIndex());
-					this.updateReceiveMessage(message);
+                    this.updateReceiveMessage(message);
                 }else{
                     message.setMessageStatusType(MessageStatusType.ROS_OFF_LINE.getIndex());
                     this.updateReceiveMessage(message);
@@ -170,31 +172,31 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public AjaxResult publishMessage(Ros ros, MessageInfo messageInfo){
-            try {
-                logger.info("-->> parameter publishMessage start");
-                CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
-                if(StringUtil.isEmpty(commonInfo)
-                        || StringUtil.isEmpty(commonInfo.getTopicName())
-                        || StringUtil.isEmpty(commonInfo.getTopicType())
-                        || StringUtil.isEmpty(commonInfo.getPublishMessage())){
-                    logger.warn("-->> publishMessage commonInfo is null");
-                    return AjaxResult.failed(MessageStatusType.PARAMETER_ERROR.getName());
-                }
-				long end = System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache();
-                if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX){
-                    Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
-                    Message toSend = new Message(commonInfo.getPublishMessage());
-                    echo.publish(toSend);
-                    logger.info("-->> publishMessage commonInfo to ros success");
-                    return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());
-                }else{
-                    logger.info("-->> publishMessage fail, ros not connect");
-                    return AjaxResult.failed(MessageStatusType.ROS_OFF_LINE.getName());
-                }
-            } catch (Exception e) {
-                logger.error("-->> Scheduled publishMessage Exception", e);
-                return AjaxResult.failed(MessageStatusType.FAILURE_MESSAGE.getName());
+        try {
+            logger.info("-->> parameter publishMessage start");
+            CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
+            if(StringUtil.isEmpty(commonInfo)
+                    || StringUtil.isEmpty(commonInfo.getTopicName())
+                    || StringUtil.isEmpty(commonInfo.getTopicType())
+                    || StringUtil.isEmpty(commonInfo.getPublishMessage())){
+                logger.warn("-->> publishMessage commonInfo is null");
+                return AjaxResult.failed(MessageStatusType.PARAMETER_ERROR.getName());
             }
+            long end = System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache();
+            if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX){
+                Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                Message toSend = new Message(commonInfo.getPublishMessage());
+                echo.publish(toSend);
+                logger.info("-->> publishMessage commonInfo to ros success");
+                return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());
+            }else{
+                logger.info("-->> publishMessage fail, ros not connect");
+                return AjaxResult.failed(MessageStatusType.ROS_OFF_LINE.getName());
+            }
+        } catch (Exception e) {
+            logger.error("-->> Scheduled publishMessage Exception", e);
+            return AjaxResult.failed(MessageStatusType.FAILURE_MESSAGE.getName());
+        }
     }
 
     @Override
@@ -212,8 +214,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         }
     }
 
-	public void updateReceiveMessage(ReceiveMessage message){
-		message.setSuccess(false);
+    public void updateReceiveMessage(ReceiveMessage message){
+        message.setSuccess(false);
         try {
             receiveMessageService.update(message);
         } catch (Exception e) {
@@ -253,5 +255,17 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             logger.error("Scheduled time synchronized exception", e);
         }
         System.out.println("*********** x86 time synchronized request ***************");
+    }
+
+    @Override
+    public void sendRobotInfo() {
+        rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+        MessageInfo info = new MessageInfo();
+        Robot robot = CacheInfoManager.getRobotInfoCache();
+        info.setMessageText(JSON.toJSONString(robot));
+        info.setSendTime(new Date());
+        info.setSenderId(localRobotSN);
+        info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
+        rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
     }
 }

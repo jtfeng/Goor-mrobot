@@ -1,5 +1,8 @@
 package cn.muye.base.service.mapper.message;
 
+import cn.mrobot.bean.enums.MessageStatusType;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.mapper.config.AppConfigMapper;
 import cn.muye.base.mapper.message.OffLineMessageMapper;
 import cn.muye.base.model.config.AppConfig;
@@ -23,6 +26,9 @@ public class OffLineMessageService {
     private OffLineMessageMapper offLineMessageMapper;
 
     public OffLineMessage get(Long id){
+        if(null == id){
+            return null;
+        }
         return offLineMessageMapper.get(id);
     }
 
@@ -31,11 +37,17 @@ public class OffLineMessageService {
     }
 
     public long save(OffLineMessage message) throws Exception {
+        if(null == message){
+            return 0L;
+        }
         message.setSendTime(new Date());
         return offLineMessageMapper.save(message);
     }
 
     public void update(OffLineMessage message) throws Exception {
+        if(null == message){
+            return;
+        }
         message.setUpdateTime(new Date());
         offLineMessageMapper.update(message);
     }

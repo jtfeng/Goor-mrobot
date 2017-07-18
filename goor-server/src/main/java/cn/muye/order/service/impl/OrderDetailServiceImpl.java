@@ -67,4 +67,9 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
         example.setOrderByClause("STATUS ASC, CREATE_TIME DESC");
         return myMapper.selectByExample(example);
     }
+
+    @Override
+    public OrderDetail getOrderDetailInfo(Long id) {
+        return orderDetailMapper.getOrderDetailInfo(id);
+    }
 }

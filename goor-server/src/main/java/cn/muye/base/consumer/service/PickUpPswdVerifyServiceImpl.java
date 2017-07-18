@@ -11,6 +11,7 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import com.google.gson.reflect.TypeToken;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class PickUpPswdVerifyServiceImpl
         implements PickUpPswdVerifyService {
+
+    private Logger logger = Logger.getLogger(PickUpPswdVerifyServiceImpl.class);
 
     @Autowired
     private RobotPasswordService robotPasswordService;
@@ -81,7 +84,7 @@ public class PickUpPswdVerifyServiceImpl
         robotPassword.setBoxNum(bean.getBoxNum());
         robotPassword.setPassword(bean.getPswd());
         robotPassword.setRobotId(robot.getId());
-        robotPassword = robotPasswordService.findByRobotIdAndBoxNumAndPswd(robotPassword);
+        robotPassword = robotPasswordService.findByRobotIdAndBoxNumAndPwd(robotPassword);
         if (robotPassword == null){
             //没有查询到记录，验证失败
             bean.setRetCode(PickUpPswdVerifyBean.RET_CODE_ERROR_NO_RECORD);

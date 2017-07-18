@@ -167,6 +167,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue directRobotAutoRegister() {
+        return new Queue(TopicConstants.DIRECT_COMMAND_ROBOT_INFO,false,false,true);
+    }
+
+    @Bean
     public Queue directCommandReportAndReceive() {
         return new Queue(TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE,false,false,true);
     }

@@ -1,7 +1,10 @@
 package cn.muye.funcs.service;
 
 import cn.mrobot.bean.mission.task.MissionListTask;
+import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.order.Order;
+
+import java.util.List;
 
 /**
  * Created by abel on 17-7-13.
@@ -13,5 +16,19 @@ public interface MissionFuncsService {
      * @param order
      * @return
      */
-    MissionListTask createMissionLists(Order order);
+    boolean createMissionLists(Order order);
+
+    /**
+     * 获取任务下发的消息对象json字串
+     * @param listTasks
+     * @return
+     */
+    String getGoorMissionMsg(List<MissionListTask> listTasks);
+
+    /**
+     * 获取指定机器人当前执行任务状态的列表，如果没有执行中的任务，则返回null
+     * @param robotCode
+     * @return
+     */
+    List<MissionTask> getMissionTaskStatus(String robotCode);
 }

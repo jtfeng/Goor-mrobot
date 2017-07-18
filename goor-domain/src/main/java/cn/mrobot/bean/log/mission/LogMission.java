@@ -25,6 +25,22 @@ public class LogMission extends BaseBean {
         }
     }
 
+    public static final String event_start_success = "start_success";
+    public static final String event_start_fail = "start_fail";
+    public static final String event_pause_success = "pause_success";
+    public static final String event_pause_fail = "pause_fail";
+    public static final String event_resume_success = "resume_success";
+    public static final String event_resume_fail = "resume_fail";
+    public static final String event_cancel_success = "cancel_success";
+    public static final String event_cancel_fail = "cancel_fail";
+    public static final String event_finish = "finish";
+    public static final String event_fail = "fail";
+
+
+    public static final String object_mission_list = "mission_list";
+    public static final String object_mission = "mission";
+    public static final String object_mission_item = "mission_item";
+
     /**
      * 机器人编号
      */
@@ -46,6 +62,10 @@ public class LogMission extends BaseBean {
      *任务节点ID
      */
     private Long missionItemId;
+    /**
+     * 任务item的name
+     */
+    private String missionItemName;
     /**
      *任务列表重复
      */
@@ -79,6 +99,14 @@ public class LogMission extends BaseBean {
     private int powerPercent;  //电量  范围  0-100
 
     private String ros; //ros当前位置信息
+
+    public String getMissionItemName() {
+        return missionItemName;
+    }
+
+    public void setMissionItemName(String missionItemName) {
+        this.missionItemName = missionItemName;
+    }
 
     public String getRobotCode() {
         return robotCode;

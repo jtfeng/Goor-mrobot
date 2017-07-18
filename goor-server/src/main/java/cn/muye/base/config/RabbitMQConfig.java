@@ -99,6 +99,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue directRobotAutoRegister() {
+        return new Queue(TopicConstants.DIRECT_COMMAND_ROBOT_INFO,false,false,true);
+    }
+
+    @Bean
     public Queue directX86MissionQueueResponse() {
         return new Queue(TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE,false,false,true);
     }

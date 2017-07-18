@@ -33,6 +33,8 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, MessageInfo> mapCurrentCache = new ConcurrentHashMapCache<String, MessageInfo>();
     //机器人原始地图的缓存
     private static ConcurrentHashMapCache<String, MapInfo> mapOriginalCache = new ConcurrentHashMapCache<String, MapInfo>();
+	/** uuid 的缓存 */
+	private static ConcurrentHashMapCache<String, MessageInfo> UUIDCache = new ConcurrentHashMapCache<String, MessageInfo>();
 
     static {
 
@@ -41,7 +43,8 @@ public class CacheInfoManager implements ApplicationContextAware {
         messageCache.setMaxLifeTime(0);
         mapCurrentCache.setMaxLifeTime(0);
         mapOriginalCache.setMaxLifeTime(0);
-    }
+		UUIDCache.setMaxLifeTime(60*1000);//设置超时时间60秒
+	}
 
     private CacheInfoManager() {
 
@@ -79,6 +82,13 @@ public class CacheInfoManager implements ApplicationContextAware {
         }
         return appConfigInfo;
     }
+	public static void setUUIDCache(String uuId, MessageInfo messageInfo){
+		UUIDCache.put(uuId, messageInfo);
+	}
+
+	public static MessageInfo getUUIDCache(String uuId){
+		return UUIDCache.get(uuId);
+	}
 
 
     public static void setMapCurrentCache(MessageInfo messageInfo) {
