@@ -243,6 +243,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotPasswordService.delete(new RobotPassword(null, id));
     }
 
+    @Override
+    public void deleteRobotByCode(String code) {
+        Example example = new Example(Robot.class);
+        example.createCriteria().andCondition("CODE =", code);
+        myMapper.deleteByExample(example);
+    }
+
     public Robot getByName(String name) {
         Robot robot = new Robot();
         robot.setName(name);

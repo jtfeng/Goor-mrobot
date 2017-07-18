@@ -377,20 +377,27 @@ public class ConsumerCommon {
     public void subscribeRobotInfo(@Payload MessageInfo messageInfo) {
         try {
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
+                Long sendTime = messageInfo.getSendTime().getTime();
+                Long time = new Date().getTime();
                 JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
                 String code = jsonObject.getString(SearchConstants.SEARCH_CODE);
                 String name = jsonObject.getString(SearchConstants.SEARCH_NAME);
                 int typeId = Integer.valueOf(jsonObject.getString(SearchConstants.SEARCH_TYPE_ID));
                 int batteryThreshold = Integer.valueOf(jsonObject.getString(SearchConstants.SEARCH_BATTERY_THRESHOLD));
-                //将robotInfo进行AES加密后发送至
-                Robot robot = new Robot();
-                robot.setTypeId(typeId);
-                robot.setBatteryThreshold(batteryThreshold);
-                robot.setCode(code);
-                robot.setName(name);
-                String json = JSON.toJSONString(robot);
-                byte[] robotInfo = AES.encrypt(json.getBytes(), Constant.AES_KEY.getBytes());
-                robotService.autoRegister(robotInfo);
+                //超过10分钟则离线，需要删除该机器人 600000 10分钟
+                if (time - sendTime > Constant.CHECK_IF_OFFLINE_TIME) {
+                    robotService.deleteRobotByCode(code);
+                } else {
+                    //将robotInfo进行AES加密后发送至
+                    Robot robot = new Robot();
+                    robot.setTypeId(typeId);
+                    robot.setBatteryThreshold(batteryThreshold);
+                    robot.setCode(code);
+                    robot.setName(name);
+                    String json = JSON.toJSONString(robot);
+                    byte[] robotInfo = AES.encrypt(json.getBytes(), Constant.AES_KEY.getBytes());
+                    robotService.autoRegister(robotInfo);
+                }
             }
         } catch (Exception e) {
             logger.error("consumer directAgentSub exception", e);

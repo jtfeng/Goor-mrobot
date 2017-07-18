@@ -53,6 +53,8 @@ public class Constant {
 
     public final static String ROBOT_CACHE_KEY = "robotInfo"; //自动注册机器人缓存KEY
 
+    public final static Long CHECK_IF_OFFLINE_TIME = 600000L; //10分钟=600000毫秒
+
     //与地图点相关的指令列表
     public final static List<Long> ORDER_MAP_POINT_RELATE_LIST = Arrays.asList(
             1L,//单点导航

@@ -25,6 +25,8 @@ public interface RobotService extends BaseService<Robot>{
 
     void deleteRobotById(Long id);
 
+    void deleteRobotByCode(String code);
+
     Robot getByName(String name);
 
     Robot getByCode(String code);
