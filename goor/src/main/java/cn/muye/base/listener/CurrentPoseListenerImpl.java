@@ -1,5 +1,6 @@
 package cn.muye.base.listener;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.producer.ProducerCommon;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
@@ -11,6 +12,7 @@ public class CurrentPoseListenerImpl implements TopicCallback{
 	@Override
 	public void handleMessage(Message message) {
 		try {
+            if (TopicConstants.DEBUG)
 			logger.info("From ROS ====== CurrentPose topic  " + message.toString());
 			ProducerCommon msg = SingleFactory.getProducerCommon();
 			msg.sendCurrentPoseMessage(message.toString());

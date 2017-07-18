@@ -1,5 +1,6 @@
 package cn.muye.base.listener;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.producer.ProducerCommon;
@@ -29,6 +30,7 @@ public class AppSubListenerImpl implements TopicCallback, ApplicationContextAwar
 	private static Logger logger = Logger.getLogger(AppSubListenerImpl.class);
 	@Override
 	public void handleMessage(Message message) {
+        if (TopicConstants.DEBUG)
 		logger.info("From ROS ====== app_sub topic  " + message.toString());
 		if(TopicSubscribeInfo.checkSubNameIsNeedConsumer(message.toString())){
 			ProducerCommon msg = SingleFactory.getProducerCommon();

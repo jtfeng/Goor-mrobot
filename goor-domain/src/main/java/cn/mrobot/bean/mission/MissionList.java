@@ -154,7 +154,7 @@ public class MissionList extends BaseBean{
 			for(Mission mission : missions) {
 				missionDTOS.add(mission.toDTO());
 			}
-			missionListDTO.setMissionDTOList(missionDTOS);
+			missionListDTO.setMissionList(missionDTOS);
 		}
 		return missionListDTO;
 	}

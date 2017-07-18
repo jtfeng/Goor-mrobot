@@ -128,6 +128,7 @@ public class ConsumerCommon {
                 String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
+                    if (TopicConstants.DEBUG)
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
 

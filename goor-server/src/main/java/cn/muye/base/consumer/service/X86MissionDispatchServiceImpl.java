@@ -1,5 +1,6 @@
 package cn.muye.base.consumer.service;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,6 @@ public class X86MissionDispatchServiceImpl implements X86MissionDispatchService 
     public void sendX86MissionDispatch(
             String robotCode,
             String missionListData) {
-        baseMessageService.sendRobotMessage(robotCode, missionListData);
+        baseMessageService.sendRobotMessage(robotCode, TopicConstants.X86_MISSION_DISPATCH, missionListData);
     }
 }

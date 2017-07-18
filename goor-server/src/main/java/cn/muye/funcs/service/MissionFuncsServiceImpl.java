@@ -2,6 +2,7 @@ package cn.muye.funcs.service;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.mission.task.JsonMissionListPub;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
@@ -19,6 +20,8 @@ import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
 import com.google.gson.reflect.TypeToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +32,9 @@ import java.util.*;
  */
 @Service
 public class MissionFuncsServiceImpl implements MissionFuncsService {
+
+    protected static final Logger logger = LoggerFactory.getLogger(MissionFuncsServiceImpl.class);
+
 
     @Autowired
     StationService stationService;
@@ -57,12 +63,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public boolean createMissionLists(Order order) {
         boolean ret = false;
 
+        logger.info("##############  createMissionLists #################");
+
         //判断order
         if (order == null ||
                 order.getOrderSetting() == null ||
                 order.getRobot() == null ||
                 order.getOrderSetting().getStartPoint() == null ||
                 order.getOrderSetting().getEndPoint() == null){
+            logger.info("##############  createMissionLists attrs error #################");
             return ret;
         }
 
@@ -92,6 +101,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 getGoorMissionMsg(listTasks)
         );
 
+        logger.info("robot code is: " + order.getRobot().getCode() +
+                " , ####### tesk is: " + getGoorMissionMsg(listTasks));
+        logger.info("##############  createMissionLists successed #################");
+
         return true;
     }
 
@@ -113,8 +126,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
         }
 
-        return JsonUtils.toJson(dtos,
-                new TypeToken<List<MissionListDTO>>(){}.getType());
+        //加入uuid
+        JsonMissionListPub jsonMissionListPub =
+                new JsonMissionListPub();
+        jsonMissionListPub.setSendTime(System.currentTimeMillis());
+        jsonMissionListPub.setMissionLists(dtos);
+        jsonMissionListPub.setUuid(UUID.randomUUID().toString().replace("-", ""));
+
+        return JsonUtils.toJson(jsonMissionListPub,
+                new TypeToken<JsonMissionListPub>(){}.getType());
     }
 
     @Override
@@ -180,13 +200,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         }
                                     }
                                 }
-                                missionDTO.setMissionItemDTOSet(new HashSet<>(missionItemDTOS));
+                                missionDTO.setMissionItemSet(new HashSet<>(missionItemDTOS));
                             }
                             missionDTOS.add(missionDTO);
                         }
                     }
                 }
-                missionListDTO.setMissionDTOList(missionDTOS);
+                missionListDTO.setMissionList(missionDTOS);
             }
 
             return missionListDTO;
@@ -365,7 +385,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //先初始化任务列表的相关属性
         missionListTask.setIntervalTime(0L);
         missionListTask.setDescription("下单自动任务列表"+System.currentTimeMillis());
-        missionListTask.setMissionListType("");
+        missionListTask.setMissionListType(MissionListType_normal);
         missionListTask.setName(missionListTask.getDescription());
         missionListTask.setOrderId(order.getId());
         missionListTask.setRepeatTimes(1);
@@ -590,9 +610,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setIntervalTime(0L);
         missionTask.setState("");
         missionTask.setPresetMissionCode("");
-        missionTask.setCreatedBy(System.currentTimeMillis());
-        missionTask.setCreateTime(new Date());
-        missionTask.setStoreId(order.getStoreId());
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
@@ -615,9 +632,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是单点导航的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
-        itemTask.setCreatedBy(System.currentTimeMillis());
-        itemTask.setCreateTime(new Date());
-        itemTask.setStoreId(order.getStoreId());
         itemTask.setFeatureValue(FeatureValue_nav);
 
         return itemTask;
@@ -636,9 +650,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setIntervalTime(0L);
         missionTask.setState("");
         missionTask.setPresetMissionCode("");
-        missionTask.setCreatedBy(System.currentTimeMillis());
-        missionTask.setCreateTime(new Date());
-        missionTask.setStoreId(order.getStoreId());
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
@@ -661,9 +672,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
-        itemTask.setCreatedBy(System.currentTimeMillis());
-        itemTask.setCreateTime(new Date());
-        itemTask.setStoreId(order.getStoreId());
         itemTask.setFeatureValue(FeatureValue_waiting);
         return itemTask;
     }
@@ -681,9 +689,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setIntervalTime(0L);
         missionTask.setState("");
         missionTask.setPresetMissionCode("");
-        missionTask.setCreatedBy(System.currentTimeMillis());
-        missionTask.setCreateTime(new Date());
-        missionTask.setStoreId(order.getStoreId());
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
@@ -706,9 +711,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
-        itemTask.setCreatedBy(System.currentTimeMillis());
-        itemTask.setCreateTime(new Date());
-        itemTask.setStoreId(order.getStoreId());
         itemTask.setFeatureValue(FeatureValue_mp3);
 
         return itemTask;
@@ -727,9 +729,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setIntervalTime(0L);
         missionTask.setState("");
         missionTask.setPresetMissionCode("");
-        missionTask.setCreatedBy(System.currentTimeMillis());
-        missionTask.setCreateTime(new Date());
-        missionTask.setStoreId(order.getStoreId());
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
@@ -752,9 +751,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
-        itemTask.setCreatedBy(System.currentTimeMillis());
-        itemTask.setCreateTime(new Date());
-        itemTask.setStoreId(order.getStoreId());
         itemTask.setFeatureValue(FeatureValue_gotocharge);
 
         return itemTask;
@@ -773,9 +769,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setIntervalTime(0L);
         missionTask.setState("");
         missionTask.setPresetMissionCode("");
-        missionTask.setCreatedBy(System.currentTimeMillis());
-        missionTask.setCreateTime(new Date());
-        missionTask.setStoreId(order.getStoreId());
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
@@ -798,9 +791,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
         itemTask.setState("");
-        itemTask.setCreatedBy(System.currentTimeMillis());
-        itemTask.setCreateTime(new Date());
-        itemTask.setStoreId(order.getStoreId());
         itemTask.setFeatureValue(FeatureValue_leavecharge);
 
         return itemTask;
@@ -831,6 +821,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionItemName_leavecharge = "leaveCharge";
     public static final String MissionItemName_mp3 = "mp3";
     public static final String MissionItemName_waiting = "waiting";
+
+    public static final String MissionListType_normal = "normal";
+
 
     /**
      * 地图点的属性类
