@@ -92,16 +92,16 @@ public class StringUtil {
         return map;
     }
 
-    private static final int    PAD_LIMIT = 8192;
-    public static final  String SPACE     = " ";
+    private static final int PAD_LIMIT = 8192;
+    public static final String SPACE = " ";
 
     public static boolean isEmpty(final CharSequence cs) {
         return cs == null || cs.length() == 0;
     }
 
-	public static boolean isEmpty(Object str) {
-		return str == null || "".equals(str);
-	}
+    public static boolean isEmpty(Object str) {
+        return str == null || "".equals(str);
+    }
 
     public static String repeat(final char ch, final int repeat) {
         final char[] buf = new char[repeat];
@@ -161,13 +161,13 @@ public class StringUtil {
     }
 
     public static boolean isNumeric(CharSequence cs) {
-        if(isEmpty(cs)) {
+        if (isEmpty(cs)) {
             return false;
         } else {
             int sz = cs.length();
 
-            for(int i = 0; i < sz; ++i) {
-                if(!Character.isDigit(cs.charAt(i))) {
+            for (int i = 0; i < sz; ++i) {
+                if (!Character.isDigit(cs.charAt(i))) {
                     return false;
                 }
             }
@@ -176,8 +176,8 @@ public class StringUtil {
         }
     }
 
-    public static final String EMPTY      = "";
-    public static final char   WHITESPACE = ' ';
+    public static final String EMPTY = "";
+    public static final char WHITESPACE = ' ';
 
     /**
      * @param text
@@ -352,45 +352,91 @@ public class StringUtil {
         return lhs.equals(rhs);
     }
 
-    public static String nullToString(Object v){
+    public static String nullToString(Object v) {
         return v == null ? "" : v.toString();
     }
 
-	/** 把字符串里的数字都提取出来	*/
-	public static String collectNumber(String str) {
-		if (str == null) {
-			return str;
-		}
-		char[] chars = str.toCharArray();
-		int length = chars.length;
-		StringBuffer sb = new StringBuffer(length);
-		for (int i = 0; i < length; i++){
-			if (chars[i] >= '0' && chars[i] <= '9'){
-				sb.append(chars[i]);
-			}
-		}
-		return sb.toString();
-	}
+    /**
+     * 把字符串里的数字都提取出来
+     */
+    public static String collectNumber(String str) {
+        if (str == null) {
+            return str;
+        }
+        char[] chars = str.toCharArray();
+        int length = chars.length;
+        StringBuffer sb = new StringBuffer(length);
+        for (int i = 0; i < length; i++) {
+            if (chars[i] >= '0' && chars[i] <= '9') {
+                sb.append(chars[i]);
+            }
+        }
+        return sb.toString();
+    }
 
-	/**按指定长度进行字符串截断*/
-	public static String cut(String str, int len) {
-		if (str == null) {
-			return "";
-		}
-		if (str.length() > len){
-			return str.substring(0, len) + "...";
-		}
-		return str;
-	}
+    /**
+     * 按指定长度进行字符串截断
+     */
+    public static String cut(String str, int len) {
+        if (str == null) {
+            return "";
+        }
+        if (str.length() > len) {
+            return str.substring(0, len) + "...";
+        }
+        return str;
+    }
 
-	/**判断字符串是否包含中文*/
-	public static boolean isContainChinese(String str){
-		Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
-		Matcher m = p.matcher(str);
-		if (m.find()) {
-			return true;
-		}
-		return false;
-	}
+    /**
+     * 判断字符串是否包含中文
+     */
+    public static boolean isContainChinese(String str) {
+        Pattern p = Pattern.compile("[\u4e00-\u9fa5]");
+        Matcher m = p.matcher(str);
+        if (m.find()) {
+            return true;
+        }
+        return false;
+    }
 
+    /**
+     * 判断字符串转为二进制字符串（包含十六进制）
+     */
+    public static String parseToBit(String str) {
+        String regex = "[a-f0-9A-F]*";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(str);
+        StringBuffer stringBuffer = new StringBuffer();
+        if (m.matches()) {
+            char[] chars = str.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                char c = chars[i];
+                if (Character.isDigit(c)) {
+                    String binStr = Integer.toBinaryString(Integer.parseInt(c + "")); //十进制转二进制
+                    stringBuffer.append(append0(binStr));
+                } else if ((c >= 65 && c <= 70) || (c >= 97 && c <= 102)) {
+                    String hexStr = Integer.valueOf(c + "", 16).toString();
+                    String binStr = Integer.toBinaryString(Integer.parseInt(hexStr));
+                    stringBuffer.append(append0(binStr));
+                }
+            }
+        }else {
+            stringBuffer.append("输入参数错误");
+        }
+        return stringBuffer.toString();
+    }
+
+    private static String append0(String binStr) {
+        int length = binStr.length();
+        if (length < 4) {
+            binStr = "0" + binStr;
+            return append0(binStr);
+        } else {
+            return binStr;
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(parseToBit("1b"));
+    }
 }

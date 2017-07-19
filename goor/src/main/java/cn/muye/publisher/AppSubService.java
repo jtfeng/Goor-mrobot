@@ -59,20 +59,19 @@ public class AppSubService implements ApplicationContextAware {
 
     /**
      * 向app_pub发送消息，获取信息
-     * @param pubName
+     * @param data
      * @param topicType
      */
-    public void sendAppPubTopic(String pubName, String topicType) {
+    public void sendAppPubTopic(String topicType,Object data) {
         getRos();
         if (null == ros) {
             LOGGER.error("-->> ros is not connect");
             return;
         }
         Topic echo = new Topic(ros, TopicConstants.APP_PUB, topicType);
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(TopicConstants.PUB_NAME, pubName);
+
         JSONObject messageObject = new JSONObject();
-        messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(data));
         Message toSend = new Message(JSON.toJSONString(messageObject));
         echo.publish(toSend);
     }

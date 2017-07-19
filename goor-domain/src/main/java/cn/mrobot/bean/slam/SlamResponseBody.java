@@ -23,6 +23,8 @@ public class SlamResponseBody<T> {
     @JSONField(name = "error_code")
     private String errorCode;
 
+    private String uuid;
+
     public String getSubName() {
         return subName;
     }
@@ -53,6 +55,14 @@ public class SlamResponseBody<T> {
 
     public void setErrorCode(String errorCode) {
         this.errorCode = errorCode;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     @Override

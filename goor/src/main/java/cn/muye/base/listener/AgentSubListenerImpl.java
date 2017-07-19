@@ -49,9 +49,10 @@ public class AgentSubListenerImpl implements TopicCallback,ApplicationContextAwa
 			String data = jsonObject.getString(TopicConstants.DATA);
 			JSONObject dataObject = JSON.parseObject(data);
 			String subName = dataObject.getString(TopicConstants.SUB_NAME);
+			String uuid = dataObject.getString(TopicConstants.UUID);
 			if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName)) {
 				FileUpladService fileUpladService = applicationContext.getBean(FileUpladService.class);
-				fileUpladService.uploadMapFile();
+				fileUpladService.uploadMapFile(uuid);
 			}
 		}
 	}
