@@ -1,6 +1,7 @@
 package cn.muye.base.service.batch;
 
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.slam.SlamRequestBody;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
@@ -8,6 +9,7 @@ import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import cn.muye.publisher.AppSubService;
+import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +116,8 @@ public class ScheduleTasks {
     @Scheduled(cron = "*/30 * * * * *") //test cron
     public void getChargeAndPosition() {
         try {
-            appSubService.sendAppPubTopic(TopicConstants.CHARGING_STATUS_INQUIRY, TopicConstants.TOPIC_TYPE_STRING);
+            SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.CHARGING_STATUS_INQUIRY);
+            appSubService.sendAppPubTopic(TopicConstants.TOPIC_TYPE_STRING,slamRequestBody);
         } catch (Exception e) {
             logger.error("获取电量信息或当前位置信息出错", e);
         }

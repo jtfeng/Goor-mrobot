@@ -28,19 +28,12 @@ CREATE TABLE `A_MAP_INFO` (
   `SCENE_NAME` varchar(50) DEFAULT NULL COMMENT '场景名',
   `PNG_IMAGE_LOCAL_PATH` varchar(100) DEFAULT NULL COMMENT '地图png文件本地地址',
   `ROS` varchar(400) DEFAULT NULL,
+  `MAP_ZIP_ID` INT DEFAULT NULL,
   `MAP_ALIAS` varchar(50) DEFAULT NULL,
   `DEVICE_ID` varchar(200) DEFAULT NULL,
   `OVERLAY_MAP` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of A_MAP_INFO
--- ----------------------------
-INSERT INTO `A_MAP_INFO` VALUES ('69', '100', null, '2017-07-12 09:55:51', 'agv', 'agv', 'e:\\download_home\\100\\SNabc0010\\agv\\map\\agv.png', '{\"image\":\"agv.pgm\",\"resolution\":0.05,\"origin\":[-15.2,-16.2,0],\"negate\":0,\"occupied_thresh\":0.65,\"free_thresh\":0.196}', null, 'SNabc0010', null);
-INSERT INTO `A_MAP_INFO` VALUES ('70', '100', null, '2017-07-12 09:55:51', 'agv2', 'agv', 'e:\\download_home\\100\\SNabc0010\\agv\\map\\agv2.png', '{\"negate\":0,\"image\":\"agv2.pgm\",\"origin\":[-4,-16.2,0],\"resolution\":0.05,\"free_thresh\":0.196,\"occupied_thresh\":0.65}', null, 'SNabc0010', null);
-INSERT INTO `A_MAP_INFO` VALUES ('71', '100', null, '2017-07-12 09:55:51', 'cloud', 'cloud', 'e:\\download_home\\100\\SNabc0010\\cloud\\map\\cloud.png', '{\"image\":\"cloud.pgm\",\"resolution\":0.05,\"origin\":[-23.2,-16.2,0],\"negate\":0,\"occupied_thresh\":0.65,\"free_thresh\":0.196}', null, 'SNabc0010', null);
-INSERT INTO `A_MAP_INFO` VALUES ('72', '100', null, '2017-07-12 09:55:51', 'F001', 'example', 'e:\\download_home\\100\\SNabc0010\\example\\map\\F001.png', '{\"image\":\"F001.pgm\",\"occupied_thresh\":0.65,\"negate\":0,\"origin\":[-4,-17,0],\"free_thresh\":0.196,\"resolution\":0.025}', null, 'SNabc0010', null);
 
 -- ----------------------------
 -- Table structure for A_MAP_POINT
@@ -571,28 +564,11 @@ CREATE TABLE `AS_ROBOT` (
   `UPDATE_TIME` datetime DEFAULT NULL COMMENT '更新时间',
   `BOX_ACTIVATED` bit(1) DEFAULT b'1' COMMENT '是否启用',
   `IS_BUSY` bit(1) DEFAULT b'0' COMMENT '状态(0-空闲， 1-占用)',
+  `IS_ONLINE` bit(1) DEFAULT b'1' COMMENT '是否在线(0-不在线， 1-在线)',
   PRIMARY KEY (`ID`),
   KEY `TYPE` (`TYPE_ID`),
   CONSTRAINT `AS_ROBOT_ibfk_1` FOREIGN KEY (`TYPE_ID`) REFERENCES `AS_ROBOT_TYPE` (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=332 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of AS_ROBOT
--- ----------------------------
-INSERT INTO `AS_ROBOT` VALUES ('314', 'testBot', 'dr1', '3', null, '2017-07-03 16:58:20', '1', '100', null, '', '\0');
-INSERT INTO `AS_ROBOT` VALUES ('315', 'dreamBot2', 'dr2', '1', null, '2017-07-03 17:00:26', '1', '100', '2017-07-03 17:01:28', null, '\0');
-INSERT INTO `AS_ROBOT` VALUES ('316', 'dreamBot3', 'dr3', '1', null, '2017-07-03 17:02:09', '1', '100', null, '', '');
-INSERT INTO `AS_ROBOT` VALUES ('317', 'dreamBot4', 'SNabc001', '1', null, '2017-07-03 17:02:14', '1', '100', null, '', '');
-INSERT INTO `AS_ROBOT` VALUES ('318', 'dreamBot5', 'dr5', '1', null, '2017-07-03 17:02:19', '1', '100', null, '', '');
-INSERT INTO `AS_ROBOT` VALUES ('319', 'dreamBot6', 'dr6', '1', null, '2017-07-03 17:02:27', '1', '100', null, '', '\0');
-INSERT INTO `AS_ROBOT` VALUES ('320', 'dreamBot7', 'dr7', '1', null, '2017-07-03 17:02:32', '1', '100', null, '', '\0');
-INSERT INTO `AS_ROBOT` VALUES ('321', 'dreamBot8', 'dr8', '1', null, '2017-07-03 17:02:40', '1', '100', null, '', '\0');
-INSERT INTO `AS_ROBOT` VALUES ('322', 'dreamBot9', 'dr9', '2', null, '2017-07-03 17:02:47', '1', '100', null, '', '\0');
-INSERT INTO `AS_ROBOT` VALUES ('323', 'dreamBot10', 'dr10', '2', null, '2017-07-03 17:02:56', '1', '100', null, '', '\0');
-INSERT INTO `AS_ROBOT` VALUES ('324', 'dreamBot11', 'dr11', '2', null, '2017-07-03 17:27:52', '1', '100', null, '', '\0');
-INSERT INTO `AS_ROBOT` VALUES ('325', 'dreamBot12', 'dr12', '3', 'dc ray ray', '2017-07-03 17:27:59', '1', '100', '2017-07-07 17:39:55', null, '\0');
-INSERT INTO `AS_ROBOT` VALUES ('328', 'daBit', 'daBit', '3', null, '2017-07-08 16:50:53', '111', '100', null, null, '\0');
-INSERT INTO `AS_ROBOT` VALUES ('331', 'newBot2', 'nb2', '3', null, '2017-07-11 20:19:35', null, '100', null, '', '\0');
+) ENGINE=InnoDB AUTO_INCREMENT=342 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for AS_ROBOT_CONFIG

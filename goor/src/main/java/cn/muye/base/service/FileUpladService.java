@@ -3,15 +3,18 @@ package cn.muye.base.service;
 import cn.mrobot.bean.FileResult;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.utils.HttpClientUtil;
 import cn.mrobot.utils.ZipUtils;
 import cn.mrobot.utils.ajax.AjaxResponse;
+import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import org.apache.http.client.ClientProtocolException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +35,8 @@ public class FileUpladService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileUpladService.class);
     public final static String PREFIX = "http://"; //前缀
+    private static final String MAP_UPLOAD_SUCCESS = "1";
+    private static final String MAP_UPLOAD_FAIL = "-1";
 
     @Value("${goor.server}")
     public String ip; //正式服务器地址
@@ -50,10 +55,13 @@ public class FileUpladService {
     @Value("${server.mapPath}")
     private String MAP_PATH;
 
+    @Autowired
+    private AppSubService appSubService;
+
     /**
      * 打包上传地图文件
      */
-    public void uploadMapFile() {
+    public void uploadMapFile(String uuid) {
         String REMOTE_URL = PREFIX + ip;
         if (lock.tryLock()) {
             try {
@@ -108,6 +116,7 @@ public class FileUpladService {
                         if (resp.getStatus() == AjaxResponse.RESPONSE_STATUS_SUCCESS) {
                             //上传成功
                             uploadFile.delete();
+                            sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传成功");
                         }
                     } else {
                         //假提示上传成功 同时删除本地文件
@@ -115,15 +124,28 @@ public class FileUpladService {
                     }
                 }
             } catch (SocketTimeoutException e) {
+                sendTopic(MAP_UPLOAD_FAIL, uuid, "socket超时");
                 LOGGER.error("socket超时", e);
             } catch (ClientProtocolException e) {
+                sendTopic(MAP_UPLOAD_FAIL, uuid, "socket超时");
                 LOGGER.error("socket超时", e);
             } catch (Exception e) {
+                sendTopic(MAP_UPLOAD_FAIL, uuid, "上传错误");
                 LOGGER.error("上传错误", e);
             } finally {
                 this.lock.unlock();
             }
         }
+    }
+
+    private void sendTopic(String errorCode, String uuid, String message) {
+        //封装数据，通知Artmis地图上传成功
+        SlamBody slamBody = new SlamBody();
+        slamBody.setErrorCode(errorCode);
+        slamBody.setPubName(TopicConstants.AGENT_LOCAL_MAP_UPLOAD);
+        slamBody.setUuid(uuid);
+        slamBody.setMsg(message);
+        appSubService.sendAppPubTopic(TopicConstants.TOPIC_TYPE_STRING, slamBody);
     }
 
     private String getSceneName() {
@@ -138,7 +160,7 @@ public class FileUpladService {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < files.length; i++) {
             String name = files[i].getName();
-            if(name.lastIndexOf(".zip") >= 0 || name.lastIndexOf(".flags") >= 0)
+            if (name.lastIndexOf(".zip") >= 0 || name.lastIndexOf(".flags") >= 0)
                 continue;
             sb.append(files[i].getName()).append(",");
         }

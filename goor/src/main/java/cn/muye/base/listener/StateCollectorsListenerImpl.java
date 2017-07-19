@@ -18,16 +18,15 @@ import org.apache.log4j.Logger;
  * Version:1.0
  */
 public class StateCollectorsListenerImpl implements TopicCallback {
-	private static Logger logger = Logger.getLogger(StateCollectorsListenerImpl.class);
-	@Override
-	public void handleMessage(Message message) {
+    private static Logger logger = Logger.getLogger(StateCollectorsListenerImpl.class);
+
+    @Override
+    public void handleMessage(Message message) {
         if (TopicConstants.DEBUG)
-		logger.info("From ROS ====== state_collectors topic  " + message.toString());
-		if(TopicSubscribeInfo.checkPubNameIsNeedConsumer(message.toString())){
-            if (TopicConstants.DEBUG)
-			logger.info(" ====== message.toString()===" + message.toString());
-			ProducerCommon msg = SingleFactory.getProducerCommon();
-			msg.sendAgentPubMessage(message.toString());
-		}
-	}
+            logger.info("From ROS ====== state_collectors topic  " + message.toString());
+        if (TopicConstants.DEBUG)
+            logger.info(" ====== message.toString()===" + message.toString());
+        ProducerCommon msg = SingleFactory.getProducerCommon();
+        msg.sendStateCollectorMessage(message.toString());
+    }
 }

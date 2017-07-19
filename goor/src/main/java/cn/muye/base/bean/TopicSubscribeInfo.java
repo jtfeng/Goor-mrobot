@@ -71,7 +71,7 @@ public class TopicSubscribeInfo implements Serializable {
 		TopicCallback receiveCallback = new X86MissionReceiveListenerImpl();
 		receiveTopic.subscribe(receiveCallback);
 		//接收机器人当前状态
-		Topic stateCollectorsTopic = new Topic(ros, TopicConstants.STATE_COLLECTORS, TopicConstants.TOPIC_TYPE_STRING);
+		Topic stateCollectorsTopic = new Topic(ros, TopicConstants.STATE_COLLECTOR, TopicConstants.TOPIC_TYPE_STRING);
 		TopicCallback stateCollectorsCallback = new StateCollectorsListenerImpl();
 		stateCollectorsTopic.subscribe(stateCollectorsCallback);
 	}
