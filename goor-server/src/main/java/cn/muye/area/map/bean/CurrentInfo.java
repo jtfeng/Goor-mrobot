@@ -13,7 +13,7 @@ public class CurrentInfo {
 
     private MapInfo mapInfo;
 
-    private CollectorState collectorState;
+//    private CollectorState collectorState;
 
     public String getPose() {
         return pose;
@@ -31,11 +31,11 @@ public class CurrentInfo {
         this.mapInfo = mapInfo;
     }
 
-    public CollectorState getCollectorState() {
-        return collectorState;
-    }
-
-    public void setCollectorState(CollectorState collectorState) {
-        this.collectorState = collectorState;
-    }
+//    public CollectorState getCollectorState() {
+//        return collectorState;
+//    }
+//
+//    public void setCollectorState(CollectorState collectorState) {
+//        this.collectorState = collectorState;
+//    }
 }
