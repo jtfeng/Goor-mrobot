@@ -5,6 +5,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.Message;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.MessageView;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.github.pagehelper.PageInfo;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @Controller
 @Slf4j
 @RequestMapping("sendLog")
-public class OffLineMessageController {
+public class SendLogController {
     @Autowired
     private OffLineMessageService offLineMessageService;
 
@@ -43,8 +44,8 @@ public class OffLineMessageController {
     private AjaxResult pageList(WhereRequest whereRequest){
         try {
             List<OffLineMessage> offLineMessageList = offLineMessageService.pageList(whereRequest.getPage(),whereRequest.getPageSize());
-            List<MessageInfo> messageInfoList = offLineMessageList.stream().map(offLineMessage -> new MessageInfo(offLineMessage)).collect(Collectors.toList());
-            PageInfo<MessageInfo> pageList = new PageInfo<>(messageInfoList);
+            List<MessageView> messageViewList = offLineMessageList.stream().map(offLineMessage -> new MessageView(offLineMessage)).collect(Collectors.toList());
+            PageInfo<MessageView> pageList = new PageInfo<>(messageViewList);
             return AjaxResult.success(pageList,"发送日志查询成功");
         } catch (Exception e) {
             log.error("查询发送日志出现错误", e);
