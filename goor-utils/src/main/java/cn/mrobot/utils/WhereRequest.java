@@ -7,9 +7,9 @@ package cn.mrobot.utils;
  */
 public class WhereRequest {
 
-	private int page;
+	private int page = 1;
 
-	private int pageSize;
+	private int pageSize = 10;
 
     private String queryObj;
 

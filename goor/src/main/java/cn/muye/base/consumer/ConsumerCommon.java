@@ -1,17 +1,19 @@
 package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.model.message.OffLineMessage;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.MapService;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
-import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import com.alibaba.fastjson.JSON;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Service;
 import edu.wpi.rail.jrosbridge.callback.ServiceCallback;
@@ -19,23 +21,29 @@ import edu.wpi.rail.jrosbridge.services.ServiceRequest;
 import edu.wpi.rail.jrosbridge.services.ServiceResponse;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
-
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
+import java.util.Properties;
 
 @Component
 public class ConsumerCommon {
     private static Logger logger = Logger.getLogger(ConsumerCommon.class);
     @Autowired
     private Ros ros;
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
+
+    //    @Autowired
+//    private RabbitTemplate rabbitTemplate;
     @Autowired
     private ReceiveMessageService receiveMessageService;
     @Autowired
@@ -74,13 +82,78 @@ public class ConsumerCommon {
                     return clientTimeSynchronized(messageInfo);
                 }
 
+                if (MessageType.ROBOT_BATTERY_THRESHOLD.equals(messageInfo.getMessageType())) {
+                    String commonInfoStr = messageInfo.getMessageText();
+                    CommonInfo commonInfo = JSON.parseObject(commonInfoStr, CommonInfo.class);
+                    String robotInfoStr = commonInfo.getPublishMessage();
+                    Robot robotInfo = JSON.parseObject(robotInfoStr, Robot.class);
+                    //改缓存
+                    CacheInfoManager.setRobotInfoCache(robotInfo);
+                    //改配置文件
+                    updateProperties("application.properties", robotInfo.getBatteryThreshold());
+                    return syncRobotBatteryThreshold(messageInfo);
+                }
+
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 return service.publishMessage(ros, messageInfo);
             }
+
         }catch (Exception e){
             logger.error("topicCommandAndReceiveMessage Exception", e);
         }
         return AjaxResult.failed();
+    }
+
+    /**
+     * 同步机器人电量阈值
+     * @param messageInfo
+     * @return
+     */
+    private AjaxResult syncRobotBatteryThreshold(MessageInfo messageInfo) {
+        ScheduledHandleService service = new ScheduledHandleServiceImp();
+        return service.publishMessage(ros, messageInfo);
+    }
+
+    /**
+     * 传递键值对的Map，更新properties文件
+     *
+     * @param fileName
+     *            文件名(放在resource源包目录下)，需要后缀
+     * @param batteryThreshold
+     *            键值对Map
+     */
+    public static void updateProperties(String fileName, int batteryThreshold/*Map<String, String> keyValueMap*/) {
+        //getResource方法使用了utf-8对路径信息进行了编码，当路径中存在中文和空格时，他会对这些字符进行转换，这样，
+        //得到的往往不是我们想要的真实路径，在此，调用了URLDecoder的decode方法进行解码，以便得到原始的中文及空格路径。
+        String filePath = ConsumerCommon.class.getClassLoader().getResource(fileName).getFile();
+        Properties props = null;
+        BufferedWriter bw = null;
+
+        try {
+            filePath = URLDecoder.decode(filePath,"utf-8");
+            logger.debug("updateProperties propertiesPath:" + filePath);
+            props = PropertiesLoaderUtils.loadProperties(new ClassPathResource(fileName));
+            logger.debug("updateProperties old:"+props);
+
+            // 写入属性文件
+            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath)));
+
+//            props.clear();// 清空旧的文件
+            props.setProperty("robot.batteryThreshold", String.valueOf(batteryThreshold));
+//            for (String key : keyValueMap.keySet())
+//                props.setProperty(key, keyValueMap.get(key));
+
+            logger.debug("updateProperties new:"+props);
+            props.store(bw, "");
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        } finally {
+            try {
+                bw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

@@ -5,4 +5,5 @@ public interface ScheduledHandleService {
 
     void executeTwentyThreeAtNightPerDay();
 
+    void executeRobotHeartBeat();
 }

@@ -10,6 +10,7 @@
         <result property="batteryThreshold" column="BATTERY_THRESHOLD"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
+        <result property="isOnline" column="IS_ONLINE"/>
     </resultMap>
 
     <select id="listRobot" resultMap="robotResult">
@@ -20,7 +21,8 @@
             type.ID as TYPE_ID,
           config.BATTERY_THRESHOLD,
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
-            robot.BOX_ACTIVATED
+            robot.BOX_ACTIVATED,
+            robot.IS_ONLINE
         FROM
             AS_ROBOT robot
         LEFT JOIN AS_ROBOT_TYPE type ON robot.TYPE_ID = type.ID

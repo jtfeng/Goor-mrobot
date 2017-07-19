@@ -1,9 +1,8 @@
 package cn.muye.base.service.mapper.message;
 
-import cn.muye.base.mapper.config.AppConfigMapper;
 import cn.muye.base.mapper.message.OffLineMessageMapper;
-import cn.muye.base.model.config.AppConfig;
 import cn.muye.base.model.message.OffLineMessage;
+import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +22,9 @@ public class OffLineMessageService {
     private OffLineMessageMapper offLineMessageMapper;
 
     public OffLineMessage get(Long id){
+        if(null == id){
+            return null;
+        }
         return offLineMessageMapper.get(id);
     }
 
@@ -31,17 +33,24 @@ public class OffLineMessageService {
     }
 
     public long save(OffLineMessage message) throws Exception {
+        if(null == message){
+            return 0L;
+        }
         message.setSendTime(new Date());
         return offLineMessageMapper.save(message);
     }
 
     public void update(OffLineMessage message) throws Exception {
+        if(null == message){
+            return;
+        }
         message.setUpdateTime(new Date());
         offLineMessageMapper.update(message);
     }
 
-    public List<OffLineMessage> list() throws Exception {
-        return offLineMessageMapper.list();
+    public List<OffLineMessage> pageList(int page, int pageSize) throws Exception {
+        PageHelper.startPage(page, pageSize);
+        return offLineMessageMapper.pageList();
     }
 
     public List<OffLineMessage> listByIsSuccess(boolean isSuccess) throws Exception {

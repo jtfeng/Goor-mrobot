@@ -135,7 +135,7 @@ public class Mission extends BaseBean {
 			for(MissionItem missionItem : missionItems) {
 				missionItemDTOS.add(missionItem.toDTO());
 			}
-			missionDTO.setMissionItemDTOSet(missionItemDTOS);
+			missionDTO.setMissionItemSet(missionItemDTOS);
 		}
 		return missionDTO;
 	}

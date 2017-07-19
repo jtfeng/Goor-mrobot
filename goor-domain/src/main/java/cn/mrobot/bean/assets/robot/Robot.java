@@ -32,6 +32,8 @@ public class Robot extends BaseBean {
 
     private Boolean isBusy = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
 
+    private Boolean isOnline = Boolean.TRUE; //在线状态
+
     @Transient
     private List<RobotPassword> passwords;
 
@@ -125,5 +127,13 @@ public class Robot extends BaseBean {
 
     public void setChargerMapPointList(List<MapPoint> chargerMapPointList) {
         this.chargerMapPointList = chargerMapPointList;
+    }
+
+    public Boolean getOnline() {
+        return isOnline;
+    }
+
+    public void setOnline(Boolean online) {
+        isOnline = online;
     }
 }

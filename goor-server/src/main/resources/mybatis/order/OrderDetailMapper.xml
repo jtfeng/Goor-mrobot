@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.order.mapper.OrderDetailMapper">
+
+    <resultMap id="orderDetailResult" type="cn.mrobot.bean.order.OrderDetail">
+        <id property="id" column="id" />
+        <result property="orderId" column="orderId" />
+        <result property="status" column="status" />
+        <result property="finishDate" column="finishDate" />
+        <result property="storeId" column="storeId" />
+        <result property="createBy" column="createBy" />
+        <result property="createTime" column="createTime" />
+        <collection property="goodsInfoList" ofType="cn.mrobot.bean.order.GoodsInfo">
+            <id column="goodsInfo.id" property="id"/>
+            <result column="goodsInfo.num" property="num"/>
+            <association property="goods" javaType="cn.mrobot.bean.order.Goods">
+                <id column="goods.id" property="id"/>
+                <result column="goods.name" property="name"/>
+                <result column="goods.unit" property="unit"/>
+                <result column="goods.deleteStatus" property="deleteStatus"/>
+            </association>
+        </collection>
+    </resultMap>
+
+    <sql id = "orderDetailColumn">
+        od.id AS "id",
+        od.order_id AS "orderId",
+        od.finish_date AS "finishDate",
+        od.status AS "status",
+        od.store_id AS "storeId",
+        od.created_by AS "createdBy",
+        od.create_time AS "createTime",
+        gi.id AS "goodsInfo.id",
+        gi.num AS "goodsInfo.num",
+        g.id AS "goods.id",
+        g.name AS "goods.name",
+        g.unit AS "goods.unit",
+        g.delete_status AS "goods.deleteStatus"
+    </sql>
+
+    <sql id = "orderDetailJoin">
+        LEFT JOIN OR_GOODS_INFO gi ON od.id = gi.order_detail_id
+        LEFT JOIN OR_GOODS g ON gi.goods_id = g.id
+    </sql>
+
+    <select id="listOrderDetailByOrderId" resultMap="orderDetailResult">
+        select
+        <include refid="orderDetailColumn" />
+        from OR_ORDER_DETAIL od
+        <include refid="orderDetailJoin" />
+        where od.order_id = #{orderId}
+    </select>
+
+    <select id="getOrderDetailInfo" resultMap="orderDetailResult">
+        select
+        <include refid="orderDetailColumn" />
+        from OR_ORDER_DETAIL od
+        <include refid="orderDetailJoin" />
+        where od.id = #{id}
+    </select>
+
+    <select id="countUndoneDetail" resultType="Integer">
+        select count(1)
+        from OR_ORDER_DETAIL
+        where order_id = #{orderId} AND status = 0
+    </select>
+
+
+
+
+</mapper>

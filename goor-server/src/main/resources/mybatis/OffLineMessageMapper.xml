@@ -48,10 +48,10 @@
     WHERE o.SUCCESS = #{success} ASC limit 1;
   </select>
 
-  <select id="list" resultMap="offLineMessageResult">
+  <select id="pageList" resultMap="offLineMessageResult">
     SELECT
     <include refid="Base_Column_List" />
-    FROM OFFLINE_MESSAGE o
+    FROM OFFLINE_MESSAGE o ORDER BY o.SEND_TIME DESC
   </select>
 
   <select id="listByIsSuccess" resultMap="offLineMessageResult">

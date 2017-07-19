@@ -1,16 +1,18 @@
 package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.charge.ChargeInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
+import cn.mrobot.utils.aes.AES;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.base.consumer.service.PickUpPswdVerifyService;
-import cn.muye.base.consumer.service.X86MissionEventService;
+import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.charge.service.ChargeInfoService;
@@ -44,6 +46,9 @@ public class ConsumerCommon {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private RobotService robotService;
 
     /**
      * 透传ros发布的topic：agent_pub
@@ -122,6 +127,7 @@ public class ConsumerCommon {
                 String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
+                    if (TopicConstants.DEBUG)
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
 
@@ -177,84 +183,6 @@ public class ConsumerCommon {
             CacheInfoManager.setMessageCache(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCurrentPose exception", e);
-        }
-    }
-
-    /**
-     * 透传ros发布的topic：x86_mission_queue_response
-     *
-     * @param messageInfo
-     */
-    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE)
-    public void directX86MissionQueueResponse(@Payload MessageInfo messageInfo) {
-        try {
-
-        } catch (Exception e) {
-            logger.error("consumer directX86MissionQueueResponse exception", e);
-        }
-    }
-
-    @Autowired
-    X86MissionEventService x86MissionEventService;
-
-    /**
-     * 透传ros发布的topic：x86_mission_state_response
-     *
-     * @param messageInfo
-     */
-    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE)
-    public void directX86MissionStateResponse(@Payload MessageInfo messageInfo) {
-        try {
-            //直接service方法处理上报的数据
-            x86MissionEventService.handleX86MissionEvent(messageInfo);
-        } catch (Exception e) {
-            logger.error("consumer directX86MissionStateResponse exception", e);
-        }
-    }
-
-    /**
-     * 透传ros发布的topic：x86_mission_event
-     *
-     * @param messageInfo
-     */
-    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_EVENT)
-    public void directX86MissionEvent(@Payload MessageInfo messageInfo) {
-        try {
-
-        } catch (Exception e) {
-            logger.error("consumer directX86MissionEvent exception", e);
-        }
-    }
-
-    /**
-     * 透传ros发布的topic：x86_mission_receive，收到回执消息更新数据库
-     *
-     * @param messageInfo
-     */
-    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_RECEIVE)
-    public void directX86MissionReceive(@Payload MessageInfo messageInfo) {
-        try {
-            if(null != messageInfo){
-                return;
-            }
-            JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
-            String data = jsonObject.getString(TopicConstants.DATA);
-            JSONObject jsonObjectData = JSON.parseObject(data);
-            String uuId = jsonObjectData.getString(TopicConstants.UUID);
-            String code = jsonObjectData.getString(TopicConstants.CODE);
-            if(StringUtils.isEmpty(uuId)){
-                return;
-            }
-            OffLineMessage message = new OffLineMessage();
-            message.setMessageStatusType("0".equals(code) ? MessageStatusType.ROBOT_RECEIVE_SUCCESS.getIndex() : MessageStatusType.ROBOT_RECEIVE_FAIL.getIndex());//如果是回执，将对方传过来的信息带上
-            message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
-            message.setSuccess(true);//接收到回执，发送消息成功
-            message.setUuId(uuId);//更新的主键
-            message.setReceiverId(messageInfo.getSenderId());
-            message.setUpdateTime(messageInfo.getSendTime());//更新时间
-            offLineMessageService.update(message);//更新发送的消息
-        } catch (Exception e) {
-            logger.error("consumer directX86MissionReceive exception", e);
         }
     }
 
@@ -353,6 +281,25 @@ public class ConsumerCommon {
             }
         }
         return;
+    }
+
+    /**
+     * 接收goor发布的topic：direct.command_robot_info
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_ROBOT_INFO)
+    public void subscribeRobotInfo(@Payload MessageInfo messageInfo) {
+        try {
+            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
+                String robotStr = AES.decryptFromBase64(messageInfo.getMessageText(), Constant.AES_KEY);
+                Robot robotNew = JSON.parseObject(robotStr, Robot.class);
+                CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), messageInfo.getSendTime().getTime());
+                robotService.autoRegister(robotNew);
+            }
+        } catch (Exception e) {
+            logger.error("consumer robotInfo exception", e);
+        }
     }
 
 }

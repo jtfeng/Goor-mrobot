@@ -1,10 +1,10 @@
 package cn.muye.base.cache;
 
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.FileUtils;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.model.config.AppConfig;
 import cn.muye.base.service.mapper.config.AppConfigService;
 import org.apache.log4j.Logger;
@@ -12,6 +12,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class CacheInfoManager implements ApplicationContextAware {
@@ -33,6 +35,11 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, MessageInfo> mapCurrentCache = new ConcurrentHashMapCache<String, MessageInfo>();
     //机器人原始地图的缓存
     private static ConcurrentHashMapCache<String, MapInfo> mapOriginalCache = new ConcurrentHashMapCache<String, MapInfo>();
+	/** uuid 的缓存 */
+	private static ConcurrentHashMapCache<String, MessageInfo> UUIDCache = new ConcurrentHashMapCache<String, MessageInfo>();
+
+    /** 机器人同步时间的缓存 */
+    private static ConcurrentHashMap<String, Long> robotAutoRegisterTimeCache = new ConcurrentHashMap<>();
 
     static {
 
@@ -41,7 +48,8 @@ public class CacheInfoManager implements ApplicationContextAware {
         messageCache.setMaxLifeTime(0);
         mapCurrentCache.setMaxLifeTime(0);
         mapOriginalCache.setMaxLifeTime(0);
-    }
+		UUIDCache.setMaxLifeTime(60*1000);//设置超时时间60秒
+	}
 
     private CacheInfoManager() {
 
@@ -79,6 +87,13 @@ public class CacheInfoManager implements ApplicationContextAware {
         }
         return appConfigInfo;
     }
+	public static void setUUIDCache(String uuId, MessageInfo messageInfo){
+		UUIDCache.put(uuId, messageInfo);
+	}
+
+	public static MessageInfo getUUIDCache(String uuId){
+		return UUIDCache.get(uuId);
+	}
 
 
     public static void setMapCurrentCache(MessageInfo messageInfo) {
@@ -116,4 +131,11 @@ public class CacheInfoManager implements ApplicationContextAware {
         CacheInfoManager.applicationContext = applicationContext;
     }
 
+    public static Long getRobotAutoRegisterTimeCache(String robotCode) {
+        return robotAutoRegisterTimeCache.get(Constant.ROBOT_AUTO_REGISTER_PREFIX + robotCode);
+    }
+
+    public static void setRobotAutoRegisterTimeCache(String robotCode, Long time) {
+        robotAutoRegisterTimeCache.put(Constant.ROBOT_AUTO_REGISTER_PREFIX + robotCode, time);
+    }
 }

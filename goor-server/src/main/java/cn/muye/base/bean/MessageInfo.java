@@ -60,7 +60,7 @@ public class MessageInfo implements Serializable {
             if(!StringUtil.isEmpty(message.getMessageType())){
                 this.messageType = MessageType.valueOf(message.getMessageType());
             }
-            if(message.getMessageStatusType() > 0){
+            if(null != message.getMessageStatusType() && message.getMessageStatusType() > 0){
                 this.messageStatusType = MessageStatusType.getType(message.getMessageStatusType());
             }
         }
@@ -72,7 +72,7 @@ public class MessageInfo implements Serializable {
             if(!StringUtil.isEmpty(message.getMessageType())){
                 this.messageType = MessageType.valueOf(message.getMessageType());
             }
-            if(message.getMessageStatusType() > 0){
+            if(null != message.getMessageStatusType() && message.getMessageStatusType() > 0){
                 this.messageStatusType = MessageStatusType.getType(message.getMessageStatusType());
             }
         }

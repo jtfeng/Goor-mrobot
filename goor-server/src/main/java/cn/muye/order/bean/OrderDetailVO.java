@@ -2,7 +2,8 @@ package cn.muye.order.bean;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.order.GoodsInfo;
+import cn.mrobot.bean.assets.shelf.Shelf;
+import com.alibaba.fastjson.annotation.JSONField;
 
 import java.util.Date;
 import java.util.List;
@@ -13,25 +14,37 @@ import java.util.List;
  */
 public class OrderDetailVO {
 
-    private List<GoodsInfo>  goodsInfoList; //装配货物的列表
+    private List<GoodsInfoVO>  goodsInfoList; //装配货物的列表
 
     private Robot robot;  //运输的robot
 
     private Station startStation; //下单站
 
-    private Date beginDate; //开始时间
-
     private Boolean needSign; //是否需要签收
 
+    private Shelf shelf; //货架编号
+
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date beginDate; //开始时间
+
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date finishDate; //到达或者签收时间
 
     private Integer status; //状态
 
-    public List<GoodsInfo> getGoodsInfoList() {
+    public Shelf getShelf() {
+        return shelf;
+    }
+
+    public void setShelf(Shelf shelf) {
+        this.shelf = shelf;
+    }
+
+    public List<GoodsInfoVO> getGoodsInfoList() {
         return goodsInfoList;
     }
 
-    public void setGoodsInfoList(List<GoodsInfo> goodsInfoList) {
+    public void setGoodsInfoList(List<GoodsInfoVO> goodsInfoList) {
         this.goodsInfoList = goodsInfoList;
     }
 

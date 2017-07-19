@@ -61,7 +61,7 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
     }
 
     @Override
-    public RobotPassword findByRobotIdAndBoxNumAndPswd(RobotPassword robotPassword) {
+    public RobotPassword findByRobotIdAndBoxNumAndPwd(RobotPassword robotPassword) {
         if (robotPassword == null ||
                 robotPassword.getBoxNum() == null ||
                 robotPassword.getRobotId() == null ||
@@ -69,6 +69,23 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
             return null;
         }
         return myMapper.selectOne(robotPassword);
+    }
+
+    @Override
+    public String getPwdByRobotIdAndBoxNum(Long robotId, Integer boxNum) {
+        RobotPassword robotPassword = new RobotPassword();
+        robotPassword.setRobotId(robotId);
+        robotPassword.setBoxNum(boxNum);
+        RobotPassword pwd = myMapper.selectOne(robotPassword);
+        return pwd == null ? "" : pwd.getPassword();
+    }
+
+    @Override
+    public String getPwdByRobotId(Long robotId) {
+        RobotPassword robotPassword = new RobotPassword();
+        robotPassword.setRobotId(robotId);
+        RobotPassword pwd = myMapper.selectOne(robotPassword);
+        return pwd == null ? "" : pwd.getPassword();
     }
 
 

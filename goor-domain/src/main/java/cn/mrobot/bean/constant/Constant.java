@@ -51,10 +51,15 @@ public class Constant {
 
     public final static String AES_KEY = "trOmVF7Uaqd4h9AN"; //自助注册AES校验码
 
+    public final static String ROBOT_CACHE_KEY = "robotInfo"; //自动注册机器人缓存KEY
+
+    public final static Long CHECK_IF_OFFLINE_TIME = 60000L; //1分钟=60000毫秒
+
     //与地图点相关的指令列表
     public final static List<Long> ORDER_MAP_POINT_RELATE_LIST = Arrays.asList(
             1L,//单点导航
             4L//
     );
 
+    public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";
 }
