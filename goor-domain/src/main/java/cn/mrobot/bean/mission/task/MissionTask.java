@@ -14,6 +14,10 @@ public class MissionTask extends BaseBean {
     private static final long serialVersionUID = 3913238395538242407L;
 
     /**
+     * 场景ID
+     */
+    private Long sceneId;
+    /**
      *任务列表ID
      */
     private Long missionListId;
@@ -48,6 +52,14 @@ public class MissionTask extends BaseBean {
     private String name; //任务名
     private String description; //描述
     private Long intervalTime;
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
+    }
 
     public List<MissionItemTask> getMissionItemTasks() {
         return missionItemTasks;

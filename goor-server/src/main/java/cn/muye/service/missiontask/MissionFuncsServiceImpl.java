@@ -2,6 +2,7 @@ package cn.muye.service.missiontask;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.log.mission.JsonMissionStateResponse;
 import cn.mrobot.bean.mission.task.JsonMissionListPub;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
@@ -145,7 +146,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //查询是否有正在执行中的任务
         List<MissionListTask> listTasks =
                 missionListTaskService.findByRobotCodeAndState(
-                        robotCode, "");
+                        robotCode, JsonMissionStateResponse.state_executing);
         if (listTasks != null &&
                 !listTasks.isEmpty()){
             for (MissionListTask mlt :
@@ -593,6 +594,53 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////
+    ////  测试任务及任务item相关方法
+    ////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * 获取测试任务
+     * @param mp
+     * @return
+     */
+    private MissionTask getTestTask(Order order, MapPoint mp) {
+        MissionTask missionTask = new MissionTask();
+        missionTask.setDescription("测试任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState("");
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getVoiceItemTask(order, mp));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取测试ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getTestItemTask(Order order, MapPoint mp) {
+        MissionItemTask itemTask = new MissionItemTask();
+        itemTask.setDescription("测试任务");
+        itemTask.setName(MissionItemName_test);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData("");
+        itemTask.setState("");
+        itemTask.setFeatureValue(FeatureValue_test);
+
+        return itemTask;
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////
     ////  任务及任务item相关方法
     ////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -810,11 +858,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MPointType_SONGHUO = "songhuo";//中间的送货点，order detail station point
     public static final String MPointType_CHONGDIAN = "chongdian";//充电点
 
+    public static final String FeatureValue_test = "test";//测试命令
+
     public static final String FeatureValue_nav = "nav";//单点导航命令
     public static final String FeatureValue_waiting = "waiting";//等待命令
     public static final String FeatureValue_gotocharge = "gotocharge";//进入充电命令
     public static final String FeatureValue_leavecharge = "leavecharge";//离开充电命令
     public static final String FeatureValue_mp3 = "mp3";//语音命令
+
+    public static final String MissionItemName_test = "fake";
 
     public static final String MissionItemName_nav = "laserNavigation";
     public static final String MissionItemName_gotocharge = "gotoCharge";
