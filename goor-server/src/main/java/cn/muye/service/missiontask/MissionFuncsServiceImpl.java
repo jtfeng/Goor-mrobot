@@ -1,4 +1,4 @@
-package cn.muye.funcs.service;
+package cn.muye.service.missiontask;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
@@ -15,7 +15,7 @@ import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
-import cn.muye.base.consumer.service.X86MissionDispatchService;
+import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;

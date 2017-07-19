@@ -1,4 +1,4 @@
-package cn.muye.base.consumer.service;
+package cn.muye.service.consumer.topic;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import org.apache.log4j.Logger;

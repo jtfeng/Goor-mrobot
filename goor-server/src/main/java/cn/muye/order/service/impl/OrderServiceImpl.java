@@ -6,7 +6,7 @@ import cn.mrobot.bean.order.OrderDetail;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.service.imp.BasePreInject;
-import cn.muye.funcs.service.MissionFuncsService;
+import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.order.mapper.GoodsInfoMapper;
 import cn.muye.order.mapper.OrderMapper;
 import cn.muye.order.service.OrderDetailService;
