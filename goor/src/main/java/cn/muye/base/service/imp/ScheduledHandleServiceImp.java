@@ -23,14 +23,13 @@ import edu.wpi.rail.jrosbridge.messages.Message;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
-
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ScheduledHandleServiceImp implements ScheduledHandleService, ApplicationContextAware {
@@ -45,7 +44,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private String localRobotSN;
 
-    public ScheduledHandleServiceImp(){
+    public ScheduledHandleServiceImp() {
 
     }
 
@@ -62,7 +61,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 info.setMessageType(MessageType.REPLY);
                 rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_REPORT, info);
                 message.setSuccess(true);
-                message.setSendCount(message.getSendCount()+1);
+                message.setSendCount(message.getSendCount() + 1);
                 receiveMessageService.update(message);
             }
         } catch (final Exception e) {
@@ -75,7 +74,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         logger.info("-->> Scheduled rosHealthCheck start");
         try {
             ros = applicationContext.getBean(Ros.class);
-            if(null == ros){
+            if (null == ros) {
                 logger.error("-->> ros is not connect");
                 return;
             }
@@ -87,7 +86,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
 
             logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
-            if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX){
+            if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 ros.disconnect();
                 ros.connect();
                 TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
@@ -101,7 +100,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void downloadResource(){
+    public void downloadResource() {
         try {
             logger.info("-->> Scheduled downloadResource start");
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
@@ -109,10 +108,10 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             List<ReceiveMessage> list = receiveMessageService.listByMessageStatus(new ReceiveMessage(MessageStatusType.FILE_NOT_DOWNLOADED.getIndex()));//从接收的库查询出需要下载的资源
             for (ReceiveMessage message : list) {
                 MessageInfo messageInfo = new MessageInfo(message);
-                if(null != messageInfo){
+                if (null != messageInfo) {
                     CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
                     //忽略掉不需要发topic的资源
-                    if(null != commonInfo && StringUtils.isEmpty(commonInfo.getTopicName())){
+                    if (null != commonInfo && StringUtils.isEmpty(commonInfo.getTopicName())) {
                         continue;
                     }
                 }
@@ -136,7 +135,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void publishMessage(){
+    public void publishMessage() {
         try {
 //            logger.info("-->> Scheduled publishMessage start");
             ros = applicationContext.getBean(Ros.class);
@@ -145,21 +144,21 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             for (ReceiveMessage message : list) {
                 CommonInfo commonInfo = JSON.parseObject(message.getMessageText(), CommonInfo.class);
                 MessageInfo messageInfo = new MessageInfo(message);
-                if(StringUtil.isEmpty(commonInfo.getTopicName())
+                if (StringUtil.isEmpty(commonInfo.getTopicName())
                         || StringUtil.isEmpty(commonInfo.getTopicType())
-                        || StringUtil.isEmpty(commonInfo.getPublishMessage())){
+                        || StringUtil.isEmpty(commonInfo.getPublishMessage())) {
                     message.setMessageStatusType(MessageStatusType.PARAMETER_ERROR.getIndex());
                     this.updateReceiveMessage(message);
                     return;
                 }
-                if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX){
+                if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                     Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                     Message toSend = new Message(commonInfo.getPublishMessage());
                     echo.publish(toSend);
                     //更新发布状态，已经发送
                     message.setMessageStatusType(MessageStatusType.PUBLISH_ROS_MESSAGE.getIndex());
                     this.updateReceiveMessage(message);
-                }else{
+                } else {
                     message.setMessageStatusType(MessageStatusType.ROS_OFF_LINE.getIndex());
                     this.updateReceiveMessage(message);
                     logger.info("-->> publishMessage fail, ros not connect");
@@ -171,25 +170,25 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public AjaxResult publishMessage(Ros ros, MessageInfo messageInfo){
+    public AjaxResult publishMessage(Ros ros, MessageInfo messageInfo) {
         try {
             logger.info("-->> parameter publishMessage start");
             CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
-            if(StringUtil.isEmpty(commonInfo)
+            if (StringUtil.isEmpty(commonInfo)
                     || StringUtil.isEmpty(commonInfo.getTopicName())
                     || StringUtil.isEmpty(commonInfo.getTopicType())
-                    || StringUtil.isEmpty(commonInfo.getPublishMessage())){
+                    || StringUtil.isEmpty(commonInfo.getPublishMessage())) {
                 logger.warn("-->> publishMessage commonInfo is null");
                 return AjaxResult.failed(MessageStatusType.PARAMETER_ERROR.getName());
             }
-            long end = System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache();
-            if((System.currentTimeMillis()-CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX){
+            long end = System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache();
+            if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                 Message toSend = new Message(commonInfo.getPublishMessage());
                 echo.publish(toSend);
                 logger.info("-->> publishMessage commonInfo to ros success");
                 return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());
-            }else{
+            } else {
                 logger.info("-->> publishMessage fail, ros not connect");
                 return AjaxResult.failed(MessageStatusType.ROS_OFF_LINE.getName());
             }
@@ -200,7 +199,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void executeTwentyThreeAtNightPerDay(){
+    public void executeTwentyThreeAtNightPerDay() {
         logger.info("Scheduled clear message start");
         try {
             ReceiveMessage receiveMessage = new ReceiveMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
@@ -214,7 +213,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         }
     }
 
-    public void updateReceiveMessage(ReceiveMessage message){
+    public void updateReceiveMessage(ReceiveMessage message) {
         message.setSuccess(false);
         try {
             receiveMessageService.update(message);
@@ -223,13 +222,13 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         }
     }
 
-    private boolean getLocalRobotSN(){
-        if(null == applicationContext){
+    private boolean getLocalRobotSN() {
+        if (null == applicationContext) {
             logger.error("sendGoorMessage applicationContext is null error");
             return false;
         }
         localRobotSN = (String) applicationContext.getBean("localRobotSN");
-        if(StringUtils.isEmpty(localRobotSN)){
+        if (StringUtils.isEmpty(localRobotSN)) {
             logger.error("sendGoorMessage localRobotSN is null error ");
             return false;
         }
@@ -258,14 +257,27 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void sendRobotInfo() {
+    public AjaxResult sendRobotInfo() {
+        ros = applicationContext.getBean(Ros.class);
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
         MessageInfo info = new MessageInfo();
         Robot robot = CacheInfoManager.getRobotInfoCache();
-        info.setMessageText(JSON.toJSONString(robot));
-        info.setSendTime(new Date());
-        info.setSenderId(localRobotSN);
-        info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
-        rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
+        if (robot != null) {
+            //电量阈值发送到ROS
+            CommonInfo commonInfo = new CommonInfo();
+            commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
+            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            commonInfo.setPublishMessage(JSON.toJSONString(robot));
+            info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            info.setSendTime(new Date());
+            info.setSenderId("goor-server");
+            info.setReceiverId(robot.getCode());
+            info.setMessageType(MessageType.ROBOT_BATTERY_THRESHOLD);
+            info.setMessageText(JSON.toJSONString(commonInfo));
+            ScheduledHandleService service = new ScheduledHandleServiceImp();
+            return service.publishMessage(ros, info);
+        } else {
+            return AjaxResult.failed("自动注册失败");
+        }
     }
 }

@@ -48,6 +48,7 @@ public class TopicConstants {
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
+	public static final String TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD = "ros_robot_battery_threshold"; //发布电量阈值的topic
 	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
 	public static final String STATE_COLLECTORS = "state_collectors"; //状态机返回状态的topic
 	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic

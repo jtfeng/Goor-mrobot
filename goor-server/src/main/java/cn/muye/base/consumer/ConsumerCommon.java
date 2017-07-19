@@ -5,19 +5,17 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
+import cn.mrobot.utils.aes.AES;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.consumer.service.PickUpPswdVerifyService;
-import cn.muye.base.consumer.service.X86MissionEventService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.charge.service.ChargeInfoService;
-import cn.muye.util.aes.AES;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
@@ -27,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
+
 import java.util.Date;
 
 @Component
@@ -293,30 +292,13 @@ public class ConsumerCommon {
     public void subscribeRobotInfo(@Payload MessageInfo messageInfo) {
         try {
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
-                Long sendTime = messageInfo.getSendTime().getTime();
-                Long time = new Date().getTime();
-                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
-                String code = jsonObject.getString(SearchConstants.SEARCH_CODE);
-                String name = jsonObject.getString(SearchConstants.SEARCH_NAME);
-                int typeId = Integer.valueOf(jsonObject.getString(SearchConstants.SEARCH_TYPE_ID));
-                int batteryThreshold = Integer.valueOf(jsonObject.getString(SearchConstants.SEARCH_BATTERY_THRESHOLD));
-                //超过10分钟则离线，需要删除该机器人 600000 10分钟
-                if (time - sendTime > Constant.CHECK_IF_OFFLINE_TIME) {
-                    robotService.deleteRobotByCode(code);
-                } else {
-                    //将robotInfo进行AES加密后发送至
-                    Robot robot = new Robot();
-                    robot.setTypeId(typeId);
-                    robot.setBatteryThreshold(batteryThreshold);
-                    robot.setCode(code);
-                    robot.setName(name);
-                    String json = JSON.toJSONString(robot);
-                    byte[] robotInfo = AES.encrypt(json.getBytes(), Constant.AES_KEY.getBytes());
-                    robotService.autoRegister(robotInfo);
-                }
+                String robotStr = AES.decryptFromBase64(messageInfo.getMessageText(), Constant.AES_KEY);
+                Robot robotNew = JSON.parseObject(robotStr, Robot.class);
+                CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), messageInfo.getSendTime().getTime());
+                robotService.autoRegister(robotNew);
             }
         } catch (Exception e) {
-            logger.error("consumer directAgentSub exception", e);
+            logger.error("consumer robotInfo exception", e);
         }
     }
 

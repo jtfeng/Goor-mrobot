@@ -4,7 +4,6 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.*;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
@@ -15,8 +14,6 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
-import cn.muye.util.aes.AES;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
@@ -24,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.Date;
 import java.util.List;
 
@@ -203,10 +199,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
     @Override
-    public AjaxResult autoRegister(byte[] robot) {
+    public AjaxResult autoRegister(Robot robotNew) {
         try {
-            byte[] robotByte = AES.decrypt(robot, Constant.AES_KEY.getBytes());
-            Robot robotNew = JSON.parseObject(robotByte, Robot.class);
             if (robotNew.getId() != null) {
                 return AjaxResult.failed("注册失败，配置文件有误");
             }
