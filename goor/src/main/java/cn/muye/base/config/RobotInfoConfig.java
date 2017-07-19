@@ -15,7 +15,7 @@ public class RobotInfoConfig {
     @Value("${robot.name}")
     private String robotName;
 
-    @Value("${robot.sn}")
+    @Value("${local.robot.SN}")
     private String robotCode;
 
     @Value("${robot.typeId}")
