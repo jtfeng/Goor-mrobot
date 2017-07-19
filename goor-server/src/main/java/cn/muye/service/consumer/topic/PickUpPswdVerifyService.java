@@ -1,4 +1,4 @@
-package cn.muye.base.consumer.service;
+package cn.muye.service.consumer.topic;
 
 import cn.muye.base.bean.MessageInfo;
 import com.alibaba.fastjson.JSONObject;

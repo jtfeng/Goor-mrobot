@@ -28,19 +28,12 @@ CREATE TABLE `A_MAP_INFO` (
   `SCENE_NAME` varchar(50) DEFAULT NULL COMMENT '场景名',
   `PNG_IMAGE_LOCAL_PATH` varchar(100) DEFAULT NULL COMMENT '地图png文件本地地址',
   `ROS` varchar(400) DEFAULT NULL,
+  `MAP_ZIP_ID` INT DEFAULT NULL,
   `MAP_ALIAS` varchar(50) DEFAULT NULL,
   `DEVICE_ID` varchar(200) DEFAULT NULL,
   `OVERLAY_MAP` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=73 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of A_MAP_INFO
--- ----------------------------
-INSERT INTO `A_MAP_INFO` VALUES ('69', '100', null, '2017-07-12 09:55:51', 'agv', 'agv', 'e:\\download_home\\100\\SNabc0010\\agv\\map\\agv.png', '{\"image\":\"agv.pgm\",\"resolution\":0.05,\"origin\":[-15.2,-16.2,0],\"negate\":0,\"occupied_thresh\":0.65,\"free_thresh\":0.196}', null, 'SNabc0010', null);
-INSERT INTO `A_MAP_INFO` VALUES ('70', '100', null, '2017-07-12 09:55:51', 'agv2', 'agv', 'e:\\download_home\\100\\SNabc0010\\agv\\map\\agv2.png', '{\"negate\":0,\"image\":\"agv2.pgm\",\"origin\":[-4,-16.2,0],\"resolution\":0.05,\"free_thresh\":0.196,\"occupied_thresh\":0.65}', null, 'SNabc0010', null);
-INSERT INTO `A_MAP_INFO` VALUES ('71', '100', null, '2017-07-12 09:55:51', 'cloud', 'cloud', 'e:\\download_home\\100\\SNabc0010\\cloud\\map\\cloud.png', '{\"image\":\"cloud.pgm\",\"resolution\":0.05,\"origin\":[-23.2,-16.2,0],\"negate\":0,\"occupied_thresh\":0.65,\"free_thresh\":0.196}', null, 'SNabc0010', null);
-INSERT INTO `A_MAP_INFO` VALUES ('72', '100', null, '2017-07-12 09:55:51', 'F001', 'example', 'e:\\download_home\\100\\SNabc0010\\example\\map\\F001.png', '{\"image\":\"F001.pgm\",\"occupied_thresh\":0.65,\"negate\":0,\"origin\":[-4,-17,0],\"free_thresh\":0.196,\"resolution\":0.025}', null, 'SNabc0010', null);
 
 -- ----------------------------
 -- Table structure for A_MAP_POINT

@@ -3,14 +3,19 @@ package cn.mrobot.bean.slam;
 import com.alibaba.fastjson.annotation.JSONField;
 
 /**
- * 命令返回结果
- * Created by jelynn on 2017/6/3
+ * 请求和返回的topic body
+ * Created by Jelynn on 2017/7/17.
  */
+public class SlamBody <T> {
 
-public class SlamResponseBody<T> {
+    //方法名
+    @JSONField(name = "pub_name")
+    private String pubName;
+
     //方法名
     @JSONField(name = "sub_name")
     private String subName;
+
 
     @JSONField(name = "data")
     private T data;
@@ -23,7 +28,16 @@ public class SlamResponseBody<T> {
     @JSONField(name = "error_code")
     private String errorCode;
 
+    @JSONField(name = "uuid")
     private String uuid;
+
+    public String getPubName() {
+        return pubName;
+    }
+
+    public void setPubName(String pubName) {
+        this.pubName = pubName;
+    }
 
     public String getSubName() {
         return subName;
@@ -64,15 +78,4 @@ public class SlamResponseBody<T> {
     public void setUuid(String uuid) {
         this.uuid = uuid;
     }
-
-    @Override
-    public String toString() {
-        return "SlamResponseBody{" +
-               "subName='" + subName + '\'' +
-               ", data=" + data +
-               ", msg='" + msg + '\'' +
-               ", errorCode='" + errorCode + '\'' +
-               '}';
-    }
-
 }

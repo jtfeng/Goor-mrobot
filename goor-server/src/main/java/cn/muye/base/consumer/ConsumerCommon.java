@@ -12,7 +12,7 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.base.consumer.service.PickUpPswdVerifyService;
+import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.charge.service.ChargeInfoService;

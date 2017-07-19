@@ -106,7 +106,7 @@ public class ProducerCommon implements ApplicationContextAware {
     }
 
     /**
-     * 发布agent_pub topic的消息
+     * 发布state_collector topic的消息 (MQ)
      * @param text
      */
     public void sendAgentPubMessage(String text){
@@ -120,6 +120,26 @@ public class ProducerCommon implements ApplicationContextAware {
                 return;
             }
             rabbitTemplate.convertAndSend(TopicConstants.DIRECT_AGENT_PUB, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendAgentPubMessage error",e);
+        }
+    }
+
+    /**
+     * 发布state_collector topic的消息
+     * @param text
+     */
+    public void sendStateCollectorMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_STATE_COLLECTOR, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
             log.error("sendAgentPubMessage error",e);
         }

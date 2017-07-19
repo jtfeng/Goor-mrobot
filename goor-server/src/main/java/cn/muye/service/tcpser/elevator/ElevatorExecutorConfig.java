@@ -1,7 +1,6 @@
-package cn.muye.tcpser.elevator;
+package cn.muye.service.tcpser.elevator;
 
 import cn.muye.log.elevator.service.LogElevatorService;
-import cn.muye.log.elevator.service.LogElevatorServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

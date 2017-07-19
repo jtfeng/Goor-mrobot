@@ -1,4 +1,4 @@
-package cn.muye.base.consumer.service;
+package cn.muye.service.consumer.topic;
 
 /**
  * Created by abel on 17-7-11.

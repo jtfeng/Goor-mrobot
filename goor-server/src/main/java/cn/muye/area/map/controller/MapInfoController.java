@@ -5,11 +5,12 @@ import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.area.map.bean.CurrentPose;
+import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+//import cn.muye.log.state.StateCollectorService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -32,6 +33,9 @@ public class MapInfoController {
 
     @Autowired
     private MapInfoService mapInfoService;
+
+//    @Autowired
+//    private StateCollectorService stateCollectorService;
 
     @RequestMapping(value = "area/mapinfo", method = {RequestMethod.POST})
     @ResponseBody
@@ -73,7 +77,7 @@ public class MapInfoController {
     public AjaxResult getPosition(HttpServletRequest request, @RequestParam("code") String code) {
         try {
             //TODO 从redis中获取当前机器的坐标
-            CurrentPose currentPose = new CurrentPose();
+            CurrentInfo currentInfo = new CurrentInfo();
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
             if (null == currentPoseInfo) {
                 return AjaxResult.failed("未获取到当前机器人（" + code + "）实时坐标");
@@ -83,7 +87,7 @@ public class MapInfoController {
                 return AjaxResult.failed("获取到的当前机器人（" + code + "）实时坐标数据有误");
             }
             parsePoseData(currentPoseInfo);
-            currentPose.setPose(parsePoseData(currentPoseInfo));
+            currentInfo.setPose(parsePoseData(currentPoseInfo));
             //TODO 根据场景名和地图名获取地图信息
             MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
             if (null == currentMap) {
@@ -106,8 +110,10 @@ public class MapInfoController {
                 return AjaxResult.failed("未找到地图信息 name=" + mapName + "，sceneName=" + sceneName);
             }
             //TODO 按照数据格式封装给前端
-            currentPose.setMapInfo(mapInfo);
-            return AjaxResult.success(currentPose, "获取当前位置信息成功");
+            currentInfo.setMapInfo(mapInfo);
+//            //设置状态
+//            currentInfo.setCollectorState(stateCollectorService.getCollectorState(code));
+            return AjaxResult.success(currentInfo, "获取当前位置信息成功");
         } catch (Exception e) {
             LOGGER.error("getPosition exception", e);
             return AjaxResult.failed("获取机器人位置信息出错");
