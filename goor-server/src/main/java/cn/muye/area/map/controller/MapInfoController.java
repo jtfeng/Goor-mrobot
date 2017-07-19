@@ -77,7 +77,7 @@ public class MapInfoController {
     public AjaxResult getPosition(HttpServletRequest request, @RequestParam("code") String code) {
         try {
             //TODO 从redis中获取当前机器的坐标
-            CurrentInfo currentPose = new CurrentInfo();
+            CurrentInfo currentInfo = new CurrentInfo();
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
             if (null == currentPoseInfo) {
                 return AjaxResult.failed("未获取到当前机器人（" + code + "）实时坐标");
@@ -87,7 +87,7 @@ public class MapInfoController {
                 return AjaxResult.failed("获取到的当前机器人（" + code + "）实时坐标数据有误");
             }
             parsePoseData(currentPoseInfo);
-            currentPose.setPose(parsePoseData(currentPoseInfo));
+            currentInfo.setPose(parsePoseData(currentPoseInfo));
             //TODO 根据场景名和地图名获取地图信息
             MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
             if (null == currentMap) {
@@ -110,10 +110,10 @@ public class MapInfoController {
                 return AjaxResult.failed("未找到地图信息 name=" + mapName + "，sceneName=" + sceneName);
             }
             //TODO 按照数据格式封装给前端
-            currentPose.setMapInfo(mapInfo);
+            currentInfo.setMapInfo(mapInfo);
 //            //设置状态
-//            currentPose.setCollectorState(stateCollectorService.getCollectorState(code));
-            return AjaxResult.success(currentPose, "获取当前位置信息成功");
+//            currentInfo.setCollectorState(stateCollectorService.getCollectorState(code));
+            return AjaxResult.success(currentInfo, "获取当前位置信息成功");
         } catch (Exception e) {
             LOGGER.error("getPosition exception", e);
             return AjaxResult.failed("获取机器人位置信息出错");
