@@ -21,7 +21,7 @@ public interface RobotService extends BaseService<Robot>{
 
     void saveRobot(Robot robot);
 
-    AjaxResult autoRegister(byte[] robot);
+    AjaxResult autoRegister(Robot robotNew);
 
     void deleteRobotById(Long id);
 

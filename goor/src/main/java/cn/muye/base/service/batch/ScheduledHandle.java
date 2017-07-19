@@ -54,7 +54,7 @@ public class ScheduledHandle {
                     ScheduledHandleService service = new ScheduledHandleServiceImp();
                     service.sendRobotInfo();
                 } catch (Exception e) {
-                    logger.error("schedule replyMessageScheduled exception", e);
+                    logger.error("schedule sendRobotInfoScheduled exception", e);
                 }
             }
         }, 9, 10, TimeUnit.SECONDS);

@@ -1,6 +1,6 @@
 package cn.muye;
 
-import cn.muye.tcpser.elevator.ElevatorAsyncTask;
+import cn.muye.service.tcpser.elevator.ElevatorAsyncTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

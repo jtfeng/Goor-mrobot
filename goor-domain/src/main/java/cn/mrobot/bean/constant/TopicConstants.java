@@ -15,6 +15,8 @@ import com.alibaba.fastjson.JSON;
  */
 public class TopicConstants {
 
+	public static final boolean DEBUG = false;
+
 	public static final String LAGENT_PREFIX = "agent_local"; //需要agent本地处理的topic
 
 	public static final String DATA = "data";
@@ -35,6 +37,11 @@ public class TopicConstants {
 	public static final String AGENT_PUB = "/agent_pub";
 	public static final String AGENT_SUB = "/agent_sub";
 	public static final String CURRENT_POSE = "/current_pose";
+	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
+	public static final String X86_MISSION_DISPATCH = "/x86_mission_dispatch";//任务下发topic
+	public static final String X86_MISSION_QUEUE_CANCEL = "/x86_mission_queue_cancel";//取消任务队列中某些任务列表topic
+	public static final String X86_MISSION_INSTANT_CONTROL = "/x86_mission_instant_control";//对当前任务控制topic
+	public static final String X86_MISSION_COMMON_REQUEST = "/x86_mission_common_request";//任务数据请求topic
 	public static final String X86_MISSION_QUEUE_RESPONSE = "/x86_mission_queue_response";//当前任务队列数据响应topic
 	public static final String X86_MISSION_STATE_RESPONSE = "/x86_mission_state_response";//当前任务状态响应topic
 	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
@@ -42,7 +49,8 @@ public class TopicConstants {
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
-
+	public static final String TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD = "ros_robot_battery_threshold"; //发布电量阈值的topic
+	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
 	public static final String STATE_COLLECTOR = "/state_collector"; //状态机返回状态的topic
 	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic
 
@@ -107,7 +115,6 @@ public class TopicConstants {
 	public static final String DIRECT_X86_MISSION_EVENT = "direct.x86_mission_event";//任务事件上报topic
 	public static final String DIRECT_X86_MISSION_RECEIVE = "direct.x86_mission_receive";//任务回执上报topic
 
-	public static final String DIRECT_STATE_COLLECTOR = "direct.state_collector";
 	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";
 	public static final String DIRECT_COMMAND_REPORT_RECEIVE = "direct.command_report_receive";
 	public static final String DIRECT_COMMAND_ROBOT_INFO = "direct.command_robot_info";

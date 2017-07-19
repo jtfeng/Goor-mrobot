@@ -1,14 +1,16 @@
-package cn.muye.util.aes;
-
-import org.apache.log4j.Logger;
+package cn.mrobot.utils.aes;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+import cn.mrobot.utils.DateTimeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Digest {
-	private static final Logger log = Logger.getLogger(Digest.class);
+	private static final Logger log =  LoggerFactory.getLogger(Digest.class);
 	public static final String ENCODE = "UTF-8"; 
 	
 	public static String signMD5(String aValue, String encoding) {

@@ -1,4 +1,4 @@
-package cn.muye.funcs.service;
+package cn.muye.service.missiontask;
 
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;

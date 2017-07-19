@@ -1,6 +1,10 @@
 package cn.muye.base.service.imp;
 
-import cn.muye.base.bean.MessageInfo;
+import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.constant.Constant;
+import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
@@ -11,11 +15,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class ScheduledHandleServiceImp implements ScheduledHandleService, ApplicationContextAware {
@@ -26,6 +27,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     private OffLineMessageService offLineMessageService;
 
     private ReceiveMessageService receiveMessageService;
+
+    private RobotService robotService;
 
     public ScheduledHandleServiceImp(){
 
@@ -45,6 +48,28 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             offLineMessageService.deleteBySendTime(offLineMessage);//删除昨天的数据
         } catch (Exception e) {
             logger.error("Scheduled clear message error", e);
+        }
+    }
+
+    @Override
+    public void executeRobotHeartBeat() {
+        robotService = applicationContext.getBean(RobotService.class);
+        //拿sendTime跟内存里的同步时间
+        Long currentTime = new Date().getTime();
+        List<Robot> list = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (list != null && list.size() > 0) {
+            for (Robot robot : list) {
+                String code = robot.getCode();
+                Long sendTime = CacheInfoManager.getRobotAutoRegisterTimeCache(code);
+                //如果大于1分钟
+                if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
+                    Robot robotDb = robotService.getByCode(code);
+                    if (robotDb != null) {
+                        robotDb.setOnline(false);
+                        robotService.updateRobot(robotDb);
+                    }
+                }
+            }
         }
     }
 

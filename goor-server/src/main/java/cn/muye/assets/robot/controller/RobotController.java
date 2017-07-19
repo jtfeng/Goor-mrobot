@@ -3,24 +3,34 @@ package cn.muye.assets.robot.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
+import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.RabbitMqBean;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by Ray.Fu on 2017/6/12.
@@ -35,6 +45,12 @@ public class RobotController {
     private RobotService robotService;
     @Autowired
     private RobotPasswordService robotPasswordService;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private RobotConfigService robotConfigService;
 
     /**
      * 查询机器人列表
@@ -57,52 +73,78 @@ public class RobotController {
      * @param robot
      * @return
      */
-    @RequestMapping(value = {"assets/robot"}, method = RequestMethod.POST)
-    @ApiOperation(value = "新增或修改机器人", httpMethod = "POST", notes = "新增或修改机器人")
+    @RequestMapping(value = {"assets/robot"}, method = {RequestMethod.POST, RequestMethod.PUT})
+    @ApiOperation(value = "新增或修改机器人", httpMethod = "POST/PUT", notes = "新增或修改机器人")
     @ResponseBody
     public AjaxResult addOrUpdateRobot(@ApiParam(value = "机器人") @RequestBody Robot robot) {
-        if (robot.getTypeId() == null || robot.getTypeId() <= 0 || robot.getTypeId() > RobotTypeEnum.DRAWER.getCaption()) {
+        Long robotId = robot.getId();
+        Integer robotTypeId = robot.getTypeId();
+        String robotName = robot.getName();
+        String robotCode = robot.getCode();
+        int robotBatteryThreshold = robot.getBatteryThreshold();
+        if (robotTypeId == null || robotTypeId <= 0 || robotTypeId > RobotTypeEnum.DRAWER.getCaption()) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
         }
-        if (StringUtil.isNullOrEmpty(robot.getName()) || StringUtil.isNullOrEmpty(robot.getCode())) {
+        if (StringUtil.isNullOrEmpty(robotName) || StringUtil.isNullOrEmpty(robotCode)) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
         }
         if (robot.getBatteryThreshold() == null) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
         }
         //判断是否有重复的名称
-        Robot robotDbByName = robotService.getByName(robot.getName());
-        if (robotDbByName != null && !robotDbByName.getId().equals(robot.getId())) {
+        Robot robotDbByName = robotService.getByName(robotName);
+        if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
         }
         //判断是否有重复的编号
-        Robot robotDbByCode = robotService.getByCode(robot.getCode());
-        if (robotDbByCode != null && !robotDbByCode.getId().equals(robot.getId())) {
+        Robot robotDbByCode = robotService.getByCode(robotCode);
+        if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
         }
-        if (robot.getId() != null) { //修改
-            Robot robotDb = robotService.getById(robot.getId());
-            if (robotDb != null && robot.getCode().equals(robotDb.getCode())) {
-                robotDb.setName(robot.getName());
+        if (robotId != null) { //修改
+            Robot robotDb = robotService.getById(robotId);
+            RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
+            int batteryThresholdDb = robotConfig.getBatteryThreshold();
+            String robotCodeDb = robotDb.getCode();
+            if (robotDb != null && robotCode.equals(robotCodeDb)) {
+                robotDb.setName(robotName);
                 robotDb.setDescription(robot.getDescription());
                 robotDb.setUpdateTime(new Date());
                 robotDb.setBoxActivated(robot.getBoxActivated());
-                robotDb.setBatteryThreshold(robot.getBatteryThreshold());
+                robotDb.setBatteryThreshold(robotBatteryThreshold);
                 robotService.updateRobot(robotDb);
-                //同步配置文件中的机器人信息
-
+                //向X86上同步配置文件中的机器人电量阈值信息，改缓存
+                if (batteryThresholdDb != robotBatteryThreshold) {
+                    CommonInfo commonInfo = new CommonInfo();
+                    commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
+                    commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+                    commonInfo.setPublishMessage(JSON.toJSONString(robotDb));
+                    MessageInfo info = new MessageInfo();
+                    info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+                    info.setSendTime(new Date());
+                    info.setSenderId("goor-server");
+                    info.setReceiverId(robotCodeDb);
+                    info.setMessageType(MessageType.ROBOT_BATTERY_THRESHOLD);
+                    info.setMessageText(JSON.toJSONString(commonInfo));
+                    String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(robotCodeDb, true, MessageType.EXECUTOR_COMMAND.name());
+                    //单机器命令发送（带回执）
+                    AjaxResult ajaxCommandResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultCommandRoutingKey, info);
+                    if (ajaxCommandResult.isSuccess()) {
+                        return AjaxResult.success(robotDb, "修改成功，同步配置成功");
+                    } else {
+                        return AjaxResult.success(robotDb, "修改成功，同步配置失败, 可以手动修改配置，重启机器");
+                    }
+                }
                 return AjaxResult.success(robotDb, "修改成功");
-            } else if (robotDb != null && !robot.getCode().equals(robotDb.getCode())){
+            } else if (robotDb != null && !robotCode.equals(robotCodeDb)) {
                 return AjaxResult.failed(robot, "不能修改机器人的编号");
             } else {
                 return AjaxResult.failed("不存在的机器人");
             }
-        } else if (robot.getId() == null) {
+        } else {
             robot.setBoxActivated(true);
             robotService.saveRobot(robot);
             return AjaxResult.success(robot, "新增成功");
-        } else {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误，查询失败");
         }
     }
 

@@ -1,18 +1,17 @@
-package cn.muye.tcpser.elevator;
+package cn.muye.service.tcpser.elevator;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.elevator.LogElevator;
 import cn.mrobot.utils.HexStringUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.log.elevator.service.LogElevatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Date;
 import java.util.concurrent.Future;
 
 /**
@@ -47,6 +46,7 @@ public class ElevatorClientAsyncTask {
                     //读取
                     inputStream.read(buf, 0, buf.length);
                     //打印客户端的消息
+                    if (TopicConstants.DEBUG)
                     logger.info("Remote Address: " + client.getRemoteSocketAddress() + " ,taskElevatorTcpSerClient get message...:" + HexStringUtil.bytesToHexString(buf));
                     //处理消息，并发送通知
                     LogElevator logElevator = new LogElevator();
@@ -63,6 +63,7 @@ public class ElevatorClientAsyncTask {
                             logger.info(e.getMessage());
                         }
                         if (logElevator.getId() != null){
+                            if (TopicConstants.DEBUG)
                             logger.info("保存日志成功！");
                         }else{
                             logger.info("保存日志失败！");

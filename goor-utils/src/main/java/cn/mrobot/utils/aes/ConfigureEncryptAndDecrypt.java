@@ -1,4 +1,4 @@
-package cn.muye.util.aes;
+package cn.mrobot.utils.aes;
 
 public class ConfigureEncryptAndDecrypt {
 	public static final String CHAR_ENCODING = "UTF-8";

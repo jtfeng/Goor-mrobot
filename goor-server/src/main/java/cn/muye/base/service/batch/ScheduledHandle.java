@@ -4,7 +4,6 @@ import cn.mrobot.utils.TimeUtil;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import org.apache.log4j.Logger;
-
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -13,9 +12,10 @@ public class ScheduledHandle {
 
     private final ScheduledExecutorService scheduledExecutor;
 
-    public ScheduledHandle(ScheduledExecutorService scheduledExecutor){
+    public ScheduledHandle(ScheduledExecutorService scheduledExecutor) {
         this.scheduledExecutor = scheduledExecutor;
         this.executeTwentyThreeAtNightPerDay();
+        this.executeRobotHeartBeat();
     }
 
     /**
@@ -24,22 +24,43 @@ public class ScheduledHandle {
      */
     public void executeTwentyThreeAtNightPerDay() {
         long oneDay = 24 * 60 * 60 * 1000;
-        long initDelay  = TimeUtil.getTimeMillis("23:00:00") - System.currentTimeMillis();
+        long initDelay = TimeUtil.getTimeMillis("23:00:00") - System.currentTimeMillis();
         initDelay = initDelay > 0 ? initDelay : oneDay + initDelay;
         scheduledExecutor.scheduleAtFixedRate(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            ScheduledHandleService service = new ScheduledHandleServiceImp();
-                            service.executeTwentyThreeAtNightPerDay();
-                            logger.info("schedule sendMessageWithLock");
-                        } catch (Exception e) {
-                            logger.error("schedule sendMessageWithLock exception", e);
-                        }
-                    }
-                },
+                                                  @Override
+                                                  public void run() {
+                                                      try {
+                                                          ScheduledHandleService service = new ScheduledHandleServiceImp();
+                                                          service.executeTwentyThreeAtNightPerDay();
+                                                          logger.info("schedule sendMessageWithLock");
+                                                      } catch (Exception e) {
+                                                          logger.error("schedule sendMessageWithLock exception", e);
+                                                      }
+                                                  }
+                                              },
                 initDelay,
                 oneDay,
+                TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * 判断是否机器人在线
+     */
+    public void executeRobotHeartBeat() {
+        scheduledExecutor.scheduleAtFixedRate(new Runnable() {
+                                                  @Override
+                                                  public void run() {
+                                                      try {
+                                                          ScheduledHandleService service = new ScheduledHandleServiceImp();
+                                                          service.executeRobotHeartBeat();
+                                                          logger.info("schedule executeRobotHeartBeat");
+                                                      } catch (Exception e) {
+                                                          logger.error("schedule executeRobotHeartBeat exception", e);
+                                                      }
+                                                  }
+                                              },
+                9,
+                10,
                 TimeUnit.MILLISECONDS);
     }
 
