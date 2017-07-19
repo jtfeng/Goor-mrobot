@@ -19,13 +19,15 @@ public interface MissionItemMapper {
 
 	long save(MissionItem missionItem);
 
-	MissionItem findByName(String name);
+	MissionItem findByName(@Param("name")String name,
+						   @Param("storeId")long storeId);
 
 	void update(MissionItem missionItem);
 
 	void delete(MissionItem missionItem);
 
-	MissionItem get(long id);
+	MissionItem get(@Param("id")long id,
+					@Param("storeId")long storeId);
 
 	/*List<MissionItem> list(@Param("missionChainId") Object missionChainId,
 						   @Param("name") Object name,
@@ -35,8 +37,9 @@ public interface MissionItemMapper {
 
 	List<MissionItem> list(@Param("name") Object name,
 						   @Param("beginDate") Object beginDate,
-						   @Param("endDate") Object endDate);
+						   @Param("endDate") Object endDate,
+						   @Param("storeId") Object storeId);
 
-	List<MissionItem> listAll();
+	List<MissionItem> listAll(Long storeId);
 }
 

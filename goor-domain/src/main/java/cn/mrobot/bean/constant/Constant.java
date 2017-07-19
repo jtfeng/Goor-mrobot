@@ -61,6 +61,8 @@ public class Constant {
             4L//
     );
 
+    public final static long ORDER_WAIT_ID = 6L;//等待任务ID
+
     public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";
 
     //Session 中存储的场景（Scene 场景常量标识）
