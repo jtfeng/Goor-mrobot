@@ -47,21 +47,16 @@ public class ScheduledHandle {
      * 判断是否机器人在线
      */
     public void executeRobotHeartBeat() {
-        scheduledExecutor.scheduleAtFixedRate(new Runnable() {
-                                                  @Override
-                                                  public void run() {
-                                                      try {
-                                                          ScheduledHandleService service = new ScheduledHandleServiceImp();
-                                                          service.executeRobotHeartBeat();
-                                                          logger.info("schedule executeRobotHeartBeat");
-                                                      } catch (Exception e) {
-                                                          logger.error("schedule executeRobotHeartBeat exception", e);
-                                                      }
-                                                  }
-                                              },
-                9,
-                10,
-                TimeUnit.MILLISECONDS);
+        scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.executeRobotHeartBeat();
+                } catch (Exception e) {
+                    logger.error("schedule publishRosScheduled exception", e);
+                }
+            }
+        }, 9, 60, TimeUnit.SECONDS);
     }
-
 }
