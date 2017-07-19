@@ -122,4 +122,9 @@ public class RabbitMQConfig {
     public Queue directX86MissionReceive() {
         return new Queue(TopicConstants.DIRECT_X86_MISSION_RECEIVE,false,false,true);
     }
+
+    @Bean
+    public Queue directStateCollector() {
+        return new Queue(TopicConstants.DIRECT_STATE_COLLECTOR,false,false,true);
+    }
 }
