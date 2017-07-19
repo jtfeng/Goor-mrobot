@@ -22,18 +22,20 @@ public interface MissionListService {
 
 	void update(MissionList missionList);
 
-	void update(MissionList missionList, List<Long> missionIdList);
+	void update(MissionList missionList, List<Long> missionIdList,long storeId);
 
 //	void update(MissionList missionList, List<Mission> missions);
 
-    MissionList get(long id);
+    MissionList get(long id,long storeId);
 
-	MissionList findByName(String name);
+	MissionList findByName(String name,long storeId);
 
-	void delete(MissionList missionList);
+	void delete(MissionList missionList,long storeId);
 
-    List<MissionList> list(WhereRequest whereRequest);
+    List<MissionList> list(WhereRequest whereRequest,long storeId);
 
-	List<MissionList> list();
+	List<MissionList> list(long storeId);
+
+    void updateFull(MissionList missionList, MissionList missionListDB,long storeId);
 }
 

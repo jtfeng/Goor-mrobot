@@ -36,8 +36,8 @@ public class MissionItemServiceImpl implements MissionItemService {
 	}
 
 	@Override
-	public MissionItem findByName(String name) {
-		return missionItemMapper.findByName(name);
+	public MissionItem findByName(String name,long storeId) {
+		return missionItemMapper.findByName(name,storeId);
 	}
 
 	@Override
@@ -51,13 +51,12 @@ public class MissionItemServiceImpl implements MissionItemService {
 	}
 
 	@Override
-	public MissionItem get(long id) {
-		return missionItemMapper.get(id);
+	public MissionItem get(long id,long storeId) {
+		return missionItemMapper.get(id,storeId);
 	}
 
 	@Override
-	public List<MissionItem> list(WhereRequest whereRequest) {
-
+	public List<MissionItem> list(WhereRequest whereRequest,Long storeId) {
 		List<MissionItem> missionChainList = new ArrayList<>();
 		if (whereRequest.getQueryObj() != null) {
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
@@ -67,16 +66,16 @@ public class MissionItemServiceImpl implements MissionItemService {
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
 //			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionChainList = missionItemMapper.list(name, /*missionChainId,*/ beginDate, endDate/*, priority*/);
+			missionChainList = missionItemMapper.list(name, /*missionChainId,*/ beginDate, endDate/*, priority*/,storeId);
 		}else {
-			missionChainList = missionItemMapper.listAll();
+			missionChainList = missionItemMapper.listAll(storeId);
 		}
 		return missionChainList;
 	}
 
 	@Override
-	public List<MissionItem> list() {
-		return missionItemMapper.listAll();
+	public List<MissionItem> list(Long storeId) {
+		return missionItemMapper.listAll(storeId);
 	}
 
 }

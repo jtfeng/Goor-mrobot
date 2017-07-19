@@ -19,16 +19,16 @@ public interface MissionItemService {
 
 	long save(MissionItem missionItem);
 
-	MissionItem findByName(String name);
+	MissionItem findByName(String name,long storeId);
 
 	void update(MissionItem missionItem);
 
 	void delete(MissionItem missionItem);
 
-    MissionItem get(long id);
+    MissionItem get(long id,long storeId);
 
-    List<MissionItem> list(WhereRequest whereRequest);
+    List<MissionItem> list(WhereRequest whereRequest,Long storeId);
 
-	List<MissionItem> list();
+	List<MissionItem> list(Long storeId);
 }
 
