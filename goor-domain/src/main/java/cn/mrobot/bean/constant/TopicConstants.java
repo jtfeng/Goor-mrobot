@@ -42,6 +42,10 @@ public class TopicConstants {
 	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
 	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
 
+	// TODO: 17/07/2017 摇杆 Topic，临时测试
+	public static final String ROS_YAOGAN_TOPIC = "android_joystick_cmd_vel";
+	public static final String ROS_YAOGAN_TOPIC_TYPE = "geometry_msgs/Twist";
+
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
 	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
@@ -91,6 +95,12 @@ public class TopicConstants {
 
 	//pub name
 	public static final String MAP_CURRENT_GET = "map_current_get";
+	//ros摇杆控制 Topic
+	public static final String ROS_ROCKER_CONTROL_TOPIC_NAME = "android_joystick_cmd_vel_controll";
+	public static final String ROS_ROCKER_CONTROL_TOPIC_TYPE = "geometry_msgs/Twist_controll";
+	public static final String ROS_ROCKER_CONTROL_START_PUB_NAME = "robot_start";
+	public static final String ROS_ROCKER_CONTROL_END_PUB_NAME = "robot_end";
+
 
 
 	//sub name

@@ -11,7 +11,7 @@ public class CurrentPoseListenerImpl implements TopicCallback{
 	@Override
 	public void handleMessage(Message message) {
 		try {
-			logger.info("From ROS ====== CurrentPose topic  " + message.toString());
+//			logger.info("From ROS ====== CurrentPose topic  " + message.toString());
 			ProducerCommon msg = SingleFactory.getProducerCommon();
 			msg.sendCurrentPoseMessage(message.toString());
 		}catch (Exception e){
