@@ -42,8 +42,8 @@ public class TopicConstants {
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
-	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
-	public static final String STATE_COLLECTORS = "state_collectors"; //状态机返回状态的topic
+
+	public static final String STATE_COLLECTOR = "/state_collector"; //状态机返回状态的topic
 	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
@@ -107,6 +107,7 @@ public class TopicConstants {
 	public static final String DIRECT_X86_MISSION_EVENT = "direct.x86_mission_event";//任务事件上报topic
 	public static final String DIRECT_X86_MISSION_RECEIVE = "direct.x86_mission_receive";//任务回执上报topic
 
+	public static final String DIRECT_STATE_COLLECTOR = "direct.state_collector";
 	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";
 	public static final String DIRECT_COMMAND_REPORT_RECEIVE = "direct.command_report_receive";
 	public static final String DIRECT_COMMAND_ROBOT_INFO = "direct.command_robot_info";
