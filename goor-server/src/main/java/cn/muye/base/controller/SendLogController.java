@@ -43,10 +43,6 @@ public class SendLogController {
     @ResponseBody
     private AjaxResult pageList(WhereRequest whereRequest){
         try {
-            log.info("查询开始");
-            log.debug("查询开始debug");
-            log.warn("查询开始warn");
-            log.error("查询开始error");
             List<OffLineMessage> offLineMessageList = offLineMessageService.pageList(whereRequest.getPage(),whereRequest.getPageSize());
             List<MessageView> messageViewList = offLineMessageList.stream().map(offLineMessage -> new MessageView(offLineMessage)).collect(Collectors.toList());
             PageInfo<MessageView> pageList = new PageInfo<>(messageViewList);
