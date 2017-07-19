@@ -39,7 +39,7 @@ public class ScheduledHandle {
                     logger.error("schedule replyMessageScheduled exception", e);
                 }
             }
-        }, 6, 10, TimeUnit.SECONDS);
+        }, 100, 10, TimeUnit.SECONDS);
     }
 
     /**
@@ -57,7 +57,7 @@ public class ScheduledHandle {
                     logger.error("schedule sendRobotInfoScheduled exception", e);
                 }
             }
-        }, 9, 10, TimeUnit.SECONDS);
+        }, 90, 10, TimeUnit.SECONDS);
     }
 
     /**
@@ -75,7 +75,7 @@ public class ScheduledHandle {
                     logger.error("schedule downloadResourceScheduled exception", e);
                 }
             }
-        }, 3, 5, TimeUnit.SECONDS);
+        }, 105, 5, TimeUnit.SECONDS);
     }
 
 
@@ -94,7 +94,7 @@ public class ScheduledHandle {
                     logger.error("schedule publishRosScheduled exception", e);
                 }
             }
-        }, 15, 1, TimeUnit.SECONDS);
+        }, 110, 1, TimeUnit.SECONDS);
     }
 
     /**
@@ -112,7 +112,7 @@ public class ScheduledHandle {
                     logger.error("schedule rosHealthCheckScheduled exception", e);
                 }
             }
-        }, 10, 10, TimeUnit.SECONDS);
+        }, 115, 10, TimeUnit.SECONDS);
     }
 
     /**
@@ -124,20 +124,16 @@ public class ScheduledHandle {
         long initDelay = TimeUtil.getTimeMillis("23:00:00") - System.currentTimeMillis();
         initDelay = initDelay > 0 ? initDelay : oneDay + initDelay;
         scheduledExecutor.scheduleAtFixedRate(new Runnable() {
-                                                  @Override
-                                                  public void run() {
-                                                      try {
-                                                          ScheduledHandleService service = new ScheduledHandleServiceImp();
-                                                          service.executeTwentyThreeAtNightPerDay();
-//                            logger.info("schedule sendMessageWithLock");
-                                                      } catch (Exception e) {
-                                                          logger.error("schedule sendMessageWithLock exception", e);
-                                                      }
-                                                  }
-                                              },
-                initDelay,
-                oneDay,
-                TimeUnit.MILLISECONDS);
+            @Override
+            public void run() {
+                try {
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.executeTwentyThreeAtNightPerDay();
+                } catch (Exception e) {
+                    logger.error("schedule sendMessageWithLock exception", e);
+                }
+            }
+        }, initDelay, oneDay, TimeUnit.MILLISECONDS);
     }
 
 }
