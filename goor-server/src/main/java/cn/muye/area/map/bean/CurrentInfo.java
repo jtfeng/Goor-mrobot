@@ -1,7 +1,7 @@
 package cn.muye.area.map.bean;
 
 import cn.mrobot.bean.area.map.MapInfo;
-import cn.mrobot.bean.state.enums.CollectorState;
+//import cn.mrobot.bean.state.enums.CollectorState;
 import cn.muye.base.bean.MessageInfo;
 
 /**
