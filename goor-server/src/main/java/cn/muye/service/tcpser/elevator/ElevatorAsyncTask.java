@@ -1,4 +1,4 @@
-package cn.muye.tcpser.elevator;
+package cn.muye.service.tcpser.elevator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

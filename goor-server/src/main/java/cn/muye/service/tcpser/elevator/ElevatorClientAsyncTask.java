@@ -1,4 +1,4 @@
-package cn.muye.tcpser.elevator;
+package cn.muye.service.tcpser.elevator;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.elevator.LogElevator;
@@ -7,13 +7,11 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.log.elevator.service.LogElevatorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Date;
 import java.util.concurrent.Future;
 
 /**
