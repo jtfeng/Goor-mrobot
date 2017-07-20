@@ -68,4 +68,6 @@ public class Constant {
 
     //Session 中存储的场景（Scene 场景常量标识）
     public static final String SCENE_SESSION_TAG = "scene_session_information";
+
+    public static final String SESSION_STATION_ID = "stationId";
 }
