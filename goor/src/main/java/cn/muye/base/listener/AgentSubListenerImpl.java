@@ -52,6 +52,7 @@ public class AgentSubListenerImpl implements TopicCallback,ApplicationContextAwa
 			String uuid = dataObject.getString(TopicConstants.UUID);
 			if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName)) {
 				FileUpladService fileUpladService = applicationContext.getBean(FileUpladService.class);
+				fileUpladService.sendTopic("0", uuid,"请求接收成功");
 				fileUpladService.uploadMapFile(uuid);
 			}
 		}

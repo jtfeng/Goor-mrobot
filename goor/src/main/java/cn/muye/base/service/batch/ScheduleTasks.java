@@ -117,7 +117,7 @@ public class ScheduleTasks {
     public void getChargeAndPosition() {
         try {
             SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.CHARGING_STATUS_INQUIRY);
-            appSubService.sendAppPubTopic(TopicConstants.TOPIC_TYPE_STRING,slamRequestBody);
+            appSubService.sendTopic(TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING, slamRequestBody);
         } catch (Exception e) {
             logger.error("获取电量信息或当前位置信息出错", e);
         }
@@ -141,17 +141,17 @@ public class ScheduleTasks {
     public void deleteZipMapFile() {
         logger.info("Scheduled delete Zip map file");
         try {
-          File mapPathDir = new File(mapPath);
-          if(mapPathDir.exists() && mapPathDir.isDirectory()){
-              File parentDir = new File(mapPathDir.getParent());
-              File[] files = parentDir.listFiles();
-              for(int i=0; i < files.length; i ++){
-                  File file = files[i];
-                  if(file.getName().lastIndexOf(".zip") >= 0 || file.getName().lastIndexOf(".flags") >= 0 ){
-                      file.delete();
-                  }
-              }
-          }
+            File mapPathDir = new File(mapPath);
+            if (mapPathDir.exists() && mapPathDir.isDirectory()) {
+                File parentDir = new File(mapPathDir.getParent());
+                File[] files = parentDir.listFiles();
+                for (int i = 0; i < files.length; i++) {
+                    File file = files[i];
+                    if (file.getName().lastIndexOf(".zip") >= 0 || file.getName().lastIndexOf(".flags") >= 0) {
+                        file.delete();
+                    }
+                }
+            }
         } catch (Exception e) {
             logger.error("Scheduled clear message error", e);
         }
