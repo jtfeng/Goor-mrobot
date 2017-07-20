@@ -77,16 +77,16 @@ public class MapZipServiceImpl implements MapZipService {
     public List<MapZip> list(WhereRequest whereRequest, long storeId) {
         Example example = new Example(MapZip.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andCondition("STORE_ID =", storeId);
+        criteria.andCondition("STORE_ID ="+storeId);
         if (whereRequest.getQueryObj() != null) {
             JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
             Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
             Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
             if (mapName != null) {
-                criteria.andCondition("MAP_NAME like ", "%" + mapName + "%");
+                criteria.andCondition("MAP_NAME like %" + mapName + "%");
             }
             if (sceneName != null) {
-                criteria.andCondition("SCENE_NAME like ", "%" + sceneName + "%");
+                criteria.andCondition("SCENE_NAME like %" + sceneName + "%");
             }
         }
         example.setOrderByClause("CREATE_TIME DESC");

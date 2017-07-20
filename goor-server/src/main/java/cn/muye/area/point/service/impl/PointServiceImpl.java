@@ -60,9 +60,9 @@ public class PointServiceImpl implements PointService {
     @Override
     public void delete(String sceneName, String mapName, long storeId) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("MAP_NAME = ", "'" + mapName + "'")
-                .andCondition("SCENE_NAME =", "'" + sceneName + "'")
-                .andCondition("STORE_ID =", storeId);
+        condition.createCriteria().andCondition("MAP_NAME ='" + mapName + "'")
+                .andCondition("SCENE_NAME ='" + sceneName + "'")
+                .andCondition("STORE_ID ="+ storeId);
         pointMapper.deleteByExample(condition);
     }
 
@@ -79,10 +79,10 @@ public class PointServiceImpl implements PointService {
     @Override
     public List<MapPoint> findByName(String pointName, String sceneName, String mapName, long storeId) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("POINT_NAME =", "'" + pointName + "'")
-                .andCondition("SCENE_NAME = ", "'" + sceneName + "'")
-                .andCondition("MAP_NAME = ", "'" + mapName + "'")
-                .andCondition("STORE_ID = ", storeId);
+        condition.createCriteria().andCondition("POINT_NAME ='" + pointName + "'")
+                .andCondition("SCENE_NAME = '" + sceneName + "'")
+                .andCondition("MAP_NAME = '" + mapName + "'")
+                .andCondition("STORE_ID ="+storeId);
         condition.setOrderByClause("POINT_NAME desc");
         return pointMapper.selectByExample(condition);
     }
@@ -96,22 +96,26 @@ public class PointServiceImpl implements PointService {
             Object pointName = jsonObject.get(SearchConstants.SEARCH_POINT_NAME);
             Object pointAlias = jsonObject.get(SearchConstants.SEARCH_POINT_ALIAS);
             Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
+            Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
             Object mapPointTypeId = jsonObject.get(SearchConstants.SEARCH_MAP_POINT_TYPE_ID);
             if (pointName != null) {
-                criteria.andCondition("POINT_NAME like ", "%" + pointName + "%");
+                criteria.andCondition("POINT_NAME like %" + pointName + "%");
             }
             if (pointAlias != null) {
-                criteria.andCondition("POINT_ALIAS like ", "%" + pointAlias + "%");
+                criteria.andCondition("POINT_ALIAS like %" + pointAlias + "%");
             }
             if (sceneName != null) {
-                criteria.andCondition("SCENE_NAME like", "%" + sceneName + "%");
+                criteria.andCondition("SCENE_NAME like %" + sceneName + "%");
+            }
+            if (sceneName != null) {
+                criteria.andCondition("MAP_NAME like %" + mapName + "%");
             }
             if (mapPointTypeId != null) {
-                criteria.andCondition("MAP_POINT_TYPE_ID =", mapPointTypeId);
+                criteria.andCondition("MAP_POINT_TYPE_ID ="+mapPointTypeId);
             }
         }
-        criteria.andCondition("STORE_ID = ", storeId);
-        condition.setOrderByClause("ID DESC");
+        criteria.andCondition("STORE_ID = "+storeId);
+        condition.setOrderByClause("SCENE_NAME，MAP_NAME ASC");
 
         List<MapPoint> mapPointList = pointMapper.selectByExample(condition);
         //处理枚举类型
@@ -128,7 +132,7 @@ public class PointServiceImpl implements PointService {
     @Override
     public List<MapPoint> findBySceneName(String sceneName) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("SCENE_NAME = ", "'" + sceneName + "'");
+        condition.createCriteria().andCondition("SCENE_NAME ='" + sceneName + "'");
         condition.setOrderByClause("SCENE_NAME desc");
         return pointMapper.selectByExample(condition);
     }
