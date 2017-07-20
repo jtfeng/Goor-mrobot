@@ -2,10 +2,8 @@ package cn.muye.service.missiontask;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
-import cn.mrobot.bean.mission.task.JsonMissionListPub;
-import cn.mrobot.bean.mission.task.MissionItemTask;
-import cn.mrobot.bean.mission.task.MissionListTask;
-import cn.mrobot.bean.mission.task.MissionTask;
+import cn.mrobot.bean.log.mission.JsonMissionStateResponse;
+import cn.mrobot.bean.mission.task.*;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.dto.mission.MissionDTO;
@@ -145,7 +143,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //查询是否有正在执行中的任务
         List<MissionListTask> listTasks =
                 missionListTaskService.findByRobotCodeAndState(
-                        robotCode, "");
+                        robotCode, JsonMissionStateResponse.state_executing);
         if (listTasks != null &&
                 !listTasks.isEmpty()){
             for (MissionListTask mlt :
@@ -167,6 +165,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      */
     private MissionListDTO getGoorMissionList(MissionListTask task) {
         if (task != null){
+
+            logger.info("### MissionListTask is: " + JsonUtils.toJson(task, new TypeToken<MissionListTask>(){}.getType()));
+
             MissionListDTO missionListDTO = new MissionListDTO();
             missionListDTO.setId(task.getId());
             missionListDTO.setIntervalTime(task.getIntervalTime());
@@ -300,6 +301,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             List<MapPoint> mapPoints,
             HashMap<MapPoint, MPointAtts> mpAttrs) {
+
+        logger.info("### order is: " + JsonUtils.toJson(order, new TypeToken<Order>(){}.getType()));
 
         MPointAtts atts;
 
@@ -492,6 +495,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             MPointAtts mPointAtts) {
+
+        logger.info("### initMissionTaskChongDian ");
+
+        //test
+        MissionTask testTask = getTestTask(order, mp);
+        missionListTask.getMissionTasks().add(testTask);
+
         //单点路径导航任务，当前路径导航到充电点
         MissionTask sigleNavTask = getSigleNavTask(order, mp);
         missionListTask.getMissionTasks().add(sigleNavTask);
@@ -513,6 +523,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             MPointAtts mPointAtts) {
+
+        logger.info("### initMissionTaskXiaHuo ");
+
+        //test
+        MissionTask testTask = getTestTask(order, mp);
+        missionListTask.getMissionTasks().add(testTask);
+
         //单点导航任务，回到下货点
         MissionTask sigleNavTask = getSigleNavTask(order, mp);
         missionListTask.getMissionTasks().add(sigleNavTask);
@@ -542,6 +559,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             MPointAtts mPointAtts) {
+
+        logger.info("### initMissionTaskQuHuo ");
+
+        //test
+        MissionTask testTask = getTestTask(order, mp);
+        missionListTask.getMissionTasks().add(testTask);
+
         //离开充电任务
         MissionTask leavechargeTask = getLeaveChargeTask(order, mp);
         missionListTask.getMissionTasks().add(leavechargeTask);
@@ -576,6 +600,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             MPointAtts mPointAtts) {
+
+        logger.info("### initMissionTaskSongHuo ");
+
+        //test
+        MissionTask testTask = getTestTask(order, mp);
+        missionListTask.getMissionTasks().add(testTask);
+
         //单点导航任务，导航到目标送货点
         MissionTask sigleNavTask = getSigleNavTask(order, mp);
         missionListTask.getMissionTasks().add(sigleNavTask);
@@ -589,6 +620,61 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //语音任务，感谢使用，我要出发了，再见？
         MissionTask voiceTask = getVoiceTask(order, mp);
         missionListTask.getMissionTasks().add(voiceTask);
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////
+    ////  测试任务及任务item相关方法
+    ////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * 获取测试任务
+     * @param mp
+     * @return
+     */
+    private MissionTask getTestTask(Order order, MapPoint mp) {
+        MissionTask missionTask = new MissionTask();
+        missionTask.setDescription("测试任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState("");
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getTestItemTask(order, mp));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取测试ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getTestItemTask(Order order, MapPoint mp) {
+        MissionItemTask itemTask = new MissionItemTask();
+        itemTask.setDescription("测试任务");
+        itemTask.setName(MissionItemName_test);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        JsonMissionItemDataFake fake = new JsonMissionItemDataFake();
+        fake.setId(0L);
+        fake.setX(0L);
+        fake.setY(0L);
+        fake.setZ(0L);
+        fake.setMapName("agv");
+        fake.setSceneName("agv");
+        itemTask.setData(JsonUtils.toJson(fake,
+                new TypeToken<JsonMissionItemDataFake>(){}.getType()));
+        itemTask.setState("");
+        itemTask.setFeatureValue(FeatureValue_test);
+
+        return itemTask;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -732,7 +818,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
-        missionItemTasks.add(getVoiceItemTask(order, mp));
+        missionItemTasks.add(getGotoChargeItemTask(order, mp));
 
         missionTask.setMissionItemTasks(missionItemTasks);
 
@@ -772,7 +858,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
-        missionItemTasks.add(getVoiceItemTask(order, mp));
+        missionItemTasks.add(getLeaveChargeItemTask(order, mp));
 
         missionTask.setMissionItemTasks(missionItemTasks);
 
@@ -810,11 +896,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MPointType_SONGHUO = "songhuo";//中间的送货点，order detail station point
     public static final String MPointType_CHONGDIAN = "chongdian";//充电点
 
+    public static final String FeatureValue_test = "test";//测试命令
+
     public static final String FeatureValue_nav = "nav";//单点导航命令
     public static final String FeatureValue_waiting = "waiting";//等待命令
     public static final String FeatureValue_gotocharge = "gotocharge";//进入充电命令
     public static final String FeatureValue_leavecharge = "leavecharge";//离开充电命令
     public static final String FeatureValue_mp3 = "mp3";//语音命令
+
+    public static final String MissionItemName_test = "fake";
 
     public static final String MissionItemName_nav = "laserNavigation";
     public static final String MissionItemName_gotocharge = "gotoCharge";

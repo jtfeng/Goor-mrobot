@@ -27,20 +27,17 @@ public class ScheduledHandle {
         long initDelay = TimeUtil.getTimeMillis("23:00:00") - System.currentTimeMillis();
         initDelay = initDelay > 0 ? initDelay : oneDay + initDelay;
         scheduledExecutor.scheduleAtFixedRate(new Runnable() {
-                                                  @Override
-                                                  public void run() {
-                                                      try {
-                                                          ScheduledHandleService service = new ScheduledHandleServiceImp();
-                                                          service.executeTwentyThreeAtNightPerDay();
-                                                          logger.info("schedule sendMessageWithLock");
-                                                      } catch (Exception e) {
-                                                          logger.error("schedule sendMessageWithLock exception", e);
-                                                      }
-                                                  }
-                                              },
-                initDelay,
-                oneDay,
-                TimeUnit.MILLISECONDS);
+            @Override
+            public void run() {
+                try {
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.executeTwentyThreeAtNightPerDay();
+                    logger.info("schedule sendMessageWithLock");
+                } catch (Exception e) {
+                    logger.error("schedule sendMessageWithLock exception", e);
+                }
+            }
+        }, initDelay, oneDay, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -57,6 +54,7 @@ public class ScheduledHandle {
                     logger.error("schedule publishRosScheduled exception", e);
                 }
             }
-        }, 9, 60, TimeUnit.SECONDS);
+        }, 60, 60, TimeUnit.SECONDS);
     }
+
 }

@@ -10,6 +10,7 @@
         <!--<result property="intervalTime" column="INTERVAL_TIME"/>-->
         <result property="data" column="DATA"/>
         <result property="createTime" column="CREATE_TIME"/>
+        <result property="storeId" column="STORE_ID"/>
         <result property="updateTime" column="UPDATE_TIME"/>
         <!--<result property="priority" column="PRIORITY"/>-->
         <result property="featureItemId" column="FEATURE_ITEM_ID"/>
@@ -22,69 +23,72 @@
 
     <sql id="Base_Column_List">
         ID,
+        STORE_ID,
+        NAME,
+        DESCRIPTION,
+<!--         REPEAT_COUNT,
+         INTERVAL_TIME, -->
+        DATA,
+        CREATE_TIME,
+        UPDATE_TIME,
+<!--         PRIORITY,
+         MISSION_CHAIN_ID,-->
+        FEATURE_ITEM_ID
+    </sql>
+
+    <insert id="save" parameterType="cn.mrobot.bean.mission.MissionItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO D_MISSION_ITEM(
+        ID,
+        STORE_ID,
         NAME,
         DESCRIPTION,
         <!--         REPEAT_COUNT,
-                 INTERVAL_TIME, -->
+                 INTERVAL_TIME,-->
                 DATA,
                 CREATE_TIME,
                 UPDATE_TIME,
         <!--         PRIORITY,
                  MISSION_CHAIN_ID,-->
                 FEATURE_ITEM_ID
-            </sql>
+                ) values (
+                #{id},
+                #{storeId},
+                #{name},
+                #{description},
+        <!--         #{repeatCount},
+                 #{intervalTime},-->
+                #{data},
+                #{createTime},
+                #{updateTime},
+        <!--         #{priority},
+               missionIdinId},-->
+                #{featureItemId}
+                );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
 
-            <insert id="save" parameterType="cn.mrobot.bean.mission.MissionItem" useGeneratedKeys="true" keyProperty="id">
-                INSERT INTO D_MISSION_ITEM(
-                ID,
-                NAME,
-                DESCRIPTION,
-                <!--         REPEAT_COUNT,
-                         INTERVAL_TIME,-->
-                        DATA,
-                        CREATE_TIME,
-                        UPDATE_TIME,
-                <!--         PRIORITY,
-                         MISSION_CHAIN_ID,-->
-                        FEATURE_ITEM_ID
-                        ) values (
-                        #{id},
-                        #{name},
-                        #{description},
-                <!--         #{repeatCount},
-                         #{intervalTime},-->
-                        #{data},
-                        #{createTime},
-                        #{updateTime},
-                <!--         #{priority},
-                       missionIdinId},-->
-                        #{featureItemId}
-                        );
-                        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
-                            SELECT LAST_INSERT_ID() AS ID
-                        </selectKey>
-                    </insert>
+    <select id="findByName" resultMap="missionItem">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_ITEM
+        WHERE NAME = #{name} AND STORE_ID = #{storeId}
+    </select>
 
-                    <select id="findByName" resultMap="missionItem">
-                        SELECT
-                        <include refid="Base_Column_List"/>
-                        FROM D_MISSION_ITEM
-                        WHERE NAME = #{name}
-                    </select>
+    <select id="get" resultMap="missionItem">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_ITEM
+        WHERE ID = #{id} AND STORE_ID = #{storeId}
+    </select>
 
-                    <select id="get" resultMap="missionItem">
-                        SELECT
-                        <include refid="Base_Column_List"/>
-                        FROM D_MISSION_ITEM
-                        WHERE ID = #{id}
-                    </select>
-
-                    <update id="update">
-                        UPDATE D_MISSION_ITEM
-                        <trim prefix="set" suffixOverrides=",">
-                            <if test="description != null">
-                                DESCRIPTION = #{description},
-                            </if>
+    <update id="update">
+        UPDATE D_MISSION_ITEM
+        <trim prefix="set" suffixOverrides=",">
+            <if test="description != null">
+                DESCRIPTION = #{description},
+            </if>
                             <!--<if test="repeatCount != null">-->
                 <!--REPEAT_COUNT = #{repeatCount},-->
             <!--</if>-->
@@ -104,30 +108,29 @@
                 FEATURE_ITEM_ID = #{featureItemId},
             </if>
         </trim>
-        WHERE ID = #{id}
+        WHERE ID = #{id} AND STORE_ID = #{storeId}
     </update>
 
     <select id="list" resultMap="missionItem">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_ITEM d
-        <where>
-            <if test="name != null">
-                AND d.NAME like CONCAT('%',#{name},'%')
-            </if>
-            <!--<if temissionIdinId != null">-->
-                <!--AND d.MISSION_CHAIN_ID missionIdinId}-->
-            <!--</if>-->
-            <if test="beginDate != null ">
-                AND d.CREATE_TIME &gt;= #{beginDate}
-            </if>
-            <if test="endDate != null">
-                AND d.CREATE_TIME &lt; #{endDate}
-            </if>
-            <!--<if test="priority != null">-->
-                <!--AND d.PRIORITY = #{priority}-->
-            <!--</if>-->
-        </where>
+        WHERE STORE_ID = #{storeId}
+        <if test="name != null">
+            AND d.NAME like CONCAT('%',#{name},'%')
+        </if>
+        <!--<if temissionIdinId != null">-->
+            <!--AND d.MISSION_CHAIN_ID missionIdinId}-->
+        <!--</if>-->
+        <if test="beginDate != null ">
+            AND d.CREATE_TIME &gt;= #{beginDate}
+        </if>
+        <if test="endDate != null">
+            AND d.CREATE_TIME &lt; #{endDate}
+        </if>
+        <!--<if test="priority != null">-->
+            <!--AND d.PRIORITY = #{priority}-->
+        <!--</if>-->
         ORDER BY NAME
     </select>
 
@@ -135,11 +138,12 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_ITEM d
+        WHERE STORE_ID = #{storeId}
         ORDER BY NAME
     </select>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM D_MISSION_ITEM WHERE ID = #{id}
+        DELETE FROM D_MISSION_ITEM WHERE ID = #{id} AND STORE_ID = #{storeId}
     </delete>
 
 </mapper>

@@ -11,6 +11,11 @@ import javax.persistence.Table;
 public class MissionItemTask extends BaseBean {
 
     private static final long serialVersionUID = 8828205395122968816L;
+
+    /**
+     * 场景ID
+     */
+    private Long sceneId;
     /**
      *任务列表ID
      */
@@ -29,6 +34,14 @@ public class MissionItemTask extends BaseBean {
     private String description; //描述
     private String data;//任务详细/功能数据
     private String featureValue;//data对应子功能的唯一命令字串
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
+    }
 
     public Long getMissionListId() {
         return missionListId;

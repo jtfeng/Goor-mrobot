@@ -4,6 +4,7 @@
 
     <resultMap id="mission" type="cn.mrobot.bean.mission.Mission">
         <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="createTime" column="CREATE_TIME"/>
@@ -18,6 +19,7 @@
 
     <sql id="Base_Column_List">
         ID,
+        STORE_ID,
         NAME,
         DESCRIPTION,
         CREATE_TIME,
@@ -33,6 +35,7 @@
     <insert id="save" parameterType="cn.mrobot.bean.mission.MissionList" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_MISSION(
             ID,
+            STORE_ID,
             NAME,
             DESCRIPTION,
             CREATE_TIME,
@@ -45,6 +48,7 @@
             PRIORITY-->
         ) values (
             #{id},
+            #{storeId},
             #{name},
             #{description},
             #{createTime},
@@ -93,57 +97,56 @@
             <!--</if>-->
         </trim>
         WHERE
-        ID = #{id}
+        ID = #{id} AND STORE_ID = #{storeId}
     </update>
 
     <select id="get" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION
-        WHERE ID = #{id}
+        WHERE ID = #{id} AND STORE_ID = #{storeId}
     </select>
 
     <delete id="delete" parameterType="long">
-        DELETE FROM D_MISSION WHERE ID = #{id}
+        DELETE FROM D_MISSION WHERE ID = #{id} AND STORE_ID = #{storeId}
     </delete>
 
     <select id="findByName" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION
-        WHERE NAME = #{name}
+        WHERE NAME = #{name} AND STORE_ID = #{storeId}
     </select>
 
     <select id="list" resultMap="mission">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION d
-        <where>
-            <!--<if temissionListIdinId != null">-->
-                <!--AND d.MISSION_MAIN_ID missionListIdinId}-->
-            <!--</if>-->
-            <if test="name != null">
-                AND d.NAME like CONCAT('%',#{name},'%')
-            </if>
-            <!--<if test="deviceId != null">-->
-                <!--AND d.DEVICE_ID = #{deviceId}-->
-            <!--</if>-->
-            <if test="beginDate != null ">
-                AND d.CREATE_TIME &gt;= #{beginDate}
-            </if>
-            <if test="endDate != null">
-                AND d.CREATE_TIME &lt; #{endDate}
-            </if>
-            <if test="sceneName != null">
-                AND d.SCENE_NAME = #{sceneName}
-            </if>
-            <if test="typeId != null">
-                AND d.TYPE_ID = #{typeId}
-            </if>
-            <!--<if test="priority != null">-->
-                <!--AND d.PRIORITY = #{priority}-->
-            <!--</if>-->
-        </where>
+        WHERE STORE_ID = #{storeId}
+        <!--<if temissionListIdinId != null">-->
+            <!--AND d.MISSION_MAIN_ID missionListIdinId}-->
+        <!--</if>-->
+        <if test="name != null">
+            AND d.NAME like CONCAT('%',#{name},'%')
+        </if>
+        <!--<if test="deviceId != null">-->
+            <!--AND d.DEVICE_ID = #{deviceId}-->
+        <!--</if>-->
+        <if test="beginDate != null ">
+            AND d.CREATE_TIME &gt;= #{beginDate}
+        </if>
+        <if test="endDate != null">
+            AND d.CREATE_TIME &lt; #{endDate}
+        </if>
+        <if test="sceneName != null">
+            AND d.SCENE_NAME = #{sceneName}
+        </if>
+        <if test="typeId != null">
+            AND d.TYPE_ID = #{typeId}
+        </if>
+        <!--<if test="priority != null">-->
+            <!--AND d.PRIORITY = #{priority}-->
+        <!--</if>-->
         ORDER BY NAME ASC
     </select>
 
@@ -151,6 +154,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION d
+        WHERE STORE_ID = #{storeId}
         ORDER BY NAME
     </select>
 </mapper>

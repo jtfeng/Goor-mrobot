@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
+import edu.wpi.rail.jrosbridge.messages.Message;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
@@ -42,6 +43,16 @@ public class TopicSubscribeInfo implements Serializable {
 		Topic currentPoseTopic = new Topic(ros, TopicConstants.CURRENT_POSE, TopicConstants.TOPIC_NAV_MSGS);
 		TopicCallback currentPoseCallback = new CurrentPoseListenerImpl();
 		currentPoseTopic.subscribe(currentPoseCallback);
+		// TODO: 17/07/2017 摇杆发布的 Topic 测试
+		Topic rosYaoganTopic = new Topic(ros, TopicConstants.ROS_YAOGAN_TOPIC, TopicConstants.ROS_YAOGAN_TOPIC_TYPE);
+		rosYaoganTopic.subscribe(new TopicCallback() {
+			@Override
+			public void handleMessage(Message message) {
+				log.info(" ----- ----- ----- ros 摇杆开始移动 ----- ----- -----");
+				log.info(message.toString());
+				log.info(" ----- ----- ----- ros 摇杆停止移动 ----- ----- -----");
+			}
+		});
 
 		//当前任务队列数据响应
 		Topic queueResponseTopic = new Topic(ros, TopicConstants.X86_MISSION_QUEUE_RESPONSE, TopicConstants.TOPIC_TYPE_STRING);

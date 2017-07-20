@@ -20,20 +20,20 @@ public interface MissionService {
 
 	void update(Mission mission);
 
-	void updateFull(Mission mission, Mission missionDB);
+	void updateFull(Mission mission, Mission missionDB,long storeId);
 
-	void update(Mission mission, List<Long> nodeIdList);
+	void update(Mission mission, List<Long> nodeIdList,long storeId);
 
 //	void update(Mission mission, List<MissionItem> missionItems);
 
-    Mission get(long id);
+    Mission get(long id,long storeId);
 
-	void delete(Mission mission);
+	void delete(Mission mission,long storeId);
 
-	Mission findByName(String name);
+	Mission findByName(String name,long storeId);
 
-	List<Mission> list(WhereRequest whereRequest);
+	List<Mission> list(WhereRequest whereRequest,long storeId);
 
-	List<Mission> list();
+	List<Mission> list(long storeId);
 }
 
