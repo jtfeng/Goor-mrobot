@@ -1,6 +1,7 @@
 package cn.muye.area.map.service.impl;
 
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapZipService;
@@ -77,7 +78,7 @@ public class MapZipServiceImpl implements MapZipService {
     public List<MapZip> list(WhereRequest whereRequest, long storeId) {
         Example example = new Example(MapZip.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andCondition("STORE_ID ="+storeId);
+        criteria.andCondition("STORE_ID =" + storeId);
         if (whereRequest.getQueryObj() != null) {
             JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
             Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
@@ -124,13 +125,11 @@ public class MapZipServiceImpl implements MapZipService {
     }
 
     private String parseLocalPath(String localPath) {
+        if(StringUtil.isNullOrEmpty(localPath))
+            return "";
         //将文件路径封装成http路径
-        localPath = localPath.replaceAll("\\\\","/");
-        int index = localPath.indexOf(SearchConstants.FAKE_MERCHANT_STORE_ID + "");
-        if (index >= 0) {
-            return DOWNLOAD_HTTP + localPath.substring(index);
-        }
-        return "";
+        localPath = localPath.replaceAll("\\\\", "/");
+        return DOWNLOAD_HTTP + localPath;
     }
 }
 
