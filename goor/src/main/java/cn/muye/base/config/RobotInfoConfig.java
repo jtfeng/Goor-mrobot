@@ -12,17 +12,20 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RobotInfoConfig {
 
-    @Value("${robot.name}")
+    @Value("${local.robot.name}")
     private String robotName;
 
     @Value("${local.robot.SN}")
     private String robotCode;
 
-    @Value("${robot.typeId}")
+    @Value("${local.robot.typeId}")
     private int robotTypeId;
 
-    @Value("${robot.batteryThreshold}")
+    @Value("${local.robot.batteryThreshold}")
     private int robotBatteryThreshold;
+
+    @Value("${local.robot.storeId}")
+    private Long storeId;
 
     @Bean
     public Robot getRobotInfo() {
@@ -31,6 +34,7 @@ public class RobotInfoConfig {
         robot.setCode(robotCode);
         robot.setBatteryThreshold(robotBatteryThreshold);
         robot.setTypeId(robotTypeId);
+        robot.setStoreId(storeId);
         CacheInfoManager.setRobotInfoCache(robot);
         return robot;
     }

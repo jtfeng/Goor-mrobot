@@ -53,7 +53,7 @@ public class Constant {
 
     public final static String ROBOT_CACHE_KEY = "robotInfo"; //自动注册机器人缓存KEY
 
-    public final static Long CHECK_IF_OFFLINE_TIME = 60000L; //1分钟=60000毫秒
+    public final static Long CHECK_IF_OFFLINE_TIME = 300000L; //5分钟=30000毫秒
 
     //与地图点相关的指令列表
     public final static List<Long> ORDER_MAP_POINT_RELATE_LIST = Arrays.asList(
@@ -61,6 +61,7 @@ public class Constant {
             4L//
     );
 
+    public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
     public final static long ORDER_WAIT_ID = 6L;//等待任务ID
 
     public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";

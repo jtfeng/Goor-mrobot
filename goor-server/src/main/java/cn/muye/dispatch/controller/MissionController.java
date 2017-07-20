@@ -699,7 +699,7 @@ public class MissionController {
 	 * @param command
 	 * @return
 	 */
-	@RequestMapping(value = {"dispatch/command"}, method = RequestMethod.GET)
+	/*@RequestMapping(value = {"dispatch/command"}, method = RequestMethod.GET)
 	@ResponseBody
 	public AjaxResult sendCommand(String command) {
 		boolean flag = false;
@@ -728,16 +728,13 @@ public class MissionController {
 
 	private boolean sendMissionCommand(String command) {
 		boolean flag = false;
-		MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+		MessageInfo info = new MessageInfo();
 		info.setUuId(UUID.randomUUID().toString().replace("-", ""));
 		info.setSendTime(new Date());
 		info.setSenderId("goor-server");
 		info.setReceiverId("daBit");
-		info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
-//        info.setMessageType(MessageType.EXECUTOR_RESOURCE);//TODO 如果发送资源,将此行注释去掉，注释此行上面第一行
-//        info.setMessageType(MessageType.EXECUTOR_LOG);//TODO 针对 x86 agent 业务逻辑,不接收发送到ros的信息，如：发送命令要求上传log等
-//                info.setMessageText(JSON.toJSONString(robotDb));//TODO 发送资源及rostopic命令
-		info.setMessageText("{\"topicName\":\""+ command + "\",\"topicType\":\"std_msgs/String\",\"publishMessage\":{\"command\":\"pause\",\"sendTime\":\"2017-07-14 11:50:53\"}}");//TODO 发送资源及rostopic命令
+		info.setMessageType(MessageType.EXECUTOR_COMMAND);
+		info.setMessageText("{\"topicName\":\""+ command + "\",\"topicType\":\"std_msgs/String\",\"publishMessage\":{\"command\":\""+ command + "\",\"sendTime\":\"2017-07-14 11:50:53\"}}");
 
 		String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey("daBit",true, MessageType.EXECUTOR_COMMAND.name());
 		//单机器命令发送（带回执）
@@ -746,6 +743,6 @@ public class MissionController {
 			return true;
 		}
 		return flag;
-	}
+	}*/
 
 }

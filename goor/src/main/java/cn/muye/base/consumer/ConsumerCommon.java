@@ -3,6 +3,8 @@ package cn.muye.base.consumer;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.base.PubData;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
@@ -22,16 +24,11 @@ import edu.wpi.rail.jrosbridge.services.ServiceResponse;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.URLDecoder;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
@@ -41,14 +38,13 @@ public class ConsumerCommon {
     private static Logger logger = Logger.getLogger(ConsumerCommon.class);
     @Autowired
     private Ros ros;
-
-    //    @Autowired
-//    private RabbitTemplate rabbitTemplate;
     @Autowired
     private ReceiveMessageService receiveMessageService;
     @Autowired
     private MapService mapService;
 
+    @Value("${local.applicationProperties.path}")
+    private String path; //本地application.properties配置文件路径
     /**
      * 接收命令消息（无回执）
      * @param messageInfo
@@ -81,19 +77,9 @@ public class ConsumerCommon {
                 if (MessageType.TIME_SYNCHRONIZED.equals(messageInfo.getMessageType())) {
                     return clientTimeSynchronized(messageInfo);
                 }
-
                 if (MessageType.ROBOT_BATTERY_THRESHOLD.equals(messageInfo.getMessageType())) {
-                    String commonInfoStr = messageInfo.getMessageText();
-                    CommonInfo commonInfo = JSON.parseObject(commonInfoStr, CommonInfo.class);
-                    String robotInfoStr = commonInfo.getPublishMessage();
-                    Robot robotInfo = JSON.parseObject(robotInfoStr, Robot.class);
-                    //改缓存
-                    CacheInfoManager.setRobotInfoCache(robotInfo);
-                    //改配置文件
-                    updateProperties("application.properties", robotInfo.getBatteryThreshold());
-                    return syncRobotBatteryThreshold(messageInfo);
+                    updateCacheAndChangeProperties(messageInfo);
                 }
-
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 return service.publishMessage(ros, messageInfo);
             }
@@ -105,48 +91,42 @@ public class ConsumerCommon {
     }
 
     /**
-     * 同步机器人电量阈值
+     * 后台修改了机器人电量阈值需要将Goor的
      * @param messageInfo
-     * @return
      */
-    private AjaxResult syncRobotBatteryThreshold(MessageInfo messageInfo) {
-        ScheduledHandleService service = new ScheduledHandleServiceImp();
-        return service.publishMessage(ros, messageInfo);
+    private void updateCacheAndChangeProperties(MessageInfo messageInfo) {
+        String commonInfoStr = messageInfo.getMessageText();
+        CommonInfo commonInfo = JSON.parseObject(commonInfoStr, CommonInfo.class);
+        String pubDataStr = commonInfo.getPublishMessage();
+        PubData pubData = JSON.parseObject(pubDataStr, PubData.class);
+        Robot robotInfo = JSON.parseObject(pubData.getData(), Robot.class);
+        robotInfo.setId(null);
+        //改缓存
+        CacheInfoManager.setRobotInfoCache(robotInfo);
+        //改配置文件
+        updateProperties(robotInfo.getBatteryThreshold());
     }
 
     /**
-     * 传递键值对的Map，更新properties文件
-     *
-     * @param fileName
-     *            文件名(放在resource源包目录下)，需要后缀
-     * @param batteryThreshold
-     *            键值对Map
+     * 更新properties文件
+     * @param batteryThreshold 键值对Map
      */
-    public static void updateProperties(String fileName, int batteryThreshold/*Map<String, String> keyValueMap*/) {
-        //getResource方法使用了utf-8对路径信息进行了编码，当路径中存在中文和空格时，他会对这些字符进行转换，这样，
-        //得到的往往不是我们想要的真实路径，在此，调用了URLDecoder的decode方法进行解码，以便得到原始的中文及空格路径。
-        String filePath = ConsumerCommon.class.getClassLoader().getResource(fileName).getFile();
-        Properties props = null;
+    public void updateProperties(int batteryThreshold) {
+        Properties prop = new Properties();
+        FileInputStream fis;
         BufferedWriter bw = null;
-
+        String filePath = path;
         try {
-            filePath = URLDecoder.decode(filePath,"utf-8");
-            logger.debug("updateProperties propertiesPath:" + filePath);
-            props = PropertiesLoaderUtils.loadProperties(new ClassPathResource(fileName));
-            logger.debug("updateProperties old:"+props);
-
+            fis = new FileInputStream(filePath);
+            prop.load(fis);
             // 写入属性文件
             bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath)));
-
-//            props.clear();// 清空旧的文件
-            props.setProperty("robot.batteryThreshold", String.valueOf(batteryThreshold));
-//            for (String key : keyValueMap.keySet())
-//                props.setProperty(key, keyValueMap.get(key));
-
-            logger.debug("updateProperties new:"+props);
-            props.store(bw, "");
+            prop.setProperty(Constant.ROBOT_BATTERY_THRESHOLD, String.valueOf(batteryThreshold));
+            prop.store(bw, "");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            e.printStackTrace();
         } finally {
             try {
                 bw.close();
@@ -154,6 +134,24 @@ public class ConsumerCommon {
                 e.printStackTrace();
             }
         }
+        //todo SnakeYaml来修改配置文件
+//        Yaml yaml = new Yaml();
+//        File f = new File(path);
+//        //读入文件
+//        String result= null;
+//        try {
+//            result = (String)yaml.load(new FileInputStream(f));
+//        } catch (FileNotFoundException e) {
+//            logger.error("{}",e);
+//        }
+//        String[] properties =  result.split("\\s+");
+//        if (properties != null && properties.length > 0) {
+//            for (String property : properties) {
+//                String[] args = property.split("=");
+//
+//            }
+//        }
+//        System.out.println( result);
     }
 
     /**

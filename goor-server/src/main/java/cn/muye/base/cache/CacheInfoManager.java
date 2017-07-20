@@ -43,7 +43,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, ChargeInfo> robotChargeInfoCache = new ConcurrentHashMapCache<>();
 
     /** 机器人同步时间的缓存 */
-    private static ConcurrentHashMap<String, Long> robotAutoRegisterTimeCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMapCache<String, Long> robotAutoRegisterTimeCache = new ConcurrentHashMapCache<String, Long>();
 
 
 
@@ -62,6 +62,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         messageCache.setMaxLifeTime(0);
         mapCurrentCache.setMaxLifeTime(0);
         mapOriginalCache.setMaxLifeTime(0);
+        robotAutoRegisterTimeCache.setMaxLifeTime(0);
 		UUIDCache.setMaxLifeTime(60*1000);//设置超时时间60秒
 
         robotChargeInfoCache.setMaxLifeTime(10*60*1000);

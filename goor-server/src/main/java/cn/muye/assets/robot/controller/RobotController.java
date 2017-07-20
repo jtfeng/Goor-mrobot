@@ -7,6 +7,7 @@ import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
@@ -16,6 +17,7 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
+import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.Api;
@@ -97,7 +99,7 @@ public class RobotController {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
         }
         //判断是否有重复的编号
-        Robot robotDbByCode = robotService.getByCode(robotCode);
+        Robot robotDbByCode = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
         }
@@ -118,7 +120,7 @@ public class RobotController {
                     CommonInfo commonInfo = new CommonInfo();
                     commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
                     commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-                    commonInfo.setPublishMessage(JSON.toJSONString(robotDb));
+                    commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(robotDb))));
                     MessageInfo info = new MessageInfo();
                     info.setUuId(UUID.randomUUID().toString().replace("-", ""));
                     info.setSendTime(new Date());
@@ -147,19 +149,6 @@ public class RobotController {
             return AjaxResult.success(robot, "新增成功");
         }
     }
-
-//    /**
-//     * 自动注册接口
-//     * @param robot
-//     * @return
-//     */
-//    @RequestMapping(value = {"assets/robot/register"}, method = RequestMethod.POST)
-//    @ApiOperation(value = "自动注册机器人", httpMethod = "POST", notes = "自动注册机器人")
-//    @ResponseBody
-//    public AjaxResult registerRobot(@RequestParam("robot") byte[] robot) {
-//        robotService.autoRegister(robot);
-//        return null;
-//    }
 
     @RequestMapping(value = {"assets/robot/{id}"}, method = RequestMethod.DELETE)
     @ApiOperation(value = "删除机器人", httpMethod = "DELETE", notes = "删除机器人")

@@ -41,16 +41,14 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, Integer> nameLSubCache = new ConcurrentHashMapCache<String, Integer>();
 
     /** 机器人信息的缓存(读配置文件的信息放入缓存) */
-    private static ConcurrentHashMap<String, Robot> robotInfoCache = new ConcurrentHashMap<>();
-
-    /** 机器人同步时间的缓存 */
-    private static ConcurrentHashMap<String, Long> robotAutoRegisterTimeCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMapCache<String, Robot> robotInfoCache = new ConcurrentHashMapCache<>();
 
     static {
         appConfigCache.setMaxLifeTime(0);
         topicHeartCheckCache.setMaxLifeTime(0);
         nameSubCache.setMaxLifeTime(0);
         nameLSubCache.setMaxLifeTime(0);
+        robotInfoCache.setMaxLifeTime(0);
         topicHeartCheckCache.put(1, System.currentTimeMillis());
     }
 
@@ -95,14 +93,6 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setRobotInfoCache(Robot robotInfo) {
         robotInfoCache.put(Constant.ROBOT_CACHE_KEY, robotInfo);
-    }
-
-    public static Long getRobotAutoRegisterTimeCache(String robotCode) {
-        return robotAutoRegisterTimeCache.get(Constant.ROBOT_AUTO_REGISTER_PREFIX + robotCode);
-    }
-
-    public static void setRobotAutoRegisterTimeCache(String robotCode, Long time) {
-        robotAutoRegisterTimeCache.put(Constant.ROBOT_AUTO_REGISTER_PREFIX + robotCode, time);
     }
 
     /**

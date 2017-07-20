@@ -7,6 +7,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.service.RobotService;
 import cn.mrobot.bean.charge.ChargeInfo;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.log.charge.service.ChargeInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -59,7 +60,7 @@ public class ChargeInfoController implements ApplicationContextAware {
                 return AjaxResult.failed("设备编号不能为空");
             }
 
-            Robot robot = robotService.getByCode(code);
+            Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (null == robot) {
                 return AjaxResult.failed("机器人编号（" + code + "）不存在");
             }

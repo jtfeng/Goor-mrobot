@@ -291,6 +291,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_ROBOT_INFO)
     public void subscribeRobotInfo(@Payload MessageInfo messageInfo) {
         try {
+            logger.info("subscribeRobotInfo start");
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 String robotStr = AES.decryptFromBase64(messageInfo.getMessageText(), Constant.AES_KEY);
                 Robot robotNew = JSON.parseObject(robotStr, Robot.class);

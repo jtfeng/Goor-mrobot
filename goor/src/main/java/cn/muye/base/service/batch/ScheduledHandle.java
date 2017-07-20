@@ -50,7 +50,7 @@ public class ScheduledHandle {
             @Override
             public void run() {
                 try {
-//                    logger.info("schedule replyMessageScheduled start");
+                    logger.info("sendRobotInfo Scheduled");
                     ScheduledHandleService service = new ScheduledHandleServiceImp();
                     service.sendRobotInfo();
                 } catch (Exception e) {
