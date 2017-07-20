@@ -115,7 +115,7 @@ public class PointServiceImpl implements PointService {
             }
         }
         criteria.andCondition("STORE_ID = "+storeId);
-        condition.setOrderByClause("SCENE_NAME，MAP_NAME ASC");
+        condition.setOrderByClause("SCENE_NAME, MAP_NAME ASC");
 
         List<MapPoint> mapPointList = pointMapper.selectByExample(condition);
         //处理枚举类型
