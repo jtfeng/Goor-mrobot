@@ -35,7 +35,7 @@ public class SendLogController {
     }
 
     /**
-     * 分页查询资源
+     * 分页查询发送消息
      * @param whereRequest
      * @return
      */

@@ -29,7 +29,7 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getByName(String name);
 
-    Robot getByCode(String code);
+    Robot getByCode(String code, Long storeId);
 
     void updateRobot(Robot robot);
 
@@ -37,5 +37,5 @@ public interface RobotService extends BaseService<Robot>{
 
     void bindChargerMapPoint(Long robotId, List<MapPoint> list);
 
-    List<MapPoint> getChargerMapPointByRobotCode(String robotCode);
+    List<MapPoint> getChargerMapPointByRobotCode(String robotCode, Long storeId);
 }

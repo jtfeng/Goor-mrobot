@@ -63,7 +63,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 Long sendTime = CacheInfoManager.getRobotAutoRegisterTimeCache(code);
                 //如果大于1分钟
                 if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
-                    Robot robotDb = robotService.getByCode(code);
+                    Robot robotDb = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
                     if (robotDb != null) {
                         robotDb.setOnline(false);
                         robotService.updateRobot(robotDb);

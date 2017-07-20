@@ -51,6 +51,7 @@ public class MapInfoController {
                 return AjaxResult.failed("地图数据不存在");
             }
             mapInfoDB.setMapAlias(mapInfo.getMapAlias());
+            mapInfoDB.setPngDesigned(mapInfo.getPngDesigned());
             mapInfoService.update(mapInfoDB);
             return AjaxResult.success(mapInfoDB, "修改成功");
         } catch (Exception e) {

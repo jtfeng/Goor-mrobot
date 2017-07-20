@@ -33,7 +33,7 @@ public class MapInfo extends BaseBean {
 
 	private String deviceId;
 
-	private String overlayMap;
+	private String pngDesigned; //  设计图的相对路径
 
 	private Long mapZipId;
 
@@ -93,13 +93,7 @@ public class MapInfo extends BaseBean {
 		this.deviceId = deviceId;
 	}
 
-	public String getOverlayMap() {
-		return overlayMap;
-	}
 
-	public void setOverlayMap(String overlayMap) {
-		this.overlayMap = overlayMap;
-	}
 
 	public Long getMapZipId() {
 		return mapZipId;
@@ -107,5 +101,13 @@ public class MapInfo extends BaseBean {
 
 	public void setMapZipId(Long mapZipId) {
 		this.mapZipId = mapZipId;
+	}
+
+	public String getPngDesigned() {
+		return pngDesigned;
+	}
+
+	public void setPngDesigned(String pngDesigned) {
+		this.pngDesigned = pngDesigned;
 	}
 }

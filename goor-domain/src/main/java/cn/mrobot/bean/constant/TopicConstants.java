@@ -124,7 +124,7 @@ public class TopicConstants {
 	public static final String DIRECT_X86_MISSION_EVENT = "direct.x86_mission_event";//任务事件上报topic
 	public static final String DIRECT_X86_MISSION_RECEIVE = "direct.x86_mission_receive";//任务回执上报topic
 
-	public static final String DIRECT_STATE_COLLECTOR = "direct.state_collector";
+	public static final String DIRECT_STATE_COLLECTOR = "direct.state_collector"; //状态机上报 queue
 	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";
 	public static final String DIRECT_COMMAND_REPORT_RECEIVE = "direct.command_report_receive";
 	public static final String DIRECT_COMMAND_ROBOT_INFO = "direct.command_robot_info";

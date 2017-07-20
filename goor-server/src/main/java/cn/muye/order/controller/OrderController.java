@@ -3,6 +3,8 @@ package cn.muye.order.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.order.GoodsInfo;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
@@ -71,7 +73,12 @@ public class OrderController extends BaseController {
     public AjaxResult saveOrder(@RequestBody Order order,HttpSession session ){
         Robot arrangeRobot = null;
         try {
-            Long stationId = (Long)session.getAttribute("stationId");
+            //注入发起站
+            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
+            order.setStartStation(new Station(stationId));
+            //注入场景
+            Scene scene = (Scene)session.getAttribute(Constant.SCENE_SESSION_TAG);
+            order.setScene(scene);
             //现在orderSetting后台默认注入默认配置
             if(order.getOrderSetting() == null){
                 OrderSetting orderSetting = orderSettingService.getDefaultSetting(stationId);
@@ -89,7 +96,6 @@ public class OrderController extends BaseController {
                 order.setNeedShelf(Boolean.TRUE);
             }
             order.setRobot(arrangeRobot);
-            order.setStartStation(new Station(stationId));
             orderService.saveOrder(order);
             return AjaxResult.success("保存订单成功");
         } catch (Exception e) {
@@ -112,7 +118,7 @@ public class OrderController extends BaseController {
     @ResponseBody
     public AjaxResult listStationTasks(HttpSession session,WhereRequest whereRequest){
         try {
-            Long stationId = (Long)session.getAttribute("stationId");
+            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
             List<OrderDetail> orderDetailList = orderDetailService.listStationTasks(stationId, whereRequest);
             List<OrderDetailVO> orderDetailVOs = orderDetailList.stream().map(orderDetail -> generateOrderDetailVO(orderDetail)).collect(Collectors.toList());
             PageInfo<OrderDetailVO> detailPageInfo = new PageInfo<>(orderDetailVOs);

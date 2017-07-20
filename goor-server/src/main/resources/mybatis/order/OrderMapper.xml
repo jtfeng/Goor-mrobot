@@ -9,6 +9,7 @@
         o.start_station_id AS "startStation.id",
         o.need_shelf AS "needShelf",
         o.shelf_id AS "shelf.id",
+        o.scene_id AS "scene.id",
         o.status AS "status",
         o.store_id AS "storeId",
         o.created_by AS "createdBy",
@@ -32,6 +33,7 @@
         start_station_id,
         need_shelf,
         shelf_id,
+        scene_id,
         status,
         store_id,
         created_by,
@@ -42,6 +44,7 @@
         #{startStation.id},
         #{needShelf},
         #{shelf.id},
+        #{scene.id},
         #{status},
         #{storeId},
         #{createdBy},
@@ -66,6 +69,9 @@
             </if>
             <if test="shelf != null and shelf.id != null and shelf.id != ''" >
                 shelf_id = #{shelf.id},
+            </if>
+            <if test="scene != null and scene.id != null and scene.id != ''" >
+                scene_id = #{scene.id},
             </if>
             <if test="status != null" >
                 status = #{status}
