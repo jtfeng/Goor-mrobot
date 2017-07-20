@@ -13,6 +13,7 @@ import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
@@ -351,7 +352,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //最后添加充电点，目前充电点从机器人的数据库里面查询出来
         //查询列表
         List<MapPoint> chongMPs = robotService
-                .getChargerMapPointByRobotCode(order.getRobot().getCode());
+                .getChargerMapPointByRobotCode(order.getRobot().getCode(), SearchConstants.FAKE_MERCHANT_STORE_ID);
         //取第一个有效的点设置进去
         if (chongMPs != null){
             for (MapPoint mp :

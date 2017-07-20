@@ -33,6 +33,7 @@ public class SearchConstants {
 	public static String SEARCH_MISSION_CHAIN_ID = "missionChainId";
 	public static String SEARCH_MISSION_SCENE_NAME = "missionSceneName";
 	public static String SEARCH_MISSION_TYPE_ID = "missionTypeId";
+	public static String SEARCH_MISSION_LIST_TYPE = "missionListType";
 	public static String SEARCH_PRIORITY = "priority";
 	public static String SEARCH_FEATURE_ITEM_TYPE_ID = "featureItemTypeId";
 	public static String SEARCH_FEATURE_ITEM_ID = "featureItemId";
@@ -40,6 +41,7 @@ public class SearchConstants {
 	public static String SEARCH_POINT_NAME = "pointName";
 	public static String SEARCH_POINT_ALIAS = "pointAlias";
 	public static String SEARCH_SCENE_NAME = "sceneName";
+	public static String SEARCH_SCENE_ID = "sceneId";
 	public static String SEARCH_MAP_POINT_TYPE_ID = "mapPointTypeId";
 
 	public static String SEARCH_MAP_NAME = "mapName";

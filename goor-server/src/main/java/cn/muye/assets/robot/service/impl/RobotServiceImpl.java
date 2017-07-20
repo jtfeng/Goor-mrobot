@@ -4,6 +4,10 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.*;
+import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.base.PubData;
+import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
@@ -12,17 +16,25 @@ import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
+import java.io.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
+import java.util.UUID;
 
 /**
  * Created by Ray.Fu on 2017/6/12.
@@ -41,7 +53,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     private StationRobotXREFService stationRobotXREFService;
 
     @Autowired
-    private RobotService robotService;
+    private RabbitTemplate rabbitTemplate;
 
     @Autowired
     private RobotChargerMapPointXREFService robotChargerMapPointXREFService;
@@ -76,7 +88,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         if (list != null && list.size() > 0) {
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
-                Robot robotDb = robotService.getById(robotId);
+                Robot robotDb = getById(robotId);
                 if (robotDb != null && robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId)) {
                     availableRobot = robotDb;
                     break;
@@ -112,9 +124,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public List<MapPoint> getChargerMapPointByRobotCode(String robotCode) {
+    public List<MapPoint> getChargerMapPointByRobotCode(String robotCode, Long storeId) {
         if (robotCode != null) {
-            Robot robotDb = robotService.getByCode(robotCode);
+            Robot robotDb = getByCode(robotCode, storeId);
             if (robotDb != null) {
                 Long robotId = robotDb.getId();
                 List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
@@ -214,22 +226,45 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
             }
             //判断是否有重复的名称
-            Robot robotDbByName = robotService.getByName(robotNew.getName());
+            Robot robotDbByName = getByName(robotNew.getName());
             if (robotDbByName != null && !robotDbByName.getId().equals(robotNew.getId())) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
             }
             //判断是否有重复的编号
-            Robot robotDbByCode = robotService.getByCode(robotNew.getCode());
+            Robot robotDbByCode = getByCode(robotNew.getCode(), robotNew.getStoreId());
             if (robotDbByCode != null && !robotDbByCode.getId().equals(robotNew.getId())) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
             }
-            robotService.saveRobot(robotNew);
+            saveRobot(robotNew);
+            //往ros上透传电量阈值
+            syncRosRobotConfig(robotNew);
             return AjaxResult.success(robotNew, "注册成功");
         } catch (Exception e) {
 //            log.error("注册失败, 错误日志 >>>> {}", e.getMessage());
             return AjaxResult.failed("注册失败");
         } finally {
         }
+    }
+
+    /**
+     * 往ros上透传机器人配置信息（电量阈值，。。。）
+     * @param robotNew
+     */
+    private void syncRosRobotConfig(Robot robotNew) {
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(robotNew))));
+        String robotCode = robotNew.getCode();
+        MessageInfo info = new MessageInfo();
+        info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        info.setSendTime(new Date());
+        info.setSenderId("goor-server");
+        info.setReceiverId(robotCode);
+        info.setMessageType(MessageType.ROBOT_BATTERY_THRESHOLD);
+        info.setMessageText(JSON.toJSONString(commonInfo));
+        String noResultResourceRoutingKey = RabbitMqBean.getRoutingKey(robotCode, false, MessageType.EXECUTOR_COMMAND.name());
+        rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, noResultResourceRoutingKey, info);
     }
 
     public void deleteRobotById(Long id) {
@@ -245,14 +280,24 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
     public Robot getByName(String name) {
-        Robot robot = new Robot();
-        robot.setName(name);
-        return myMapper.selectOne(robot);
+        Example example = new Example(Robot.class);
+        example.createCriteria().andCondition("NAME =", name);
+        List<Robot> list = myMapper.selectByExample(example);
+        if (list != null && list.size() > 0) {
+            return list.get(0);
+        } else {
+            return null;
+        }
     }
 
-    public Robot getByCode(String code) {
-        Robot robot = new Robot();
-        robot.setCode(code);
-        return myMapper.selectOne(robot);
+    public Robot getByCode(String code, Long storeId) {
+        Example example = new Example(Robot.class);
+        example.createCriteria().andCondition("CODE =", code);
+        List<Robot> list = myMapper.selectByExample(example);
+        if (list != null && list.size() > 0) {
+            return list.get(0);
+        } else {
+            return null;
+        }
     }
 }

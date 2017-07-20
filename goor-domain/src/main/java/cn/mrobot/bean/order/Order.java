@@ -2,6 +2,7 @@ package cn.mrobot.bean.order;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.base.BaseBean;
 
@@ -24,9 +25,19 @@ public class Order extends BaseBean{
 
     private Shelf shelf;  //货架编号 若需要货架
 
+    private Scene scene;  //场景
+
     private Integer status; //订单状态 0未完成 1完成
 
     public Order() {
+    }
+
+    public Scene getScene() {
+        return scene;
+    }
+
+    public void setScene(Scene scene) {
+        this.scene = scene;
     }
 
     public Shelf getShelf() {

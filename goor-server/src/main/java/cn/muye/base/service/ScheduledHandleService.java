@@ -3,7 +3,7 @@ package cn.muye.base.service;
 
 public interface ScheduledHandleService {
 
-    void executeTwentyThreeAtNightPerDay();
+    void executeTwentyThreeAtNightPerDay() throws Exception;
 
-    void executeRobotHeartBeat();
+    void executeRobotHeartBeat() throws Exception;
 }

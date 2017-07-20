@@ -1,6 +1,7 @@
 package cn.muye.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.order.OrderSetting;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.OrderSettingService;
@@ -46,7 +47,7 @@ public class OrderSettingController extends BaseController{
     @ResponseBody
     public AjaxResult listAvailableOrderSetting(HttpSession session){
         try {
-            Long stationId = (Long)session.getAttribute("stationId");
+            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
             List<OrderSetting> orderSetting = orderSettingService.listAvailableOrderSettingByStationId(stationId);
             return AjaxResult.success(orderSetting);
         } catch (Exception e) {
@@ -64,7 +65,7 @@ public class OrderSettingController extends BaseController{
     @ResponseBody
     public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting,HttpSession session){
         try {
-            Long stationId = (Long)session.getAttribute("stationId");
+            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
             if(stationId == null){
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "session内无法获取站id");
             }
@@ -111,7 +112,7 @@ public class OrderSettingController extends BaseController{
     @ResponseBody
     public AjaxResult updateDefaultOrderSetting(@RequestParam("id") Long id, HttpSession session){
         try {
-            Long stationId = (Long)session.getAttribute("stationId");
+            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
             List<OrderSetting> settingList = orderSettingService.listAvailableOrderSettingByStationId(stationId);
             settingList.forEach(orderSetting -> {
                if(orderSetting.getId() == id ){

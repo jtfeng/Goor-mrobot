@@ -1,9 +1,13 @@
 package cn.mrobot.bean.assets.scene;
 
+import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by wlkfec on 19/07/2017.
@@ -13,6 +17,11 @@ public class Scene extends BaseBean{
     private String name;
     private String aliasName;
     private String intro;
+
+    @Transient
+    private List<MapInfo> mapInfos;
+    @Transient
+    private List<Robot> robots;
 
     public String getName() {
         return name;
@@ -36,5 +45,32 @@ public class Scene extends BaseBean{
 
     public void setIntro(String intro) {
         this.intro = intro;
+    }
+
+    public List<MapInfo> getMapInfos() {
+        return mapInfos;
+    }
+
+    public void setMapInfos(List<MapInfo> mapInfos) {
+        this.mapInfos = mapInfos;
+    }
+
+    public List<Robot> getRobots() {
+        return robots;
+    }
+
+    public void setRobots(List<Robot> robots) {
+        this.robots = robots;
+    }
+
+    @Override
+    public String toString() {
+        return "Scene{" +
+                "name='" + name + '\'' +
+                ", aliasName='" + aliasName + '\'' +
+                ", intro='" + intro + '\'' +
+                ", mapInfos=" + mapInfos +
+                ", robots=" + robots +
+                '}';
     }
 }

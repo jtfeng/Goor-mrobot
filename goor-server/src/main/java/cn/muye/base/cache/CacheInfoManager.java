@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import javax.websocket.Session;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,7 +45,9 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, ChargeInfo> robotChargeInfoCache = new ConcurrentHashMapCache<>();
 
     /** 机器人同步时间的缓存 */
-    private static ConcurrentHashMap<String, Long> robotAutoRegisterTimeCache = new ConcurrentHashMap<>();
+    private static ConcurrentHashMapCache<String, Long> robotAutoRegisterTimeCache = new ConcurrentHashMapCache<String, Long>();
+    /** webSocket根据用户名来缓存Session 的缓存 */
+    private static ConcurrentHashMapCache<String, Session> webSocketSessionCache = new ConcurrentHashMapCache<String, Session>();
 
 
 
@@ -63,9 +66,11 @@ public class CacheInfoManager implements ApplicationContextAware {
         messageCache.setMaxLifeTime(0);
         mapCurrentCache.setMaxLifeTime(0);
         mapOriginalCache.setMaxLifeTime(0);
+        robotAutoRegisterTimeCache.setMaxLifeTime(0);
 		UUIDCache.setMaxLifeTime(60*1000);//设置超时时间60秒
 
         robotChargeInfoCache.setMaxLifeTime(10*60*1000);
+        webSocketSessionCache.setMaxLifeTime(0);
 
         //状态机缓存
 //        autoChargeCache.setMaxLifeTime(5 * 1000);
@@ -143,10 +148,7 @@ public class CacheInfoManager implements ApplicationContextAware {
             if(names.length != 3){
                 return null;
             }
-            List<MapInfo> mapInfoList = mapInfoService.getMapInfo(names[0], names[1], Long.parseLong(names[2]));
-            if(null != mapInfoList && mapInfoList.size() >0){
-                mapInfo = mapInfoList.get(0);
-            }
+            mapInfo = mapInfoService.getMapInfo(names[0], names[1], Long.parseLong(names[2]));
             mapOriginalCache.put(key, mapInfo);
             return mapInfo;
         }
@@ -176,6 +178,21 @@ public class CacheInfoManager implements ApplicationContextAware {
         return robotChargeInfoCache.get(deviceId);
     }
 
+    public static void setWebSocketSessionCache(String userName, Session session){
+        webSocketSessionCache.put(userName, session);
+    }
+
+    public static Session getWebSocketSessionCache(String userName){
+        return webSocketSessionCache.get(userName);
+    }
+
+    public static int getWebSocketSessionCacheSize(){
+        return webSocketSessionCache.size();
+    }
+
+    public static void removeWebSocketSessionCache(String userName){
+        webSocketSessionCache.remove(userName);
+    }
     //自动回充缓存
 //    public static void setAutoChargeCache(String deviceId, StateCollectorAutoCharge stateCollectorAutoCharge){
 //        autoChargeCache.put(deviceId, stateCollectorAutoCharge);

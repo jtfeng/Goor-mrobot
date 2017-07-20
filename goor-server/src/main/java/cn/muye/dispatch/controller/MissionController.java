@@ -1,5 +1,6 @@
 package cn.muye.dispatch.controller;
 
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.AjaxResult;
@@ -14,6 +15,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.area.point.service.PointService;
 import cn.muye.dispatch.service.*;
+import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
@@ -65,6 +67,13 @@ public class MissionController {
 			if (missionItemDB != null && !missionItemDB.getId().equals(missionItem.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务节点！");
 			}
+
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+			missionItem.setSceneId(scene.getId());
 
 			String msg = "";
 
@@ -159,14 +168,22 @@ public class MissionController {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
 
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+			mission.setSceneId(scene.getId());
+
 			String msg = "";
 			if (mission.getId() != null) {
 				mission.setUpdateTime(new Date());
 				missionService.update(mission);
 				msg = "修改成功";
 			} else {
-				//TODO 从session取当前切换门店的ID
-				mission.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+				mission.setStoreId(storeId);
+				//从session取当前切换的sceneId
+
 
 				mission.setCreateTime(new Date());
 				missionService.save(mission);
@@ -190,7 +207,7 @@ public class MissionController {
 	@RequestMapping(value = {"dispatch/mission/full"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_mission_u')")
-	public AjaxResult saveOrUpdateMissionFull(@RequestBody Mission mission, HttpServletRequest request) throws Exception {
+	public AjaxResult saveOrUpdateMissionFull(@RequestBody Mission mission,HttpServletRequest request) throws Exception {
 		AjaxResult resp;
 		try {
 			//TODO 从session取当前切换门店的ID
@@ -200,6 +217,13 @@ public class MissionController {
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
+
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+			mission.setSceneId(scene.getId());
 
 			//校验点是否存在
 			Set<MissionItem> missionItemSet = mission.getMissionItemSet();
@@ -342,6 +366,13 @@ public class MissionController {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
 
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+			missionList.setSceneId(scene.getId());
+
 			String msg = "";
 			if (missionList.getId() != null) {
 				missionList.setUpdateTime(new Date());
@@ -456,13 +487,21 @@ public class MissionController {
 	@RequestMapping(value = {"dispatch/missionList/full"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_mission_u')")
-	public AjaxResult saveOrUpdateMissionListFull(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
+	public AjaxResult saveOrUpdateMissionListFull(@RequestBody MissionList missionList, @RequestParam Long waitTime, HttpServletRequest request) throws Exception {
 		AjaxResult resp;
 		try {
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+			missionList.setSceneId(scene.getId());
+
 			//TODO 从session取当前切换门店的ID
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 
-			//TODO 美亚调度写死两个Mission，第一个是导航或语音的mission，第二个是到目标点后等待任务的长短
+
+			//TODO 美亚调度写死两个Mission，第一个是导航和语音的mission，第二个是到目标点后等待任务的长短
 			if(missionList.getMissionList() == null || missionList.getMissionList().size() != 2) {
 				return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误！");
 			}
@@ -514,12 +553,6 @@ public class MissionController {
 					|| missionWaitItemSet.size() != 1) {
 				return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
 			}
-			for(MissionItem missionItem : missionWaitItemSet) {
-				if(!(missionItem.getFeatureItemId()).equals(Constant.ORDER_WAIT_ID)) {
-					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
-				}
-			}
-
 
 			if (missionList.getId() != null) {
 				msg = "修改成功";
@@ -540,28 +573,28 @@ public class MissionController {
 
 
 	/**
-	 * 发送调度任务，由多个导航点组成
-	 * @param productUsedIdList
-	 * @param missionNodeIdList
+	 * 发送调度任务，由多个任务列表拼接组成
+	 * @param robotCodes
+	 * @param missionListIds
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(value = {"dispatch/navigation/sendNavigation","api/dispatch/navigation/sendNavigation"}, method = RequestMethod.POST)
+	@RequestMapping(value = {"dispatch/missionList/sendDispatch"}, method = RequestMethod.POST)
 	@ResponseBody
 //    @PreAuthorize("hasAuthority('mrc_navigation_u')")
 	public AjaxResult updateSendNavigation(
-			@RequestParam Long[] productUsedIdList,
-			@RequestParam Long[] missionNodeIdList,
+			@RequestParam Long[] robotCodes,
+			@RequestParam Long[] missionListIds,
 			HttpServletRequest request) {
 		AjaxResult resp = AjaxResult.success();
-//		try {
-//			if(productUsedIdList.length <= 0 || missionNodeIdList.length <= 0) {
-//				return AjaxResult.failed(-1,"参数错误");
-//			}
-//
-//			String[] productUsedCodeArray = getProductUsedCodeArrayByIdList(productUsedIdList);
-//			if(productUsedCodeArray == null) {
-//				return AjaxResult.failed(-1,"未找到设备组");
+		try {
+			if(robotCodes.length <= 0 || robotCodes.length <= 0) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
+			}
+
+//			String[] robotCodesArray = getRobotCodesArrayByIdList(robotCodes);
+//			if(robotCodesArray == null) {
+//				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"未找到机器人");
 //			}
 //
 //			String uuid = UUID.randomUUID().toString();
@@ -612,10 +645,10 @@ public class MissionController {
 //
 //			Map result = mrcSendOperationsService.sendMission(uuid,productUsedCodeArray,missionMain);
 //			resp.addDataEntry(result);
-//		} catch (Exception e) {
-//			LOGGER.error(e.getMessage(),e);
-//			resp = AjaxResponse.failed(AjaxResponse.RESPONSE_STATUS_FAIURE,"出错");
-//		}
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(),e);
+			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"出错");
+		}
 		return resp;
 	}
 
@@ -699,7 +732,7 @@ public class MissionController {
 	 * @param command
 	 * @return
 	 */
-	@RequestMapping(value = {"dispatch/command"}, method = RequestMethod.GET)
+	/*@RequestMapping(value = {"dispatch/command"}, method = RequestMethod.GET)
 	@ResponseBody
 	public AjaxResult sendCommand(String command) {
 		boolean flag = false;
@@ -728,16 +761,13 @@ public class MissionController {
 
 	private boolean sendMissionCommand(String command) {
 		boolean flag = false;
-		MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+		MessageInfo info = new MessageInfo();
 		info.setUuId(UUID.randomUUID().toString().replace("-", ""));
 		info.setSendTime(new Date());
 		info.setSenderId("goor-server");
 		info.setReceiverId("daBit");
-		info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
-//        info.setMessageType(MessageType.EXECUTOR_RESOURCE);//TODO 如果发送资源,将此行注释去掉，注释此行上面第一行
-//        info.setMessageType(MessageType.EXECUTOR_LOG);//TODO 针对 x86 agent 业务逻辑,不接收发送到ros的信息，如：发送命令要求上传log等
-//                info.setMessageText(JSON.toJSONString(robotDb));//TODO 发送资源及rostopic命令
-		info.setMessageText("{\"topicName\":\""+ command + "\",\"topicType\":\"std_msgs/String\",\"publishMessage\":{\"command\":\"pause\",\"sendTime\":\"2017-07-14 11:50:53\"}}");//TODO 发送资源及rostopic命令
+		info.setMessageType(MessageType.EXECUTOR_COMMAND);
+		info.setMessageText("{\"topicName\":\""+ command + "\",\"topicType\":\"std_msgs/String\",\"publishMessage\":{\"command\":\""+ command + "\",\"sendTime\":\"2017-07-14 11:50:53\"}}");
 
 		String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey("daBit",true, MessageType.EXECUTOR_COMMAND.name());
 		//单机器命令发送（带回执）
@@ -746,6 +776,6 @@ public class MissionController {
 			return true;
 		}
 		return flag;
-	}
+	}*/
 
 }

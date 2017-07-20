@@ -9,11 +9,11 @@
         <association property="missionList"
                      javaType="cn.mrobot.bean.mission.MissionList"
                      column="MISSION_LIST_ID"
-                     select="cn.muye.dispatch.mapper.MissionListMapper.get"/>
+                     select="cn.muye.dispatch.mapper.MissionListMapper.getById"/>
         <association property="mission"
                      javaType="cn.mrobot.bean.mission.Mission"
                      column="MISSION_ID"
-                     select="cn.muye.dispatch.mapper.MissionMapper.get"/>
+                     select="cn.muye.dispatch.mapper.MissionMapper.getById"/>
     </resultMap>
 
     <sql id="Base_Column_List">

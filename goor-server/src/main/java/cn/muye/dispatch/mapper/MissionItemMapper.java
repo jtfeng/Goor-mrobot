@@ -38,7 +38,8 @@ public interface MissionItemMapper {
 	List<MissionItem> list(@Param("name") Object name,
 						   @Param("beginDate") Object beginDate,
 						   @Param("endDate") Object endDate,
-						   @Param("storeId") Object storeId);
+						   @Param("storeId") Object storeId,
+						   @Param("sceneId") Object sceneId);
 
 	List<MissionItem> listAll(Long storeId);
 }

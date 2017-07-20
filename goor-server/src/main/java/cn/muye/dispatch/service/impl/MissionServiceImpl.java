@@ -163,9 +163,10 @@ public class MissionServiceImpl implements MissionService {
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
 			Object sceneName = map.get(SearchConstants.SEARCH_MISSION_SCENE_NAME);
 			Object typeId = map.get(SearchConstants.SEARCH_MISSION_TYPE_ID);
+			Object sceneId = map.get(SearchConstants.SEARCH_SCENE_ID);
 //			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionList = missionMapper.list(/*missionMainId, */name, beginDate, endDate, sceneName, typeId/*, priority*/,storeId);
+			missionList = missionMapper.list(/*missionMainId, */name, beginDate, endDate, sceneName, typeId/*, priority*/,storeId,sceneId);
 		}else {
 			missionList = missionMapper.listAll(storeId);
 		}

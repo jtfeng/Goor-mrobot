@@ -10,6 +10,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.SearchConstants;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +67,7 @@ public class PickUpPswdVerifyServiceImpl
         }
         //进行业务逻辑
         //首先由robot code 查询机器人的记录
-        Robot robot = robotService.getByCode(bean.getRobotCode());
+        Robot robot = robotService.getByCode(bean.getRobotCode(), SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (robot == null ||
                 robot.getId() == null){
             // TODO: 17-7-5 没有查到机器人记录，返回错误

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.assets.scene.mapper.SceneMapper">
+
+    <resultMap id="RobotSimpleMap" type="cn.mrobot.bean.assets.robot.Robot">
+        <id column="robot_type_id" property="id" jdbcType="BIGINT"/>
+    </resultMap>
+    <resultMap id="MapInfoSimpleMap" type="cn.mrobot.bean.area.map.MapInfo">
+        <id column="map_type_id" property="id" jdbcType="BIGINT"/>
+        <result column="MAP_ZIP_ID" property="mapZipId" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <select id="findRobotBySceneId" resultMap="RobotSimpleMap" parameterType="java.lang.Long">
+        SELECT ROBOT_ID AS robot_type_id FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
+    </select>
+
+    <select id="findMapBySceneId" resultMap="MapInfoSimpleMap" parameterType="java.lang.Long">
+        SELECT smr.MAP_ID AS map_type_id, m.MAP_ZIP_ID
+        FROM A_MAP_INFO m LEFT JOIN SCENES_MAPS_RELATIONS smr ON m.ID = smr.MAP_ID
+        WHERE smr.SCENE_ID = #{0}
+    </select>
+
+    <delete id="deleteRobotAndSceneRelations" parameterType="java.lang.Long">
+        DELETE FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
+    </delete>
+
+    <delete id="deleteMapAndSceneRelations" parameterType="java.lang.Long">
+        DELETE FROM SCENES_MAPS_RELATIONS WHERE SCENE_ID = #{0}
+    </delete>
+
+    <!--（场景与地图 - 多对多关系）-->
+    <insert id="insertSceneAndMapRelations">
+        INSERT INTO SCENES_MAPS_RELATIONS
+        (SCENE_ID,MAP_ID)
+        VALUES
+        <foreach collection="param2" item="id" separator=",">
+            (#{param1}, #{id})
+        </foreach>
+    </insert>
+
+    <!--（场景与机器人 - 多对多关系）-->
+    <insert id="insertSceneAndRobotRelations">
+        INSERT INTO SCENES_ROBOTS_RELATIONS
+        (SCENE_ID,ROBOT_ID)
+        VALUES
+        <foreach collection="param2" item="id" separator=",">
+            (#{param1}, #{id})
+        </foreach>
+    </insert>
+
+</mapper>
