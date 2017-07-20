@@ -19,6 +19,8 @@ public class MissionItem extends BaseBean {
 
 	private Long id;
 
+	private Long sceneId;//所属场景ID
+
 	private String name;
 
 	private String description; //描述
@@ -51,6 +53,7 @@ public class MissionItem extends BaseBean {
 //		private Integer priority;//优先级
 //		private Long missionChainId;
 		private Long featureItemId;
+		private Long sceneId;
 		private FeatureItem featureItem;
 
 		public Builder name(String name) {
@@ -108,6 +111,11 @@ public class MissionItem extends BaseBean {
 			return this;
 		}
 
+		public Builder sceneId(Long sceneId) {
+			this.sceneId = sceneId;
+			return this;
+		}
+
 		public MissionItem build() {
 			return new MissionItem(this);
 		}
@@ -128,6 +136,7 @@ public class MissionItem extends BaseBean {
 //		missionChainId = builder.missionChainId;
 		featureItemId = builder.featureItemId;
 		featureItem = builder.featureItem;
+		sceneId = builder.sceneId;
 	}
 
 	public MissionItemDTO toDTO() {
@@ -224,5 +233,13 @@ public class MissionItem extends BaseBean {
 
 	public void setFeatureItem(FeatureItem featureItem) {
 		this.featureItem = featureItem;
+	}
+
+	public Long getSceneId() {
+		return sceneId;
+	}
+
+	public void setSceneId(Long sceneId) {
+		this.sceneId = sceneId;
 	}
 }

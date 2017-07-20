@@ -125,8 +125,10 @@ public class MissionListServiceImpl implements MissionListService {
 			Object beginDate = map.get(SearchConstants.SEARCH_BEGIN_DATE);
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
 			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
+			Object sceneId = map.get(SearchConstants.SEARCH_SCENE_ID);
+			Object missionListType = map.get(SearchConstants.SEARCH_MISSION_LIST_TYPE);
 
-			missionListList = missionListMapper.list(name, /*deviceId,*/beginDate,endDate,priority,storeId);
+			missionListList = missionListMapper.list(name, /*deviceId,*/beginDate,endDate,priority,storeId,sceneId,missionListType);
 		}else {
 			missionListList = missionListMapper.listAll(storeId);
 		}
@@ -143,7 +145,7 @@ public class MissionListServiceImpl implements MissionListService {
 	private List<MissionList> bindMission(List<MissionList> missionLists){
 		for(MissionList missionList : missionLists){
 			List<Mission> missions = new ArrayList<Mission>();
-			List<MissionListMissionXREF> missionListMissionXREFList = missionListMissionXREFMapper.findByListId(missionList.getId());
+			List<MissionListMissionXREF> missionListMissionXREFList = missionListMissionXREFMapper.findByListId(missionList.getId(),null);
 			for(MissionListMissionXREF missionListMissionXREF : missionListMissionXREFList){
 				Mission mission = missionListMissionXREF.getMission();
 				if(mission == null) {
