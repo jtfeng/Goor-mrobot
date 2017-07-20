@@ -48,19 +48,12 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     @Override
-    public MapInfo getMapInfo(String name, String sceneName, long storeId) {
+    public List<MapInfo> getMapInfo(String name, String sceneName, long storeId) {
         Condition example = new Condition(MapInfo.class);
         example.createCriteria().andCondition("MAP_NAME = '" + name + "'")
                 .andCondition("SCENE_NAME = '" + sceneName + "'")
                 .andCondition("STORE_ID = " + storeId + "");
-        List<MapInfo> mapInfoList = mapInfoMapper.selectByExample(example);
-        if (mapInfoList.size() > 0) {
-            MapInfo mapInfo = mapInfoList.get(0);
-            mapInfo.setPngImageHttpPath(parseLocalPath(mapInfo.getPngImageLocalPath()));
-            mapInfo.setPngDesigned(parseLocalPath(mapInfo.getPngDesigned()));
-            return mapInfo;
-        }
-        return null;
+        return mapInfoMapper.selectByExample(example);
     }
 
     @Override
