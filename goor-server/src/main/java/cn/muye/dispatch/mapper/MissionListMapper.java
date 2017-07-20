@@ -37,6 +37,8 @@ public interface MissionListMapper {
                            @Param("beginDate") Object beginDate,
                            @Param("endDate") Object endDate,
                            @Param("priority") Object priority,
-						   @Param("storeId") Object storeId);
+						   @Param("storeId") Object storeId,
+						   @Param("sceneId") Object sceneId,
+						   @Param("missionListType") Object missionListType);
 }
 

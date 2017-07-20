@@ -5,6 +5,7 @@
     <resultMap id="missionList" type="cn.mrobot.bean.mission.MissionList">
         <result property="id" column="ID"/>
         <result property="storeId" column="STORE_ID"/>
+        <result property="sceneId" column="SCENE_ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="missionListType" column="MISSION_LIST_TYPE"/>
@@ -19,6 +20,7 @@
     <sql id="Base_Column_List">
         ID,
         STORE_ID,
+        SCENE_ID,
         NAME,
         DESCRIPTION,
         MISSION_LIST_TYPE,
@@ -34,6 +36,7 @@
         INSERT INTO D_MISSION_LIST(
         ID,
         STORE_ID,
+        SCENE_ID,
         NAME,
         DESCRIPTION,
         MISSION_LIST_TYPE,
@@ -46,6 +49,7 @@
         ) values (
         #{id},
         #{storeId},
+        #{sceneId},
         #{name},
         #{description},
         #{missionListType},
@@ -101,7 +105,17 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_LIST
-        WHERE ID = #{id} AND STORE_ID = #{storeId}
+        WHERE ID = #{id}
+        <if test="storeId != null">
+            AND STORE_ID = #{storeId}
+        </if>
+    </select>
+
+    <select id="getById" resultMap="missionList">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION_LIST
+        WHERE ID = #{id}
     </select>
 
     <select id="findByName" resultMap="missionList">
@@ -134,6 +148,12 @@
         </if>
         <if test="priority != null">
             AND d.PRIORITY = #{priority}
+        </if>
+        <if test="sceneId != null">
+            AND d.SCENE_ID = #{sceneId}
+        </if>
+        <if test="missionListType != null">
+            AND d.MISSION_LIST_TYPE = #{missionListType}
         </if>
         ORDER BY NAME ASC
     </select>

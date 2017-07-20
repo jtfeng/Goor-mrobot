@@ -20,6 +20,8 @@ public class Mission extends BaseBean {
 
 	private Long id;
 
+	private Long sceneId;//所属场景ID
+
 	private String name; //任务名
 
 	private String description; //描述
@@ -58,6 +60,7 @@ public class Mission extends BaseBean {
 		private Long intervalTime;
 		private Set<MissionItem> missionItemSet;
 //		private Long missionMainId;
+		private Long sceneId;
 
 		public Builder name(String name) {
 			this.name = name;
@@ -106,6 +109,11 @@ public class Mission extends BaseBean {
 //			return this;
 //		}
 
+		public Builder sceneId(Long sceneId) {
+			this.sceneId = sceneId;
+			return this;
+		}
+
 		public Mission build() {
 			return new Mission(this);
 		}
@@ -121,6 +129,7 @@ public class Mission extends BaseBean {
 //		missionMainId = builder.missionMainId;
 		missionItemSet = builder.missionItemSet;
 		updateTime = builder.updateTime;
+		sceneId = builder.sceneId;
 	}
 
 	public MissionDTO toDTO() {
@@ -227,4 +236,11 @@ public class Mission extends BaseBean {
 		this.typeId = typeId;
 	}
 
+	public Long getSceneId() {
+		return sceneId;
+	}
+
+	public void setSceneId(Long sceneId) {
+		this.sceneId = sceneId;
+	}
 }

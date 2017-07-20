@@ -5,6 +5,7 @@
     <resultMap id="mission" type="cn.mrobot.bean.mission.Mission">
         <result property="id" column="ID"/>
         <result property="storeId" column="STORE_ID"/>
+        <result property="sceneId" column="SCENE_ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="createTime" column="CREATE_TIME"/>
@@ -20,6 +21,7 @@
     <sql id="Base_Column_List">
         ID,
         STORE_ID,
+        SCENE_ID,
         NAME,
         DESCRIPTION,
         CREATE_TIME,
@@ -36,6 +38,7 @@
         INSERT INTO D_MISSION(
             ID,
             STORE_ID,
+            SCENE_ID,
             NAME,
             DESCRIPTION,
             CREATE_TIME,
@@ -49,6 +52,7 @@
         ) values (
             #{id},
             #{storeId},
+            #{sceneId},
             #{name},
             #{description},
             #{createTime},
@@ -104,7 +108,17 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION
-        WHERE ID = #{id} AND STORE_ID = #{storeId}
+        WHERE ID = #{id}
+        <if test="storeId != null">
+            AND STORE_ID = #{storeId}
+        </if>
+    </select>
+
+    <select id="getById" resultMap="mission">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_MISSION
+        WHERE ID = #{id}
     </select>
 
     <delete id="delete" parameterType="long">
@@ -143,6 +157,9 @@
         </if>
         <if test="typeId != null">
             AND d.TYPE_ID = #{typeId}
+        </if>
+        <if test="sceneId != null">
+            AND d.SCENE_ID = #{sceneId}
         </if>
         <!--<if test="priority != null">-->
             <!--AND d.PRIORITY = #{priority}-->

@@ -36,7 +36,8 @@ public interface MissionMapper {
                        @Param("endDate") Object endDate,
 					   @Param("sceneName") Object sceneName,
 					   @Param("typeId") Object typeId,
-					   @Param("storeId") Object storeId/*,
+					   @Param("storeId") Object storeId,
+					   @Param("sceneId") Object sceneId/*,
                        @Param("priority") Object priority*/);
 
 	List<Mission> listAll(long storeId);

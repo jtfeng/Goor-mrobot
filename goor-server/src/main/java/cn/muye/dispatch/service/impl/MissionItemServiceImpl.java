@@ -64,9 +64,10 @@ public class MissionItemServiceImpl implements MissionItemService {
 			Object name = map.get(SearchConstants.SEARCH_NAME);
 			Object beginDate = map.get(SearchConstants.SEARCH_BEGIN_DATE);
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
+			Object sceneId = map.get(SearchConstants.SEARCH_SCENE_ID);
 //			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionChainList = missionItemMapper.list(name, /*missionChainId,*/ beginDate, endDate/*, priority*/,storeId);
+			missionChainList = missionItemMapper.list(name, /*missionChainId,*/ beginDate, endDate/*, priority*/,storeId,sceneId);
 		}else {
 			missionChainList = missionItemMapper.listAll(storeId);
 		}
