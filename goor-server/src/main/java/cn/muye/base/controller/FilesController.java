@@ -198,6 +198,7 @@ public class FilesController {
             }
             //获取文件的相对路径
             String relativePath = real.getPath().replace(DOWNLOAD_HOME,"");
+            LOGGER.info("上传成功，文件保存路径，path = "+real.getPath());
             // 传输成功后，添加至数据库
             FileUpload uploadFile = fileUploadService.getByName(fileName);
             if (uploadFile != null) {
@@ -358,9 +359,11 @@ public class FilesController {
             mapInfo.setDeviceId(deviceId);
             mapInfo.setCreateTime(new Date());
             //TODO 删除原数据库中的地图数据
-            MapInfo mapInfoDB = mapInfoService.getMapInfo(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            if (mapInfoDB != null) {
-                mapInfoService.delete(mapInfoDB);
+            List<MapInfo> mapInfoDBList = mapInfoService.getMapInfo(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            if(null != mapInfoDBList && mapInfoDBList.size() > 0){
+                for (MapInfo mapInfoDB : mapInfoDBList ){
+                    mapInfoService.delete(mapInfoDB);
+                }
             }
             mapInfo.setRos(JSON.toJSONString(map));
 

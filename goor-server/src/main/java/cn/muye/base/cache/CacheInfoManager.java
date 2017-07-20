@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -142,7 +143,10 @@ public class CacheInfoManager implements ApplicationContextAware {
             if(names.length != 3){
                 return null;
             }
-            mapInfo = mapInfoService.getMapInfo(names[0], names[1], Long.parseLong(names[2]));
+            List<MapInfo> mapInfoList = mapInfoService.getMapInfo(names[0], names[1], Long.parseLong(names[2]));
+            if(null != mapInfoList && mapInfoList.size() >0){
+                mapInfo = mapInfoList.get(0);
+            }
             mapOriginalCache.put(key, mapInfo);
             return mapInfo;
         }
