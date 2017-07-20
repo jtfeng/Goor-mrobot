@@ -23,5 +23,5 @@ public interface ScheduledHandleService {
 
     void timeSynchronized(String localRobotSN);
 
-    AjaxResult sendRobotInfo();
+    void sendRobotInfo() throws Exception;
 }

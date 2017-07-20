@@ -196,6 +196,8 @@ public class FilesController {
                 }
                 isSuccess = true;
             }
+            //获取文件的相对路径
+            String relativePath = real.getPath().replace(DOWNLOAD_HOME,"");
             // 传输成功后，添加至数据库
             FileUpload uploadFile = fileUploadService.getByName(fileName);
             if (uploadFile != null) {
@@ -211,13 +213,13 @@ public class FilesController {
                 newFile.setLength(temp.length());
                 newFile.setName(fileName);
                 newFile.setStatus(Constant.FILE_OK);
-                newFile.setPath(real.getPath());
+                newFile.setPath(relativePath);
                 // newFile.setMd5(FileValidCreateUtil.fileMD5(real.getAbsolutePath()));
                 fileUploadService.save(newFile);
                 uploadFile = newFile;
             }
 
-            otherInfoObject.put("filePath", real.getPath());
+            otherInfoObject.put("filePath", relativePath);
             otherInfoObject.put("fileUploadId", uploadFile.getId());
 
             return AjaxResponse.success();
@@ -298,7 +300,7 @@ public class FilesController {
                     FileUtils.deleteDir(saveFile);
                 }
                 saveFile.mkdirs();
-                ZipUtils.unzip(mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
+                ZipUtils.unzip(DOWNLOAD_HOME + mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
                 LOGGER.info("地图文件解压成功，保存地址 path=" + saveFile.getAbsolutePath());
                 //解析地图文件
                 analysisFile(saveFile, mapZip);
@@ -364,7 +366,7 @@ public class FilesController {
 
             File pgmFile = new File(mapFilePath.getAbsolutePath(), map.get("image").toString());
             String convertPGMFilePath = convertFile(pgmFile);
-            mapInfo.setPngImageLocalPath(convertPGMFilePath);
+            mapInfo.setPngImageLocalPath(convertPGMFilePath.replace(DOWNLOAD_HOME, ""));//保存相对路径
             mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
             CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID));
             mapInfoService.save(mapInfo);

@@ -4,6 +4,7 @@
 
     <resultMap id="missionList" type="cn.mrobot.bean.mission.MissionList">
         <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
         <result property="name" column="NAME"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="missionListType" column="MISSION_LIST_TYPE"/>
@@ -17,6 +18,7 @@
 
     <sql id="Base_Column_List">
         ID,
+        STORE_ID,
         NAME,
         DESCRIPTION,
         MISSION_LIST_TYPE,
@@ -31,6 +33,7 @@
     <insert id="save" parameterType="cn.mrobot.bean.mission.MissionList" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO D_MISSION_LIST(
         ID,
+        STORE_ID,
         NAME,
         DESCRIPTION,
         MISSION_LIST_TYPE,
@@ -42,6 +45,7 @@
         PRIORITY
         ) values (
         #{id},
+        #{storeId},
         #{name},
         #{description},
         #{missionListType},
@@ -90,47 +94,47 @@
         </trim>
         WHERE
         ID = #{id}
+        AND STORE_ID = #{storeId}
     </update>
 
     <select id="get" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_LIST
-        WHERE ID = #{id}
+        WHERE ID = #{id} AND STORE_ID = #{storeId}
     </select>
 
     <select id="findByName" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_LIST
-        WHERE NAME = #{name}
+        WHERE NAME = #{name} AND STORE_ID = #{storeId}
     </select>
 
     <delete id="delete" parameterType="long">
-        delete from D_MISSION_LIST where ID = #{id}
+        delete from D_MISSION_LIST where ID = #{id} AND STORE_ID = #{storeId}
     </delete>
 
     <select id="list" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_LIST d
-        <where>
-            <if test="name != null">
-                AND d.NAME like CONCAT('%',#{name},'%')
-            </if>
-            <!--<if test="deviceId != null">
-                AND d.DEVICE_ID = #{deviceId}
-            </if>-->
-            <if test="beginDate != null ">
-                AND d.CREATE_TIME &gt;= #{beginDate}
-            </if>
-            <if test="endDate != null">
-                AND d.CREATE_TIME &lt; #{endDate}
-            </if>
-            <if test="priority != null">
-                AND d.PRIORITY = #{priority}
-            </if>
-        </where>
+        WHERE STORE_ID = #{storeId}
+        <if test="name != null">
+            AND d.NAME like CONCAT('%',#{name},'%')
+        </if>
+        <!--<if test="deviceId != null">
+            AND d.DEVICE_ID = #{deviceId}
+        </if>-->
+        <if test="beginDate != null ">
+            AND d.CREATE_TIME &gt;= #{beginDate}
+        </if>
+        <if test="endDate != null">
+            AND d.CREATE_TIME &lt; #{endDate}
+        </if>
+        <if test="priority != null">
+            AND d.PRIORITY = #{priority}
+        </if>
         ORDER BY NAME ASC
     </select>
 
@@ -138,6 +142,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM D_MISSION_LIST d
+        WHERE STORE_ID = #{storeId}
         ORDER BY NAME
     </select>
 

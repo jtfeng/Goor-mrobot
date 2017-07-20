@@ -57,20 +57,28 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionitem_u')")
 	public AjaxResult saveOrUpdateMissionItem(@RequestBody MissionItem missionItem, HttpServletRequest request) throws Exception {
 		try {
+			//TODO 从session取当前切换的门店ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
 			String missionItemName = missionItem.getName();
-			MissionItem missionItemDB = missionItemService.findByName(missionItemName);
+			MissionItem missionItemDB = missionItemService.findByName(missionItemName,storeId);
 			if (missionItemDB != null && !missionItemDB.getId().equals(missionItem.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务节点！");
 			}
 
+			String msg = "";
+
 			if (missionItem.getId() != null) {
 				missionItem.setUpdateTime(new Date());
 				missionItemService.update(missionItem);
+				msg = "修改成功";
 			} else {
+				missionItem.setStoreId(storeId);
 				missionItem.setCreateTime(new Date());
 				missionItemService.save(missionItem);
+				msg = "新增成功";
 			}
-			return AjaxResult.success(missionItem,"成功");
+			return AjaxResult.success(missionItem,msg);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
@@ -86,7 +94,8 @@ public class MissionController {
 			if (id == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
 			}
-			MissionItem missionItemDB = missionItemService.get(id);
+			//TODO 从session取当前切换的门店ID
+			MissionItem missionItemDB = missionItemService.get(id,SearchConstants.FAKE_MERCHANT_STORE_ID);
 			if (missionItemDB == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
 			}
@@ -111,7 +120,9 @@ public class MissionController {
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
 
-			List<MissionItem> missionItemList = missionItemService.list(whereRequest);
+			//TODO 从session获取切换的门店ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			List<MissionItem> missionItemList = missionItemService.list(whereRequest,storeId);
 			PageInfo<MissionItem> page = new PageInfo<MissionItem>(missionItemList);
 
 			return AjaxResult.success(page);
@@ -125,7 +136,8 @@ public class MissionController {
 	@ResponseBody
 	public List listMissionItem(HttpServletRequest request) {
 		try {
-			return missionItemService.list();
+			//TODO 从session取当前切换门店的ID
+			return missionItemService.list(SearchConstants.FAKE_MERCHANT_STORE_ID);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return null;
@@ -139,8 +151,10 @@ public class MissionController {
 	public AjaxResult saveOrUpdateMission(@RequestBody Mission mission, HttpServletRequest request) throws Exception {
 		AjaxResult resp;
 		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			String missionName = mission.getName();
-			Mission missionDB = missionService.findByName(missionName);
+			Mission missionDB = missionService.findByName(missionName,storeId);
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
@@ -151,6 +165,9 @@ public class MissionController {
 				missionService.update(mission);
 				msg = "修改成功";
 			} else {
+				//TODO 从session取当前切换门店的ID
+				mission.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+
 				mission.setCreateTime(new Date());
 				missionService.save(mission);
 				msg = "新增成功";
@@ -176,8 +193,10 @@ public class MissionController {
 	public AjaxResult saveOrUpdateMissionFull(@RequestBody Mission mission, HttpServletRequest request) throws Exception {
 		AjaxResult resp;
 		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			String missionName = mission.getName();
-			Mission missionDB = missionService.findByName(missionName);
+			Mission missionDB = missionService.findByName(missionName,storeId);
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
@@ -206,12 +225,12 @@ public class MissionController {
 			}
 			String msg = "";
 			if (mission.getId() != null) {
-				missionService.updateFull(mission,missionDB);
 				msg = "修改成功";
 			} else {
-				missionService.updateFull(mission,missionDB);
 				msg = "新增成功";
 			}
+
+			missionService.updateFull(mission,missionDB,storeId);
 			resp = AjaxResult.success(mission,msg);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -229,14 +248,18 @@ public class MissionController {
 										HttpServletRequest request) throws Exception {
 		AjaxResult resp;
 		try {
-			Mission missionDB = missionService.get(missionId);
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
+			Mission missionDB = missionService.get(missionId,storeId);
 			if (missionDB == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "任务串不存在！");
 			}
 
 			List<Long> bindList = JSON.parseArray(bindString, Long.class);
 			missionDB.setUpdateTime(new Date());
-			missionService.update(missionDB, bindList);
+
+			missionService.update(missionDB, bindList,storeId);
 //			missionService.update(missionDB, missionItems);
 			resp = AjaxResult.success("成功");
 		} catch (Exception e) {
@@ -252,12 +275,14 @@ public class MissionController {
 	public AjaxResult deleteMission(@PathVariable long id, HttpServletRequest request) throws Exception {
 		AjaxResult resp;
 		try {
-			Mission missionDB = missionService.get(id);
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			Mission missionDB = missionService.get(id,storeId);
 			if (missionDB == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
 			}
 
-			missionService.delete(missionDB);
+			missionService.delete(missionDB,storeId);
 			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -270,13 +295,15 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_mission_r')")
 	public AjaxResult pageMission(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
 			pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
-			List<Mission> missionList = missionService.list(whereRequest);
+			List<Mission> missionList = missionService.list(whereRequest,storeId);
 
 			//用PageInfo对结果进行包装
 			PageInfo<Mission> page = new PageInfo<Mission>(missionList);
@@ -291,7 +318,9 @@ public class MissionController {
 	@ResponseBody
 	public List listMission(HttpServletRequest request) {
 		try {
-			List<Mission> missionList = missionService.list();
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			List<Mission> missionList = missionService.list(storeId);
 			return missionList;
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -305,8 +334,10 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionList_u')")
 	public AjaxResult saveOrUpdateMissionList(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
 		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			String missionListName = missionList.getName();
-			MissionList missionListDB = missionListService.findByName(missionListName);
+			MissionList missionListDB = missionListService.findByName(missionListName,storeId);
 			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
@@ -317,6 +348,7 @@ public class MissionController {
 				missionListService.update(missionList);
 				msg = "修改成功";
 			} else {
+				missionList.setStoreId(storeId);
 				missionList.setCreateTime(new Date());
 				missionListService.save(missionList);
 				msg = "新建成功";
@@ -334,12 +366,14 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionList_d')")
 	public AjaxResult deleteMissionList(@PathVariable long id, HttpServletRequest request) throws Exception {
 		try {
-			MissionList missionListDB = missionListService.get(id);
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			MissionList missionListDB = missionListService.get(id,storeId);
 			if (missionListDB == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
 			}
 
-			missionListService.delete(missionListDB);
+			missionListService.delete(missionListDB,storeId);
 			return AjaxResult.success("删除成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -352,13 +386,16 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionList_r')")
 	public AjaxResult pageMissionList(HttpServletRequest request, WhereRequest whereRequest) {
 		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
 			pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 			pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 			PageHelper.startPage(pageNo, pageSize);
-			List<MissionList> missionListList = missionListService.list(whereRequest);
+			List<MissionList> missionListList = missionListService.list(whereRequest,storeId);
 
 			PageInfo<MissionList> page = new PageInfo<>(missionListList);
 			return AjaxResult.success(page);
@@ -372,7 +409,9 @@ public class MissionController {
 	@ResponseBody
 	public AjaxResult listMissionList(HttpServletRequest request) {
 		try {
-			List<MissionList> missionListList = missionListService.list();
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			List<MissionList> missionListList = missionListService.list(storeId);
 			return AjaxResult.success(missionListList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -388,7 +427,9 @@ public class MissionController {
 //									   @RequestParam("missions") List<Mission> missions,
 									   HttpServletRequest request) throws Exception {
 		try {
-			MissionList missionListDB = missionListService.get(missionListId);
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			MissionList missionListDB = missionListService.get(missionListId,storeId);
 			if (missionListDB == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "总任务不存在！");
 			}
@@ -396,7 +437,7 @@ public class MissionController {
 			List<Long> bindList = JSON.parseArray(bindString, Long.class);
 
 			missionListDB.setUpdateTime(new Date());
-			missionListService.update(missionListDB, bindList);
+			missionListService.update(missionListDB, bindList,storeId);
 //			missionListService.update(missionListDB, missions);
 			return AjaxResult.success("成功");
 		} catch (Exception e) {
@@ -404,6 +445,99 @@ public class MissionController {
 			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
 		}
 	}
+
+	/**
+	 *创建任务列表，同时创建并关联任务、子任务
+	 * @param missionList
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = {"dispatch/missionList/full"}, method = {RequestMethod.POST, RequestMethod.PUT})
+	@ResponseBody
+//	@PreAuthorize("hasAuthority('mrc_mission_u')")
+	public AjaxResult saveOrUpdateMissionListFull(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
+		AjaxResult resp;
+		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
+			//TODO 美亚调度写死两个Mission，第一个是导航或语音的mission，第二个是到目标点后等待任务的长短
+			if(missionList.getMissionList() == null || missionList.getMissionList().size() != 2) {
+				return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误！");
+			}
+
+			String missionListName = missionList.getName();
+			MissionList missionListDB = missionListService.findByName(missionListName,storeId);
+			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
+			}
+
+			//取第一个Mission做导航、语音业务参数校验---------------------------------------
+			Mission mission = missionList.getMissionList().get(0);
+
+			//校验点是否存在
+			Set<MissionItem> missionItemSet = mission.getMissionItemSet();
+			if(missionItemSet == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能创建空任务！");
+			}
+			for(MissionItem missionItem : missionItemSet) {
+				//跟点相关的指令，需要校验点是否存在
+				if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(missionItem.getFeatureItemId())) {
+					String data = missionItem.getData();
+					try {
+						Long pointId = JSON.parseObject(data).getLong(Constant.ID);
+						MapPoint mapPoint = pointService.findById(pointId);
+						if(mapPoint == null) {
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
+						}
+						missionItem.setData(JSON.toJSONString(mapPoint));
+					}
+					catch (Exception e) {
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
+					}
+				}
+			}
+			String msg = "";
+//			if (missionList.getId() != null) {
+//				missionService.updateFull(missionList,missionDB);
+//				msg = "修改成功";
+//			} else {
+//				missionService.updateFull(missionList,missionDB);
+//				msg = "新增成功";
+//			}
+
+			//取第二个mission做等待任务业务参数校验
+			Mission missionWait = missionList.getMissionList().get(1);
+			Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
+			if(missionWaitItemSet == null
+					|| missionWaitItemSet.size() != 1) {
+				return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+			}
+			for(MissionItem missionItem : missionWaitItemSet) {
+				if(!(missionItem.getFeatureItemId()).equals(Constant.ORDER_WAIT_ID)) {
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+				}
+			}
+
+
+			if (missionList.getId() != null) {
+				msg = "修改成功";
+			} else {
+				msg = "新增成功";
+			}
+			missionListService.updateFull(missionList,missionListDB,storeId);
+
+			resp = AjaxResult.success(missionList,msg);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+		}
+		return resp;
+	}
+
+
+
 
 	/**
 	 * 发送调度任务，由多个导航点组成
@@ -549,7 +683,9 @@ public class MissionController {
 				WhereRequest whereRequest = new WhereRequest();
 				String queryObj = "{\"" + SearchConstants.SEARCH_MISSION_SCENE_NAME + "\": \""+ sceneName +"\"}" ;
 				whereRequest.setQueryObj(queryObj);
-				List<Mission> missionList = missionService.list(whereRequest);
+				//TODO 从session取当前切换门店的ID
+				Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+				List<Mission> missionList = missionService.list(whereRequest,storeId);
 				return AjaxResult.success(missionList, "查询成功");
 			}
 		} else {
@@ -563,7 +699,7 @@ public class MissionController {
 	 * @param command
 	 * @return
 	 */
-	@RequestMapping(value = {"dispatch/command"}, method = RequestMethod.GET)
+	/*@RequestMapping(value = {"dispatch/command"}, method = RequestMethod.GET)
 	@ResponseBody
 	public AjaxResult sendCommand(String command) {
 		boolean flag = false;
@@ -592,16 +728,13 @@ public class MissionController {
 
 	private boolean sendMissionCommand(String command) {
 		boolean flag = false;
-		MessageInfo info = new MessageInfo();//TODO 具体发送消息内容统一封装在此bean里
+		MessageInfo info = new MessageInfo();
 		info.setUuId(UUID.randomUUID().toString().replace("-", ""));
 		info.setSendTime(new Date());
 		info.setSenderId("goor-server");
 		info.setReceiverId("daBit");
-		info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
-//        info.setMessageType(MessageType.EXECUTOR_RESOURCE);//TODO 如果发送资源,将此行注释去掉，注释此行上面第一行
-//        info.setMessageType(MessageType.EXECUTOR_LOG);//TODO 针对 x86 agent 业务逻辑,不接收发送到ros的信息，如：发送命令要求上传log等
-//                info.setMessageText(JSON.toJSONString(robotDb));//TODO 发送资源及rostopic命令
-		info.setMessageText("{\"topicName\":\""+ command + "\",\"topicType\":\"std_msgs/String\",\"publishMessage\":{\"command\":\"pause\",\"sendTime\":\"2017-07-14 11:50:53\"}}");//TODO 发送资源及rostopic命令
+		info.setMessageType(MessageType.EXECUTOR_COMMAND);
+		info.setMessageText("{\"topicName\":\""+ command + "\",\"topicType\":\"std_msgs/String\",\"publishMessage\":{\"command\":\""+ command + "\",\"sendTime\":\"2017-07-14 11:50:53\"}}");
 
 		String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey("daBit",true, MessageType.EXECUTOR_COMMAND.name());
 		//单机器命令发送（带回执）
@@ -610,6 +743,6 @@ public class MissionController {
 			return true;
 		}
 		return flag;
-	}
+	}*/
 
 }

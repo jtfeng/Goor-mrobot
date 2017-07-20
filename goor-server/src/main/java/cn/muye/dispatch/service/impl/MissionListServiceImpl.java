@@ -8,16 +8,14 @@ import cn.muye.dispatch.mapper.MissionListMapper;
 import cn.muye.dispatch.mapper.MissionMapper;
 import cn.muye.dispatch.mapper.MissionMissionItemXREFMapper;
 import cn.muye.dispatch.service.MissionListService;
+import cn.muye.dispatch.service.MissionService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -44,6 +42,9 @@ public class MissionListServiceImpl implements MissionListService {
 	@Autowired
 	protected MissionMissionItemXREFMapper missionMissionItemXREFMapper;
 
+	@Autowired
+	protected MissionService missionService;
+
 	@Override
 	public long save(MissionList missionList) {
 		return missionListMapper.save(missionList);
@@ -55,15 +56,24 @@ public class MissionListServiceImpl implements MissionListService {
 	}
 
 	@Override
-	public void update(MissionList missionList, List<Long> missionIdList) {
+	public void update(MissionList missionList, List<Long> missionIdList,long storeId) {
 
 		Long missionListId = missionList.getId();
 
 		//添加关联关系,先全部删除，然后再关联
-		missionListMissionXREFMapper.deleteByListId(missionListId);
+		if(missionListId == null) {
+			missionList.setStoreId(storeId);
+			missionListMapper.save(missionList);
+			missionListId = missionList.getId();
+		}
+		else {
+			missionListMapper.update(missionList);
+			missionListMissionXREFMapper.deleteByListId(missionListId);
+		}
+
 		for (Long id : missionIdList) {
 			//判断missionItem是否存在
-			Mission mission = missionMapper.get(id);
+			Mission mission = missionMapper.get(id,storeId);
 			if(mission == null) {
 				continue;
 			}
@@ -89,24 +99,24 @@ public class MissionListServiceImpl implements MissionListService {
 //	}
 
 	@Override
-    public MissionList get(long id) {
-        return missionListMapper.get(id);
+    public MissionList get(long id,long storeId) {
+        return missionListMapper.get(id,storeId);
     }
 
 	@Override
-	public MissionList findByName(String name) {
-		return missionListMapper.findByName(name);
+	public MissionList findByName(String name,long storeId) {
+		return missionListMapper.findByName(name,storeId);
 	}
 
 	@Override
-	public void delete(MissionList missionList) {
+	public void delete(MissionList missionList,long storeId) {
 		//删除关联关系
 		missionListMissionXREFMapper.deleteByListId(missionList.getId());
-		missionListMapper.delete(missionList.getId());
+		missionListMapper.delete(missionList.getId(),storeId);
 	}
 
 	@Override
-    public List<MissionList> list(WhereRequest whereRequest) {
+    public List<MissionList> list(WhereRequest whereRequest,long storeId) {
 		List<MissionList> missionListList = new ArrayList<>();
 		if(whereRequest != null && whereRequest.getQueryObj() != null){
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
@@ -116,19 +126,20 @@ public class MissionListServiceImpl implements MissionListService {
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
 			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionListList = missionListMapper.list(name, /*deviceId,*/beginDate,endDate,priority);
+			missionListList = missionListMapper.list(name, /*deviceId,*/beginDate,endDate,priority,storeId);
 		}else {
-			missionListList = missionListMapper.listAll();
+			missionListList = missionListMapper.listAll(storeId);
 		}
 
         return bindMission(missionListList);
     }
 
 	@Override
-	public List<MissionList> list() {
-		return bindMission(missionListMapper.listAll());
+	public List<MissionList> list(long storeId) {
+		return bindMission(missionListMapper.listAll(storeId));
 	}
 
+	//查找出关联的任务
 	private List<MissionList> bindMission(List<MissionList> missionLists){
 		for(MissionList missionList : missionLists){
 			List<Mission> missions = new ArrayList<Mission>();
@@ -150,6 +161,39 @@ public class MissionListServiceImpl implements MissionListService {
 			missionList.setMissionList(missions);
 		}
 		return missionLists;
+	}
+
+	public void updateFull(MissionList missionList, MissionList missionListDB,long storeId) {
+		Date now = new Date();
+		if(missionListDB == null) {
+			missionList.setCreateTime(now);
+		}
+		//新建关联任务，并更新关联关系
+		List<Mission> missions = missionList.getMissionList();
+		List<Long> bindList = new ArrayList<Long>();
+		if(missions != null && missions.size() > 0) {
+			for(Mission mission : missions) {
+				mission.setName(mission.getName() + now.getTime());
+				if (mission.getId() != null) {
+					Mission missionDB = missionService.get(mission.getId(),storeId);
+					//有id且数据库不存在的任务不做处理
+					if(missionDB == null) {
+						continue;
+					}
+					mission.setUpdateTime(new Date());
+					//级联创建更新missionItem
+					missionService.updateFull(mission,missionDB,storeId);
+				} else {
+					mission.setCreateTime(new Date());
+					//级联创建更新missionItem
+					missionService.updateFull(mission,null,storeId);
+				}
+				bindList.add(mission.getId());
+			}
+			missionList.setUpdateTime(now);
+		}
+
+		update(missionList, bindList,storeId);
 	}
 }
 

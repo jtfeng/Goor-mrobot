@@ -1,6 +1,7 @@
 package cn.muye.area.map.service.impl;
 
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapInfoMapper;
 import cn.muye.area.map.service.MapInfoService;
@@ -56,6 +57,7 @@ public class MapInfoServiceImpl implements MapInfoService {
         if (mapInfoList.size() > 0) {
             MapInfo mapInfo = mapInfoList.get(0);
             mapInfo.setPngImageHttpPath(parseLocalPath(mapInfo.getPngImageLocalPath()));
+            mapInfo.setPngDesigned(parseLocalPath(mapInfo.getPngDesigned()));
             return mapInfo;
         }
         return null;
@@ -95,19 +97,18 @@ public class MapInfoServiceImpl implements MapInfoService {
         for (int i = 0; i < mapInfoList.size(); i++) {
             MapInfo mapInfo = mapInfoList.get(i);
             mapInfo.setPngImageHttpPath(parseLocalPath(mapInfo.getPngImageLocalPath()));
+            mapInfo.setPngDesigned(parseLocalPath(mapInfo.getPngDesigned()));
             resultList.add(mapInfo);
         }
         return resultList;
     }
 
     private String parseLocalPath(String localPath) {
+        if(StringUtil.isNullOrEmpty(localPath))
+            return "";
         //将文件路径封装成http路径
         localPath = localPath.replaceAll("\\\\", "/");
-        int index = localPath.indexOf(SearchConstants.FAKE_MERCHANT_STORE_ID + "");
-        if (index >= 0) {
-            return DOWNLOAD_HTTP + localPath.substring(index);
-        }
-        return "";
+        return DOWNLOAD_HTTP + localPath;
     }
 
 }

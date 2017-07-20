@@ -21,18 +21,22 @@ public interface MissionListMapper {
 
 	void update(MissionList missionList);
 
-	MissionList get(long id);
+	MissionList get(@Param("id")long id,
+					@Param("storeId")long storeId);
 
-	MissionList findByName(String name);
+	MissionList findByName(@Param("name")String name,
+						   @Param("storeId")long storeId);
 
-	void delete(long id);
+	void delete(@Param("id")long id,
+				@Param("storeId")long storeId);
 
-	List<MissionList> listAll();
+	List<MissionList> listAll(long storeId);
 
 	List<MissionList> list(@Param("name") Object name,
                            /*@Param("deviceId") Object deviceId,*/
                            @Param("beginDate") Object beginDate,
                            @Param("endDate") Object endDate,
-                           @Param("priority") Object priority);
+                           @Param("priority") Object priority,
+						   @Param("storeId") Object storeId);
 }
 

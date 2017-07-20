@@ -5,7 +5,6 @@ import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import javax.persistence.Transient;
 import java.util.*;
 
 /**

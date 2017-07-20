@@ -54,10 +54,14 @@ public class MissionServiceImpl implements MissionService {
 	}
 
 	@Override
-	public void updateFull(Mission mission, Mission missionDB) {
+	public void updateFull(Mission mission, Mission missionDB,long storeId) {
 		Date now = new Date();
 		if(missionDB == null) {
+			mission.setStoreId(storeId);
 			mission.setCreateTime(now);
+		}
+		else {
+			mission.setStoreId(missionDB.getStoreId());
 		}
 		//新建关联子任务，并更新关联关系
 		Set<MissionItem> missionItemSet = mission.getMissionItemSet();
@@ -66,7 +70,7 @@ public class MissionServiceImpl implements MissionService {
 			for(MissionItem missionItem : missionItemSet) {
 				missionItem.setName(missionItem.getName() + now.getTime());
 				if (missionItem.getId() != null) {
-					MissionItem missionItemDB = missionItemService.get(missionItem.getId());
+					MissionItem missionItemDB = missionItemService.get(missionItem.getId(),missionItem.getStoreId());
 					//有id且数据库不存在的子任务不做处理
 					if(missionItemDB == null) {
 						continue;
@@ -74,6 +78,7 @@ public class MissionServiceImpl implements MissionService {
 					missionItem.setUpdateTime(new Date());
 					missionItemService.update(missionItem);
 				} else {
+					missionItem.setStoreId(storeId);
 					missionItem.setCreateTime(new Date());
 					missionItemService.save(missionItem);
 				}
@@ -82,15 +87,16 @@ public class MissionServiceImpl implements MissionService {
 			mission.setUpdateTime(now);
 		}
 
-		update(mission, bindList);
+		update(mission, bindList,storeId);
 	}
 
 	@Override
-	public void update(Mission mission, List<Long> missionItemIdList) {
+	public void update(Mission mission, List<Long> missionItemIdList,long storeId) {
 		Long missionId = mission.getId();
 
 		//添加关联关系,先全部删除，然后再关联
 		if(missionId == null) {
+			mission.setStoreId(storeId);
 			missionMapper.save(mission);
 			missionId = mission.getId();
 		}
@@ -101,7 +107,7 @@ public class MissionServiceImpl implements MissionService {
 
 		for (Long id : missionItemIdList) {
 			//判断missionItem是否存在
-			MissionItem missionItem = missionItemMapper.get(id);
+			MissionItem missionItem = missionItemMapper.get(id,storeId);
 			if(missionItem == null) {
 				continue;
 			}
@@ -131,23 +137,23 @@ public class MissionServiceImpl implements MissionService {
 //	}
 
 	@Override
-	public Mission get(long id) {
-		return missionMapper.get(id);
+	public Mission get(long id,long storeId) {
+		return missionMapper.get(id,storeId);
 	}
 
 	@Override
-	public void delete(Mission mission) {
+	public void delete(Mission mission,long storeId) {
 		missionMissionItemXREFMapper.deleteByMissionId(mission.getId());//删除关联关系
-		missionMapper.delete(mission.getId());
+		missionMapper.delete(mission.getId(),storeId);
 	}
 
 	@Override
-	public Mission findByName(String name) {
-		return missionMapper.findByName(name);
+	public Mission findByName(String name,long storeId) {
+		return missionMapper.findByName(name,storeId);
 	}
 
 	@Override
-	public List<Mission> list(WhereRequest whereRequest) {
+	public List<Mission> list(WhereRequest whereRequest,long storeId) {
 		List<Mission> missionList = new ArrayList<>();
 		if (whereRequest != null && whereRequest.getQueryObj() != null) {
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
@@ -159,19 +165,20 @@ public class MissionServiceImpl implements MissionService {
 			Object typeId = map.get(SearchConstants.SEARCH_MISSION_TYPE_ID);
 //			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
 
-			missionList = missionMapper.list(/*missionMainId, */name, beginDate, endDate, sceneName, typeId/*, priority*/);
+			missionList = missionMapper.list(/*missionMainId, */name, beginDate, endDate, sceneName, typeId/*, priority*/,storeId);
 		}else {
-			missionList = missionMapper.listAll();
+			missionList = missionMapper.listAll(storeId);
 		}
 		return bindMissionNodeList(missionList);
 	}
 
 	@Override
-	public List<Mission> list() {
-		List<Mission> missionList = missionMapper.listAll();
+	public List<Mission> list(long storeId) {
+		List<Mission> missionList = missionMapper.listAll(storeId);
 		return bindMissionNodeList(missionList);
 	}
 
+	//查找出关联的子任务
 	private List<Mission> bindMissionNodeList(List<Mission> missionList) {
 		Mission mission;
 		for (int i = 0; i < missionList.size(); i++) {

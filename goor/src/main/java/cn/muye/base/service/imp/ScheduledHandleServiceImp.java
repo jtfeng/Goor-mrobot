@@ -3,10 +3,12 @@ package cn.muye.base.service.imp;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
+import cn.mrobot.utils.aes.AES;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.cache.CacheInfoManager;
@@ -27,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.util.StringUtils;
+
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -257,27 +260,20 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public AjaxResult sendRobotInfo() {
+    public void sendRobotInfo() throws Exception {
         ros = applicationContext.getBean(Ros.class);
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+        localRobotSN = (String) applicationContext.getBean("localRobotSN");
         MessageInfo info = new MessageInfo();
         Robot robot = CacheInfoManager.getRobotInfoCache();
         if (robot != null) {
-            //电量阈值发送到ROS
-            CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
-            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-            commonInfo.setPublishMessage(JSON.toJSONString(robot));
-            info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            //先往Goor-Server里发自动注册信息
+            String robotJson = AES.encryptToBase64(JSON.toJSONString(robot), Constant.AES_KEY);
+            info.setMessageText(robotJson);
             info.setSendTime(new Date());
-            info.setSenderId("goor-server");
-            info.setReceiverId(robot.getCode());
-            info.setMessageType(MessageType.ROBOT_BATTERY_THRESHOLD);
-            info.setMessageText(JSON.toJSONString(commonInfo));
-            ScheduledHandleService service = new ScheduledHandleServiceImp();
-            return service.publishMessage(ros, info);
-        } else {
-            return AjaxResult.failed("自动注册失败");
+            info.setSenderId(localRobotSN);
+            info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
         }
     }
 }
