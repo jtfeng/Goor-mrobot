@@ -121,64 +121,13 @@ public class PointController {
 	@RequestMapping(value = "area/point/cascade", method = RequestMethod.GET)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult cascadeMapPoint(){
+	public AjaxResult cascadeMapPoint(@RequestParam("level") int level){
 		try {
-			List<CascadePoint> cascadeMapPointList = pointService.cascadeMapPoint();
+			List<CascadePoint> cascadeMapPointList = pointService.cascadeMapPoint(level);
 			return AjaxResult.success(cascadeMapPointList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed("系统错误");
 		}
 	}
-
-//	/**
-//	 * 向机器人发送指令
-//	 * 载入地图和场景的导航点
-//	 *
-//	 * @param sceneName
-//	 * @param mapName
-//	 * @return
-//	 * @throws Exception
-//	 */
-//	@RequestMapping(value = "area/point/load", method = RequestMethod.GET)
-//	@ResponseBody
-////	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-//	public AjaxResult loadMapPoint(@RequestParam("sceneName") String sceneName,
-//								   @RequestParam("mapName") String mapName) throws Exception {
-//		try {
-//			//封装数据
-//			JSONObject pointDataJsonObject = new JSONObject();
-//			pointDataJsonObject.put(TopicConstants.SCENE_NAME, sceneName);
-//			pointDataJsonObject.put(TopicConstants.MAP_NAME, mapName);
-//
-//			SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.POINT_LOAD);
-//			slamRequestBody.setData(pointDataJsonObject);
-//			JSONObject messageObject = new JSONObject();
-//			messageObject.put(TopicConstants.DATA, JSON.toJSONString(slamRequestBody));
-//
-//			CommonInfo commonInfo = new CommonInfo();
-//			commonInfo.setTopicName(TopicConstants.APP_PUB);
-//			commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-//			commonInfo.setPublishMessage(JSON.toJSONString(messageObject));
-//
-//			String text = JSON.toJSONString(commonInfo);
-//			byte[] b = text.getBytes();
-//			MessageInfo info = new MessageInfo(MessageType.EXECUTOR_COMMAND, text, b);
-//			info.setMessageStatusType(MessageStatusType.INIT);
-////		info.setReceiptWebSocket(true);
-////		info.setWebSocketId("user-9");
-//			info.setSendDeviceType(DeviceType.GOOR_SERVER);
-//			info.setReceiverDeviceType(DeviceType.GOOR);
-//			info.setMessageKind(0);
-//			info.setSendTime(new Date());
-//			info.setUpdateTime(new Date());
-//			info.setSendCount(0);
-//
-//			messageSendService.sendNoStatusMessage("cookyPlus1301_jelynn", info);
-//			return AjaxResult.success();
-//		} catch (Exception e) {
-//			LOGGER.error(e.getMessage(), e);
-//			return AjaxResult.failed();
-//		}
-//	}
 }

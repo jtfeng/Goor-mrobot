@@ -6,6 +6,7 @@ import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.base.service.LogInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
@@ -60,10 +62,6 @@ public class LogInfoController {
 		}
 
 		return AjaxResult.success(JSONArray.toJSONString(logInfoList));
-//		LogInfoUtils.info("dasdf", LogType.INFO_EXECUTE_TASK, "asdfasdf");
-//		LogInfoUtils.warn("dasdf", LogType.INFO_EXECUTE_TASK, "asdfasdf");
-//		LogInfoUtils.error("dasdf", LogType.INFO_EXECUTE_TASK, "asdfasdf");
-//		return AjaxResult.success();
 	}
 
 	private LogInfo objectToEntry(LogInfo logInfo) {

@@ -6,12 +6,14 @@ import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+//import cn.mrobot.bean.state.StateCollectorResponse;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+//import cn.muye.log.state.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -49,6 +51,9 @@ public class ConsumerCommon {
 
     @Autowired
     private RobotService robotService;
+//
+//    @Autowired
+//    private StateCollectorService stateCollectorService;
 
     /**
      * 透传ros发布的topic：agent_pub
@@ -160,10 +165,12 @@ public class ConsumerCommon {
                     CacheInfoManager.setMapCurrentCache(messageInfo);
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
                     //保存电量信息
+                    String deviceId = messageInfo.getSenderId();
                     ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
-                    chargeInfo.setDeviceId(messageInfo.getSenderId());
+                    chargeInfo.setDeviceId(deviceId);
                     chargeInfo.setCreateTime(messageInfo.getSendTime());
                     chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    CacheInfoManager.setRobotChargeInfoCache(deviceId, chargeInfo);
                     chargeInfoService.save(chargeInfo);
                 }
             }
@@ -171,6 +178,26 @@ public class ConsumerCommon {
             logger.error("consumer directAppSub exception", e);
         }
     }
+
+//    /**
+//     * 透传ros发布的topic：state_collector
+//     *
+//     * @param messageInfo
+//     */
+//    @RabbitListener(queues = TopicConstants.DIRECT_STATE_COLLECTOR)
+//    public void directStateCollector(@Payload MessageInfo messageInfo) {
+//        try {
+//            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
+//                StateCollectorResponse stateCollectorResponse = JSON.parseObject(messageInfo.getMessageText(), StateCollectorResponse.class);
+//                stateCollectorResponse.setTime(messageInfo.getSendTime());
+//                stateCollectorResponse.setSenderId(messageInfo.getSenderId());
+//                stateCollectorService.handleStateCollector(stateCollectorResponse);
+//            }
+//        } catch (Exception e) {
+//            logger.error("consumer directAgentPub exception", e);
+//        }
+//    }
+//
 
     /**
      * 透传ros发布的topic：current_pose

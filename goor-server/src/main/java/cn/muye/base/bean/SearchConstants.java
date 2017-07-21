@@ -38,11 +38,11 @@ public class SearchConstants {
 	public static String SEARCH_FEATURE_ITEM_TYPE_ID = "featureItemTypeId";
 	public static String SEARCH_FEATURE_ITEM_ID = "featureItemId";
 
-	public static String SEARCH_POINT_NAME = "pointName";
-	public static String SEARCH_POINT_ALIAS = "pointAlias";
+	public static String SEARCH_POINT_NAME = "point_name";
+	public static String SEARCH_POINT_ALIAS = "point_alias";
 	public static String SEARCH_SCENE_NAME = "sceneName";
 	public static String SEARCH_SCENE_ID = "sceneId";
-	public static String SEARCH_MAP_POINT_TYPE_ID = "mapPointTypeId";
+	public static String SEARCH_POINT_TYPE = "point_type";
 
 	public static String SEARCH_MAP_NAME = "mapName";
 }
