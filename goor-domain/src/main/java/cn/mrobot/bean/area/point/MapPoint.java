@@ -69,13 +69,6 @@ public class MapPoint extends BaseBean {
 	@Column(name = "MAP_POINT_TYPE_ID")
     private int mapPointTypeId;
 
-	/**
-	 * 点类型:不存库
-	 * */
-	@Transient
-	@JSONField(name = "map_point_type")
-	private String mapPointType;
-
 	@Column(name = "POINT_LEVEL")
 	@JSONField(name = "point_level")
 	private int pointLevel;
@@ -143,14 +136,6 @@ public class MapPoint extends BaseBean {
     public void setMapPointTypeId(int mapPointTypeId) {
         this.mapPointTypeId = mapPointTypeId;
     }
-
-	public String getMapPointType() {
-		return mapPointType;
-	}
-
-	public void setMapPointType(String mapPointType) {
-		this.mapPointType = mapPointType;
-	}
 
 	public int getPointLevel() {
 		return pointLevel;

@@ -14,7 +14,10 @@ public enum RobotTypeEnum {
 
     TRAILER(1, "拖车式"),
     CABINET(2, "柜式"),
-    DRAWER(3, "抽屉式");
+    DRAWER(3, "抽屉式"),
+    COOKY(4, "Cooky"),
+    COOKYPLUS(5, "CookyPlus"),
+    CARSON(6, "Carson");
 
     private String value;
 

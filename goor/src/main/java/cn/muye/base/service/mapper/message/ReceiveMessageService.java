@@ -1,14 +1,13 @@
 package cn.muye.base.service.mapper.message;
 
-import cn.muye.base.mapper.config.AppConfigMapper;
+import cn.muye.base.mapper.config.RobotInfoConfigMapper;
 import cn.muye.base.mapper.message.ReceiveMessageMapper;
-import cn.muye.base.model.config.AppConfig;
+import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.ReceiveMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
-
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class ReceiveMessageService {
     private ReceiveMessageMapper receiveMessageMapper;
 
     @Autowired
-    private AppConfigMapper appConfigMapper;
+    private RobotInfoConfigMapper robotInfoConfigMapper;
 
     public ReceiveMessage get(Long id){
         return receiveMessageMapper.get(id);
@@ -38,7 +37,11 @@ public class ReceiveMessageService {
         if(StringUtils.isEmpty(message.getUuId())){
             return 0L;
         }
-        AppConfig config = appConfigMapper.get(1);
+        List<RobotInfoConfig> configList = robotInfoConfigMapper.list();
+        if (configList != null && configList.size() > 0) {
+            RobotInfoConfig robotInfoConfig = configList.get(0);
+            message.setSenderId(robotInfoConfig.getRobotSn());
+        }
         message.setUpdateTime(new Date());
         message.setSuccess(false);//设置为false
         return receiveMessageMapper.save(message);

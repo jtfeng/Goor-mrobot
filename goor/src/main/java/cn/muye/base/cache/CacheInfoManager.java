@@ -1,29 +1,22 @@
 package cn.muye.base.cache;
 
-import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
-import cn.muye.base.model.config.AppConfig;
-import cn.muye.base.service.mapper.config.AppConfigService;
+import cn.muye.base.model.config.RobotInfoConfig;
+import cn.muye.base.service.mapper.config.RobotInfoConfigService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class CacheInfoManager implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
-    private static AppConfigService appConfigService;
+    private static RobotInfoConfigService robotInfoConfigService;
 
     protected final static Logger logger = Logger.getLogger(CacheInfoManager.class);
-
-    /**
-     * AppConfig 的缓存
-     */
-    private static ConcurrentHashMapCache<Long, AppConfig> appConfigCache = new ConcurrentHashMapCache<Long, AppConfig>();
 
     /**
      * topicHeartCheck 的缓存
@@ -40,24 +33,31 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<String, Integer> nameLSubCache = new ConcurrentHashMapCache<String, Integer>();
 
-    /** 机器人信息的缓存(读配置文件的信息放入缓存) */
-    private static ConcurrentHashMapCache<String, Robot> robotInfoCache = new ConcurrentHashMapCache<>();
+    /** 机器人信息的缓存*/
+    private static ConcurrentHashMapCache<String, RobotInfoConfig> robotInfoConfigCache = new ConcurrentHashMapCache<>();
+
+    /**
+     * uuid 对应的操作是否已处理
+     */
+    private static ConcurrentHashMapCache<String, Boolean> uuidHandledCache = new ConcurrentHashMapCache<String, Boolean>();
+
 
     static {
-        appConfigCache.setMaxLifeTime(0);
         topicHeartCheckCache.setMaxLifeTime(0);
         nameSubCache.setMaxLifeTime(0);
         nameLSubCache.setMaxLifeTime(0);
-        robotInfoCache.setMaxLifeTime(0);
+        robotInfoConfigCache.setMaxLifeTime(0);
         topicHeartCheckCache.put(1, System.currentTimeMillis());
+
+        uuidHandledCache.setMaxLifeTime(0);
     }
 
     private CacheInfoManager() {
 
     }
 
-    public static void removeAppConfigCache(Long id) {
-        appConfigCache.remove(id);
+    public static void removeRobotInfoConfigCache() {
+        robotInfoConfigCache.remove(Constant.ROBOT_CACHE_KEY);
     }
 
     public static void setNameSubCache(String nameSub) {
@@ -87,29 +87,18 @@ public class CacheInfoManager implements ApplicationContextAware {
         return topicHeartCheckCache.get(1);
     }
 
-    public static Robot getRobotInfoCache() {
-        return robotInfoCache.get(Constant.ROBOT_CACHE_KEY);
-    }
-
-    public static void setRobotInfoCache(Robot robotInfo) {
-        robotInfoCache.put(Constant.ROBOT_CACHE_KEY, robotInfo);
-    }
-
     /**
-     * AppConfigCache
+     * RobotInfoConfigCache
      */
-    public static AppConfig getAppConfigCache(Long id) {
-        if (id == null) {
-            return null;
+    public static RobotInfoConfig getRobotInfoConfigCache() {
+        RobotInfoConfig robotInfoConfig = robotInfoConfigCache.get(Constant.ROBOT_CACHE_KEY);
+        if (robotInfoConfig == null) {
+            robotInfoConfigService = applicationContext.getBean(RobotInfoConfigService.class);
+            RobotInfoConfig robotInfoConfigDb = robotInfoConfigService.get();
+            robotInfoConfigCache.put(Constant.ROBOT_CACHE_KEY, robotInfoConfigDb);
+            return robotInfoConfigDb;
         }
-        AppConfig appConfigInfo = appConfigCache.get(id);
-        if (appConfigInfo == null) {
-            appConfigService = applicationContext.getBean(AppConfigService.class);
-            AppConfig appConfig = appConfigService.get(1);
-            appConfigCache.put(id, appConfig);
-            return appConfig;
-        }
-        return appConfigInfo;
+        return robotInfoConfig;
     }
 
     @Override
@@ -117,4 +106,16 @@ public class CacheInfoManager implements ApplicationContextAware {
         CacheInfoManager.applicationContext = applicationContext;
     }
 
+
+    public static boolean getUUIDHandledCache(String uuid) {
+        Boolean flag = uuidHandledCache.get(uuid);
+        return null == flag ? false :flag;
+    }
+
+    public static void setUUIDHandledCache(String uuid) {
+        if(uuidHandledCache.ContainsKey(uuid)){
+            return;
+        }
+        uuidHandledCache.put(uuid, true); //set默认为true
+    }
 }

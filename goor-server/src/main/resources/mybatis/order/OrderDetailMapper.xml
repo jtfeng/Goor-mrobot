@@ -7,6 +7,7 @@
         <result property="orderId" column="orderId" />
         <result property="status" column="status" />
         <result property="finishDate" column="finishDate" />
+        <result property="stationId" column="stationId" />
         <result property="storeId" column="storeId" />
         <result property="createBy" column="createBy" />
         <result property="createTime" column="createTime" />
@@ -25,6 +26,7 @@
     <sql id = "orderDetailColumn">
         od.id AS "id",
         od.order_id AS "orderId",
+        od.station_id AS "stationId",
         od.finish_date AS "finishDate",
         od.status AS "status",
         od.store_id AS "storeId",

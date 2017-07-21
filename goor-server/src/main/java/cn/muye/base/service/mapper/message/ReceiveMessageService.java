@@ -1,8 +1,6 @@
 package cn.muye.base.service.mapper.message;
 
-import cn.muye.base.mapper.config.AppConfigMapper;
 import cn.muye.base.mapper.message.ReceiveMessageMapper;
-import cn.muye.base.model.config.AppConfig;
 import cn.muye.base.model.message.ReceiveMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

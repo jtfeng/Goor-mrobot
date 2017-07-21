@@ -7,8 +7,6 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.FileUtils;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.model.config.AppConfig;
-import cn.muye.base.service.mapper.config.AppConfigService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -17,14 +15,11 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class CacheInfoManager implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
-
-    private static AppConfigService appConfigService;
 
     private static MapInfoService mapInfoService;
 
@@ -33,7 +28,6 @@ public class CacheInfoManager implements ApplicationContextAware {
     /**
      * AppConfig 的缓存
      */
-    private static ConcurrentHashMapCache<Long, AppConfig> appConfigCache = new ConcurrentHashMapCache<Long, AppConfig>();
     private static ConcurrentHashMapCache<String, MessageInfo> messageCache = new ConcurrentHashMapCache<String, MessageInfo>();
     //机器人当前加载地图的缓存
     private static ConcurrentHashMapCache<String, MessageInfo> mapCurrentCache = new ConcurrentHashMapCache<String, MessageInfo>();
@@ -62,7 +56,6 @@ public class CacheInfoManager implements ApplicationContextAware {
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
-        appConfigCache.setMaxLifeTime(0);
         messageCache.setMaxLifeTime(0);
         mapCurrentCache.setMaxLifeTime(0);
         mapOriginalCache.setMaxLifeTime(0);
@@ -85,10 +78,6 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     }
 
-    public static void removeAppConfigCache(Long id) {
-        appConfigCache.remove(id);
-    }
-
     public static void setMessageCache(MessageInfo info) {
         messageCache.put(info.getSenderId(), info);
     }
@@ -101,22 +90,6 @@ public class CacheInfoManager implements ApplicationContextAware {
         mapOriginalCache.remove(key);
     }
 
-    /**
-     * AppConfigCache
-     */
-    public static AppConfig getAppConfigCache(Long id) {
-        if (id == null) {
-            return null;
-        }
-        AppConfig appConfigInfo = appConfigCache.get(id);
-        if (appConfigInfo == null) {
-            appConfigService = applicationContext.getBean(AppConfigService.class);
-            AppConfig appConfig = appConfigService.get(1);
-            appConfigCache.put(id, appConfig);
-            return appConfig;
-        }
-        return appConfigInfo;
-    }
 	public static void setUUIDCache(String uuId, MessageInfo messageInfo){
 		UUIDCache.put(uuId, messageInfo);
 	}

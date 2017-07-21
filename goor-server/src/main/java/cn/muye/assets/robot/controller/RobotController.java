@@ -18,6 +18,8 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.model.message.OffLineMessage;
+import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.Api;
@@ -54,6 +56,9 @@ public class RobotController {
     @Autowired
     private RobotConfigService robotConfigService;
 
+    @Autowired
+    private OffLineMessageService offLineMessageService;
+
     /**
      * 查询机器人列表
      *
@@ -65,6 +70,11 @@ public class RobotController {
     @ResponseBody
     public AjaxResult robotList(WhereRequest whereRequest) {
         List<Robot> list = robotService.listRobot(whereRequest);
+//        if (list != null && list.size() > 0) {
+//            for (Robot robot : list) {
+//                robot.setSceneName();
+//            }
+//        }
         PageInfo<Robot> pageList = new PageInfo<>(list);
         return AjaxResult.success(pageList, "查询成功");
     }
@@ -115,27 +125,9 @@ public class RobotController {
                 robotDb.setBoxActivated(robot.getBoxActivated());
                 robotDb.setBatteryThreshold(robotBatteryThreshold);
                 robotService.updateRobot(robotDb);
-                //向X86上同步配置文件中的机器人电量阈值信息，改缓存
+                //向X86上同步修改后的机器人电量阈值信息
                 if (batteryThresholdDb != robotBatteryThreshold) {
-                    CommonInfo commonInfo = new CommonInfo();
-                    commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
-                    commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-                    commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(robotDb))));
-                    MessageInfo info = new MessageInfo();
-                    info.setUuId(UUID.randomUUID().toString().replace("-", ""));
-                    info.setSendTime(new Date());
-                    info.setSenderId("goor-server");
-                    info.setReceiverId(robotCodeDb);
-                    info.setMessageType(MessageType.ROBOT_BATTERY_THRESHOLD);
-                    info.setMessageText(JSON.toJSONString(commonInfo));
-                    String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(robotCodeDb, true, MessageType.EXECUTOR_COMMAND.name());
-                    //单机器命令发送（带回执）
-                    AjaxResult ajaxCommandResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultCommandRoutingKey, info);
-                    if (ajaxCommandResult.isSuccess()) {
-                        return AjaxResult.success(robotDb, "修改成功，同步配置成功");
-                    } else {
-                        return AjaxResult.success(robotDb, "修改成功，同步配置失败, 可以手动修改配置，重启机器");
-                    }
+                    syncRobotBatteryThresholdToRos(robotDb, robotCodeDb);
                 }
                 return AjaxResult.success(robotDb, "修改成功");
             } else if (robotDb != null && !robotCode.equals(robotCodeDb)) {
@@ -148,6 +140,50 @@ public class RobotController {
             robotService.saveRobot(robot);
             return AjaxResult.success(robot, "新增成功");
         }
+    }
+
+    /**
+     * 向X86上同步修改后的机器人电量阈值信息
+     * @param robotDb
+     * @param robotCodeDb
+     * @return
+     */
+    private AjaxResult syncRobotBatteryThresholdToRos(Robot robotDb, String robotCodeDb) {
+            CommonInfo commonInfo = new CommonInfo();
+            commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
+            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            robotDb.setUuid(UUID.randomUUID().toString().replace("-", ""));
+            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(robotDb))));
+            MessageInfo info = new MessageInfo();
+            info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            info.setSendTime(new Date());
+            info.setSenderId("goor-server");
+            info.setReceiverId(robotCodeDb);
+            info.setMessageType(MessageType.ROBOT_BATTERY_THRESHOLD);
+            info.setMessageText(JSON.toJSONString(commonInfo));
+            String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(robotCodeDb, true, MessageType.EXECUTOR_COMMAND.name());
+            //单机器命令发送（带回执）
+            AjaxResult ajaxCommandResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultCommandRoutingKey, info);
+            try {
+                this.messageSave(info);
+            } catch (Exception e) {
+                LOGGER.error("save message error", e);
+            }
+            if (ajaxCommandResult != null && ajaxCommandResult.isSuccess()) {
+                return AjaxResult.success(robotDb, "修改成功，同步配置成功");
+            } else {
+                return AjaxResult.success(robotDb, "修改成功，同步配置失败, 可以手动修改配置，重启机器");
+            }
+    }
+
+    private boolean messageSave(MessageInfo messageInfo) throws Exception {
+        if (messageInfo == null
+                || StringUtil.isEmpty(messageInfo.getUuId() + "")) {
+            return false;
+        }
+        OffLineMessage message = new OffLineMessage(messageInfo);
+        offLineMessageService.save(message);//更新发送的消息
+        return true;
     }
 
     @RequestMapping(value = {"assets/robot/{id}"}, method = RequestMethod.DELETE)
