@@ -14,6 +14,9 @@ import java.util.List;
 @Table(name = "AS_ROBOT")
 public class Robot extends BaseBean {
 
+    @Transient
+    private String uuid;//uuid
+
     private String name; //机器人名称
 
     private String code; //机器人编号
@@ -33,6 +36,9 @@ public class Robot extends BaseBean {
     private Boolean isBusy = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
 
     private Boolean isOnline = Boolean.TRUE; //在线状态
+
+    @Transient
+    private String sceneName; //场景名
 
     @Transient
     private List<RobotPassword> passwords;
@@ -135,5 +141,21 @@ public class Robot extends BaseBean {
 
     public void setOnline(Boolean online) {
         isOnline = online;
+    }
+
+    public String getSceneName() {
+        return sceneName;
+    }
+
+    public void setSceneName(String sceneName) {
+        this.sceneName = sceneName;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

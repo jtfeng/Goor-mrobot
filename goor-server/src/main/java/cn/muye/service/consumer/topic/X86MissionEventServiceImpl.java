@@ -40,6 +40,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
             if (jsonLogMission != null &&
                     !StringUtil.isEmpty(jsonLogMission.getObject())){
                 LogMission logMission = new LogMission();
+                logMission.setRobotCode(baseMessageService.getSenderId(messageInfo));
                 logMission.setMissionListId(jsonLogMission.getMission_list_id());
                 logMission.setMissionListRepeatTimes(jsonLogMission.getMission_list_repeat_times());
                 logMission.setMissionEvent(jsonLogMission.getEvent());

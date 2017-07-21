@@ -213,32 +213,47 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public AjaxResult autoRegister(Robot robotNew) {
         try {
-            if (robotNew.getId() != null) {
-                return AjaxResult.failed("注册失败，配置文件有误");
+            Long robotId = robotNew.getId();
+            Integer robotTypeId = robotNew.getTypeId();
+            String robotName = robotNew.getName();
+            String robotCode = robotNew.getCode();
+            Long robotStoreId = robotNew.getStoreId();
+            Robot robotDb = getByCode(robotCode, robotStoreId);
+            if (robotId != null) {
+                if (robotDb != null) {
+                    robotNew.setOnline(true);
+                    updateRobot(robotNew);
+                    return AjaxResult.success(robotNew, "更新机器人状态成功");
+                } else {
+                    robotNew.setId(null);
+                    saveRobot(robotNew);
+                    return AjaxResult.success(robotNew, "注册成功");
+                }
+            } else {
+                if (robotTypeId == null || robotTypeId <= 0 || robotTypeId > RobotTypeEnum.DRAWER.getCaption()) {
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
+                }
+                if (StringUtil.isNullOrEmpty(robotName) || StringUtil.isNullOrEmpty(robotCode)) {
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
+                }
+                if (robotNew.getBatteryThreshold() == null) {
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
+                }
+                //判断是否有重复的名称
+                Robot robotDbByName = getByName(robotName);
+                if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
+                }
+                //判断是否有重复的编号
+                Robot robotDbByCode = getByCode(robotCode, robotStoreId);
+                if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
+                }
+                saveRobot(robotNew);
+                //往ros上透传电量阈值
+                syncRosRobotConfig(robotNew);
+                return AjaxResult.success(robotNew, "注册成功");
             }
-            if (robotNew.getTypeId() == null || robotNew.getTypeId() <= 0 || robotNew.getTypeId() > RobotTypeEnum.DRAWER.getCaption()) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
-            }
-            if (StringUtil.isNullOrEmpty(robotNew.getName()) || StringUtil.isNullOrEmpty(robotNew.getCode())) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
-            }
-            if (robotNew.getBatteryThreshold() == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
-            }
-            //判断是否有重复的名称
-            Robot robotDbByName = getByName(robotNew.getName());
-            if (robotDbByName != null && !robotDbByName.getId().equals(robotNew.getId())) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
-            }
-            //判断是否有重复的编号
-            Robot robotDbByCode = getByCode(robotNew.getCode(), robotNew.getStoreId());
-            if (robotDbByCode != null && !robotDbByCode.getId().equals(robotNew.getId())) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
-            }
-            saveRobot(robotNew);
-            //往ros上透传电量阈值
-            syncRosRobotConfig(robotNew);
-            return AjaxResult.success(robotNew, "注册成功");
         } catch (Exception e) {
 //            log.error("注册失败, 错误日志 >>>> {}", e.getMessage());
             return AjaxResult.failed("注册失败");

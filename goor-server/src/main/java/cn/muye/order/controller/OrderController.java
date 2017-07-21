@@ -4,25 +4,29 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.bean.order.GoodsInfo;
-import cn.mrobot.bean.order.Order;
-import cn.mrobot.bean.order.OrderDetail;
-import cn.mrobot.bean.order.OrderSetting;
+import cn.mrobot.bean.order.*;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.bean.GoodsInfoVO;
 import cn.muye.order.bean.OrderDetailVO;
+import cn.muye.order.bean.OrderPageInfoVO;
+import cn.muye.order.service.GoodsService;
 import cn.muye.order.service.OrderDetailService;
 import cn.muye.order.service.OrderService;
 import cn.muye.order.service.OrderSettingService;
+import cn.muye.util.SessionUtil;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,6 +48,12 @@ public class OrderController extends BaseController {
     private RobotService robotService;
     @Autowired
     private RobotPasswordService robotPasswordService;
+    @Autowired
+    private ShelfService shelfService;
+    @Autowired
+    private GoodsService goodsService;
+    @Autowired
+    private StationService stationService;
 
 
     /**
@@ -70,14 +80,14 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrder(@RequestBody Order order,HttpSession session ){
+    public AjaxResult saveOrder(@RequestBody Order order,HttpServletRequest request){
         Robot arrangeRobot = null;
         try {
             //注入发起站
-            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
+            Long stationId = SessionUtil.getStationId(request);
             order.setStartStation(new Station(stationId));
             //注入场景
-            Scene scene = (Scene)session.getAttribute(Constant.SCENE_SESSION_TAG);
+            Scene scene = SessionUtil.getScene(request);
             order.setScene(scene);
             //现在orderSetting后台默认注入默认配置
             if(order.getOrderSetting() == null){
@@ -126,6 +136,30 @@ public class OrderController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("查询任务列表进展失败");
+        }
+
+    }
+
+    /**
+     * 获取下单页面的信息
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "getOrderPageInfo", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult getOrderPageInfo(@RequestParam("type") Long type){
+        try {
+            List<Goods> goodsList = goodsService.listGoodsByType(type);
+            List<Station> stationList = stationService.listAllByStoreId(Station.class);
+            List<Shelf> shelfList = shelfService.listAllByStoreId(Shelf.class);
+            OrderPageInfoVO orderPageInfoVO = new OrderPageInfoVO();
+            orderPageInfoVO.setGoodsList(goodsList);
+            orderPageInfoVO.setShelfList(shelfList);
+            orderPageInfoVO.setStationList(stationList);
+            return AjaxResult.success(orderPageInfoVO, "查询下单页面信息成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("获取下单页面的信息失败");
         }
 
     }

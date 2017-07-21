@@ -24,4 +24,19 @@ public class SessionUtil {
         return (Scene) o;
     }
 
+    /**
+     * 从session获取当前stationId
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    public static Long getStationId(HttpServletRequest request) throws Exception {
+        Object o = request.getSession().getAttribute(Constant.SESSION_STATION_ID);
+        if(o == null) {
+            return null;
+        }
+        return (Long) o;
+    }
+
+
 }

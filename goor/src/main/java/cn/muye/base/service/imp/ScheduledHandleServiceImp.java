@@ -14,6 +14,7 @@ import cn.muye.base.bean.TopicSubscribeInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.download.DownloadHandle;
 import cn.muye.base.listener.CheckHeartSubListenerImpl;
+import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
@@ -265,8 +266,9 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
         localRobotSN = (String) applicationContext.getBean("localRobotSN");
         MessageInfo info = new MessageInfo();
-        Robot robot = CacheInfoManager.getRobotInfoCache();
-        if (robot != null) {
+        RobotInfoConfig robotInfoConfig = CacheInfoManager.getRobotInfoConfigCache();
+        if (robotInfoConfig != null) {
+            Robot robot = robotInfoConfigToRobot(robotInfoConfig);
             //先往Goor-Server里发自动注册信息
             String robotJson = AES.encryptToBase64(JSON.toJSONString(robot), Constant.AES_KEY);
             info.setMessageText(robotJson);
@@ -275,5 +277,20 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
             rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
         }
+    }
+
+    /**
+     * robotInfoConfig转成robot
+     * @param robotInfoConfig
+     * @return
+     */
+    private Robot robotInfoConfigToRobot(RobotInfoConfig robotInfoConfig) {
+        Robot robot = new Robot();
+        robot.setName(robotInfoConfig.getRobotName());
+        robot.setCode(robotInfoConfig.getRobotSn());
+        robot.setBatteryThreshold(robotInfoConfig.getRobotBatteryThreshold());
+        robot.setStoreId(robotInfoConfig.getRobotStoreId());
+        robot.setTypeId(robotInfoConfig.getRobotTypeId());
+        return robot;
     }
 }

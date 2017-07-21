@@ -9,8 +9,6 @@ public class AjaxResult implements Serializable {
 	public static final int CODE_SUCCESS = 0;
 	public static final int CODE_FAILED = 1;
 	public static final int CODE_PARAM_ERROR = 2;
-	public static final int CODE_NOT_AUTHORIZED_ERROR = 3; //未授权
-	public static final int CODE_NOT_LOGGED_ERROR = 4; //未登录
 	public static final int CODE_SYSTEM_ERROR = 5; //系统内部错误
 
 	private int code;
