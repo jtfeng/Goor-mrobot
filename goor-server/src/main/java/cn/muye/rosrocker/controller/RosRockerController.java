@@ -42,6 +42,7 @@ public class RosRockerController {
     @RequestMapping(value = "/sendMsg", method = RequestMethod.POST)
     public Object sendMessageToRos(@RequestBody RosRockerDTO rosRockerDTO){
         try {
+            // TODO: 20/07/2017 在云端控制机器人的前后左右移动，根据传入的不同坐标值决定
             sendDetailMessage(rosRockerDTO.getRobotId(), TopicConstants.ROS_YAOGAN_TOPIC,
                     TopicConstants.ROS_YAOGAN_TOPIC_TYPE, JSON.toJSONString(rosRockerDTO));
             return AjaxResult.success();

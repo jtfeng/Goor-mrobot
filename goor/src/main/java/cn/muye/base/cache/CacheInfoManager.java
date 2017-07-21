@@ -36,12 +36,20 @@ public class CacheInfoManager implements ApplicationContextAware {
     /** 机器人信息的缓存*/
     private static ConcurrentHashMapCache<String, RobotInfoConfig> robotInfoConfigCache = new ConcurrentHashMapCache<>();
 
+    /**
+     * uuid 对应的操作是否已处理
+     */
+    private static ConcurrentHashMapCache<String, Boolean> uuidHandledCache = new ConcurrentHashMapCache<String, Boolean>();
+
+
     static {
         topicHeartCheckCache.setMaxLifeTime(0);
         nameSubCache.setMaxLifeTime(0);
         nameLSubCache.setMaxLifeTime(0);
         robotInfoConfigCache.setMaxLifeTime(0);
         topicHeartCheckCache.put(1, System.currentTimeMillis());
+
+        uuidHandledCache.setMaxLifeTime(0);
     }
 
     private CacheInfoManager() {
@@ -98,4 +106,16 @@ public class CacheInfoManager implements ApplicationContextAware {
         CacheInfoManager.applicationContext = applicationContext;
     }
 
+
+    public static boolean getUUIDHandledCache(String uuid) {
+        Boolean flag = uuidHandledCache.get(uuid);
+        return null == flag ? false :flag;
+    }
+
+    public static void setUUIDHandledCache(String uuid) {
+        if(uuidHandledCache.ContainsKey(uuid)){
+            return;
+        }
+        uuidHandledCache.put(uuid, true); //set默认为true
+    }
 }
