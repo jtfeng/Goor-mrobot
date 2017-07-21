@@ -1,8 +1,8 @@
 package cn.muye.base.service.mapper.message;
 
-import cn.muye.base.mapper.config.AppConfigMapper;
+import cn.muye.base.mapper.config.RobotInfoConfigMapper;
 import cn.muye.base.mapper.message.OffLineMessageMapper;
-import cn.muye.base.model.config.AppConfig;
+import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.OffLineMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class OffLineMessageService {
     private OffLineMessageMapper offLineMessageMapper;
 
     @Autowired
-    private AppConfigMapper appConfigMapper;
+    private RobotInfoConfigMapper robotInfoConfigMapper;
 
     public OffLineMessage get(Long id){
         return offLineMessageMapper.get(id);
@@ -39,8 +39,11 @@ public class OffLineMessageService {
     }
 
     public void update(OffLineMessage message) throws Exception{
-        AppConfig config = appConfigMapper.get(1);
-        message.setSenderId(config.getMpushUserId());
+        List<RobotInfoConfig> configList = robotInfoConfigMapper.list();
+        if (configList != null && configList.size() > 0) {
+            RobotInfoConfig robotInfoConfig = configList.get(0);
+            message.setSenderId(robotInfoConfig.getRobotSn());
+        }
         message.setUpdateTime(new Date());
         offLineMessageMapper.update(message);
     }

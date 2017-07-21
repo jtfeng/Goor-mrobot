@@ -4,16 +4,17 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.MapService;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
+import cn.muye.base.service.mapper.config.RobotInfoConfigService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -24,14 +25,11 @@ import edu.wpi.rail.jrosbridge.services.ServiceResponse;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
-import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Properties;
 
 @Component
 public class ConsumerCommon {
@@ -42,9 +40,9 @@ public class ConsumerCommon {
     private ReceiveMessageService receiveMessageService;
     @Autowired
     private MapService mapService;
+    @Autowired
+    private RobotInfoConfigService robotInfoConfigService;
 
-    @Value("${local.applicationProperties.path}")
-    private String path; //本地application.properties配置文件路径
     /**
      * 接收命令消息（无回执）
      * @param messageInfo
@@ -78,7 +76,7 @@ public class ConsumerCommon {
                     return clientTimeSynchronized(messageInfo);
                 }
                 if (MessageType.ROBOT_BATTERY_THRESHOLD.equals(messageInfo.getMessageType())) {
-                    updateCacheAndChangeProperties(messageInfo);
+                    updateRobotInfoConfigRecord(messageInfo);
                 }
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 return service.publishMessage(ros, messageInfo);
@@ -91,67 +89,19 @@ public class ConsumerCommon {
     }
 
     /**
-     * 后台修改了机器人电量阈值需要将Goor的
+     * 更新机器人信息记录
      * @param messageInfo
      */
-    private void updateCacheAndChangeProperties(MessageInfo messageInfo) {
+    private void updateRobotInfoConfigRecord(MessageInfo messageInfo) {
         String commonInfoStr = messageInfo.getMessageText();
         CommonInfo commonInfo = JSON.parseObject(commonInfoStr, CommonInfo.class);
         String pubDataStr = commonInfo.getPublishMessage();
         PubData pubData = JSON.parseObject(pubDataStr, PubData.class);
         Robot robotInfo = JSON.parseObject(pubData.getData(), Robot.class);
-        robotInfo.setId(null);
-        //改缓存
-        CacheInfoManager.setRobotInfoCache(robotInfo);
-        //改配置文件
-        updateProperties(robotInfo.getBatteryThreshold());
-    }
-
-    /**
-     * 更新properties文件
-     * @param batteryThreshold 键值对Map
-     */
-    public void updateProperties(int batteryThreshold) {
-        Properties prop = new Properties();
-        FileInputStream fis;
-        BufferedWriter bw = null;
-        String filePath = path;
-        try {
-            fis = new FileInputStream(filePath);
-            prop.load(fis);
-            // 写入属性文件
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath)));
-            prop.setProperty(Constant.ROBOT_BATTERY_THRESHOLD, String.valueOf(batteryThreshold));
-            prop.store(bw, "");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                bw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        //todo SnakeYaml来修改配置文件
-//        Yaml yaml = new Yaml();
-//        File f = new File(path);
-//        //读入文件
-//        String result= null;
-//        try {
-//            result = (String)yaml.load(new FileInputStream(f));
-//        } catch (FileNotFoundException e) {
-//            logger.error("{}",e);
-//        }
-//        String[] properties =  result.split("\\s+");
-//        if (properties != null && properties.length > 0) {
-//            for (String property : properties) {
-//                String[] args = property.split("=");
-//
-//            }
-//        }
-//        System.out.println( result);
+        CacheInfoManager.removeRobotInfoConfigCache();
+        //改数据库中的robotInfoConfig表的记录
+        RobotInfoConfig robotInfoConfig = robotToRobotInfoConfig(robotInfo);
+        robotInfoConfigService.update(robotInfoConfig);
     }
 
     /**
@@ -330,4 +280,18 @@ public class ConsumerCommon {
         return AjaxResult.success();
     }
 
+    /**
+     * robot转成robotInfoConfig
+     * @param robot
+     * @return
+     */
+    private RobotInfoConfig robotToRobotInfoConfig(Robot robot) {
+        RobotInfoConfig robotInfoConfig = new RobotInfoConfig();
+        robotInfoConfig.setRobotSn(robot.getCode());
+        robotInfoConfig.setRobotName(robot.getName());
+        robotInfoConfig.setRobotBatteryThreshold(robot.getBatteryThreshold());
+        robotInfoConfig.setRobotStoreId(robot.getStoreId());
+        robotInfoConfig.setRobotTypeId(robot.getTypeId());
+        return robotInfoConfig;
+    }
 }
