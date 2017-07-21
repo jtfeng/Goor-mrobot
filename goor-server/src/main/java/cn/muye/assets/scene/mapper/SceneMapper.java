@@ -12,10 +12,9 @@ public interface SceneMapper extends MyMapper<Scene> {
     /**
      * 保存场景与地图之间的多对多关系数据
      * @param sceneId
-     * @param mapIds
      * @return
      */
-    int insertSceneAndMapRelations(Long sceneId, List<Long> mapIds);
+    int insertSceneAndMapRelations(Long sceneId, String mapSceneName);
 
     /**
      * 保存场景与机器人之间的多对多关系
@@ -39,6 +38,8 @@ public interface SceneMapper extends MyMapper<Scene> {
      */
     List<MapInfo> findMapBySceneId(Long sceneId);
 
+    List<MapInfo> findMapBySceneName(String sceneName);
+
     /**
      * 删除历史数据（场景与机器人的对应关系）
      */
@@ -48,4 +49,19 @@ public interface SceneMapper extends MyMapper<Scene> {
      * 删除历史数据（场景与地图的对应关系）
      */
     void deleteMapAndSceneRelations(Long sceneId);
+
+    /**
+     * 判断指定的机器人是否已经绑定过场景
+     * @param robotId
+     * @return
+     */
+    int checkRobot(Long robotId);
+
+    int checkRobotLegal(Long robotId);
+
+    int checkMapInfo(String mapSceneName);
+
+    int checkMapLegal(String mapSceneName);
+
+    void setSceneNeedToBeUpdatedState(String sceneName);
 }

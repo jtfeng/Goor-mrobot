@@ -12,45 +12,35 @@ import java.util.List;
  */
 public interface SceneService extends BaseService<Scene> {
 
-    List<Scene> list();
+    List<Scene> list() throws Exception;
 
-    int save(Scene scene);
+    int saveScene(Scene scene) throws Exception;
 
-    Scene getById(Long id);
+    Scene getSceneById(Long id) throws Exception;
 
-    int update(Scene scene);
+    int updateScene(Scene scene) throws Exception;
 
-    int deleteById(Long id);
+    int deleteSceneById(Long id) throws Exception;
 
-    List<Scene> listScenes(WhereRequest whereRequest);
+    List<Scene> listScenes(WhereRequest whereRequest) throws Exception;
 
-    Scene updateAliasName(Long sceneId, String aliasName);
+    int insertSceneAndMapRelations(Long sceneId, String mapSceneName) throws Exception;
 
-    /**
-     * 保存场景与地图之间的多对多关系数据
-     * @param sceneId
-     * @param mapIds
-     * @return
-     */
-    int insertSceneAndMapRelations(Long sceneId, List<Long> mapIds);
+    int insertSceneAndRobotRelations(Long sceneId, List<Long> robotIds) throws Exception;
 
-    /**
-     * 保存场景与机器人之间的多对多关系
-     * @param sceneId
-     * @param robotIds
-     * @return
-     */
-    int insertSceneAndRobotRelations(Long sceneId, List<Long> robotIds);
+    void sendSyncMapMessageToRobots(Long sceneId) throws Exception;
 
-    void sendSyncMapMessageToRobots(Long sceneId);
+    void deleteRobotAndSceneRelations(Long sceneId) throws Exception;
 
-    /**
-     * 删除历史数据（场景与机器人的对应关系）
-     */
-    void deleteRobotAndSceneRelations(Long sceneId);
+    void deleteMapAndSceneRelations(Long sceneId) throws Exception;
 
-    /**
-     * 删除历史数据（场景与地图的对应关系）
-     */
-    void deleteMapAndSceneRelations(Long sceneId);
+    int checkRobot(Long robotId) throws Exception;
+
+    int checkMapInfo(String mapSceneName) throws Exception;
+
+    void bindSceneAndMapRelations(Scene scene) throws Exception;
+
+    void bindSceneAndRobotRelations(Scene scene) throws Exception;
+
+    boolean checkSceneIsNeedToBeUpdated(String mapSceneName) throws Exception;
 }

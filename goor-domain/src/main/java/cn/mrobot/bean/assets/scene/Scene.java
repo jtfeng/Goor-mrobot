@@ -14,12 +14,13 @@ import java.util.List;
  */
 @Table(name = "AS_SCENE")
 public class Scene extends BaseBean{
+
     private String name;
-    private String aliasName;
     private String intro;
+    private Integer state = 0;//0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新
 
     @Transient
-    private List<MapInfo> mapInfos;
+    private String mapSceneName;
     @Transient
     private List<Robot> robots;
 
@@ -31,14 +32,6 @@ public class Scene extends BaseBean{
         this.name = name;
     }
 
-    public String getAliasName() {
-        return aliasName;
-    }
-
-    public void setAliasName(String aliasName) {
-        this.aliasName = aliasName;
-    }
-
     public String getIntro() {
         return intro;
     }
@@ -47,12 +40,20 @@ public class Scene extends BaseBean{
         this.intro = intro;
     }
 
-    public List<MapInfo> getMapInfos() {
-        return mapInfos;
+    public Integer getState() {
+        return state;
     }
 
-    public void setMapInfos(List<MapInfo> mapInfos) {
-        this.mapInfos = mapInfos;
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public String getMapSceneName() {
+        return mapSceneName;
+    }
+
+    public void setMapSceneName(String mapSceneName) {
+        this.mapSceneName = mapSceneName;
     }
 
     public List<Robot> getRobots() {
@@ -67,9 +68,9 @@ public class Scene extends BaseBean{
     public String toString() {
         return "Scene{" +
                 "name='" + name + '\'' +
-                ", aliasName='" + aliasName + '\'' +
                 ", intro='" + intro + '\'' +
-                ", mapInfos=" + mapInfos +
+                ", state=" + state +
+                ", mapSceneName='" + mapSceneName + '\'' +
                 ", robots=" + robots +
                 '}';
     }

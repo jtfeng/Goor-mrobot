@@ -34,25 +34,6 @@ public class SceneController {
     private SceneService sceneService;
 
     /**
-     * 修改场景别名（Alias Name）
-     * @param sceneId
-     * @param aliasName
-     * @return
-     */
-    @RequestMapping(value = "/assets/scene/{sceneId}/{aliasName}", method = RequestMethod.POST)
-    public AjaxResult updateAliasName(@PathVariable("sceneId") String sceneId, @PathVariable("aliasName") String aliasName) {
-        try {
-            if (aliasName == null || "".equals(aliasName.trim())){
-                return AjaxResult.failed("别名内容不允许为空");
-            }
-            Scene scene = sceneService.updateAliasName(Long.parseLong(sceneId), aliasName);
-            return AjaxResult.success(scene, "更改场景信息别名成功!");
-        }catch (Exception e){
-            return AjaxResult.failed(e, "更改场景信息别名失败");
-        }
-    }
-
-    /**
      * 传入一个 session ID，将场景对应的信息存入到 session
      * @param sceneId
      * @param request
@@ -65,7 +46,7 @@ public class SceneController {
                 return AjaxResult.failed("请传入合法的 sceneId 值");
             }
             log.info("传入的场景 ID 编号为 ：" + sceneId);
-            Scene scene = sceneService.getById(Long.parseLong(sceneId));
+            Scene scene = sceneService.getSceneById(Long.parseLong(sceneId));
             if (scene == null){
                 return AjaxResult.failed("指定场景编号的场景信息不存在，保存 session 信息失败");
             }
@@ -85,27 +66,12 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.POST)
     public AjaxResult createScene(@RequestBody Scene scene) {
+        // TODO: 21/07/2017 创建新场景
         try {
-            log.info(scene.toString());
-            sceneService.save(scene);
+            sceneService.saveScene(scene);
             return AjaxResult.success(scene, "新增场景信息成功!");
         }catch (Exception e){
-            return AjaxResult.failed(e, "新增场景信息失败");
-        }
-    }
-
-    /**
-     * 删除指定场景
-     * @param id
-     * @return
-     */
-    @RequestMapping(value = "/assets/scene/{id}", method = RequestMethod.DELETE)
-    public AjaxResult deletecene(@PathVariable("id") String id){
-        try {
-            sceneService.deleteById(Long.parseLong(id));
-            return AjaxResult.success(id,"删除场景信息成功！");
-        }catch (Exception e){
-            return AjaxResult.failed(e,  "删除场景信息失败！");
+            return AjaxResult.failed(e,      "新增场景信息失败");
         }
     }
 
@@ -116,11 +82,28 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.PUT)
     public AjaxResult updateScene(@RequestBody Scene scene){
+        // TODO: 21/07/2017 更新指定的场景信息
         try {
-            sceneService.update(scene);
+            sceneService.updateScene(scene);
             return AjaxResult.success(scene,"修改场景信息成功！");
         }catch (Exception e){
-            return AjaxResult.failed(e, "修改场景信息失败！");
+            return AjaxResult.failed(e,     "修改场景信息失败！");
+        }
+    }
+
+    /**
+     * 删除指定场景
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/assets/scene/{id}", method = RequestMethod.DELETE)
+    public AjaxResult deletecene(@PathVariable("id") String id){
+        // TODO: 21/07/2017 根据传入的场景 ID 编号，删除对应的场景与绑定的机器人和地图信息
+        try {
+            sceneService.deleteSceneById(Long.parseLong(id));
+            return AjaxResult.success(id,"删除场景信息成功！");
+        }catch (Exception e){
+            return AjaxResult.failed(e,  "删除场景信息失败！");
         }
     }
 
@@ -131,67 +114,13 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.GET)
     public AjaxResult sceneList(WhereRequest whereRequest) {
+        // TODO: 21/07/2017 分页列表展示场景数据信息
         try {
             List<Scene> list = sceneService.listScenes(whereRequest);
             PageInfo<Scene> pageList = new PageInfo<>(list);
             return AjaxResult.success(pageList, "查询成功");
         }catch (Exception e){
-            Example example = new Example(RfidBracelet.class);
-            return AjaxResult.failed(e,"查询失败");
-        }
-    }
-
-    /**
-     * 绑定场景信息与地图信息的多对多关系
-     * @param scene
-     * @return
-     */
-    @RequestMapping(value = "/assets/scene/bindSceneAndMapRelations", method = RequestMethod.POST)
-    public AjaxResult bindSceneAndMapRelations(@RequestBody Scene scene) {
-        try {
-            Long sceneId = Preconditions.checkNotNull(scene.getId());
-            List<MapInfo> mapInfos = Preconditions.checkNotNull(scene.getMapInfos());
-            List<Long> ids = new ArrayList<>();
-            for (MapInfo mapInfo : mapInfos){
-                ids.add(mapInfo.getId());
-            }
-            //删除历史关系数据
-            sceneService.deleteMapAndSceneRelations(sceneId);
-            int updateCount = 0;
-            if (ids.size() != 0) {
-                updateCount = sceneService.insertSceneAndMapRelations(scene.getId(), ids);
-            }
-            return AjaxResult.success("修改记录的行数为：" + updateCount, "绑定场景与地图信息多对多关系成功");
-        }catch (Exception e){
-            Example example = new Example(RfidBracelet.class);
-            return AjaxResult.failed(e,"绑定场景与地图信息多对多关系失败");
-        }
-    }
-
-    /**
-     * 绑定场景信息与机器人信息的多对多关系
-     * @param scene
-     * @return
-     */
-    @RequestMapping(value = "/assets/scene/bindSceneAndRobotRelations", method = RequestMethod.POST)
-    public AjaxResult bindSceneAndRobotRelations(@RequestBody Scene scene) {
-        try {
-            Long sceneId = Preconditions.checkNotNull(scene.getId());
-            List<Robot> robots = Preconditions.checkNotNull(scene.getRobots());
-            List<Long> ids = new ArrayList<>();
-            for (Robot robot : robots){
-                ids.add(robot.getId());
-            }
-            //删除历史关系数据
-            sceneService.deleteRobotAndSceneRelations(sceneId);
-            int updateCount = 0;
-            if (ids.size() != 0) {
-                updateCount = sceneService.insertSceneAndRobotRelations(scene.getId(), ids);
-            }
-            return AjaxResult.success("修改记录的行数为：" + updateCount, "绑定场景与机器人信息多对多关系成功");
-        }catch (Exception e){
-            Example example = new Example(RfidBracelet.class);
-            return AjaxResult.failed(e,"绑定场景与机器人信息多对多关系失败");
+            return AjaxResult.failed(e,         "查询失败");
         }
     }
 
