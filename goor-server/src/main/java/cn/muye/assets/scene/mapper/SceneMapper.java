@@ -9,59 +9,25 @@ import java.util.List;
 
 public interface SceneMapper extends MyMapper<Scene> {
 
-    /**
-     * 保存场景与地图之间的多对多关系数据
-     * @param sceneId
-     * @return
-     */
     int insertSceneAndMapRelations(Long sceneId, String mapSceneName);
 
-    /**
-     * 保存场景与机器人之间的多对多关系
-     * @param sceneId
-     * @param robotIds
-     * @return
-     */
     int insertSceneAndRobotRelations(Long sceneId, List<Long> robotIds);
 
-    /**
-     * 根据 ID 查询所有关联的机器人 ID 编号
-     * @param sceneId
-     * @return
-     */
     List<Robot> findRobotBySceneId(Long sceneId);
 
-    /**
-     * 根据 ID 查询所有关联的地图 ID 编号
-     * @param sceneId
-     * @return
-     */
     List<MapInfo> findMapBySceneId(Long sceneId);
 
-    List<MapInfo> findMapBySceneName(String sceneName);
-
-    /**
-     * 删除历史数据（场景与机器人的对应关系）
-     */
     void deleteRobotAndSceneRelations(Long sceneId);
 
-    /**
-     * 删除历史数据（场景与地图的对应关系）
-     */
     void deleteMapAndSceneRelations(Long sceneId);
 
-    /**
-     * 判断指定的机器人是否已经绑定过场景
-     * @param robotId
-     * @return
-     */
     int checkRobot(Long robotId);
 
     int checkRobotLegal(Long robotId);
 
-    int checkMapInfo(String mapSceneName);
+    int checkMapInfo(String mapSceneName, Long storeId);
 
-    int checkMapLegal(String mapSceneName);
+    int checkMapLegal(String mapSceneName, Long storeId);
 
-    void setSceneNeedToBeUpdatedState(String sceneName);
+    void setSceneNeedToBeUpdatedState(String sceneName, Long storeId);
 }

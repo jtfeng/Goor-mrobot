@@ -139,4 +139,10 @@ public class SceneController {
             return AjaxResult.failed();
         }
     }
+
+    @RequestMapping(value = "/assets/scene/checkSceneIsNeedToBeUpdated", method = RequestMethod.GET)
+    public Object checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception{
+        this.sceneService.checkSceneIsNeedToBeUpdated(mapSceneName, storeId);
+        return Arrays.asList("ok","jay");
+    }
 }

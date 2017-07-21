@@ -24,12 +24,6 @@
         WHERE smr.SCENE_ID = #{0}
     </select>
 
-    <select id="findMapBySceneName" resultMap="MapInfoSimpleMap" parameterType="java.lang.String">
-        SELECT i.ID AS map_type_id, i.SCENE_NAME as map_scenename, i.MAP_ZIP_ID as map_zipid
-        FROM A_MAP_INFO i LEFT JOIN SCENES_MAPS_RELATIONS smr ON i.SCENE_NAME = smr.MAP_SCENENAME
-        WHERE smr.MAP_SCENENAME = #{0}
-    </select>
-
     <delete id="deleteRobotAndSceneRelations" parameterType="java.lang.Long">
         DELETE FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
     </delete>
@@ -46,12 +40,14 @@
         SELECT count(*) FROM AS_ROBOT WHERE ID = #{0}
     </select>
 
-    <select id="checkMapInfo" parameterType="java.lang.String" resultType="java.lang.Integer">
-        SELECT count(*) FROM SCENES_MAPS_RELATIONS WHERE MAP_SCENENAME = #{0}
+    <select id="checkMapInfo" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM AS_SCENE s LEFT JOIN SCENES_MAPS_RELATIONS r ON s.ID = r.SCENE_ID
+        WHERE r.MAP_SCENENAME = #{param1} AND s.STORE_ID = #{param2};
     </select>
 
-    <select id="checkMapLegal" parameterType="java.lang.String" resultType="java.lang.Integer">
-        SELECT count(*) FROM A_MAP_INFO WHERE SCENE_NAME = #{0}
+    <select id="checkMapLegal" resultType="java.lang.Integer">
+        SELECT count(*) FROM A_MAP_INFO WHERE SCENE_NAME = #{0} AND STORE_ID = #{1}
     </select>
 
     <insert id="insertSceneAndMapRelations">
@@ -70,8 +66,8 @@
         </foreach>
     </insert>
 
-    <update id="setSceneNeedToBeUpdatedState" parameterType="java.lang.String">
-        UPDATE AS_SCENE SET STATE = 3 WHERE ID = (SELECT SCENE_ID FROM SCENES_MAPS_RELATIONS WHERE MAP_SCENENAME = #{0})
+    <update id="setSceneNeedToBeUpdatedState">
+        UPDATE AS_SCENE SET STATE = 3 WHERE ID = (SELECT SCENE_ID FROM SCENES_MAPS_RELATIONS WHERE MAP_SCENENAME = #{param1}) AND STORE_ID = #{param2}
     </update>
 
 </mapper>

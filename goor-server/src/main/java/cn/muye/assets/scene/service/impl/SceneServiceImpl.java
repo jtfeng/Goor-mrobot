@@ -131,11 +131,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return sceneMapper.checkRobot(robotId);
     }
 
-    @Override
-    public int checkMapInfo(String mapSceneName) throws Exception {
-        return sceneMapper.checkMapInfo(mapSceneName);
-    }
-
     private static final String MAP_INFO_ERROR_MESSAGE = "指定的地图场景不存在或者已经被绑定到云端场景，请重新选择!" ;
 
     @Override
@@ -145,7 +140,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             String sceneName = Preconditions.checkNotNull(scene.getName());
             String mapSceneName = Preconditions.checkNotNull(scene.getMapSceneName());
             this.deleteMapAndSceneRelations(sceneId);
-            if (this.sceneMapper.checkMapLegal(mapSceneName) > 0 && this.sceneMapper.checkMapInfo(mapSceneName) == 0) {
+            if (this.sceneMapper.checkMapLegal(mapSceneName, scene.getStoreId()) > 0
+                    && this.sceneMapper.checkMapInfo(mapSceneName, scene.getStoreId()) == 0) {
                 //保证场景名城合法且没有绑定云端场景
                 this.insertSceneAndMapRelations(scene.getId(), mapSceneName);
             } else {
@@ -189,9 +185,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @throws Exception
      */
     @Override
-    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName) throws Exception {
-        if (this.checkMapInfo(mapSceneName) != 0){
-            this.sceneMapper.setSceneNeedToBeUpdatedState(mapSceneName);
+    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception {
+        if (this.sceneMapper.checkMapInfo(mapSceneName, Long.parseLong(storeId)) != 0){
+            this.sceneMapper.setSceneNeedToBeUpdatedState(mapSceneName,Long.parseLong(storeId));
             return true;
         }else {
             return false;

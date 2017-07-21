@@ -36,11 +36,9 @@ public interface SceneService extends BaseService<Scene> {
 
     int checkRobot(Long robotId) throws Exception;
 
-    int checkMapInfo(String mapSceneName) throws Exception;
-
     void bindSceneAndMapRelations(Scene scene) throws Exception;
 
     void bindSceneAndRobotRelations(Scene scene) throws Exception;
 
-    boolean checkSceneIsNeedToBeUpdated(String mapSceneName) throws Exception;
+    boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception;
 }
