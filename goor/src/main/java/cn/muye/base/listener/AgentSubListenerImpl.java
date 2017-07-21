@@ -3,6 +3,7 @@ package cn.muye.base.listener;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.bean.TopicSubscribeInfo;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.producer.ProducerCommon;
 import cn.muye.base.service.FileUpladService;
 import com.alibaba.fastjson.JSON;
@@ -50,10 +51,12 @@ public class AgentSubListenerImpl implements TopicCallback,ApplicationContextAwa
 			JSONObject dataObject = JSON.parseObject(data);
 			String subName = dataObject.getString(TopicConstants.SUB_NAME);
 			String uuid = dataObject.getString(TopicConstants.UUID);
-			if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName)) {
+			boolean handled = CacheInfoManager.getUUIDHandledCache(uuid);
+			if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName) && (!handled)) {
 				FileUpladService fileUpladService = applicationContext.getBean(FileUpladService.class);
 				fileUpladService.sendTopic("0", uuid,"请求接收成功");
 				fileUpladService.uploadMapFile(uuid);
+				CacheInfoManager.setUUIDHandledCache(uuid);
 			}
 		}
 	}
