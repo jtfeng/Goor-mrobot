@@ -3,13 +3,18 @@ package cn.muye.mission.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.bean.order.OrderSetting;
+import cn.mrobot.utils.WhereRequest;
+import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.service.missiontask.MissionFuncsService;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +34,9 @@ public class MissionListTaskController {
 
     @Autowired
     MissionFuncsService missionFuncsService;
+
+    @Autowired
+    MissionListTaskService missionListTaskService;
 
     @PostMapping("/createMissionListTask")
     @ApiOperation(
@@ -73,5 +81,21 @@ public class MissionListTaskController {
             e.printStackTrace();
             return AjaxResult.failed(e.getMessage());
         }
+    }
+
+    /**
+     * 查询指定场景（必选）和状态（可选）的任务列表
+     *
+     * @param whereRequest
+     * @return
+     */
+    @GetMapping("/list")
+    @ApiOperation(
+            value = "查询任务列表数据",
+            notes = "查询任务列表数据")
+    public AjaxResult getMissionListTaskList(WhereRequest whereRequest) {
+        List<MissionListTask> list = missionListTaskService.tasksList(whereRequest);
+        PageInfo<MissionListTask> pageList = new PageInfo<>(list);
+        return AjaxResult.success(pageList, "查询成功");
     }
 }

@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,14 +64,17 @@ public class FileUpladService {
      */
     public void uploadMapFile(String uuid) {
         String REMOTE_URL = PREFIX + ip;
+        LOGGER.error("开始上传文件， path= " + MAP_PATH+" REMOTE_URL = "+REMOTE_URL);
         if (lock.tryLock()) {
             try {
                 File uploadFile = new File(MAP_PATH);
                 if (!uploadFile.exists()) {
-                    LOGGER.error("文件不存在, path= " + MAP_PATH);
+                    LOGGER.error("文件夹不存在, path= " + MAP_PATH);
                     return;
                 }
+
                 if (uploadFile.isDirectory()) {
+                    LOGGER.info("开始压缩");
                     //压缩文件夹
                     String lastDirName = uploadFile.getName();
                     DateFormat format = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
@@ -80,7 +84,7 @@ public class FileUpladService {
                     String uploadFilePath = uploadFile.getParent() + File.separator + zipFileName;
                     File zipFile = new File(uploadFilePath);
                     zipFile.deleteOnExit(); //如果存在同名文件，则删除
-
+                    LOGGER.info("压缩文件夹，zipFileName = "+zipFileName);
                     boolean zipResult = ZipUtils.zip(MAP_PATH, uploadFile.getParent(), zipFileName);
                     if (!zipResult) {
                         LOGGER.error("文件夹压缩失败，停止上传");
@@ -92,7 +96,7 @@ public class FileUpladService {
                     LOGGER.info("文件" + uploadFile.getName() + "大于500M，无法上传");
                     return;
                 }
-
+                LOGGER.info("压缩成功，查询文件是否存在，path= " +uploadFile.getAbsolutePath());
                 Map<String, String> params = Maps.newHashMap();
                 params.put("fileName", uploadFile.getName());
                 params.put("type", Constant.FILE_UPLOAD_TYPE_MAP);
@@ -110,20 +114,31 @@ public class FileUpladService {
                         otherInfo.put("robotPath", MAP_PATH);
                         otherInfo.put("sceneName", getSceneName());
                         otherInfo.put("deviceId", deviceId);
+                        LOGGER.info("开始上传，path= " +uploadFile.getAbsolutePath());
                         String uri = REMOTE_URL + UPLOAD_URL + "?fileName=" + uploadFile.getName() + "&type=" + Constant.FILE_UPLOAD_TYPE_MAP;
                         String result = HttpClientUtil.executeUploadFile(null, uri, uploadFile.getPath(), jumpSize, null, true, JSON.toJSONString(otherInfo));
                         AjaxResponse resp = JSON.parseObject(result, AjaxResponse.class);
+                        LOGGER.info("上传状态 status = " + resp.getStatus());
                         if (resp.getStatus() == AjaxResponse.RESPONSE_STATUS_SUCCESS) {
                             //上传成功
                             uploadFile.delete();
+                            LOGGER.info("上传成功，删除文件，发送topic");
                             sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传成功");
+                        }else{
+                            LOGGER.info("上传失败，发送topic");
+                            sendTopic(MAP_UPLOAD_FAIL, uuid, "地图上传失败");
                         }
                     } else {
                         //假提示上传成功 同时删除本地文件
                         uploadFile.delete();
                     }
+                }else {
+                    sendTopic(MAP_UPLOAD_FAIL, uuid, "地图上传失败");
                 }
-            } catch (SocketTimeoutException e) {
+            } catch (HttpHostConnectException e) {
+                sendTopic(MAP_UPLOAD_FAIL, uuid, "未连上服务器");
+                LOGGER.error("socket超时", e);
+            }catch (SocketTimeoutException e) {
                 sendTopic(MAP_UPLOAD_FAIL, uuid, "socket超时");
                 LOGGER.error("socket超时", e);
             } catch (ClientProtocolException e) {
@@ -138,14 +153,14 @@ public class FileUpladService {
         }
     }
 
-    private void sendTopic(String errorCode, String uuid, String message) {
+    public void sendTopic(String errorCode, String uuid, String message) {
         //封装数据，通知Artmis地图上传成功
         SlamBody slamBody = new SlamBody();
         slamBody.setErrorCode(errorCode);
         slamBody.setPubName(TopicConstants.AGENT_LOCAL_MAP_UPLOAD);
         slamBody.setUuid(uuid);
         slamBody.setMsg(message);
-        appSubService.sendAppPubTopic(TopicConstants.TOPIC_TYPE_STRING, slamBody);
+        appSubService.sendTopic(TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING, slamBody);
     }
 
     private String getSceneName() {

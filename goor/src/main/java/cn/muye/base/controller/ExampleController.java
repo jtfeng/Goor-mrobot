@@ -3,7 +3,9 @@ package cn.muye.base.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.slam.SlamBody;
 import cn.muye.base.service.FileUpladService;
+import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -22,15 +24,18 @@ public class ExampleController {
     @Autowired
     private Ros ros;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Autowired
-	private FileUpladService fileUpladService;
+    @Autowired
+    private FileUpladService fileUpladService;
 
-    @RequestMapping(value = "test1", method= RequestMethod.POST)
+    @Autowired
+    private AppSubService appSubService;
+
+    @RequestMapping(value = "test1", method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult test1(@RequestParam("aa")String aa) {
+    public AjaxResult test1(@RequestParam("aa") String aa) {
 //        logger.info("sssssssssssssssssss======" + messageSendService);
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName("/enva_test");
@@ -53,9 +58,9 @@ public class ExampleController {
         return AjaxResult.success();
     }
 
-    @RequestMapping(value = "test2", method= RequestMethod.POST)
+    @RequestMapping(value = "test2", method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult test2(@RequestParam("aa")String aa) {
+    public AjaxResult test2(@RequestParam("aa") String aa) {
 //        logger.info("sssssssssssssssssss======" + messageSendService);
 //        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
 //        byte[] b = text.getBytes();
@@ -65,9 +70,9 @@ public class ExampleController {
         return AjaxResult.success();
     }
 
-    @RequestMapping(value = "test3", method= RequestMethod.POST)
+    @RequestMapping(value = "test3", method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult test3(@RequestParam("aa")String aa) {
+    public AjaxResult test3(@RequestParam("aa") String aa) {
 //        logger.info("sssssssssssssssssss======" + messageSendService);
 //        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
 //        byte[] b = text.getBytes();
@@ -77,14 +82,15 @@ public class ExampleController {
     }
 
 
-	/**
-	 * 模拟发送导航的topic
-	 * @param aa
-	 * @return
-	 */
-	@RequestMapping(value = "test4", method= RequestMethod.POST)
-	@ResponseBody
-	public AjaxResult test4(@RequestParam("aa")String aa) {
+    /**
+     * 模拟发送导航的topic
+     *
+     * @param aa
+     * @return
+     */
+    @RequestMapping(value = "test4", method = RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult test4(@RequestParam("aa") String aa) {
 //		logPublishService.publishMessage();
 
 //        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
@@ -110,12 +116,12 @@ public class ExampleController {
 //        Message toSend = new Message("{\"data\":{\"pub_name\": \"station_list_get\",\"data\": {\"robot_code\": \"cookyPlus1301chay\"} } }");
 //        Message toSend = new Message("{\"data\": \"hello, world,appSub!"+ new Date()+aa +"\"}");
         echo.publish(toSend);
-		return AjaxResult.success();
-	}
+        return AjaxResult.success();
+    }
 
-    @RequestMapping(value = "test5", method= RequestMethod.POST)
+    @RequestMapping(value = "test5", method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult test5(@RequestParam("aa")String aa) {
+    public AjaxResult test5(@RequestParam("aa") String aa) {
 //        logger.info("sssssssssssssssssss======" + messageSendService);
 //        String text = JSON.toJSONString(new MessageInfo(MessageType.REPLY, null, null));
 //        byte[] b = text.getBytes();
@@ -133,20 +139,17 @@ public class ExampleController {
      */
     @RequestMapping(value = "area/map/upload", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult mapUpload() throws Exception {
+    public AjaxResult mapUpload(@RequestParam("uuid") String uuid) throws Exception {
         try {
-            Topic echo = new Topic(ros, TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING);
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.AGENT_LOCAL_MAP_UPLOAD);
-            JSONObject messageObject = new JSONObject();
-            messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
-            Message toSend = new Message(JSON.toJSONString(messageObject));
-            echo.publish(toSend);
+            jsonObject.put(TopicConstants.UUID, uuid);
+            logger.info("发送地图上传topic");
+            appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
             return AjaxResult.success();
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed();
         }
     }
-
 }

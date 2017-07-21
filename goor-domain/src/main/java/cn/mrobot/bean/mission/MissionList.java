@@ -22,6 +22,8 @@ public class MissionList extends BaseBean{
 
 	private Long id;
 
+	private Long sceneId;//关联场景ID
+
 	private String name;  //总任务名称
 
 	private String description;
@@ -58,6 +60,7 @@ public class MissionList extends BaseBean{
 		private int repeatCount;
 		private Long startTime;
 		private Long stopTime;
+		private Long sceneId;
 		private Integer priority;//优先级
 		private String missionListType;
 		private List<Mission> missionList;
@@ -117,6 +120,11 @@ public class MissionList extends BaseBean{
 			return this;
 		}
 
+		public Builder sceneId(Long sceneId) {
+			this.sceneId = sceneId;
+			return this;
+		}
+
 		public MissionList build() {
 			return new MissionList(this);
 		}
@@ -137,13 +145,15 @@ public class MissionList extends BaseBean{
 		priority = builder.priority;
 		missionList = builder.missionList;
 		missionListType = builder.missionListType;
+		sceneId = builder.sceneId;
 	}
 
 	public MissionListDTO toDTO() {
 		MissionListDTO missionListDTO = new MissionListDTO();
 		missionListDTO.setId(this.getId());
 		missionListDTO.setIntervalTime(this.getIntervalTime());
-		missionListDTO.setMissionListType(this.getMissionListType());
+		//从我们的类型转换成任务管理器可识别的类型
+		missionListDTO.setMissionListType(MissionListTypeEnum.getDtoCaption(this.getMissionListType()));
 		missionListDTO.setPriority(this.getPriority());
 		missionListDTO.setRepeatCount(this.getRepeatCount());
 		missionListDTO.setStartTime(this.getStartTime());
@@ -247,4 +257,11 @@ public class MissionList extends BaseBean{
 		this.missionListType = missionListType;
 	}
 
+	public Long getSceneId() {
+		return sceneId;
+	}
+
+	public void setSceneId(Long sceneId) {
+		this.sceneId = sceneId;
+	}
 }

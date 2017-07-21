@@ -1,10 +1,12 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.log.mission.JsonLogMission;
 import cn.mrobot.bean.log.mission.LogMission;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.mission.service.LogMissionService;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
@@ -65,7 +67,18 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                         default:
                             break;
                 }
-                // TODO: 17-7-17 继续从缓存里面取电量等缓存值，放入日志
+                // 17-7-17 继续从缓存里面取电量等缓存值，放入日志
+                MessageInfo currentPosInfo = CacheInfoManager.getMessageCache(baseMessageService.getSenderId(messageInfo));
+                ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(baseMessageService.getSenderId(messageInfo));
+                if (currentPosInfo != null &&
+                        !StringUtil.isNullOrEmpty(currentPosInfo.getMessageText())){
+                    logMission.setRos(currentPosInfo.getMessageText());
+                }
+                if (chargeInfo != null){
+                    logMission.setChargingStatus(chargeInfo.getChargingStatus());
+                    logMission.setPluginStatus(chargeInfo.getPluginStatus());
+                    logMission.setPowerPercent(chargeInfo.getPowerPercent());
+                }
 
                 //保存日志
                 logMissionService.save(logMission);

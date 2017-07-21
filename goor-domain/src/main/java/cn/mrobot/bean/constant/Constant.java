@@ -58,7 +58,7 @@ public class Constant {
     //与地图点相关的指令列表
     public final static List<Long> ORDER_MAP_POINT_RELATE_LIST = Arrays.asList(
             1L,//单点导航
-            4L//
+            4L//自动充电
     );
 
     public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
@@ -68,4 +68,6 @@ public class Constant {
 
     //Session 中存储的场景（Scene 场景常量标识）
     public static final String SCENE_SESSION_TAG = "scene_session_information";
+
+    public static final String SESSION_STATION_ID = "stationId";
 }

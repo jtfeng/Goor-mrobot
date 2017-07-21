@@ -112,7 +112,7 @@ public class ScheduledHandle {
                     logger.error("schedule rosHealthCheckScheduled exception", e);
                 }
             }
-        }, 115, 10, TimeUnit.SECONDS);
+        }, 20, 10, TimeUnit.SECONDS);
     }
 
     /**

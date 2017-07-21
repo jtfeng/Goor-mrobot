@@ -1,6 +1,7 @@
 package cn.muye.dispatch.mapper;
 
 import cn.mrobot.bean.mission.MissionListMissionXREF;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -22,4 +23,7 @@ public interface MissionListMissionXREFMapper {
 	void deleteByListId(long missionListId);
 
 	List<MissionListMissionXREF> findByListId(long missionListId);
+
+	List<MissionListMissionXREF> findByListId(@Param("missionListId")long missionListId,
+											  @Param("storeId")Long storeId);
 }
