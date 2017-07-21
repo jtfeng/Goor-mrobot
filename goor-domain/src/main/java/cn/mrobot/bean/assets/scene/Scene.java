@@ -6,7 +6,6 @@ import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -17,6 +16,13 @@ public class Scene extends BaseBean{
     private String name;
     private String aliasName;
     private String intro;
+
+    public Scene() {
+    }
+
+    public Scene(Long id) {
+        super(id);
+    }
 
     @Transient
     private List<MapInfo> mapInfos;
