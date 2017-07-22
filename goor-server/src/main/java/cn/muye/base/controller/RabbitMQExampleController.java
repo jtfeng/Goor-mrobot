@@ -75,6 +75,7 @@ public class RabbitMQExampleController {
             log.info("start time"+ startTime);
             for (int i=0; i<500; i++) {
                 Thread.sleep(1000);
+                //获取ROS的回执消息
                 MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(messageInfo.getUuId());
                 if(messageInfo1.isSuccess()){
                     messageInfo.setSuccess(true);
