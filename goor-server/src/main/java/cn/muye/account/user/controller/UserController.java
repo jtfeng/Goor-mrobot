@@ -15,6 +15,7 @@ import cn.mrobot.bean.mission.MissionTypeEnum;
 import cn.mrobot.dto.account.RoleDTO;
 import cn.mrobot.dto.account.UserDTO;
 import cn.mrobot.dto.area.station.StationDTO4User;
+import cn.mrobot.dto.auth.UserAuth;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.user.service.UserRoleXrefService;
@@ -22,6 +23,7 @@ import cn.muye.account.user.service.UserService;
 import cn.muye.account.user.service.impl.UserServiceImpl;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -312,13 +314,13 @@ public class UserController {
      * @param request
      * @return
      */
-    @RequestMapping(value = {"account/user/logOut"}, method = RequestMethod.POST)
-    @ResponseBody
-    public AjaxResult logOut(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        session.removeAttribute("access_token");
-        return AjaxResult.success("注销成功");
-    }
+//    @RequestMapping(value = {"account/user/logOut"}, method = RequestMethod.POST)
+//    @ResponseBody
+//    public AjaxResult logOut(HttpServletRequest request) {
+//        HttpSession session = request.getSession();
+//        session.removeAttribute("access_token");
+//        return AjaxResult.success("注销成功");
+//    }
 
 
     /**
@@ -330,13 +332,14 @@ public class UserController {
      */
     private Map<String, Object> doLogin(String userName, String password, HttpSession session) {
         //调auth_server的token接口
-        User user = null;
+        User user;
         Map map = new HashMap();
         try {
             String accessToken = doAuthorize(userName, password);
             //判断token不等于null，说明已经登录
             if (!StringUtil.isNullOrEmpty(accessToken)) {
-                session.setAttribute("access_token", accessToken);
+                session.setAttribute("access_token", JSON.toJSONString(new UserAuth(accessToken)));
+//                CacheInfoManager.setUserAccessTokenCache(userName, accessToken);
                 //查询用户的
                 List<User> list = userService.getUser(userName, password);
                 if (list != null) {

@@ -5,12 +5,12 @@ import java.io.IOException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.dto.auth.UserAuth;
 import cn.mrobot.utils.StringUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import com.alibaba.fastjson.JSON;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class avoid to throw full stack trace to client.
@@ -24,7 +24,7 @@ public class AuthValidationExceptionFilter implements Filter {
     private String[] excludedPageArray;
     private String excludedPages;
 
-    protected static final Log LOGGER = LogFactory.getLog(AuthValidationExceptionFilter.class);
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AuthValidationExceptionFilter.class);
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
@@ -39,15 +39,23 @@ public class AuthValidationExceptionFilter implements Filter {
             HttpServletRequest httpServletRequest = (HttpServletRequest) req;
             HttpServletResponse response = (HttpServletResponse) res;
             try {
-                HttpSession session = httpServletRequest.getSession();
                 String accessTokenFromReq = httpServletRequest.getParameter("access_token");
-                String accessToken = (String) session.getAttribute("access_token");
-                if (accessToken != null) {
-                    if (!accessToken.equals(accessTokenFromReq)) { //说明已登录但请求的access_token有误，无权限
-                        response.setStatus(Constant.ERROR_CODE_NOT_AUTHORIZED);
-                        response.sendError(Constant.ERROR_CODE_NOT_AUTHORIZED, "您无权限");
-                    } else if (accessToken.equals(accessTokenFromReq)) {
-                        chain.doFilter(req, res);
+//                Object principalObject = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//                String accessToken = CacheInfoManager.getUserAccessTokenCache(principalObject.toString());
+                String accessTokenStr = (String)httpServletRequest.getSession().getAttribute("access_token");
+                UserAuth userAuth = JSON.parseObject(accessTokenStr, UserAuth.class);
+                if (userAuth != null) {
+                    String accessToken = userAuth.getAccessToken();
+                    if (!StringUtil.isNullOrEmpty(accessToken)) {
+                        if (!accessToken.equals(accessTokenFromReq)) { //说明已登录但请求的access_token有误，无权限
+                            response.setStatus(Constant.ERROR_CODE_NOT_AUTHORIZED);
+                            response.sendError(Constant.ERROR_CODE_NOT_AUTHORIZED, "您无权限");
+                        } else if (accessToken.equals(accessTokenFromReq)) {
+                            chain.doFilter(req, res);
+                        }
+                    } else {
+                        response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
+                        response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
                     }
                 } else {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
