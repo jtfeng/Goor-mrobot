@@ -71,7 +71,7 @@ public class SceneController {
             sceneService.saveScene(scene);
             return AjaxResult.success(scene, "新增场景信息成功!");
         }catch (Exception e){
-            return AjaxResult.failed(e,      "新增场景信息失败");
+            return AjaxResult.failed(e.getMessage(),      "新增场景信息失败");
         }
     }
 
@@ -87,7 +87,7 @@ public class SceneController {
             sceneService.updateScene(scene);
             return AjaxResult.success(scene,"修改场景信息成功！");
         }catch (Exception e){
-            return AjaxResult.failed(e,     "修改场景信息失败！");
+            return AjaxResult.failed(e.getMessage(),     "修改场景信息失败！");
         }
     }
 

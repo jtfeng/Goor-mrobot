@@ -15,7 +15,7 @@ public interface SceneMapper extends MyMapper<Scene> {
 
     List<Robot> findRobotBySceneId(Long sceneId);
 
-    List<MapInfo> findMapBySceneId(Long sceneId);
+    List<MapInfo> findMapBySceneId(Long sceneId, Long storeId);
 
     void deleteRobotAndSceneRelations(Long sceneId);
 
@@ -29,5 +29,7 @@ public interface SceneMapper extends MyMapper<Scene> {
 
     int checkMapLegal(String mapSceneName, Long storeId);
 
-    void setSceneNeedToBeUpdatedState(String sceneName, Long storeId);
+    void setSceneState(String sceneName, Long storeId, Integer state);
+
+    List<MapInfo> findMapBySceneName(String SceneName, Long storeId);
 }
