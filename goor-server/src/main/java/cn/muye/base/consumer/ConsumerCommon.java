@@ -170,6 +170,7 @@ public class ConsumerCommon {
                     chargeInfo.setDeviceId(deviceId);
                     chargeInfo.setCreateTime(messageInfo.getSendTime());
                     chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    chargeInfo.setAutoCharging(CacheInfoManager.getAutoChargeCache(deviceId).getPluginStatus());
                     CacheInfoManager.setRobotChargeInfoCache(deviceId, chargeInfo);
                     chargeInfoService.save(chargeInfo);
                 }

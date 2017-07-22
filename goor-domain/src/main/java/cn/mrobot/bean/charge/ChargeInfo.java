@@ -14,7 +14,7 @@ import javax.persistence.Table;
  * Describe: 充电状态实体
  * Version:1.0
  */
-@Table(name = "CHARGE_INFO")
+@Table(name = "LOG_CHARGE_INFO")
 public class ChargeInfo extends BaseBean{
 
 	@JSONField(name = "device_id")
@@ -28,6 +28,8 @@ public class ChargeInfo extends BaseBean{
 
 	@JSONField(name = "power_percent")
 	private int powerPercent;  //电量  范围  0-100
+
+	private int autoCharging; //自动回充  1 打开   0:未打开
 
 	public String getDeviceId() {
 		return deviceId;
@@ -61,4 +63,11 @@ public class ChargeInfo extends BaseBean{
 		this.powerPercent = powerPercent;
 	}
 
+	public int getAutoCharging() {
+		return autoCharging;
+	}
+
+	public void setAutoCharging(int autoCharging) {
+		this.autoCharging = autoCharging;
+	}
 }
