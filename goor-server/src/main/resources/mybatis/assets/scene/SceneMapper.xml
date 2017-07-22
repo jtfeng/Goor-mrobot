@@ -3,25 +3,51 @@
 <mapper namespace="cn.muye.assets.scene.mapper.SceneMapper">
 
     <resultMap id="RobotSimpleMap" type="cn.mrobot.bean.assets.robot.Robot">
-        <id column="robot_type_id" property="id" jdbcType="BIGINT"/>
-        <result column="robot_name" property="name" jdbcType="VARCHAR"/>
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="typeId" column="TYPE_ID"/>
+        <result property="batteryThreshold" column="BATTERY_THRESHOLD"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="boxActivated" column="BOX_ACTIVATED"/>
+        <result property="isOnline" column="IS_ONLINE"/>
+        <result property="sceneId" column="SCENE_ID"/>
+        <result property="sceneName" column="SCENE_NAME"/>
     </resultMap>
     <resultMap id="MapInfoSimpleMap" type="cn.mrobot.bean.area.map.MapInfo">
-        <id column="map_type_id" property="id" jdbcType="BIGINT"/>
-        <result column="map_scenename" property="sceneName" jdbcType="VARCHAR"/>
-        <result column="map_zipid" property="mapZipId" jdbcType="BIGINT"/>
+        <id column="ID" property="id" jdbcType="BIGINT"/>
+        <result column="MAP_NAME" property="mapName" jdbcType="VARCHAR"/>
+        <result column="SCENE_NAME" property="sceneName" jdbcType="BIGINT"/>
+        <result column="MAP_ALIAS" property="mapAlias" jdbcType="VARCHAR"/>
+        <result column="PNG_IMAGE_LOCA" property="pngImageLocalPath" jdbcType="BIGINT"/>
+        <result column="ROS" property="ros" jdbcType="VARCHAR"/>
+        <result column="DEVICE_ID" property="deviceId" jdbcType="BIGINT"/>
+        <result column="PNG_DESIGNED" property="pngDesigned" jdbcType="VARCHAR"/>
+        <result column="MAP_ZIP_ID" property="mapZipId" jdbcType="BIGINT"/>
     </resultMap>
 
     <select id="findRobotBySceneId" resultMap="RobotSimpleMap" parameterType="java.lang.Long">
-        SELECT r.ROBOT_ID AS robot_type_id , b.NAME as robot_name
-        FROM AS_ROBOT b LEFT JOIN SCENES_ROBOTS_RELATIONS r ON b.ID = r.ROBOT_ID
+        SELECT
+            robot.ID,
+            robot.NAME,
+            robot.CODE,
+            ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
+            robot.BOX_ACTIVATED,
+            robot.IS_ONLINE
+        FROM AS_ROBOT robot LEFT JOIN SCENES_ROBOTS_RELATIONS r ON robot.ID = r.ROBOT_ID
         WHERE r.SCENE_ID = #{0}
     </select>
 
     <select id="findMapBySceneId" resultMap="MapInfoSimpleMap" parameterType="java.lang.Long">
-        SELECT i.ID AS map_type_id, i.SCENE_NAME as map_scenename, i.MAP_ZIP_ID as map_zipid
+        SELECT i.*
         FROM A_MAP_INFO i LEFT JOIN SCENES_MAPS_RELATIONS smr ON i.SCENE_NAME = smr.MAP_SCENENAME
-        WHERE smr.SCENE_ID = #{0}
+        WHERE smr.SCENE_ID = #{param1} AND i.STORE_ID = #{param2}
+    </select>
+
+    <select id="findMapBySceneName" resultMap="MapInfoSimpleMap">
+        SELECT i.*
+        FROM A_MAP_INFO i
+        WHERE i.SCENE_NAME = #{param1} AND i.STORE_ID = #{param2}
     </select>
 
     <delete id="deleteRobotAndSceneRelations" parameterType="java.lang.Long">
@@ -66,8 +92,8 @@
         </foreach>
     </insert>
 
-    <update id="setSceneNeedToBeUpdatedState">
-        UPDATE AS_SCENE SET STATE = 3 WHERE ID = (SELECT SCENE_ID FROM SCENES_MAPS_RELATIONS WHERE MAP_SCENENAME = #{param1}) AND STORE_ID = #{param2}
+    <update id="setSceneState">
+        UPDATE AS_SCENE SET STATE = #{param3} WHERE ID = (SELECT SCENE_ID FROM SCENES_MAPS_RELATIONS WHERE MAP_SCENENAME = #{param1}) AND STORE_ID = #{param2}
     </update>
 
 </mapper>
