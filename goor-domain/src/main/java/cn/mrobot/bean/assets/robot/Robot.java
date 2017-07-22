@@ -41,6 +41,9 @@ public class Robot extends BaseBean {
     private String sceneName; //场景名
 
     @Transient
+    private Long sceneId; //场景ID
+
+    @Transient
     private List<RobotPassword> passwords;
 
     @Transient
@@ -157,5 +160,13 @@ public class Robot extends BaseBean {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
     }
 }

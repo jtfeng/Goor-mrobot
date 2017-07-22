@@ -11,22 +11,41 @@
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
         <result property="isOnline" column="IS_ONLINE"/>
+        <result property="sceneId" column="SCENE_ID"/>
+        <result property="sceneName" column="SCENE_NAME"/>
     </resultMap>
 
-    <select id="listRobot" resultMap="robotResult">
+    <select id="listRobot" resultMap="robotResult" parameterType="java.util.Map">
         SELECT
             robot.ID,
-            robot.NAME as NAME,
+            robot.NAME,
             robot.CODE,
             type.ID as TYPE_ID,
-          config.BATTERY_THRESHOLD,
+            config.BATTERY_THRESHOLD,
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
-            robot.IS_ONLINE
+            robot.IS_ONLINE,
+            scene.ID as SCENE_ID,
+            scene.NAME as SCENE_NAME
         FROM
             AS_ROBOT robot
         LEFT JOIN AS_ROBOT_TYPE type ON robot.TYPE_ID = type.ID
         LEFT JOIN AS_ROBOT_CONFIG config ON robot.ID = config.ROBOT_ID
+        LEFT JOIN SCENES_ROBOTS_RELATIONS relation ON relation.ROBOT_ID = robot.ID
+        LEFT JOIN AS_SCENE scene ON scene.ID = relation.SCENE_ID
+        WHERE 1=1
+        <if test="name != null">
+            AND robot.NAME like CONCAT('%',#{name},'%')
+        </if>
+        <if test="type != null">
+            AND type.ID = #{type}
+        </if>
+        <if test="sceneId != null">
+            AND scene.ID = #{sceneId}
+        </if>
+        <if test="sceneName != null">
+            AND scene.NAME like CONCAT('%',#{sceneName},'%')
+        </if>
         ORDER BY ID DESC
     </select>
 
