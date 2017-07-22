@@ -3,7 +3,7 @@ package cn.muye.base.cache;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
-//import cn.mrobot.bean.state.*;
+import cn.mrobot.bean.state.*;
 import cn.mrobot.utils.FileUtils;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.MessageInfo;
@@ -44,9 +44,8 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, Session> webSocketSessionCache = new ConcurrentHashMapCache<String, Session>();
 
 
-
 //    //状态机缓存
-//    private static ConcurrentHashMapCache<String, StateCollectorAutoCharge> autoChargeCache = new ConcurrentHashMapCache<>();//自动回充状态
+    private static ConcurrentHashMapCache<String, StateCollectorAutoCharge> autoChargeCache = new ConcurrentHashMapCache<>();//自动回充状态
 //    private static ConcurrentHashMapCache<String, StateCollectorBaseDriver> leftBaseDriverCache = new ConcurrentHashMapCache<>();//左驱状态
 //    private static ConcurrentHashMapCache<String, StateCollectorBaseDriver> rightBaseDriverCache = new ConcurrentHashMapCache<>();//右驱状态
 //    private static ConcurrentHashMapCache<String, StateCollectorBaseMicroSwitchAndAntiDropping> baseMicroSwitchAndAntiCache = new ConcurrentHashMapCache<>();//微动开关与防跌落状态
@@ -66,7 +65,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         webSocketSessionCache.setMaxLifeTime(0);
 
         //状态机缓存
-//        autoChargeCache.setMaxLifeTime(5 * 1000);
+        autoChargeCache.setMaxLifeTime(5 * 1000);
 //        leftBaseDriverCache.setMaxLifeTime(5 * 1000);
 //        rightBaseDriverCache.setMaxLifeTime(5 * 1000);
 //        baseMicroSwitchAndAntiCache.setMaxLifeTime(5 * 1000);
@@ -169,13 +168,13 @@ public class CacheInfoManager implements ApplicationContextAware {
         webSocketSessionCache.remove(userName);
     }
     //自动回充缓存
-//    public static void setAutoChargeCache(String deviceId, StateCollectorAutoCharge stateCollectorAutoCharge){
-//        autoChargeCache.put(deviceId, stateCollectorAutoCharge);
-//    }
-//
-//    public static StateCollectorAutoCharge getAutoChargeCache(String deviceId){
-//        return autoChargeCache.get(deviceId);
-//    }
+    public static void setAutoChargeCache(String deviceId, StateCollectorAutoCharge stateCollectorAutoCharge){
+        autoChargeCache.put(deviceId, stateCollectorAutoCharge);
+    }
+
+    public static StateCollectorAutoCharge getAutoChargeCache(String deviceId){
+        return autoChargeCache.get(deviceId);
+    }
 //
 //    //左驱状态缓存
 //    public static void setLeftBaseDriverCache(String deviceId, StateCollectorBaseDriver stateCollectorBaseDriver){
