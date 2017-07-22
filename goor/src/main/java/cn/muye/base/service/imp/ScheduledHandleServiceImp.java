@@ -63,10 +63,12 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 MessageInfo info = new MessageInfo(message);
                 info.setSenderId(localRobotSN);
                 info.setMessageType(MessageType.REPLY);
-                rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_REPORT, info);
-                message.setSuccess(true);
-                message.setSendCount(message.getSendCount() + 1);
-                receiveMessageService.update(message);
+                AjaxResult ajaxResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE, info);
+                if(ajaxResult.isSuccess()){
+                    message.setSuccess(true);
+                    message.setSendCount(message.getSendCount() + 1);
+                    receiveMessageService.update(message);
+                }
             }
         } catch (final Exception e) {
             logger.error("Scheduled receiveMessage exception", e);

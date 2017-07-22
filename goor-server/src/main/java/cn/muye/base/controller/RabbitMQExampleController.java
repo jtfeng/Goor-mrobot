@@ -8,6 +8,8 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.*;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
+import cn.muye.base.service.MessageSendHandleService;
+import cn.muye.base.service.imp.BlockingCell;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +45,55 @@ public class RabbitMQExampleController {
     @Autowired
     private OffLineMessageService offLineMessageService;
 
+    @Autowired
+    private MessageSendHandleService messageSendHandleService;
+
 //    @Autowired
 //    private SimpMessagingTemplate messagingTemplate;
+
+
+    /**
+     * 调用统一发送消息例子
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "testSendMessage",method = RequestMethod.POST)
+    @ResponseBody
+    private AjaxResult testSendMessage(HttpServletRequest request){
+        try {
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            messageInfo.setReceiverId("enva_test0101");
+            messageInfo.setSenderId("goor-server");
+            messageInfo.setMessageType(MessageType.EXECUTOR_COMMAND);
+            messageInfo.setMessageText("sssssssssssss");
+            AjaxResult result = messageSendHandleService.sendCommandMessage(true,true,"enva_test0101",messageInfo);
+            if(!result.isSuccess()){
+                return AjaxResult.failed();
+            }
+            long startTime = System.currentTimeMillis();
+            log.info("start time"+ startTime);
+            for (int i=0; i<500; i++) {
+                Thread.sleep(1000);
+                MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(messageInfo.getUuId());
+                if(messageInfo1.isSuccess()){
+                    messageInfo.setSuccess(true);
+                    break;
+                }
+            }
+            long endTime = System.currentTimeMillis();
+            log.info("end time"+ (endTime - startTime));
+            if (messageInfo.isSuccess()) {
+                return AjaxResult.success();
+            }else{
+                return AjaxResult.failed();
+            }
+        } catch (Exception e) {
+            log.error("发送错误", e);
+            return AjaxResult.failed("系统内部错误");
+        }
+    }
+
 
     /**
      * 调用rabbitMQ发送消息demo

@@ -4,6 +4,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.service.imp.BlockingCell;
 import cn.muye.service.consumer.topic.X86MissionEventService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -77,7 +78,7 @@ public class MissionConsumer {
     @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_RECEIVE)
     public void directX86MissionReceive(@Payload MessageInfo messageInfo) {
         try {
-            if(null != messageInfo){
+            if(null == messageInfo){
                 return;
             }
             JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
