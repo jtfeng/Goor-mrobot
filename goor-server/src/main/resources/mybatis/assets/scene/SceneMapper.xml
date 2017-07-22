@@ -47,7 +47,7 @@
     </select>
 
     <select id="checkMapLegal" resultType="java.lang.Integer">
-        SELECT count(*) FROM A_MAP_INFO WHERE SCENE_NAME = #{0} AND STORE_ID = #{1}
+        SELECT count(*) FROM A_MAP_INFO WHERE SCENE_NAME = #{param1} AND STORE_ID = #{param2}
     </select>
 
     <insert id="insertSceneAndMapRelations">

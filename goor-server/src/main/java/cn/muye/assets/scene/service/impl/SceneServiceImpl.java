@@ -140,8 +140,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             String sceneName = Preconditions.checkNotNull(scene.getName());
             String mapSceneName = Preconditions.checkNotNull(scene.getMapSceneName());
             this.deleteMapAndSceneRelations(sceneId);
-            if (this.sceneMapper.checkMapLegal(mapSceneName, scene.getStoreId()) > 0
-                    && this.sceneMapper.checkMapInfo(mapSceneName, scene.getStoreId()) == 0) {
+            //&& this.sceneMapper.checkMapInfo(mapSceneName, scene.getStoreId()) == 0
+            if (this.sceneMapper.checkMapLegal(mapSceneName, scene.getStoreId()) > 0) {
                 //保证场景名城合法且没有绑定云端场景
                 this.insertSceneAndMapRelations(scene.getId(), mapSceneName);
             } else {
