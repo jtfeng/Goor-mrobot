@@ -70,11 +70,6 @@ public class RobotController {
     @ResponseBody
     public AjaxResult robotList(WhereRequest whereRequest) {
         List<Robot> list = robotService.listRobot(whereRequest);
-//        if (list != null && list.size() > 0) {
-//            for (Robot robot : list) {
-//                robot.setSceneName();
-//            }
-//        }
         PageInfo<Robot> pageList = new PageInfo<>(list);
         return AjaxResult.success(pageList, "查询成功");
     }

@@ -12,6 +12,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationRobotXREFService;
+import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -24,17 +25,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.io.*;
-import java.util.Date;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Ray.Fu on 2017/6/12.
@@ -61,8 +59,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Autowired
     private PointService pointService;
 
+    @Autowired
+    private RobotMapper robotMapper;
+
     /**
      * 更新机器人
+     *
      * @param robot
      */
     public void updateRobot(Robot robot) {
@@ -78,6 +80,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     /**
      * 由站点ID查询可用的机器人
+     *
      * @param stationId
      * @return
      */
@@ -95,7 +98,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
             }
         }
-        if(availableRobot != null){
+        if (availableRobot != null) {
             availableRobot.setBusy(true);
             updateRobot(availableRobot);
         }
@@ -119,9 +122,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     /**
      * 由机器人编号获取绑定的充电桩List
-     * @author Ray.Fu
+     *
      * @param robotCode
      * @return
+     * @author Ray.Fu
      */
     @Override
     public List<MapPoint> getChargerMapPointByRobotCode(String robotCode, Long storeId) {
@@ -145,33 +149,25 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return null;
     }
 
-    private List<Robot> listPageByStoreIdAndOrder(int page, int pageSize, String name, Integer type, Class<Robot> clazz, String order) {
+    private List<Robot> listPageByStoreIdAndOrder(int page, int pageSize, Map map) {
         PageHelper.startPage(page, pageSize);
-        Example example = new Example(clazz);
-        Example.Criteria criteria = example.createCriteria();
-        criteria = criteria.andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if (name != null) {
-            criteria.andCondition("NAME like", "%" + name + "%");
-        }
-        if (type != null) {
-            criteria.andCondition("TYPE_ID =", type);
-        }
-        if (!StringUtil.isNullOrEmpty(order)) {
-            example.setOrderByClause(order);
-        }
-        return myMapper.selectByExample(example);
+        return robotMapper.listRobot(map);
     }
 
     public List<Robot> listRobot(WhereRequest whereRequest) {
-        List<Robot> list = null;
-        if (whereRequest != null && !StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
+        Map map = Maps.newHashMap();
+        if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
             JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
             String name = (String) jsonObject.get(SearchConstants.SEARCH_NAME);
+            String sceneId = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_ID);
+            String sceneName = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
             int type = Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE));
-            list = listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), name, type, Robot.class, "ID DESC");
-        } else {
-            list = super.listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), Robot.class, "ID DESC");
+            map.put("name", name);
+            map.put("sceneId", sceneId);
+            map.put("sceneName", sceneName);
+            map.put("type", type);
         }
+        List<Robot> list = listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), map);
         list.forEach(robot -> {
             robot.setBatteryThreshold(robotConfigService.getByRobotId(robot.getId()).getBatteryThreshold());
             robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
@@ -263,6 +259,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     /**
      * 往ros上透传机器人配置信息（电量阈值，。。。）
+     *
      * @param robotNew
      */
     private void syncRosRobotConfig(Robot robotNew) {
