@@ -169,9 +169,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         List<Robot> list = listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), map);
         list.forEach(robot -> {
-            robot.setBatteryThreshold(robotConfigService.getByRobotId(robot.getId()).getBatteryThreshold());
-            robot.setPasswords(robotPasswordService.listRobotPassword(robot.getId()));
-            List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robot.getId());
+            Long robotId = robot.getId();
+            RobotConfig robotConfigDb = robotConfigService.getByRobotId(robotId);
+            robot.setBatteryThreshold(robotConfigDb != null ? robotConfigDb.getBatteryThreshold() : null);
+            List<RobotPassword> robotPasswordList = robotPasswordService.listRobotPassword(robotId);
+            robot.setPasswords(robotPasswordList);
+            List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
             List<MapPoint> mapPointList = Lists.newArrayList();
             xrefList.forEach(xref -> {
                 MapPoint mapPoint = pointService.findById(xref.getChargerMapPointId());
