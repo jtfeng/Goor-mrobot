@@ -412,6 +412,7 @@ public class FilesController {
                         field.set(mapPoint, valueMap.get(field.getName()));
                     }
                 }
+                mapPoint.setCreateTime(new Date());
                 mapPoint.setMapPointTypeId(Integer.parseInt(valueMap.get("type").toString()));
                 mapPoint.setPointAlias(valueMap.get("alias").toString());
                 mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
