@@ -70,6 +70,13 @@ public class MapPoint extends BaseBean {
     private int mapPointTypeId;
 
     /**
+     * 点类型
+     * */
+    @JSONField(name = "ic_point_type")
+    @Column(name = "IC_POINT_TYPE")
+    private String ICPointType;
+
+    /**
      * 云端点类型索引
      * */
     @JSONField(name = "cloud_point_type")
@@ -192,5 +199,13 @@ public class MapPoint extends BaseBean {
 
     public void setCloudMapPointTypeId(int cloudMapPointTypeId) {
         this.cloudMapPointTypeId = cloudMapPointTypeId;
+    }
+
+    public String getICPointType() {
+        return ICPointType;
+    }
+
+    public void setICPointType(String ICPointType) {
+        this.ICPointType = ICPointType;
     }
 }

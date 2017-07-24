@@ -1,6 +1,7 @@
 package cn.muye.area.point.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
@@ -52,8 +53,8 @@ public class PointController {
 			}
 
 			int mapPointTypeId = mapPoint.getMapPointTypeId();
-			if (mapPointTypeId <= 0 ||  MapPointType.getType(mapPointTypeId) == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "点类型有误");
+			if (mapPointTypeId <= 0 ||  IndustrialControlPointType.getType(mapPointTypeId) == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "工控点类型有误");
 			}
 
 			if (mapPoint.getId() != null) {
