@@ -52,11 +52,6 @@ public class PointController {
 				return AjaxResult.failed("已存在相同名称的导航点");
 			}
 
-			int mapPointTypeId = mapPoint.getMapPointTypeId();
-			if (mapPointTypeId <= 0 ||  IndustrialControlPointType.getType(mapPointTypeId) == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "工控点类型有误");
-			}
-
 			if (mapPoint.getId() != null) {
 				MapPoint mapPointDB = pointService.findById(mapPoint.getId());
 				if(null == mapPointDB){
