@@ -38,7 +38,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if (!this.verificationParameter(robotSN, messageInfo, false)) {
             return AjaxResult.failed("parameter error");
         }
-        return this.sendMessage(toDataBase, x86AgentReply, messageInfo, RabbitMqBean.getRoutingKey(robotSN, x86AgentReply, MessageType.EXECUTOR_COMMAND.name()), messageInfo.getUuId());
+        return this.sendMessage(toDataBase, x86AgentReply, messageInfo, RabbitMqBean.getRoutingKey(robotSN, x86AgentReply, MessageType.EXECUTOR_COMMAND.name()), TopicConstants.TOPIC_EXCHANGE);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if (!this.verificationParameter(robotSN, messageInfo, false)) {
             return AjaxResult.failed("parameter error");
         }
-        return this.sendMessage(toDataBase, x86AgentReply, messageInfo, RabbitMqBean.getRoutingKey(robotSN, x86AgentReply, MessageType.EXECUTOR_RESOURCE.name()), messageInfo.getUuId());
+        return this.sendMessage(toDataBase, x86AgentReply, messageInfo, RabbitMqBean.getRoutingKey(robotSN, x86AgentReply, MessageType.EXECUTOR_RESOURCE.name()), TopicConstants.TOPIC_EXCHANGE);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if (!this.verificationParameter(robotSN, messageInfo, false)) {
             return AjaxResult.failed("parameter error");
         }
-        return this.sendMessage(toDataBase, x86AgentReply, messageInfo, RabbitMqBean.getRoutingKey(robotSN, x86AgentReply, MessageType.EXECUTOR_CLIENT.name()), messageInfo.getUuId());
+        return this.sendMessage(toDataBase, x86AgentReply, messageInfo, RabbitMqBean.getRoutingKey(robotSN, x86AgentReply, MessageType.EXECUTOR_CLIENT.name()), TopicConstants.TOPIC_EXCHANGE);
     }
 
     @Override
@@ -62,8 +62,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if (!this.verificationParameter("", messageInfo, true)) {
             return AjaxResult.failed("parameter error");
         }
-        rabbitTemplate.convertAndSend(TopicConstants.FANOUT_COMMAND_EXCHANGE, "", messageInfo);
-        return AjaxResult.success("已发送，等待机器人回复");
+        return this.sendMessage(toDataBase, false, messageInfo, "", TopicConstants.FANOUT_COMMAND_EXCHANGE);
     }
 
     @Override
@@ -71,8 +70,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if (!this.verificationParameter("", messageInfo, true)) {
             return AjaxResult.failed("parameter error");
         }
-        rabbitTemplate.convertAndSend(TopicConstants.FANOUT_RESOURCE_EXCHANGE, "", messageInfo);
-        return AjaxResult.success("已发送，等待机器人回复");
+        return this.sendMessage(toDataBase, false, messageInfo, "", TopicConstants.FANOUT_RESOURCE_EXCHANGE);
     }
 
     @Override
@@ -80,9 +78,9 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if (!this.verificationParameter("", messageInfo, true)) {
             return AjaxResult.failed("parameter error");
         }
-        rabbitTemplate.convertAndSend(TopicConstants.FANOUT_CLIENT_EXCHANGE, "", messageInfo);
-        return AjaxResult.success("已发送，等待机器人回复");
+        return this.sendMessage(toDataBase, false, messageInfo, "", TopicConstants.FANOUT_CLIENT_EXCHANGE);
     }
+
 
     /**
      * send message
@@ -94,16 +92,20 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
      * @return
      * @throws Exception
      */
-    private AjaxResult sendMessage(boolean toDataBase, boolean x86Response, MessageInfo messageInfo, String routingKey, String uuId) throws Exception {
+    private AjaxResult sendMessage(boolean toDataBase, boolean x86Response, MessageInfo messageInfo, String routingKey, String exchange) throws Exception {
         if (toDataBase) {
             messageInfo.setSenderId("cloud");
             messageInfo.setSuccess(false);
             this.saveSendRecord(messageInfo);
         }
+        if(StringUtils.isEmpty(routingKey)){
+            rabbitTemplate.convertAndSend(exchange, "", messageInfo);
+            return AjaxResult.success("已发送，等待机器人回复");
+        }
         if (x86Response) {
-            return (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, routingKey, messageInfo);
+            return (AjaxResult) rabbitTemplate.convertSendAndReceive(exchange, routingKey, messageInfo);
         } else {
-            rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, routingKey, messageInfo);
+            rabbitTemplate.convertAndSend(exchange, routingKey, messageInfo);
             return AjaxResult.success("已发送，等待机器人回复");
         }
     }
