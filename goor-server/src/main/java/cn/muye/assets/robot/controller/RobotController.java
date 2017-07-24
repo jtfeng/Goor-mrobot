@@ -104,7 +104,7 @@ public class RobotController {
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
             int batteryThresholdDb = robotConfig.getBatteryThreshold();
             String robotCodeDb = robotDb.getCode();
-            if (robotDb != null && robotCode.equals(robotCodeDb)) {
+            if (robotDb != null && robotCode != null && robotCode.equals(robotCodeDb)) {
                 if (list != null) {
                     robotDb.setChargerMapPointList(robot.getChargerMapPointList());
                 }
@@ -127,7 +127,7 @@ public class RobotController {
                     syncRobotBatteryThresholdToRos(robotDb, robotCodeDb);
                 }
                 return AjaxResult.success(robotDb, "修改成功");
-            } else if (robotDb != null && !robotCode.equals(robotCodeDb)) {
+            } else if (robotDb != null && robotCode != null && !robotCode.equals(robotCodeDb)) {
                 return AjaxResult.failed(robot, "不能修改机器人的编号");
             } else {
                 return AjaxResult.failed("不存在的机器人");
