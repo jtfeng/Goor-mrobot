@@ -43,6 +43,7 @@ public class SearchConstants {
 	public static String SEARCH_SCENE_NAME = "sceneName";
 	public static String SEARCH_SCENE_ID = "sceneId";
 	public static String SEARCH_POINT_TYPE = "point_type";
+	public static String SEARCH_CLOUD_POINT_TYPE = "cloud_point_type";
 
 	public static String SEARCH_MAP_NAME = "mapName";
 }
