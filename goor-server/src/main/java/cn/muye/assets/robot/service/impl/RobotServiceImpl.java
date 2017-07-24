@@ -219,6 +219,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotPasswordService.saveRobotPassword(robot);
     }
 
+    /**
+     * 自动注册
+     * @param robotNew
+     * @return
+     */
     @Override
     public AjaxResult autoRegister(Robot robotNew) {
         try {

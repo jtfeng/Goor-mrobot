@@ -75,25 +75,20 @@ public class RobotController {
     }
 
     /**
-     * 新增或修改机器人
+     * 修改机器人
      *
      * @param robot
      * @return
      */
-    @RequestMapping(value = {"assets/robot"}, method = {RequestMethod.POST, RequestMethod.PUT})
-    @ApiOperation(value = "新增或修改机器人", httpMethod = "POST/PUT", notes = "新增或修改机器人")
+    @RequestMapping(value = {"assets/robot"}, method = {RequestMethod.PUT})
+    @ApiOperation(value = "修改机器人", httpMethod = "PUT", notes = "修改机器人")
     @ResponseBody
-    public AjaxResult addOrUpdateRobot(@ApiParam(value = "机器人") @RequestBody Robot robot) {
+    public AjaxResult updateRobot(@ApiParam(value = "机器人") @RequestBody Robot robot) {
         Long robotId = robot.getId();
         String robotName = robot.getName();
         String robotCode = robot.getCode();
-        int robotBatteryThreshold = robot.getBatteryThreshold();
-        if (StringUtil.isNullOrEmpty(robotName) || StringUtil.isNullOrEmpty(robotCode)) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
-        }
-        if (robot.getBatteryThreshold() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
-        }
+        Integer robotBatteryThreshold = robot.getBatteryThreshold();
+        List list = robot.getChargerMapPointList();
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
         if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
@@ -109,13 +104,23 @@ public class RobotController {
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
             int batteryThresholdDb = robotConfig.getBatteryThreshold();
             String robotCodeDb = robotDb.getCode();
-            robotDb.setChargerMapPointList(robot.getChargerMapPointList());
             if (robotDb != null && robotCode.equals(robotCodeDb)) {
-                robotDb.setName(robotName);
-                robotDb.setDescription(robot.getDescription());
+                if (list != null) {
+                    robotDb.setChargerMapPointList(robot.getChargerMapPointList());
+                }
+                if (robotName != null) {
+                    robotDb.setName(robotName);
+                }
+                if (robot.getDescription() != null) {
+                    robotDb.setDescription(robot.getDescription());
+                }
+                if (robot.getBoxActivated() != null) {
+                    robotDb.setBoxActivated(robot.getBoxActivated());
+                }
                 robotDb.setUpdateTime(new Date());
-                robotDb.setBoxActivated(robot.getBoxActivated());
-                robotDb.setBatteryThreshold(robotBatteryThreshold);
+                if (robotBatteryThreshold != null) {
+                    robotDb.setBatteryThreshold(robotBatteryThreshold);
+                }
                 robotService.updateRobotAndBindChargerMapPoint(robotDb);
                 //向X86上同步修改后的机器人电量阈值信息
                 if (batteryThresholdDb != robotBatteryThreshold) {
@@ -128,9 +133,7 @@ public class RobotController {
                 return AjaxResult.failed("不存在的机器人");
             }
         } else {
-            robot.setBoxActivated(true);
-            robotService.saveRobotAndBindChargerMapPoint(robot);
-            return AjaxResult.success(robot, "新增成功");
+            return AjaxResult.failed("不允许新增机器人");
         }
     }
 
