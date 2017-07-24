@@ -104,7 +104,7 @@ public class RobotController {
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
             int batteryThresholdDb = robotConfig.getBatteryThreshold();
             String robotCodeDb = robotDb.getCode();
-            if (robotDb != null && robotCode != null && robotCode.equals(robotCodeDb)) {
+            if (robotDb != null && robotCode == null) {
                 if (list != null) {
                     robotDb.setChargerMapPointList(robot.getChargerMapPointList());
                 }
