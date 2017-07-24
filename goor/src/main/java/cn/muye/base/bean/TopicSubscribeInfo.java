@@ -44,7 +44,7 @@ public class TopicSubscribeInfo implements Serializable {
 		TopicCallback currentPoseCallback = new CurrentPoseListenerImpl();
 		currentPoseTopic.subscribe(currentPoseCallback);
 		// TODO: 17/07/2017 摇杆发布的 Topic 测试
-		Topic rosYaoganTopic = new Topic(ros, TopicConstants.ROS_YAOGAN_TOPIC, TopicConstants.ROS_YAOGAN_TOPIC_TYPE);
+		Topic rosYaoganTopic = new Topic(ros, TopicConstants.ROS_PUB_YAOGAN_TOPIC, TopicConstants.ROS_YAOGAN_TOPIC_TYPE);
 		rosYaoganTopic.subscribe(new TopicCallback() {
 			@Override
 			public void handleMessage(Message message) {
