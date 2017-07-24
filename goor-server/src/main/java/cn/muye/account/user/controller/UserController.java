@@ -336,7 +336,7 @@ public class UserController {
             String accessToken = doAuthorize(userName, password);
             //判断token不等于null，说明已经登录
             if (!StringUtil.isNullOrEmpty(accessToken)) {
-//                session.setAttribute("access_token", accessToken);
+                session.setAttribute("access_token", accessToken);
                 //查询用户的
                 List<User> list = userService.getUser(userName, password);
                 if (list != null) {
