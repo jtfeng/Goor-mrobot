@@ -104,7 +104,7 @@ public class PointServiceImpl implements PointService {
             Object sceneName = jsonObject.get(SCENE_NAME);
             Object mapName = jsonObject.get(MAP_NAME);
             Object mapPointTypeId = jsonObject.get(SearchConstants.SEARCH_POINT_TYPE);
-            Object cloudMapPointTypeId = jsonObject.get(SearchConstants.SEARCH_CLOUD_POINT_TYPE);
+//            Object cloudMapPointTypeId = jsonObject.get(SearchConstants.SEARCH_CLOUD_POINT_TYPE);
             if (pointName != null) {
                 criteria.andCondition("POINT_NAME like %" + pointName + "%");
             }
@@ -120,9 +120,9 @@ public class PointServiceImpl implements PointService {
             if (mapPointTypeId != null) {
                 criteria.andCondition("MAP_POINT_TYPE_ID =" + mapPointTypeId);
             }
-            if (cloudMapPointTypeId != null) {
-                criteria.andCondition("CLOUD_POINT_TYPE_ID =" + cloudMapPointTypeId);
-            }
+//            if (cloudMapPointTypeId != null) {
+//                criteria.andCondition("CLOUD_POINT_TYPE_ID =" + cloudMapPointTypeId);
+//            }
         }
         criteria.andCondition("STORE_ID = " + storeId);
         condition.setOrderByClause("SCENE_NAME, MAP_NAME ASC");
