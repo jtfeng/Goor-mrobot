@@ -41,9 +41,9 @@ public class RosRockerController {
     @RequestMapping(value = "/sendMsg", method = RequestMethod.POST)
     public Object sendMessageToRos(@RequestBody RosRockerDTO rosRockerDTO){
         try {
-            sendDetailMessage(rosRockerDTO.getRobotId(), TopicConstants.ROS_SUB_YAOGAN_TOPIC,
-                    TopicConstants.ROS_YAOGAN_TOPIC_TYPE,
-                    JSON.toJSONString(new PubData(JSON.toJSONString(rosRockerDTO))));
+            //{"linear":{"y":0.0,"x":-0.288421816682403,"z":0.0},"angular":{"y":0.0,"x":0.0,"z":1.7556886488741245E-7}}
+            //robot id ： SNabc0012
+            sendDetailMessage(rosRockerDTO.getRobotId(), TopicConstants.ROS_PUB_YAOGAN_TOPIC, TopicConstants.ROS_YAOGAN_TOPIC_TYPE, JSON.toJSONString(rosRockerDTO));
             return AjaxResult.success();
         }catch (Exception e){
             e.printStackTrace();
