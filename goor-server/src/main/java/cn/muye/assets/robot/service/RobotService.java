@@ -19,7 +19,7 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getById(Long id);
 
-    void saveRobot(Robot robot);
+    void saveRobotAndBindChargerMapPoint(Robot robot);
 
     AjaxResult autoRegister(Robot robotNew);
 
@@ -31,7 +31,7 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getByCode(String code, Long storeId);
 
-    void updateRobot(Robot robot);
+    void updateRobotAndBindChargerMapPoint(Robot robot);
 
     Robot getAvailableRobotByStationId(Long stationId, Integer typeId);
 

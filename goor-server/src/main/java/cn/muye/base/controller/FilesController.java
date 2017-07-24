@@ -4,6 +4,7 @@ import cn.mrobot.bean.FileResult;
 import cn.mrobot.bean.FileUpload;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.FileUtils;
@@ -416,6 +417,7 @@ public class FilesController {
                 mapPoint.setMapPointTypeId(Integer.parseInt(valueMap.get("type").toString()));
                 mapPoint.setPointAlias(valueMap.get("alias").toString());
                 mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getName());
                 pointService.save(mapPoint);
             }
         }

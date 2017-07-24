@@ -113,13 +113,14 @@ public class RobotController {
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
             int batteryThresholdDb = robotConfig.getBatteryThreshold();
             String robotCodeDb = robotDb.getCode();
+            robotDb.setChargerMapPointList(robot.getChargerMapPointList());
             if (robotDb != null && robotCode.equals(robotCodeDb)) {
                 robotDb.setName(robotName);
                 robotDb.setDescription(robot.getDescription());
                 robotDb.setUpdateTime(new Date());
                 robotDb.setBoxActivated(robot.getBoxActivated());
                 robotDb.setBatteryThreshold(robotBatteryThreshold);
-                robotService.updateRobot(robotDb);
+                robotService.updateRobotAndBindChargerMapPoint(robotDb);
                 //向X86上同步修改后的机器人电量阈值信息
                 if (batteryThresholdDb != robotBatteryThreshold) {
                     syncRobotBatteryThresholdToRos(robotDb, robotCodeDb);
@@ -132,7 +133,7 @@ public class RobotController {
             }
         } else {
             robot.setBoxActivated(true);
-            robotService.saveRobot(robot);
+            robotService.saveRobotAndBindChargerMapPoint(robot);
             return AjaxResult.success(robot, "新增成功");
         }
     }
@@ -214,18 +215,12 @@ public class RobotController {
         }
     }
 
-    @RequestMapping(value = {"assets/robot/bindChargerMapPoint"}, method = RequestMethod.POST)
-    @ApiOperation(value = "机器人绑充电桩", httpMethod = "POST", notes = "机器人绑充电桩")
-    @ResponseBody
-    public AjaxResult bindChargerMapPoint(@RequestBody Robot robot) {
-        List<MapPoint> list = robot.getChargerMapPointList();
-        Long robotId = robot.getId();
-        if (list != null && list.size() == 1 && robotId != null) {
-            robotService.bindChargerMapPoint(robotId, list);
-            return AjaxResult.success(robot, "绑定成功");
-        } else {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
-        }
-    }
+    //整合到新增和修改接口了
+//    @RequestMapping(value = {"assets/robot/bindChargerMapPoint"}, method = RequestMethod.POST)
+//    @ApiOperation(value = "机器人绑充电桩", httpMethod = "POST", notes = "机器人绑充电桩")
+//    @ResponseBody
+//    public AjaxResult bindChargerMapPoint(@RequestBody Robot robot) {
+//
+//    }
 
 }
