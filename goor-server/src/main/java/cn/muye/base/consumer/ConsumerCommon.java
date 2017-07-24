@@ -9,6 +9,7 @@ import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.state.StateCollectorAutoCharge;
 //import cn.mrobot.bean.state.StateCollectorResponse;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
@@ -184,7 +185,10 @@ public class ConsumerCommon {
                     chargeInfo.setDeviceId(deviceId);
                     chargeInfo.setCreateTime(messageInfo.getSendTime());
                     chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                    chargeInfo.setAutoCharging(CacheInfoManager.getAutoChargeCache(deviceId).getPluginStatus());
+                    StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(deviceId);
+                    if(null != autoCharge){
+                        chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
+                    }
                     CacheInfoManager.setRobotChargeInfoCache(deviceId, chargeInfo);
                     chargeInfoService.save(chargeInfo);
                 }
@@ -203,7 +207,9 @@ public class ConsumerCommon {
 //    public void directStateCollector(@Payload MessageInfo messageInfo) {
 //        try {
 //            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
-//                StateCollectorResponse stateCollectorResponse = JSON.parseObject(messageInfo.getMessageText(), StateCollectorResponse.class);
+//                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+//                String data = jsonObject.getString(TopicConstants.DATA);
+//                StateCollectorResponse stateCollectorResponse = JSON.parseObject(data, StateCollectorResponse.class);
 //                stateCollectorResponse.setTime(messageInfo.getSendTime());
 //                stateCollectorResponse.setSenderId(messageInfo.getSenderId());
 //                stateCollectorService.handleStateCollector(stateCollectorResponse);
@@ -212,7 +218,7 @@ public class ConsumerCommon {
 //            logger.error("consumer directAgentPub exception", e);
 //        }
 //    }
-//
+
 
     /**
      * 透传ros发布的topic：current_pose

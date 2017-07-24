@@ -16,6 +16,8 @@
         <result property="th" column="TH"/>
         <result property="pointLevel" column="POINT_LEVEL"/>
         <result property="mapPointTypeId" column="MAP_POINT_TYPE_ID"/>
+        <result property="ICPointType" column="IC_POINT_TYPE"/>
+        <result property="cloudMapPointTypeId" column="CLOUD_POINT_TYPE_ID"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -31,7 +33,9 @@
         Y,
         TH,
         POINT_LEVEL,
-        MAP_POINT_TYPE_ID
+        IC_POINT_TYPE,
+        MAP_POINT_TYPE_ID,
+        CLOUD_POINT_TYPE_ID
     </sql>
 
     <select id="selectMapName" resultType="String">
@@ -63,7 +67,7 @@
     </select>
 
     <select id="selectPointTypeByMapName" resultType="int">
-        SELECT DISTINCT MAP_POINT_TYPE_ID
+        SELECT DISTINCT CLOUD_POINT_TYPE_ID
         FROM A_MAP_POINT a
         <where>
             <if test = "sceneName != null">
@@ -90,8 +94,8 @@
                 <if test = "mapName != null">
                     and a.MAP_NAME = #{mapName}
                 </if>
-                <if test="mapPointTypeId != null">
-                    and a.MAP_POINT_TYPE_ID = #{mapPointTypeId}
+                <if test="cloudMapPointTypeId != null">
+                    and a.CLOUD_POINT_TYPE_ID = #{cloudMapPointTypeId}
                 </if>
                 <if test = "storeId != null">
                     AND a.STORE_ID = #{storeId}
