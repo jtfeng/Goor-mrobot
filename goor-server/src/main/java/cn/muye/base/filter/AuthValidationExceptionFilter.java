@@ -7,10 +7,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.account.user.service.UserService;
+import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Service;
 
 /**
  * This class avoid to throw full stack trace to client.
@@ -19,15 +27,22 @@ import org.apache.commons.logging.LogFactory;
  * @author ccoman
  *         TODO should this class extend something else that ExceptionTranslationFilter?
  */
-public class AuthValidationExceptionFilter implements Filter {
+@Service
+public class AuthValidationExceptionFilter implements Filter,ApplicationContextAware {
 
     private String[] excludedPageArray;
     private String excludedPages;
+
+    private static ApplicationContext applicationContext;
+
+    private UserService userService;
 
     protected static final Log LOGGER = LogFactory.getLog(AuthValidationExceptionFilter.class);
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        userService = applicationContext.getBean(UserService.class);
+
         boolean isExcludedPage = true;
         for (String page : excludedPageArray) {//判断是否在过滤url之外
             if (((HttpServletRequest) req).getServletPath().startsWith(page)) {
@@ -39,16 +54,17 @@ public class AuthValidationExceptionFilter implements Filter {
             HttpServletRequest httpServletRequest = (HttpServletRequest) req;
             HttpServletResponse response = (HttpServletResponse) res;
             try {
-                HttpSession session = httpServletRequest.getSession();
+//                HttpSession session = httpServletRequest.getSession();
                 String accessTokenFromReq = httpServletRequest.getParameter("access_token");
-                String accessToken = (String) session.getAttribute("access_token");
-                if (accessToken != null) {
-                    if (!accessToken.equals(accessTokenFromReq)) { //说明已登录但请求的access_token有误，无权限
-                        response.setStatus(Constant.ERROR_CODE_NOT_AUTHORIZED);
-                        response.sendError(Constant.ERROR_CODE_NOT_AUTHORIZED, "您无权限");
-                    } else if (accessToken.equals(accessTokenFromReq)) {
+                User user = userService.getByAccessToken(accessTokenFromReq);
+//                String accessToken = (String) session.getAttribute("access_token");
+                if (user != null) {
+//                    if (!accessToken.equals(accessTokenFromReq)) { //说明已登录但请求的access_token有误，无权限
+//                        response.setStatus(Constant.ERROR_CODE_NOT_AUTHORIZED);
+//                        response.sendError(Constant.ERROR_CODE_NOT_AUTHORIZED, "您无权限");
+//                    } else if (accessToken.equals(accessTokenFromReq)) {
                         chain.doFilter(req, res);
-                    }
+//                    }
                 } else {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
                     response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
@@ -79,5 +95,10 @@ public class AuthValidationExceptionFilter implements Filter {
             excludedPageArray = excludedPages.split(",");
         }
         return;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        AuthValidationExceptionFilter.applicationContext = applicationContext;
     }
 }
