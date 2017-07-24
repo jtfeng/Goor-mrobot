@@ -67,7 +67,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      *
      * @param robot
      */
-    public void updateRobot(Robot robot) {
+    public void updateRobotAndBindChargerMapPoint(Robot robot) {
+        List<MapPoint> list = robot.getChargerMapPointList();
+        if (list != null && list.size() == 1) {
+            bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
+        }
         //更新机器人信息
         updateByStoreId(robot);
         //更新机器人配置信息
@@ -100,7 +104,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         if (availableRobot != null) {
             availableRobot.setBusy(true);
-            updateRobot(availableRobot);
+            updateRobotAndBindChargerMapPoint(availableRobot);
         }
         return availableRobot;
     }
@@ -178,7 +182,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             List<MapPoint> mapPointList = Lists.newArrayList();
             xrefList.forEach(xref -> {
                 MapPoint mapPoint = pointService.findById(xref.getChargerMapPointId());
-                mapPointList.add(mapPoint);
+                if (mapPoint != null)
+                    mapPointList.add(mapPoint);
             });
             robot.setChargerMapPointList(mapPointList);
         });
@@ -197,8 +202,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
 
-    public void saveRobot(Robot robot) {
+    public void saveRobotAndBindChargerMapPoint(Robot robot) {
         super.save(robot);
+        Long robotNewId = robot.getId();
+        List list = robot.getChargerMapPointList();
+        if (list != null && list.size() == 1 && robotNewId != null) {
+            bindChargerMapPoint(robotNewId, list);
+        }
         RobotConfig robotConfig = new RobotConfig();
         robotConfig.setBatteryThreshold(robot.getBatteryThreshold());
         robotConfig.setRobotId(robot.getId());
@@ -209,6 +219,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotPasswordService.saveRobotPassword(robot);
     }
 
+    /**
+     * 自动注册
+     * @param robotNew
+     * @return
+     */
     @Override
     public AjaxResult autoRegister(Robot robotNew) {
         try {
@@ -221,11 +236,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             if (robotId != null) {
                 if (robotDb != null) {
                     robotNew.setOnline(true);
-                    updateRobot(robotNew);
+                    updateRobotAndBindChargerMapPoint(robotNew);
                     return AjaxResult.success(robotNew, "更新机器人状态成功");
                 } else {
                     robotNew.setId(null);
-                    saveRobot(robotNew);
+                    saveRobotAndBindChargerMapPoint(robotNew);
                     return AjaxResult.success(robotNew, "注册成功");
                 }
             } else {
@@ -248,7 +263,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
                     return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
                 }
-                saveRobot(robotNew);
+                saveRobotAndBindChargerMapPoint(robotNew);
                 //往ros上透传电量阈值
                 syncRosRobotConfig(robotNew);
                 return AjaxResult.success(robotNew, "注册成功");

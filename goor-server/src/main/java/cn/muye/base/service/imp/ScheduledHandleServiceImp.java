@@ -66,7 +66,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                     Robot robotDb = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
                     if (robotDb != null) {
                         robotDb.setOnline(false);
-                        robotService.updateRobot(robotDb);
+                        robotService.updateRobotAndBindChargerMapPoint(robotDb);
                     }
                 }
             }

@@ -2,6 +2,9 @@ package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.base.PubBean;
+import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
@@ -10,8 +13,10 @@ import cn.mrobot.bean.state.StateCollectorAutoCharge;
 //import cn.mrobot.bean.state.StateCollectorResponse;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
+import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 //import cn.muye.log.state.StateCollectorService;
@@ -30,6 +35,8 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
 
 @Component
 public class ConsumerCommon {
@@ -52,6 +59,9 @@ public class ConsumerCommon {
 
     @Autowired
     private RobotService robotService;
+
+    @Autowired
+    private GoodsTypeService goodsTypeService;
 //
 //    @Autowired
 //    private StateCollectorService stateCollectorService;
@@ -81,6 +91,10 @@ public class ConsumerCommon {
                         case TopicConstants.PICK_UP_PSWD_VERIFY:
                             /* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
                             pickUpPswdVerifyService.handlePickUpPswdVerify(messageInfo);
+                            break;
+                        case TopicConstants.FETCH_DETAIL_GOODSTYPE:
+                            //Server Answer the detail GoodsType messages.
+                            goodsTypeService.syncGoodsTypeMessage(messageInfo, messageName);
                             break;
                         default:
                             break;
