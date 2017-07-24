@@ -20,12 +20,16 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,6 +44,8 @@ import java.util.*;
 @Service
 @Transactional
 public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RobotServiceImpl.class);
 
     @Autowired
     private RobotPasswordService robotPasswordService;
@@ -62,15 +68,21 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Autowired
     private RobotMapper robotMapper;
 
+    @Autowired
+    private OffLineMessageService offLineMessageService;
+
     /**
      * 更新机器人
      *
      * @param robot
      */
-    public void updateRobotAndBindChargerMapPoint(Robot robot) {
+    public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer batteryThresholdDb, Integer robotBatteryThreshold, String robotCodeDb) throws RuntimeException {
         List<MapPoint> list = robot.getChargerMapPointList();
         if (list != null && list.size() == 1) {
             bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
+        }
+        if (robot.getOnline() != null && robot.getOnline() == false && batteryThresholdDb != null && !batteryThresholdDb.equals(robotBatteryThreshold)) {
+            robot.setBatteryThreshold(batteryThresholdDb);
         }
         //更新机器人信息
         updateByStoreId(robot);
@@ -80,6 +92,57 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robotConfig.setBatteryThreshold(robot.getBatteryThreshold());
             robotConfigService.update(robotConfig);
         }
+        //向X86上同步修改后的机器人电量阈值信息
+        if (robot.getOnline() != null && robot.getOnline() == true && batteryThresholdDb != null && !batteryThresholdDb.equals(robotBatteryThreshold)) {
+            AjaxResult ajaxResult = syncRobotBatteryThresholdToRos(robot, robotCodeDb);
+            return ajaxResult;
+
+        }
+        return AjaxResult.success("修改成功，机器人不在线，电量阈值无法修改");
+    }
+
+    /**
+     * 向X86上同步修改后的机器人电量阈值信息
+     * @param robotDb
+     * @param robotCodeDb
+     * @return
+     */
+    private AjaxResult syncRobotBatteryThresholdToRos(Robot robotDb, String robotCodeDb) throws RuntimeException {
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.TOPIC_CLIENT_ROBOT_BATTERY_THRESHOLD);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        robotDb.setUuid(UUID.randomUUID().toString().replace("-", ""));
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(robotDb))));
+        MessageInfo info = new MessageInfo();
+        info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        info.setSendTime(new Date());
+        info.setSenderId("goor-server");
+        info.setReceiverId(robotCodeDb);
+        info.setMessageType(MessageType.ROBOT_BATTERY_THRESHOLD);
+        info.setMessageText(JSON.toJSONString(commonInfo));
+        String backResultCommandRoutingKey = RabbitMqBean.getRoutingKey(robotCodeDb, true, MessageType.EXECUTOR_COMMAND.name());
+        //单机器命令发送（带回执）
+        AjaxResult ajaxCommandResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultCommandRoutingKey, info);
+        try {
+            this.messageSave(info);
+        } catch (Exception e) {
+            LOGGER.error("save message error", e);
+        }
+        if (ajaxCommandResult == null || !ajaxCommandResult.isSuccess()) {
+            throw new RuntimeException();
+        } else {
+            return AjaxResult.success("修改同步成功");
+        }
+    }
+
+    private boolean messageSave(MessageInfo messageInfo) throws Exception {
+        if (messageInfo == null
+                || StringUtil.isEmpty(messageInfo.getUuId() + "")) {
+            return false;
+        }
+        OffLineMessage message = new OffLineMessage(messageInfo);
+        offLineMessageService.save(message);//更新发送的消息
+        return true;
     }
 
     /**
@@ -104,7 +167,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         if (availableRobot != null) {
             availableRobot.setBusy(true);
-            updateRobotAndBindChargerMapPoint(availableRobot);
+            updateRobotAndBindChargerMapPoint(availableRobot, null, null, null);
         }
         return availableRobot;
     }
@@ -236,7 +299,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             if (robotId != null) {
                 if (robotDb != null) {
                     robotNew.setOnline(true);
-                    updateRobotAndBindChargerMapPoint(robotNew);
+                    updateRobotAndBindChargerMapPoint(robotNew, null,null,null);
                     return AjaxResult.success(robotNew, "更新机器人状态成功");
                 } else {
                     robotNew.setId(null);
