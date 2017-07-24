@@ -85,13 +85,9 @@ public class RobotController {
     @ResponseBody
     public AjaxResult addOrUpdateRobot(@ApiParam(value = "机器人") @RequestBody Robot robot) {
         Long robotId = robot.getId();
-        Integer robotTypeId = robot.getTypeId();
         String robotName = robot.getName();
         String robotCode = robot.getCode();
         int robotBatteryThreshold = robot.getBatteryThreshold();
-        if (robotTypeId == null || robotTypeId <= 0 || robotTypeId > RobotTypeEnum.DRAWER.getCaption()) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
-        }
         if (StringUtil.isNullOrEmpty(robotName) || StringUtil.isNullOrEmpty(robotCode)) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
         }
