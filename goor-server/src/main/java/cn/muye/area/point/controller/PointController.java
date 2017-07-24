@@ -34,6 +34,12 @@ public class PointController {
 	@Autowired
 	private PointService pointService;
 
+	/**
+	 * 修改。目前只能修改别名和添加云端导航点类型
+	 * @param request
+	 * @param mapPoint
+	 * @return
+	 */
 	@RequestMapping(value = "area/point", method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
@@ -55,13 +61,8 @@ public class PointController {
 				if(null == mapPointDB){
 					mapPointDB = new MapPoint();
 				}
-				mapPointDB.setMapName(mapPoint.getMapName());
-				mapPointDB.setMapPointTypeId(mapPoint.getMapPointTypeId());
 				mapPointDB.setPointAlias(mapPoint.getPointAlias());
-				mapPointDB.setTh(mapPoint.getTh());
-				mapPointDB.setX(mapPoint.getX());
-				mapPointDB.setY(mapPoint.getY());
-				mapPointDB.setPointLevel(mapPoint.getPointLevel());
+				mapPointDB.setCloudMapPointTypeId(mapPoint.getCloudMapPointTypeId());
 				pointService.update(mapPointDB);
 				return AjaxResult.success(mapPointDB);
 			} else {

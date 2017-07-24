@@ -69,6 +69,13 @@ public class MapPoint extends BaseBean {
 	@Column(name = "MAP_POINT_TYPE_ID")
     private int mapPointTypeId;
 
+    /**
+     * 云端点类型索引
+     * */
+    @JSONField(name = "cloud_point_type")
+    @Column(name = "CLOUD_POINT_TYPE_ID")
+    private int cloudMapPointTypeId;
+
 	@Column(name = "POINT_LEVEL")
 	@JSONField(name = "point_level")
 	private int pointLevel;
@@ -178,4 +185,12 @@ public class MapPoint extends BaseBean {
 		result = 31 * result + (sceneName != null ? sceneName.hashCode() : 0);
 		return result;
 	}
+
+    public int getCloudMapPointTypeId() {
+        return cloudMapPointTypeId;
+    }
+
+    public void setCloudMapPointTypeId(int cloudMapPointTypeId) {
+        this.cloudMapPointTypeId = cloudMapPointTypeId;
+    }
 }
