@@ -33,15 +33,17 @@ public class GoodsTypeServiceImpl extends BaseServiceImpl<GoodsType> implements 
     private GoodsService goodsService;
     @Override
     public void syncGoodsTypeMessage(MessageInfo messageInfo, String messageName) {
+        //定义 CommonInfo
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName(TopicConstants.AGENT_SUB);
         commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
         commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String,String>(){{
-            put(TopicConstants.PUB_NAME, messageName);
+            put(TopicConstants.SUB_NAME, messageName);
             List<GoodsType> goodsTypeList = listAll();
             goodsTypeList.forEach(goodsType -> goodsType.setGoodsList(goodsService.listGoodsByType(goodsType.getId())));
             put(GOODS_TYPE_DATA, JSON.toJSONString(goodsTypeList));
         }}))));
+        //定义 MessageInfo
         MessageInfo info = new MessageInfo();
         info.setUuId(messageInfo.getUuId());
         info.setSendTime(new Date());
@@ -49,8 +51,10 @@ public class GoodsTypeServiceImpl extends BaseServiceImpl<GoodsType> implements 
         info.setReceiverId(messageInfo.getSenderId());
         info.setMessageType(MessageType.EXECUTOR_COMMAND);
         info.setMessageText(JSON.toJSONString(commonInfo));
-        String noResultCommandRoutingKey = RabbitMqBean.getRoutingKey(messageInfo.getSenderId(),
-                false, MessageType.EXECUTOR_COMMAND.name());
+        String noResultCommandRoutingKey = RabbitMqBean.getRoutingKey(
+                messageInfo.getSenderId(),
+                false,
+                MessageType.EXECUTOR_COMMAND.name());
         rabbitTemplate.convertAndSend(TopicConstants.TOPIC_EXCHANGE, noResultCommandRoutingKey, info);
     }
 }
