@@ -39,7 +39,7 @@ public class FileUpladService {
     private static final String MAP_UPLOAD_SUCCESS = "1";
     private static final String MAP_UPLOAD_FAIL = "-1";
 
-    @Value("${goor.server}")
+    @Value("${goor.server.ip}")
     public String ip; //正式服务器地址
 
     @Value("${goor.server.upload.url}")
