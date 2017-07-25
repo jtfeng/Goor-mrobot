@@ -1102,9 +1102,9 @@ CREATE TABLE `LOG_INFO` (
   `MESSAGE` varchar(256) DEFAULT NULL COMMENT '具体信息',
   `LOG_LEVEL` varchar(50) DEFAULT NULL COMMENT '日志等级',
   `LOG_TYPE` varchar(50) DEFAULT NULL COMMENT '日志类型',
-  `map_Name` varchar(50) DEFAULT NULL COMMENT '地图名称',
-  `scene_Name` varchar(50) DEFAULT NULL COMMENT '场景名称',
-  `module` int DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `MAP_NAME` varchar(50) DEFAULT NULL COMMENT '地图名称',
+  `SCENE_NAME` varchar(50) DEFAULT NULL COMMENT '场景名称',
+  `MODULE` int DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
   `HANDLE_PERSON` varchar(50) DEFAULT NULL COMMENT '处理人',
   `HANDLE_TIME` datetime DEFAULT NULL COMMENT '处理时间',
   PRIMARY KEY (`ID`)
