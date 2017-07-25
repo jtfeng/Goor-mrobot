@@ -292,6 +292,9 @@ INSERT INTO `AC_STATION_ROBOT_XREF` VALUES ('30', '20', '315');
 -- ----------------------------
 -- Table structure for AC_USER
 -- ----------------------------
+-- ----------------------------
+-- Table structure for AC_USER
+-- ----------------------------
 DROP TABLE IF EXISTS `AC_USER`;
 CREATE TABLE `AC_USER` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -302,8 +305,10 @@ CREATE TABLE `AC_USER` (
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '店铺ID',
   `CREATED_BY` bigint(20) DEFAULT NULL COMMENT 'ID',
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
+  `ACCESS_TOKEN` varchar(255) DEFAULT NULL COMMENT '临时使用（防止出现session过期问题）',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=utf8;
+
 
 -- ----------------------------
 -- Records of AC_USER

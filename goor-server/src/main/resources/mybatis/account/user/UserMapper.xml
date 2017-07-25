@@ -114,7 +114,6 @@
         rs.ID DESC
     </select>
 
-
     <select id="selectByStationAdmin" resultMap="userResult" parameterType="java.util.Map">
         SELECT
             u.ID,
@@ -130,5 +129,17 @@
         <if test="userId != null">
             and u.ID = #{userId}
         </if>
+    </select>
+
+    <select id="getByAccessToken" resultMap="userResult">
+        SELECT
+            u.ID,
+            u.USER_NAME,
+            u.PASSWORD,
+            u.ACTIVATED,
+            u.DIRECT_LOGIN_KEY,
+            u.ACCESS_TOKEN
+        FROM
+            AC_USER u WHERE u.ACCESS_TOKEN= #{accessToken}
     </select>
 </mapper>
