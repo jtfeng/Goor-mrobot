@@ -1,8 +1,8 @@
 package cn.muye.dispatch.controller;
 
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.Constant;
@@ -10,17 +10,16 @@ import cn.mrobot.bean.mission.*;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.area.point.service.PointService;
 import cn.muye.dispatch.service.*;
+import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -29,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.*;
 
 /**
@@ -47,6 +47,10 @@ public class MissionController {
 	private MissionListService missionListService;
 	@Autowired
 	private PointService pointService;
+	@Autowired
+	private RobotService robotService;
+	@Autowired
+	MissionFuncsService missionFuncsService;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
@@ -487,7 +491,7 @@ public class MissionController {
 	@RequestMapping(value = {"dispatch/missionList/full"}, method = {RequestMethod.POST, RequestMethod.PUT})
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_mission_u')")
-	public AjaxResult saveOrUpdateMissionListFull(@RequestBody MissionList missionList, @RequestParam Long waitTime, HttpServletRequest request) throws Exception {
+	public AjaxResult saveOrUpdateMissionListFull(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
 		AjaxResult resp;
 		try {
 			//从session取当前切换的场景
@@ -500,19 +504,24 @@ public class MissionController {
 			//TODO 从session取当前切换门店的ID
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 
-
-			//TODO 美亚调度写死两个Mission，第一个是导航和语音的mission，第二个是到目标点后等待任务的长短
-			if(missionList.getMissionList() == null || missionList.getMissionList().size() != 2) {
-				return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误！");
+			//校验任务类型是否正确
+			String missionListType = missionList.getMissionListType();
+			if(missionListType == null
+					|| (!missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)
+					&& !missionListType.equals(Constant.MISSION_LIST_TYPE_CHARGE))){
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务类型不正确");
 			}
 
+			MissionList missionListDB = null;
+
+			//校验数据库是否重名
 			String missionListName = missionList.getName();
-			MissionList missionListDB = missionListService.findByName(missionListName,storeId);
+			missionListDB = missionListService.findByName(missionListName,storeId);
 			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
 			}
 
-			//取第一个Mission做导航、语音业务参数校验---------------------------------------
+			//取第一个Mission做导航、语音、充电任务参数校验---------------------------------------
 			Mission mission = missionList.getMissionList().get(0);
 
 			//校验点是否存在
@@ -537,23 +546,31 @@ public class MissionController {
 					}
 				}
 			}
-			String msg = "";
-//			if (missionList.getId() != null) {
-//				missionService.updateFull(missionList,missionDB);
-//				msg = "修改成功";
-//			} else {
-//				missionService.updateFull(missionList,missionDB);
-//				msg = "新增成功";
-//			}
 
-			//取第二个mission做等待任务业务参数校验
-			Mission missionWait = missionList.getMissionList().get(1);
-			Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
-			if(missionWaitItemSet == null
-					|| missionWaitItemSet.size() != 1) {
-				return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+			//巡逻任务：还需增加等待任务
+			if(missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
+				//TODO 美亚调度写死两个Mission，第一个是导航和语音的mission，第二个是到目标点后等待任务和语音任务
+				if(missionList.getMissionList() == null || missionList.getMissionList().size() != 2) {
+					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，只能一个导航和一个等待任务！");
+				}
+
+				//取第二个mission做等待任务业务参数校验
+				Mission missionWait = missionList.getMissionList().get(1);
+				Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
+				if(missionWaitItemSet == null
+						|| missionWaitItemSet.size() != 2) {
+					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+				}
+			}
+			//充电任务
+			else if(missionListType.equals(Constant.MISSION_LIST_TYPE_CHARGE)) {
+				//TODO 美亚调度充电写死一个Mission
+				if(missionList.getMissionList() == null || missionList.getMissionList().size() != 1) {
+					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，充电任务只能有一个！");
+				}
 			}
 
+			String msg = "";
 			if (missionList.getId() != null) {
 				msg = "修改成功";
 			} else {
@@ -569,12 +586,9 @@ public class MissionController {
 		return resp;
 	}
 
-
-
-
 	/**
 	 * 发送调度任务，由多个任务列表拼接组成
-	 * @param robotCodes
+	 * @param robotIds
 	 * @param missionListIds
 	 * @param request
 	 * @return
@@ -583,74 +597,151 @@ public class MissionController {
 	@ResponseBody
 //    @PreAuthorize("hasAuthority('mrc_navigation_u')")
 	public AjaxResult updateSendNavigation(
-			@RequestParam Long[] robotCodes,
+			@RequestBody MissionList missionList,
+			@RequestParam Long[] robotIds,
 			@RequestParam Long[] missionListIds,
 			HttpServletRequest request) {
 		AjaxResult resp = AjaxResult.success();
 		try {
-			if(robotCodes.length <= 0 || robotCodes.length <= 0) {
+			if(robotIds.length <= 0 || robotIds.length <= 0) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
 			}
 
-//			String[] robotCodesArray = getRobotCodesArrayByIdList(robotCodes);
-//			if(robotCodesArray == null) {
-//				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"未找到机器人");
-//			}
-//
-//			String uuid = UUID.randomUUID().toString();
-//
-//			//从对照表找延迟时间
-//			Long delayTime = Constants.DEFAULT_DELAY_TIME;
-//			for(String[] filter : Constants.MRC_MISSION_ORDER_LIST) {
-//				if(MRCConstants.MRC_NAME_NAVIGATION.indexOf(filter[0]) > -1  ) {
-//					delayTime = Long.parseLong(filter[1]);
-//					break;
-//				}
-//			}
-//
-//			//获取语音的featureItem
-//			FeatureItem featureItem = featureItemService.findById(Constants.VOICE_FEATURE_ITEM_ID);
-//			FeatureItemType featureItemType = featureItemTypeService.findById(Constants.VOICE_FEATURE_ITEM_TYPE_ID);
-//
-//			//通过总任务ID列表得到总任务
-//			List<MissionNode> missionNodeList = new ArrayList<MissionNode>();
-//			for( Long id : missionNodeIdList ) {
-//				MissionNode missionNode = missionNodeService.findById(id);
-//				missionNodeList.add(missionNode);
-//
-//				//增加到站提示语node
-//				MissionNode missionNode1 = new MissionNode();
-//				missionNode1.setData("{\"voiceContent\":\"我已经到达"+ missionNode.getName() +"\"}");
-//				missionNode1.setFeatureItem(featureItem);
-//				missionNode1.setFeatureItemType(featureItemType);
-//				missionNodeList.add(missionNode1);
-//			}
-//
-//			if(missionNodeList.size() <= 0) {
-//				return AjaxResponse.failed(-1,"未找到任务节点");
-//			}
-//
-//			MissionChain missionChain = new MissionChain();
-//			missionChain.setMissionNodeList(missionNodeList);
-//			List<MissionChain> missionChainList = new ArrayList<MissionChain>();
-//			missionChainList.add(missionChain);
-//
-//			MissionMain missionMain = new MissionMain();
-//			missionMain.setMissionChainList(missionChainList);
-//
-//			//当前时间延后
-//			long startTime = new Date().getTime();
-//			startTime += delayTime;
-//			missionMain.setStartTime(new Date(startTime));
-//
-//			Map result = mrcSendOperationsService.sendMission(uuid,productUsedCodeArray,missionMain);
-//			resp.addDataEntry(result);
+			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
+			if(robotCodesArray == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到机器人");
+			}
+
+			//从对照表找延迟时间
+//			Long delayTime = Constant.DEFAULT_DELAY_TIME;
+
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
+			//校验字段不为空
+			if(missionList.getSceneId() == null
+					|| missionList.getStartTime() == null
+					|| missionList.getStopTime() == null
+					|| missionList.getRepeatCount() == null
+					|| missionList.getIntervalTime() == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,开始时间、结束时间、重复次数、间隔时间、场景不能为空！");
+			}
+
+			//校验任务类型是否正确
+			String missionListType = missionList.getMissionListType();
+			if(missionListType == null
+					|| (!missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)
+							&& !missionListType.equals(Constant.MISSION_LIST_TYPE_CHARGE))){
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务类型不正确");
+			}
+
+			List<MissionList> missionLists = new ArrayList<MissionList>();
+			/**
+			 * 执行巡逻任务的业务逻辑
+			 */
+			if(missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
+				//通过总任务ID列表得到总任务
+				missionList.setMissionList(new ArrayList<Mission>());
+				List<Mission> missions = missionList.getMissionList();
+				for( Long id : missionListIds ) {
+					MissionList missionListTemp = missionListService.get(id,storeId);
+					//校验missionList是否存在
+					if(missionListTemp == null) {
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到任务");
+					}
+
+					//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
+					List<Mission> missionsTemp = missionListTemp.getMissionList();
+					if(missionsTemp == null) {
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务内容异常");
+					}
+					missions.addAll(missionsTemp);
+				}
+				missionLists.add(missionList);
+			}
+			/**
+			 * 执行充电任务的业务逻辑
+			 * 充电任务比较特殊，需要拆分成两个子missionList计划任务：第一个是去充电任务，第二个是离开充电桩任务
+			 */
+			else if(missionListType.equals(Constant.MISSION_LIST_TYPE_CHARGE)) {
+				//去充电任务列表
+				MissionList goToCharge = new MissionList();
+				//离开充电桩任务列表
+				MissionList leaveCharge = new MissionList();
+
+				goToCharge.setStartTime(missionList.getStartTime());
+				goToCharge.setStopTime(missionList.getStopTime());
+				goToCharge.setRepeatCount(missionList.getRepeatCount());
+				goToCharge.setIntervalTime(missionList.getIntervalTime());
+				goToCharge.setSceneId(missionList.getSceneId());
+				goToCharge.setMissionListType(missionListType);
+				goToCharge.setMissionList(new ArrayList<Mission>());
+
+				leaveCharge.setStartTime(missionList.getStopTime());
+				leaveCharge.setStopTime(missionList.getStopTime() + Constant.LEAVE_CHARGER_DELAY_TIME );
+				leaveCharge.setRepeatCount(missionList.getRepeatCount());
+				leaveCharge.setIntervalTime(missionList.getIntervalTime());
+				leaveCharge.setSceneId(missionList.getSceneId());
+				leaveCharge.setMissionListType(missionListType);
+				leaveCharge.setMissionList(new ArrayList<Mission>());
+
+				//todo 拼接两个定时任务下发
+				//通过总任务ID列表得到总任务
+				List<Mission> missions = goToCharge.getMissionList();
+				if(missionListIds.length != 1) {
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,数量不正确,只能选择一个充电点");
+				}
+				Long id = missionListIds[0];
+				MissionList missionListTemp = missionListService.get(id,storeId);
+				//校验missionList是否存在
+				if(missionListTemp == null) {
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到任务");
+				}
+
+				//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
+				List<Mission> missionsTemp = missionListTemp.getMissionList();
+				if(missionsTemp == null) {
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务内容异常");
+				}
+				missions.addAll(missionsTemp);
+
+				leaveCharge.setMissionList(missions);
+
+				missionLists.add(goToCharge);
+				missionLists.add(leaveCharge);
+			}
+
+			Boolean result = missionFuncsService.createMissionListTasksByMissionLists(robotCodesArray,missionLists);
+
+			if(result == null || !result) {
+				return AjaxResult.failed(AjaxResult.CODE_FAILED,"消息发送失败");
+			}
+
+			resp = AjaxResult.success("消息发送成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
 			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"出错");
 		}
 		return resp;
 	}
+
+	//通过robotCodeIdList得到对应主设备的主板编号
+	private String[] getRobotCodesArrayByIdList(Long[] robotIds) {
+		ArrayList<String> robotCodeList = new ArrayList<String>();
+		for( Long id: robotIds) {
+			Robot robot = robotService.findById(id);
+			if( robot == null ) {
+				continue;
+			}
+			robotCodeList.add(robot.getCode());
+		}
+		int size = robotCodeList.size();
+		if(size <= 0) {
+			return null;
+		}
+		return (String[])robotCodeList.toArray(new String[size]);
+	}
+
 
 
 //	//把类转换成entry返回给前端，解耦和

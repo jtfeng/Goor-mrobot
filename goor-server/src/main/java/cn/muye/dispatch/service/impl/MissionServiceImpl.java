@@ -138,7 +138,14 @@ public class MissionServiceImpl implements MissionService {
 
 	@Override
 	public Mission get(long id,long storeId) {
-		return missionMapper.get(id,storeId);
+		Mission mission = missionMapper.get(id,storeId);
+		if(mission != null) {
+			List<Mission> missionList = new ArrayList<Mission>();
+			missionList.add(mission);
+			bindMissionItemList(missionList);
+			mission = missionList.get(0);
+		}
+		return mission;
 	}
 
 	@Override
@@ -170,17 +177,17 @@ public class MissionServiceImpl implements MissionService {
 		}else {
 			missionList = missionMapper.listAll(storeId);
 		}
-		return bindMissionNodeList(missionList);
+		return bindMissionItemList(missionList);
 	}
 
 	@Override
 	public List<Mission> list(long storeId) {
 		List<Mission> missionList = missionMapper.listAll(storeId);
-		return bindMissionNodeList(missionList);
+		return bindMissionItemList(missionList);
 	}
 
 	//查找出关联的子任务
-	private List<Mission> bindMissionNodeList(List<Mission> missionList) {
+	private List<Mission> bindMissionItemList(List<Mission> missionList) {
 		Mission mission;
 		for (int i = 0; i < missionList.size(); i++) {
 			Set<MissionItem> missionItemList = new HashSet<>();

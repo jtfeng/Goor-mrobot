@@ -1,6 +1,8 @@
 package cn.mrobot.bean.mission;
 
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.mission.task.MissionItemTask;
+import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -130,22 +132,6 @@ public class Mission extends BaseBean {
 		missionItemSet = builder.missionItemSet;
 		updateTime = builder.updateTime;
 		sceneId = builder.sceneId;
-	}
-
-	public MissionDTO toDTO() {
-		MissionDTO missionDTO = new MissionDTO();
-		missionDTO.setId(this.getId());
-		missionDTO.setIntervalTime(this.getIntervalTime());
-		missionDTO.setRepeatCount(this.getRepeatCount());
-		Set<MissionItem> missionItems = this.getMissionItemSet();
-		if(missionItems != null) {
-			Set<MissionItemDTO> missionItemDTOS = new HashSet<MissionItemDTO>();
-			for(MissionItem missionItem : missionItems) {
-				missionItemDTOS.add(missionItem.toDTO());
-			}
-			missionDTO.setMissionItemSet(missionItemDTOS);
-		}
-		return missionDTO;
 	}
 
 	public int getRepeatCount() {
