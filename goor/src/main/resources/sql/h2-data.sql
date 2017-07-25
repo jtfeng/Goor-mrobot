@@ -6,8 +6,8 @@ INSERT INTO ROBOT_INFO_CONFIG (
   ROBOT_STORE_ID
 )
 VALUES (
-'ray',
-'ray',
+'init_robot',
+'init_robot',
 1,
 50,
 100
