@@ -7,6 +7,7 @@ import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamResponseBody;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.mapper.PointMapper;
 import cn.muye.area.point.service.PointService;
@@ -166,7 +167,7 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<CascadePoint> cascadeMapPoint(int level) {
+    public List<CascadePoint> cascadeMapPoint(int level, String sceneName) {
 //        List<CascadePoint> cascadePointList = new ArrayList<>();
 //        //获取场景名
 //        List<String> sceneNameList = pointMapper.selectSceneName(SearchConstants.FAKE_MERCHANT_STORE_ID);
@@ -208,16 +209,31 @@ public class PointServiceImpl implements PointService {
 //        }
 //
 //        return cascadePointList;
-        return getSceneName(level);
+        return getSceneName(level, sceneName);
     }
 
     /**
      * 根据场景名获取地图名
      */
-    private List<CascadePoint> getSceneName(int level) {
+    private List<CascadePoint> getSceneName(int level, String sceneName) {
         List<CascadePoint> cascadePointList = new ArrayList<>();
         //获取场景名
         List<String> sceneNameList = pointMapper.selectSceneName(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if(!StringUtil.isNullOrEmpty(sceneName)){
+            if (sceneNameList.contains(sceneName)){
+                CascadePoint cascadePoint = new CascadePoint();
+                cascadePoint.setValue(0);
+                cascadePoint.setLabel(sceneName);
+                if (LEVEL_ONE != level) {
+                    cascadePoint.setChildren(getMapName(sceneName,level));
+                }
+                cascadePointList.add(cascadePoint);
+                return cascadePointList;
+            }else {
+                return null;
+            }
+        }
+        //获取所有场景
         for (int a = 0; a < sceneNameList.size(); a++) {
             CascadePoint cascadePoint = new CascadePoint();
             cascadePoint.setValue(a);

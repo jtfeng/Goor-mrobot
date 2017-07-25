@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.base.bean.SearchConstants;
@@ -118,9 +119,12 @@ public class PointController {
 	@RequestMapping(value = "area/point/cascade", method = RequestMethod.GET)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-	public AjaxResult cascadeMapPoint(@RequestParam("level") int level){
+	public AjaxResult cascadeMapPoint(@RequestParam("level") int level, @RequestParam(value = "sceneName",required = false) String sceneName){
 		try {
-			List<CascadePoint> cascadeMapPointList = pointService.cascadeMapPoint(level);
+			List<CascadePoint> cascadeMapPointList = pointService.cascadeMapPoint(level,sceneName);
+			if(null == cascadeMapPointList && !StringUtil.isNullOrEmpty(sceneName)){
+				return AjaxResult.failed("指定场景名sceneName = "+sceneName+"不存在");
+			}
 			return AjaxResult.success(cascadeMapPointList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);

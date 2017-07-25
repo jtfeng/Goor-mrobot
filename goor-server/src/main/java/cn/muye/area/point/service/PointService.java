@@ -44,5 +44,5 @@ public interface PointService {
 	@Deprecated
 	void handle(SlamResponseBody slamResponseBody);
 
-	List<CascadePoint> cascadeMapPoint(int level);
+	List<CascadePoint> cascadeMapPoint(int level, String sceneName);
 }
