@@ -1,13 +1,17 @@
 package cn.muye.resource.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.utils.MD5Utils;
+import cn.mrobot.utils.RandomUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.controller.BaseController;
@@ -37,10 +41,13 @@ public class ResourceController extends BaseController{
 
     public static final Integer RESOURCE_TYPE_BASE = 1;
 
+
     @Autowired
     private ResourceService resourceService;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RobotService robotService;
 
     /**
      * 保存一个resource (上传)
@@ -119,28 +126,30 @@ public class ResourceController extends BaseController{
     /**
      * 推送至agent
      * @param resourceToAgentBean
-     * @return
+     * @returnC
      */
     @RequestMapping(value = "pushToAgent",method = RequestMethod.POST)
     @ResponseBody
     private AjaxResult pushToAgent(@RequestBody ResourceToAgentBean resourceToAgentBean){
         try {
             Resource resource = resourceService.findById(resourceToAgentBean.getResourceId());
+            Robot robot = robotService.getById(resourceToAgentBean.getRobotId());
 
             CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setTopicName("/enva_test");
-            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
             commonInfo.setLocalFileName(resource.getOriginName());
-            commonInfo.setLocalPath("/home");
+            commonInfo.setLocalPath(REMOTE_DOWNLOAD_HOME);
             commonInfo.setRemoteFileUrl(DOWNLOAD_HTTP + resource.getPath());
             commonInfo.setMD5(resource.getMd5());
-            commonInfo.setPublishMessage(JSON.toJSONString(commonInfo));
+            //设置ros 是否发送topic
+            //commonInfo.setTopicName("/enva_test");
+            //commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            //commonInfo.setPublishMessage(JSON.toJSONString(commonInfo));
 
             MessageInfo info = new MessageInfo();
-            info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            info.setUuId(RandomUtil.getUUID());
             info.setSendTime(new Date());
-            info.setSenderId("goor-server");
-            info.setReceiverId("SNabc0010");
+            info.setSenderId(Constant.GOOR_SERVER);
+            info.setReceiverId(robot.getCode());
             info.setMessageType(MessageType.EXECUTOR_RESOURCE);
             info.setMessageText(JSON.toJSONString(commonInfo));
 
