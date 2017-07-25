@@ -25,6 +25,8 @@ public class SearchConstants {
 	public static String SEARCH_STATION_ID = "stationId";
 	public static String SEARCH_TYPE_ID = "typeId";
 	public static String SEARCH_BATTERY_THRESHOLD = "batteryThreshold";
+	public static String SEARCH_MODULE = "module";
+
 
 	public static String SEARCH_PAGE_NO = "page";
 	public static String SEARCH_PAGE_SIZE = "pageSize";
