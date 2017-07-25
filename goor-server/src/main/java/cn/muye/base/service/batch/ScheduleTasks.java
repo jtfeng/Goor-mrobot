@@ -4,6 +4,7 @@ import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.log.base.LogCollectService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -27,6 +28,9 @@ public class ScheduleTasks {
 
     @Autowired
     private ReceiveMessageService receiveMessageService;
+
+    @Autowired
+    private LogCollectService logCollectService;
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -93,6 +97,15 @@ public class ScheduleTasks {
 
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
-
+    //每30秒触发,记录底盘，自动导航，电量信息日志
+    @Scheduled(cron = "*/30 * * * * ?")
+    public void collectBaseState() {
+        logger.info("Scheduled log");
+        try {
+            logCollectService.startCollectLog();
+        } catch (Exception e) {
+            logger.error("Scheduled collect base state error", e);
+        }
+    }
 
 }

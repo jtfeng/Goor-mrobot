@@ -1,7 +1,9 @@
 package cn.muye.log.base.mapper;
 
 import cn.mrobot.bean.log.LogInfo;
+import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -14,14 +16,7 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-public interface LogInfoMapper {
-
-	long save(LogInfo logInfo);
-
-	List<LogInfo> lists(@Param("deviceId") Object deviceId,
-						@Param("logLevelName") Object logLevelName,
-						@Param("logTypeName") Object logTypeName,
-						@Param("beginDate") Object beginDate,
-						@Param("endDate") Object endDate);
+@Component
+public interface LogInfoMapper extends MyMapper<LogInfo>{
 
 }

@@ -25,7 +25,10 @@ public enum LogType {
 	INFO_ROBOT_RUNNING_TRACK("INFO_ROBOT_RUNNING_TRACK", "运行轨迹"), //运行轨迹
 	INFO_VOICE("INFO_VOICE", "语音交互"), //语音交互
 	INFO_USER_OPERATE("INFO_USER_OPERATE", "用户操作"),  //用户操作
+	INFO_NAVIGATION("INFO_NAVIGATION", "导航"),  //用户操作
+	INFO_BASE("INFO_BASE", "底盘"),  //用户操作
 
+	WARNING_BASE("WARNING_BASE", "底盘警告"),  //机器人静止被推动警告
 	WARNING_LOWER_POWER("WARNING_LOWER_POWER", "机器人低电量警告"),  //机器人低电量警告
 	WARNING_FORCE_RUN("WARNING_FORCE_RUN", "机器人静止被推动警告"),  //机器人静止被推动警告
 	WARNING_OUT_OF_MAP("WARNING_OUT_OF_MAP", "机器人脱离已知地图区域警告;"),  //机器人脱离已知地图区域警告;

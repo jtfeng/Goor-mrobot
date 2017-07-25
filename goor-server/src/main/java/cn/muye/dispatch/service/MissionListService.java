@@ -36,6 +36,12 @@ public interface MissionListService {
 
 	List<MissionList> list(long storeId);
 
+	/**
+	 * 任务列表带任务带子任务新建或更新并绑定接口
+	 * @param missionList
+	 * @param missionListDB
+	 * @param storeId
+	 */
     void updateFull(MissionList missionList, MissionList missionListDB,long storeId);
 }
 

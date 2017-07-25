@@ -103,6 +103,7 @@ public class ChargeInfoController implements ApplicationContextAware {
         map.put("pluginStatus", chargeInfo.getPluginStatus());
         map.put("powerPercent", chargeInfo.getPowerPercent());
         map.put("storeId", chargeInfo.getStoreId());
+        map.put("autoCharging", chargeInfo.getAutoCharging());
         return map;
     }
 

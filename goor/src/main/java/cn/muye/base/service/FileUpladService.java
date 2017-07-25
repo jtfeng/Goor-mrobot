@@ -1,5 +1,6 @@
 package cn.muye.base.service;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.FileResult;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
@@ -102,6 +103,13 @@ public class FileUpladService {
                 params.put("type", Constant.FILE_UPLOAD_TYPE_MAP);
                 //查询文件是否存在
                 String jsonResult = HttpClientUtil.executePost(null, REMOTE_URL + EXIST_URL, params, null, null, null, true);
+                JSONObject object = JSON.parseObject(jsonResult);
+                Integer code = object.getInteger("code");
+                if(null != code && (code == Constant.ERROR_CODE_NOT_AUTHORIZED || code== Constant.ERROR_CODE_NOT_LOGGED || code == AjaxResult.CODE_SYSTEM_ERROR)){
+                    LOGGER.info("上传失败，code= "+ code + ", message="+object.getString("message"));
+                    sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传失败");
+                    return;
+                }
                 FileResult fileResult = JSON.parseObject(jsonResult, FileResult.class);
                 if (fileResult.getStatus() == 0) {
                     if (!fileResult.isExist()) {

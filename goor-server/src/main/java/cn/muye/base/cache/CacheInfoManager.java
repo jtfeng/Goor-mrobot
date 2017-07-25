@@ -46,11 +46,11 @@ public class CacheInfoManager implements ApplicationContextAware {
 
 //    //状态机缓存
     private static ConcurrentHashMapCache<String, StateCollectorAutoCharge> autoChargeCache = new ConcurrentHashMapCache<>();//自动回充状态
-//    private static ConcurrentHashMapCache<String, StateCollectorBaseDriver> leftBaseDriverCache = new ConcurrentHashMapCache<>();//左驱状态
-//    private static ConcurrentHashMapCache<String, StateCollectorBaseDriver> rightBaseDriverCache = new ConcurrentHashMapCache<>();//右驱状态
-//    private static ConcurrentHashMapCache<String, StateCollectorBaseMicroSwitchAndAntiDropping> baseMicroSwitchAndAntiCache = new ConcurrentHashMapCache<>();//微动开关与防跌落状态
-//    private static ConcurrentHashMapCache<String, StateCollectorBaseSystem> baseSystemCache = new ConcurrentHashMapCache<>();//底盘系统状态
-//    private static ConcurrentHashMapCache<String, StateCollectorNavigation> navigationCache = new ConcurrentHashMapCache<>();//导航状态
+    private static ConcurrentHashMapCache<String, StateCollectorBaseDriver> leftBaseDriverCache = new ConcurrentHashMapCache<>();//左驱状态
+    private static ConcurrentHashMapCache<String, StateCollectorBaseDriver> rightBaseDriverCache = new ConcurrentHashMapCache<>();//右驱状态
+    private static ConcurrentHashMapCache<String, StateCollectorBaseMicroSwitchAndAntiDropping> baseMicroSwitchAndAntiCache = new ConcurrentHashMapCache<>();//微动开关与防跌落状态
+    private static ConcurrentHashMapCache<String, StateCollectorBaseSystem> baseSystemCache = new ConcurrentHashMapCache<>();//底盘系统状态
+    private static ConcurrentHashMapCache<String, StateCollectorNavigation> navigationCache = new ConcurrentHashMapCache<>();//导航状态
 
     static {
 
@@ -66,11 +66,11 @@ public class CacheInfoManager implements ApplicationContextAware {
 
         //状态机缓存
         autoChargeCache.setMaxLifeTime(5 * 1000);
-//        leftBaseDriverCache.setMaxLifeTime(5 * 1000);
-//        rightBaseDriverCache.setMaxLifeTime(5 * 1000);
-//        baseMicroSwitchAndAntiCache.setMaxLifeTime(5 * 1000);
-//        baseSystemCache.setMaxLifeTime(5 * 1000);
-//        navigationCache.setMaxLifeTime(5 * 1000);
+        leftBaseDriverCache.setMaxLifeTime(5 * 1000);
+        rightBaseDriverCache.setMaxLifeTime(5 * 1000);
+        baseMicroSwitchAndAntiCache.setMaxLifeTime(5 * 1000);
+        baseSystemCache.setMaxLifeTime(5 * 1000);
+        navigationCache.setMaxLifeTime(5 * 1000);
 	}
 
     private CacheInfoManager() {
@@ -175,49 +175,49 @@ public class CacheInfoManager implements ApplicationContextAware {
     public static StateCollectorAutoCharge getAutoChargeCache(String deviceId){
         return autoChargeCache.get(deviceId);
     }
-//
-//    //左驱状态缓存
-//    public static void setLeftBaseDriverCache(String deviceId, StateCollectorBaseDriver stateCollectorBaseDriver){
-//        leftBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
-//    }
-//
-//    public static StateCollectorBaseDriver getLeftBaseDriverCache(String deviceId){
-//        return leftBaseDriverCache.get(deviceId);
-//    }
-//
-//    //右驱状态缓存
-//    public static void setRightBaseDriverCache(String deviceId, StateCollectorBaseDriver stateCollectorBaseDriver){
-//        leftBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
-//    }
-//
-//    public static StateCollectorBaseDriver getRightBaseDriverCache(String deviceId){
-//        return leftBaseDriverCache.get(deviceId);
-//    }
-//
-//    //微动开关与防跌落状态缓存
-//    public static void setBaseMicroSwitchAndAntiCache(String deviceId, StateCollectorBaseMicroSwitchAndAntiDropping stateCollectorBaseMicroSwitchAndAntiDropping){
-//        baseMicroSwitchAndAntiCache.put(deviceId, stateCollectorBaseMicroSwitchAndAntiDropping);
-//    }
-//
-//    public static StateCollectorBaseMicroSwitchAndAntiDropping getBaseMicroSwitchAndAntiCache(String deviceId){
-//        return baseMicroSwitchAndAntiCache.get(deviceId);
-//    }
-//
-//    //底盘系统状态缓存
-//    public static void setBaseSystemCache(String deviceId, StateCollectorBaseSystem stateCollectorBaseSystem){
-//        baseSystemCache.put(deviceId, stateCollectorBaseSystem);
-//    }
-//
-//    public static StateCollectorBaseSystem getBaseSystemCache(String deviceId){
-//        return baseSystemCache.get(deviceId);
-//    }
-//
-//    //底盘系统状态缓存
-//    public static void setNavigationCache(String deviceId, StateCollectorNavigation stateCollectorNavigation){
-//        navigationCache.put(deviceId, stateCollectorNavigation);
-//    }
-//
-//    public static StateCollectorNavigation getNavigationCache(String deviceId){
-//        return navigationCache.get(deviceId);
-//    }
+
+    //左驱状态缓存
+    public static void setLeftBaseDriverCache(String deviceId, StateCollectorBaseDriver stateCollectorBaseDriver){
+        leftBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
+    }
+
+    public static StateCollectorBaseDriver getLeftBaseDriverCache(String deviceId){
+        return leftBaseDriverCache.get(deviceId);
+    }
+
+    //右驱状态缓存
+    public static void setRightBaseDriverCache(String deviceId, StateCollectorBaseDriver stateCollectorBaseDriver){
+        leftBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
+    }
+
+    public static StateCollectorBaseDriver getRightBaseDriverCache(String deviceId){
+        return leftBaseDriverCache.get(deviceId);
+    }
+
+    //微动开关与防跌落状态缓存
+    public static void setBaseMicroSwitchAndAntiCache(String deviceId, StateCollectorBaseMicroSwitchAndAntiDropping stateCollectorBaseMicroSwitchAndAntiDropping){
+        baseMicroSwitchAndAntiCache.put(deviceId, stateCollectorBaseMicroSwitchAndAntiDropping);
+    }
+
+    public static StateCollectorBaseMicroSwitchAndAntiDropping getBaseMicroSwitchAndAntiCache(String deviceId){
+        return baseMicroSwitchAndAntiCache.get(deviceId);
+    }
+
+    //底盘系统状态缓存
+    public static void setBaseSystemCache(String deviceId, StateCollectorBaseSystem stateCollectorBaseSystem){
+        baseSystemCache.put(deviceId, stateCollectorBaseSystem);
+    }
+
+    public static StateCollectorBaseSystem getBaseSystemCache(String deviceId){
+        return baseSystemCache.get(deviceId);
+    }
+
+    //底盘系统状态缓存
+    public static void setNavigationCache(String deviceId, StateCollectorNavigation stateCollectorNavigation){
+        navigationCache.put(deviceId, stateCollectorNavigation);
+    }
+
+    public static StateCollectorNavigation getNavigationCache(String deviceId){
+        return  navigationCache.get(deviceId);
+    }
 }

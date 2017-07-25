@@ -290,4 +290,9 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         }
         return userDb;
     }
+
+    @Override
+    public User getByAccessToken(String accessToken) {
+        return userMapper.getByAccessToken(accessToken);
+    }
 }

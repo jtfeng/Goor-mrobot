@@ -100,7 +100,16 @@ public class MissionListTaskServiceImpl
         //填充子数据
         if (list != null){
             list.forEach(missionListTask -> {
-
+                missionListTask.setMissionTasks(missionTaskService.findByListId(missionListTask.getId()));
+                //填充item数据
+                if (missionListTask.getMissionTasks() != null){
+                    missionListTask.getMissionTasks().forEach(missionTask -> {
+                        missionTask.setMissionItemTasks(missionItemTaskService.findByListIdAndMissionId(
+                                missionListTask.getId(),
+                                missionTask.getId()
+                        ));
+                    });
+                }
             });
         }
         return list;

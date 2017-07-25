@@ -1,6 +1,8 @@
 package cn.mrobot.bean.mission;
 
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.mission.task.MissionListTask;
+import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionListDTO;
 import com.alibaba.fastjson.annotation.JSONField;
@@ -42,7 +44,7 @@ public class MissionList extends BaseBean{
 	/**
 	 * //循环次数  -1为无限循环
 	 */
-	private int repeatCount;
+	private Integer repeatCount;
 
 	private Long startTime;
 
@@ -57,7 +59,7 @@ public class MissionList extends BaseBean{
 		private Date createTime;  //创建时间
 		private Date updateTime;    //更新时间
 		private Long intervalTime;
-		private int repeatCount;
+		private Integer repeatCount;
 		private Long startTime;
 		private Long stopTime;
 		private Long sceneId;
@@ -105,7 +107,7 @@ public class MissionList extends BaseBean{
 			return this;
 		}
 
-		public Builder repeatCount(int repeatCount) {
+		public Builder repeatCount(Integer repeatCount) {
 			this.repeatCount = repeatCount;
 			return this;
 		}
@@ -148,27 +150,6 @@ public class MissionList extends BaseBean{
 		sceneId = builder.sceneId;
 	}
 
-	public MissionListDTO toDTO() {
-		MissionListDTO missionListDTO = new MissionListDTO();
-		missionListDTO.setId(this.getId());
-		missionListDTO.setIntervalTime(this.getIntervalTime());
-		//从我们的类型转换成任务管理器可识别的类型
-		missionListDTO.setMissionListType(MissionListTypeEnum.getDtoCaption(this.getMissionListType()));
-		missionListDTO.setPriority(this.getPriority());
-		missionListDTO.setRepeatCount(this.getRepeatCount());
-		missionListDTO.setStartTime(this.getStartTime());
-		missionListDTO.setStopTime(this.getStopTime());
-		List<Mission> missions = this.getMissionList();
-		if(missions != null) {
-			List<MissionDTO> missionDTOS = new ArrayList<MissionDTO>();
-			for(Mission mission : missions) {
-				missionDTOS.add(mission.toDTO());
-			}
-			missionListDTO.setMissionList(missionDTOS);
-		}
-		return missionListDTO;
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -209,11 +190,11 @@ public class MissionList extends BaseBean{
 		this.intervalTime = intervalTime;
 	}
 
-	public int getRepeatCount() {
+	public Integer getRepeatCount() {
 		return repeatCount;
 	}
 
-	public void setRepeatCount(int repeatCount) {
+	public void setRepeatCount(Integer repeatCount) {
 		this.repeatCount = repeatCount;
 	}
 

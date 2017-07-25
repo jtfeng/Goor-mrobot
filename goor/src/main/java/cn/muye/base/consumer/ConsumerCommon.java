@@ -257,24 +257,18 @@ public class ConsumerCommon {
             return AjaxResult.success();
         }
 
-        System.out.println("receive server message,currentTime: " + messageInfo.getSendTime());
+        logger.info("receive server synchronized message : " + messageInfo.getMessageText());
         //调用ros service进行时间同步
-        Date date = new Date();
-        long synchronizedTime = date.getTime() / 1000;
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        System.out.println(sdf.format(synchronizedTime));
-
         Service syncTime = new Service(ros, "/sync_system_time", "sync_system_time/UpdateTime");
 
-        String jsonString = "{\"sync_time\": " + synchronizedTime + "}";
-        System.out.println("********************" + jsonString);
+        String jsonString = "{\"sync_time\": " + Long.parseLong(messageInfo.getMessageText()) + "}";
+        logger.info("time synchronized jsonString ********************" + jsonString);
         ServiceRequest request = new ServiceRequest(jsonString, "sync_system_time/UpdateTime");
 
         syncTime.callService(request, new ServiceCallback() {
             @Override
             public void handleServiceResponse(ServiceResponse response) {
-                System.out.println("the result of calling service " + response.toString());
+                logger.info("the result of calling time synchronize service : " + response.toString());
             }
         });
         return AjaxResult.success();
