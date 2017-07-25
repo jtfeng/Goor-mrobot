@@ -313,7 +313,7 @@ public class ConsumerCommon {
                     long startTime = System.currentTimeMillis();
                     sendMessageInfo.setMessageType(MessageType.TIME_SYNCHRONIZED);
                     AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);//后期带上机器编码进行区分
-                    System.out.println("the delay time :" + result.toString());
+                    logger.info("the delay time :" + result.toString());
                     long endTime = System.currentTimeMillis();
                     sum += (endTime - startTime);
                 }
@@ -323,7 +323,7 @@ public class ConsumerCommon {
                 //给指定X86发送时间同步消息
                 sendMessageInfo.setMessageText(String.valueOf(new Date().getTime() + avg));
                 AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);
-                System.out.println("the time synchronized result :" + result);
+                logger.info("the time synchronized result :" + result);
             } catch (Exception e) {
                 logger.error("time synchronized failure : " + e.toString());
             }
