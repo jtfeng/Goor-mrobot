@@ -21,6 +21,7 @@ import cn.muye.order.service.OrderDetailService;
 import cn.muye.order.service.OrderService;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.SessionUtil;
+import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -54,6 +55,8 @@ public class OrderController extends BaseController {
     private GoodsService goodsService;
     @Autowired
     private StationService stationService;
+    @Autowired
+    private UserUtil userUtil;
 
 
     /**
@@ -84,7 +87,8 @@ public class OrderController extends BaseController {
         Robot arrangeRobot = null;
         try {
             //注入发起站
-            Long stationId = SessionUtil.getStationId(request);
+            //Long stationId = SessionUtil.getStationId(request);
+            Long stationId = userUtil.getStationId();
             order.setStartStation(new Station(stationId));
             //注入场景
             Scene scene = SessionUtil.getScene(request);

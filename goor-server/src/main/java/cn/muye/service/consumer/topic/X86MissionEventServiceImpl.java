@@ -8,6 +8,8 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.mission.service.LogMissionService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +75,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                 ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(baseMessageService.getSenderId(messageInfo));
                 if (currentPosInfo != null &&
                         !StringUtil.isNullOrEmpty(currentPosInfo.getMessageText())){
-                    logMission.setRos(currentPosInfo.getMessageText());
+                    logMission.setRos(parsePoseData(currentPosInfo));
                 }
                 if (chargeInfo != null){
                     logMission.setChargingStatus(chargeInfo.getChargingStatus());
@@ -88,5 +90,12 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                 }
             }
         }
+    }
+
+    private String parsePoseData(MessageInfo messageInfo) {
+        JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+        String poseData = jsonObject.getString("pose");
+        JSONObject poseObject = JSON.parseObject(poseData);
+        return poseObject.getString("pose");
     }
 }

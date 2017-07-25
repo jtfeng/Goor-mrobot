@@ -5,7 +5,8 @@ import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.base.bean.*;
+import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
@@ -13,21 +14,18 @@ import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
-//import org.redisson.RedissonBlockingQueue;
-//import org.redisson.api.RMap;
-//import org.redisson.api.RedissonClient;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+
+//import org.redisson.RedissonBlockingQueue;
+//import org.redisson.api.RMap;
+//import org.redisson.api.RedissonClient;
 
 @CrossOrigin
 @Controller

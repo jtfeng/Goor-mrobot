@@ -25,10 +25,10 @@ public class AutoNumUtil {
      *
      * @return
      */
-    public static String createRandomVcode() {
+    public static String createRandomVcode(int num) {
         //验证码
         String vcode = "";
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < num; i++) {
             vcode = vcode + (int) (Math.random() * 9);
         }
         return vcode;

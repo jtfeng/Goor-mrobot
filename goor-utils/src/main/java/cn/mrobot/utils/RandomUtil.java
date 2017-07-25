@@ -1,5 +1,7 @@
 package cn.mrobot.utils;
 
+import java.util.UUID;
+
 public class RandomUtil {
 	private static final int MILLISECOND_PER_SECOND = 1000;
 	private static final java.util.Random random = new java.util.Random();
@@ -39,4 +41,8 @@ public class RandomUtil {
     public static String threeRandom() {
         return String.valueOf(random.nextInt(899) + 100);
     }
+
+	public static String getUUID(){
+		return UUID.randomUUID().toString().replace("-", "");
+	}
 }

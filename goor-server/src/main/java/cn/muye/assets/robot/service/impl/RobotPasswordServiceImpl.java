@@ -26,6 +26,7 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
     @Autowired
     private RobotTypeMapper robotTypeMapper;
 
+
     @Override
     public void saveRobotPassword(Robot robot) {
         RobotType robotType = robotTypeMapper.selectByPrimaryKey(robot.getTypeId());
@@ -38,7 +39,7 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
             robotPassWord.setStoreId(robot.getStoreId());
             robotPassWord.setBoxNum(i);
             robotPassWord.setRobotId(robot.getId());
-            robotPassWord.setPassword(AutoNumUtil.createRandomVcode());
+            robotPassWord.setPassword(AutoNumUtil.createRandomVcode(4));
             addList.add(robotPassWord);
         }
         myMapper.insertList(addList);
