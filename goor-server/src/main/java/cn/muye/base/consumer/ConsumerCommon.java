@@ -10,7 +10,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
-//import cn.mrobot.bean.state.StateCollectorResponse;
+import cn.mrobot.bean.state.StateCollectorResponse;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.assets.goods.service.GoodsTypeService;
@@ -19,7 +19,7 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
-//import cn.muye.log.state.StateCollectorService;
+import cn.muye.log.state.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -62,9 +62,9 @@ public class ConsumerCommon {
 
     @Autowired
     private GoodsTypeService goodsTypeService;
-//
-//    @Autowired
-//    private StateCollectorService stateCollectorService;
+
+    @Autowired
+    private StateCollectorService stateCollectorService;
 
     /**
      * 透传ros发布的topic：agent_pub
@@ -198,26 +198,26 @@ public class ConsumerCommon {
         }
     }
 
-//    /**
-//     * 透传ros发布的topic：state_collector
-//     *
-//     * @param messageInfo
-//     */
-//    @RabbitListener(queues = TopicConstants.DIRECT_STATE_COLLECTOR)
-//    public void directStateCollector(@Payload MessageInfo messageInfo) {
-//        try {
-//            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
-//                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
-//                String data = jsonObject.getString(TopicConstants.DATA);
-//                StateCollectorResponse stateCollectorResponse = JSON.parseObject(data, StateCollectorResponse.class);
-//                stateCollectorResponse.setTime(messageInfo.getSendTime());
-//                stateCollectorResponse.setSenderId(messageInfo.getSenderId());
-//                stateCollectorService.handleStateCollector(stateCollectorResponse);
-//            }
-//        } catch (Exception e) {
-//            logger.error("consumer directAgentPub exception", e);
-//        }
-//    }
+    /**
+     * 透传ros发布的topic：state_collector
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_STATE_COLLECTOR)
+    public void directStateCollector(@Payload MessageInfo messageInfo) {
+        try {
+            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
+                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+                String data = jsonObject.getString(TopicConstants.DATA);
+                StateCollectorResponse stateCollectorResponse = JSON.parseObject(data, StateCollectorResponse.class);
+                stateCollectorResponse.setTime(messageInfo.getSendTime());
+                stateCollectorResponse.setSenderId(messageInfo.getSenderId());
+                stateCollectorService.handleStateCollector(stateCollectorResponse);
+            }
+        } catch (Exception e) {
+            logger.error("consumer directAgentPub exception", e);
+        }
+    }
 
 
     /**
