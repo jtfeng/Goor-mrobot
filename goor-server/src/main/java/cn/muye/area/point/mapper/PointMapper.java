@@ -31,6 +31,6 @@ public interface PointMapper extends MyMapper<MapPoint> {
 
     List<MapPoint> selectPointByPointTypeMapName(@Param("sceneName") String sceneName,
                                                  @Param("mapName") String mapName,
-                                                 @Param("mapPointTypeId") int mapPointTypeId,
+                                                 @Param("cloudMapPointTypeId") int cloudMapPointTypeId,
                                                  @Param("storeId") long storeId);
 }

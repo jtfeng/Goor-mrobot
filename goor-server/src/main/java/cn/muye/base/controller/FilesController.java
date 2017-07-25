@@ -14,6 +14,7 @@ import cn.mrobot.utils.ajax.AjaxResponse;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.map.service.MapZipService;
 import cn.muye.area.point.service.PointService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.FileUploadService;
@@ -61,6 +62,9 @@ public class FilesController {
 
     @Autowired
     private MapInfoService mapInfoService;
+
+    @Autowired
+    private SceneService sceneService;
 
     private static final String RESOURCE_TYPE_DIR = "default";
     private static final String RESOURCE_TYPE_FILE = "file";
@@ -331,12 +335,14 @@ public class FilesController {
                 analysisPointFile(sceneName, sceneDir.getAbsolutePath());
             } catch (IllegalAccessException e) {
                 LOGGER.error("解析导航目标点出错", e);
+            }catch (Exception e) {
+                LOGGER.error("解析导航目标点出错", e);
             }
         }
     }
 
     //解析地图文件
-    private void analysisMapFile(String sceneName, String sceneDir, String deviceId, Long mapzipId) throws IllegalAccessException {
+    private void analysisMapFile(String sceneName, String sceneDir, String deviceId, Long mapzipId) throws Exception {
         File mapFilePath = FileUtils.getFile(sceneDir, Constant.MAP_FILE_PATH);
         if (!mapFilePath.exists()) {
             LOGGER.info("地图文件夹不存在。sceneName=" + sceneName + ", sceneDir=" + sceneDir);
@@ -374,6 +380,8 @@ public class FilesController {
             mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
             CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID));
             mapInfoService.save(mapInfo);
+            //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
+            sceneService.checkSceneIsNeedToBeUpdated(sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID +"");
         }
     }
 

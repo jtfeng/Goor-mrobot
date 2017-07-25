@@ -20,6 +20,12 @@ public interface MissionService {
 
 	void update(Mission mission);
 
+	/**
+	 * 任务带子任务新建或更新并绑定接口
+	 * @param mission
+	 * @param missionDB
+	 * @param storeId
+	 */
 	void updateFull(Mission mission, Mission missionDB,long storeId);
 
 	void update(Mission mission, List<Long> nodeIdList,long storeId);

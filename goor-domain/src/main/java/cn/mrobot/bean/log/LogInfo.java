@@ -1,9 +1,8 @@
 package cn.mrobot.bean.log;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import cn.mrobot.bean.base.BaseBean;
 
-import java.io.Serializable;
-import java.util.Date;
+import javax.persistence.Table;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,9 +13,8 @@ import java.util.Date;
  * Describe:
  * Version:1.0
  */
-public class LogInfo implements Serializable {
-
-	private long id;
+@Table(name = "LOG_INFO")
+public class LogInfo extends BaseBean {
 
 	/**
 	 * 设备编号
@@ -30,34 +28,30 @@ public class LogInfo implements Serializable {
 	/**
 	 * 日志类型
 	 */
-	private LogType logType;
+	private String logType;
 
-	private String logTypeName;
+	/**
+	 * 地图
+	 */
+	private String mapName;
+
+	/**
+	 * 机器人场景
+	 */
+	private String sceneName;
+
 
 	/**
 	 * 日志等级
 	 */
-	private LogLevel logLevel;
+	private String logLevel;
 
-	private String logLevelName;
+	//模块
+	private int module;  //ModuleEnums 枚举类
 
 	private String handlePerson;  //警告错误处理人
 
 	private String handleTime; //警告错误处理时间
-
-	/**
-	 * 日志记录时间
-	 */
-	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
-	private Date createDate;
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
 
 	public String getDeviceId() {
 		return deviceId;
@@ -75,44 +69,20 @@ public class LogInfo implements Serializable {
 		this.message = message;
 	}
 
-	public LogType getLogType() {
+	public String getLogType() {
 		return logType;
 	}
 
-	public void setLogType(LogType logType) {
+	public void setLogType(String logType) {
 		this.logType = logType;
 	}
 
-	public Date getCreateDate() {
-		return createDate;
-	}
-
-	public void setCreateDate(Date createDate) {
-		this.createDate = createDate;
-	}
-
-	public LogLevel getLogLevel() {
+	public String getLogLevel() {
 		return logLevel;
 	}
 
-	public void setLogLevel(LogLevel logLevel) {
+	public void setLogLevel(String logLevel) {
 		this.logLevel = logLevel;
-	}
-
-	public String getLogTypeName() {
-		return logTypeName;
-	}
-
-	public void setLogTypeName(String logTypeName) {
-		this.logTypeName = logTypeName;
-	}
-
-	public String getLogLevelName() {
-		return logLevelName;
-	}
-
-	public void setLogLevelName(String logLevelName) {
-		this.logLevelName = logLevelName;
 	}
 
 	public String getHandlePerson() {
@@ -129,5 +99,29 @@ public class LogInfo implements Serializable {
 
 	public void setHandleTime(String handleTime) {
 		this.handleTime = handleTime;
+	}
+
+	public int getModule() {
+		return module;
+	}
+
+	public void setModule(int module) {
+		this.module = module;
+	}
+
+	public String getMapName() {
+		return mapName;
+	}
+
+	public void setMapName(String mapName) {
+		this.mapName = mapName;
+	}
+
+	public String getSceneName() {
+		return sceneName;
+	}
+
+	public void setSceneName(String sceneName) {
+		this.sceneName = sceneName;
 	}
 }

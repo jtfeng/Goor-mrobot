@@ -2,27 +2,24 @@ package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.base.CommonInfo;
-import cn.mrobot.bean.base.PubBean;
-import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
-//import cn.mrobot.bean.state.StateCollectorResponse;
+import cn.mrobot.bean.state.StateCollectorAutoCharge;
+import cn.mrobot.bean.state.StateCollectorResponse;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
-//import cn.muye.log.state.StateCollectorService;
-import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.charge.service.ChargeInfoService;
+import cn.muye.log.state.StateCollectorService;
+import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
@@ -34,8 +31,14 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
+
+//import cn.mrobot.bean.state.StateCollectorResponse;
+
+//import cn.mrobot.bean.state.StateCollectorResponse;
+//import cn.muye.log.state.StateCollectorService;
+
+//import cn.mrobot.bean.state.StateCollectorResponse;
+//import cn.muye.log.state.StateCollectorService;
 
 @Component
 public class ConsumerCommon {
@@ -61,9 +64,9 @@ public class ConsumerCommon {
 
     @Autowired
     private GoodsTypeService goodsTypeService;
-//
-//    @Autowired
-//    private StateCollectorService stateCollectorService;
+
+    @Autowired
+    private StateCollectorService stateCollectorService;
 
     /**
      * 透传ros发布的topic：agent_pub
@@ -184,7 +187,10 @@ public class ConsumerCommon {
                     chargeInfo.setDeviceId(deviceId);
                     chargeInfo.setCreateTime(messageInfo.getSendTime());
                     chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                    chargeInfo.setAutoCharging(CacheInfoManager.getAutoChargeCache(deviceId).getPluginStatus());
+                    StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(deviceId);
+                    if(null != autoCharge){
+                        chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
+                    }
                     CacheInfoManager.setRobotChargeInfoCache(deviceId, chargeInfo);
                     chargeInfoService.save(chargeInfo);
                 }
@@ -194,25 +200,27 @@ public class ConsumerCommon {
         }
     }
 
-//    /**
-//     * 透传ros发布的topic：state_collector
-//     *
-//     * @param messageInfo
-//     */
-//    @RabbitListener(queues = TopicConstants.DIRECT_STATE_COLLECTOR)
-//    public void directStateCollector(@Payload MessageInfo messageInfo) {
-//        try {
-//            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
-//                StateCollectorResponse stateCollectorResponse = JSON.parseObject(messageInfo.getMessageText(), StateCollectorResponse.class);
-//                stateCollectorResponse.setTime(messageInfo.getSendTime());
-//                stateCollectorResponse.setSenderId(messageInfo.getSenderId());
-//                stateCollectorService.handleStateCollector(stateCollectorResponse);
-//            }
-//        } catch (Exception e) {
-//            logger.error("consumer directAgentPub exception", e);
-//        }
-//    }
-//
+    /**
+     * 透传ros发布的topic：state_collector
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_STATE_COLLECTOR)
+    public void directStateCollector(@Payload MessageInfo messageInfo) {
+        try {
+            if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
+                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+                String data = jsonObject.getString(TopicConstants.DATA);
+                StateCollectorResponse stateCollectorResponse = JSON.parseObject(data, StateCollectorResponse.class);
+                stateCollectorResponse.setTime(messageInfo.getSendTime());
+                stateCollectorResponse.setSenderId(messageInfo.getSenderId());
+                stateCollectorService.handleStateCollector(stateCollectorResponse);
+            }
+        } catch (Exception e) {
+            logger.error("consumer directAgentPub exception", e);
+        }
+    }
+
 
     /**
      * 透传ros发布的topic：current_pose
@@ -256,6 +264,22 @@ public class ConsumerCommon {
     public AjaxResult directCommandReportAndReceive(@Payload MessageInfo messageInfo) {
         try {
             messageSaveOrUpdate(messageInfo);
+        } catch (Exception e) {
+            logger.error("consumer directCommandReport exception", e);
+        }
+        return AjaxResult.success();
+    }
+
+    /**
+     * 测试
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.TOPIC_SERVER_COMMAND)
+    public AjaxResult directCommandReportAndReceive1(@Payload MessageInfo messageInfo) {
+        try {
+            logger.info("11111111111111111111111111111111111111111111");
+            //messageSaveOrUpdate(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCommandReport exception", e);
         }
@@ -307,7 +331,7 @@ public class ConsumerCommon {
                     long startTime = System.currentTimeMillis();
                     sendMessageInfo.setMessageType(MessageType.TIME_SYNCHRONIZED);
                     AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);//后期带上机器编码进行区分
-                    System.out.println("the delay time :" + result.toString());
+                    logger.info("the delay time :" + result.toString());
                     long endTime = System.currentTimeMillis();
                     sum += (endTime - startTime);
                 }
@@ -317,7 +341,7 @@ public class ConsumerCommon {
                 //给指定X86发送时间同步消息
                 sendMessageInfo.setMessageText(String.valueOf(new Date().getTime() + avg));
                 AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);
-                System.out.println("the time synchronized result :" + result);
+                logger.info("the time synchronized result :" + result);
             } catch (Exception e) {
                 logger.error("time synchronized failure : " + e.toString());
             }

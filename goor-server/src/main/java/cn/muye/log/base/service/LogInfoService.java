@@ -22,30 +22,9 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-@Service
-@Transactional
-public class LogInfoService {
+public interface LogInfoService {
 
-	@Autowired
-	private LogInfoMapper logInfoMapper;
+    void save(LogInfo logInfo);
 
-	public void save(LogInfo logInfo) {
-		logInfoMapper.save(logInfo);
-	}
-
-	public List<LogInfo> lists(WhereRequest whereRequest) {
-		List<LogInfo> logInfoList = new ArrayList<>();
-		if (whereRequest.getQueryObj() != null) {
-			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
-			Object beginDate = map.get(SearchConstants.SEARCH_BEGIN_DATE);
-			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
-			Object logLevel = map.get(SearchConstants.SEARCH_LOG_LEVEL);
-			Object logType = map.get(SearchConstants.SEARCH_LOG_TYPE);
-			Object deviceId = map.get(SearchConstants.SEARCH_DEVICE_ID);
-
-			logInfoList = logInfoMapper.lists(deviceId, logLevel, logType, beginDate, endDate);
-		}
-		return logInfoList;
-
-	}
+    List<LogInfo> lists(WhereRequest whereRequest, Long storeId);
 }

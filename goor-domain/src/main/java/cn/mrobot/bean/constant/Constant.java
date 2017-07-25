@@ -8,6 +8,11 @@ import java.util.List;
  */
 public class Constant {
 
+    //数据库数据删除状态
+    public final static Integer DELETED = 0; //删除
+    public final static Integer NORMAL = 1;  //正常值
+
+
     public static final String UTF_8 = "UTF-8";
 
     public static final String CONTENT = "content";
@@ -45,6 +50,8 @@ public class Constant {
 
     public static final int ERROR_CODE_NOT_LOGGED = 40002; //未登录
 
+    public static final long MANUAL_ORDER_ID = -10086; //手动调度的订单号
+
     //地图文件场景下的点和地图路径名
     public final static String MAP_FILE_PATH = "map"; // 地图
     public final static String POINT_FILE_PATH = "point"; // 导航目标点
@@ -53,7 +60,12 @@ public class Constant {
 
     public final static String ROBOT_CACHE_KEY = "robotInfo"; //自动注册机器人缓存KEY
 
+    public final static String MISSION_LIST_TYPE_PATROL = "patrol"; //巡逻任务-美亚
+    public final static String MISSION_LIST_TYPE_CHARGE = "charge"; //充电任务-美亚
+
     public final static Long CHECK_IF_OFFLINE_TIME = 300000L; //5分钟=30000毫秒
+
+    public final static Long LEAVE_CHARGER_DELAY_TIME = 60000L; //1分钟=60000毫秒
 
     //与地图点相关的指令列表
     public final static List<Long> ORDER_MAP_POINT_RELATE_LIST = Arrays.asList(
@@ -62,6 +74,11 @@ public class Constant {
     );
 
     public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
+
+    public final static long ORDER_GOTO_CHARGE_ID = 4L;//自动回充任务ID
+
+    public final static long ORDER_LEAVE_CHARGE_ID = 5L;//离开充电桩任务ID
+
     public final static long ORDER_WAIT_ID = 6L;//等待任务ID
 
     public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";

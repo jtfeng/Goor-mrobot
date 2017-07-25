@@ -100,7 +100,14 @@ public class MissionListServiceImpl implements MissionListService {
 
 	@Override
     public MissionList get(long id,long storeId) {
-        return missionListMapper.get(id,storeId);
+		MissionList missionList = missionListMapper.get(id,storeId);
+		if(missionList != null) {
+			List<MissionList> missionLists = new ArrayList<MissionList>();
+			missionLists.add(missionList);
+			bindMission(missionLists);
+			missionList = missionLists.get(0);
+		}
+        return missionList;
     }
 
 	@Override

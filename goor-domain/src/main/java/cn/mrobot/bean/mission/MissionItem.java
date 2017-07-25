@@ -1,6 +1,7 @@
 package cn.mrobot.bean.mission;
 
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.dto.mission.MissionItemDTO;
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -139,13 +140,7 @@ public class MissionItem extends BaseBean {
 		sceneId = builder.sceneId;
 	}
 
-	public MissionItemDTO toDTO() {
-		MissionItemDTO missionItemDTO = new MissionItemDTO();
-		missionItemDTO.setId(this.getId());
-		missionItemDTO.setName(this.getName());
-		missionItemDTO.setData(this.getData());
-		return missionItemDTO;
-	}
+
 
 	public Long getId() {
 		return id;

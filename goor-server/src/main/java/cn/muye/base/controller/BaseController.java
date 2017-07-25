@@ -22,4 +22,7 @@ public abstract class BaseController {
     @Value("${goor.push.http}")
     protected String DOWNLOAD_HTTP;
 
+    @Value("${goor.push.remote.dirs}")
+    protected String REMOTE_DOWNLOAD_HOME;
+
 }
