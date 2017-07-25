@@ -1095,29 +1095,20 @@ INSERT INTO `D_MISSION_MISSION_ITEM_XREF` VALUES ('2', '5');
 DROP TABLE IF EXISTS `LOG_INFO`;
 CREATE TABLE `LOG_INFO` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `DEVICE_ID` varchar(256) NOT NULL,
-  `MESSAGE` varchar(256) DEFAULT NULL,
-  `LOG_LEVEL` varchar(50) NOT NULL,
-  `LOG_TYPE` varchar(50) NOT NULL,
-  `CREATE_DATE` datetime NOT NULL,
-  `HANDLE_PERSON` varchar(50) DEFAULT NULL,
-  `HANDLE_TIME` datetime DEFAULT NULL,
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  `DEVICE_ID` varchar(256) DEFAULT NULL COMMENT '设备编号',
+  `MESSAGE` varchar(256) DEFAULT NULL COMMENT '具体信息',
+  `LOG_LEVEL` varchar(50) DEFAULT NULL COMMENT '日志等级',
+  `LOG_TYPE` varchar(50) DEFAULT NULL COMMENT '日志类型',
+  `map_Name` varchar(50) DEFAULT NULL COMMENT '地图名称',
+  `scene_Name` varchar(50) DEFAULT NULL COMMENT '场景名称',
+  `module` int DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `HANDLE_PERSON` varchar(50) DEFAULT NULL COMMENT '处理人',
+  `HANDLE_TIME` datetime DEFAULT NULL COMMENT '处理时间',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
-
--- ----------------------------
--- Records of LOG_INFO
--- ----------------------------
-INSERT INTO `LOG_INFO` VALUES ('1', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-08 15:43:54', null, null);
-INSERT INTO `LOG_INFO` VALUES ('2', 'dasdf', 'asdfasdf', 'WARNING', 'INFO_EXECUTE_TASK', '2017-06-08 15:43:54', null, null);
-INSERT INTO `LOG_INFO` VALUES ('3', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_TASK', '2017-06-08 15:43:54', null, null);
-INSERT INTO `LOG_INFO` VALUES ('4', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:19', null, null);
-INSERT INTO `LOG_INFO` VALUES ('5', 'dasdf', 'asdfasdf', 'WARNING', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:19', null, null);
-INSERT INTO `LOG_INFO` VALUES ('6', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
-INSERT INTO `LOG_INFO` VALUES ('7', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
-INSERT INTO `LOG_INFO` VALUES ('8', 'dasdf', 'asdfasdf', 'WARNING', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
-INSERT INTO `LOG_INFO` VALUES ('9', 'dasdf', 'asdfasdf', 'ERROR', 'INFO_EXECUTE_TASK', '2017-06-08 15:44:20', null, null);
-INSERT INTO `LOG_INFO` VALUES ('10', 'dasdf', 'asdfasdf', 'INFO', 'INFO_EXECUTE_TASK', '2017-06-09 15:44:20', 'null', '2017-06-20 14:23:37');
 
 -- ----------------------------
 -- Table structure for LOG_MISSION
