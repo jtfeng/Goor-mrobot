@@ -1,8 +1,12 @@
 package cn.muye.area.map.bean;
 
 import cn.mrobot.bean.area.map.MapInfo;
-//import cn.mrobot.bean.state.enums.CollectorState;
+//import cn.mrobot.bean.state.CollectorState;
+import cn.mrobot.bean.charge.ChargeInfo;
+import cn.mrobot.bean.state.*;
 import cn.muye.base.bean.MessageInfo;
+
+import java.util.List;
 
 /**
  * Created by Jelynn on 2017/7/13.
@@ -13,7 +17,9 @@ public class CurrentInfo {
 
     private MapInfo mapInfo;
 
-//    private CollectorState collectorState;
+    private ChargeInfo chargeInfo;
+
+    private List<StateDetail> list;
 
     public String getPose() {
         return pose;
@@ -31,11 +37,19 @@ public class CurrentInfo {
         this.mapInfo = mapInfo;
     }
 
-//    public CollectorState getCollectorState() {
-//        return collectorState;
-//    }
-//
-//    public void setCollectorState(CollectorState collectorState) {
-//        this.collectorState = collectorState;
-//    }
+    public ChargeInfo getChargeInfo() {
+        return chargeInfo;
+    }
+
+    public void setChargeInfo(ChargeInfo chargeInfo) {
+        this.chargeInfo = chargeInfo;
+    }
+
+    public List<StateDetail> getList() {
+        return list;
+    }
+
+    public void setList(List<StateDetail> list) {
+        this.list = list;
+    }
 }

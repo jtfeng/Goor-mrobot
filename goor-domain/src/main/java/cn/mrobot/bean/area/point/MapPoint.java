@@ -87,6 +87,8 @@ public class MapPoint extends BaseBean {
 	@JSONField(name = "point_level")
 	private int pointLevel;
 
+    private int deleteFlag;
+
     public String getPointName() {
         return pointName;
     }
@@ -207,5 +209,13 @@ public class MapPoint extends BaseBean {
 
     public void setICPointType(String ICPointType) {
         this.ICPointType = ICPointType;
+    }
+
+    public int getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(int deleteFlag) {
+        this.deleteFlag = deleteFlag;
     }
 }

@@ -270,21 +270,21 @@ public class ConsumerCommon {
         return AjaxResult.success();
     }
 
-    /**
-     * 测试
-     *
-     * @param messageInfo
-     */
-    @RabbitListener(queues = TopicConstants.TOPIC_SERVER_COMMAND)
-    public AjaxResult directCommandReportAndReceive1(@Payload MessageInfo messageInfo) {
-        try {
-            logger.info("11111111111111111111111111111111111111111111");
-            //messageSaveOrUpdate(messageInfo);
-        } catch (Exception e) {
-            logger.error("consumer directCommandReport exception", e);
-        }
-        return AjaxResult.success();
-    }
+//    /**
+//     * 测试
+//     *
+//     * @param messageInfo
+//     */
+//    @RabbitListener(queues = TopicConstants.TOPIC_SERVER_COMMAND)
+//    public AjaxResult directCommandReportAndReceive1(@Payload MessageInfo messageInfo) {
+//        try {
+//            logger.info("11111111111111111111111111111111111111111111");
+//            //messageSaveOrUpdate(messageInfo);
+//        } catch (Exception e) {
+//            logger.error("consumer directCommandReport exception", e);
+//        }
+//        return AjaxResult.success();
+//    }
 
 
     private boolean messageSaveOrUpdate(MessageInfo messageInfo) throws Exception {
@@ -357,7 +357,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_ROBOT_INFO)
     public void subscribeRobotInfo(@Payload MessageInfo messageInfo) {
         try {
-            logger.info("subscribeRobotInfo start");
+//            logger.info("subscribeRobotInfo start");
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 String robotStr = AES.decryptFromBase64(messageInfo.getMessageText(), Constant.AES_KEY);
                 Robot robotNew = JSON.parseObject(robotStr, Robot.class);

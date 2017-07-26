@@ -2,6 +2,7 @@ package cn.muye.area.map.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.WhereRequest;
@@ -10,7 +11,7 @@ import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
-//import cn.muye.log.state.StateCollectorService;
+import cn.muye.log.state.StateCollectorService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -34,8 +35,8 @@ public class MapInfoController {
     @Autowired
     private MapInfoService mapInfoService;
 
-//    @Autowired
-//    private StateCollectorService stateCollectorService;
+    @Autowired
+    private StateCollectorService stateCollectorService;
 
     @RequestMapping(value = "area/mapinfo", method = {RequestMethod.POST})
     @ResponseBody
@@ -74,11 +75,11 @@ public class MapInfoController {
         }
     }
 
-    @RequestMapping(value = "area/mapinfo/getPosition", method = RequestMethod.GET)
+    @RequestMapping(value = "area/mapinfo/getCurrentInfo", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult getPosition(HttpServletRequest request, @RequestParam("code") String code) {
+    public AjaxResult getCurrentInfo(HttpServletRequest request, @RequestParam("code") String code) {
         try {
-            //TODO 从redis中获取当前机器的坐标
+            //从缓存中获取当前机器的坐标
             CurrentInfo currentInfo = new CurrentInfo();
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
             if (null == currentPoseInfo) {
@@ -90,7 +91,8 @@ public class MapInfoController {
             }
             parsePoseData(currentPoseInfo);
             currentInfo.setPose(parsePoseData(currentPoseInfo));
-            //TODO 根据场景名和地图名获取地图信息
+
+            //根据场景名和地图名获取地图信息
             MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
             if (null == currentMap) {
                 return AjaxResult.failed("未获取到当前机器人（" + code + "）实时地图");
@@ -111,13 +113,20 @@ public class MapInfoController {
             if (mapInfo == null) {
                 return AjaxResult.failed("未找到地图信息 name=" + mapName + "，sceneName=" + sceneName);
             }
-            //TODO 按照数据格式封装给前端
-            currentInfo.setMapInfo(mapInfo);
-//            //设置状态
-//            currentInfo.setCollectorState(stateCollectorService.getCollectorState(code));
-            return AjaxResult.success(currentInfo, "获取当前位置信息成功");
-        } catch (Exception e) {
-            LOGGER.error("getPosition exception", e);
+            //获取当前电量信息
+            ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(code);
+            if(chargeInfo != null ){
+                currentInfo.setChargeInfo(chargeInfo);
+            }
+
+            //过滤状态。封装成List<StateDetail> 返回
+            currentInfo.setList(stateCollectorService.getCurrentTriggeredState(code));
+            return AjaxResult.success(currentInfo, "获取当前信息成功");
+        }catch (IllegalAccessException e) {
+            LOGGER.error("getCurrentInfo exception", e);
+            return AjaxResult.failed("获取机器人状态信息出错");
+        }catch (Exception e) {
+            LOGGER.error("getCurrentInfo exception", e);
             return AjaxResult.failed("获取机器人位置信息出错");
         }
     }

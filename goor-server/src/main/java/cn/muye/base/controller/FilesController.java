@@ -202,8 +202,8 @@ public class FilesController {
                 isSuccess = true;
             }
             //获取文件的相对路径
-            String relativePath = real.getPath().replace(DOWNLOAD_HOME,"");
-            LOGGER.info("上传成功，文件保存路径，path = "+real.getPath());
+            String relativePath = real.getPath().replace(DOWNLOAD_HOME, "");
+            LOGGER.info("上传成功，文件保存路径，path = " + real.getPath());
             // 传输成功后，添加至数据库
             FileUpload uploadFile = fileUploadService.getByName(fileName);
             if (uploadFile != null) {
@@ -244,7 +244,9 @@ public class FilesController {
                     analysis(type, otherInfoObject);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                return AjaxResponse.failed(-1);
+            }catch (Exception e) {
+                return AjaxResponse.failed(-1);
             }
         }
     }
@@ -292,7 +294,7 @@ public class FilesController {
      * @param type
      * @param info
      */
-    private void analysis(String type, JSONObject info) {
+    private void analysis(String type, JSONObject info) throws Exception {
         if (Constant.FILE_UPLOAD_TYPE_MAP.equals(type)) {
             //保存地图上传信息
             MapZip mapZip = JSON.parseObject(JSON.toJSONString(info), MapZip.class);
@@ -300,23 +302,23 @@ public class FilesController {
             mapZip.setCreateTime(new Date());
             mapZipService.save(mapZip);
             //解压文件夹到固定路径
-            try {
-                File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", mapZip.getDeviceId());
-                if (saveFile.exists()) {
-                    FileUtils.deleteDir(saveFile);
-                }
-                saveFile.mkdirs();
-                ZipUtils.unzip(DOWNLOAD_HOME + mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
-                LOGGER.info("地图文件解压成功，保存地址 path=" + saveFile.getAbsolutePath());
-                //解析地图文件
-                analysisFile(saveFile, mapZip);
-            } catch (Exception e) {
-                LOGGER.error("地图文件解压失败", e);
+            File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", mapZip.getDeviceId());
+            if (saveFile.exists()) {
+                FileUtils.deleteDir(saveFile);
             }
+            saveFile.mkdirs();
+            boolean result = ZipUtils.unzip(DOWNLOAD_HOME + mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
+            if (!result) {
+                LOGGER.info("地图文件解压失败");
+                throw new RuntimeException("地图文件解压失败");
+            }
+            LOGGER.info("地图文件解压成功，保存地址 path=" + saveFile.getAbsolutePath());
+            //解析地图文件
+            analysisFile(saveFile, mapZip);
         }
     }
 
-    public void analysisFile(File mapFilePath, MapZip mapZip) {
+    public void analysisFile(File mapFilePath, MapZip mapZip) throws Exception {
         String deviceId = mapZip.getDeviceId();
         Long mapzipId = mapZip.getId();
         LOGGER.info("解析导航目标点文件，地图文件地址=" + mapFilePath);
@@ -328,16 +330,10 @@ public class FilesController {
         for (int i = 0; i < sceneFileDirs.length; i++) {
             File sceneDir = sceneFileDirs[i];
             String sceneName = sceneDir.getName();
-            try {
-                //解析地图文件
-                analysisMapFile(sceneName, sceneDir.getAbsolutePath(), deviceId, mapzipId);
-                //解析导航点文件
-                analysisPointFile(sceneName, sceneDir.getAbsolutePath());
-            } catch (IllegalAccessException e) {
-                LOGGER.error("解析导航目标点出错", e);
-            }catch (Exception e) {
-                LOGGER.error("解析导航目标点出错", e);
-            }
+            //解析地图文件
+            analysisMapFile(sceneName, sceneDir.getAbsolutePath(), deviceId, mapzipId);
+            //解析导航点文件
+            analysisPointFile(sceneName, sceneDir.getAbsolutePath());
         }
     }
 
@@ -367,8 +363,8 @@ public class FilesController {
             mapInfo.setCreateTime(new Date());
             //TODO 删除原数据库中的地图数据
             List<MapInfo> mapInfoDBList = mapInfoService.getMapInfo(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            if(null != mapInfoDBList && mapInfoDBList.size() > 0){
-                for (MapInfo mapInfoDB : mapInfoDBList ){
+            if (null != mapInfoDBList && mapInfoDBList.size() > 0) {
+                for (MapInfo mapInfoDB : mapInfoDBList) {
                     mapInfoService.delete(mapInfoDB);
                 }
             }
@@ -378,10 +374,10 @@ public class FilesController {
             String convertPGMFilePath = convertFile(pgmFile);
             mapInfo.setPngImageLocalPath(convertPGMFilePath.replace(DOWNLOAD_HOME, ""));//保存相对路径
             mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID));
+            CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
             mapInfoService.save(mapInfo);
             //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
-            sceneService.checkSceneIsNeedToBeUpdated(sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID +"");
+            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "");
         }
     }
 

@@ -15,12 +15,14 @@ import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.bean.state.enums.NavigationType;
 import cn.mrobot.bean.state.enums.StateFieldEnums;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.area.map.bean.StateDetail;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.base.service.LogInfoService;
+import cn.muye.log.state.StateCollectorService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +49,14 @@ public class LogCollectService {
     @Autowired
     private LogInfoService logInfoService;
 
+    @Autowired
+    private StateCollectorService stateCollectorService;
+
     public void startCollectLog() {
         List<Robot> robotList = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if(robotList == null || robotList.size() <=0){
+            return;
+        }
         ExecutorService executorService = Executors.newFixedThreadPool(robotList.size());
         for (int i = 0; i < robotList.size(); i++) {
             Robot robot = robotList.get(i);
@@ -138,7 +146,6 @@ public class LogCollectService {
                 }
             }
 
-
             saveLogInfo(code, ModuleEnums.BASE, LogLevel.WARNING, LogType.WARNING_BASE, stringBuffer.toString());
         }catch (Exception e){
 
@@ -149,14 +156,11 @@ public class LogCollectService {
      * 收集记录导航日志
      */
     private void collectNavigationLog(String code) {
-        StateCollectorNavigation navigation = CacheInfoManager.getNavigationCache(code);
-        if(null == null){
-            return;
+        List<StateDetail> stateDetails = stateCollectorService.getCurrentNavigationState(code);
+        if(null != stateDetails && stateDetails.size() > 0){
+            StateDetail stateDetail = stateDetails.get(0);
+            saveLogInfo(code, ModuleEnums.NAVIGATION, LogLevel.INFO, LogType.INFO_NAVIGATION, stateDetail.getCHValue());
         }
-        int navigationTypeCode = navigation.getNavigationTypeCode();
-        NavigationType type = NavigationType.getType(navigationTypeCode);
-        String navigationTypeCodeStr = (type != null) ? type.getName() : "未定义状态";
-        saveLogInfo(code, ModuleEnums.NAVIGATION, LogLevel.INFO, LogType.INFO_NAVIGATION, navigationTypeCodeStr);
     }
 
     private String getChargeMessage(ChargeInfo chargeInfo) {

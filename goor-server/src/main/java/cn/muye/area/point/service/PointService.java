@@ -28,6 +28,8 @@ public interface PointService {
 
 	void delete(MapPoint mapPoint);
 
+	void delete(long storeId, int deleteFlag);
+
 	void delete(String sceneName, String mapName, long storeId);
 
 	void update(MapPoint mapPoint);

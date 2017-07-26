@@ -192,6 +192,12 @@ public class ZipUtils {
                     //删除已存在的目标文件
                     entryFile.delete();
                 }
+                String parent = entryFile.getParent();
+                File parentFile = new File(parent);
+                if (!parentFile.exists())
+                    parentFile.mkdirs();
+
+                entryFile.createNewFile();
                 //写入文件
                 bos = new BufferedOutputStream(new FileOutputStream(entryFile));
                 bis = new BufferedInputStream(zip.getInputStream(entry));

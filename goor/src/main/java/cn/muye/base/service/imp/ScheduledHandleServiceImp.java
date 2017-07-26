@@ -77,7 +77,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public void rosHealthCheck() {
-        logger.info("-->> Scheduled rosHealthCheck start");
+//        logger.info("-->> Scheduled rosHealthCheck start");
         try {
             ros = applicationContext.getBean(Ros.class);
             if (null == ros) {
@@ -91,7 +91,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             Topic mapCurrentPubTopic = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
             mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
 
-            logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
+//            logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 ros.disconnect();
                 ros.connect();
@@ -108,7 +108,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public void downloadResource() {
         try {
-            logger.info("-->> Scheduled downloadResource start");
+//            logger.info("-->> Scheduled downloadResource start");
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
             ros = applicationContext.getBean(Ros.class);
             List<ReceiveMessage> list = receiveMessageService.listByMessageStatus(new ReceiveMessage(MessageStatusType.FILE_NOT_DOWNLOADED.getIndex()));//从接收的库查询出需要下载的资源
@@ -123,7 +123,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 }
                 DownloadHandle.downloadCheck(ros, messageInfo, receiveMessageService);
             }
-            logger.info("-->> Scheduled downloadResource end");
+//            logger.info("-->> Scheduled downloadResource end");
         } catch (final Exception e) {
             logger.error("Scheduled downloadResource Exception", e);
         }
@@ -178,7 +178,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public AjaxResult publishMessage(Ros ros, MessageInfo messageInfo) {
         try {
-            logger.info("-->> parameter publishMessage start");
+//            logger.info("-->> parameter publishMessage start");
             CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
             if (StringUtil.isEmpty(commonInfo)
                     || StringUtil.isEmpty(commonInfo.getTopicName())
@@ -192,7 +192,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                 Message toSend = new Message(commonInfo.getPublishMessage());
                 echo.publish(toSend);
-                logger.info("-->> publishMessage commonInfo to ros success");
+//                logger.info("-->> publishMessage commonInfo to ros success");
                 return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());
             } else {
                 logger.info("-->> publishMessage fail, ros not connect");
