@@ -2,21 +2,13 @@ package cn.muye.base.controller;
 
 import cn.mrobot.bean.FileResult;
 import cn.mrobot.bean.FileUpload;
-import cn.mrobot.bean.area.map.MapInfo;
-import cn.mrobot.bean.area.map.MapZip;
-import cn.mrobot.bean.area.point.IndustrialControlPointType;
-import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.exception.MapAnalysisException;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
-import cn.mrobot.utils.ZipUtils;
 import cn.mrobot.utils.ajax.AjaxResponse;
-import cn.muye.area.map.service.MapInfoService;
-import cn.muye.area.map.service.MapZipService;
-import cn.muye.area.point.service.PointService;
-import cn.muye.assets.scene.service.SceneService;
+import cn.muye.area.map.service.MapAnalysisService;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.FileUploadService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -30,12 +22,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.yaml.snakeyaml.Yaml;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.*;
-import java.lang.reflect.Field;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by Martin on 2016/4/21.
@@ -52,19 +47,10 @@ public class FilesController {
     private String DOWNLOAD_HTTP;
 
     @Autowired
-    private MapZipService mapZipService;
-
-    @Autowired
     private FileUploadService fileUploadService;
 
     @Autowired
-    private PointService pointService;
-
-    @Autowired
-    private MapInfoService mapInfoService;
-
-    @Autowired
-    private SceneService sceneService;
+    private MapAnalysisService mapAnalysisService;
 
     private static final String RESOURCE_TYPE_DIR = "default";
     private static final String RESOURCE_TYPE_FILE = "file";
@@ -232,7 +218,7 @@ public class FilesController {
 
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResponse.failed(-1);
+            return AjaxResponse.failed(-1, "文件上传失败");
         } finally {
             try {
                 in.close();
@@ -244,9 +230,9 @@ public class FilesController {
                     analysis(type, otherInfoObject);
                 }
             } catch (IOException e) {
-                return AjaxResponse.failed(-1);
+                return AjaxResponse.failed(-1, "文件上传失败");
             }catch (Exception e) {
-                return AjaxResponse.failed(-1);
+                return AjaxResponse.failed(-1, e.getMessage());
             }
         }
     }
@@ -288,206 +274,16 @@ public class FilesController {
         }
     }
 
-    /**
-     * 处理文件上传的其他信息
-     *
-     * @param type
-     * @param info
-     */
-    private void analysis(String type, JSONObject info) throws Exception {
+    public void analysis(String type, JSONObject info) throws Exception {
         if (Constant.FILE_UPLOAD_TYPE_MAP.equals(type)) {
-            //保存地图上传信息
-            MapZip mapZip = JSON.parseObject(JSON.toJSONString(info), MapZip.class);
-            mapZip.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            mapZip.setCreateTime(new Date());
-            mapZipService.save(mapZip);
-            //解压文件夹到固定路径
-            File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", mapZip.getDeviceId());
-            if (saveFile.exists()) {
-                FileUtils.deleteDir(saveFile);
-            }
-            saveFile.mkdirs();
-            boolean result = ZipUtils.unzip(DOWNLOAD_HOME + mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
-            if (!result) {
-                LOGGER.info("地图文件解压失败");
-                throw new RuntimeException("地图文件解压失败");
-            }
-            LOGGER.info("地图文件解压成功，保存地址 path=" + saveFile.getAbsolutePath());
-            //解析地图文件
-            analysisFile(saveFile, mapZip);
-        }
-    }
-
-    public void analysisFile(File mapFilePath, MapZip mapZip) throws Exception {
-        String deviceId = mapZip.getDeviceId();
-        Long mapzipId = mapZip.getId();
-        LOGGER.info("解析导航目标点文件，地图文件地址=" + mapFilePath);
-        if (!mapFilePath.exists()) {
-            return;
-        }
-        //场景文件夹
-        File[] sceneFileDirs = mapFilePath.listFiles();
-        for (int i = 0; i < sceneFileDirs.length; i++) {
-            File sceneDir = sceneFileDirs[i];
-            String sceneName = sceneDir.getName();
-            //解析地图文件
-            analysisMapFile(sceneName, sceneDir.getAbsolutePath(), deviceId, mapzipId);
-            //解析导航点文件
-            analysisPointFile(sceneName, sceneDir.getAbsolutePath());
-        }
-    }
-
-    //解析地图文件
-    private void analysisMapFile(String sceneName, String sceneDir, String deviceId, Long mapzipId) throws Exception {
-        File mapFilePath = FileUtils.getFile(sceneDir, Constant.MAP_FILE_PATH);
-        if (!mapFilePath.exists()) {
-            LOGGER.info("地图文件夹不存在。sceneName=" + sceneName + ", sceneDir=" + sceneDir);
-            return;
-        }
-
-        File[] mapFiles = mapFilePath.listFiles();
-        for (int i = 0; i < mapFiles.length; i++) {
-            File file = mapFiles[i];
-            String mapName = file.getName().substring(0, file.getName().lastIndexOf("."));
-
-            Map map = readFileYAML(file);
-            if (null == map || map.isEmpty()) {
-                continue;
-            }
-            //遍历导航点
-            MapInfo mapInfo = new MapInfo();
-            mapInfo.setMapName(mapName);
-            mapInfo.setSceneName(sceneName);
-            mapInfo.setMapZipId(mapzipId);
-            mapInfo.setDeviceId(deviceId);
-            mapInfo.setCreateTime(new Date());
-            //TODO 删除原数据库中的地图数据
-            List<MapInfo> mapInfoDBList = mapInfoService.getMapInfo(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            if (null != mapInfoDBList && mapInfoDBList.size() > 0) {
-                for (MapInfo mapInfoDB : mapInfoDBList) {
-                    mapInfoService.delete(mapInfoDB);
-                }
-            }
-            mapInfo.setRos(JSON.toJSONString(map));
-
-            File pgmFile = new File(mapFilePath.getAbsolutePath(), map.get("image").toString());
-            String convertPGMFilePath = convertFile(pgmFile);
-            mapInfo.setPngImageLocalPath(convertPGMFilePath.replace(DOWNLOAD_HOME, ""));//保存相对路径
-            mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
-            mapInfoService.save(mapInfo);
-            //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
-            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "");
-        }
-    }
-
-    //解析导航目标点文件
-    private void analysisPointFile(String sceneName, String sceneDir) throws IllegalAccessException {
-        File pointFilePath = FileUtils.getFile(sceneDir, Constant.POINT_FILE_PATH);
-        if (!pointFilePath.exists()) {
-            return;
-        }
-        File[] pointFiles = pointFilePath.listFiles();
-        for (int i = 0; i < pointFiles.length; i++) {
-            File file = pointFiles[i];
-
-            String mapName = file.getName().substring(0, file.getName().lastIndexOf("."));
-            //删除原数据库中该地图和场景名中的导航目标点
-            pointService.delete(sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-
-            Map map = readFileYAML(file);
-            if (null == map || map.isEmpty()) {
-                continue;
-            }
-            Iterator iterator = map.entrySet().iterator();
-            //遍历导航点
-            while (iterator.hasNext()) {
-                MapPoint mapPoint = new MapPoint();
-                mapPoint.setMapName(mapName);
-                mapPoint.setSceneName(sceneName);
-                Map.Entry entry = (Map.Entry) iterator.next();
-                mapPoint.setPointName(entry.getKey().toString());
-                Map valueMap = (Map) entry.getValue();
-                //通过反射设置属性值
-                Field[] fields = MapPoint.class.getDeclaredFields();
-                for (int j = 0; j < fields.length; j++) {
-                    if (valueMap.containsKey(fields[j].getName())) {
-                        Field field = fields[j];
-                        field.setAccessible(true);
-                        field.set(mapPoint, valueMap.get(field.getName()));
-                    }
-                }
-                mapPoint.setCreateTime(new Date());
-                mapPoint.setMapPointTypeId(Integer.parseInt(valueMap.get("type").toString()));
-                mapPoint.setPointAlias(valueMap.get("alias").toString());
-                mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getName());
-                pointService.save(mapPoint);
-            }
-        }
-    }
-
-    // 读取YAML配置文件
-    private Map readFileYAML(File file) {
-        try {
-            String name = file.getName();
-            if (name.endsWith(".yaml")) {
-                Yaml yaml = new Yaml();
-                //也可以将值转换为Map
-                Map map = (Map) yaml.load(new FileInputStream(file));
-                return map;
-            }
-        } catch (Exception e) {
-            LOGGER.error("读取YAML配置文件,path=" + file.getAbsolutePath(), e);
-        }
-        return new HashMap<>();
-    }
-
-    // pgm转png
-    private String pgmConvertPng(File file) {
-        File flist[] = file.listFiles();
-        if (flist == null || flist.length == 0) {
-            return "";
-        }
-        for (File f : flist) {
-            if (f.isDirectory()) {
-                //这里将列出所有的文件夹
-                LOGGER.info("Dir pgmConvertPng==>" + f.getAbsolutePath());
-                pgmConvertPng(f);
-            } else {
-                return this.convertFile(f);
-            }
-        }
-        return "";
-    }
-
-    private String convertFile(File f) {
-        if (f.getName().contains(".pgm")) {
-            String pngFilePath = f.getAbsolutePath().replace(".pgm", ".png");
-            String cmd = "convert " + f.getAbsolutePath() + " " + pngFilePath;
-            LOGGER.info("file pgmConvertPng==>" + f.getAbsolutePath());
-            Runtime run = Runtime.getRuntime();//返回与当前 Java 应用程序相关的运行时对象
+            //解析上传的地图
             try {
-                LOGGER.info("cmd ==========>" + cmd);
-                Process p = run.exec(cmd);// 启动另一个进程来执行命令
-                BufferedInputStream in = new BufferedInputStream(p.getInputStream());
-                BufferedReader inBr = new BufferedReader(new InputStreamReader(in));
-                String lineStr;
-                while ((lineStr = inBr.readLine()) != null)
-                    //获得命令执行后在控制台的输出信息
-                    LOGGER.info(lineStr);// 打印输出信息
-                //检查命令是否执行失败。
-                if (p.waitFor() != 0) {
-                    if (p.exitValue() == 1)//p.exitValue()==0表示正常结束，1：非正常结束
-                        LOGGER.error("命令执行失败!");
-                }
-                inBr.close();
-                in.close();
-                return pngFilePath;
+                mapAnalysisService.analysis(info);
             } catch (Exception e) {
-                LOGGER.error("convertFile error", e);
+                mapAnalysisService.callBack();
+                throw new MapAnalysisException("地图解析失败，数据回滚");
             }
+
         }
-        return "";
     }
 }

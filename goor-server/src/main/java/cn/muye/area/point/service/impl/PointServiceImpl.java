@@ -220,6 +220,11 @@ public class PointServiceImpl implements PointService {
         return getSceneName(level, sceneName);
     }
 
+    @Override
+    public void updateDeleteFlag(long storeId, int deleteFlag) {
+        pointMapper.updateDeleteFlag(storeId, deleteFlag);
+    }
+
     /**
      * 根据场景名获取地图名
      */

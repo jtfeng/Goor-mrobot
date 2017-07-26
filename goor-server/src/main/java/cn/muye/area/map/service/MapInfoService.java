@@ -24,9 +24,9 @@ public interface MapInfoService {
 
     void delete(MapInfo mapInfo);
 
-    void delete(long storeId, int deleteFlag);
-
     void update(MapInfo mapInfo);
+
+    void delete(long storeId, int deleteFlag);
 
     void updateDeleteFlag(long storeId, int deleteFlag);
 

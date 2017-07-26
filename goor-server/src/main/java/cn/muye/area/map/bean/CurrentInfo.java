@@ -1,10 +1,7 @@
 package cn.muye.area.map.bean;
 
 import cn.mrobot.bean.area.map.MapInfo;
-//import cn.mrobot.bean.state.CollectorState;
 import cn.mrobot.bean.charge.ChargeInfo;
-import cn.mrobot.bean.state.*;
-import cn.muye.base.bean.MessageInfo;
 
 import java.util.List;
 

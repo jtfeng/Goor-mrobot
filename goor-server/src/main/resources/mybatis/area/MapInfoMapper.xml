@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.area.map.mapper.MapInfoMapper">
+
+    <resultMap id="mapInfo" type="cn.mrobot.bean.area.map.MapInfo">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+
+        <result property="mapName" column="MAP_NAME"/>
+        <result property="sceneName" column="SCENE_NAME"/>
+        <result property="mapAlias" column="MAP_ALIAS"/>
+        <result property="pngImageLocalPath" column="PNG_IMAGE_LOCAL_PATH"/>
+        <result property="ros" column="ROS"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="pngDesigned" column="PNG_DESIGNED"/>
+        <result property="mapZipId" column="MAP_ZIP_ID"/>
+        <result property="floor" column="FLOOR"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
+        MAP_NAME,
+        SCENE_NAME,
+        MAP_ALIAS,
+        PNG_IMAGE_LOCAL_PATH,
+        ROS,
+        DEVICE_ID,
+        PNG_DESIGNED,
+        MAP_ZIP_ID,
+        FLOOR,
+        DELETE_FLAG
+</sql>
+
+    <update id="updateDeleteFlag">
+        UPDATE  A_MAP_INFO
+        SET
+        <if test="deleteFlag != null">
+            DELETE_FLAG = #{deleteFlag}
+        </if>
+        WHERE
+        STORE_ID = #{storeId}
+    </update>
+
+</mapper>
