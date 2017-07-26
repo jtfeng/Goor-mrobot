@@ -573,7 +573,7 @@ public class MissionController {
 			//巡逻任务：还需增加等待任务
 			if(missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
 				//TODO 美亚调度写死两个Mission，第一个是导航和语音的mission，第二个是到目标点后等待任务和语音任务
-				if(missionList.getMissionList() == null || missionList.getMissionList().size() >= 2) {
+				if(missionList.getMissionList() == null || missionList.getMissionList().size() > 2) {
 					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，只能一个导航和一个等待任务！");
 				}
 
@@ -581,7 +581,7 @@ public class MissionController {
 				Mission missionWait = missionList.getMissionList().get(1);
 				Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
 				if(missionWaitItemSet == null
-						|| missionWaitItemSet.size() >= 2) {
+						|| missionWaitItemSet.size() > 2) {
 					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
 				}
 			}
