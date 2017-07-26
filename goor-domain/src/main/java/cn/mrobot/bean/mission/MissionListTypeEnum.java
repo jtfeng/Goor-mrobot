@@ -16,7 +16,7 @@ public enum MissionListTypeEnum {
 	NORMAL("normal", "普通任务","normal"),
 	PLAN("plan", "计划任务","plan"),
 	PATROL("patrol", "巡逻任务","plan"),
-	CHARGE("charge", "充电任务","normal");
+	CHARGE("charge", "充电任务","plan");
 
 	private String caption;
 

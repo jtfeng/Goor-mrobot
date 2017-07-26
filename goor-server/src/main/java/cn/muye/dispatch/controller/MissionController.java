@@ -424,6 +424,14 @@ public class MissionController {
 			//TODO 从session取当前切换门店的ID
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			//如果场景后台切换过，传入场景ID。
+			// 当whereRequest含场景ID条件时，则取该场景ID作为过滤条件；若whereRequest不含场景ID条件时，则取出入的场景ID作为过滤条件。
+			if(scene != null) {
+				whereRequest = getSceneWhereRequest(scene.getId(),whereRequest);
+			}
+
 			Integer pageNo = whereRequest.getPage();
 			Integer pageSize = whereRequest.getPageSize();
 
@@ -438,6 +446,21 @@ public class MissionController {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed();
 		}
+	}
+
+	/**
+	 * 根据切换的场景构建查询条件
+	 * @param whereRequest
+	 * @param sceneId 当whereRequest里面sceneId为空时，若为null，则无场景过滤；若有值，使用该值场景过滤；
+	 * @return
+	 */
+	private WhereRequest getSceneWhereRequest(Long sceneId, WhereRequest whereRequest) throws Exception{
+		JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
+		Object o = jsonObject.get(SearchConstants.SEARCH_SCENE_ID);
+		if(o == null && sceneId != null) {
+			jsonObject.put(SearchConstants.SEARCH_SCENE_ID, sceneId);
+		}
+		return whereRequest;
 	}
 
 	@RequestMapping(value = {"dispatch/missionList/list"}, method = RequestMethod.GET)
@@ -603,6 +626,13 @@ public class MissionController {
 			HttpServletRequest request) {
 		AjaxResult resp = AjaxResult.success();
 		try {
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+			missionList.setSceneId(scene.getId());
+
 			if(robotIds.length <= 0 || robotIds.length <= 0) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
 			}
