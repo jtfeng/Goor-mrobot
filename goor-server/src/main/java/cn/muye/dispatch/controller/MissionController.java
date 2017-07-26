@@ -572,17 +572,19 @@ public class MissionController {
 
 			//巡逻任务：还需增加等待任务
 			if(missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
-				//TODO 美亚调度写死两个Mission，第一个是导航和语音的mission，第二个是到目标点后等待任务和语音任务
-				if(missionList.getMissionList() == null || missionList.getMissionList().size() >= 2) {
+				//TODO 美亚调度写死两个Mission，第一个是导航和语音的mission，第二个是到目标点后等待任务和语音任务（可以没有等待任务）
+				if(missionList.getMissionList() == null || missionList.getMissionList().size() > 2) {
 					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，只能一个导航和一个等待任务！");
 				}
 
-				//取第二个mission做等待任务业务参数校验
-				Mission missionWait = missionList.getMissionList().get(1);
-				Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
-				if(missionWaitItemSet == null
-						|| missionWaitItemSet.size() >= 2) {
-					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+				//取第二个mission做等待任务业务参数校验，如果第二个任务存在，再判断时
+				if(missionList.getMissionList().size() ==2) {
+					Mission missionWait = missionList.getMissionList().get(1);
+					Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
+					if(missionWaitItemSet == null
+							|| missionWaitItemSet.size() > 2) {
+						return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+					}
 				}
 			}
 			//充电任务
