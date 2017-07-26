@@ -52,6 +52,7 @@ public class MapInfoController {
             }
             mapInfoDB.setMapAlias(mapInfo.getMapAlias());
             mapInfoDB.setPngDesigned(mapInfo.getPngDesigned());
+            mapInfoDB.setFloor(mapInfo.getFloor());
             mapInfoService.update(mapInfoDB);
             return AjaxResult.success(mapInfoDB, "修改成功");
         } catch (Exception e) {

@@ -37,6 +37,8 @@ public class MapInfo extends BaseBean {
 
 	private Long mapZipId;
 
+	private int floor;
+
 	public String getMapName() {
 		return mapName;
 	}
@@ -93,7 +95,13 @@ public class MapInfo extends BaseBean {
 		this.deviceId = deviceId;
 	}
 
+	public int getFloor() {
+		return floor;
+	}
 
+	public void setFloor(int floor) {
+		this.floor = floor;
+	}
 
 	public Long getMapZipId() {
 		return mapZipId;
