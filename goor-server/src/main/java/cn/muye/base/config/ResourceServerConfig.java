@@ -18,7 +18,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers("/resources/static/**").permitAll()
                 .antMatchers("/services/**").permitAll()
                 .antMatchers("/druid/**").permitAll()
-                .antMatchers("/**").permitAll()
+//                .antMatchers("/**").permitAll()
                 .anyRequest().authenticated();
     }
 
