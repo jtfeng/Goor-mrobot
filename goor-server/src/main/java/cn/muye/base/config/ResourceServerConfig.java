@@ -11,16 +11,15 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
-//        http.authorizeRequests()
-//                .antMatchers("/account/user/login").permitAll()
-//                .antMatchers("/account/user/login/pad").permitAll()
-//                .antMatchers("/account/user/logOut").permitAll()
-//                .antMatchers("/resources/static/**").permitAll()
-//                .antMatchers("/services/**").permitAll()
-//                .antMatchers("/druid/**").permitAll()
+        http.authorizeRequests()
+                .antMatchers("/account/user/login").permitAll()
+                .antMatchers("/account/user/login/pad").permitAll()
+                .antMatchers("/account/user/logOut").permitAll()
+                .antMatchers("/resources/static/**").permitAll()
+                .antMatchers("/services/**").permitAll()
+                .antMatchers("/druid/**").permitAll()
 //                .antMatchers("/**").permitAll()
-//                .anyRequest().authenticated();
-        http.authorizeRequests().anyRequest().permitAll();
+                .anyRequest().authenticated();
     }
 
 }
