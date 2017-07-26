@@ -63,14 +63,14 @@ public class MapPoint extends BaseBean {
     private double th;
 
     /**
-     * 点类型索引
+     * 工控点类型索引
      * */
 	@JSONField(name = "point_type")
 	@Column(name = "MAP_POINT_TYPE_ID")
     private int mapPointTypeId;
 
     /**
-     * 点类型
+     * 点类型名称展示
      * */
     @JSONField(name = "ic_point_type")
     @Column(name = "IC_POINT_TYPE")
