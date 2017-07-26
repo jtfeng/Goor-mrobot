@@ -94,7 +94,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public Scene getSceneById(Long id) throws Exception {
         Scene scene = sceneMapper.selectByPrimaryKey(id);
         scene.setRobots(this.sceneMapper.findRobotBySceneId(id));
-        scene.setMapSceneName(this.sceneMapper.findMapBySceneId(id, scene.getStoreId()).get(0).getSceneName());
+        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(id, scene.getStoreId());
+        if (mapInfos != null && mapInfos.size() != 0) {
+            scene.setMapSceneName(mapInfos.get(0).getSceneName());
+        }
         return scene;
     }
 
@@ -108,7 +111,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         List<Scene> scenes = listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(),Scene.class,"ID DESC");
         for (Scene scene : scenes){
             scene.setRobots(      this.sceneMapper.findRobotBySceneId(scene.getId()));//设置绑定的机器人信息
-            scene.setMapSceneName(this.sceneMapper.findMapBySceneId(scene.getId(), scene.getStoreId()).get(0).getSceneName());//设置绑定的场景名城
+            List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(scene.getId(), scene.getStoreId());
+            if (mapInfos != null && mapInfos.size() != 0) {
+                scene.setMapSceneName(mapInfos.get(0).getSceneName());//设置绑定的场景名城
+            }
         }
         return scenes;
     }
@@ -131,6 +137,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         if (robots.size() == 0 || mapInfos.size() == 0){
             return;
         }
+        Preconditions.checkNotNull(mapInfos);
+        Preconditions.checkArgument(mapInfos.size()!=0, "该场景没有绑定地图，请绑定地图后重试!");
         MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
         sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
         mapSyncService.sendMapSyncMessage(robots, mapZip);
