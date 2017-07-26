@@ -8,6 +8,11 @@ import java.util.List;
  */
 public class Constant {
 
+    //数据库数据删除状态
+    public final static Integer DELETED = 0; //删除
+    public final static Integer NORMAL = 1;  //正常值
+
+
     public static final String UTF_8 = "UTF-8";
 
     public static final String CONTENT = "content";
