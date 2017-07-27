@@ -9,9 +9,16 @@ import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.dto.rosrocker.RosRockerDTO;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
+import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.rosrocker.bean.RosRockerPubBean;
 import com.alibaba.fastjson.JSON;
 import static com.google.common.base.Preconditions.*;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +37,8 @@ public class RosRockerController {
 
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private MessageSendHandleService messageSendHandleService;
 
     /**
      * 客户端发送摇杆动作消息给 ROS 处理
@@ -50,26 +59,50 @@ public class RosRockerController {
     }
 
     /**
-     * 通过指定命令 控制机器人或者任务 执行指定的不同操作（包含：pause、resume、skipMission、skipMissionList、clear）
-     * @param robotId
+     * 通过指定命令 控制机器人或者任务 执行指定的不同操作（包含：pause、resume、clear）
+     * @param robotCode
      * @param command
      * @return
      */
-    @RequestMapping(value = "/controlState/{robotId}/{command}", method = RequestMethod.GET)
-    public Object controlState(@PathVariable("robotId") String robotId, @PathVariable("command") String command){
+    //        SNabc0010_jelynn
+    @RequestMapping(value = "/controlState/{robotCode}/{command}", method = RequestMethod.GET)
+    public Object controlState(@PathVariable("robotId") String robotCode, @PathVariable("command") String command){
         try {
-            checkArgument(!("".equals(robotId.trim())), "机器人编号不能为空串!");
-            checkArgument(!("".equals(robotId.trim())), "传入的指令不能为空串!");
-            //分别根据不同的指令内容，执行不同的操作。
-            this.sendDetailMessage(robotId,
-                    TopicConstants.X86_MISSION_INSTANT_CONTROL,
-                    TopicConstants.TOPIC_TYPE_STRING,
-                    JSON.toJSONString(new HashMap<String, String>(){{
-                        put("command", command);
-                    }}));
-            return AjaxResult.success("指令调用成功");
+
+            checkArgument(!("".equals(robotCode.trim())), "机器人编号不能为空串!");
+            checkArgument(!("".equals(robotCode.trim())), "传入的指令不能为空串!");
+            checkArgument(ImmutableList.of("pause", "resume", "clear").indexOf(command) != -1, "您传入的指令不正确，合法的指令包括：（ pause、resume、clear ）");
+
+            String uuid = UUID.randomUUID().toString().replace("-", "");
+            CommonInfo commonInfo = new CommonInfo();
+            commonInfo.setTopicName(TopicConstants.X86_MISSION_INSTANT_CONTROL);
+            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            commonInfo.setPublishMessage(JSON.toJSONString(new HashMap<String, String>(){{
+                put("command", command);put("uuid", uuid);put("sendTime", String.valueOf(new Date().getTime()));
+            }}));
+            MessageInfo info = new MessageInfo();
+            info.setUuId(uuid);info.setSendTime(new Date());info.setSenderId("goor-server");info.setReceiverId(robotCode);
+            info.setMessageType(MessageType.EXECUTOR_COMMAND);info.setMessageText(JSON.toJSONString(commonInfo));
+
+            AjaxResult result = messageSendHandleService.sendCommandMessage(true,true,"robotCode",info);
+            if(!result.isSuccess()){
+                return AjaxResult.failed(String.format("%s 指令调用失败，请重试", command));
+            }
+            for (int i=0; i<500; i++) {
+                Thread.sleep(1000);
+                MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(info.getUuId());
+                if(messageInfo1.isSuccess()){
+                    info.setSuccess(true);
+                    break;
+                }
+            }
+            if (info.isSuccess()) {
+                return AjaxResult.success(String.format("%s 指令调用成功!", command));
+            }else{
+                return AjaxResult.failed(String.format("%s 指令调用失败，请重试", command));
+            }
         }catch (Exception e){
-            return AjaxResult.failed( "指令调用失败");
+            return AjaxResult.failed(e.getMessage());
         }
     }
 
