@@ -16,9 +16,9 @@ import java.util.List;
  */
 @Table(name = "A_STATION_MAP_POINT_XREF")
 public class StationMapPointXREF {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    private Long id;
     /**
      * 站索引
      */
@@ -28,13 +28,13 @@ public class StationMapPointXREF {
      * */
     private Long mapPointId;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+//    public Long getId() {
+//        return id;
+//    }
+//
+//    public void setId(Long id) {
+//        this.id = id;
+//    }
 
     public Long getStationId() {
         return stationId;
