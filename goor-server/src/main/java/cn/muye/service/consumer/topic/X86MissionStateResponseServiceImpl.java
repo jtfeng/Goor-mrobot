@@ -10,6 +10,8 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
+import cn.muye.order.service.OrderDetailService;
+import cn.muye.service.missiontask.MissionFuncsServiceImpl;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +21,12 @@ import org.springframework.stereotype.Service;
  * Created by abel on 17-7-18.
  */
 @Service
-public class X86MissionStateResponseServiceImpl implements X86MissionStateResponseService {
+public class X86MissionStateResponseServiceImpl
+        implements X86MissionStateResponseService {
 
 
-    private Logger logger = Logger.getLogger(X86MissionStateResponseServiceImpl.class);
+    private Logger logger = Logger
+            .getLogger(X86MissionStateResponseServiceImpl.class);
 
     @Autowired
     BaseMessageService baseMessageService;
@@ -35,6 +39,9 @@ public class X86MissionStateResponseServiceImpl implements X86MissionStateRespon
 
     @Autowired
     MissionItemTaskService missionItemTaskService;
+
+    @Autowired
+    OrderDetailService orderDetailService;
 
     @Override
     public void handleX86MissionStateResponse(MessageInfo messageInfo) {
@@ -123,6 +130,22 @@ public class X86MissionStateResponseServiceImpl implements X86MissionStateRespon
                             missionTask.setRepeatTimesReal(en.getRepeat_times());
                         }
                         missionTaskService.save(missionTask);
+                        //判断当前如果关联了order detail,则置状态
+                        if (MissionFuncsServiceImpl.MissionStateFinished.equalsIgnoreCase(en.getState()) &&
+                                !StringUtil.isNullOrEmpty(missionTask.getOrderDetailMission()) &&
+                                !MissionFuncsServiceImpl.str_zero.equalsIgnoreCase(missionTask.getOrderDetailMission())){
+                            //
+                            Long id = null;
+                            try {
+                                id = Long.valueOf(missionTask.getOrderDetailMission());
+                            } catch (NumberFormatException e) {
+                                logger.error("设置order detail失败。id转换失败。mission id is: "+ missionTask.getId());
+                            }
+                            if (id != null){
+                                //设置order detail的单子状态为完成
+                                orderDetailService.finishedDetailTask(id);
+                            }
+                        }
                     }
 
                     //更新mission item state

@@ -16,4 +16,6 @@ public interface BaseMessageService {
     void sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody);
     void sendRobotMessage(String robotCode, String data);
     void sendRobotMessage(String robotCode, String topic, String data);
+    void sendAllRobotMessage(String data);
+    void sendAllRobotMessage(String topic, String data);
 }

@@ -371,7 +371,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     Station station = stationService.findById(od.getStationId(), od.getStoreId());
                     if (station != null &&
                             station.getMapPoints() != null){
-                        logger.info("###### get order detail station is ok ");
+                        logger.info("###### get order detail station is ok， list size is: " + station.getMapPoints().size());
+                        for (MapPoint mp :
+                                station.getMapPoints()) {
+                            if (mp != null) {
+                                logger.info("mpname: " + mp.getMapName() + ", scenename: " + mp.getSceneName() + ", pointname: " + mp.getPointName());
+                            }
+                        }
                         //目前只取第一个坐标点加入
                         for (MapPoint mp :
                                 station.getMapPoints()) {
@@ -385,6 +391,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         //标记该点的属性
                                         atts = new MPointAtts();
                                         atts.type = MPointType_ELEVATOR;
+                                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                                         mpAttrs.put(mp, atts);
                                         elevatorPoint = mp;
                                         logger.info("###### order elevator station is ok ");
@@ -395,6 +402,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         //标记该点的属性
                                         atts = new MPointAtts();
                                         atts.type = MPointType_SONGHUO;
+                                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                                         mpAttrs.put(mp, atts);
                                         //如果电梯点对象不为null，则要根据当前点设置电梯点的属性
                                         setElevatorPointAttr(mpAttrs, mp);
@@ -409,6 +417,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
         }
 
+        if (order.getOrderSetting().getEndPoint() != null) {
+            logger.info("### end point ####  mpname: " + order.getOrderSetting().getEndPoint().getMapName() +
+                    ", scenename: " + order.getOrderSetting().getEndPoint().getSceneName() +
+                    ", pointname: " + order.getOrderSetting().getEndPoint().getPointName());
+        }
         //中间点添加完毕，添加卸货点
         mapPoints.add(order.getOrderSetting().getEndPoint());
         //设置属性
@@ -432,7 +445,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     //设置属性
                     atts = new MPointAtts();
                     atts.type = MPointType_CHONGDIAN;
-                    atts.orderDetailMP = str_one;//标记是orderdetail的点
                     mpAttrs.put(mp, atts);
                     //如果电梯点对象不为null，则要根据当前点设置电梯点的属性
                     setElevatorPointAttr(mpAttrs, mp);
@@ -508,7 +520,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.setRobotCode(order.getRobot().getCode());
         missionListTask.setStartTime(System.currentTimeMillis() + 60);
         missionListTask.setStopTime(System.currentTimeMillis() + 600);
-        missionListTask.setState("");
+        missionListTask.setState(MissionStateExecuting);
         missionListTask.setCreatedBy(System.currentTimeMillis());
         missionListTask.setCreateTime(new Date());
         missionListTask.setStoreId(order.getStoreId());
@@ -627,9 +639,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataElevator jsonMissionItemDataElevator =
                 new JsonMissionItemDataElevator();
         if (mPointAtts != null){
-//            jsonMissionItemDataElevator.setFloor(mPointAtts.nextFloor);
+            jsonMissionItemDataElevator.setFloor(mPointAtts.nextFloor);
+        }else{
+            logger.error("没有获取到电梯到达的楼层，请注意查看地图是否配置了楼层数据，或者电梯点后续是否没有设置到达点！");
         }
-        jsonMissionItemDataElevator.setFloor(1);
 
         MissionTask elevatorTask = getElevatorTask(order, mp, parentName, jsonMissionItemDataElevator);
         missionListTask.getMissionTasks().add(elevatorTask);
@@ -776,8 +789,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "中间送货站点任务-";
 
+        boolean isSetOrderDetailMP = false;
+        if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
+                !str_zero.equalsIgnoreCase(mPointAtts.orderDetailMP)){
+            isSetOrderDetailMP = true;
+        }
+
         //单点导航任务，导航到目标送货点
         MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
+        if (isSetOrderDetailMP){
+            sigleNavTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(sigleNavTask);
 
         //等待任务（同时语音提示，物品已经送达，请查收）
@@ -787,10 +809,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionListTask.getMissionTasks().add(waitingTask);
 
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_ARRIVE);
+        if (isSetOrderDetailMP){
+            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //卸货任务，取代等待任务
         MissionTask unloadTask = getUnloadTask(order, mp, parentName);
+        if (isSetOrderDetailMP){
+            unloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
 //        unloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
 
         missionListTask.getMissionTasks().add(unloadTask);
@@ -824,7 +852,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -862,7 +890,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         fake.setSceneName("agv");
         itemTask.setData(JsonUtils.toJson(fake,
                 new TypeToken<JsonMissionItemDataFake>(){}.getType()));
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_test);
 
         return itemTask;
@@ -891,7 +919,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -927,7 +955,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         data.setMap(mp.getMapName());
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataLaserNavigation>(){}.getType()));
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_nav);
 
         return itemTask;
@@ -950,7 +978,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -979,7 +1007,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_waiting);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_waiting);
         return itemTask;
     }
@@ -1003,7 +1031,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1038,7 +1066,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         json.setFilename(fileName);
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataMp3>(){}.getType()));
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_mp3);
 
         return itemTask;
@@ -1061,7 +1089,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1097,7 +1125,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         json.setMap(mp.getMapName());
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataGotocharge>(){}.getType()));
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_gotocharge);
 
         return itemTask;
@@ -1120,7 +1148,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1149,7 +1177,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_leavecharge);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_leavecharge);
 
         return itemTask;
@@ -1172,7 +1200,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1201,7 +1229,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_load);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_load);
 
         return itemTask;
@@ -1224,7 +1252,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1253,7 +1281,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_unload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_unload);
 
         return itemTask;
@@ -1276,7 +1304,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1305,7 +1333,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_finalUnload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_finalUnload);
 
         return itemTask;
@@ -1329,7 +1357,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState("");
+        missionTask.setState(MissionStateExecuting);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1360,7 +1388,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataElevator>(){}.getType()));
-        itemTask.setState("");
+        itemTask.setState(MissionStateExecuting);
         itemTask.setFeatureValue(FeatureValue_elevator);
 
         return itemTask;
@@ -1573,6 +1601,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MP3_ARRIVE = "arrive.mp3";//到站语音
     public static final String MP3_LOAD = "load.mp3";//到站语音
     public static final String MP3_CHARGE = "charge.mp3";//到站语音
+
+    //Mission State
+    public static final String MissionStateFinished = "finished";//已经完成
+    public static final String MissionStateExecuting = "executing";//正在执行
+    public static final String MissionStatePaused = "paused";//暂停中
+    public static final String MissionStateWaiting = "waiting";//等待中
+    public static final String MissionStateCanceled = "canceled";//被取消
 
     /**
      * 地图点的属性类
