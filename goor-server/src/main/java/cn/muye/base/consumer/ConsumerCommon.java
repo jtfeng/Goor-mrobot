@@ -271,19 +271,31 @@ public class ConsumerCommon {
     }
 
     /**
-     * 测试
+     * 消费掉topic.server消息
      *
      * @param messageInfo
      */
     @RabbitListener(queues = TopicConstants.TOPIC_SERVER_COMMAND)
-    public AjaxResult directCommandReportAndReceive1(@Payload MessageInfo messageInfo) {
+    public void topicServerCommand(@Payload MessageInfo messageInfo) {
         try {
-            logger.info("11111111111111111111111111111111111111111111");
-            //messageSaveOrUpdate(messageInfo);
+            logger.info("topicServerCommand receive message");
         } catch (Exception e) {
-            logger.error("consumer directCommandReport exception", e);
+            logger.error("consumer topicServerCommand exception", e);
         }
-        return AjaxResult.success();
+    }
+
+    /**
+     * 消费掉fanout.server消息
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.FANOUT_SERVER_COMMAND)
+    public void fanoutServerCommand(@Payload MessageInfo messageInfo) {
+        try {
+            logger.info("fanoutServerCommand receive message");
+        } catch (Exception e) {
+            logger.error("consumer fanoutServerCommand exception", e);
+        }
     }
 
 
