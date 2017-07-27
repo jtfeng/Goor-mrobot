@@ -5,6 +5,7 @@ import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import cn.muye.log.base.LogCollectService;
+import cn.muye.service.consumer.topic.X86MissionCommonRequestService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -103,6 +104,20 @@ public class ScheduleTasks {
         logger.info("Scheduled log");
         try {
             logCollectService.startCollectLog();
+        } catch (Exception e) {
+            logger.error("Scheduled collect base state error", e);
+        }
+    }
+
+    //每30秒触发,向任务管理器异步查询当前执行任务状态，任务管理器收到后异步上报信息
+    @Autowired
+    X86MissionCommonRequestService x86MissionCommonRequestService;
+
+    @Scheduled(cron = "*/30 * * * * ?")
+    public void missionStateCommonRequest() {
+        logger.info("missionStateCommonRequest Scheduled send");
+        try {
+            x86MissionCommonRequestService.sendX86MissionStateCommonRequest();
         } catch (Exception e) {
             logger.error("Scheduled collect base state error", e);
         }

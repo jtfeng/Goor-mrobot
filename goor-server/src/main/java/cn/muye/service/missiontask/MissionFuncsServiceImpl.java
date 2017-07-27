@@ -371,7 +371,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     Station station = stationService.findById(od.getStationId(), od.getStoreId());
                     if (station != null &&
                             station.getMapPoints() != null){
-                        logger.info("###### get order detail station is ok ");
+                        logger.info("###### get order detail station is ok， list size is: " + station.getMapPoints().size());
+                        for (MapPoint mp :
+                                station.getMapPoints()) {
+                            if (mp != null) {
+                                logger.info("mpname: " + mp.getMapName() + ", scenename: " + mp.getSceneName() + ", pointname: " + mp.getPointName());
+                            }
+                        }
                         //目前只取第一个坐标点加入
                         for (MapPoint mp :
                                 station.getMapPoints()) {
@@ -385,6 +391,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         //标记该点的属性
                                         atts = new MPointAtts();
                                         atts.type = MPointType_ELEVATOR;
+                                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                                         mpAttrs.put(mp, atts);
                                         elevatorPoint = mp;
                                         logger.info("###### order elevator station is ok ");
@@ -395,6 +402,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         //标记该点的属性
                                         atts = new MPointAtts();
                                         atts.type = MPointType_SONGHUO;
+                                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                                         mpAttrs.put(mp, atts);
                                         //如果电梯点对象不为null，则要根据当前点设置电梯点的属性
                                         setElevatorPointAttr(mpAttrs, mp);
@@ -409,6 +417,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
         }
 
+        if (order.getOrderSetting().getEndPoint() != null) {
+            logger.info("### end point ####  mpname: " + order.getOrderSetting().getEndPoint().getMapName() +
+                    ", scenename: " + order.getOrderSetting().getEndPoint().getSceneName() +
+                    ", pointname: " + order.getOrderSetting().getEndPoint().getPointName());
+        }
         //中间点添加完毕，添加卸货点
         mapPoints.add(order.getOrderSetting().getEndPoint());
         //设置属性
@@ -432,7 +445,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     //设置属性
                     atts = new MPointAtts();
                     atts.type = MPointType_CHONGDIAN;
-                    atts.orderDetailMP = str_one;//标记是orderdetail的点
                     mpAttrs.put(mp, atts);
                     //如果电梯点对象不为null，则要根据当前点设置电梯点的属性
                     setElevatorPointAttr(mpAttrs, mp);
@@ -776,8 +788,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "中间送货站点任务-";
 
+        boolean isSetOrderDetailMP = false;
+        if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
+                !str_zero.equalsIgnoreCase(mPointAtts.orderDetailMP)){
+            isSetOrderDetailMP = true;
+        }
+
         //单点导航任务，导航到目标送货点
         MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
+        if (isSetOrderDetailMP){
+            sigleNavTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(sigleNavTask);
 
         //等待任务（同时语音提示，物品已经送达，请查收）
@@ -787,10 +808,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionListTask.getMissionTasks().add(waitingTask);
 
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_ARRIVE);
+        if (isSetOrderDetailMP){
+            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //卸货任务，取代等待任务
         MissionTask unloadTask = getUnloadTask(order, mp, parentName);
+        if (isSetOrderDetailMP){
+            unloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
 //        unloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
 
         missionListTask.getMissionTasks().add(unloadTask);
@@ -1573,6 +1600,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MP3_ARRIVE = "arrive.mp3";//到站语音
     public static final String MP3_LOAD = "load.mp3";//到站语音
     public static final String MP3_CHARGE = "charge.mp3";//到站语音
+
+    //Mission State
+    public static final String MissionStateFinished = "finished";//已经完成
+    public static final String MissionStateExecuting = "executing";//正在执行
+    public static final String MissionStatePaused = "paused";//暂停中
+    public static final String MissionStateWaiting = "waiting";//等待中
+    public static final String MissionStateCanceled = "canceled";//被取消
 
     /**
      * 地图点的属性类
