@@ -104,4 +104,13 @@
         </where>
     </select>
 
+    <update id="updateDeleteFlag">
+        UPDATE  A_MAP_POINT
+        SET
+        <if test="deleteFlag != null">
+            DELETE_FLAG = #{deleteFlag}
+        </if>
+        WHERE
+        STORE_ID = #{storeId}
+    </update>
 </mapper>

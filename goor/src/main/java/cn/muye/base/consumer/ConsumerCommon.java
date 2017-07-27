@@ -11,7 +11,6 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.ReceiveMessage;
-import cn.muye.base.service.MapService;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.config.RobotInfoConfigService;
@@ -28,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
-import java.text.SimpleDateFormat;
+
 import java.util.Date;
 
 @Component
@@ -38,8 +37,6 @@ public class ConsumerCommon {
     private Ros ros;
     @Autowired
     private ReceiveMessageService receiveMessageService;
-    @Autowired
-    private MapService mapService;
     @Autowired
     private RobotInfoConfigService robotInfoConfigService;
 

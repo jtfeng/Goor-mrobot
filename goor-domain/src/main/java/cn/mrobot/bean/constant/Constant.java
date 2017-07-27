@@ -9,8 +9,8 @@ import java.util.List;
 public class Constant {
 
     //数据库数据删除状态
-    public final static Integer DELETED = 0; //删除
-    public final static Integer NORMAL = 1;  //正常值
+    public final static Integer NORMAL = 0; //正常值
+    public final static Integer DELETE = 1;  //删除
 
 
     public static final String UTF_8 = "UTF-8";

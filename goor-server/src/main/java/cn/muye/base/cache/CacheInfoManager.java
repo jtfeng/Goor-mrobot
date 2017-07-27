@@ -65,12 +65,12 @@ public class CacheInfoManager implements ApplicationContextAware {
         webSocketSessionCache.setMaxLifeTime(0);
 
         //状态机缓存
-        autoChargeCache.setMaxLifeTime(5 * 1000);
-        leftBaseDriverCache.setMaxLifeTime(5 * 1000);
-        rightBaseDriverCache.setMaxLifeTime(5 * 1000);
-        baseMicroSwitchAndAntiCache.setMaxLifeTime(5 * 1000);
-        baseSystemCache.setMaxLifeTime(5 * 1000);
-        navigationCache.setMaxLifeTime(5 * 1000);
+        autoChargeCache.setMaxLifeTime(60 * 1000);
+        leftBaseDriverCache.setMaxLifeTime(60 * 1000);
+        rightBaseDriverCache.setMaxLifeTime(60 * 1000);
+        baseMicroSwitchAndAntiCache.setMaxLifeTime(60 * 1000);
+        baseSystemCache.setMaxLifeTime(60 * 1000);
+        navigationCache.setMaxLifeTime(60 * 1000);
 	}
 
     private CacheInfoManager() {

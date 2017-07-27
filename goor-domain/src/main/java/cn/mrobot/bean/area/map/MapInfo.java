@@ -37,6 +37,10 @@ public class MapInfo extends BaseBean {
 
 	private Long mapZipId;
 
+	private int floor;
+
+	private int deleteFlag;   //0 : 删除   1：未删除
+
 	public String getMapName() {
 		return mapName;
 	}
@@ -109,5 +113,21 @@ public class MapInfo extends BaseBean {
 
 	public void setPngDesigned(String pngDesigned) {
 		this.pngDesigned = pngDesigned;
+	}
+
+	public int getDeleteFlag() {
+		return deleteFlag;
+	}
+
+	public void setDeleteFlag(int deleteFlag) {
+		this.deleteFlag = deleteFlag;
+	}
+
+	public int getFloor() {
+		return floor;
+	}
+
+	public void setFloor(int floor) {
+		this.floor = floor;
 	}
 }

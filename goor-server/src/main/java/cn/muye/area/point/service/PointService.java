@@ -45,4 +45,8 @@ public interface PointService {
 	void handle(SlamResponseBody slamResponseBody);
 
 	List<CascadePoint> cascadeMapPoint(int level, String sceneName);
+
+	void delete(long storeId, int deleteFlag);
+
+	void updateDeleteFlag(long storeId, int deleteFlag);
 }

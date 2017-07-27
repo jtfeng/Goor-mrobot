@@ -78,7 +78,7 @@ public class FileUpladService {
                     LOGGER.info("开始压缩");
                     //压缩文件夹
                     String lastDirName = uploadFile.getName();
-                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
+                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
                     String dateStr = format.format(new Date());
                     String zipFileName = lastDirName + "_" + dateStr + TopicConstants.ZIP_FILE_SUFFIX;
 

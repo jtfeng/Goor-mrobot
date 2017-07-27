@@ -62,15 +62,27 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     @Override
+    public void delete(long storeId, int deleteFlag) {
+        Example example = new Example(MapInfo.class);
+        example.createCriteria().andCondition("STORE_ID = " + storeId).andCondition("DELETE_FLAG=" + deleteFlag);
+        mapInfoMapper.deleteByExample(example);
+    }
+
+    @Override
     public void update(MapInfo mapInfo) {
         mapInfoMapper.updateByPrimaryKey(mapInfo);
+    }
+
+    @Override
+    public void updateDeleteFlag(long storeId, int deleteFlag) {
+        mapInfoMapper.updateDeleteFlag(storeId, deleteFlag);
     }
 
     @Override
     public List<MapInfo> getMapInfo(WhereRequest whereRequest, long storeId) {
         Condition example = new Condition(MapInfo.class);
         Example.Criteria criteria = example.createCriteria();
-        if (whereRequest.getQueryObj() != null) {
+        if (whereRequest != null && whereRequest.getQueryObj() != null) {
             JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
             Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
             Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
@@ -97,7 +109,7 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     private String parseLocalPath(String localPath) {
-        if(StringUtil.isNullOrEmpty(localPath))
+        if (StringUtil.isNullOrEmpty(localPath))
             return "";
         //将文件路径封装成http路径
         localPath = localPath.replaceAll("\\\\", "/");

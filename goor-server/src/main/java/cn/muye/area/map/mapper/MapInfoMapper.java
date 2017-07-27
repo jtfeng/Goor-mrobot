@@ -2,6 +2,7 @@ package cn.muye.area.map.mapper;
 
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.muye.util.MyMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,4 +14,6 @@ import cn.muye.util.MyMapper;
  * Version:1.0
  */
 public interface MapInfoMapper extends MyMapper<MapInfo> {
+
+    void updateDeleteFlag(@Param("storeId") long storeId, @Param("deleteFlag")int deleteFlag);
 }

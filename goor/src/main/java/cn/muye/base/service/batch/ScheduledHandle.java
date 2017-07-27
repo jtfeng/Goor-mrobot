@@ -50,7 +50,7 @@ public class ScheduledHandle {
             @Override
             public void run() {
                 try {
-                    logger.info("sendRobotInfo Scheduled");
+//                    logger.info("sendRobotInfo Scheduled");
                     ScheduledHandleService service = new ScheduledHandleServiceImp();
                     service.sendRobotInfo();
                 } catch (Exception e) {
@@ -107,7 +107,7 @@ public class ScheduledHandle {
                 try {
                     ScheduledHandleService service = new ScheduledHandleServiceImp();
                     service.rosHealthCheck();
-                    logger.info("schedule rosHealthCheckScheduled");
+//                    logger.info("schedule rosHealthCheckScheduled");
                 } catch (Exception e) {
                     logger.error("schedule rosHealthCheckScheduled exception", e);
                 }

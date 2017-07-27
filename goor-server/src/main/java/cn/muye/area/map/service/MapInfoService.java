@@ -26,6 +26,10 @@ public interface MapInfoService {
 
     void update(MapInfo mapInfo);
 
+    void delete(long storeId, int deleteFlag);
+
+    void updateDeleteFlag(long storeId, int deleteFlag);
+
     List<MapInfo> getMapInfo(WhereRequest whereRequest, long storeId);
 
 }
