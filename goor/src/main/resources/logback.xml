@@ -23,7 +23,7 @@
     <property name="LOG_PATH" value="/Users/wlkfec/Downloads/splog" />
     <!--<property name="LOG_PATH" value="E:\\logs" />-->
     <!--设置系统日志目录-->
-    <property name="APPDIR" value="goor" />
+    <property name="APPDIR" value="logs" />
 
     <!-- 日志记录器，日期滚动记录 -->
     <appender name="FILEERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">

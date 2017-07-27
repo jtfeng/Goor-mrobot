@@ -19,10 +19,10 @@
            stdout将日志信息输出到控制上，为方便开发测试使用
     -->
     <contextName>SpringBootDemo</contextName>
-    <property name="LOG_PATH" value="/logs" />
+    <property name="LOG_PATH" value="/mnt/server" />
     <!--<property name="LOG_PATH" value="E:\\logs" />-->
     <!--设置系统日志目录-->
-    <property name="APPDIR" value="goor-server" />
+    <property name="APPDIR" value="logs" />
 
     <!-- 日志记录器，日期滚动记录 -->
     <appender name="FILEERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
