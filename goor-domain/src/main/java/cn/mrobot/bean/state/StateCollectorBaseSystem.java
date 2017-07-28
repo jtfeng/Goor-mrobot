@@ -5,7 +5,7 @@ package cn.mrobot.bean.state;
  * 底盘系统状态
  * Created by Jelynn on 2017/7/17.
  */
-public class StateCollectorBaseSystem {
+public class StateCollectorBaseSystem extends StateCollector{
 
     private int res;
 

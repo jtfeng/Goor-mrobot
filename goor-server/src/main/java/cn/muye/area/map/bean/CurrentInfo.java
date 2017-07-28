@@ -18,6 +18,8 @@ public class CurrentInfo {
 
     private List<StateDetail> list;
 
+    private List<StateDetail> mission;
+
     public String getPose() {
         return pose;
     }
@@ -48,5 +50,13 @@ public class CurrentInfo {
 
     public void setList(List<StateDetail> list) {
         this.list = list;
+    }
+
+    public List<StateDetail> getMission() {
+        return mission;
+    }
+
+    public void setMission(List<StateDetail> mission) {
+        this.mission = mission;
     }
 }

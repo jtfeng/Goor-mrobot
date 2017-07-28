@@ -7,13 +7,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.log.LogType;
-import cn.mrobot.bean.state.StateCollectorBaseDriver;
-import cn.mrobot.bean.state.StateCollectorBaseMicroSwitchAndAntiDropping;
-import cn.mrobot.bean.state.StateCollectorBaseSystem;
-import cn.mrobot.bean.state.StateCollectorNavigation;
 import cn.mrobot.bean.state.enums.ModuleEnums;
-import cn.mrobot.bean.state.enums.NavigationType;
-import cn.mrobot.bean.state.enums.StateFieldEnums;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.bean.StateDetail;
 import cn.muye.assets.robot.service.RobotConfigService;
@@ -25,10 +19,11 @@ import cn.muye.log.base.service.LogInfoService;
 import cn.muye.log.state.StateCollectorService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -40,6 +35,7 @@ import java.util.concurrent.Executors;
 @Service
 public class LogCollectService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogCollectService.class);
     @Autowired
     private RobotService robotService;
 
@@ -54,7 +50,7 @@ public class LogCollectService {
 
     public void startCollectLog() {
         List<Robot> robotList = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if(robotList == null || robotList.size() <=0){
+        if (robotList == null || robotList.size() <= 0) {
             return;
         }
         ExecutorService executorService = Executors.newFixedThreadPool(robotList.size());
@@ -100,55 +96,20 @@ public class LogCollectService {
     }
 
     /**
-     * 收集记录底盘日志
+     * 收集记录底盘日志,只记录触发状态
      */
-    private void collectBaseLog(String code) {
-        StringBuffer stringBuffer = new StringBuffer();
+    private void collectBaseLog(String code){
         try{
-            //添加传感器状体日志
-            StateCollectorBaseMicroSwitchAndAntiDropping baseMicroSwitchAndAntiDropping = CacheInfoManager.getBaseMicroSwitchAndAntiCache(code);
-            Field[] fields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-            for(Field field : fields){
-                int value = (int)field.get(baseMicroSwitchAndAntiDropping);
-                if(value == 1){
-                    stringBuffer.append(StateFieldEnums.getCHFieldName(field.getName())).append(": 触发");
+            List<StateDetail> stateDetailList = stateCollectorService.getCurrentBaseState(code);
+            if(stateDetailList != null && stateDetailList.size() > 0){
+                StringBuffer stringBuffer = new StringBuffer();
+                for(StateDetail stateDetail : stateDetailList){
+                    stringBuffer.append(stateDetail.getCHName()).append(":").append(stateDetail.getCHValue()).append("; ");
                 }
+                saveLogInfo(code, ModuleEnums.BASE, LogLevel.WARNING, LogType.WARNING_BASE, stringBuffer.toString());
             }
-            stringBuffer.append(System.getProperty("line.separator"));
-            StateCollectorBaseSystem baseSystem = CacheInfoManager.getBaseSystemCache(code);
-            Field[] baseSystemFields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-            for(Field field : baseSystemFields){
-                int value = (int)field.get(baseSystem);
-                if(value == 1 && (!field.getName().equals(StateFieldEnums.POWER_ON.getName()))){ //排除开机。开机为1
-                    stringBuffer.append(StateFieldEnums.getCHFieldName(field.getName())).append(": 触发");
-                }else if (value == 0 && field.getName().equals(StateFieldEnums.POWER_ON.getName())){
-                    stringBuffer.append(StateFieldEnums.POWER_ON.getCHFieldName()).append(":开机");
-                }
-            }
-
-            stringBuffer.append(System.getProperty("line.separator"));
-            StateCollectorBaseDriver leftBaseDriver = CacheInfoManager.getLeftBaseDriverCache(code);
-            Field[] leftBaseDriverFields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-            for(Field field : leftBaseDriverFields){
-                int value = (int)field.get(leftBaseDriver);
-                if(value == 1){
-                    stringBuffer.append(StateFieldEnums.getCHFieldName(field.getName())).append(": 触发");
-                }
-            }
-
-            stringBuffer.append(System.getProperty("line.separator"));
-            StateCollectorBaseDriver rightBaseDriver =  CacheInfoManager.getRightBaseDriverCache(code);
-            Field[] rightBaseDriverFields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-            for(Field field : rightBaseDriverFields){
-                int value = (int)field.get(rightBaseDriver);
-                if(value == 1){
-                    stringBuffer.append(StateFieldEnums.getCHFieldName(field.getName())).append(": 触发");
-                }
-            }
-
-            saveLogInfo(code, ModuleEnums.BASE, LogLevel.WARNING, LogType.WARNING_BASE, stringBuffer.toString());
         }catch (Exception e){
-
+            LOGGER.error("收集记录底盘日志,只记录触发状态. code="+code, e);
         }
     }
 
@@ -157,15 +118,14 @@ public class LogCollectService {
      */
     private void collectNavigationLog(String code) {
         List<StateDetail> stateDetails = stateCollectorService.getCurrentNavigationState(code);
-        if(null != stateDetails && stateDetails.size() > 0){
+        if (null != stateDetails && stateDetails.size() > 0) {
             StateDetail stateDetail = stateDetails.get(0);
             saveLogInfo(code, ModuleEnums.NAVIGATION, LogLevel.INFO, LogType.INFO_NAVIGATION, stateDetail.getCHValue());
         }
     }
 
     private String getChargeMessage(ChargeInfo chargeInfo) {
-        StringBuffer stringBuffer = new StringBuffer();
-        int powerPercent = chargeInfo.getPowerPercent();
+        StringBuffer stringBuffer = new StringBuffer();int powerPercent = chargeInfo.getPowerPercent();
         stringBuffer.append("当前电量:").append(powerPercent).append("%");
 
         int chargingStatus = chargeInfo.getChargingStatus();
@@ -182,7 +142,15 @@ public class LogCollectService {
         return stringBuffer.toString();
     }
 
+    private void collectTaskLog(String code){
+        List<StateDetail> stateDetailList = stateCollectorService.collectTaskLog(code);
+
+    }
+
     private void saveLogInfo(String code, ModuleEnums module, LogLevel logLevel, LogType logType, String message) {
+        if(StringUtil.isNullOrEmpty(message)){
+            return;
+        }
         LogInfo logInfo = new LogInfo();
         logInfo.setCreateTime(new Date());
         logInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
@@ -193,20 +161,20 @@ public class LogCollectService {
         logInfo.setLogType(logType.getName());
         logInfo.setMessage(message);
         MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
-        if(currentMap != null && !StringUtil.isNullOrEmpty(currentMap.getMessageText())){
+        if (currentMap != null && !StringUtil.isNullOrEmpty(currentMap.getMessageText())) {
             JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
             String data = jsonObject.getString(TopicConstants.DATA);
             JSONObject object = JSON.parseObject(data);
-            String mapData = object.getString(TopicConstants.DATA);
-
-            JSONObject mapDataObject = JSON.parseObject(mapData);
-            logInfo.setMapName(mapDataObject.getString(TopicConstants.MAP_NAME));
-            logInfo.setSceneName(mapDataObject.getString(TopicConstants.SCENE_NAME));
+            Integer currentMapCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
+            if(currentMapCode != null && currentMapCode == 0 ){
+                String mapData = object.getString(TopicConstants.DATA);
+                JSONObject mapObject = JSON.parseObject(mapData);
+                logInfo.setMapName(object.getString(TopicConstants.MAP_NAME));
+                logInfo.setSceneName(object.getString(TopicConstants.SCENE_NAME));
+            }
         }
         logInfoService.save(logInfo);
     }
 
-    private void collectTaskLog(String code){
 
-    }
 }

@@ -22,6 +22,7 @@ public class SearchConstants {
 	public static String SEARCH_NAME = "name";
 	public static String SEARCH_TYPE = "type";
 	public static String SEARCH_CODE = "code";
+	public static String SEARCH_ERROR_CODE = "error_code";
 	public static String SEARCH_STATION_ID = "stationId";
 	public static String SEARCH_TYPE_ID = "typeId";
 	public static String SEARCH_BATTERY_THRESHOLD = "batteryThreshold";

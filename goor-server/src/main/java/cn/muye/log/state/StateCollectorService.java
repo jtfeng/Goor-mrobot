@@ -1,14 +1,17 @@
 package cn.muye.log.state;
 
-import cn.mrobot.bean.log.LogLevel;
-import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.mission.MissionState;
+import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.state.*;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.bean.state.enums.NavigationType;
 import cn.mrobot.bean.state.enums.StateFieldEnums;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.bean.StateDetail;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.service.missiontask.MissionFuncsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
@@ -31,6 +34,10 @@ public class StateCollectorService {
 
     private static final String ON = "开机";
     private static final String HAPPEN = "触发";
+    private static final String UNHAPPEN = "未触发";
+
+    @Autowired
+    private MissionFuncsService missionFuncsService;
 
     public void handleStateCollector(StateCollectorResponse stateCollectorResponse) {
         String module = stateCollectorResponse.getModule();
@@ -164,52 +171,51 @@ public class StateCollectorService {
 
         //添加传感器状体日志
         StateCollectorBaseMicroSwitchAndAntiDropping baseMicroSwitchAndAntiDropping = CacheInfoManager.getBaseMicroSwitchAndAntiCache(code);
-        Field[] fields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-        for (Field field : fields) {
-            int value = (int) field.get(baseMicroSwitchAndAntiDropping);
-            if (value == 1) {
-                baseStateList.add(parseStateDetail(field, value, HAPPEN));
-            }
-        }
+        List<StateDetail> baseMicroSwitchAndAntiDroppingList = getHappenState("", StateCollectorBaseMicroSwitchAndAntiDropping.class, baseMicroSwitchAndAntiDropping);
+        baseStateList.addAll(baseMicroSwitchAndAntiDroppingList);
 
         //添加底盘系统日志
         StateCollectorBaseSystem baseSystem = CacheInfoManager.getBaseSystemCache(code);
-        Field[] baseSystemFields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-        for (Field field : baseSystemFields) {
-            int value = (int) field.get(baseSystem);
-            if (value == 1 && (!field.getName().equals(StateFieldEnums.POWER_ON.getName()))) { //排除开机。开机为1
-                baseStateList.add(parseStateDetail(field, value, HAPPEN));
-            } else if (value == 0 && field.getName().equals(StateFieldEnums.POWER_ON.getName())) {
-                baseStateList.add(parseStateDetail(field, value, ON));
-            }
-        }
+        List<StateDetail> baseSystemList = getHappenState("", StateCollectorBaseSystem.class, baseSystem);
+        baseStateList.addAll(baseSystemList);
 
         //添加左驱动日志
         StateCollectorBaseDriver leftBaseDriver = CacheInfoManager.getLeftBaseDriverCache(code);
-        Field[] leftBaseDriverFields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-        for (Field field : leftBaseDriverFields) {
-            int value = (int) field.get(leftBaseDriver);
-            if (value == 1) {
-                baseStateList.add(parseStateDetail(field, value, HAPPEN));
-            }
-        }
+        List<StateDetail> leftBaseDriverList = getHappenState("左驱动", StateCollectorBaseDriver.class, leftBaseDriver);
+        baseStateList.addAll(leftBaseDriverList);
 
         //添加右驱动日志
         StateCollectorBaseDriver rightBaseDriver = CacheInfoManager.getRightBaseDriverCache(code);
-        Field[] rightBaseDriverFields = StateCollectorBaseMicroSwitchAndAntiDropping.class.getDeclaredFields();
-        for (Field field : rightBaseDriverFields) {
-            int value = (int) field.get(rightBaseDriver);
-            if (value == 1) {
-                baseStateList.add(parseStateDetail(field, value, HAPPEN));
-            }
-        }
+        List<StateDetail> rightBaseDriverList = getHappenState("右驱动", StateCollectorBaseDriver.class, rightBaseDriver);
+        baseStateList.addAll(rightBaseDriverList);
+
         return baseStateList;
     }
 
-    private StateDetail parseStateDetail(Field field, int value, String chValue) {
+    private <T extends StateCollector> List<StateDetail> getHappenState(String chPrefix, Class<T> clazz, StateCollector stateCollector) throws IllegalAccessException {
+        List<StateDetail> stateDetailList = new ArrayList<>();
+        if (null == stateCollector) {
+            return stateDetailList;
+        }
+        Field[] fields = clazz.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            int value = (int) field.get(stateCollector);
+            if (value == 1 && (!field.getName().equals(StateFieldEnums.POWER_ON.getName()))) { //排除开机。开机为1
+                stateDetailList.add(parseStateDetail(chPrefix, field, value, HAPPEN));
+            } else if (value == 1 && field.getName().equals(StateFieldEnums.POWER_ON.getName())) {
+                stateDetailList.add(parseStateDetail(chPrefix, field, value, ON));
+            } else if (value == 0 && field.getName().equals(StateFieldEnums.SWITCH_EMERGENCY_STOP.getName())) {
+                stateDetailList.add(parseStateDetail(chPrefix, field, value, UNHAPPEN));
+            }
+        }
+        return stateDetailList;
+    }
+
+    private StateDetail parseStateDetail(String chPrefix, Field field, int value, String chValue) {
         StateDetail stateDetail = new StateDetail();
         stateDetail.setName(field.getName());
-        stateDetail.setCHName(StateFieldEnums.getCHFieldName(field.getName()));
+        stateDetail.setCHName(chPrefix + StateFieldEnums.getCHFieldName(field.getName()));
         stateDetail.setValue(value);
         stateDetail.setCHValue(chValue);
         return stateDetail;
@@ -237,6 +243,32 @@ public class StateCollectorService {
         stateDetail.setCHValue(navigationTypeCodeStr);
         list.add(stateDetail);
         return list;
+    }
+
+    /**
+     * 添加任务状态日志
+     * @param code
+     * @return
+     */
+    public List<StateDetail> collectTaskLog(String code) {
+        List<StateDetail> stateDetailList = new ArrayList<>();
+        List<MissionTask> missionTaskList = missionFuncsService.getMissionTaskStatus(code);
+        if(missionTaskList == null || stateDetailList.size() <0){
+            return stateDetailList;
+        }
+        for(MissionTask missionTask : missionTaskList){
+            StateDetail stateDetail = new StateDetail();
+            String dateStr = DateTimeUtils.getDefaultDateString(missionTask.getCreateTime());
+            stateDetail.setCHName(dateStr + " "+missionTask.getName());
+            String state = missionTask.getState();
+            if (StringUtil.isNullOrEmpty(state)){
+                stateDetail.setCHValue(MissionState.STATE_INIT.getName());
+            }else {
+                stateDetail.setCHValue(MissionState.getMissionState(state).getName());
+            }
+            stateDetailList.add(stateDetail);
+        }
+        return stateDetailList;
     }
 
     private int parseInt(char c) {

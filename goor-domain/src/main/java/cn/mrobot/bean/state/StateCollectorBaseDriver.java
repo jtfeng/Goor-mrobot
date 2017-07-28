@@ -4,7 +4,7 @@ package cn.mrobot.bean.state;
  * 驱动器状态
  * Created by Jelynn on 2017/7/17.
  */
-public class StateCollectorBaseDriver{
+public class StateCollectorBaseDriver extends StateCollector{
 
     private int driverFlow;//驱动器过流
 
