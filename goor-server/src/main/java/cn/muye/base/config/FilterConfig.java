@@ -1,6 +1,5 @@
 package cn.muye.base.config;
 
-//import cn.muye.base.filter.AuthValidationExceptionFilter;
 import cn.muye.base.filter.AuthValidationExceptionFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

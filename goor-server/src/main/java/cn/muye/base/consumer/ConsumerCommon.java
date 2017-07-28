@@ -136,14 +136,16 @@ public class ConsumerCommon {
                     //上报至云端
                     MessageInfo cacheInfo = new MessageInfo();
                     int errorCode = jsonObjectData.getInteger("error_code");
-                    String uuid = jsonObjectData.getString(TopicConstants.UUID);
+                    String innerData = jsonObjectData.getString(TopicConstants.DATA);
+                    JSONObject innerJsonObjectData = JSON.parseObject(innerData);
+                    String uuid = innerJsonObjectData.getString(TopicConstants.UUID);
                     if (errorCode == 0) {
                         cacheInfo.setSuccess(true);
                     } else {
                         cacheInfo.setSuccess(false);
                     }
                     CacheInfoManager.setUUIDCache(uuid, cacheInfo);
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询电量阈值请求
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
                     String robotCode = messageInfo.getSenderId();
                     Robot robotDb = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
                     syncRosRobotConfig(robotDb);
