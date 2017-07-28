@@ -7,6 +7,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.resource.Resource;
+import cn.mrobot.bean.resource.VoiceFile;
 import cn.mrobot.utils.MD5Utils;
 import cn.mrobot.utils.RandomUtil;
 import cn.mrobot.utils.StringUtil;
@@ -17,6 +18,7 @@ import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.controller.BaseController;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
+import cn.muye.resource.service.VoiceFileService;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.io.FileUtils;
@@ -37,7 +39,7 @@ import java.util.UUID;
  */
 @Controller
 @RequestMapping("resource")
-public class ResourceController extends BaseController{
+public class ResourceController extends BaseController {
 
     public static final Integer RESOURCE_TYPE_BASE = 1;
 
@@ -45,12 +47,15 @@ public class ResourceController extends BaseController{
     @Autowired
     private ResourceService resourceService;
     @Autowired
+    private VoiceFileService voiceFileService;
+    @Autowired
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private RobotService robotService;
 
     /**
      * 保存一个resource (上传)
+     *
      * @param file
      * @param resourceType
      * @return
@@ -58,26 +63,27 @@ public class ResourceController extends BaseController{
     @RequestMapping(value = "save", method = RequestMethod.POST)
     @ResponseBody
     private AjaxResult saveResource(@RequestParam("file") MultipartFile file,
-                                    @RequestParam("resourceType") Integer resourceType){
+                                    @RequestParam("resourceType") Integer resourceType) {
         try {
             //上传文件
-            StringBuffer path = new StringBuffer("/"+ resourceType.toString());
+            StringBuffer path = new StringBuffer("/" + resourceType.toString());
             File dest = FileUtils.getFile(DOWNLOAD_HOME + File.separator + resourceType);
             dest.mkdirs();
             Resource resource = new Resource();
             boolean bool = false;
             String generateName = "";
-            if(!file.isEmpty()){
+            if (!file.isEmpty()) {
                 String uuid = UUID.randomUUID().toString();
                 String fileName = file.getOriginalFilename();
                 String type = FilenameUtils.getExtension(fileName);
-                if(StringUtil.isBlank(type)){
+                if (StringUtil.isBlank(type)) {
                     generateName = uuid;
-                }else {
-                    generateName = uuid + "." + type;;
+                } else {
+                    generateName = uuid + "." + type;
+                    ;
                 }
                 dest = FileUtils.getFile(dest.getPath() + File.separator + generateName);
-                if(!dest.exists()){
+                if (!dest.exists()) {
                     dest.createNewFile();
                 }
                 resource.setFileSize(file.getSize());
@@ -87,7 +93,7 @@ public class ResourceController extends BaseController{
                 file.transferTo(dest);
                 bool = true;
             }
-            if(bool){
+            if (bool) {
                 path.append("/" + generateName);
                 //上传成功后添加入表
                 resource.setGenerateName(generateName);
@@ -106,16 +112,17 @@ public class ResourceController extends BaseController{
 
     /**
      * 分页查询资源
+     *
      * @param whereRequest
      * @return
      */
-    @RequestMapping(value = "pageList",method = RequestMethod.POST)
+    @RequestMapping(value = "pageList", method = RequestMethod.POST)
     @ResponseBody
-    private AjaxResult pageResourceList(WhereRequest whereRequest){
+    private AjaxResult pageResourceList(WhereRequest whereRequest) {
         try {
-            List<Resource> resourceList = resourceService.listByType(RESOURCE_TYPE_BASE,whereRequest.getPage(),whereRequest.getPageSize());
+            List<Resource> resourceList = resourceService.listByType(RESOURCE_TYPE_BASE, whereRequest.getPage(), whereRequest.getPageSize());
             PageInfo<Resource> pageList = new PageInfo<>(resourceList);
-            return AjaxResult.success(pageList,"资源查询成功");
+            return AjaxResult.success(pageList, "资源查询成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("系统内部出错");
@@ -125,12 +132,13 @@ public class ResourceController extends BaseController{
 
     /**
      * 推送至agent
+     *
      * @param resourceToAgentBean
      * @returnC
      */
-    @RequestMapping(value = "pushToAgent",method = RequestMethod.POST)
+    @RequestMapping(value = "pushToAgent", method = RequestMethod.POST)
     @ResponseBody
-    private AjaxResult pushToAgent(@RequestBody ResourceToAgentBean resourceToAgentBean){
+    private AjaxResult pushToAgent(@RequestBody ResourceToAgentBean resourceToAgentBean) {
         try {
             Resource resource = resourceService.findById(resourceToAgentBean.getResourceId());
             Robot robot = robotService.getById(resourceToAgentBean.getRobotId());
@@ -154,12 +162,29 @@ public class ResourceController extends BaseController{
             info.setMessageText(JSON.toJSONString(commonInfo));
 
             String backResultResourceRoutingKey = RabbitMqBean.getRoutingKey(info.getReceiverId(), true, MessageType.EXECUTOR_RESOURCE.name());
-            return (AjaxResult)rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultResourceRoutingKey, info);
+            return (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultResourceRoutingKey, info);
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("系统内部出错");
         }
 
+    }
+
+    /**
+     * 语音文件列表接口
+     * @return
+     */
+    @RequestMapping(value = "listVoiceFile", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listVoiceFiles(WhereRequest whereRequest) {
+        try {
+            List<VoiceFile> list = voiceFileService.listVoiceFiles(whereRequest.getPage(), whereRequest.getPageSize());
+            PageInfo<VoiceFile> pageList = new PageInfo<>(list);
+            return AjaxResult.success(pageList, "语音文件查询成功");
+        } catch (Exception e) {
+            logger.error("{}", e);
+            return AjaxResult.failed("系统内部出错");
+        }
     }
 
 

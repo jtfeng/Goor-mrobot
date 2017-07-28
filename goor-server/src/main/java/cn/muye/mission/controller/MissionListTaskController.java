@@ -154,7 +154,7 @@ public class MissionListTaskController {
         }
     }
 
-    @PostMapping("/missionTaskPause")
+    @PostMapping("/missionTaskCancel")
     @ApiOperation(
             value = "场景任务Task终止",
             notes = "场景任务Task终止")
@@ -162,7 +162,7 @@ public class MissionListTaskController {
         MissionListTask missionListTask = missionListTaskService.findById(missionTaskId);
         if (missionListTask != null) {
             String robotCode = missionListTask.getRobotCode();
-            AjaxResult ajaxResult = sendMissionCommand("pause", robotCode);
+            AjaxResult ajaxResult = sendMissionCommand("clear", robotCode);
             return ajaxResult;
         } else {
             return AjaxResult.failed("查询错误");
