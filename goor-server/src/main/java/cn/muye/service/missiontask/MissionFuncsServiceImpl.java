@@ -1608,7 +1608,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionStatePaused = "paused";//暂停中
     public static final String MissionStateWaiting = "waiting";//等待中
     public static final String MissionStateCanceled = "canceled";//被取消
-    public static final String MissionStateInit = "";//初始状态，代表未执行
+    public static final String MissionStateInit = "init";//初始状态，代表未执行,待执行
 
     /**
      * 地图点的属性类
