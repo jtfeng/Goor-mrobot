@@ -520,7 +520,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.setRobotCode(order.getRobot().getCode());
         missionListTask.setStartTime(System.currentTimeMillis() + 60);
         missionListTask.setStopTime(System.currentTimeMillis() + 600);
-        missionListTask.setState(MissionStateExecuting);
+        missionListTask.setState(MissionStateInit);
         missionListTask.setCreatedBy(System.currentTimeMillis());
         missionListTask.setCreateTime(new Date());
         missionListTask.setStoreId(order.getStoreId());
@@ -852,7 +852,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -890,7 +890,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         fake.setSceneName("agv");
         itemTask.setData(JsonUtils.toJson(fake,
                 new TypeToken<JsonMissionItemDataFake>(){}.getType()));
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_test);
 
         return itemTask;
@@ -919,7 +919,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -955,7 +955,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         data.setMap(mp.getMapName());
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataLaserNavigation>(){}.getType()));
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_nav);
 
         return itemTask;
@@ -978,7 +978,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1007,7 +1007,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_waiting);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_waiting);
         return itemTask;
     }
@@ -1031,7 +1031,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1066,7 +1066,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         json.setFilename(fileName);
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataMp3>(){}.getType()));
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_mp3);
 
         return itemTask;
@@ -1089,7 +1089,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1125,7 +1125,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         json.setMap(mp.getMapName());
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataGotocharge>(){}.getType()));
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_gotocharge);
 
         return itemTask;
@@ -1148,7 +1148,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1177,7 +1177,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_leavecharge);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_leavecharge);
 
         return itemTask;
@@ -1200,7 +1200,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1229,7 +1229,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_load);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_load);
 
         return itemTask;
@@ -1252,7 +1252,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1281,7 +1281,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_unload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_unload);
 
         return itemTask;
@@ -1304,7 +1304,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1333,7 +1333,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setName(MissionItemName_finalUnload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData("");
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_finalUnload);
 
         return itemTask;
@@ -1357,7 +1357,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionTask.setName(missionTask.getDescription());
         missionTask.setRepeatTimes(1);
         missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateExecuting);
+        missionTask.setState(MissionStateInit);
         missionTask.setPresetMissionCode("");
 
         List<MissionItemTask> missionItemTasks =
@@ -1388,7 +1388,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataElevator>(){}.getType()));
-        itemTask.setState(MissionStateExecuting);
+        itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_elevator);
 
         return itemTask;
@@ -1608,6 +1608,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionStatePaused = "paused";//暂停中
     public static final String MissionStateWaiting = "waiting";//等待中
     public static final String MissionStateCanceled = "canceled";//被取消
+    public static final String MissionStateInit = "";//初始状态，代表未执行
 
     /**
      * 地图点的属性类
