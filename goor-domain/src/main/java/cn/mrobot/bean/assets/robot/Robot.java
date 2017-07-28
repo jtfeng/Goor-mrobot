@@ -15,7 +15,7 @@ import java.util.List;
 public class Robot extends BaseBean {
 
     @Transient
-    private String uuid;//uuid
+    private String uuid;//uuid消息唯一标识符
 
     private String name; //机器人名称
 
@@ -44,7 +44,7 @@ public class Robot extends BaseBean {
     private Long sceneId; //场景ID
 
     @Transient
-    private List<RobotPassword> passwords;
+    private List<RobotPassword> passwords; //机器人抽屉密码
 
     @Transient
     private List<MapPoint> chargerMapPointList; //充电桩点LIST

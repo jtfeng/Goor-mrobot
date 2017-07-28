@@ -19,6 +19,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.Date;
 import java.util.List;
 
@@ -82,6 +83,7 @@ public class RobotController {
         if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
         }
+        AjaxResult ajaxResult = null;
         if (robotId != null) { //修改
             Robot robotDb = robotService.getById(robotId);
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
@@ -104,12 +106,12 @@ public class RobotController {
                 if (robotBatteryThreshold != null) {
                     robotDb.setBatteryThreshold(robotBatteryThreshold);
                 }
-                try{
-                    return robotService.updateRobotAndBindChargerMapPoint(robotDb, batteryThresholdDb, robotBatteryThreshold, robotCodeDb);
+                try {
+                    ajaxResult = robotService.updateRobotAndBindChargerMapPoint(robotDb, batteryThresholdDb, robotBatteryThreshold, robotCodeDb);
                 } catch (Exception e) {
-                    LOGGER.error("error", e);
-                } finally {
+                    LOGGER.error("{}", e);
                     return AjaxResult.failed("修改同步失败，回滚操作");
+                } finally {
                 }
             } else if (robotDb != null && robotCode != null && !robotCode.equals(robotCodeDb)) {
                 return AjaxResult.failed(robot, "不能修改机器人的编号");
@@ -119,6 +121,7 @@ public class RobotController {
         } else {
             return AjaxResult.failed("不允许新增机器人");
         }
+        return ajaxResult;
     }
 
     @RequestMapping(value = {"assets/robot/{id}"}, method = RequestMethod.DELETE)

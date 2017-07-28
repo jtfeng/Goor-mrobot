@@ -25,10 +25,11 @@ public class FilterConfig {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new AuthValidationExceptionFilter());
         registration.addUrlPatterns("/*");
-        registration.addInitParameter("excludedUrl", "/account/user/logOut," +
+        registration.addInitParameter("excludedUrl",
+                "/account/user/logOut," +
                 "/account/user/login/pad," +
                 "/account/user/login," +
-                "/services/");
+                "/services/,/checkOnLine,/checkMysql,/checkRabbitmq,/checkRedis,/checkAuth2,/checkNginx");
         registration.setName("authValidationExceptionFilter");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return registration;

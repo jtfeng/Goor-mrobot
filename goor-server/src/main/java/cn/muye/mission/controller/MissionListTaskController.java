@@ -7,10 +7,12 @@ import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.mission.CommandInfo;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.bean.order.OrderSetting;
+import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
@@ -22,6 +24,8 @@ import com.github.pagehelper.PageInfo;
 import com.google.common.collect.ImmutableList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,6 +42,8 @@ import static com.google.common.base.Preconditions.checkArgument;
         value = "任务列表功能测试",
         description = "任务列表功能测试")
 public class MissionListTaskController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MissionListTaskController.class);
 
     @Autowired
     MissionFuncsService missionFuncsService;
@@ -145,6 +151,73 @@ public class MissionListTaskController {
             }
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    @PostMapping("/missionTaskPause")
+    @ApiOperation(
+            value = "场景任务Task终止",
+            notes = "场景任务Task终止")
+    public AjaxResult missionTaskPause(@RequestParam("missionTaskId") Long missionTaskId) {
+        MissionListTask missionListTask = missionListTaskService.findById(missionTaskId);
+        if (missionListTask != null) {
+            String robotCode = missionListTask.getRobotCode();
+            AjaxResult ajaxResult = sendMissionCommand("pause", robotCode);
+            return ajaxResult;
+        } else {
+            return AjaxResult.failed("查询错误");
+        }
+
+    }
+
+    private AjaxResult sendMissionCommand(String command, String robotSn) {
+        try {
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            messageInfo.setSendTime(new Date());
+            messageInfo.setSenderId("goor-server");
+            messageInfo.setReceiverId(robotSn);
+            messageInfo.setMessageType(MessageType.EXECUTOR_COMMAND);
+            CommonInfo commonInfo = new CommonInfo();
+            commonInfo.setTopicName(TopicConstants.X86_MISSION_INSTANT_CONTROL);
+            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            String uuid = UUID.randomUUID().toString().replace("-", "");
+            CommandInfo commandInfo = new CommandInfo();
+            commandInfo.setUuid(uuid);
+            commandInfo.setCommand(command);
+            commandInfo.setSendTime(new Date().getTime());
+            SlamBody slamBody = new SlamBody();
+            slamBody.setPubName(TopicConstants.PUB_NAME_MISSION_LIST_TASK);
+            slamBody.setUuid(uuid);
+            slamBody.setData(commandInfo);
+            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+            AjaxResult ajaxResult = messageSendHandleService.sendCommandMessage(true, true, robotSn, messageInfo);
+            if (!ajaxResult.isSuccess()) {
+                return AjaxResult.failed();
+            }
+            long startTime = System.currentTimeMillis();
+            LOGGER.info("start time" + startTime);
+            for (int i = 0; i < 100; i++) {
+                Thread.sleep(1000);
+                //获取ROS的回执消息
+                MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(messageInfo.getUuId());
+                if (messageInfo1 != null && messageInfo1.isSuccess()) {
+                    messageInfo.setSuccess(true);
+                    break;
+                }
+            }
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("end time" + (endTime - startTime));
+            if (messageInfo.isSuccess()) {
+                return AjaxResult.success();
+            } else {
+                return AjaxResult.failed();
+            }
+        } catch (Exception e) {
+            LOGGER.error("{}", e);
+            return AjaxResult.failed();
+        } finally {
         }
     }
 }

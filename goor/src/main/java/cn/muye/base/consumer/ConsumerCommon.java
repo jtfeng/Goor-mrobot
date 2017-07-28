@@ -6,6 +6,7 @@ import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
@@ -15,6 +16,7 @@ import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.config.RobotInfoConfigService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Service;
@@ -39,6 +41,8 @@ public class ConsumerCommon {
     private ReceiveMessageService receiveMessageService;
     @Autowired
     private RobotInfoConfigService robotInfoConfigService;
+    @Autowired
+    private AppSubService appSubService;
 
     /**
      * 接收命令消息（无回执）
@@ -72,7 +76,7 @@ public class ConsumerCommon {
                 if (MessageType.TIME_SYNCHRONIZED.equals(messageInfo.getMessageType())) {
                     return clientTimeSynchronized(messageInfo);
                 }
-                if (MessageType.ROBOT_BATTERY_THRESHOLD.equals(messageInfo.getMessageType())) {
+                if (MessageType.ROBOT_INFO.equals(messageInfo.getMessageType())) {
                     updateRobotInfoConfigRecord(messageInfo);
                 }
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
@@ -94,10 +98,11 @@ public class ConsumerCommon {
         CommonInfo commonInfo = JSON.parseObject(commonInfoStr, CommonInfo.class);
         String pubDataStr = commonInfo.getPublishMessage();
         PubData pubData = JSON.parseObject(pubDataStr, PubData.class);
-        Robot robotInfo = JSON.parseObject(pubData.getData(), Robot.class);
+        SlamBody slamBody = JSON.parseObject(pubData.getData(), SlamBody.class);
+        Robot robot = (Robot) slamBody.getData();
         CacheInfoManager.removeRobotInfoConfigCache();
         //改数据库中的robotInfoConfig表的记录
-        RobotInfoConfig robotInfoConfig = robotToRobotInfoConfig(robotInfo);
+        RobotInfoConfig robotInfoConfig = robotToRobotInfoConfig(robot);
         robotInfoConfigService.update(robotInfoConfig);
     }
 
