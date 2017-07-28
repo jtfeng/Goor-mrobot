@@ -22,11 +22,25 @@ public interface StationService extends BaseService<Station>{
 
 	int update(Station station );
 
-	Station findById(long id, long storeId);
+	Station findById(long id, long storeId,Long sceneId);
 
-	List<Station> list(WhereRequest whereRequest, Long storeId);
+	/**
+	 * 查询站列表
+	 * @param whereRequest
+	 * @param storeId 超级管理员传storeId=null，能查看所有站；医院管理员传storeId!=null，只能查看该医院的站
+	 * @param sceneId sceneId=null，不按场景过滤
+	 * @return
+	 */
+	List<Station> list(WhereRequest whereRequest, Long storeId,Long sceneId);
 
-	List<Station> listByName(String name);
+	/**
+	 * 根据名称查看站列表
+	 * @param name
+	 * @param storeId
+	 * @param sceneId
+	 * @return
+	 */
+	List<Station> listByName(String name, long storeId,long sceneId);
 
 	int delete(Station station);
 

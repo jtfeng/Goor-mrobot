@@ -368,7 +368,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         od.getStationId() != null) {
                     logger.info("###### begin get order detail station ");
                     //取得站点对象
-                    Station station = stationService.findById(od.getStationId(), od.getStoreId());
+                    //TODO 以后AGV也需要按照切换的场景过滤
+                    Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
                     if (station != null &&
                             station.getMapPoints() != null){
                         logger.info("###### get order detail station is ok， list size is: " + station.getMapPoints().size());

@@ -414,7 +414,7 @@ public class UserController {
             }
         } else {
             if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())))  {
-                List<Station> stationList = stationService.list(null, user.getStoreId());
+                List<Station> stationList = stationService.list(null, user.getStoreId(),null);
                 if (stationList != null && stationList.size() > 0) {
                     for (Station station : stationList) {
                         stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
@@ -423,7 +423,7 @@ public class UserController {
                 userDTO.setStationList(stationDTO4UserList);
             }
             if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
-                List<Station> stationList = stationService.list(null, null);
+                List<Station> stationList = stationService.list(null, null,null);
                 if (stationList != null && stationList.size() > 0) {
                     for (Station station : stationList) {
                         stationDTO4UserList.add(UserServiceImpl.stationToDTO(station));
