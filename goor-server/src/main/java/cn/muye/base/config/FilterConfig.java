@@ -29,7 +29,7 @@ public class FilterConfig {
                 "/account/user/logOut," +
                 "/account/user/login/pad," +
                 "/account/user/login," +
-                "/services/,/checkOnLine,/checkMysql,/checkRabbitmq,/checkRedis,/checkAuth2,/checkNginx");
+                "/services/,/check*");
         registration.setName("authValidationExceptionFilter");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return registration;

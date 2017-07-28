@@ -15,7 +15,6 @@ import cn.mrobot.bean.mission.MissionTypeEnum;
 import cn.mrobot.dto.account.RoleDTO;
 import cn.mrobot.dto.account.UserDTO;
 import cn.mrobot.dto.area.station.StationDTO4User;
-import cn.mrobot.dto.auth.UserAuth;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.user.service.UserRoleXrefService;
@@ -35,7 +34,6 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.net.util.Base64;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import cn.mrobot.bean.constant.Constant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -336,15 +334,9 @@ public class UserController {
             String accessToken = doAuthorize(userName, password);
             //判断token不等于null，说明已经登录
             if (!StringUtil.isNullOrEmpty(accessToken)) {
+                session.setAttribute("access_token", accessToken);
                 //查询用户的
                 List<User> list = userService.getUser(userName, password);
-                if (list != null && list.size() > 0) {
-                    user = list.get(0);
-                    user.setAccessToken(accessToken);
-                    userService.updateUser(user);
-                }
-                session.setAttribute("access_token", accessToken);
-
                 if (list != null) {
                     user = list.get(0);
                     List<StationDTO4User> stationList = user.getStationList();
