@@ -21,7 +21,7 @@ public interface StationMapPointXREFService {
 
 	void update(StationMapPointXREF stationMapPointXREF);
 
-	StationMapPointXREF get(long id);
+//	StationMapPointXREF get(long id);
 
 	List<StationMapPointXREF> list(WhereRequest whereRequest);
 

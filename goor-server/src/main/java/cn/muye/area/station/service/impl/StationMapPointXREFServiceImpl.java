@@ -40,10 +40,10 @@ public class StationMapPointXREFServiceImpl implements StationMapPointXREFServic
 		mapper.updateByPrimaryKey(stationMapPointXREF);
 	}
 
-	@Override
-	public StationMapPointXREF get(long id) {
-		return mapper.selectByPrimaryKey(id);
-	}
+//	@Override
+//	public StationMapPointXREF get(long id) {
+//		return mapper.selectByPrimaryKey(id);
+//	}
 
 	@Override
 	public List<StationMapPointXREF> list(WhereRequest whereRequest) {
