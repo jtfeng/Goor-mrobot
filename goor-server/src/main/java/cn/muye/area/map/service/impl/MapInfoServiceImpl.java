@@ -53,7 +53,7 @@ public class MapInfoServiceImpl implements MapInfoService {
         example.createCriteria().andCondition("MAP_NAME = '" + name + "'")
                 .andCondition("SCENE_NAME = '" + sceneName + "'")
                 .andCondition("STORE_ID = " + storeId + "");
-        return mapInfoMapper.selectByExample(example);
+        return parseLocalPath(mapInfoMapper.selectByExample(example));
     }
 
     @Override

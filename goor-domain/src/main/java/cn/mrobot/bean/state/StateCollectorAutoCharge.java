@@ -1,12 +1,10 @@
 package cn.mrobot.bean.state;
 
-import cn.mrobot.bean.base.BaseBean;
-
 /**
  * 自动回充状态
  * Created by Jelynn on 2017/7/17.
  */
-public class StateCollectorAutoCharge extends BaseBean {
+public class StateCollectorAutoCharge extends StateCollector {
 
     private int pluginStatus;
 
