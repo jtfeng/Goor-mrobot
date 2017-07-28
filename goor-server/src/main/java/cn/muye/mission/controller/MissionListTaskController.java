@@ -193,7 +193,7 @@ public class MissionListTaskController {
             commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
             messageInfo.setMessageText(JSON.toJSONString(commonInfo));
             AjaxResult ajaxResult = messageSendHandleService.sendCommandMessage(true, true, robotSn, messageInfo);
-            if (!ajaxResult.isSuccess()) {
+            if (ajaxResult != null && !ajaxResult.isSuccess()) {
                 return AjaxResult.failed();
             }
             long startTime = System.currentTimeMillis();
@@ -210,13 +210,13 @@ public class MissionListTaskController {
             long endTime = System.currentTimeMillis();
             LOGGER.info("end time" + (endTime - startTime));
             if (messageInfo.isSuccess()) {
-                return AjaxResult.success();
+                return AjaxResult.success("场景任务终止成功");
             } else {
-                return AjaxResult.failed();
+                return AjaxResult.failed("场景任务终止失败");
             }
         } catch (Exception e) {
             LOGGER.error("{}", e);
-            return AjaxResult.failed();
+            return AjaxResult.failed("场景任务终止失败");
         } finally {
         }
     }
