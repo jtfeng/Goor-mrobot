@@ -21,10 +21,12 @@ public class User extends BaseBean{
 
     private Integer directLoginKey; //快捷登陆口令（4位码）
 
+    private String accessToken; //临时解决方案(防止登陆后随时可能出现session过期问题)
+
     @Transient
     private Long roleId; //用户类型(1- 超级管理员， 2- 医院管理员, 3-站管理员)
 
-//    todo 以后还是要做切换站功能，暂时每个用户只能绑一个站，字段预留
+    //    todo 以后还是要做切换站功能，暂时每个用户只能绑一个站，字段预留
     @Transient
     private List<StationDTO4User> stationList; //绑定的站List
 
@@ -100,4 +102,11 @@ public class User extends BaseBean{
         this.storeId = storeId;
     }
 
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
 }
