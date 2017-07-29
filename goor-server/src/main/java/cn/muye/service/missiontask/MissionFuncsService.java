@@ -37,7 +37,6 @@ public interface MissionFuncsService {
      * 根据MissionList列表和机器人列表生成MissionListTask列表并发送到机器人
      * @param robotCodesArray
      * @param missionLists
-     * @param name
      * @return
      */
     Boolean createMissionListTasksByMissionLists(String[] robotCodesArray, List<MissionList> missionLists)  throws Exception;
