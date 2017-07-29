@@ -114,7 +114,8 @@ public class MissionListTaskController {
         try {
             checkArgument(!("".equals(robotCode.trim())), "机器人编号不能为空串!");
             checkArgument(!("".equals(robotCode.trim())), "传入的指令不能为空串!");
-            checkArgument(ImmutableList.of("pause", "resume", "clear").indexOf(command) != -1, "您传入的指令不正确，合法的指令包括：（ pause、resume、clear ）");
+            checkArgument(ImmutableList.of("pause", "resume", "clear", "skipMissionList", "startNextMission")
+                    .indexOf(command) != -1, "您传入的指令不正确，合法的指令包括：（ pause、resume、clear、skipMissionList、startNextMission ）");
             String uuid = UUID.randomUUID().toString().replace("-", "");
             CommonInfo commonInfo = new CommonInfo();
             commonInfo.setTopicName(TopicConstants.X86_MISSION_INSTANT_CONTROL);
@@ -134,7 +135,6 @@ public class MissionListTaskController {
                 MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(info.getUuId());
                 if(messageInfo1.isSuccess()){
                     info.setSuccess(true);
-
                     break;
                 }
             }
