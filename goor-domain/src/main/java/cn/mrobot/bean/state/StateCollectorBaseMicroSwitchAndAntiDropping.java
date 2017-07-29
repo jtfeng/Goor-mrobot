@@ -4,7 +4,7 @@ package cn.mrobot.bean.state;
  * 防碰撞(碰撞开关)传感器,与防跌落传感器状态
  * Created by Jelynn on 2017/7/17.
  */
-public class StateCollectorBaseMicroSwitchAndAntiDropping {
+public class StateCollectorBaseMicroSwitchAndAntiDropping  extends StateCollector{
 
     private int leftAntiDropping;//防跌落左传感器
 

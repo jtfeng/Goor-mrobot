@@ -122,6 +122,7 @@ public class CacheInfoManager implements ApplicationContextAware {
             }
             List<MapInfo> mapInfoList = mapInfoService.getMapInfo(names[0], names[1], Long.parseLong(names[2]));
             if(mapInfoList.size() > 0){
+                mapInfo = mapInfoList.get(0) ;
                 mapOriginalCache.put(key, mapInfo);
             }
             return mapInfo;

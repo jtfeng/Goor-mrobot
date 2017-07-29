@@ -44,9 +44,8 @@ public class LogInfoController {
         pageNo = pageNo == null ? 1 : pageNo;
         pageSize = pageSize == null ? 10 : pageSize;
         PageHelper.startPage(pageNo, pageSize);
-        List<LogInfo> lists = new ArrayList<>();
         //用PageInfo对结果进行包装
-        PageInfo<LogInfo> page = new PageInfo<LogInfo>(lists);
+        PageInfo<LogInfo> page = new PageInfo<LogInfo>(logInfoList);
         return AjaxResult.success(page);
     }
 }

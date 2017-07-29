@@ -2,10 +2,13 @@ package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
 import cn.mrobot.bean.state.StateCollectorResponse;
 import cn.mrobot.utils.StringUtil;
@@ -16,6 +19,7 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
+import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.StateCollectorService;
@@ -31,6 +35,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
+import java.util.UUID;
 
 //import cn.mrobot.bean.state.StateCollectorResponse;
 
@@ -67,6 +72,9 @@ public class ConsumerCommon {
 
     @Autowired
     private StateCollectorService stateCollectorService;
+
+    @Autowired
+    private MessageSendHandleService messageSendHandleService;
 
     /**
      * 透传ros发布的topic：agent_pub
@@ -124,13 +132,53 @@ public class ConsumerCommon {
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.SUB_NAME_ROBOT_INFO_REPLY)) { //应用反馈给云端是否同步电量阈值成功
+                    //上报至云端
+                    MessageInfo cacheInfo = new MessageInfo();
+                    int errorCode = jsonObjectData.getInteger("error_code");
+                    String innerData = jsonObjectData.getString(TopicConstants.DATA);
+                    JSONObject innerJsonObjectData = JSON.parseObject(innerData);
+                    String uuid = innerJsonObjectData.getString(TopicConstants.UUID);
+                    if (errorCode == 0) {
+                        cacheInfo.setSuccess(true);
+                    } else {
+                        cacheInfo.setSuccess(false);
+                    }
+                    CacheInfoManager.setUUIDCache(uuid, cacheInfo);
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
+                    String robotCode = messageInfo.getSenderId();
+                    Robot robotDb = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    syncRosRobotConfig(robotDb);
                 }
-//                else if(){
-//
-//                }
             }
         } catch (Exception e) {
             logger.error("consumer directAgentSub exception", e);
+        }
+    }
+
+    private void syncRosRobotConfig(Robot robotNew) {
+        try {
+            CommonInfo commonInfo = new CommonInfo();
+            commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
+            String uuid = UUID.randomUUID().toString().replace("-", "");
+            robotNew.setUuid(uuid);
+            SlamBody slamBody = new SlamBody();
+            slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+            slamBody.setUuid(uuid);
+            slamBody.setData(robotNew);
+            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            messageInfo.setReceiverId(robotNew.getCode());
+            messageInfo.setSenderId("goor-server");
+            messageInfo.setMessageType(MessageType.ROBOT_INFO);
+            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+            messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
+        } catch (Exception e) {
+            logger.error("发送错误", e);
+        } finally {
         }
     }
 

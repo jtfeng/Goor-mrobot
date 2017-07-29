@@ -25,6 +25,16 @@ public class Station extends BaseBean{
     private Integer stationTypeId;
 
     /**
+     * 关联场景
+     * */
+    private Long sceneId;
+
+    /**
+     * 假删除标志：0 未删除，1 已删除
+     */
+    private int active;
+
+    /**
      * 站类型JSON串:不存库
      * */
 //    @Transient
@@ -33,6 +43,22 @@ public class Station extends BaseBean{
      * 描述
      */
     private String description;
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public void setActive(int active) {
+        this.active = active;
+    }
 
     public Station() {
     }
@@ -44,8 +70,6 @@ public class Station extends BaseBean{
     /**
      * 关联点列表：卸货点、停车点、充电桩点、充电桩原点、装货点等
      * */
-
-
     @Transient
     private List<MapPoint> mapPoints;
 

@@ -5,11 +5,14 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.util.SessionUtil;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -50,10 +54,15 @@ public class StationController {
     @RequestMapping(value = {"area/station"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询站列表", httpMethod = "GET", notes = "查询站列表")
     @ResponseBody
-    private AjaxResult pageStation(WhereRequest whereRequest) {
+    private AjaxResult pageStation(WhereRequest whereRequest,HttpServletRequest request) {
         try {
+            //从session取当前切换的场景
+            Scene scene = SessionUtil.getScene(request);
+            if(scene == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+            }
             //TODO 从session取切换门店的ID，现在先写死
-            List<Station> stationList = stationService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            List<Station> stationList = stationService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID,scene.getId());
             if (stationList != null && stationList.size() > 0) {
                 for (Station station : stationList) {
                     station = toEntity(station);
@@ -78,14 +87,19 @@ public class StationController {
     @RequestMapping(value = {"area/station/{id}"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询站详情", httpMethod = "GET", notes = "查询站详情")
     @ResponseBody
-    public AjaxResult getStation(@ApiParam(value = "站ID") @PathVariable Long id) {
+    public AjaxResult getStation(@ApiParam(value = "站ID") @PathVariable Long id,HttpServletRequest request) {
         if (id == null) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
         }
         Station station = null;
         try {
+            //从session取当前切换的场景
+            Scene scene = SessionUtil.getScene(request);
+            if(scene == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+            }
             //TODO 从session取切换门店的ID，现在先写死
-            station = stationService.findById(Long.valueOf(id), SearchConstants.FAKE_MERCHANT_STORE_ID);
+            station = stationService.findById(Long.valueOf(id), SearchConstants.FAKE_MERCHANT_STORE_ID,scene.getId());
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
@@ -102,15 +116,21 @@ public class StationController {
     @RequestMapping(value = "area/station/{id}", method = RequestMethod.DELETE)
     @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-    public AjaxResult deleteMapPoint(@PathVariable long id) throws Exception {
+    public AjaxResult deleteMapPoint(@PathVariable long id,HttpServletRequest request) throws Exception {
         try {
+            //从session取当前切换的场景
+            Scene scene = SessionUtil.getScene(request);
+            if(scene == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+            }
             //TODO 从session取切换门店的ID，现在先写死
-            Station stationDB = stationService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            Station stationDB = stationService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID,scene.getId());
             if (stationDB == null) {
                 return AjaxResult.failed("删除对象不存在");
             }
-            stationService.delete(stationDB);
-
+            stationDB.setActive(Constant.DELETE);
+//            stationService.delete(stationDB);
+            stationService.update(stationDB);
             return AjaxResult.success("删除成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -127,8 +147,15 @@ public class StationController {
     @RequestMapping(value = {"area/station"}, method = RequestMethod.POST)
     @ApiOperation(value = "新增或修改站", httpMethod = "POST", notes = "新增或修改站")
     @ResponseBody
-    public AjaxResult saveOrUpdateStation(@ApiParam(value = "站") @RequestBody Station station) {
+    public AjaxResult saveOrUpdateStation(@ApiParam(value = "站") @RequestBody Station station,HttpServletRequest request) {
         try {
+            //从session取当前切换的场景
+            Scene scene = SessionUtil.getScene(request);
+            if(scene == null) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+            }
+            Long sceneId = scene.getId();
+
             Integer stationTypeId = station.getStationTypeId();
             if (stationTypeId == null || stationTypeId <= 0 || StationType.getType(stationTypeId) == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站类型有误");
@@ -137,8 +164,11 @@ public class StationController {
             if (StringUtil.isNullOrEmpty(name)) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站名称不能为空");
             }
+            //TODO 从session取切换门店的ID，现在先写死
+            Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
             //判断是否有重复的名称,且查找到的对象ID不是提交的对象ID
-            List<Station> stationDbList = stationService.listByName(name);
+            List<Station> stationDbList = stationService.listByName(name,storeId,sceneId);
             int size = stationDbList.size();
             Long id = station.getId();
             if (stationDbList != null
@@ -153,8 +183,8 @@ public class StationController {
             }
 
             if (station != null && id != null) { //修改
-                //TODO 从session取切换门店的ID，现在先写死
-                Station stationDb = stationService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID);
+
+                Station stationDb = stationService.findById(id, storeId,sceneId);
                 if (stationDb == null) {
                     return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要修改的对象不存在");
                 }
@@ -165,9 +195,10 @@ public class StationController {
 
                 stationService.update(stationDb);
                 return AjaxResult.success(toEntity(stationDb), "修改成功");
-            } else if (station != null && id == null) {
-                //TODO 从session取切换门店的ID，现在先写死
-                station.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            } else if (station != null && id == null) { //新增
+                station.setActive(Constant.NORMAL);
+                station.setSceneId(scene.getId());
+                station.setStoreId(storeId);
                 station.setCreateTime(new Date());
                 //TODO 从session取登录用户ID
                 station.setCreatedBy(SearchConstants.FAKE_MERCHANT_STORE_ID);

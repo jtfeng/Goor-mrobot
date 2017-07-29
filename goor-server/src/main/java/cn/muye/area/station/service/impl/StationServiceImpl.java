@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationMapPointXREF;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationMapPointXREFService;
@@ -83,10 +84,15 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     }
 
     @Override
-    public Station findById(long id, long storeId) {
+    public Station findById(long id, long storeId,Long sceneId) {
         Example example = new Example(Station.class);
-        example.createCriteria().andCondition("ID =", id)
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("ID =", id)
+                .andCondition("ACTIVE =", Constant.NORMAL)
                 .andCondition("STORE_ID =", storeId);
+        if(sceneId != null) {
+            criteria.andCondition("SCENE_ID =", sceneId);
+        }
         example.setOrderByClause("ID DESC");
         List<Station> temp = myMapper.selectByExample(example);
         if (temp == null || temp.size() <= 0) {
@@ -109,7 +115,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     }
 
     @Override
-    public List<Station> list(WhereRequest whereRequest, Long storeId) {
+    public List<Station> list(WhereRequest whereRequest, Long storeId,Long sceneId) {
         //如果whereRequest不为null，则分页
         if (whereRequest != null) {
             PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
@@ -124,8 +130,13 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 
             //方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
             Example example = new Example(Station.class);
-            example.createCriteria().andCondition("NAME like", "%" + name + "%")
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andCondition("NAME like", "%" + name + "%")
+                    .andCondition("ACTIVE =", Constant.NORMAL)
                     .andCondition("STORE_ID =", storeId);
+            if(sceneId != null) {
+                criteria.andCondition("SCENE_ID =", sceneId);
+            }
             example.setOrderByClause("ID DESC");
             stationList = myMapper.selectByExample(example);
         } else {
@@ -134,10 +145,15 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 
             //方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
             Example example = new Example(Station.class);
+            Example.Criteria criteria = example.createCriteria();
+            criteria.andCondition("ACTIVE =", Constant.NORMAL);
             example.setOrderByClause("ID DESC");
             //超级管理员传storeId=null，能查看所有站；医院管理员传storeId!=null，只能查看该医院的站
             if (storeId != null) {
-                example.createCriteria().andCondition("STORE_ID =", storeId);
+                criteria.andCondition("STORE_ID =", storeId);
+            }
+            if(sceneId != null) {
+                criteria.andCondition("SCENE_ID =", sceneId);
             }
             stationList = myMapper.selectByExample(example);
         }
@@ -186,9 +202,12 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     }
 
     @Override
-    public List<Station> listByName(String name) {
+    public List<Station> listByName(String name,long storeId,long sceneId) {
         Example example = new Example(Station.class);
-        example.createCriteria().andCondition("NAME =", name);
+        example.createCriteria().andCondition("NAME =", name)
+                .andCondition("SCENE_ID =", sceneId)
+                .andCondition("STORE_ID =", storeId)
+                .andCondition("ACTIVE =", Constant.NORMAL);
         return myMapper.selectByExample(example);
     }
 

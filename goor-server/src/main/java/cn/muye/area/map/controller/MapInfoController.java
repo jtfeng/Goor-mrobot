@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.thymeleaf.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -82,37 +81,36 @@ public class MapInfoController {
             //从缓存中获取当前机器的坐标
             CurrentInfo currentInfo = new CurrentInfo();
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
-            if (null == currentPoseInfo) {
-                return AjaxResult.failed("未获取到当前机器人（" + code + "）实时坐标");
+            if (null != currentPoseInfo) {
+                parsePoseData(currentPoseInfo);
+                currentInfo.setPose(parsePoseData(currentPoseInfo));
+            }else {
+                LOGGER.info("未获取到当前机器人（" + code + "）实时坐标");
             }
-            if (StringUtils.isEmpty(currentPoseInfo.getMessageText())) {
-                LOGGER.error("currentPoseInfo 的 MessageText为空");
-                return AjaxResult.failed("获取到的当前机器人（" + code + "）实时坐标数据有误");
-            }
-            parsePoseData(currentPoseInfo);
-            currentInfo.setPose(parsePoseData(currentPoseInfo));
 
             //根据场景名和地图名获取地图信息
             MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
-            if (null == currentMap) {
-                return AjaxResult.failed("未获取到当前机器人（" + code + "）实时地图");
+            if (null != currentMap) {
+                JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
+                String data = jsonObject.getString(TopicConstants.DATA);
+                JSONObject object = JSON.parseObject(data);
+                Integer errorCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
+                if(errorCode != null && errorCode == 0 ){
+                    String mapData = object.getString(TopicConstants.DATA);
+                    JSONObject mapObject = JSON.parseObject(mapData);
+                    String mapName = mapObject.getString(TopicConstants.MAP_NAME);
+                    String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
+                    MapInfo mapInfo = CacheInfoManager.getMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID));
+                    if (mapInfo != null) {
+                        currentInfo.setMapInfo(mapInfo);
+                    }else {
+                        LOGGER.info("未找到地图信息 name=" + mapName + "，sceneName=" + sceneName);
+                    }
+                }
+            }else {
+                LOGGER.info("未获取到当前机器人（" + code + "）实时地图");
             }
-            if (StringUtils.isEmpty(currentMap.getMessageText())) {
-                LOGGER.error("currentMap的MessageText为空");
-                return AjaxResult.failed("获取到的当前机器人（" + code + "）实时地图数据有误");
-            }
-            JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
-            String data = jsonObject.getString(TopicConstants.DATA);
-            JSONObject object = JSON.parseObject(data);
-            String mapData = object.getString(TopicConstants.DATA);
-            JSONObject mapDataObject = JSON.parseObject(mapData);
-            String mapName = mapDataObject.getString(TopicConstants.MAP_NAME);
-            String sceneName = mapDataObject.getString(TopicConstants.SCENE_NAME);
 
-            MapInfo mapInfo = CacheInfoManager.getMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID));
-            if (mapInfo == null) {
-                return AjaxResult.failed("未找到地图信息 name=" + mapName + "，sceneName=" + sceneName);
-            }
             //获取当前电量信息
             ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(code);
             if(chargeInfo != null ){
@@ -121,13 +119,17 @@ public class MapInfoController {
 
             //过滤状态。封装成List<StateDetail> 返回
             currentInfo.setList(stateCollectorService.getCurrentTriggeredState(code));
+
+            //添加当前任务状态
+            currentInfo.setMission(stateCollectorService.collectTaskLog(code));
+
             return AjaxResult.success(currentInfo, "获取当前信息成功");
         }catch (IllegalAccessException e) {
             LOGGER.error("getCurrentInfo exception", e);
             return AjaxResult.failed("获取机器人状态信息出错");
         }catch (Exception e) {
             LOGGER.error("getCurrentInfo exception", e);
-            return AjaxResult.failed("获取机器人位置信息出错");
+            return AjaxResult.failed("获取机器人状态信息出错");
         }
     }
 

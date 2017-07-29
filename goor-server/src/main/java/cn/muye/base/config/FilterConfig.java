@@ -1,6 +1,5 @@
 package cn.muye.base.config;
 
-//import cn.muye.base.filter.AuthValidationExceptionFilter;
 import cn.muye.base.filter.AuthValidationExceptionFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -25,10 +24,11 @@ public class FilterConfig {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new AuthValidationExceptionFilter());
         registration.addUrlPatterns("/*");
-        registration.addInitParameter("excludedUrl", "/account/user/logOut," +
+        registration.addInitParameter("excludedUrl",
+                "/account/user/logOut," +
                 "/account/user/login/pad," +
                 "/account/user/login," +
-                "/services/");
+                "/services/,/check*");
         registration.setName("authValidationExceptionFilter");
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return registration;

@@ -13,5 +13,5 @@ public enum MessageType {
     TIME_SYNCHRONIZED,//时间同步请求消息
     REPLY,//回执消息
     ROBOT_AUTO_REGISTER,//自动注册机器人信息消息
-    ROBOT_BATTERY_THRESHOLD;//机器人电量阈值消息
+    ROBOT_INFO;//机器人信息(包含电量阈值以及其他属性)消息
 }
