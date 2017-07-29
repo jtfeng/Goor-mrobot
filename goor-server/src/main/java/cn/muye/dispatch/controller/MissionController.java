@@ -7,6 +7,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.*;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
@@ -625,6 +626,7 @@ public class MissionController {
 			@RequestBody MissionList missionList,
 			@RequestParam Long[] robotIds,
 			@RequestParam Long[] missionListIds,
+			@RequestParam String name,
 			HttpServletRequest request) {
 		AjaxResult resp = AjaxResult.success();
 		try {
@@ -668,12 +670,18 @@ public class MissionController {
 			}
 
 			List<MissionList> missionLists = new ArrayList<MissionList>();
+			//如果任务没有名称，则我们根据类型自定义名称
+			if(name == null || "".equals(name)) {
+				name = MissionListTypeEnum.getValue(missionListType);
+			}
+			String currentDateTimeString = DateTimeUtils.getCurrentDateTimeString();
 			/**
 			 * 执行巡逻任务的业务逻辑
 			 */
 			if(missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
 				//通过总任务ID列表得到总任务
 				missionList.setMissionList(new ArrayList<Mission>());
+				missionList.setName(name + currentDateTimeString);
 				List<Mission> missions = missionList.getMissionList();
 				for( Long id : missionListIds ) {
 					MissionList missionListTemp = missionListService.get(id,storeId);
@@ -701,6 +709,7 @@ public class MissionController {
 				//离开充电桩任务列表
 				MissionList leaveCharge = new MissionList();
 
+				goToCharge.setName(name + Constant.START + currentDateTimeString);
 				goToCharge.setStartTime(missionList.getStartTime());
 				goToCharge.setStopTime(missionList.getStopTime());
 				goToCharge.setRepeatCount(missionList.getRepeatCount());
@@ -709,6 +718,7 @@ public class MissionController {
 				goToCharge.setMissionListType(missionListType);
 				goToCharge.setMissionList(new ArrayList<Mission>());
 
+				leaveCharge.setName(name + Constant.STOP + currentDateTimeString);
 				leaveCharge.setStartTime(missionList.getStopTime());
 				leaveCharge.setStopTime(missionList.getStopTime() + Constant.LEAVE_CHARGER_DELAY_TIME );
 				leaveCharge.setRepeatCount(missionList.getRepeatCount());

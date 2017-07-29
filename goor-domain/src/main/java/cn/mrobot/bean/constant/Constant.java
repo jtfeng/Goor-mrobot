@@ -83,6 +83,9 @@ public class Constant {
 
     public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";
 
+    public final static String START = "开始";//开始
+    public final static String STOP = "结束";//结束
+
     //Session 中存储的场景（Scene 场景常量标识）
     public static final String SCENE_SESSION_TAG = "scene_session_information";
 

@@ -4,10 +4,8 @@ import cn.mrobot.bean.mission.MissionList;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.order.Order;
-import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by abel on 17-7-13.
@@ -39,6 +37,7 @@ public interface MissionFuncsService {
      * 根据MissionList列表和机器人列表生成MissionListTask列表并发送到机器人
      * @param robotCodesArray
      * @param missionLists
+     * @param name
      * @return
      */
     Boolean createMissionListTasksByMissionLists(String[] robotCodesArray, List<MissionList> missionLists)  throws Exception;
