@@ -115,6 +115,7 @@ public class MissionListTaskController {
         return AjaxResult.success(pageList, "查询成功");
     }
 
+    //SNabc013_jelynn
     @RequestMapping(value = "/controlState/{robotCode}/{command}", method = RequestMethod.GET)
     public Object controlState(@PathVariable("robotCode") String robotCode, @PathVariable("command") String command){
         try {
@@ -126,8 +127,10 @@ public class MissionListTaskController {
             CommonInfo commonInfo = new CommonInfo();
             commonInfo.setTopicName(TopicConstants.X86_MISSION_INSTANT_CONTROL);
             commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>(){{
-                put("command", command);put("uuid", uuid);put("sendTime", String.valueOf(new Date().getTime()));
+            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, Object>(){{
+                put("command", command);
+                put("uuid", uuid);
+                put("sendTime", new Date().getTime());
             }}))));
             MessageInfo info = new MessageInfo();
             info.setUuId(uuid);info.setSendTime(new Date());info.setSenderId("goor-server");info.setReceiverId(robotCode);
@@ -139,7 +142,7 @@ public class MissionListTaskController {
             for (int i=0; i<500; i++) {
                 Thread.sleep(1000);
                 MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(info.getUuId());
-                if(messageInfo1.isSuccess()){
+                if(messageInfo1 != null && messageInfo1.isSuccess()){
                     info.setSuccess(true);
                     break;
                 }
