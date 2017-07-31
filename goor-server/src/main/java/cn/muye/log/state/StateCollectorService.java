@@ -258,6 +258,7 @@ public class StateCollectorService {
         }
         for(MissionTask missionTask : missionTaskList){
             StateDetail stateDetail = new StateDetail();
+            stateDetail.setCreateTime(missionTask.getCreateTime());
             String dateStr = DateTimeUtils.getDefaultDateString(missionTask.getCreateTime());
             stateDetail.setCHName(dateStr + " "+missionTask.getName());
             String state = missionTask.getState();

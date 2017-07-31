@@ -20,10 +20,11 @@ public class LogInfo extends BaseBean {
 	 * 设备编号
 	 */
 	private String deviceId;
+
 	/**
-	 * 信息内容
+	 * 日志等级
 	 */
-	private String message;
+	private String logLevel;
 
 	/**
 	 * 日志类型
@@ -40,14 +41,13 @@ public class LogInfo extends BaseBean {
 	 */
 	private String sceneName;
 
+	private String baseState; //底盘状态
 
-	/**
-	 * 日志等级
-	 */
-	private String logLevel;
+	private String chargeState; //充电状态
 
-	//模块
-	private int module;  //ModuleEnums 枚举类
+	private String missionState; //任务状态
+
+	private String navigationState; //导航状态
 
 	private String handlePerson;  //警告错误处理人
 
@@ -61,12 +61,12 @@ public class LogInfo extends BaseBean {
 		this.deviceId = deviceId;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getLogLevel() {
+		return logLevel;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setLogLevel(String logLevel) {
+		this.logLevel = logLevel;
 	}
 
 	public String getLogType() {
@@ -77,12 +77,44 @@ public class LogInfo extends BaseBean {
 		this.logType = logType;
 	}
 
-	public String getLogLevel() {
-		return logLevel;
+	public String getMapName() {
+		return mapName;
 	}
 
-	public void setLogLevel(String logLevel) {
-		this.logLevel = logLevel;
+	public void setMapName(String mapName) {
+		this.mapName = mapName;
+	}
+
+	public String getSceneName() {
+		return sceneName;
+	}
+
+	public void setSceneName(String sceneName) {
+		this.sceneName = sceneName;
+	}
+
+	public String getBaseState() {
+		return baseState;
+	}
+
+	public void setBaseState(String baseState) {
+		this.baseState = baseState;
+	}
+
+	public String getChargeState() {
+		return chargeState;
+	}
+
+	public void setChargeState(String chargeState) {
+		this.chargeState = chargeState;
+	}
+
+	public String getMissionState() {
+		return missionState;
+	}
+
+	public void setMissionState(String missionState) {
+		this.missionState = missionState;
 	}
 
 	public String getHandlePerson() {
@@ -101,27 +133,11 @@ public class LogInfo extends BaseBean {
 		this.handleTime = handleTime;
 	}
 
-	public int getModule() {
-		return module;
+	public String getNavigationState() {
+		return navigationState;
 	}
 
-	public void setModule(int module) {
-		this.module = module;
-	}
-
-	public String getMapName() {
-		return mapName;
-	}
-
-	public void setMapName(String mapName) {
-		this.mapName = mapName;
-	}
-
-	public String getSceneName() {
-		return sceneName;
-	}
-
-	public void setSceneName(String sceneName) {
-		this.sceneName = sceneName;
+	public void setNavigationState(String navigationState) {
+		this.navigationState = navigationState;
 	}
 }

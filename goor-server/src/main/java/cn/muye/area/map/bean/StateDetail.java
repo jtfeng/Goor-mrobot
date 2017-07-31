@@ -1,5 +1,7 @@
 package cn.muye.area.map.bean;
 
+import java.util.Date;
+
 /**
  * Created by Jelynn on 2017/7/25.
  */
@@ -17,6 +19,7 @@ public class StateDetail {
     //属性值 中文表示
     private String CHValue;
 
+    private Date createTime;
 
     public String getName() {
         return name;
@@ -48,5 +51,13 @@ public class StateDetail {
 
     public void setCHValue(String CHValue) {
         this.CHValue = CHValue;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }
