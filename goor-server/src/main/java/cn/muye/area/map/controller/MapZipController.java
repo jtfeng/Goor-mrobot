@@ -76,11 +76,14 @@ public class MapZipController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult listMapZip(WhereRequest whereRequest) {
         try {
-            List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            int pageNo = (whereRequest.getPage() == 0) ? 1 : whereRequest.getPage();
-            int pageSize = (whereRequest.getPageSize() == 0) ? 10 : whereRequest.getPage();
 
+            Integer pageNo = whereRequest.getPage() ;
+            Integer pageSize = whereRequest.getPageSize();
+
+            pageNo = pageNo == null ? 1 : pageNo;
+            pageSize = pageSize == null ? 10 : pageSize;
             PageHelper.startPage(pageNo, pageSize);
+            List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
             PageInfo<MapZip> page = new PageInfo<>(mapZipList);
             return AjaxResult.success(page, "查询成功");
         } catch (Exception e) {

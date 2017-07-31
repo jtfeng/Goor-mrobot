@@ -5,8 +5,6 @@ import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.log.base.service.LogInfoService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,8 +33,6 @@ public class LogInfoController {
     @RequestMapping(value = "log/list", method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult list(WhereRequest whereRequest) {
-        List<LogInfo> logInfoList = logInfoService.lists(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-
         Integer pageNo = whereRequest.getPage() ;
         Integer pageSize = whereRequest.getPageSize();
 
@@ -45,6 +40,7 @@ public class LogInfoController {
         pageSize = pageSize == null ? 10 : pageSize;
         PageHelper.startPage(pageNo, pageSize);
         //用PageInfo对结果进行包装
+        List<LogInfo> logInfoList = logInfoService.lists(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
         PageInfo<LogInfo> page = new PageInfo<LogInfo>(logInfoList);
         return AjaxResult.success(page);
     }
