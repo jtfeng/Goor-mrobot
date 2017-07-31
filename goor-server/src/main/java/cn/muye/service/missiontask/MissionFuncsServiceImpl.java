@@ -640,7 +640,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataElevator jsonMissionItemDataElevator =
                 new JsonMissionItemDataElevator();
         if (mPointAtts != null){
-            jsonMissionItemDataElevator.setFloor(mPointAtts.nextFloor);
+            jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
         }else{
             logger.error("没有获取到电梯到达的楼层，请注意查看地图是否配置了楼层数据，或者电梯点后续是否没有设置到达点！");
         }
