@@ -1,14 +1,10 @@
 package cn.muye.base.filter;
 
 import java.io.IOException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
+import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.account.user.service.UserService;
@@ -44,10 +40,7 @@ public class AuthValidationExceptionFilter implements Filter,ApplicationContextA
 
         boolean isExcludedPage = true;
         for (String page : excludedPageArray) {//判断是否在过滤url之外
-            Pattern pattern = Pattern.compile(page);
-            Matcher matcher = pattern.matcher(((HttpServletRequest) req).getServletPath());
-            boolean rs = matcher.find();
-            if (rs) {
+            if (((HttpServletRequest) req).getServletPath().startsWith(page)) {
                 isExcludedPage = false;
                 break;
             }
@@ -56,16 +49,17 @@ public class AuthValidationExceptionFilter implements Filter,ApplicationContextA
             HttpServletRequest httpServletRequest = (HttpServletRequest) req;
             HttpServletResponse response = (HttpServletResponse) res;
             try {
-                HttpSession session = httpServletRequest.getSession();
+//                HttpSession session = httpServletRequest.getSession();
                 String accessTokenFromReq = httpServletRequest.getParameter("access_token");
-                String accessToken = (String) session.getAttribute("access_token");
-                if (accessToken != null) {
-                    if (!accessToken.equals(accessTokenFromReq)) { //说明已登录但请求的access_token有误，无权限
-                        response.setStatus(Constant.ERROR_CODE_NOT_AUTHORIZED);
-                        response.sendError(Constant.ERROR_CODE_NOT_AUTHORIZED, "您无权限");
-                    } else if (accessToken.equals(accessTokenFromReq)) {
-                        chain.doFilter(req, res);
-                    }
+                User user = userService.getByAccessToken(accessTokenFromReq);
+//                String accessToken = (String) session.getAttribute("access_token");
+                if (user != null) {
+//                    if (!accessToken.equals(accessTokenFromReq)) { //说明已登录但请求的access_token有误，无权限
+//                        response.setStatus(Constant.ERROR_CODE_NOT_AUTHORIZED);
+//                        response.sendError(Constant.ERROR_CODE_NOT_AUTHORIZED, "您无权限");
+//                    } else if (accessToken.equals(accessTokenFromReq)) {
+                    chain.doFilter(req, res);
+//                    }
                 } else {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
                     response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
