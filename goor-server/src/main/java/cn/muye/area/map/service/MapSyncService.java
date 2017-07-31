@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,9 @@ public class MapSyncService implements ApplicationContextAware {
 
     @Autowired
     private OffLineMessageService offLineMessageService;
+
+    @Value("${goor.push.dirs}")
+    private String DOWNLOAD_HOME;
 
     public String syncMap(long storeId) {
         MapZip mapZip = mapZipService.latestZip(storeId);
@@ -76,7 +80,7 @@ public class MapSyncService implements ApplicationContextAware {
             commonInfo.setLocalFileName(mapZip.getFileName());
             commonInfo.setLocalPath(mapZip.getRobotPath());
             commonInfo.setRemoteFileUrl(mapZip.getFileHttpPath());
-            commonInfo.setMD5(FileValidCreateUtil.fileMD5(mapZip.getFilePath()));
+            commonInfo.setMD5(FileValidCreateUtil.fileMD5(DOWNLOAD_HOME + mapZip.getFilePath()));
 
             MessageInfo messageInfo = new MessageInfo();
             messageInfo.setMessageText(JSON.toJSONString(commonInfo));

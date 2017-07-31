@@ -73,7 +73,7 @@ public class MapAnalysisService {
      * @param mapZip
      * @return
      */
-    private File unzipMapZipFile(MapZip mapZip) {
+    public File unzipMapZipFile(MapZip mapZip) {
         //解压文件夹到固定路径
         File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", mapZip.getDeviceId());
         if (saveFile.exists()) {
