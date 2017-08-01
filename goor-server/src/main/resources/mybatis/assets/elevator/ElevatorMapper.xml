@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.mrobot.bean.assets.elevator.Elevator">
+
+
+    <!-- 电梯映射关系 -->
+    <resultMap id="Elevator" type="cn.mrobot.bean.assets.elevator.Elevator">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="info" property="info" jdbcType="VARCHAR"/>
+        <result column="lock_state" property="lockState" jdbcType="VARCHAR"/>
+        <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="store_id" property="storeId" jdbcType="BIGINT"/>
+        <result column="created_by" property="createdBy" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+
+</mapper>
