@@ -1617,7 +1617,7 @@ CREATE TABLE `LOG_BASE_STATE` (
 -- ----------------------------
 DROP TABLE IF EXISTS `VOICE_FILE`;
 CREATE TABLE `VOICE_FILE` (
-  `ID` bigint(20) NOT NULL,
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `VOICE_KEY` varchar(255) DEFAULT NULL,
   `FILE_NAME` varchar(255) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
