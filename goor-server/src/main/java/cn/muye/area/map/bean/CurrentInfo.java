@@ -10,15 +10,25 @@ import java.util.List;
  */
 public class CurrentInfo {
 
-    private String pose;
+    private boolean online; //是否开机
 
-    private MapInfo mapInfo;
+    private String pose; //位置信息
 
-    private ChargeInfo chargeInfo;
+    private MapInfo mapInfo; //地图信息
 
-    private List<StateDetail> list;
+    private ChargeInfo chargeInfo; //电量信息
 
-    private List<StateDetail> mission;
+    private List<StateDetail> list;  //状态
+
+    private List<StateDetail> mission; //任务主状态
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
 
     public String getPose() {
         return pose;
