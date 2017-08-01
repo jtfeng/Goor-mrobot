@@ -22,9 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -95,6 +93,7 @@ public class HttpDownloader extends Thread {
 //                }
                 if (isDone && MessageType.EXECUTOR_MAP.equals(messageInfo.getMessageType())) {//地图下载
 //                    this.fileCheck();
+                    logger.info("地图文件下载完成，开始解压");
                     unzipMapFile();
                 }
                 logger.info(info.getPair().localName + " Download is done! isDone==" + isDone + "");
@@ -134,26 +133,38 @@ public class HttpDownloader extends Thread {
     }
 
 
-    private void unzipMapFile(){
+    private void unzipMapFile() {
         try {
             String localPath = commonInfo.getLocalPath();
             String zipFilePath = localPath + File.separator + commonInfo.getLocalFileName();
             //移动文件到上层目录，删除地图文件夹下所有文件
             String moveFilePath = new File(localPath).getParent() + File.separator + commonInfo.getLocalFileName();
-            long copyTime = FileUtils.copyFile(new File(zipFilePath),new File(moveFilePath));
-            if(copyTime <= 0){
+            logger.info("移动文件到上层目录。path= " + moveFilePath);
+            long copyTime = FileUtils.copyFile(new File(zipFilePath), new File(moveFilePath));
+            if (copyTime <= 0) {
                 logger.info("移动文件出错 ");
             }
             FileUtils.deleteDir(new File(localPath));
 
             boolean unzipFlag = ZipUtils.unzip(moveFilePath, localPath, false);
             if (unzipFlag) {
+                //更改文件夹权限 将maps文件夹下所有文件的owner更改为robot
+//                String os = System.getProperty("os.name");
+//                logger.info("系统,更改权限，os=" + os);
+//                if (os.toLowerCase().startsWith("lin")) {
+//                    logger.info("Linux系统,更改权限");
+////                    Runtime.getRuntime().exec("chmod 777 -R /home/robot/catkin_ws/install/share/map_server/maps");
+//                    changePermission(localPath);
+//                }
                 //更新数据库状态为解压完成
+                logger.info("解压完成。回执消息 ");
                 messageInfo.setRelyMessage("resource unzip success");
                 messageInfo.setMessageStatusType(MessageStatusType.FILE_UMZIP_COMPLETE);
                 messageInfo.setSuccess(false);//重新发送回执消息
                 ReceiveMessage receiveMessage = new ReceiveMessage(messageInfo);
                 receiveMessageService.update(receiveMessage);
+            } else {
+                logger.info("解压失败");
             }
         } catch (Exception e) {
             logger.info("更新数据库状态为解压失败 ", e);

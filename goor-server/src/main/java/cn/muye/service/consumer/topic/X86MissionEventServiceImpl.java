@@ -3,11 +3,14 @@ package cn.muye.service.consumer.topic;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.log.mission.JsonLogMission;
 import cn.mrobot.bean.log.mission.LogMission;
+import cn.mrobot.bean.mission.MissionState;
+import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.mission.service.LogMissionService;
+import cn.muye.mission.service.MissionListTaskService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.reflect.TypeToken;
@@ -28,6 +31,9 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
 
     @Autowired
     LogMissionService logMissionService;
+
+    @Autowired
+    private MissionListTaskService missionListTaskService;
 
     @Override
     public void handleX86MissionEvent(MessageInfo messageInfo) {
@@ -82,11 +88,15 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                     logMission.setPluginStatus(chargeInfo.getPluginStatus());
                     logMission.setPowerPercent(chargeInfo.getPowerPercent());
                 }
-
                 //保存日志
                 logMissionService.save(logMission);
                 if (logMission.getId() == null){
                     logger.warn("logMissionService save new mission log failed! Pls check!!!");
+                }
+                MissionListTask missionListTaskDb = missionListTaskService.findById(jsonLogMission.getMission_list_id());
+                if (missionListTaskDb != null) {
+                    missionListTaskDb.setState(jsonLogMission.getEvent());
+                    missionListTaskService.update(missionListTaskDb);
                 }
             }
         }

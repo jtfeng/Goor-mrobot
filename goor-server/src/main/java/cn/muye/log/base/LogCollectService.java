@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -56,15 +58,10 @@ public class LogCollectService {
         ExecutorService executorService = Executors.newFixedThreadPool(robotList.size());
         for (int i = 0; i < robotList.size(); i++) {
             Robot robot = robotList.get(i);
-            String code = robot.getCode();
-
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    collectChargeLog(robot);
-                    collectBaseLog(code);
-                    collectNavigationLog(code);
-                    collectTaskLog(code);
+                    collectRobotCurrentState(robot);
                 }
             });
             executorService.execute(thread);
@@ -73,17 +70,43 @@ public class LogCollectService {
     }
 
 
+    private void collectRobotCurrentState(Robot robot) {
+        if (null == robot) {
+            return;
+        }
+        String code = robot.getCode();
+        String chargeState = collectChargeLog(robot);
+        String baseState = collectBaseLog(code);
+        String navigationState = collectNavigationLog(code);
+        String missionState = collectMissionLog(code);
+
+        if(StringUtil.isNullOrEmpty(chargeState) && StringUtil.isNullOrEmpty(baseState)
+                && StringUtil.isNullOrEmpty(navigationState) && StringUtil.isNullOrEmpty(missionState)){
+            return;
+        }
+        LogInfo logInfo = new LogInfo();
+        logInfo.setDeviceId(code);
+        logInfo.setLogLevel(LogLevel.INFO.getName());
+        logInfo.setChargeState(StringUtil.isNullOrEmpty(chargeState) ? "无" : chargeState);
+        logInfo.setBaseState(StringUtil.isNullOrEmpty(baseState) ? "无" : baseState);
+        logInfo.setMissionState(StringUtil.isNullOrEmpty(missionState) ? "无" : missionState);
+        logInfo.setNavigationState(StringUtil.isNullOrEmpty(navigationState) ? "无" : navigationState);
+
+        saveLogInfo(logInfo);
+    }
+
     /**
      * 收集记录电量日志
      */
-    private void collectChargeLog(Robot robot) {
+    private String collectChargeLog(Robot robot) {
+        String chargeState = "";
         String code = robot.getCode();
         ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(code);
         if (chargeInfo == null) {
-            return;
+            return chargeState;
         }
-        saveLogInfo(code, ModuleEnums.CHARGE, LogLevel.INFO, LogType.INFO_CHARGE, getChargeMessage(chargeInfo));
-
+        //获取电量状态
+        chargeState = getChargeMessage(chargeInfo);
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
         int batteryThreshold = robotConfig.getBatteryThreshold();
         //保存低电量警告
@@ -91,41 +114,52 @@ public class LogCollectService {
         if (powerPercent <= batteryThreshold) {
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("电量阈值：").append(batteryThreshold).append("%,当前电量：").append(powerPercent).append("%");
-            saveLogInfo(code, ModuleEnums.CHARGE, LogLevel.WARNING, LogType.WARNING_LOWER_POWER, stringBuffer.toString());
+            LogInfo logInfo = new LogInfo();
+            logInfo.setDeviceId(code);
+            logInfo.setLogLevel(LogLevel.WARNING.getName());
+            logInfo.setLogType(LogType.WARNING_LOWER_POWER.getName());
+            logInfo.setChargeState(stringBuffer.toString());
+            saveLogInfo(logInfo);
         }
+        return chargeState;
     }
 
     /**
      * 收集记录底盘日志,只记录触发状态
      */
-    private void collectBaseLog(String code){
-        try{
+    private String collectBaseLog(String code) {
+        try {
             List<StateDetail> stateDetailList = stateCollectorService.getCurrentBaseState(code);
-            if(stateDetailList != null && stateDetailList.size() > 0){
+            if (stateDetailList != null && stateDetailList.size() > 0) {
                 StringBuffer stringBuffer = new StringBuffer();
-                for(StateDetail stateDetail : stateDetailList){
+                for (StateDetail stateDetail : stateDetailList) {
                     stringBuffer.append(stateDetail.getCHName()).append(":").append(stateDetail.getCHValue()).append("; ");
                 }
-                saveLogInfo(code, ModuleEnums.BASE, LogLevel.WARNING, LogType.WARNING_BASE, stringBuffer.toString());
+               return stringBuffer.toString();
             }
-        }catch (Exception e){
-            LOGGER.error("收集记录底盘日志,只记录触发状态. code="+code, e);
+        } catch (Exception e) {
+            LOGGER.error("收集记录底盘日志,只记录触发状态. code=" + code, e);
         }
+        return "";
     }
 
     /**
      * 收集记录导航日志
      */
-    private void collectNavigationLog(String code) {
+    private String  collectNavigationLog(String code) {
         List<StateDetail> stateDetails = stateCollectorService.getCurrentNavigationState(code);
         if (null != stateDetails && stateDetails.size() > 0) {
             StateDetail stateDetail = stateDetails.get(0);
-            saveLogInfo(code, ModuleEnums.NAVIGATION, LogLevel.INFO, LogType.INFO_NAVIGATION, stateDetail.getCHValue());
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append(ModuleEnums.NAVIGATION.getModuleName()).append(":").append(stateDetail.getCHValue()).append(",");
+            return stringBuffer.toString();
         }
+        return "";
     }
 
     private String getChargeMessage(ChargeInfo chargeInfo) {
-        StringBuffer stringBuffer = new StringBuffer();int powerPercent = chargeInfo.getPowerPercent();
+        StringBuffer stringBuffer = new StringBuffer();
+        int powerPercent = chargeInfo.getPowerPercent();
         stringBuffer.append("当前电量:").append(powerPercent).append("%");
 
         int chargingStatus = chargeInfo.getChargingStatus();
@@ -142,35 +176,43 @@ public class LogCollectService {
         return stringBuffer.toString();
     }
 
-    private void collectTaskLog(String code){
+    //TODO
+    private String collectMissionLog(String code) {
         List<StateDetail> stateDetailList = stateCollectorService.collectTaskLog(code);
-
+        if (stateDetailList == null || stateDetailList.size() <= 0) {
+            return "";
+        }
+        //按创建时间排序
+        Collections.sort(stateDetailList, new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                StateDetail stateDetail1 = (StateDetail) o1;
+                StateDetail stateDetail2 = (StateDetail) o2;
+                return stateDetail1.getCreateTime().compareTo(stateDetail2.getCreateTime());
+            }
+        });
+        //按照时间顺序添加日志
+        StringBuffer stringBuffer = new StringBuffer();
+        for (StateDetail stateDetail : stateDetailList) {
+            stringBuffer.append(stateDetail.getCHName()).append(" ").append(stateDetail.getCHValue()).append(",");
+        }
+        return stringBuffer.toString();
     }
 
-    private void saveLogInfo(String code, ModuleEnums module, LogLevel logLevel, LogType logType, String message) {
-        if(StringUtil.isNullOrEmpty(message)){
-            return;
-        }
-        LogInfo logInfo = new LogInfo();
+    private void saveLogInfo(LogInfo logInfo) {
         logInfo.setCreateTime(new Date());
         logInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        logInfo.setDeviceId(code);
-        logInfo.setLogLevel(logLevel.getName());
-        logInfo.setModule(module.getModuleId());
-
-        logInfo.setLogType(logType.getName());
-        logInfo.setMessage(message);
-        MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
+        MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(logInfo.getDeviceId());
         if (currentMap != null && !StringUtil.isNullOrEmpty(currentMap.getMessageText())) {
             JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
             String data = jsonObject.getString(TopicConstants.DATA);
             JSONObject object = JSON.parseObject(data);
             Integer currentMapCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
-            if(currentMapCode != null && currentMapCode == 0 ){
+            if (currentMapCode != null && currentMapCode == 0) {
                 String mapData = object.getString(TopicConstants.DATA);
                 JSONObject mapObject = JSON.parseObject(mapData);
-                logInfo.setMapName(object.getString(TopicConstants.MAP_NAME));
-                logInfo.setSceneName(object.getString(TopicConstants.SCENE_NAME));
+                logInfo.setMapName(mapObject.getString(TopicConstants.MAP_NAME));
+                logInfo.setSceneName(mapObject.getString(TopicConstants.SCENE_NAME));
             }
         }
         logInfoService.save(logInfo);

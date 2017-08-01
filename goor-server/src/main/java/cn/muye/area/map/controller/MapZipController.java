@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.service.MapAnalysisService;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.MapZipService;
 import cn.muye.assets.robot.service.RobotService;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,11 +76,14 @@ public class MapZipController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult listMapZip(WhereRequest whereRequest) {
         try {
-            List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            int pageNo = (whereRequest.getPage() == 0) ? 1 : whereRequest.getPage();
-            int pageSize = (whereRequest.getPageSize() == 0) ? 10 : whereRequest.getPage();
 
+            Integer pageNo = whereRequest.getPage() ;
+            Integer pageSize = whereRequest.getPageSize();
+
+            pageNo = pageNo == null ? 1 : pageNo;
+            pageSize = pageSize == null ? 10 : pageSize;
             PageHelper.startPage(pageNo, pageSize);
+            List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
             PageInfo<MapZip> page = new PageInfo<>(mapZipList);
             return AjaxResult.success(page, "查询成功");
         } catch (Exception e) {
@@ -139,6 +144,31 @@ public class MapZipController {
                 result = mapSyncService.syncMap(mapZip, robotList);
             }
             return AjaxResult.success(result,"地图同步请求发送成功");
+        } catch (Exception e) {
+            LOGGER.error("地图同步出错", e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
+
+    @Autowired
+    private MapAnalysisService mapAnalysisService;
+
+    /**
+     *解压地图压缩包（仅做还原数据）
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "area/mapZip/unzip", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult unzip(@RequestParam("id") Long id) {
+        try {
+            MapZip mapZip = mapZipService.getMapZip(id);
+            File saveFile = mapAnalysisService.unzipMapZipFile(mapZip);
+            if (saveFile.exists()) {
+                mapAnalysisService.analysisFile(saveFile, mapZip);
+            }
+            return AjaxResult.success("地图压缩包解压成功");
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
             return AjaxResult.failed("系统错误");

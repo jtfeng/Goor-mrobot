@@ -79,7 +79,6 @@ public class PointController {
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult listMapPoint(WhereRequest whereRequest, HttpServletRequest request) {
         try {
-            List<MapPoint> pointListDB = pointService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
             Integer pageNo = whereRequest.getPage();
             Integer pageSize = whereRequest.getPageSize();
 
@@ -87,6 +86,7 @@ public class PointController {
             pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
             PageHelper.startPage(pageNo, pageSize);
             //用PageInfo对结果进行包装
+            List<MapPoint> pointListDB = pointService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
             PageInfo<MapPoint> page = new PageInfo<MapPoint>(pointListDB);
             return AjaxResult.success(page);
 

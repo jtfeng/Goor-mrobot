@@ -15,16 +15,16 @@ import cn.mrobot.dto.mission.MissionListDTO;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.service.MapInfoService;
+import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.service.FeatureItemService;
-import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
+import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +65,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     @Autowired
     MapInfoService mapInfoService;
+
+    @Autowired
+    private PointService pointService;
 
     /**
      * 根据订单数据创建任务列表
@@ -125,10 +128,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @param robotCodesArray
      * @param missionLists
      * @return 返回结果表示对应机器人的下发消息成功失败状态
-     *         {"robotCode":"001","sendStatus":"false"}
+     *
      */
     public Boolean createMissionListTasksByMissionLists(String[] robotCodesArray,
-                                                                 List<MissionList> missionLists) throws Exception{
+                                                        List<MissionList> missionLists) throws Exception{
         if(missionLists == null || missionLists.size() <= 0
                 || robotCodesArray == null || robotCodesArray.length <= 0) {
             return false;
@@ -640,7 +643,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataElevator jsonMissionItemDataElevator =
                 new JsonMissionItemDataElevator();
         if (mPointAtts != null){
-            jsonMissionItemDataElevator.setFloor(mPointAtts.nextFloor);
+            jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
+            //暂时写死
+            jsonMissionItemDataElevator.setCurrent_floor(4);
+            MapPoint entryPoint = pointService.findById(1000L);
+            MapPoint setPosePoint = pointService.findById(1001L);
+            MapPoint backPoint = pointService.findById(1002L);
+            //存入
+            jsonMissionItemDataElevator.setEnter_point(changeToPoint(entryPoint));
+            jsonMissionItemDataElevator.setSet_pose_point(changeToPoint(setPosePoint));
+            jsonMissionItemDataElevator.setBack_point(changeToPoint(backPoint));
         }else{
             logger.error("没有获取到电梯到达的楼层，请注意查看地图是否配置了楼层数据，或者电梯点后续是否没有设置到达点！");
         }
@@ -648,6 +660,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         MissionTask elevatorTask = getElevatorTask(order, mp, parentName, jsonMissionItemDataElevator);
         missionListTask.getMissionTasks().add(elevatorTask);
 
+    }
+
+    private JsonMissionItemDataElevator.Point changeToPoint(MapPoint mapPoint){
+        JsonMissionItemDataElevator.Point point= new JsonMissionItemDataElevator.Point();
+        point.setMap_name(mapPoint.getMapName());
+        point.setPoint_name(mapPoint.getPointName());
+        point.setScene_name(mapPoint.getSceneName());
+        point.setTh(mapPoint.getTh());
+        point.setX(mapPoint.getX());
+        point.setY(mapPoint.getY());
+        return point;
     }
 
 
@@ -1427,8 +1450,23 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionItemTask.setId(missionItem.getId());
         FeatureItem featureItem = featureItemService.get(missionItem.getFeatureItemId());
         missionItemTask.setFeatureValue(featureItem.getValue());
-        missionItemTask.setName(missionItem.getName()==null?"":missionItem.getName());
-        missionItemTask.setData(missionItem.getData());
+//        missionItemTask.setName(missionItem.getName()==null?"":missionItem.getName());
+        missionItemTask.setName(featureItem.getValue()==null?"":featureItem.getValue());
+
+        //只有导航相关的任务才需要转换点数据
+        String data = missionItem.getData();
+        if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(missionItem.getFeatureItemId())) {
+            MapPoint mapPoint = JSON.parseObject(missionItem.getData(),MapPoint.class);
+            //这里就是单点导航的数据格式存储地方,根据mp和数据格式定义来创建
+            JsonMissionItemDataLaserNavigation data1 = new JsonMissionItemDataLaserNavigation();
+            data1.setX(mapPoint.getX());
+            data1.setY(mapPoint.getY());
+            data1.setTh(mapPoint.getTh());
+            data1.setMap(mapPoint.getMapName());
+            data = JSON.toJSONString(data1);
+        }
+
+        missionItemTask.setData(data);
         missionItemTask.setDescription(featureItem.getDescription()==null?"":featureItem.getDescription());
         missionItemTask.setSceneId(missionList.getSceneId());
         missionItemTask.setCreatedBy(missionItem.getCreatedBy());

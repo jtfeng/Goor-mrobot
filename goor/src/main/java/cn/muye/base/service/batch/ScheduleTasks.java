@@ -116,6 +116,7 @@ public class ScheduleTasks {
     @Scheduled(cron = "*/30 * * * * *") //test cron
     public void getChargeAndPosition() {
         try {
+            logger.info("定时获取电量信息");
             SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.CHARGING_STATUS_INQUIRY);
             appSubService.sendTopic(TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING, slamRequestBody);
         } catch (Exception e) {
