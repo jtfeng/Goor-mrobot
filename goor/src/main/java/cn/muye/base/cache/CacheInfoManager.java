@@ -24,6 +24,11 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<Integer, Long> topicHeartCheckCache = new ConcurrentHashMapCache<Integer, Long>();
 
     /**
+     * 降低获取机器人当前位置信息 的缓存
+     */
+    private static ConcurrentHashMapCache<Integer, Long> currentPoseSendTime = new ConcurrentHashMapCache<Integer, Long>();
+
+    /**
      * sub_name 的缓存
      */
     private static ConcurrentHashMapCache<String, Integer> nameSubCache = new ConcurrentHashMapCache<String, Integer>();
@@ -49,11 +54,12 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     static {
         topicHeartCheckCache.setMaxLifeTime(0);
+        currentPoseSendTime.setMaxLifeTime(0);
         nameSubCache.setMaxLifeTime(0);
         nameLSubCache.setMaxLifeTime(0);
         robotInfoConfigCache.setMaxLifeTime(0);
         topicHeartCheckCache.put(1, System.currentTimeMillis());
-
+        currentPoseSendTime.put(1, System.currentTimeMillis());
         uuidHandledCache.setMaxLifeTime(0);
 
         stateModuleCache.setMaxLifeTime(2 * 1000); //存活时间 2s
@@ -94,6 +100,13 @@ public class CacheInfoManager implements ApplicationContextAware {
         return topicHeartCheckCache.get(1);
     }
 
+    public static void setCurrentPoseSendTime() {
+        currentPoseSendTime.put(1, System.currentTimeMillis());
+    }
+
+    public static Long getCurrentPoseSendTime() {
+        return currentPoseSendTime.get(1);
+    }
     /**
      * RobotInfoConfigCache
      */

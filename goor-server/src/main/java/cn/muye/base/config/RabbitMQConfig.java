@@ -1,6 +1,7 @@
 package cn.muye.base.config;
 
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.utils.RabbitmqUtil;
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,22 +14,22 @@ public class RabbitMQConfig {
     //以下为服务器一对多发送
     @Bean
     public Queue fanoutCommon() {
-        return new Queue(TopicConstants.FANOUT_SERVER_COMMAND,false,false,true);
+        return new Queue(TopicConstants.FANOUT_SERVER_COMMAND,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public FanoutExchange fanoutCommandExchange() {
-        return new FanoutExchange(TopicConstants.FANOUT_COMMAND_EXCHANGE,false,true);
+        return new FanoutExchange(TopicConstants.FANOUT_COMMAND_EXCHANGE,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public FanoutExchange fanoutResourceExchange() {
-        return new FanoutExchange(TopicConstants.FANOUT_RESOURCE_EXCHANGE,false,true);
+        return new FanoutExchange(TopicConstants.FANOUT_RESOURCE_EXCHANGE,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public FanoutExchange fanoutClientExchange() {
-        return new FanoutExchange(TopicConstants.FANOUT_CLIENT_EXCHANGE,false,true);
+        return new FanoutExchange(TopicConstants.FANOUT_CLIENT_EXCHANGE,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
@@ -49,7 +50,7 @@ public class RabbitMQConfig {
     //以下为服务器一对一发送
     @Bean
     public Queue topicCommon() {
-        return new Queue(TopicConstants.TOPIC_SERVER_COMMAND, false, false, true);
+        return new Queue(TopicConstants.TOPIC_SERVER_COMMAND, false, false, true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
@@ -65,66 +66,66 @@ public class RabbitMQConfig {
     //以下为goor客户端上报到goor-server端上报队列
     @Bean
     public Queue directCommandReport() {
-        return new Queue(TopicConstants.DIRECT_COMMAND_REPORT,false,false,true);
+        return new Queue(TopicConstants.DIRECT_COMMAND_REPORT,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directCommandReportAndReceive() {
-        return new Queue(TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE,false,false,true);
+        return new Queue(TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directAppSub() {
-        return new Queue(TopicConstants.DIRECT_APP_SUB,false,false,true);
+        return new Queue(TopicConstants.DIRECT_APP_SUB,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directAppPub() {
-        return new Queue(TopicConstants.DIRECT_APP_PUB,false,false,true);
+        return new Queue(TopicConstants.DIRECT_APP_PUB,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directAgentSub() {
-        return new Queue(TopicConstants.DIRECT_AGENT_SUB,false,false,true);
+        return new Queue(TopicConstants.DIRECT_AGENT_SUB,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directAgentPub() {
-        return new Queue(TopicConstants.DIRECT_AGENT_PUB,false,false,true);
+        return new Queue(TopicConstants.DIRECT_AGENT_PUB,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directCurrentPosition() {
-        return new Queue(TopicConstants.DIRECT_CURRENT_POSE,false,false,true);
+        return new Queue(TopicConstants.DIRECT_CURRENT_POSE,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directRobotAutoRegister() {
-        return new Queue(TopicConstants.DIRECT_COMMAND_ROBOT_INFO,false,false,true);
+        return new Queue(TopicConstants.DIRECT_COMMAND_ROBOT_INFO,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directX86MissionQueueResponse() {
-        return new Queue(TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE,false,false,true);
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directX86MissionStateResponse() {
-        return new Queue(TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE,false,false,true);
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_STATE_RESPONSE,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directX86MissionEvent() {
-        return new Queue(TopicConstants.DIRECT_X86_MISSION_EVENT,false,false,true);
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_EVENT,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directX86MissionReceive() {
-        return new Queue(TopicConstants.DIRECT_X86_MISSION_RECEIVE,false,false,true);
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_RECEIVE,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean
     public Queue directStateCollector() {
-        return new Queue(TopicConstants.DIRECT_STATE_COLLECTOR,false,false,true);
+        return new Queue(TopicConstants.DIRECT_STATE_COLLECTOR,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 }
