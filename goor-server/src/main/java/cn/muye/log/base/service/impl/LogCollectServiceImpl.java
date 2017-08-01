@@ -1,4 +1,4 @@
-package cn.muye.log.base;
+package cn.muye.log.base.service.impl;
 
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
@@ -15,8 +15,9 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.log.base.service.LogCollectService;
 import cn.muye.log.base.service.LogInfoService;
-import cn.muye.log.state.StateCollectorService;
+import cn.muye.log.state.service.StateCollectorService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ import java.util.concurrent.Executors;
  * Created by Jelynn on 2017/7/24.
  */
 @Service
-public class LogCollectService {
+public class LogCollectServiceImpl implements LogCollectService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogCollectService.class);
     @Autowired
@@ -50,6 +51,7 @@ public class LogCollectService {
     @Autowired
     private StateCollectorService stateCollectorService;
 
+    @Override
     public void startCollectLog() {
         List<Robot> robotList = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (robotList == null || robotList.size() <= 0) {
@@ -135,7 +137,7 @@ public class LogCollectService {
                 for (StateDetail stateDetail : stateDetailList) {
                     stringBuffer.append(stateDetail.getCHName()).append(":").append(stateDetail.getCHValue()).append("; ");
                 }
-               return stringBuffer.toString();
+                return stringBuffer.toString();
             }
         } catch (Exception e) {
             LOGGER.error("收集记录底盘日志,只记录触发状态. code=" + code, e);
