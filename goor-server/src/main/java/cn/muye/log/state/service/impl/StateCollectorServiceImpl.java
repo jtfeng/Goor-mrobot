@@ -1,4 +1,4 @@
-package cn.muye.log.state;
+package cn.muye.log.state.service.impl;
 
 import cn.mrobot.bean.mission.MissionState;
 import cn.mrobot.bean.mission.task.MissionTask;
@@ -10,6 +10,7 @@ import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.bean.StateDetail;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.missiontask.MissionFuncsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ import java.util.List;
  * Created by Jelynn on 2017/7/18.
  */
 @Service
-public class StateCollectorService {
+public class StateCollectorServiceImpl implements StateCollectorService {
 
     private static final int MODULE_SLAM_NAVI = 100; //导航
     private static final int MODULE_AUTO_CHARGING = 200; //自动回充
@@ -39,6 +40,7 @@ public class StateCollectorService {
     @Autowired
     private MissionFuncsService missionFuncsService;
 
+    @Override
     public void handleStateCollector(StateCollectorResponse stateCollectorResponse) {
         String module = stateCollectorResponse.getModule();
         int moduleId = Integer.parseInt(module);
@@ -149,6 +151,7 @@ public class StateCollectorService {
      * @param code
      * @return
      */
+    @Override
     public List<StateDetail> getCurrentTriggeredState(String code) throws IllegalAccessException {
         List<StateDetail> baseStateList = getCurrentBaseState(code);
         List<StateDetail> navigationStateList = getCurrentNavigationState(code);
@@ -165,6 +168,7 @@ public class StateCollectorService {
      * @param code
      * @return
      */
+    @Override
     public List<StateDetail> getCurrentBaseState(String code) throws IllegalAccessException {
 
         List<StateDetail> baseStateList = new ArrayList<>();
@@ -227,6 +231,7 @@ public class StateCollectorService {
      * @param code
      * @return
      */
+    @Override
     public List<StateDetail> getCurrentNavigationState(String code) {
         List<StateDetail> list = new ArrayList<>();
         StateCollectorNavigation navigation = CacheInfoManager.getNavigationCache(code);
@@ -250,6 +255,7 @@ public class StateCollectorService {
      * @param code
      * @return
      */
+    @Override
     public List<StateDetail> collectTaskLog(String code) {
         List<StateDetail> stateDetailList = new ArrayList<>();
         List<MissionTask> missionTaskList = missionFuncsService.getMissionTaskStatus(code);

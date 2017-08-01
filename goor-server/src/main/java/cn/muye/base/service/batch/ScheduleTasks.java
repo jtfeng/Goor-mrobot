@@ -4,7 +4,7 @@ import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
-import cn.muye.log.base.LogCollectService;
+import cn.muye.log.base.service.LogCollectService;
 import cn.muye.service.consumer.topic.X86MissionCommonRequestService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +121,19 @@ public class ScheduleTasks {
         } catch (Exception e) {
             logger.error("Scheduled collect base state error", e);
         }
+    }
+
+    /**
+     * 每秒发送机器人当前的位置信息给工控，工控做机器人排队
+     */
+    @Scheduled(cron = "*/1 * * * * ?")
+    public void sendCurrentPose() {
+//        logger.info(" Scheduled send current pose");
+//        try {
+//            x86MissionCommonRequestService.sendX86MissionStateCommonRequest();
+//        } catch (Exception e) {
+//            logger.error("Scheduled send current pose error", e);
+//        }
     }
 
 }

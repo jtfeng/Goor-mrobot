@@ -22,7 +22,7 @@ import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.charge.service.ChargeInfoService;
-import cn.muye.log.state.StateCollectorService;
+import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -36,14 +36,6 @@ import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
 import java.util.UUID;
-
-//import cn.mrobot.bean.state.StateCollectorResponse;
-
-//import cn.mrobot.bean.state.StateCollectorResponse;
-//import cn.muye.log.state.StateCollectorService;
-
-//import cn.mrobot.bean.state.StateCollectorResponse;
-//import cn.muye.log.state.StateCollectorService;
 
 @Component
 public class ConsumerCommon {
