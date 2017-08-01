@@ -1611,3 +1611,17 @@ CREATE TABLE `LOG_BASE_STATE` (
   `RIGHT_BASE_MICRO_SWITCH` bit DEFAULT 0 COMMENT '防碰撞右开关',
     PRIMARY KEY (`ID`)
 ) ;
+
+-- ----------------------------
+-- Table structure for VOICE_FILE
+-- ----------------------------
+DROP TABLE IF EXISTS `VOICE_FILE`;
+CREATE TABLE `VOICE_FILE` (
+  `ID` bigint(20) NOT NULL,
+  `VOICE_KEY` varchar(255) DEFAULT NULL,
+  `FILE_NAME` varchar(255) DEFAULT NULL,
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
