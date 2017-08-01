@@ -15,14 +15,15 @@ import cn.mrobot.dto.mission.MissionListDTO;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.service.MapInfoService;
+import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.service.FeatureItemService;
-import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
+import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
@@ -64,6 +65,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     @Autowired
     MapInfoService mapInfoService;
+
+    @Autowired
+    private PointService pointService;
 
     /**
      * 根据订单数据创建任务列表
@@ -123,7 +127,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * 根据MissionList列表和机器人列表生成MissionListTask列表并发送到机器人
      * @param robotCodesArray
      * @param missionLists
-     * @param name
      * @return 返回结果表示对应机器人的下发消息成功失败状态
      *
      */
@@ -641,6 +644,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 new JsonMissionItemDataElevator();
         if (mPointAtts != null){
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
+            //暂时写死
+            jsonMissionItemDataElevator.setCurrent_floor(4);
+            MapPoint entryPoint = pointService.findById(1000L);
+            MapPoint setPosePoint = pointService.findById(1001L);
+            MapPoint backPoint = pointService.findById(1002L);
+            //存入
+            jsonMissionItemDataElevator.setEnter_point(changeToPoint(entryPoint));
+            jsonMissionItemDataElevator.setSet_pose_point(changeToPoint(setPosePoint));
+            jsonMissionItemDataElevator.setBack_point(changeToPoint(backPoint));
         }else{
             logger.error("没有获取到电梯到达的楼层，请注意查看地图是否配置了楼层数据，或者电梯点后续是否没有设置到达点！");
         }
@@ -648,6 +660,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         MissionTask elevatorTask = getElevatorTask(order, mp, parentName, jsonMissionItemDataElevator);
         missionListTask.getMissionTasks().add(elevatorTask);
 
+    }
+
+    private JsonMissionItemDataElevator.Point changeToPoint(MapPoint mapPoint){
+        JsonMissionItemDataElevator.Point point= new JsonMissionItemDataElevator.Point();
+        point.setMap_name(mapPoint.getMapName());
+        point.setPoint_name(mapPoint.getPointName());
+        point.setScene_name(mapPoint.getSceneName());
+        point.setTh(mapPoint.getTh());
+        point.setX(mapPoint.getX());
+        point.setY(mapPoint.getY());
+        return point;
     }
 
 
