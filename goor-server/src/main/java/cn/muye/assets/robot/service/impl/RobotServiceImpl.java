@@ -302,7 +302,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotConfig.setCreateTime(new Date());
         robotConfig.setCreatedBy(1L);
         robotConfigService.add(robotConfig);
-        robotPasswordService.saveRobotPassword(robot);
+        if (robot.getTypeId() != null) {
+            robotPasswordService.saveRobotPassword(robot);
+        }
     }
 
     /**
@@ -331,15 +333,18 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     return AjaxResult.success(robotNew, "注册成功");
                 }
             } else {
-                if (robotTypeId == null || robotTypeId <= 0 || robotTypeId > RobotTypeEnum.DRAWER.getCaption()) {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
+                if (StringUtil.isNullOrEmpty(robotCode)) {
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号不能为空");
                 }
-                if (StringUtil.isNullOrEmpty(robotName) || StringUtil.isNullOrEmpty(robotCode)) {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
-                }
-                if (robotNew.getBatteryThreshold() == null) {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
-                }
+//                if (robotTypeId == null || robotTypeId <= 0 || robotTypeId > RobotTypeEnum.DRAWER.getCaption()) {
+//                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
+//                }
+//                if (StringUtil.isNullOrEmpty(robotName) || StringUtil.isNullOrEmpty(robotCode)) {
+//                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
+//                }
+//                if (robotNew.getBatteryThreshold() == null) {
+//                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
+//                }
                 //判断是否有重复的名称
                 Robot robotDbByName = getByName(robotName);
                 if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
