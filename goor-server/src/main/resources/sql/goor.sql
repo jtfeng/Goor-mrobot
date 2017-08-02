@@ -951,15 +951,17 @@ CREATE TABLE `D_FEATURE_ITEM` (
   `DESCRIPTION` varchar(256) DEFAULT NULL COMMENT '描述',
   `DATA_MODEL` varchar(256) DEFAULT NULL COMMENT '数据模板，方便前端用户输入',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of D_FEATURE_ITEM
 -- ----------------------------
-INSERT INTO `D_FEATURE_ITEM` VALUES ('1', '单点导航', 'navigation_point', '单点导航命令', '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('1', '单点导航', 'laserNavigation', '单点导航', '{\"id\":0,\"x\":0,\"y\":0,\"z\":0,\"sceneName\":\"场景名\",\"mapName\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('2', 'TTS语音', 'voice_tts', 'TTS语音命令', '{\"voiceContent\":\"要说的话\"}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('3', 'MP3语音', 'voice_mp3', 'MP3语音命令', '{\"fileName\":\"要播放的语音文件名\"}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('4', '自动充电', 'charge_auto', '自动回充', '{}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('3', 'MP3语音', 'mp3', 'MP3语音命令', '{\"fileName\":\"要播放的语音文件名\"}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('4', '自动充电', 'gotoCharge', '自动回充', '{}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('5', '离开充电桩', 'leaveCharge', '离开充电桩', '{}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('6', '等待任务', 'wait', '等待任务', '{\"waitTime\":10000}');
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
