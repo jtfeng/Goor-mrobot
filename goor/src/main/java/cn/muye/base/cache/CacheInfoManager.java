@@ -112,13 +112,11 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     public static RobotInfoConfig getRobotInfoConfigCache() {
         RobotInfoConfig robotInfoConfig = robotInfoConfigCache.get(Constant.ROBOT_CACHE_KEY);
-        if (robotInfoConfig == null) {
-            robotInfoConfigService = applicationContext.getBean(RobotInfoConfigService.class);
-            RobotInfoConfig robotInfoConfigDb = robotInfoConfigService.get();
-            robotInfoConfigCache.put(Constant.ROBOT_CACHE_KEY, robotInfoConfigDb);
-            return robotInfoConfigDb;
-        }
         return robotInfoConfig;
+    }
+
+    public static void setRobotInfoConfigCache(RobotInfoConfig robotInfoConfig) {
+        robotInfoConfigCache.put(Constant.ROBOT_CACHE_KEY, robotInfoConfig);
     }
 
     @Override
