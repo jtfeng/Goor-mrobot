@@ -2,6 +2,7 @@ package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
@@ -15,6 +16,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+
 import java.util.Date;
 import java.util.List;
 
@@ -30,21 +32,21 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private RobotService robotService;
 
-    public ScheduledHandleServiceImp(){
+    public ScheduledHandleServiceImp() {
 
     }
 
     @Override
-    public void executeTwentyThreeAtNightPerDay(){
+    public void executeTwentyThreeAtNightPerDay() {
         logger.info("Scheduled clear message start");
         try {
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
             offLineMessageService = applicationContext.getBean(OffLineMessageService.class);
             ReceiveMessage receiveMessage = new ReceiveMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
-            receiveMessage.setSendTime(new Date());
+            receiveMessage.setSendTime(DateTimeUtils.getInternalDateByDay(new Date(), -1));
             receiveMessageService.deleteBySendTime(receiveMessage);//删除昨天的数据
             OffLineMessage offLineMessage = new OffLineMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
-            offLineMessage.setSendTime(new Date());
+            offLineMessage.setSendTime(DateTimeUtils.getInternalDateByDay(new Date(), -1));
             offLineMessageService.deleteBySendTime(offLineMessage);//删除昨天的数据
         } catch (Exception e) {
             logger.error("Scheduled clear message error", e);
@@ -61,14 +63,18 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             for (Robot robot : list) {
                 String code = robot.getCode();
                 Long sendTime = CacheInfoManager.getRobotAutoRegisterTimeCache(code);
-                //如果大于1分钟
-                if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
-                    Robot robotDb = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-                    if (robotDb != null) {
+                Robot robotDb = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                if (robotDb != null) {
+                    //如果大于1分钟
+                    if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
                         robotDb.setOnline(false);
-                        robotService.updateRobotAndBindChargerMapPoint(robotDb, null,null,null);
+                        robotService.updateRobotAndBindChargerMapPoint(robotDb, null, null, null);
+                    } else {
+                        robotDb.setOnline(true);
+                        robotService.updateRobotAndBindChargerMapPoint(robotDb, null, null, null);
                     }
                 }
+
             }
         }
     }

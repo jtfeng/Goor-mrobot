@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -525,6 +526,9 @@ public class MissionController {
 			}
 			missionList.setSceneId(scene.getId());
 
+			//设置重复次数是1，执行1次
+			missionList.setRepeatCount(1);
+
 			//TODO 从session取当前切换门店的ID
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 
@@ -626,7 +630,7 @@ public class MissionController {
 			@RequestBody MissionList missionList,
 			@RequestParam Long[] robotIds,
 			@RequestParam Long[] missionListIds,
-			@RequestParam String name,
+			@RequestParam(required = false) String name,
 			HttpServletRequest request) {
 		AjaxResult resp = AjaxResult.success();
 		try {
@@ -645,6 +649,8 @@ public class MissionController {
 			if(robotCodesArray == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到机器人");
 			}
+
+			//TODO 机器人低电量不接收任务下单
 
 			//从对照表找延迟时间
 //			Long delayTime = Constant.DEFAULT_DELAY_TIME;
@@ -742,12 +748,46 @@ public class MissionController {
 
 				//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
 				List<Mission> missionsTemp = missionListTemp.getMissionList();
-				if(missionsTemp == null) {
+				//充电任务列表只能有一个任务：充电任务
+				if(missionsTemp == null && missionsTemp.size() != 1) {
 					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务内容异常");
 				}
 				missions.addAll(missionsTemp);
 
-				leaveCharge.setMissionList(missions);
+				Mission missionTemp = missionsTemp.get(0);
+				Set<MissionItem> missionItemTemps = missionTemp.getMissionItemSet();
+				//校验missionItemTemps只能有一个充电任务
+				if(missionItemTemps == null || missionItemTemps.size() == 0) {
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务单元内容异常");
+				}
+
+				//拼接离开充电桩任务
+				List<Mission> leaveChargeMissions = new ArrayList<Mission>();
+				Mission leaveChargeMission = new Mission();
+				leaveChargeMission.setSceneId(missionTemp.getSceneId());
+				leaveChargeMission.setSceneId(missionTemp.getStoreId());
+				leaveChargeMission.setCreateTime(missionListTemp.getCreateTime());
+				leaveChargeMission.setUpdateTime(missionListTemp.getUpdateTime());
+				leaveChargeMission.setRepeatCount(missionTemp.getRepeatCount());
+				leaveChargeMission.setIntervalTime(missionTemp.getIntervalTime());
+				leaveChargeMission.setName(missionTemp.getName());
+				leaveChargeMission.setDescription(missionTemp.getDescription());
+				leaveChargeMission.setMissionItemSet( new HashSet<MissionItem>() );
+				for(MissionItem missionItem : missionItemTemps) {
+					MissionItem missionItem1 = new MissionItem();
+					//设置离开充电桩任务ID
+					missionItem1.setFeatureItemId(Constant.ORDER_LEAVE_CHARGE_ID);
+					missionItem1.setName(missionItem.getName());
+					missionItem1.setData(missionItem.getData());
+					missionItem1.setStoreId(missionItem.getStoreId());
+					missionItem1.setCreateTime(missionItem.getCreateTime());
+					missionItem1.setUpdateTime(missionItem.getUpdateTime());
+					missionItem1.setSceneId(missionItem.getSceneId());
+					missionItem1.setCreatedBy(missionItem.getCreatedBy());
+					leaveChargeMission.getMissionItemSet().add(missionItem1);
+				}
+				leaveChargeMissions.add(leaveChargeMission);
+				leaveCharge.setMissionList(leaveChargeMissions);
 
 				missionLists.add(goToCharge);
 				missionLists.add(leaveCharge);

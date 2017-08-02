@@ -101,9 +101,10 @@ public class ConsumerCommon {
         SlamBody slamBody = JSON.parseObject(pubData.getData(), SlamBody.class);
         Robot robot = (Robot) slamBody.getData();
         CacheInfoManager.removeRobotInfoConfigCache();
+        CacheInfoManager.setRobotInfoConfigCache(robotToRobotInfoConfig(robot));
         //改数据库中的robotInfoConfig表的记录
-        RobotInfoConfig robotInfoConfig = robotToRobotInfoConfig(robot);
-        robotInfoConfigService.update(robotInfoConfig);
+//        RobotInfoConfig robotInfoConfig = robotToRobotInfoConfig(robot);
+//        robotInfoConfigService.update(robotInfoConfig);
     }
 
     /**

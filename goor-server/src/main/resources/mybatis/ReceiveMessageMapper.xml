@@ -150,13 +150,13 @@
   </update>
 
   <delete id="delete">
-    delete from RECEIVE_MESSAGE
+    delete from goor.RECEIVE_MESSAGE
     where SUCCESS = TRUE AND UUID = #{uuId}
   </delete>
 
   <delete id="deleteBySendTime">
     delete from RECEIVE_MESSAGE
-    where SEND_TIME <![CDATA[ <  ]]>to_date(#{sendTime,jdbcType=DATE},'yyyy-MM-dd')
+    where SEND_TIME <![CDATA[<=#{sendTime} ]]>;
   </delete>
 
 </mapper>

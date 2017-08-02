@@ -7,6 +7,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.base.bean.MessageInfo;
@@ -15,8 +16,10 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.download.DownloadHandle;
 import cn.muye.base.listener.CheckHeartSubListenerImpl;
 import cn.muye.base.model.config.RobotInfoConfig;
+import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
+import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -41,6 +44,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     private static ApplicationContext applicationContext;
 
     private ReceiveMessageService receiveMessageService;
+
+    private OffLineMessageService offLineMessageService;
 
     private RabbitTemplate rabbitTemplate;
 
@@ -206,14 +211,16 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public void executeTwentyThreeAtNightPerDay() {
-        logger.info("Scheduled clear message start");
+        logger.info("Scheduled executeTwentyThreeAtNightPerDay clear message start");
         try {
+            receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
+            offLineMessageService = applicationContext.getBean(OffLineMessageService.class);
             ReceiveMessage receiveMessage = new ReceiveMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
-            receiveMessage.setSendTime(new Date());
+            receiveMessage.setSendTime(DateTimeUtils.getInternalDateByDay(new Date(), -1));
             receiveMessageService.deleteBySendTime(receiveMessage);//删除昨天的数据
-//            OffLineMessage offLineMessage = new OffLineMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
-//            offLineMessage.setSendTime(new Date());
-//            offLineMessageService.deleteBySendTime(offLineMessage);//删除昨天的数据
+            OffLineMessage offLineMessage = new OffLineMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
+            offLineMessage.setSendTime(DateTimeUtils.getInternalDateByDay(new Date(), -1));
+            offLineMessageService.deleteBySendTime(offLineMessage);//删除昨天的数据
         } catch (Exception e) {
             logger.error("Scheduled clear message error", e);
         }
@@ -269,16 +276,21 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         localRobotSN = (String) applicationContext.getBean("localRobotSN");
         MessageInfo info = new MessageInfo();
         RobotInfoConfig robotInfoConfig = CacheInfoManager.getRobotInfoConfigCache();
+        Robot robot;
         if (robotInfoConfig != null) {
-            Robot robot = robotInfoConfigToRobot(robotInfoConfig);
-            //先往Goor-Server里发自动注册信息
-            String robotJson = AES.encryptToBase64(JSON.toJSONString(robot), Constant.AES_KEY);
-            info.setMessageText(robotJson);
-            info.setSendTime(new Date());
-            info.setSenderId(localRobotSN);
-            info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
-            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
+            robot = robotInfoConfigToRobot(robotInfoConfig);
+        } else {
+            robot = new Robot();
+            robot.setCode(localRobotSN);
         }
+        //先往Goor-Server里发自动注册信息
+        String robotJson = AES.encryptToBase64(JSON.toJSONString(robot), Constant.AES_KEY);
+        info.setMessageText(robotJson);
+        info.setSendTime(new Date());
+        info.setSenderId(localRobotSN);
+        info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
+        logger.info(localRobotSN + "注册信息，发送成功");
+        rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
     }
 
     /**

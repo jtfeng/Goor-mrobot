@@ -221,8 +221,8 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public void updateDeleteFlag(long storeId, int deleteFlag) {
-        pointMapper.updateDeleteFlag(storeId, deleteFlag);
+    public void updateDeleteFlag(long storeId, long mapZipId, int deleteFlag) {
+        pointMapper.updateDeleteFlag(storeId, mapZipId, deleteFlag);
     }
 
     /**

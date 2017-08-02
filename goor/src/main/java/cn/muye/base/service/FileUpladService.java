@@ -24,8 +24,7 @@ import java.io.File;
 import java.net.SocketTimeoutException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -65,7 +64,7 @@ public class FileUpladService {
      */
     public void uploadMapFile(String uuid) {
         String REMOTE_URL = PREFIX + ip;
-        LOGGER.error("开始上传文件， path= " + MAP_PATH+" REMOTE_URL = "+REMOTE_URL);
+        LOGGER.error("开始上传文件， path= " + MAP_PATH + " REMOTE_URL = " + REMOTE_URL);
         if (lock.tryLock()) {
             try {
                 File uploadFile = new File(MAP_PATH);
@@ -85,7 +84,7 @@ public class FileUpladService {
                     String uploadFilePath = uploadFile.getParent() + File.separator + zipFileName;
                     File zipFile = new File(uploadFilePath);
                     zipFile.deleteOnExit(); //如果存在同名文件，则删除
-                    LOGGER.info("压缩文件夹，zipFileName = "+zipFileName);
+                    LOGGER.info("压缩文件夹，zipFileName = " + zipFileName);
                     boolean zipResult = ZipUtils.zip(MAP_PATH, uploadFile.getParent(), zipFileName);
                     if (!zipResult) {
                         LOGGER.error("文件夹压缩失败，停止上传");
@@ -97,7 +96,7 @@ public class FileUpladService {
                     LOGGER.info("文件" + uploadFile.getName() + "大于500M，无法上传");
                     return;
                 }
-                LOGGER.info("压缩成功，查询文件是否存在，path= " +uploadFile.getAbsolutePath());
+                LOGGER.info("压缩成功，查询文件是否存在，path= " + uploadFile.getAbsolutePath());
                 Map<String, String> params = Maps.newHashMap();
                 params.put("fileName", uploadFile.getName());
                 params.put("type", Constant.FILE_UPLOAD_TYPE_MAP);
@@ -105,8 +104,8 @@ public class FileUpladService {
                 String jsonResult = HttpClientUtil.executePost(null, REMOTE_URL + EXIST_URL, params, null, null, null, true);
                 JSONObject object = JSON.parseObject(jsonResult);
                 Integer code = object.getInteger("code");
-                if(null != code && (code == Constant.ERROR_CODE_NOT_AUTHORIZED || code== Constant.ERROR_CODE_NOT_LOGGED || code == AjaxResult.CODE_SYSTEM_ERROR)){
-                    LOGGER.info("上传失败，code= "+ code + ", message="+object.getString("message"));
+                if (null != code && (code == Constant.ERROR_CODE_NOT_AUTHORIZED || code == Constant.ERROR_CODE_NOT_LOGGED || code == AjaxResult.CODE_SYSTEM_ERROR)) {
+                    LOGGER.info("上传失败，code= " + code + ", message=" + object.getString("message"));
                     sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传失败");
                     return;
                 }
@@ -120,9 +119,9 @@ public class FileUpladService {
                         //获取上传信息
                         JSONObject otherInfo = new JSONObject();
                         otherInfo.put("robotPath", MAP_PATH);
-                        otherInfo.put("sceneName", getSceneName());
+                        otherInfo.put(Constant.SCENE_MAP_NAME, getSceneMapName());
                         otherInfo.put("deviceId", deviceId);
-                        LOGGER.info("开始上传，path= " +uploadFile.getAbsolutePath());
+                        LOGGER.info("开始上传，path= " + uploadFile.getAbsolutePath());
                         String uri = REMOTE_URL + UPLOAD_URL + "?fileName=" + uploadFile.getName() + "&type=" + Constant.FILE_UPLOAD_TYPE_MAP;
                         String result = HttpClientUtil.executeUploadFile(null, uri, uploadFile.getPath(), jumpSize, null, true, JSON.toJSONString(otherInfo));
                         AjaxResponse resp = JSON.parseObject(result, AjaxResponse.class);
@@ -132,7 +131,7 @@ public class FileUpladService {
                             uploadFile.delete();
                             LOGGER.info("上传成功，删除文件，发送topic");
                             sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传成功");
-                        }else{
+                        } else {
                             LOGGER.info("上传失败，发送topic");
                             sendTopic(MAP_UPLOAD_FAIL, uuid, "地图上传失败");
                         }
@@ -140,13 +139,13 @@ public class FileUpladService {
                         //假提示上传成功 同时删除本地文件
                         uploadFile.delete();
                     }
-                }else {
+                } else {
                     sendTopic(MAP_UPLOAD_FAIL, uuid, "地图上传失败");
                 }
             } catch (HttpHostConnectException e) {
                 sendTopic(MAP_UPLOAD_FAIL, uuid, "未连上服务器");
                 LOGGER.error("socket超时", e);
-            }catch (SocketTimeoutException e) {
+            } catch (SocketTimeoutException e) {
                 sendTopic(MAP_UPLOAD_FAIL, uuid, "socket超时");
                 LOGGER.error("socket超时", e);
             } catch (ClientProtocolException e) {
@@ -171,22 +170,36 @@ public class FileUpladService {
         appSubService.sendTopic(TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING, slamBody);
     }
 
-    private String getSceneName() {
+    /**
+     * 获取场景和地图名，返回值为map,key为场景名，value为场景对应的地图名，多个地图名通过下划线（_）拼接
+     *
+     * @return
+     */
+    private Map<String, List<String>> getSceneMapName() {
         File file = new File(MAP_PATH);
+        Map<String, List<String>> map = new HashMap<>();
         if (!file.exists()) {
-            return "";
-        }
-        if (file.isFile()) {
-            return file.getName();
+            return map;
         }
         File[] files = file.listFiles();
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < files.length; i++) {
-            String name = files[i].getName();
-            if (name.lastIndexOf(".zip") >= 0 || name.lastIndexOf(".flags") >= 0)
+            List<String> mapNameList = new ArrayList<>();
+            File sceneDir = files[i];
+            File mapDir = new File(sceneDir.getAbsolutePath() + File.separator + Constant.MAP_FILE_PATH);
+            if (!mapDir.exists()) {
                 continue;
-            sb.append(files[i].getName()).append(",");
+            }
+            File[] mapFiles = mapDir.listFiles();
+            for (int j = 0; j < mapFiles.length; j++) {
+                File mapFile = mapFiles[j];
+                if (mapFile.getName().endsWith(Constant.ROS_MAP_FILE_SUFFIX)) {
+                    String mapFileName = mapFile.getName();
+                    mapNameList.add(mapFileName.substring(0, mapFileName.indexOf(Constant.ROS_MAP_FILE_SUFFIX)));
+                }
+            }
+            map.put(sceneDir.getName(), mapNameList);
         }
-        return sb.toString();
+        return map;
     }
 }

@@ -2,6 +2,7 @@ package cn.muye.base.service.batch;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamRequestBody;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
@@ -101,10 +102,10 @@ public class ScheduleTasks {
         logger.info("Scheduled clear message start");
         try {
             ReceiveMessage receiveMessage = new ReceiveMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
-            receiveMessage.setSendTime(new Date());
+            receiveMessage.setSendTime(DateTimeUtils.getInternalDateByDay(new Date(), -1));
             receiveMessageService.deleteBySendTime(receiveMessage);//删除昨天的数据
             OffLineMessage offLineMessage = new OffLineMessage();//TODO 增加删除文件前，查询(DateTimeUtils.getInternalDateByDay(new Date(), -1))，将删除文件写入log或历史库，供查阅
-            offLineMessage.setSendTime(new Date());
+            offLineMessage.setSendTime(DateTimeUtils.getInternalDateByDay(new Date(), -1));
             offLineMessageService.deleteBySendTime(offLineMessage);//删除昨天的数据
         } catch (Exception e) {
             logger.error("Scheduled clear message error", e);
