@@ -55,6 +55,7 @@ CREATE TABLE `A_MAP_POINT` (
   `Y` double(20,15) DEFAULT NULL COMMENT '坐标Y',
   `TH` double(20,15) DEFAULT NULL COMMENT '坐标旋转角度',
   `MAP_POINT_TYPE_ID` int(11) DEFAULT NULL COMMENT '点类型索引',
+  `MAP_ZIP_ID` INT DEFAULT NULL,
   `IC_POINT_TYPE` varchar(20) DEFAULT NULL COMMENT '工控点类型',
   `CLOUD_POINT_TYPE_ID` int(11) DEFAULT NULL COMMENT '云端点类型索引',
   `DELETE_FLAG` int DEFAULT 0 COMMENT '数据库删除状态 0 :正常 1：删除',
@@ -72,7 +73,7 @@ CREATE TABLE `A_MAP_ZIP` (
   `CREATED_BY` bigint(20) DEFAULT NULL COMMENT '创建人',
   `CREATE_TIME` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `MAP_NAME` varchar(50) DEFAULT NULL COMMENT '地图名称',
-  `SCENE_NAME` varchar(50) NOT NULL COMMENT '场景名称',
+  `SCENE_NAME` varchar(50) DEFAULT NULL COMMENT '场景名称',
   `FILE_PATH` varchar(256) DEFAULT NULL COMMENT '文件路径',
   `VERSION` varchar(50) DEFAULT NULL COMMENT '版本号',
   `FILE_NAME` varchar(50) DEFAULT NULL COMMENT '文件名',
@@ -96,6 +97,17 @@ INSERT INTO `A_MAP_ZIP` VALUES ('81', '100', null, '2017-07-12 09:51:23', null, 
 INSERT INTO `A_MAP_ZIP` VALUES ('82', '100', null, '2017-07-12 09:53:35', null, 'agv,cloud,example,', 'e:\\download_home\\100\\upload\\map\\maps_2017-07-12_09-53-34.zip', null, 'maps_2017-07-12_09-53-34.zip', null, 'SNabc0010', '89', 'E:\\share\\map_server');
 INSERT INTO `A_MAP_ZIP` VALUES ('83', '100', null, '2017-07-12 09:55:05', null, 'agv,cloud,example,', 'e:\\download_home\\100\\upload\\map\\maps_2017-07-12_09-55-03.zip', null, 'maps_2017-07-12_09-55-03.zip', null, 'SNabc0010', '90', 'E:\\share\\map_server');
 INSERT INTO `A_MAP_ZIP` VALUES ('84', '100', null, '2017-07-12 09:55:51', null, 'agv,cloud,example,', 'e:\\download_home\\100\\upload\\map\\maps_2017-07-12_09-55-50.zip', null, 'maps_2017-07-12_09-55-50.zip', null, 'SNabc0010', '91', 'E:\\share\\map_server');
+
+-- ----------------------------
+-- Table structure for A_MAP_ZIP
+-- ----------------------------
+DROP TABLE IF EXISTS `A_SCENE_MAP_ZIP_XREF`;
+CREATE TABLE `A_SCENE_MAP_ZIP_XREF` (
+  `MAP_NAME` varchar(50) DEFAULT NULL COMMENT '地图名称',
+  `SCENE_NAME` varchar(50) DEFAULT NULL COMMENT '场景名称',
+  `MAP_ZIP_ID` INT DEFAULT NULL,
+  `DELETE_FLAG` int DEFAULT 0 COMMENT '数据库删除状态 0 :正常 1：删除'
+) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for A_STATION
