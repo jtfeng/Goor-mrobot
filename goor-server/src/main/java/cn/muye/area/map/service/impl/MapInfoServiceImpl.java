@@ -74,8 +74,8 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     @Override
-    public void updateDeleteFlag(long storeId, int deleteFlag) {
-        mapInfoMapper.updateDeleteFlag(storeId, deleteFlag);
+    public void updateDeleteFlag(long storeId, long mapZipId, int deleteFlag) {
+        mapInfoMapper.updateDeleteFlag(storeId, mapZipId, deleteFlag);
     }
 
     @Override

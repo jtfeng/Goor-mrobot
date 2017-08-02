@@ -15,5 +15,5 @@ import org.apache.ibatis.annotations.Param;
  */
 public interface MapInfoMapper extends MyMapper<MapInfo> {
 
-    void updateDeleteFlag(@Param("storeId") long storeId, @Param("deleteFlag")int deleteFlag);
+    void updateDeleteFlag(@Param("storeId") long storeId, @Param("mapZipId") long mapZipId, @Param("deleteFlag") int deleteFlag);
 }

@@ -2,6 +2,7 @@ package cn.muye.area.map.service;
 
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.bean.area.map.SceneMapZipXREF;
 import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.Constant;
@@ -35,7 +36,9 @@ public class MapAnalysisService {
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
 
-    private static Long newMapZipId = 0L;
+    private Long newMapZipId = 0L; //最新地图压缩包id
+
+    private Long oldMapZipId = 0L; //上一批次解压的地图压缩包ID
 
     @Autowired
     private MapZipService mapZipService;
@@ -49,6 +52,9 @@ public class MapAnalysisService {
     @Autowired
     private SceneService sceneService;
 
+    @Autowired
+    private SceneMapZipXREFService sceneMapZipXREFService;
+
     /**
      * 处理文件上传的其他信息
      *
@@ -59,11 +65,24 @@ public class MapAnalysisService {
         MapZip mapZip = JSON.parseObject(JSON.toJSONString(info), MapZip.class);
         mapZip.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         mapZip.setCreateTime(new Date());
+        Object sceneMapObject = info.get(Constant.SCENE_MAP_NAME);
+
+        List<String> sceneNames = new ArrayList<>();
+        if (sceneMapObject != null) {
+            Map<String, List<String>> sceneMapNameMap = (Map<String, List<String>>) sceneMapObject;
+            sceneNames = saveSceneMapZipXREF(sceneMapNameMap);
+        }
+        StringBuffer stringBuffer = new StringBuffer();
+        for(int i  =0; i <sceneNames.size(); i ++ ){
+            stringBuffer.append(sceneNames.get(i)).append(",");
+        }
+        mapZip.setSceneName(stringBuffer.toString());
         mapZipService.save(mapZip);
         newMapZipId = mapZip.getId();  //保存当前的地图压缩包ID
+
         File saveFile = unzipMapZipFile(mapZip);
         if (saveFile.exists()) {
-            analysisFile(saveFile, mapZip);
+            analysisFile(saveFile, sceneNames,mapZip);
         }
     }
 
@@ -96,11 +115,13 @@ public class MapAnalysisService {
      * @param mapZip
      * @throws Exception
      */
-    public void analysisFile(File mapFilePath, MapZip mapZip) throws Exception {
+    public void analysisFile(File mapFilePath, List<String> sceneNames, MapZip mapZip) throws Exception {
         //更改当前数据库地图数据的状态，改为已删除状态
-        mapInfoService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
+        mapInfoService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID ,oldMapZipId, Constant.DELETE);
         //更改数据库中导航目标点删除状态，改为已删除
-        pointService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
+        pointService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, oldMapZipId, Constant.DELETE);
+        //更改数据库中关联关系表状态，改为已删除
+        sceneMapZipXREFService.updateDeleteFlag(oldMapZipId, Constant.DELETE);
 
         String deviceId = mapZip.getDeviceId();
         Long mapzipId = mapZip.getId();
@@ -109,24 +130,25 @@ public class MapAnalysisService {
             return;
         }
         //场景文件夹
-        File[] sceneFileDirs = mapFilePath.listFiles();
-        for (int i = 0; i < sceneFileDirs.length; i++) {
-            File sceneDir = sceneFileDirs[i];
+        for (int i = 0; i < sceneNames.size(); i++) {
+            File sceneDir = new File(mapFilePath.getAbsolutePath() + File.separator +sceneNames.get(i));
             String sceneName = sceneDir.getName();
             //解析地图文件
             analysisMapFile(sceneName, sceneDir.getAbsolutePath(), deviceId, mapzipId);
             //解析导航点文件
-            analysisPointFile(sceneName, sceneDir.getAbsolutePath());
+            analysisPointFile(sceneName, sceneDir.getAbsolutePath(), mapzipId);
         }
         LOGGER.info("解析完成，删除作废的数据");
+
         //删除状态为DELETE的地图信息
         mapInfoService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
         //删除状态为DELETE的导航点信息
         pointService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
+        sceneMapZipXREFService.delete(Constant.DELETE);
     }
 
     /**
-     *  解析地图文件
+     * 解析地图文件
      */
     private void analysisMapFile(String sceneName, String sceneDir, String deviceId, Long mapzipId) throws Exception {
         LOGGER.info("开始解析地图文件");
@@ -168,7 +190,7 @@ public class MapAnalysisService {
     /**
      * 解析导航目标点文件
      */
-    private void analysisPointFile(String sceneName, String sceneDir) throws IllegalAccessException {
+    private void analysisPointFile(String sceneName, String sceneDir,Long mapzipId) throws IllegalAccessException {
         LOGGER.info("开始解析导航目标点文件");
         File pointFilePath = FileUtils.getFile(sceneDir, Constant.POINT_FILE_PATH);
         if (!pointFilePath.exists()) {
@@ -189,6 +211,7 @@ public class MapAnalysisService {
                 MapPoint mapPoint = new MapPoint();
                 mapPoint.setMapName(mapName);
                 mapPoint.setSceneName(sceneName);
+                mapPoint.setMapZipId(mapzipId);
                 Map.Entry entry = (Map.Entry) iterator.next();
                 mapPoint.setPointName(entry.getKey().toString());
                 Map valueMap = (Map) entry.getValue();
@@ -282,18 +305,52 @@ public class MapAnalysisService {
      */
     public boolean callBack() {
         //回滚压缩文件
-        MapZip mapZip = mapZipService.getMapZip(newMapZipId-1);
+        MapZip mapZip = mapZipService.getMapZip(newMapZipId - 1);
         File zipFile = unzipMapZipFile(mapZip);
-        if(zipFile.exists()){
+        if (zipFile.exists()) {
             LOGGER.info("地图压缩包回滚成功，回滚导航点和地图数据");
             //回滚地图信息
             mapInfoService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.NORMAL); //删除新增的正常数据
-            mapInfoService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.NORMAL); //回滚上一批次数据
+            mapInfoService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID,oldMapZipId, Constant.NORMAL); //回滚上一批次数据
             //回滚导航目标点
             pointService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.NORMAL); //删除新增的正常数据
-            pointService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.NORMAL); //回滚上一批次数据
+            pointService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, oldMapZipId, Constant.NORMAL); //回滚上一批次数据
+
+            //回滚关联关系数据
+            sceneMapZipXREFService.delete(newMapZipId); //删除新增的正常数据
+            sceneMapZipXREFService.updateDeleteFlag(oldMapZipId, Constant.NORMAL); //回滚上一批次数据
             return true;
         }
         return false;
+    }
+
+    /**
+     * 保存场景，地图和地图压缩包的关联关系
+     *
+     * @param sceneMapNameMap
+     */
+    private List<String> saveSceneMapZipXREF(Map<String, List<String>> sceneMapNameMap) {
+        List<String> sceneNames = new ArrayList<>();
+        Iterator iterator = sceneMapNameMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, List<String>> entry = (Map.Entry<String, List<String>>) iterator.next();
+            String sceneName = entry.getKey();
+            sceneNames.add(sceneName);
+            List<String> mapNameList = entry.getValue();
+            for (int i = 0; i < mapNameList.size(); i++) {
+                SceneMapZipXREF sceneMapZipXREF = new SceneMapZipXREF();
+                String mapName = mapNameList.get(i);
+                sceneMapZipXREF.setMapName(mapName);
+                sceneMapZipXREF.setSceneName(sceneName);
+                sceneMapZipXREF.setMapZipId(newMapZipId);
+                //如果数据为0，继续查询
+                Long lastMapZipId = sceneMapZipXREFService.getMapZipId(sceneName, mapName);
+                if(lastMapZipId != null && lastMapZipId != 0L){
+                    oldMapZipId =lastMapZipId;
+                }
+                sceneMapZipXREFService.save(sceneMapZipXREF);
+            }
+        }
+        return sceneNames;
     }
 }

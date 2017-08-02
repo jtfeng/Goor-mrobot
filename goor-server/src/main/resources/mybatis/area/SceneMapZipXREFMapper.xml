@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.area.map.mapper.SceneMapZipXREFMapper">
+
+    <resultMap id="mapInfo" type="cn.mrobot.bean.area.map.SceneMapZipXREF">
+        <result property="mapName" column="MAP_NAME"/>
+        <result property="sceneName" column="SCENE_NAME"/>
+        <result property="mapZipId" column="MAP_ZIP_ID"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
+    </resultMap>
+
+    <update id="updateDeleteFlag">
+        UPDATE  A_SCENE_MAP_ZIP_XREF
+        SET
+        <if test="deleteFlag != null">
+            DELETE_FLAG = #{deleteFlag}
+        </if>
+        WHERE
+        MAP_ZIP_ID = #{mapZipId}
+    </update>
+
+</mapper>
