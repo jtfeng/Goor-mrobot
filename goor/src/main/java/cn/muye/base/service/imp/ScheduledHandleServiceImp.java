@@ -269,16 +269,21 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         localRobotSN = (String) applicationContext.getBean("localRobotSN");
         MessageInfo info = new MessageInfo();
         RobotInfoConfig robotInfoConfig = CacheInfoManager.getRobotInfoConfigCache();
+        Robot robot;
         if (robotInfoConfig != null) {
-            Robot robot = robotInfoConfigToRobot(robotInfoConfig);
-            //先往Goor-Server里发自动注册信息
-            String robotJson = AES.encryptToBase64(JSON.toJSONString(robot), Constant.AES_KEY);
-            info.setMessageText(robotJson);
-            info.setSendTime(new Date());
-            info.setSenderId(localRobotSN);
-            info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
-            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
+            robot = robotInfoConfigToRobot(robotInfoConfig);
+        } else {
+            robot = new Robot();
+            robot.setCode(localRobotSN);
         }
+        //先往Goor-Server里发自动注册信息
+        String robotJson = AES.encryptToBase64(JSON.toJSONString(robot), Constant.AES_KEY);
+        info.setMessageText(robotJson);
+        info.setSendTime(new Date());
+        info.setSenderId(localRobotSN);
+        info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
+        logger.info(localRobotSN + "注册信息，发送成功");
+        rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
     }
 
     /**
