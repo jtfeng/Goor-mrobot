@@ -9,7 +9,7 @@ import java.util.List;
 public class Elevator extends BaseBean {
     private String name;
     private String ip;
-    private String lockState;
+    private String lockState = "0";
     private String info;
     private Long elevatorshaftId;
     @Transient

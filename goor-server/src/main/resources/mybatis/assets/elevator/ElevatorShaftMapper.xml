@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.mrobot.bean.assets.elevator.ElevatorShaft">
+<mapper namespace="cn.muye.assets.elevator.mapper.ElevatorShaftMapper">
 
 
     <!-- 电梯井映射关系 -->

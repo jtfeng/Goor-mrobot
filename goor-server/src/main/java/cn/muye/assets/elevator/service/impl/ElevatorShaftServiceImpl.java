@@ -38,6 +38,11 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
     @Override
     public List<ElevatorShaft> listPageByStoreIdAndOrder(int page, int pageSize, Class<ElevatorShaft> clazz, String order) {
         List<ElevatorShaft> elevatorShafts = super.listPageByStoreIdAndOrder(page, pageSize, clazz, order);
+        packageDateBindelevator(elevatorShafts);
+        return elevatorShafts;
+    }
+
+    private void packageDateBindelevator(List<ElevatorShaft> elevatorShafts){
         for (ElevatorShaft elevatorShaft:elevatorShafts){
             try {
                 checkNotNull(elevatorShaft.getId());
@@ -53,6 +58,12 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
                 elevatorShaft.setElevators(Lists.newArrayList());
             }
         }
-        return elevatorShafts;
+    }
+
+    @Override
+    public ElevatorShaft findById(Long id) {
+        ElevatorShaft shaft = super.findById(id);
+        packageDateBindelevator(Lists.newArrayList(shaft));
+        return shaft;
     }
 }

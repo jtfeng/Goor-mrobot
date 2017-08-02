@@ -17,4 +17,20 @@ public interface ElevatorService extends BaseService<Elevator> {
      */
     public List<Elevator> listElevators(WhereRequest whereRequest) throws Exception;
 
+
+    List<Elevator> findByElevatorPointCombinationId(Long elevatorPointCombinationId);
+
+    /**
+     * 创建电梯信息
+     * @param elevator
+     * @throws Exception
+     */
+    void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception;
+
+    /**
+     * 更新电梯信息
+     * @param elevator
+     * @throws Exception
+     */
+    void updateElevator(Elevator elevator, List<Long> combinationIds) throws Exception;
 }

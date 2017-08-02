@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.assets.elevator.mapper.ElevatorPointCombinationMapper">
+
+    <!-- 四点组合关系映射表 -->
+    <resultMap id="ElevatorPointCombinationMap" type="cn.mrobot.bean.assets.elevator.ElevatorPointCombination">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="info" property="info" jdbcType="VARCHAR"/>
+        <result column="wait_point" property="waitPoint" jdbcType="BIGINT"/>
+        <result column="go_point" property="goPoint" jdbcType="BIGINT"/>
+        <result column="out_point" property="outPoint" jdbcType="BIGINT"/>
+        <result column="inner_point" property="innerPoint" jdbcType="BIGINT"/>
+        <result column="store_id" property="storeId" jdbcType="BIGINT"/>
+        <result column="created_by" property="createdBy" jdbcType="BIGINT"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <select id="findByElevatorId" resultMap="ElevatorPointCombinationMap" parameterType="java.lang.Long">
+        SELECT r.*
+        FROM goor.AS_ELEVATORPOINTCOMBINATION r LEFT JOIN goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS ees ON r.ID = ees.ELEVATORPOINTCOMBINATION_ID
+        WHERE ees.ELEVATOR_ID = #{0}
+    </select>
+
+    <select id="checkCreateCondition" resultType="java.lang.Long">
+        SELECT count( DISTINCT MAP_NAME,STORE_ID)
+        FROM A_MAP_POINT
+        WHERE ID IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+          #{item}
+        </foreach>
+    </select>
+
+</mapper>

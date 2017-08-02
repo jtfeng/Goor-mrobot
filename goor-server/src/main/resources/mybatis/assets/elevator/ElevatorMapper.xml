@@ -1,19 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.mrobot.bean.assets.elevator.Elevator">
-
+<mapper namespace="cn.muye.assets.elevator.mapper.ElevatorMapper">
 
     <!-- 电梯映射关系 -->
-    <resultMap id="Elevator" type="cn.mrobot.bean.assets.elevator.Elevator">
+    <resultMap id="ElevatorMap" type="cn.mrobot.bean.assets.elevator.Elevator">
         <id column="id" property="id" jdbcType="BIGINT"/>
         <result column="name" property="name" jdbcType="VARCHAR"/>
         <result column="info" property="info" jdbcType="VARCHAR"/>
         <result column="lock_state" property="lockState" jdbcType="VARCHAR"/>
         <result column="ip" property="ip" jdbcType="VARCHAR"/>
+        <result column="elevatorshaft_id" property="elevatorshaftId" jdbcType="BIGINT"/>
         <result column="store_id" property="storeId" jdbcType="BIGINT"/>
         <result column="created_by" property="createdBy" jdbcType="BIGINT"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+    <select id="findByElevatorPointCombinationId" resultMap="ElevatorMap" parameterType="java.lang.Long">
+        SELECT r.*
+        FROM goor.AS_ELEVATOR r LEFT JOIN goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS ees ON r.ID = ees.ELEVATOR_ID
+        WHERE ees.ELEVATORPOINTCOMBINATION_ID = #{0}
+    </select>
+
+    <delete id="deleteRelationsByElevatorId" parameterType="java.lang.Long">
+        DELETE FROM goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS WHERE ELEVATOR_ID = #{0}
+    </delete>
+
+    <insert id="insertRelationsByElevatorId">
+        INSERT INTO goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS
+        (ELEVATOR_ID,ELEVATORPOINTCOMBINATION_ID)
+        VALUES
+        <foreach collection="param2" item="id" separator=",">
+            (#{param1}, #{id})
+        </foreach>
+    </insert>
 
 </mapper>
