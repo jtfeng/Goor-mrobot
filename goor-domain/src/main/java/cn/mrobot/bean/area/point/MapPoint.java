@@ -87,6 +87,8 @@ public class MapPoint extends BaseBean {
 	@JSONField(name = "point_level")
 	private int pointLevel;
 
+    private Long mapZipId;
+
     private int deleteFlag;
 
     public String getPointName() {
@@ -219,5 +221,13 @@ public class MapPoint extends BaseBean {
 
     public void setDeleteFlag(int deleteFlag) {
         this.deleteFlag = deleteFlag;
+    }
+
+    public Long getMapZipId() {
+        return mapZipId;
+    }
+
+    public void setMapZipId(Long mapZipId) {
+        this.mapZipId = mapZipId;
     }
 }

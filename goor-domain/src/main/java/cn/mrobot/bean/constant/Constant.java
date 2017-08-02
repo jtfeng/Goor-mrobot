@@ -55,6 +55,9 @@ public class Constant {
     //地图文件场景下的点和地图路径名
     public final static String MAP_FILE_PATH = "map"; // 地图
     public final static String POINT_FILE_PATH = "point"; // 导航目标点
+    public final static String ROS_MAP_FILE_SUFFIX = ".pgm"; // 导航目标点
+
+    public final static String SCENE_MAP_NAME = "sceneMapName"; // 场景地图名
 
     public final static String AES_KEY = "trOmVF7Uaqd4h9AN"; //自助注册AES校验码
 

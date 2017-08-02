@@ -22,31 +22,31 @@ import java.util.Map;
  */
 public interface PointService {
 
-	long save(MapPoint mapPoint);
+    long save(MapPoint mapPoint);
 
-	int save(List<MapPoint> mapPointList);
+    int save(List<MapPoint> mapPointList);
 
-	void delete(MapPoint mapPoint);
+    void delete(MapPoint mapPoint);
 
-	void delete(String sceneName, String mapName, long storeId);
+    void delete(String sceneName, String mapName, long storeId);
 
-	void update(MapPoint mapPoint);
+    void update(MapPoint mapPoint);
 
-	MapPoint findById(long id);
+    MapPoint findById(long id);
 
-	List<MapPoint> findByName(String pointName, String sceneName,String mapName,long storeId );
+    List<MapPoint> findByName(String pointName, String sceneName, String mapName, long storeId);
 
-	@Deprecated
-	List<MapPoint> findBySceneName(String sceneName);
+    @Deprecated
+    List<MapPoint> findBySceneName(String sceneName);
 
-	List<MapPoint> list(WhereRequest whereRequest, long storeId);
+    List<MapPoint> list(WhereRequest whereRequest, long storeId);
 
-	@Deprecated
-	void handle(SlamResponseBody slamResponseBody);
+    @Deprecated
+    void handle(SlamResponseBody slamResponseBody);
 
-	List<CascadePoint> cascadeMapPoint(int level, String sceneName);
+    List<CascadePoint> cascadeMapPoint(int level, String sceneName);
 
-	void delete(long storeId, int deleteFlag);
+    void delete(long storeId, int deleteFlag);
 
-	void updateDeleteFlag(long storeId, int deleteFlag);
+    void updateDeleteFlag(long storeId, long mapZipId, int deleteFlag);
 }

@@ -2,12 +2,14 @@ package cn.muye.area.map.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.bean.area.map.SceneMapZipXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.service.MapAnalysisService;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.MapZipService;
+import cn.muye.area.map.service.SceneMapZipXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSONArray;
@@ -46,6 +48,9 @@ public class MapZipController {
     @Autowired
     private MapSyncService mapSyncService;
 
+    @Autowired
+    private SceneMapZipXREFService sceneMapZipXREFService;
+
     @RequestMapping(value = "area/mapzip", method = {RequestMethod.POST, RequestMethod.PUT})
     @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
@@ -77,7 +82,7 @@ public class MapZipController {
     public AjaxResult listMapZip(WhereRequest whereRequest) {
         try {
 
-            Integer pageNo = whereRequest.getPage() ;
+            Integer pageNo = whereRequest.getPage();
             Integer pageSize = whereRequest.getPageSize();
 
             pageNo = pageNo == null ? 1 : pageNo;
@@ -143,7 +148,7 @@ public class MapZipController {
             } else {
                 result = mapSyncService.syncMap(mapZip, robotList);
             }
-            return AjaxResult.success(result,"地图同步请求发送成功");
+            return AjaxResult.success(result, "地图同步请求发送成功");
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
             return AjaxResult.failed("系统错误");
@@ -154,7 +159,7 @@ public class MapZipController {
     private MapAnalysisService mapAnalysisService;
 
     /**
-     *解压地图压缩包（仅做还原数据）
+     * 解压地图压缩包（仅做还原数据）
      *
      * @param id
      * @return
@@ -165,8 +170,14 @@ public class MapZipController {
         try {
             MapZip mapZip = mapZipService.getMapZip(id);
             File saveFile = mapAnalysisService.unzipMapZipFile(mapZip);
+            List<SceneMapZipXREF> sceneMapZipXREFList = sceneMapZipXREFService.list(id);
+            List<String> sceneNames = new ArrayList<>();
+            for (int i = 0; i < sceneMapZipXREFList.size(); i++) {
+                sceneNames.add(sceneMapZipXREFList.get(i).getSceneName());
+            }
+
             if (saveFile.exists()) {
-                mapAnalysisService.analysisFile(saveFile, mapZip);
+                mapAnalysisService.analysisFile(saveFile, sceneNames, mapZip);
             }
             return AjaxResult.success("地图压缩包解压成功");
         } catch (Exception e) {

@@ -45,6 +45,8 @@
         </if>
         WHERE
         STORE_ID = #{storeId}
+        AND
+        MAP_ZIP_ID = #{mapZipId}
     </update>
 
 </mapper>

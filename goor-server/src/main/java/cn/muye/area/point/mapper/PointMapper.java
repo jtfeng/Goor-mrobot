@@ -34,5 +34,5 @@ public interface PointMapper extends MyMapper<MapPoint> {
                                                  @Param("cloudMapPointTypeId") int cloudMapPointTypeId,
                                                  @Param("storeId") long storeId);
 
-    void updateDeleteFlag(@Param("storeId") long storeId, @Param("deleteFlag")int deleteFlag);
+    void updateDeleteFlag(@Param("storeId") long storeId, @Param("mapZipId") long mapZipId, @Param("deleteFlag") int deleteFlag);
 }
