@@ -1,6 +1,8 @@
 package cn.muye.base.filter;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -40,7 +42,10 @@ public class AuthValidationExceptionFilter implements Filter,ApplicationContextA
 
         boolean isExcludedPage = true;
         for (String page : excludedPageArray) {//判断是否在过滤url之外
-            if (((HttpServletRequest) req).getServletPath().startsWith(page)) {
+            Pattern pattern = Pattern.compile(page);
+            Matcher matcher = pattern.matcher(((HttpServletRequest) req).getServletPath());
+            boolean rs = matcher.find();
+            if (rs) {
                 isExcludedPage = false;
                 break;
             }
