@@ -92,7 +92,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action)  throws Exception{
+    public synchronized boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action)  throws Exception{
         Elevator elevator = super.findById(elevatorId);
         if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)){
             //上锁
