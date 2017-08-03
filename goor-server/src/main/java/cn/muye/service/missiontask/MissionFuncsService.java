@@ -1,5 +1,6 @@
 package cn.muye.service.missiontask;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.mission.MissionList;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
@@ -35,11 +36,11 @@ public interface MissionFuncsService {
 
     /**
      * 根据MissionList列表和机器人列表生成MissionListTask列表并发送到机器人
-     * @param robotCodesArray
+     * @param robotCode
      * @param missionLists
      * @return
      */
-    Boolean createMissionListTasksByMissionLists(String[] robotCodesArray, List<MissionList> missionLists)  throws Exception;
+    AjaxResult createMissionListTasksByMissionLists(String robotCode, List<MissionList> missionLists)  throws Exception;
 
 
 }
