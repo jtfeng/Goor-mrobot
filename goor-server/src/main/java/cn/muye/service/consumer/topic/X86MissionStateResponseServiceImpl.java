@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.log.mission.JsonMissionStateResponse;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
@@ -44,7 +45,7 @@ public class X86MissionStateResponseServiceImpl
     OrderDetailService orderDetailService;
 
     @Override
-    public void handleX86MissionStateResponse(MessageInfo messageInfo) {
+    public AjaxResult handleX86MissionStateResponse(MessageInfo messageInfo) {
         logger.info(JsonUtils.toJson(
                 messageInfo,
                 new TypeToken<MessageInfo>(){}.getType()));
@@ -86,6 +87,7 @@ public class X86MissionStateResponseServiceImpl
                 }
             }
         }
+        return null;
     }
 
     /**

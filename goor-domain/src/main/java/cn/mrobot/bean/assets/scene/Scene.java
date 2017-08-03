@@ -80,4 +80,12 @@ public class Scene extends BaseBean{
                 ", robots=" + robots +
                 '}';
     }
+
+    /**
+     * 在使用的两种场景状态
+     */
+    public static enum SCENE_STATE {
+        UPLOAD_SUCCESS,
+        UPDATE_STATE
+    }
 }

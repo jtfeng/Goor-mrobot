@@ -213,12 +213,18 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @throws Exception
      */
     @Override
-    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception {
-        if (this.sceneMapper.checkMapInfo(mapSceneName, Long.parseLong(storeId)) != 0){
-            this.sceneMapper.setSceneState(mapSceneName,Long.parseLong(storeId),3);
-            return true;
-        }else {
-            return false;
+    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state) throws Exception {
+        Preconditions.checkNotNull(state);
+        if (Scene.SCENE_STATE.UPDATE_STATE.equals(state)) {
+            //标明状态为可更新状态
+            if (this.sceneMapper.checkMapInfo(mapSceneName, Long.parseLong(storeId)) != 0) {
+                this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 3);
+            }
         }
+        if (Scene.SCENE_STATE.UPLOAD_SUCCESS.equals(state)){
+            //表明状态为上传成功状态
+            this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 1);
+        }
+        return true;
     }
 }

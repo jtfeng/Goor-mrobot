@@ -7,7 +7,8 @@
         <result property="name" column="NAME"/>
         <result property="code" column="CODE"/>
         <result property="typeId" column="TYPE_ID"/>
-        <result property="batteryThreshold" column="BATTERY_THRESHOLD"/>
+        <result property="lowBatteryThreshold" column="LOW_BATTERY_THRESHOLD"/>
+        <result property="sufficientBatteryThreshold" column="SUFFICIENT_BATTERY_THRESHOLD"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
         <result property="isOnline" column="IS_ONLINE"/>
@@ -21,7 +22,8 @@
             robot.NAME,
             robot.CODE,
             type.ID as TYPE_ID,
-            config.BATTERY_THRESHOLD,
+            config.LOW_BATTERY_THRESHOLD,
+            config.SUFFICIENT_BATTERY_THRESHOLD,
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
             robot.IS_ONLINE,

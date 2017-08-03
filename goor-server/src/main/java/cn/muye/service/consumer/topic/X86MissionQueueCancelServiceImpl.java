@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
@@ -24,10 +25,10 @@ public class X86MissionQueueCancelServiceImpl
     BaseMessageService baseMessageService;
 
     @Override
-    public void sendX86MissionQueueCancel(
+    public AjaxResult sendX86MissionQueueCancel(
             String robotCode,
             List<QueueCancelBody> bodyList) {
-        baseMessageService.sendRobotMessage(
+        return baseMessageService.sendRobotMessage(
                 robotCode,
                 TopicConstants.X86_MISSION_QUEUE_CANCEL,
                 JsonUtils.toJson(bodyList,

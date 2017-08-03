@@ -1,17 +1,19 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
+
 /**
  * Created by abel on 17-7-27.
  */
 public interface X86MissionCommonRequestService {
 
-    void sendX86MissionStateCommonRequest(
+    AjaxResult sendX86MissionStateCommonRequest(
             String robotCode);
 
-    void sendX86MissionQueueCommonRequest(
+    AjaxResult sendX86MissionQueueCommonRequest(
             String robotCode);
 
-    void sendX86MissionStateCommonRequest();
+    AjaxResult sendX86MissionStateCommonRequest();
 
-    void sendX86MissionQueueCommonRequest();
+    AjaxResult sendX86MissionQueueCommonRequest();
 }

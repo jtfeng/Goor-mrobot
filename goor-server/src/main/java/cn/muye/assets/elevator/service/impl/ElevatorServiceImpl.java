@@ -1,5 +1,6 @@
 package cn.muye.assets.elevator.service.impl;
 
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.elevator.ElevatorShaft;
@@ -19,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -40,13 +44,77 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor) {
-        return null;
+    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor){
+        try {
+            Long storeId = 100L;
+
+            List<Elevator> elevators = this.listAll();
+
+            bindElevatorShaft(elevators);
+            bindElevatorPointCombination(elevators);
+
+            elevators = elevators.stream().filter(new Predicate<Elevator>() {
+                @Override
+                public boolean test(Elevator elevator) {
+                    return storeId.equals(elevator.getStoreId());
+                }
+            }).collect(Collectors.toList());
+
+            elevators.forEach(new Consumer<Elevator>() {
+                @Override
+                public void accept(Elevator elevator) {
+                    List<ElevatorPointCombination> combinations = elevator.getElevatorPointCombinations();
+                    elevator.setElevatorPointCombinations(
+                            combinations.stream().filter(new Predicate<ElevatorPointCombination>() {
+                                @Override
+                                public boolean test(ElevatorPointCombination combination) {
+                                    return mapInfoId.equals(combination.getgPoint().getMapInfo().getId())
+                                            && floor.equals(combination.getgPoint().getMapInfo().getFloor());
+                                }
+                            }).collect(Collectors.toList())
+                    );
+                }
+            });
+
+            return elevators.stream().filter(new Predicate<Elevator>() {
+                @Override
+                public boolean test(Elevator elevator) {
+                    return elevator.getElevatorPointCombinations().size() != 0;
+                }
+            }).collect(Collectors.toList());
+        }catch (Exception e){
+            e.printStackTrace();
+            return Lists.newArrayList();
+        }
     }
 
     @Override
-    public void updateElevatorLockState(Long elevatorId, Integer state) {
-        this.elevatorMapper.updateElevatorLockState(elevatorId, state);
+    public MapInfo findByMapNameAndStoreId(String mapName, Long storeId) throws Exception {
+        List<MapInfo> mapInfos = this.elevatorMapper.findByMapNameAndStoreId(mapName, storeId);
+        checkArgument(mapInfos != null && mapInfos.size() == 1, "同一门店下不能有重名地图，请检查!");
+        return mapInfos.get(0);
+    }
+
+    @Override
+    public synchronized boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action){
+        Elevator elevator = super.findById(elevatorId);
+        if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)){
+            //上锁
+            if ("1".equals(elevator.getLockState())){// 1表示上锁
+                return false;
+            }else {
+                this.elevatorMapper.updateElevatorLockState(elevatorId, 1);
+                return true;
+            }
+        }
+        if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)){
+            //解锁
+            if ("1".equals(elevator.getLockState())) {// 1表示上锁
+                this.elevatorMapper.updateElevatorLockState(elevatorId, 0);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

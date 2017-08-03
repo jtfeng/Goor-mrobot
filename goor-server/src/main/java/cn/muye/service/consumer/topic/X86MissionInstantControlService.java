@@ -1,25 +1,27 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
+
 /**
  * Created by abel on 17-7-27.
  */
 public interface X86MissionInstantControlService {
 
-    void sendX86MissionInstantControlPause(
+    AjaxResult sendX86MissionInstantControlPause(
             String robotCode);
 
-    void sendX86MissionInstantControlResume(
+    AjaxResult sendX86MissionInstantControlResume(
             String robotCode);
 
-    void sendX86MissionInstantControlSkipMission(
+    AjaxResult sendX86MissionInstantControlSkipMission(
             String robotCode);
 
-    void sendX86MissionInstantControlSkipMissionList(
+    AjaxResult sendX86MissionInstantControlSkipMissionList(
             String robotCode);
 
-    void sendX86MissionInstantControlClear(
+    AjaxResult sendX86MissionInstantControlClear(
             String robotCode);
 
-    void sendX86MissionInstantControlStartNextMission(
+    AjaxResult sendX86MissionInstantControlStartNextMission(
             String robotCode);
 }

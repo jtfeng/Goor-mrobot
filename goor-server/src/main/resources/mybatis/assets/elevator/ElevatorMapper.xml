@@ -15,6 +15,24 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
     </resultMap>
 
+    <!--地图映射关系-->
+    <resultMap id="MapInfoMap" type="cn.mrobot.bean.area.map.MapInfo">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="mapName" column="MAP_NAME"/>
+        <result property="sceneName" column="SCENE_NAME"/>
+        <result property="mapAlias" column="MAP_ALIAS"/>
+        <result property="pngImageLocalPath" column="PNG_IMAGE_LOCAL_PATH"/>
+        <result property="ros" column="ROS"/>
+        <result property="deviceId" column="DEVICE_ID"/>
+        <result property="pngDesigned" column="PNG_DESIGNED"/>
+        <result property="mapZipId" column="MAP_ZIP_ID"/>
+        <result property="floor" column="FLOOR"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
+    </resultMap>
+
     <select id="findByElevatorPointCombinationId" resultMap="ElevatorMap" parameterType="java.lang.Long">
         SELECT r.*
         FROM goor.AS_ELEVATOR r LEFT JOIN goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS ees ON r.ID = ees.ELEVATOR_ID
@@ -24,6 +42,10 @@
     <delete id="deleteRelationsByElevatorId" parameterType="java.lang.Long">
         DELETE FROM goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS WHERE ELEVATOR_ID = #{0}
     </delete>
+
+    <select id="findByMapNameAndStoreId" resultMap="MapInfoMap">
+        SELECT i.* FROM goor.A_MAP_INFO i WHERE i.MAP_NAME = #{param1} AND i.STORE_ID = #{param2}
+    </select>
 
     <insert id="insertRelationsByElevatorId">
         INSERT INTO goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS

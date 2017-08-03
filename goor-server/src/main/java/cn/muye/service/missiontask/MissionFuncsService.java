@@ -18,7 +18,7 @@ public interface MissionFuncsService {
      * @param order
      * @return
      */
-    boolean createMissionLists(Order order);
+    AjaxResult createMissionLists(Order order);
 
     /**
      * 获取任务下发的消息对象json字串

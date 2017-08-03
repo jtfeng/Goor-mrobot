@@ -1,5 +1,6 @@
 package cn.muye.assets.elevator.mapper;
 
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.muye.util.MyMapper;
 
@@ -14,4 +15,6 @@ public interface ElevatorMapper extends MyMapper<Elevator> {
     void insertRelationsByElevatorId(Long id, List<Long> combinationIds);
 
     void updateElevatorLockState(Long elevatorId, Integer state);
+
+    List<MapInfo> findByMapNameAndStoreId(String mapName, Long storeId);
 }

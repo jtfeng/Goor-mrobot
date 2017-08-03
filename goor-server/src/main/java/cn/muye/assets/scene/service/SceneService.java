@@ -40,5 +40,5 @@ public interface SceneService extends BaseService<Scene> {
 
     void bindSceneAndRobotRelations(Scene scene) throws Exception;
 
-    boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception;
+    boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state) throws Exception;
 }
