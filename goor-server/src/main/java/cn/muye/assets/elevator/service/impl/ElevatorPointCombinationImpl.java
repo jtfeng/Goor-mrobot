@@ -83,33 +83,21 @@ public class ElevatorPointCombinationImpl extends BaseServiceImpl<ElevatorPointC
                 checkNotNull((mapPointId = combination.getWaitPoint()));
                 System.out.println(this.mapPointMapper.selectByPrimaryKey(mapPointId));
                 log.info("等待点：" + (mapPoint = this.mapPointMapper.selectByPrimaryKey(mapPointId)));
-                mapPoint.setMapInfo(this.elevatorService.findByMapNameAndStoreId(
-                        mapPoint.getMapName(), combination.getStoreId()
-                ));
                 combination.setwPoint(mapPoint);
             }catch (Exception e){ combination.setwPoint(null); }
             try {
                 checkNotNull((mapPointId = combination.getGoPoint()));
                 log.info("进入点：" + (mapPoint = this.mapPointMapper.selectByPrimaryKey(mapPointId)));
-                mapPoint.setMapInfo(this.elevatorService.findByMapNameAndStoreId(
-                        mapPoint.getMapName(), combination.getStoreId()
-                ));
                 combination.setgPoint(mapPoint);
             }catch (Exception e){ combination.setwPoint(null); }
             try {
                 checkNotNull((mapPointId = combination.getOutPoint()));
                 log.info("出去点：" + (mapPoint = this.mapPointMapper.selectByPrimaryKey(mapPointId)));
-                mapPoint.setMapInfo(this.elevatorService.findByMapNameAndStoreId(
-                        mapPoint.getMapName(), combination.getStoreId()
-                ));
                 combination.setoPoint(mapPoint);
             }catch (Exception e){ combination.setwPoint(null); }
             try {
                 checkNotNull((mapPointId = combination.getInnerPoint()));
                 log.info("内部点：" + (mapPoint = this.mapPointMapper.selectByPrimaryKey(mapPointId)));
-                mapPoint.setMapInfo(this.elevatorService.findByMapNameAndStoreId(
-                        mapPoint.getMapName(), combination.getStoreId()
-                ));
                 combination.setiPoint(mapPoint);
             }catch (Exception e){ combination.setwPoint(null); }
             log.info(" - - - - - ");

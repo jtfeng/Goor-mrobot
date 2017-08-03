@@ -297,4 +297,17 @@ public class ElevatorController {
             return AjaxResult.failed(e.getMessage());
         }
     }
+
+    @RequestMapping(value = "/assets/findByMapFloor/{mapInfoId}/{floor}", method = RequestMethod.GET)
+    public AjaxResult findByMapFloor(
+            @PathVariable("mapInfoId") String mapInfoId,
+            @PathVariable("floor") String floor
+    ){
+        try {
+            List<Elevator> elevators = elevatorService.findByMapFloor(Long.parseLong(mapInfoId), Integer.parseInt(floor));
+            return AjaxResult.success(elevators);
+        }catch (Exception e){
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
 }
