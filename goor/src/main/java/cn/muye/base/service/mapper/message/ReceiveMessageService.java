@@ -37,11 +37,6 @@ public class ReceiveMessageService {
         if(StringUtils.isEmpty(message.getUuId())){
             return 0L;
         }
-        List<RobotInfoConfig> configList = robotInfoConfigMapper.list();
-        if (configList != null && configList.size() > 0) {
-            RobotInfoConfig robotInfoConfig = configList.get(0);
-            message.setSenderId(robotInfoConfig.getRobotSn());
-        }
         message.setUpdateTime(new Date());
         message.setSuccess(false);//设置为false
         return receiveMessageMapper.save(message);
