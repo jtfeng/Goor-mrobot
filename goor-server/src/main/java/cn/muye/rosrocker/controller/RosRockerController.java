@@ -63,8 +63,8 @@ public class RosRockerController {
             // TODO: 02/08/2017 坐标需要经过一个算法转换
 
             RosRockerDTO dto = new RosRockerDTO(String.valueOf(robotId),
-                    new RosRockerDTO.Linear (obj.getLinearVelocityX(),-obj.getLinearVelocityY(),0.0),
-                    new RosRockerDTO.Angular(0.0,0.0,-obj.getAngularVelocityZ()));
+                    new RosRockerDTO.Linear (obj.getLinearVelocityX()/2,-obj.getLinearVelocityY()/2,0.0),
+                    new RosRockerDTO.Angular(0.0,0.0,-obj.getAngularVelocityZ()/2));
             sendDetailMessage(String.valueOf(robotId), TopicConstants.ROS_PUB_YAOGAN_TOPIC, TopicConstants.ROS_YAOGAN_TOPIC_TYPE, JSON.toJSONString(dto));
             Thread.sleep(500);
             return AjaxResult.success();

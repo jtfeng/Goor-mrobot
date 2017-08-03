@@ -44,6 +44,7 @@ public interface ElevatorService extends BaseService<Elevator> {
 
     /**
      * 根据地图楼层查询电梯信息
+     * todo 必须返回的是电梯当层的点集合
      * @param mapInfoId
      * @param floor
      * @return

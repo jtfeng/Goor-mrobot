@@ -41,6 +41,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
 
     @Override
     public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor) {
+        // TODO: 03/08/2017 查询出的楼层对应点集合只能为当前参数纸袋的楼层
         return null;
     }
 
