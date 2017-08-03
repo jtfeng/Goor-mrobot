@@ -130,4 +130,21 @@ public class MapInfo extends BaseBean {
 	public void setFloor(int floor) {
 		this.floor = floor;
 	}
+
+	@Override
+	public String toString() {
+		return "MapInfo{" +
+				"mapName='" + mapName + '\'' +
+				", sceneName='" + sceneName + '\'' +
+				", mapAlias='" + mapAlias + '\'' +
+				", pngImageLocalPath='" + pngImageLocalPath + '\'' +
+				", pngImageHttpPath='" + pngImageHttpPath + '\'' +
+				", ros='" + ros + '\'' +
+				", deviceId='" + deviceId + '\'' +
+				", pngDesigned='" + pngDesigned + '\'' +
+				", mapZipId=" + mapZipId +
+				", floor=" + floor +
+				", deleteFlag=" + deleteFlag +
+				'}';
+	}
 }

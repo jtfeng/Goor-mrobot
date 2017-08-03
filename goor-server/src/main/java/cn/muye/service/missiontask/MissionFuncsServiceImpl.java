@@ -672,12 +672,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataElevator jsonMissionItemDataElevator =
                 new JsonMissionItemDataElevator();
         if (mPointAtts != null){
-            List<Elevator> preElevator = elevatorService.findByMapFloor(
-                    mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
-            List<Elevator> nextElevator = elevatorService.findByMapFloor(
-                    mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
+            List<Elevator> preElevator = null;
+            List<Elevator> nextElevator = null;
+            try {
+                preElevator = elevatorService.findByMapFloor(
+                        mPointAtts.currentMapId,
+                        mPointAtts.currentFloor);
+                nextElevator = elevatorService.findByMapFloor(
+                        mPointAtts.nextMapId,
+                        mPointAtts.nextFloor);
+            }catch (Exception e){e.printStackTrace();}
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){

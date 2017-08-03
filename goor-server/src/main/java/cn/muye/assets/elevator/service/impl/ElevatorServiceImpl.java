@@ -44,48 +44,44 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor){
-        try {
-            Long storeId = 100L;
-
-            List<Elevator> elevators = this.listAll();
-
-            bindElevatorShaft(elevators);
-            bindElevatorPointCombination(elevators);
-
-            elevators = elevators.stream().filter(new Predicate<Elevator>() {
-                @Override
-                public boolean test(Elevator elevator) {
-                    return storeId.equals(elevator.getStoreId());
-                }
-            }).collect(Collectors.toList());
-
-            elevators.forEach(new Consumer<Elevator>() {
-                @Override
-                public void accept(Elevator elevator) {
-                    List<ElevatorPointCombination> combinations = elevator.getElevatorPointCombinations();
-                    elevator.setElevatorPointCombinations(
-                            combinations.stream().filter(new Predicate<ElevatorPointCombination>() {
-                                @Override
-                                public boolean test(ElevatorPointCombination combination) {
-                                    return mapInfoId.equals(combination.getgPoint().getMapInfo().getId())
-                                            && floor.equals(combination.getgPoint().getMapInfo().getFloor());
-                                }
-                            }).collect(Collectors.toList())
-                    );
-                }
-            });
-
-            return elevators.stream().filter(new Predicate<Elevator>() {
-                @Override
-                public boolean test(Elevator elevator) {
-                    return elevator.getElevatorPointCombinations().size() != 0;
-                }
-            }).collect(Collectors.toList());
-        }catch (Exception e){
-            e.printStackTrace();
-            return Lists.newArrayList();
+    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor) throws Exception{
+        Long storeId = 100L;
+        List<Elevator> elevators = this.listAll();
+        bindElevatorShaft(elevators);
+        bindElevatorPointCombination(elevators);
+        elevators = elevators.stream().filter(new Predicate<Elevator>() {
+            @Override
+            public boolean test(Elevator elevator) {
+                return storeId.equals(elevator.getStoreId());
+            }
+        }).collect(Collectors.toList());
+        System.out.println(" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ");
+        for (Elevator elevator:elevators) {
+            List<ElevatorPointCombination> combinations = elevator.getElevatorPointCombinations();
+            elevator.setElevatorPointCombinations(
+                    combinations.stream().filter(new Predicate<ElevatorPointCombination>() {
+                        @Override
+                        public boolean test(ElevatorPointCombination combination) {
+                            boolean isPassed = false;
+                            try {
+                                MapInfo mapInfo = findByMapNameAndStoreId(combination.getgPoint().getMapName(), combination.getStoreId());
+                                isPassed = mapInfoId.equals(mapInfo.getId()) && floor.equals(mapInfo.getFloor());
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                            return isPassed;
+                        }
+                    }).collect(Collectors.toList())
+            );
         }
+        System.out.println(" = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = ");
+        return elevators.stream().filter(new Predicate<Elevator>() {
+            @Override
+            public boolean test(Elevator elevator) {
+                return elevator.getElevatorPointCombinations().size() != 0;
+            }
+        }).collect(Collectors.toList());
+
     }
 
     @Override
