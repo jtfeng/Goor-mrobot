@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
 
 @SpringBootApplication
 @ComponentScan
@@ -26,12 +25,7 @@ public class Application {
 
     @Bean
     public ScheduledExecutorService scheduledHandle(){
-        ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(2, new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                return new Thread(r, "Application scheduledHandle");
-            }
-        });
+        ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(2, (e) -> new Thread(e, "Application scheduledHandle"));
         new ScheduledHandle(scheduledExecutor);
         return scheduledExecutor;
     }

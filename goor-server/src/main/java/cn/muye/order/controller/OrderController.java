@@ -110,8 +110,15 @@ public class OrderController extends BaseController {
                 order.setNeedShelf(Boolean.TRUE);
             }
             order.setRobot(arrangeRobot);
-            orderService.saveOrder(order);
-            return AjaxResult.success("保存订单成功");
+            AjaxResult ajaxResult = orderService.saveOrder(order);
+            //若未成功， 机器人状态也回滚
+            if(!ajaxResult.isSuccess()){
+                if(arrangeRobot != null){
+                    arrangeRobot.setBusy(Boolean.FALSE);
+                    robotService.updateSelective(arrangeRobot);
+                }
+            }
+            return ajaxResult;
         } catch (Exception e) {
             e.printStackTrace();
             //若失败 机器人状态回滚
@@ -119,7 +126,7 @@ public class OrderController extends BaseController {
                 arrangeRobot.setBusy(Boolean.FALSE);
                 robotService.updateSelective(arrangeRobot);
             }
-            return AjaxResult.failed("保存订单失败");
+            return AjaxResult.failed("提交订单出现异常，订单失败");
         }
     }
 

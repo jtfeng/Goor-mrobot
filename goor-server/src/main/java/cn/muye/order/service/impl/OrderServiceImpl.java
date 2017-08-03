@@ -1,20 +1,22 @@
 package cn.muye.order.service.impl;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.service.imp.BasePreInject;
-import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.order.mapper.GoodsInfoMapper;
 import cn.muye.order.mapper.OrderMapper;
 import cn.muye.order.service.OrderDetailService;
 import cn.muye.order.service.OrderService;
 import cn.muye.order.service.OrderSettingService;
+import cn.muye.service.missiontask.MissionFuncsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.List;
 
@@ -42,7 +44,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     private MissionFuncsService missionFuncsService;
 
     @Override
-    public void saveOrder(Order order) {
+    public AjaxResult saveOrder(Order order) {
         //保存订单
         preInject(order);
         order.setStatus(OrderConstant.ORDER_STATUS_UNDONE);
@@ -61,7 +63,11 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         });
         //在这里调用任务生成器
         Order sqlOrder = getOrder(order.getId());
-        missionFuncsService.createMissionLists(sqlOrder);
+        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
+        if(!ajaxResult.isSuccess()){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return ajaxResult;
     }
 
     @Override

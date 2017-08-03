@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.*;
 
@@ -80,7 +81,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      */
     @Override
     public AjaxResult createMissionLists(Order order) {
-        AjaxResult ret = null;
 
         logger.info("##############  createMissionLists #################");
 
@@ -91,7 +91,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 order.getOrderSetting().getStartPoint() == null ||
                 order.getOrderSetting().getEndPoint() == null){
             logger.info("##############  createMissionLists attrs error #################");
-            return ret;
         }
 
         //定义地图点的集合
@@ -115,16 +114,23 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         List<MissionListTask> listTasks =
                 new ArrayList<>();
         listTasks.add(missionListTask);
-
-
-        logger.info("robot code is: " + order.getRobot().getCode() +
-                " , ####### tesk is: " + getGoorMissionMsg(listTasks));
-        logger.info("##############  createMissionLists successed #################");
-
-        return x86MissionDispatchService.sendX86MissionDispatch(
+        AjaxResult ajaxResult = x86MissionDispatchService.sendX86MissionDispatch(
                 order.getRobot().getCode(),
                 getGoorMissionMsg(listTasks)
         );
+        if(ajaxResult == null || !ajaxResult.isSuccess()){
+            logger.info("##############  createMissionLists failed ，发送客户端goor失败#################");
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ajaxResult == null ? AjaxResult.failed("客户端无法连接，订单失败") : ajaxResult;
+        }else {
+            logger.info("robot code is: " + order.getRobot().getCode() +
+                    " , ####### tesk is: " + getGoorMissionMsg(listTasks));
+            logger.info("##############  createMissionLists successed #################");
+            return ajaxResult;
+        }
+
+
+
     }
 
     /**
@@ -1661,7 +1667,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         FeatureItem featureItem = featureItemService.get(missionItem.getFeatureItemId());
         missionItemTask.setFeatureValue(featureItem.getValue());
 //        missionItemTask.setName(missionItem.getName()==null?"":missionItem.getName());
-        missionItemTask.setName(featureItem.getValue()==null?"":featureItem.getValue());
+        missionItemTask.setName(featureItem.getValue() == null ? "" : featureItem.getValue());
 
         //只有导航相关的任务才需要转换点数据
         String data = missionItem.getData();
@@ -1730,8 +1736,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             missionTask.setMissionItemTasks(missionItemTasks);
         }
-        missionTask.setDescription(mission.getDescription()==null?"":mission.getDescription());
-        missionTask.setName(mission.getName()==null?"":mission.getName());
+        missionTask.setDescription(mission.getDescription() == null ? "" : mission.getDescription());
+        missionTask.setName(mission.getName() == null ? "" : mission.getName());
         missionTask.setSceneId(missionList.getSceneId());
         missionTask.setCreatedBy(mission.getCreatedBy());
         missionTask.setCreateTime(new Date());
