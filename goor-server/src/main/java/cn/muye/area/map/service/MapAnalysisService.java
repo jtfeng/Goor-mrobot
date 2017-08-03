@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.SceneMapZipXREF;
 import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.ZipUtils;
@@ -183,7 +184,7 @@ public class MapAnalysisService {
             CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
             mapInfoService.save(mapInfo);
             //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
-            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "");
+            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPDATE_STATE);
         }
     }
 

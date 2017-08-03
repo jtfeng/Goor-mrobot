@@ -288,14 +288,13 @@ public class ElevatorController {
     ){
         //Long elevatorId, Integer state
         try {
-            elevatorService.updateElevatorLockState(Long.parseLong(elevatorId), Integer.parseInt(state));
+            Elevator.ELEVATOR_ACTION action = null;
+            if ("1".equals(state)){action = Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK;}
+            if ("0".equals(state)){action = Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK;}
+            elevatorService.updateElevatorLockState(Long.parseLong(elevatorId), action);
             return AjaxResult.success();
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }
-    }
-
-    public static void main(String[] args) {
-        // TODO: 02/08/2017 电梯井 、电梯 、四个基准点的组合
     }
 }

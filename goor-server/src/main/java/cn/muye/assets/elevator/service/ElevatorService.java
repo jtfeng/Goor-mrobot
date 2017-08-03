@@ -1,5 +1,6 @@
 package cn.muye.assets.elevator.service;
 
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorShaft;
 import cn.mrobot.utils.WhereRequest;
@@ -38,16 +39,22 @@ public interface ElevatorService extends BaseService<Elevator> {
     /**
      * 更新电梯状态
      * @param elevatorId
-     * @param state
      */
-    void updateElevatorLockState(Long elevatorId, Integer state);
+    boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action) throws Exception;
 
     /**
-     * 根据地图楼层查询电梯信息
-     * todo 必须返回的是电梯当层的点集合
+     * 根据地图楼层查询电梯信息（ Abel 使用）
      * @param mapInfoId
      * @param floor
      * @return
      */
-    List<Elevator> findByMapFloor(Long mapInfoId, Integer floor);
+    List<Elevator> findByMapFloor(Long mapInfoId, Integer floor) throws Exception;
+
+    /**
+     * 根据地图名称以及门店编号查询对应的地图实体信息
+     * @param mapName
+     * @param storeId
+     * @return
+     */
+     MapInfo findByMapNameAndStoreId(String mapName, Long storeId) throws Exception;
 }

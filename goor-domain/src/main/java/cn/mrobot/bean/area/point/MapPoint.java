@@ -1,5 +1,6 @@
 package cn.mrobot.bean.area.point;
 
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -85,6 +86,10 @@ public class MapPoint extends BaseBean {
 
 	@Column(name = "POINT_LEVEL")
 	@JSONField(name = "point_level")
+
+    @Transient
+    private MapInfo mapInfo;
+
 	private int pointLevel;
 
     private Long mapZipId;
@@ -229,5 +234,13 @@ public class MapPoint extends BaseBean {
 
     public void setMapZipId(Long mapZipId) {
         this.mapZipId = mapZipId;
+    }
+
+    public MapInfo getMapInfo() {
+        return mapInfo;
+    }
+
+    public void setMapInfo(MapInfo mapInfo) {
+        this.mapInfo = mapInfo;
     }
 }

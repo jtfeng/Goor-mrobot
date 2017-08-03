@@ -85,4 +85,11 @@ public class Elevator extends BaseBean {
     public void setElevatorshaftId(Long elevatorshaftId) {
         this.elevatorshaftId = elevatorshaftId;
     }
+
+    //电梯动作
+    public static enum ELEVATOR_ACTION {
+        ELEVATOR_LOCK,
+        ELEVATOR_UNLOCK
+    }
+
 }
