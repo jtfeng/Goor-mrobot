@@ -40,7 +40,7 @@ public interface ElevatorService extends BaseService<Elevator> {
      * 更新电梯状态
      * @param elevatorId
      */
-    boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action) throws Exception;
+    boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action);
 
     /**
      * 根据地图楼层查询电梯信息（ Abel 使用）
@@ -48,7 +48,7 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @param floor
      * @return
      */
-    List<Elevator> findByMapFloor(Long mapInfoId, Integer floor) throws Exception;
+    List<Elevator> findByMapFloor(Long mapInfoId, Integer floor);
 
     /**
      * 根据地图名称以及门店编号查询对应的地图实体信息
