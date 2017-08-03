@@ -5,8 +5,6 @@ import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
-import cn.mrobot.bean.assets.elevator.Elevator;
-import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.bean.mission.task.*;
@@ -20,7 +18,6 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
-import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.service.FeatureItemService;
@@ -345,7 +342,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     }
 
-    private MapPoint prePoint;
+    private MapPoint elevatorPoint;
     /**
      * 根据订单信息搜集任务点
      * @param order
@@ -367,10 +364,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         atts = new MPointAtts();
         atts.type = MPointType_QUHUO;
         mpAttrs.put(order.getOrderSetting().getStartPoint(), atts);
-        prePoint = order.getOrderSetting().getStartPoint();
         logger.info("###### quhuo is ok ");
 
-        //判断中间站点，如果有中间站点，添加中间站点的地图点，如果中间点跨楼层，则要在两个任务中间插入电梯任务
+        //判断中间站点，如果有中间站点，添加中间站点的地图点
         if (order.getDetailList() != null){
             for (OrderDetail od :
                     order.getDetailList()) {
@@ -393,12 +389,20 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         for (MapPoint mp :
                                 station.getMapPoints()) {
                             if(mp != null){
-                                //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
-                                addElevatorPoint(mp, mapPoints, mpAttrs);
                                 //判断当前点的属性，根据属性加入相应的任务
                                 switch (MapPointType.getType(mp.getMapPointTypeId())){
                                     case ELEVATOR:
                                     case ELEVATOR_WAIT:
+                                        //加入该点，并标记这个点状态是orderDetail点
+                                        mapPoints.add(mp);
+                                        //标记该点的属性
+                                        atts = new MPointAtts();
+                                        atts.type = MPointType_ELEVATOR;
+                                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
+                                        mpAttrs.put(mp, atts);
+                                        elevatorPoint = mp;
+                                        logger.info("###### order elevator station is ok ");
+                                        break;
                                     default:
                                         //加入该点，并标记这个点状态是orderDetail点
                                         mapPoints.add(mp);
@@ -407,6 +411,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         atts.type = MPointType_SONGHUO;
                                         atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                                         mpAttrs.put(mp, atts);
+                                        //如果电梯点对象不为null，则要根据当前点设置电梯点的属性
+                                        setElevatorPointAttr(mpAttrs, mp);
                                         logger.info("###### order detail station is ok ");
                                         break;
                                 }
@@ -423,15 +429,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     ", scenename: " + order.getOrderSetting().getEndPoint().getSceneName() +
                     ", pointname: " + order.getOrderSetting().getEndPoint().getPointName());
         }
-
-        //判断添加电梯点
-        addElevatorPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
         //中间点添加完毕，添加卸货点
         mapPoints.add(order.getOrderSetting().getEndPoint());
         //设置属性
         atts = new MPointAtts();
         atts.type = MPointType_XIAHUO;
         mpAttrs.put(order.getOrderSetting().getEndPoint(), atts);
+        //如果电梯点对象不为null，则要根据当前点设置电梯点的属性
+        setElevatorPointAttr(mpAttrs, order.getOrderSetting().getEndPoint());
         logger.info("###### xiahuo is ok ");
 
         //最后添加充电点，目前充电点从机器人的数据库里面查询出来
@@ -443,14 +448,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             for (MapPoint mp :
                     chongMPs) {
                 if (mp != null) {
-                    //如果充电点和上一个点不在同一个楼层，则要添加相应的电梯任务。
-                    addElevatorPoint(mp, mapPoints, mpAttrs);
-                    //添加充电点任务
                     mapPoints.add(mp);
                     //设置属性
                     atts = new MPointAtts();
                     atts.type = MPointType_CHONGDIAN;
                     mpAttrs.put(mp, atts);
+                    //如果电梯点对象不为null，则要根据当前点设置电梯点的属性
+                    setElevatorPointAttr(mpAttrs, mp);
                     logger.info("###### chongdian is ok ");
                     break;
                 }
@@ -459,68 +463,38 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     }
 
     /**
-     * 判断新增电梯任务
-     * @param mp
-     * @param mapPoints
+     * 设置电梯点到达楼层的信息
      * @param mpAttrs
-     */
-    private void addElevatorPoint(MapPoint mp,
-                                  List<MapPoint> mapPoints,
-                                  HashMap<MapPoint, MPointAtts> mpAttrs) {
-        if (prePoint == null || mp == null){
-            return;
-        }
-        MPointAtts prefloor = getMapPointFloor(prePoint);
-        MPointAtts mpfloor = getMapPointFloor(mp);
-        if (prefloor == null ||
-                prefloor.currentMapId == null ||
-                prefloor.currentFloor == null ||
-                mpfloor == null ||
-                mpfloor.currentFloor == null ||
-                mpfloor.currentMapId == null){
-            return;
-        }
-        if (!prefloor.currentFloor.equals(mpfloor.currentFloor)){
-            //楼层不一样，需要新增电梯任务
-            MapPoint temp = new MapPoint();
-            //
-            mapPoints.add(temp);
-            //标记该点的属性
-            MPointAtts atts = new MPointAtts();
-            atts.type = MPointType_ELEVATOR;
-            atts.currentFloor = prefloor.currentFloor;
-            atts.currentMapId = prefloor.currentMapId;
-            atts.nextFloor = mpfloor.currentFloor;
-            atts.nextMapId = mpfloor.currentMapId;
-            mpAttrs.put(temp, atts);
-            logger.info("###### addElevatorPoint is ok ");
-        }
-        prePoint = mp;
-    }
-
-    /**
-     * 获取地图点所在的楼层
      * @param mp
-     * @return
      */
-    private MPointAtts getMapPointFloor(MapPoint mp) {
-        MPointAtts ret = new MPointAtts();
-        List<MapInfo> mapInfos = mapInfoService.getMapInfo(
-                mp.getMapName(),
-                mp.getSceneName(),
-                SearchConstants.FAKE_MERCHANT_STORE_ID
-        );
-        if (mapInfos != null){
-            for (MapInfo m :
-                    mapInfos) {
-                if (m != null) {
-                    ret.currentFloor = m.getFloor();
-                    ret.currentMapId = m.getId();
-                    break;
+    private void setElevatorPointAttr(HashMap<MapPoint, MPointAtts> mpAttrs, MapPoint mp) {
+        if (elevatorPoint != null && mp != null){
+            //获取mp所属地图的楼层数据
+            Integer floor = null;
+            List<MapInfo> mapInfos = mapInfoService.getMapInfo(
+                    mp.getMapName(),
+                    mp.getSceneName(),
+                    SearchConstants.FAKE_MERCHANT_STORE_ID
+            );
+            if (mapInfos != null){
+                for (MapInfo m :
+                        mapInfos) {
+                    if (m != null) {
+                        floor = m.getFloor();
+                        break;
+                    }
                 }
             }
+
+            //设置楼层
+            if (mpAttrs != null &&
+                    mpAttrs.get(elevatorPoint) != null &&
+                    floor != null){
+                mpAttrs.get(elevatorPoint).nextFloor = floor;
+            }
+            //取消对象
+            elevatorPoint = null;
         }
-        return ret;
     }
 
     /**
@@ -647,9 +621,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-    @Autowired
-    ElevatorService elevatorService;
-
     /**
      * 实例化电梯任务
      * @param missionListTask
@@ -667,102 +638,30 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "电梯任务-";
 
-        Long elevatorid = null;
+        //单点路径导航任务，当前路径导航到电梯点
+        MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
+        missionListTask.getMissionTasks().add(sigleNavTask);
+
         //电梯任务，发送进入电梯到第几层
         JsonMissionItemDataElevator jsonMissionItemDataElevator =
                 new JsonMissionItemDataElevator();
         if (mPointAtts != null){
-            List<Elevator> preElevator = elevatorService.findByMapFloor(
-                    mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
-            List<Elevator> nextElevator = elevatorService.findByMapFloor(
-                    mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
-            jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
-            if (preElevator != null){
-                for (Elevator ev :
-                        preElevator) {
-                    if (ev != null &&
-                            ev.getElevatorPointCombinations() != null &&
-                            ev.getElevatorPointCombinations().size() > 0) {
-                        for (ElevatorPointCombination epc :
-                                ev.getElevatorPointCombinations()) {
-                            if (epc != null) {
-                                //等待点导航任务
-                                //单点路径导航任务，当前路径导航到电梯等待点
-                                MissionTask sigleNavTask = getSigleNavTask(
-                                        order, epc.getwPoint(), parentName);
-                                missionListTask.getMissionTasks().add(sigleNavTask);
-                                //加入check电梯状态任务
-                                JsonMissionItemDataElevatorLock lock =
-                                        new JsonMissionItemDataElevatorLock();
-                                lock.setElevator_id(ev.getId());
-                                MissionTask elevatorLockTask = getElevatorLockTask(
-                                        order, epc.getwPoint(), parentName,
-                                        lock
-                                );
-                                missionListTask.getMissionTasks().add(elevatorLockTask);
-                                elevatorid = ev.getId();
-
-                                jsonMissionItemDataElevator
-                                        .setEnter_point(
-                                                changeToPoint(epc.getiPoint())
-                                        );
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-            if (nextElevator != null){
-                for (Elevator ev :
-                        nextElevator) {
-                    if (ev != null &&
-                            ev.getElevatorPointCombinations() != null &&
-                            ev.getElevatorPointCombinations().size() > 0) {
-                        for (ElevatorPointCombination epc :
-                                ev.getElevatorPointCombinations()) {
-                            if (epc != null) {
-                                jsonMissionItemDataElevator
-                                        .setSet_pose_point(
-                                                changeToPoint(epc.getiPoint())
-                                        );
-                                jsonMissionItemDataElevator
-                                        .setBack_point(
-                                                changeToPoint(epc.getoPoint())
-                                        );
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
+            //暂时写死
+            jsonMissionItemDataElevator.setCurrent_floor(4);
+            MapPoint entryPoint = pointService.findById(1000L);
+            MapPoint setPosePoint = pointService.findById(1001L);
+            MapPoint backPoint = pointService.findById(1002L);
+            //存入
+            jsonMissionItemDataElevator.setEnter_point(changeToPoint(entryPoint));
+            jsonMissionItemDataElevator.setSet_pose_point(changeToPoint(setPosePoint));
+            jsonMissionItemDataElevator.setBack_point(changeToPoint(backPoint));
         }else{
             logger.error("没有获取到电梯到达的楼层，请注意查看地图是否配置了楼层数据，或者电梯点后续是否没有设置到达点！");
         }
 
-
-
-        //电梯任务
-        MissionTask elevatorTask = getElevatorTask(
-                order,
-                mp,
-                parentName,
-                jsonMissionItemDataElevator);
+        MissionTask elevatorTask = getElevatorTask(order, mp, parentName, jsonMissionItemDataElevator);
         missionListTask.getMissionTasks().add(elevatorTask);
-
-        //加入check电梯状态解锁任务
-        JsonMissionItemDataElevatorUnlock unlock =
-                new JsonMissionItemDataElevatorUnlock();
-        unlock.setElevator_id(elevatorid);
-        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
-                order, mp, parentName,
-                unlock
-        );
-        missionListTask.getMissionTasks().add(elevatorUnlockTask);
 
     }
 
@@ -1080,9 +979,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         data.setX(mp.getX());
         data.setY(mp.getY());
         data.setTh(mp.getTh());
-        data.setMap_name(mp.getMapName());
         data.setMap(mp.getMapName());
-        data.setScene_name(mp.getSceneName());
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataLaserNavigation>(){}.getType()));
         itemTask.setState(MissionStateInit);
@@ -1524,116 +1421,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         return itemTask;
     }
 
-    /**
-     * 电梯解锁
-     * @param mp
-     * @return
-     */
-    private MissionTask getElevatorUnlockTask(
-            Order order,
-            MapPoint mp,
-            String parentName,
-            JsonMissionItemDataElevatorUnlock json) {
-        MissionTask missionTask = new MissionTask();
-        if (order.getScene() != null) {
-            missionTask.setSceneId(order.getScene().getId());
-        }
-        missionTask.setDescription(parentName + "电梯解锁任务");
-        missionTask.setName(missionTask.getDescription());
-        missionTask.setRepeatTimes(1);
-        missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateInit);
-        missionTask.setPresetMissionCode("");
-
-        List<MissionItemTask> missionItemTasks =
-                new ArrayList<>();
-        missionItemTasks.add(getElevatorUnlockItemTask(order, mp, parentName, json));
-
-        missionTask.setMissionItemTasks(missionItemTasks);
-
-        return missionTask;
-    }
-
-    /**
-     * 获取电梯解锁ITEM任务
-     * @param mp
-     * @return
-     */
-    private MissionItemTask getElevatorUnlockItemTask(
-            Order order,
-            MapPoint mp,
-            String parentName,
-            JsonMissionItemDataElevatorUnlock json) {
-        MissionItemTask itemTask = new MissionItemTask();
-        if (order.getScene() != null) {
-            itemTask.setSceneId(order.getScene().getId());
-        }
-        itemTask.setDescription(parentName + "电梯解锁Item");
-        itemTask.setName(MissionItemName_elevator_unlock);
-        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData(JsonUtils.toJson(json,
-                new TypeToken<JsonMissionItemDataElevatorUnlock>(){}.getType()));
-        itemTask.setState(MissionStateInit);
-        itemTask.setFeatureValue(FeatureValue_elevator_unlock);
-
-        return itemTask;
-    }
-
-    /**
-     * 电梯加锁
-     * @param mp
-     * @return
-     */
-    private MissionTask getElevatorLockTask(
-            Order order,
-            MapPoint mp,
-            String parentName,
-            JsonMissionItemDataElevatorLock json) {
-        MissionTask missionTask = new MissionTask();
-        if (order.getScene() != null) {
-            missionTask.setSceneId(order.getScene().getId());
-        }
-        missionTask.setDescription(parentName + "电梯加锁任务");
-        missionTask.setName(missionTask.getDescription());
-        missionTask.setRepeatTimes(1);
-        missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateInit);
-        missionTask.setPresetMissionCode("");
-
-        List<MissionItemTask> missionItemTasks =
-                new ArrayList<>();
-        missionItemTasks.add(getElevatorLockItemTask(order, mp, parentName, json));
-
-        missionTask.setMissionItemTasks(missionItemTasks);
-
-        return missionTask;
-    }
-
-    /**
-     * 获取电梯加锁ITEM任务
-     * @param mp
-     * @return
-     */
-    private MissionItemTask getElevatorLockItemTask(
-            Order order,
-            MapPoint mp,
-            String parentName,
-            JsonMissionItemDataElevatorLock json) {
-        MissionItemTask itemTask = new MissionItemTask();
-        if (order.getScene() != null) {
-            itemTask.setSceneId(order.getScene().getId());
-        }
-        itemTask.setDescription(parentName + "电梯加锁Item");
-        itemTask.setName(MissionItemName_elevator_lock);
-        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData(JsonUtils.toJson(json,
-                new TypeToken<JsonMissionItemDataElevatorLock>(){}.getType()));
-        itemTask.setState(MissionStateInit);
-        itemTask.setFeatureValue(FeatureValue_elevator_lock);
-
-        return itemTask;
-    }
-
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////
     ////  missionItem,mission,missionList转成对应DTO和Task对象的方法
@@ -1679,8 +1466,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             data1.setY(mapPoint.getY());
             data1.setTh(mapPoint.getTh());
             data1.setMap(mapPoint.getMapName());
-            data1.setMap_name(mapPoint.getMapName());
-            data1.setScene_name(mapPoint.getSceneName());
             data = JSON.toJSONString(data1);
         }
 
@@ -1838,8 +1623,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String FeatureValue_unload = "unload";//卸货
     public static final String FeatureValue_finalUnload = "finalUnload";//终点卸货
     public static final String FeatureValue_elevator = "elevator";//电梯
-    public static final String FeatureValue_elevator_lock = "elevatorLock";
-    public static final String FeatureValue_elevator_unlock = "elevatorUnlock";
 
     public static final String MissionItemName_test = "fake";
 
@@ -1852,8 +1635,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionItemName_unload = "unload";
     public static final String MissionItemName_finalUnload = "finalUnload";
     public static final String MissionItemName_elevator = "elevator";
-    public static final String MissionItemName_elevator_lock = "elevatorLock";
-    public static final String MissionItemName_elevator_unlock = "elevatorUnlock";
 
     public static final String MissionListType_normal = "normal";
 
@@ -1882,8 +1663,5 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public String type;
         public String orderDetailMP;
         public Integer nextFloor;
-        public Integer currentFloor;
-        public Long currentMapId;
-        public Long nextMapId;
     }
 }
