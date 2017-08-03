@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
@@ -23,41 +24,41 @@ public class X86MissionCommonRequestServiceImpl
     BaseMessageService baseMessageService;
 
     @Override
-    public void sendX86MissionStateCommonRequest(String robotCode) {
-        send(robotCode, "currentState");
+    public AjaxResult sendX86MissionStateCommonRequest(String robotCode) {
+        return send(robotCode, "currentState");
     }
 
     @Override
-    public void sendX86MissionQueueCommonRequest(String robotCode) {
-        send(robotCode, "missionQueue");
+    public AjaxResult sendX86MissionQueueCommonRequest(String robotCode) {
+        return send(robotCode, "missionQueue");
     }
 
     @Override
-    public void sendX86MissionStateCommonRequest() {
-        send("currentState");
+    public AjaxResult sendX86MissionStateCommonRequest() {
+        return send("currentState");
     }
 
     @Override
-    public void sendX86MissionQueueCommonRequest() {
-        send("missionQueue");
+    public AjaxResult sendX86MissionQueueCommonRequest() {
+        return send("missionQueue");
     }
 
-    void send(String robotCode, String content){
+    AjaxResult send(String robotCode, String content){
         MissionCommonRequestBody body =
                 new MissionCommonRequestBody();
         body.setContent(content);
-        baseMessageService.sendRobotMessage(
+        return baseMessageService.sendRobotMessage(
                 robotCode,
                 TopicConstants.X86_MISSION_COMMON_REQUEST,
                 JsonUtils.toJson(body,
                         new TypeToken<MissionCommonRequestBody>(){}.getType()));
     }
 
-    void send(String content){
+    AjaxResult send(String content){
         MissionCommonRequestBody body =
                 new MissionCommonRequestBody();
         body.setContent(content);
-        baseMessageService.sendAllRobotMessage(
+        return baseMessageService.sendAllRobotMessage(
                 TopicConstants.X86_MISSION_COMMON_REQUEST,
                 JsonUtils.toJson(body,
                         new TypeToken<MissionCommonRequestBody>(){}.getType()));

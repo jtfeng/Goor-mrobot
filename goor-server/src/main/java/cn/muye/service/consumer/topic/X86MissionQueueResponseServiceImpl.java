@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.muye.base.bean.MessageInfo;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ public class X86MissionQueueResponseServiceImpl
             .getLogger(X86MissionQueueResponseServiceImpl.class);
 
     @Override
-    public void handleX86MissionQueueResponse(MessageInfo messageInfo) {
-
+    public AjaxResult handleX86MissionQueueResponse(MessageInfo messageInfo) {
+        return null;
     }
 }

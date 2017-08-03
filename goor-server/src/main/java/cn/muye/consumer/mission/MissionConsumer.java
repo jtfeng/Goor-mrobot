@@ -4,6 +4,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.service.consumer.topic.X86ElevatorLockService;
 import cn.muye.service.consumer.topic.X86MissionEventService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -66,6 +67,24 @@ public class MissionConsumer {
             x86MissionEventService.handleX86MissionEvent(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directX86MissionEvent exception", e);
+        }
+    }
+
+    @Autowired
+    X86ElevatorLockService x86ElevatorLockService;
+
+    /**
+     * 透传ros发布的topic：x86_elevator_lock
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_X86_ELEVATOR_LOCK)
+    public void directX86ElevatorLock(@Payload MessageInfo messageInfo) {
+        try {
+            //直接service方法处理上报的数据
+            x86ElevatorLockService.handleX86ElevatorLock(messageInfo);
+        } catch (Exception e) {
+            logger.error("consumer directX86ElevatorLock exception", e);
         }
     }
 

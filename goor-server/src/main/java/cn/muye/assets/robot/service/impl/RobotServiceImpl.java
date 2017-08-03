@@ -323,11 +323,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 Integer robotTypeId = robotNew.getTypeId();
                 String robotName = robotNew.getName();
                 Long robotStoreId = robotNew.getStoreId();
-                Long userId = robotNew.getCreatedBy();
-                Date createTime = robotNew.getCreateTime();
                 Integer lowBatteryThreshold = robotNew.getLowBatteryThreshold();
                 Integer sufficientBatteryThreshold = robotNew.getSufficientBatteryThreshold();
-                Boolean isBusy = robotNew.getBusy();
                 //todo 按照robotCode的规范来赋值typeId
                 if (!StringUtil.isNullOrEmpty(robotCode) && robotTypeId == null) {
 
@@ -335,23 +332,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (!StringUtil.isNullOrEmpty(robotCode) && StringUtil.isNullOrEmpty(robotName)) {
                     robotNew.setName(robotCode);
                 }
-                if (robotStoreId == null) {
-                    robotNew.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                }
-                if (userId == null) {
-                    robotNew.setCreatedBy(SearchConstants.USER_ID);
-                }
-                if (createTime == null) {
-                    robotNew.setCreateTime(new Date());
-                }
                 if (lowBatteryThreshold == null) {
                     robotNew.setLowBatteryThreshold(Constant.ROBOT_LOW_BATTERY_THRESHOLD_DEFAULT);
                 }
                 if (sufficientBatteryThreshold == null) {
                     robotNew.setSufficientBatteryThreshold(Constant.ROBOT_SUFFICIENT_BATTERY_THRESHOLD_DEFAULT);
-                }
-                if (isBusy == null) {
-                    robotNew.setBusy(false);
                 }
                 Robot robotDb = getByCode(robotCode, robotStoreId);
                 if (robotId != null) {
