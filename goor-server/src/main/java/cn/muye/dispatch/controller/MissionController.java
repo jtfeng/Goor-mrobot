@@ -646,8 +646,10 @@ public class MissionController {
 			}
 
 			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
-			if(robotCodesArray == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到机器人");
+			//TODO 暂时限定只能发送到1台机器人
+			if(robotCodesArray == null
+					|| robotCodesArray.length != 1) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到机器人或选择的机器人多于1台");
 			}
 
 			//TODO 机器人低电量不接收任务下单
@@ -793,10 +795,13 @@ public class MissionController {
 				missionLists.add(leaveCharge);
 			}
 
-			Boolean result = missionFuncsService.createMissionListTasksByMissionLists(robotCodesArray,missionLists);
-
-			if(result == null || !result) {
-				return AjaxResult.failed(AjaxResult.CODE_FAILED,"消息发送失败");
+			//遍历发送机器人消息
+			for(String robotCode : robotCodesArray) {
+				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists);
+				if(ajaxResult.getCode() != AjaxResult.CODE_SUCCESS) {
+					//TODO 现在限定是一台机器人，将来多台，返回结果还需要Map形式
+					return ajaxResult;
+				}
 			}
 
 			resp = AjaxResult.success("消息发送成功");
