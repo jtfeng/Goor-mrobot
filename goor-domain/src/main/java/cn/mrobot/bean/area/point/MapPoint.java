@@ -172,11 +172,11 @@ public class MapPoint extends BaseBean {
     }
 
     public String getLabel() {
-        return pointName;
+        return pointAlias;
     }
 
     public void setLabel(String label) {
-        this.label = pointName;
+        this.label = pointAlias;
     }
 
     @Override
