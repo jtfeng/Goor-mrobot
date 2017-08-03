@@ -226,4 +226,9 @@ public class RabbitMQConfig {
     public Queue directStateCollector() {
         return new Queue(TopicConstants.DIRECT_STATE_COLLECTOR,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
+
+    @Bean
+    public Queue directX86ElevatorLock() {
+        return new Queue(TopicConstants.DIRECT_X86_ELEVATOR_LOCK,false,false,true, RabbitmqUtil.getRabbitMQArguments());
+    }
 }
