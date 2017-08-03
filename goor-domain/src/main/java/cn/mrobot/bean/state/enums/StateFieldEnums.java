@@ -1,5 +1,12 @@
 package cn.mrobot.bean.state.enums;
 
+import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 状态收集属性的中英文名称对照表
  * Created by Jelynn on 2017/7/24.
@@ -97,5 +104,20 @@ public enum StateFieldEnums {
             }
         }
         return "";
+    }
+
+    public static List list() {
+        List<Map> resultList = new ArrayList<Map>();
+        for (StateFieldEnums c : StateFieldEnums.values()) {
+            resultList.add(toDTO(c)) ;
+        }
+        return resultList;
+    }
+
+    private static Map toDTO(StateFieldEnums c) {
+        Map result = new HashMap<String,Object>();
+        result.put("name",c.getName());
+        result.put("cHFieldName",c.getCHFieldName());
+        return result;
     }
 }

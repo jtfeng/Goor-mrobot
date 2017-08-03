@@ -118,10 +118,11 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Long roleId = user.getRoleId();
         List<StationDTO4User> stationList = user.getStationList();
         Role roleDb = roleService.getById(roleId);
-        user.setRoleName(roleDb.getCnName());
-        //todo 暂时先删除用户站关联
-        userStationXrefService.deleteByUserId(userId);
-        saveUserStationXref(stationList, userId);
+        if(roleDb != null) {
+            user.setRoleName(roleDb.getCnName());
+            //todo 暂时先删除用户站关联
+            userStationXrefService.deleteByUserId(userId);
+            saveUserStationXref(stationList, userId);
         /*if (userRoleXrefDb != null) {
             ////如果原来角色是3，变更角色是2就需要把user_station_xref的记录删掉
             if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
@@ -146,6 +147,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                 saveUserStationXref(stationList, userId);
             }
         }*/
+        }
+
     }
 
     /**

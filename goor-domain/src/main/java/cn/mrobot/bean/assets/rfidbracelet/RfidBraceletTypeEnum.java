@@ -1,5 +1,6 @@
 package cn.mrobot.bean.assets.rfidbracelet;
 
+import cn.mrobot.bean.state.enums.ModuleEnums;
 import com.alibaba.fastjson.JSON;
 
 import java.util.ArrayList;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Ray.Fu on 2017/6/30.
+ * Created by Wlkfec on 2017/6/30.
  */
 
 /**
@@ -29,5 +30,20 @@ public enum RfidBraceletTypeEnum {
     }
     public void setValue(Integer value) {
         this.value = value;
+    }
+
+    public static List list() {
+        List<Map> resultList = new ArrayList<Map>();
+        for (RfidBraceletTypeEnum c : RfidBraceletTypeEnum.values()) {
+            resultList.add(toDTO(c)) ;
+        }
+        return resultList;
+    }
+
+    private static Map toDTO(RfidBraceletTypeEnum c) {
+        Map result = new HashMap<String,Object>();
+        result.put("name",c);
+        result.put("value",c.getValue());
+        return result;
     }
 }
