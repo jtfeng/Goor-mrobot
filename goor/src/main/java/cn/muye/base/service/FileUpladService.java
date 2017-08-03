@@ -101,7 +101,7 @@ public class FileUpladService {
                 params.put("fileName", uploadFile.getName());
                 params.put("type", Constant.FILE_UPLOAD_TYPE_MAP);
                 //查询文件是否存在
-                String jsonResult = HttpClientUtil.executePost(null, REMOTE_URL + EXIST_URL, params, null, null, null, true);
+                String jsonResult = HttpClientUtil.executePost(null, REMOTE_URL + EXIST_URL, params, null, null, null,null,null, true);
                 JSONObject object = JSON.parseObject(jsonResult);
                 Integer code = object.getInteger("code");
                 if (null != code && (code == Constant.ERROR_CODE_NOT_AUTHORIZED || code == Constant.ERROR_CODE_NOT_LOGGED || code == AjaxResult.CODE_SYSTEM_ERROR)) {
