@@ -134,25 +134,27 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             AjaxResult result = messageSendHandleService.sendCommandMessage(true, true, robotDb.getCode(), messageInfo);
             if (!result.isSuccess()) {
                 return AjaxResult.failed();
-            }
-            long startTime = System.currentTimeMillis();
-            LOGGER.info("start time" + startTime);
-            for (int i = 0; i < 10; i++) {
-                Thread.sleep(1000);
-                //获取ROS的回执消息
-                MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(messageInfo.getUuId());
-                if (messageInfo1 != null && messageInfo1.isSuccess()) {
-                    messageInfo.setSuccess(true);
-                    break;
-                }
-            }
-            long endTime = System.currentTimeMillis();
-            LOGGER.info("end time" + (endTime - startTime));
-            if (messageInfo.isSuccess()) {
-                return AjaxResult.success();
             } else {
-                throw new RuntimeException();
+                return AjaxResult.success();
             }
+//            long startTime = System.currentTimeMillis();
+//            LOGGER.info("start time" + startTime);
+//            for (int i = 0; i < 10; i++) {
+//                Thread.sleep(1000);
+//                //获取ROS的回执消息
+//                MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(messageInfo.getUuId());
+//                if (messageInfo1 != null && messageInfo1.isSuccess()) {
+//                    messageInfo.setSuccess(true);
+//                    break;
+//                }
+//            }
+//            long endTime = System.currentTimeMillis();
+//            LOGGER.info("end time" + (endTime - startTime));
+//            if (messageInfo.isSuccess()) {
+//                return AjaxResult.success();
+//            } else {
+//                throw new RuntimeException();
+//            }
         } catch (Exception e) {
             LOGGER.error("发送错误", e);
             return AjaxResult.failed("系统内部错误");
@@ -393,30 +395,66 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @param robotNew
      */
     private void syncRosRobotConfig(Robot robotNew) {
-        try {
-            CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-            //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
-            String uuid = UUID.randomUUID().toString().replace("-", "");
-            robotNew.setUuid(uuid);
-            SlamBody slamBody = new SlamBody();
-            slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
-            slamBody.setUuid(uuid);
-            slamBody.setData(robotNew);
-            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-            messageInfo.setReceiverId(robotNew.getCode());
-            messageInfo.setSenderId("goor-server");
-            messageInfo.setMessageType(MessageType.ROBOT_INFO);
-            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-            messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
-        } catch (Exception e) {
-            LOGGER.error("发送错误{}", e);
-        } finally {
+        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+            try {
+                CommonInfo commonInfo = new CommonInfo();
+                commonInfo.setTopicName(topic);
+                commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+                //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
+                String uuid = UUID.randomUUID().toString().replace("-", "");
+                robotNew.setUuid(uuid);
+                if (topic.equals(TopicConstants.TOPIC_TYPE_STRING)) {
+                    SlamBody slamBody = new SlamBody();
+                    slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                    slamBody.setUuid(uuid);
+                    slamBody.setData(robotNew);
+                    commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+                } else if (topic.equals(TopicConstants.X86_MISSION_COMMON_REQUEST)) {
+
+                }
+
+                MessageInfo messageInfo = new MessageInfo();
+                messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+                messageInfo.setReceiverId(robotNew.getCode());
+                messageInfo.setSenderId("goor-server");
+                messageInfo.setMessageType(MessageType.ROBOT_INFO);
+                messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+                messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
+            } catch (Exception e) {
+                LOGGER.error("发送错误{}", e);
+            } finally {
+            }
         }
-    }
+
+//        CommonInfo commonInfo = new CommonInfo();
+//        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+//        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+//        //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
+//        String uuid = UUID.randomUUID().toString().replace("-", "");
+//        robotNew.setUuid(uuid);
+//        SlamBody slamBody = new SlamBody();
+//        slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+//        slamBody.setUuid(uuid);
+//        slamBody.setData(robotNew);
+//        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+//        MessageInfo messageInfo = new MessageInfo();
+//        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+//        messageInfo.setReceiverId(robotNew.getCode());
+//        messageInfo.setSenderId("goor-server");
+//        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+//        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+//        messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
+//    } catch(
+//    Exception e)
+//
+//    {
+//        LOGGER.error("发送错误{}", e);
+//    } finally
+//
+//    {
+//    }
+
+}
 
     public void deleteRobotById(Long id) {
         myMapper.deleteByPrimaryKey(id);
