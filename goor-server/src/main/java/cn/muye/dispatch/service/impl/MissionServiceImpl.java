@@ -3,6 +3,7 @@ package cn.muye.dispatch.service.impl;
 import cn.mrobot.bean.mission.Mission;
 import cn.mrobot.bean.mission.MissionMissionItemXREF;
 import cn.mrobot.bean.mission.MissionItem;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.MissionMapper;
@@ -68,7 +69,12 @@ public class MissionServiceImpl implements MissionService {
 		List<Long> bindList = new ArrayList<Long>();
 		if(missionItemSet != null && missionItemSet.size() > 0) {
 			for(MissionItem missionItem : missionItemSet) {
-				missionItem.setName(missionItem.getName() + now.getTime());
+				//如果missionItem名称为空，则取父级的名称加时间戳
+				String name = missionItem.getName();
+				if(name == null || name.equals("")) {
+					name = mission.getName();
+				}
+				missionItem.setName(name + "_" + DateTimeUtils.getCurrentDateTimeString());
 				if (missionItem.getId() != null) {
 					MissionItem missionItemDB = missionItemService.get(missionItem.getId(),missionItem.getStoreId());
 					//有id且数据库不存在的子任务不做处理
