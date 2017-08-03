@@ -12,4 +12,6 @@ public interface ElevatorMapper extends MyMapper<Elevator> {
     void deleteRelationsByElevatorId(Long id);
 
     void insertRelationsByElevatorId(Long id, List<Long> combinationIds);
+
+    void updateElevatorLockState(Long elevatorId, Integer state);
 }
