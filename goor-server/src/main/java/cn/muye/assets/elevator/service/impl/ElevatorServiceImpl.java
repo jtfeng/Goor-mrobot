@@ -44,44 +44,48 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor)  throws Exception{
+    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor){
+        try {
+            Long storeId = 100L;
 
-        Long storeId = 100L;
+            List<Elevator> elevators = this.listAll();
 
-        List<Elevator> elevators = this.listAll();
+            bindElevatorShaft(elevators);
+            bindElevatorPointCombination(elevators);
 
-        bindElevatorShaft(elevators);
-        bindElevatorPointCombination(elevators);
+            elevators = elevators.stream().filter(new Predicate<Elevator>() {
+                @Override
+                public boolean test(Elevator elevator) {
+                    return storeId.equals(elevator.getStoreId());
+                }
+            }).collect(Collectors.toList());
 
-        elevators = elevators.stream().filter(new Predicate<Elevator>() {
-            @Override
-            public boolean test(Elevator elevator) {
-                return storeId.equals(elevator.getStoreId());
-            }
-        }).collect(Collectors.toList());
+            elevators.forEach(new Consumer<Elevator>() {
+                @Override
+                public void accept(Elevator elevator) {
+                    List<ElevatorPointCombination> combinations = elevator.getElevatorPointCombinations();
+                    elevator.setElevatorPointCombinations(
+                            combinations.stream().filter(new Predicate<ElevatorPointCombination>() {
+                                @Override
+                                public boolean test(ElevatorPointCombination combination) {
+                                    return mapInfoId.equals(combination.getgPoint().getMapInfo().getId())
+                                            && floor.equals(combination.getgPoint().getMapInfo().getFloor());
+                                }
+                            }).collect(Collectors.toList())
+                    );
+                }
+            });
 
-        elevators.forEach(new Consumer<Elevator>() {
-            @Override
-            public void accept(Elevator elevator) {
-                List<ElevatorPointCombination> combinations = elevator.getElevatorPointCombinations();
-                elevator.setElevatorPointCombinations(
-                        combinations.stream().filter(new Predicate<ElevatorPointCombination>() {
-                            @Override
-                            public boolean test(ElevatorPointCombination combination) {
-                                return mapInfoId.equals(combination.getgPoint().getMapInfo().getId())
-                                        && floor.equals(combination.getgPoint().getMapInfo().getFloor());
-                            }
-                        }).collect(Collectors.toList())
-                );
-            }
-        });
-
-        return elevators.stream().filter(new Predicate<Elevator>() {
-            @Override
-            public boolean test(Elevator elevator) {
-                return elevator.getElevatorPointCombinations().size() != 0;
-            }
-        }).collect(Collectors.toList());
+            return elevators.stream().filter(new Predicate<Elevator>() {
+                @Override
+                public boolean test(Elevator elevator) {
+                    return elevator.getElevatorPointCombinations().size() != 0;
+                }
+            }).collect(Collectors.toList());
+        }catch (Exception e){
+            e.printStackTrace();
+            return Lists.newArrayList();
+        }
     }
 
     @Override
@@ -92,7 +96,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public synchronized boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action)  throws Exception{
+    public synchronized boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action){
         Elevator elevator = super.findById(elevatorId);
         if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)){
             //上锁
