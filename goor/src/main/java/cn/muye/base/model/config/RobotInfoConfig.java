@@ -4,7 +4,7 @@ package cn.muye.base.model.config;
 import java.io.Serializable;
 
 /**
- * Created by enva on 2017/5/9.
+ * Created by ray.fu on 2017/5/9.
  */
 public class RobotInfoConfig implements Serializable {
 
@@ -14,7 +14,9 @@ public class RobotInfoConfig implements Serializable {
 
     private Integer robotTypeId;
 
-    private Integer robotBatteryThreshold;
+    private Integer lowBatteryThreshold; //机器人低电量阈值
+
+    private Integer sufficientBatteryThreshold; //机器人足电量阈值
 
     private Long robotStoreId;
 
@@ -46,12 +48,20 @@ public class RobotInfoConfig implements Serializable {
         this.robotTypeId = robotTypeId;
     }
 
-    public Integer getRobotBatteryThreshold() {
-        return robotBatteryThreshold;
+    public Integer getLowBatteryThreshold() {
+        return lowBatteryThreshold;
     }
 
-    public void setRobotBatteryThreshold(Integer robotBatteryThreshold) {
-        this.robotBatteryThreshold = robotBatteryThreshold;
+    public void setLowBatteryThreshold(Integer lowBatteryThreshold) {
+        this.lowBatteryThreshold = lowBatteryThreshold;
+    }
+
+    public Integer getSufficientBatteryThreshold() {
+        return sufficientBatteryThreshold;
+    }
+
+    public void setSufficientBatteryThreshold(Integer sufficientBatteryThreshold) {
+        this.sufficientBatteryThreshold = sufficientBatteryThreshold;
     }
 
     public Long getRobotStoreId() {

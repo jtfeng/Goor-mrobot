@@ -78,6 +78,10 @@ public class Constant {
 
     public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
 
+    public final static int ROBOT_LOW_BATTERY_THRESHOLD_DEFAULT = 50; //机器人低电量阈值默认值
+
+    public final static int ROBOT_SUFFICIENT_BATTERY_THRESHOLD_DEFAULT = 80; //机器人足电量阈值默认值
+
     public final static long ORDER_GOTO_CHARGE_ID = 4L;//自动回充任务ID
 
     public final static long ORDER_LEAVE_CHARGE_ID = 5L;//离开充电桩任务ID
