@@ -97,4 +97,7 @@ public class Constant {
     public static final String SCENE_SESSION_TAG = "scene_session_information";
 
     public static final String SESSION_STATION_ID = "stationId";
+
+    public static final String[] BATTERY_THRESHOLD_TOPICS = {TopicConstants.AGENT_PUB, TopicConstants.X86_MISSION_COMMON_REQUEST};
+
 }
