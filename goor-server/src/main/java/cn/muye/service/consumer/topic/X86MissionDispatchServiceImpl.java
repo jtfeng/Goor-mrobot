@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.TopicConstants;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,10 @@ public class X86MissionDispatchServiceImpl
     BaseMessageService baseMessageService;
 
     @Override
-    public void sendX86MissionDispatch(
+    public AjaxResult sendX86MissionDispatch(
             String robotCode,
             String missionListData) {
-        baseMessageService.sendRobotMessage(
+        return baseMessageService.sendRobotMessage(
                 robotCode,
                 TopicConstants.X86_MISSION_DISPATCH,
                 missionListData);

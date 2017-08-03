@@ -1,5 +1,6 @@
 package cn.muye.service.missiontask;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
@@ -125,39 +126,35 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     /**
      * 根据MissionList列表和机器人列表生成MissionListTask列表并发送到机器人
-     * @param robotCodesArray
+     * @param robotCode
      * @param missionLists
      * @return 返回结果表示对应机器人的下发消息成功失败状态
      *
      */
-    public Boolean createMissionListTasksByMissionLists(String[] robotCodesArray,
-                                                        List<MissionList> missionLists) throws Exception{
+    public AjaxResult createMissionListTasksByMissionLists(String robotCode,
+                                                           List<MissionList> missionLists) throws Exception{
         if(missionLists == null || missionLists.size() <= 0
-                || robotCodesArray == null || robotCodesArray.length <= 0) {
-            return false;
+                || robotCode == null ) {
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
         }
 
-        for(String robotCode : robotCodesArray) {
-            List<MissionListTask> listTasks = new ArrayList<>();
-            //先转换对象
-            for(MissionList missionList : missionLists) {
-                if(missionList == null) {
-                    continue;
-                }
-                //missionList转化成missionListTask
-                MissionListTask missionListTask = missionListToTask(missionList,robotCode);
-                //任务列表实例化完成，将数据存储到数据库
-                saveMissionListTask(missionListTask);
-                listTasks.add(missionListTask);
+        List<MissionListTask> listTasks = new ArrayList<>();
+        //先转换对象
+        for(MissionList missionList : missionLists) {
+            if(missionList == null) {
+                continue;
             }
-
-            x86MissionDispatchService.sendX86MissionDispatch(
-                    robotCode,
-                    getGoorMissionMsg(listTasks)
-            );
+            //missionList转化成missionListTask
+            MissionListTask missionListTask = missionListToTask(missionList,robotCode);
+            //任务列表实例化完成，将数据存储到数据库
+            saveMissionListTask(missionListTask);
+            listTasks.add(missionListTask);
         }
 
-        return true;
+        return x86MissionDispatchService.sendX86MissionDispatch(
+                robotCode,
+                getGoorMissionMsg(listTasks)
+        );
     }
 
     @Override

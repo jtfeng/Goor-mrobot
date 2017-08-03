@@ -1,12 +1,12 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.service.MessageSendHandleService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -176,9 +176,9 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     }
 
     @Override
-    public void sendRobotMessage(String robotCode, String topic, String data) {
+    public AjaxResult sendRobotMessage(String robotCode, String topic, String data) {
         if (data == null){
-            return;
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"数据为空");
         }
 
         JSONObject messageObject = new JSONObject();
@@ -202,9 +202,10 @@ public class BaseMessageServiceImpl implements BaseMessageService {
 
         //单机器命令发送（带回执）
         try {
-            messageSendHandleService.sendCommandMessage(true, true, robotCode, info);
+            return messageSendHandleService.sendCommandMessage(true, true, robotCode, info);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
         }
     }
 

@@ -159,6 +159,8 @@ public class HttpClientUtil {
      * @param url             请求的远程地址
      * @param paramsObj       提交的参数信息，目前支持Map,和String(JSON\xml)
      * @param reffer          reffer信息，可传null
+     * @param contentType     contentType信息，可传null
+     * @param authorization   authorization信息，可传null
      * @param cookie          cookies信息，可传null
      * @param charset         请求编码，默认UTF8
      * @param closeHttpClient 执行请求结束后是否关闭HttpClient客户端实例
@@ -166,7 +168,7 @@ public class HttpClientUtil {
      * @throws IOException
      * @throws ClientProtocolException
      */
-    public static String executePost(CloseableHttpClient httpClient, String url, Object paramsObj, String reffer, String cookie, String charset, boolean closeHttpClient) throws IOException {
+    public static String executePost(CloseableHttpClient httpClient, String url, Object paramsObj, String reffer, String cookie, String contentType, String authorization, String charset, boolean closeHttpClient) throws IOException {
         CloseableHttpResponse httpResponse = null;
         try {
             if (httpClient == null) {
@@ -178,6 +180,12 @@ public class HttpClientUtil {
             }
             if (reffer != null && !"".equals(reffer)) {
                 post.setHeader("Reffer", reffer);
+            }
+            if (contentType != null && !"".equals(contentType)) {
+                post.setHeader("Content-Type", contentType);
+            }
+            if (authorization != null && !"".equals(authorization)) {
+                post.setHeader("Authorization", authorization);
             }
             charset = getCharset(charset);
             // 设置参数
