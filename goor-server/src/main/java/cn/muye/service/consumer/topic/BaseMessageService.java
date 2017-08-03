@@ -13,10 +13,10 @@ public interface BaseMessageService {
     String getPubData(MessageInfo messageInfo);
     String getMessageName(MessageInfo messageInfo);
     String getSenderId(MessageInfo messageInfo);
-    void sendRobotMessage(String robotCode, SlamResponseBody slamResponseBody);
-    void sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody);
-    void sendRobotMessage(String robotCode, String data);
+    AjaxResult sendRobotMessage(String robotCode, SlamResponseBody slamResponseBody);
+    AjaxResult sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody);
+    AjaxResult sendRobotMessage(String robotCode, String data);
     AjaxResult sendRobotMessage(String robotCode, String topic, String data);
-    void sendAllRobotMessage(String data);
-    void sendAllRobotMessage(String topic, String data);
+    AjaxResult sendAllRobotMessage(String data);
+    AjaxResult sendAllRobotMessage(String topic, String data);
 }

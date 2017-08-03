@@ -128,14 +128,14 @@ public class BaseMessageServiceImpl implements BaseMessageService {
      * @param slamResponseBody
      */
     @Override
-    public void sendRobotMessage(String robotCode, SlamResponseBody slamResponseBody){
-        sendRobotMessage(robotCode, TopicConstants.AGENT_SUB, slamResponseBody);
+    public AjaxResult sendRobotMessage(String robotCode, SlamResponseBody slamResponseBody){
+        return sendRobotMessage(robotCode, TopicConstants.AGENT_SUB, slamResponseBody);
     }
 
     @Override
-    public void sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody) {
+    public AjaxResult sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody) {
         if (slamResponseBody == null){
-            return;
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
         }
 
         JSONObject messageObject = new JSONObject();
@@ -159,9 +159,10 @@ public class BaseMessageServiceImpl implements BaseMessageService {
 
         //单机器命令发送（带回执）
         try {
-            messageSendHandleService.sendCommandMessage(true, true, robotCode, info);
+           return messageSendHandleService.sendCommandMessage(true, true, robotCode, info);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
         }
     }
 
@@ -171,8 +172,8 @@ public class BaseMessageServiceImpl implements BaseMessageService {
      * @param data
      */
     @Override
-    public void sendRobotMessage(String robotCode, String data){
-        sendRobotMessage(TopicConstants.AGENT_SUB, data);
+    public AjaxResult sendRobotMessage(String robotCode, String data){
+        return sendRobotMessage(TopicConstants.AGENT_SUB, data);
     }
 
     @Override
@@ -210,14 +211,14 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     }
 
     @Override
-    public void sendAllRobotMessage(String data) {
-        sendAllRobotMessage(TopicConstants.AGENT_SUB, data);
+    public AjaxResult sendAllRobotMessage(String data) {
+        return sendAllRobotMessage(TopicConstants.AGENT_SUB, data);
     }
 
     @Override
-    public void sendAllRobotMessage(String topic, String data) {
+    public AjaxResult sendAllRobotMessage(String topic, String data) {
         if (data == null){
-            return;
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
         }
 
         JSONObject messageObject = new JSONObject();
@@ -237,9 +238,10 @@ public class BaseMessageServiceImpl implements BaseMessageService {
 
         //单机器命令发送（带回执）
         try {
-            messageSendHandleService.sendCommandMessageAndAll(false, info);
+            return messageSendHandleService.sendCommandMessageAndAll(false, info);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(),e);
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
         }
     }
 
