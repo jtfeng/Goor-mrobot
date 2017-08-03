@@ -38,6 +38,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if (!this.verificationParameter(robotSN, messageInfo, false)) {
             return AjaxResult.failed("parameter error");
         }
+        log.info("开始发送sendCommandMessage，toDataBase="+toDataBase+",x86AgentReply="+x86AgentReply+"robotSN="+robotSN);
         return this.sendMessage(toDataBase, x86AgentReply, messageInfo, RabbitMqBean.getRoutingKey(robotSN, x86AgentReply, MessageType.EXECUTOR_COMMAND.name()), TopicConstants.TOPIC_EXCHANGE);
     }
 
@@ -99,12 +100,15 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
             this.saveSendRecord(messageInfo);
         }
         if(StringUtils.isEmpty(routingKey)){
+            log.info("开始批量发送消息");
             rabbitTemplate.convertAndSend(exchange, "", messageInfo);
             return AjaxResult.success("已发送，等待机器人回复");
         }
         if (x86Response) {
+            log.info("开始发送带回执消息");
             return (AjaxResult) rabbitTemplate.convertSendAndReceive(exchange, routingKey, messageInfo);
         } else {
+            log.info("开始发送无回执消息");
             rabbitTemplate.convertAndSend(exchange, routingKey, messageInfo);
             return AjaxResult.success("已发送，等待机器人回复");
         }
@@ -134,6 +138,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
      */
     private boolean verificationParameter(String robotSN, MessageInfo messageInfo, boolean all) throws Exception {
         if (StringUtils.isEmpty(robotSN) && !all) {
+            log.error("robotSN为空，取消发送");
             return false;
         }
         if (null == messageInfo
@@ -142,8 +147,10 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
                 || null == messageInfo.getMessageType()
                 || StringUtils.isEmpty(messageInfo.getMessageType().name())
                 || StringUtils.isEmpty(messageInfo.getMessageText())) {
+            log.error("发送的messageInfo参数错误,必须包含uuId，receiverId,messageType,messageText，取消发送");
             return false;
         }
+        log.error("发送的messageInfo参数正确，继续以下操作");
         return true;
     }
 
