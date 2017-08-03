@@ -6,6 +6,7 @@ import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.*;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.slam.SlamBody;
@@ -86,14 +87,14 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
         }
         if (robot.getOnline() != null && robot.getOnline() == false && batteryThresholdDb != null && !batteryThresholdDb.equals(robotBatteryThreshold)) {
-            robot.setBatteryThreshold(batteryThresholdDb);
+            robot.setLowBatteryThreshold(batteryThresholdDb);
         }
         //更新机器人信息
         updateByStoreId(robot);
         //更新机器人配置信息
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
-        if (robotConfig != null && robot.getBatteryThreshold() != null) {
-            robotConfig.setBatteryThreshold(robot.getBatteryThreshold());
+        if (robotConfig != null && robot.getLowBatteryThreshold() != null) {
+            robotConfig.setLowBatteryThreshold(robot.getLowBatteryThreshold());
             robotConfigService.update(robotConfig);
         }
         //向X86上同步修改后的机器人电量阈值信息
@@ -261,7 +262,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         list.forEach(robot -> {
             Long robotId = robot.getId();
             RobotConfig robotConfigDb = robotConfigService.getByRobotId(robotId);
-            robot.setBatteryThreshold(robotConfigDb != null ? robotConfigDb.getBatteryThreshold() : null);
+            robot.setLowBatteryThreshold(robotConfigDb != null ? robotConfigDb.getLowBatteryThreshold() : null);
             List<RobotPassword> robotPasswordList = robotPasswordService.listRobotPassword(robotId);
             robot.setPasswords(robotPasswordList);
             List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
@@ -296,7 +297,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             bindChargerMapPoint(robotNewId, list);
         }
         RobotConfig robotConfig = new RobotConfig();
-        robotConfig.setBatteryThreshold(robot.getBatteryThreshold());
+        robotConfig.setLowBatteryThreshold(robot.getLowBatteryThreshold());
         robotConfig.setRobotId(robot.getId());
         robotConfig.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         robotConfig.setCreateTime(new Date());
@@ -316,26 +317,57 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public AjaxResult autoRegister(Robot robotNew) {
         try {
-            Long robotId = robotNew.getId();
-            Integer robotTypeId = robotNew.getTypeId();
-            String robotName = robotNew.getName();
-            String robotCode = robotNew.getCode();
-            Long robotStoreId = robotNew.getStoreId();
-            Robot robotDb = getByCode(robotCode, robotStoreId);
-            if (robotId != null) {
-                if (robotDb != null) {
-                    robotNew.setOnline(true);
-                    updateRobotAndBindChargerMapPoint(robotNew, null, null, null);
-                    return AjaxResult.success(robotNew, "更新机器人状态成功");
+            if (robotNew != null) {
+                Long robotId = robotNew.getId();
+                String robotCode = robotNew.getCode();
+                Integer robotTypeId = robotNew.getTypeId();
+                String robotName = robotNew.getName();
+                Long robotStoreId = robotNew.getStoreId();
+                Long userId = robotNew.getCreatedBy();
+                Date createTime = robotNew.getCreateTime();
+                Integer lowBatteryThreshold = robotNew.getLowBatteryThreshold();
+                Integer sufficientBatteryThreshold = robotNew.getSufficientBatteryThreshold();
+                Boolean isBusy = robotNew.getBusy();
+                //todo 按照robotCode的规范来赋值typeId
+                if (!StringUtil.isNullOrEmpty(robotCode) && robotTypeId == null) {
+
+                }
+                if (!StringUtil.isNullOrEmpty(robotCode) && StringUtil.isNullOrEmpty(robotName)) {
+                    robotNew.setName(robotCode);
+                }
+                if (robotStoreId == null) {
+                    robotNew.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                }
+                if (userId == null) {
+                    robotNew.setCreatedBy(SearchConstants.USER_ID);
+                }
+                if (createTime == null) {
+                    robotNew.setCreateTime(new Date());
+                }
+                if (lowBatteryThreshold == null) {
+                    robotNew.setLowBatteryThreshold(Constant.ROBOT_LOW_BATTERY_THRESHOLD_DEFAULT);
+                }
+                if (sufficientBatteryThreshold == null) {
+                    robotNew.setSufficientBatteryThreshold(Constant.ROBOT_SUFFICIENT_BATTERY_THRESHOLD_DEFAULT);
+                }
+                if (isBusy == null) {
+                    robotNew.setBusy(false);
+                }
+                Robot robotDb = getByCode(robotCode, robotStoreId);
+                if (robotId != null) {
+                    if (robotDb != null) {
+                        robotNew.setOnline(true);
+                        updateRobotAndBindChargerMapPoint(robotNew, null, null, null);
+                        return AjaxResult.success(robotNew, "更新机器人状态成功");
+                    } else {
+                        robotNew.setId(null);
+                        saveRobotAndBindChargerMapPoint(robotNew);
+                        return AjaxResult.success(robotNew, "注册成功");
+                    }
                 } else {
-                    robotNew.setId(null);
-                    saveRobotAndBindChargerMapPoint(robotNew);
-                    return AjaxResult.success(robotNew, "注册成功");
-                }
-            } else {
-                if (StringUtil.isNullOrEmpty(robotCode)) {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号不能为空");
-                }
+                    if (StringUtil.isNullOrEmpty(robotCode)) {
+                        return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号不能为空");
+                    }
 //                if (robotTypeId == null || robotTypeId <= 0 || robotTypeId > RobotTypeEnum.DRAWER.getCaption()) {
 //                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
 //                }
@@ -345,23 +377,26 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 //                if (robotNew.getBatteryThreshold() == null) {
 //                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
 //                }
-                //判断是否有重复的名称
-                Robot robotDbByName = getByName(robotName);
-                if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
-                    return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
+                    //判断是否有重复的名称
+                    Robot robotDbByName = getByName(robotName);
+                    if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
+                        return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
+                    }
+                    //判断是否有重复的编号
+                    Robot robotDbByCode = getByCode(robotCode, robotStoreId);
+                    if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
+                        return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
+                    }
+                    saveRobotAndBindChargerMapPoint(robotNew);
+                    //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
+                    syncRosRobotConfig(robotNew);
+                    return AjaxResult.success(robotNew, "注册成功");
                 }
-                //判断是否有重复的编号
-                Robot robotDbByCode = getByCode(robotCode, robotStoreId);
-                if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
-                    return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
-                }
-                saveRobotAndBindChargerMapPoint(robotNew);
-                //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
-                syncRosRobotConfig(robotNew);
-                return AjaxResult.success(robotNew, "注册成功");
+            } else {
+                return AjaxResult.failed("注册失败");
             }
         } catch (Exception e) {
-//            log.error("注册失败, 错误日志 >>>> {}", e.getMessage());
+            LOGGER.error("注册失败, 错误日志 >>>> {}", e);
             return AjaxResult.failed("注册失败");
         } finally {
         }
@@ -393,7 +428,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             messageInfo.setMessageText(JSON.toJSONString(commonInfo));
             messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
         } catch (Exception e) {
-            LOGGER.error("发送错误", e);
+            LOGGER.error("发送错误{}", e);
         } finally {
         }
     }

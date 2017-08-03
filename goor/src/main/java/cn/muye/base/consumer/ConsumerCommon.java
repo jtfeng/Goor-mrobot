@@ -286,7 +286,7 @@ public class ConsumerCommon {
         RobotInfoConfig robotInfoConfig = new RobotInfoConfig();
         robotInfoConfig.setRobotSn(robot.getCode());
         robotInfoConfig.setRobotName(robot.getName());
-        robotInfoConfig.setRobotBatteryThreshold(robot.getBatteryThreshold());
+        robotInfoConfig.setLowBatteryThreshold(robot.getLowBatteryThreshold());
         robotInfoConfig.setRobotStoreId(robot.getStoreId());
         robotInfoConfig.setRobotTypeId(robot.getTypeId());
         return robotInfoConfig;

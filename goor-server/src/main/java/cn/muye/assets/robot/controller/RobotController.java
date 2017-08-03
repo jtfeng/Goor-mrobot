@@ -71,7 +71,7 @@ public class RobotController {
         Long robotId = robot.getId();
         String robotName = robot.getName();
         String robotCode = robot.getCode();
-        Integer robotBatteryThreshold = robot.getBatteryThreshold();
+        Integer robotBatteryThreshold = robot.getLowBatteryThreshold();
         List list = robot.getChargerMapPointList();
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
@@ -87,7 +87,7 @@ public class RobotController {
         if (robotId != null) { //修改
             Robot robotDb = robotService.getById(robotId);
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
-            int batteryThresholdDb = robotConfig.getBatteryThreshold();
+            int batteryThresholdDb = robotConfig.getLowBatteryThreshold();
             String robotCodeDb = robotDb.getCode();
             if (robotDb != null && robotCode == null) {
                 if (list != null) {
@@ -104,7 +104,7 @@ public class RobotController {
                 }
                 robotDb.setUpdateTime(new Date());
                 if (robotBatteryThreshold != null) {
-                    robotDb.setBatteryThreshold(robotBatteryThreshold);
+                    robotDb.setLowBatteryThreshold(robotBatteryThreshold);
                 }
                 try {
                     ajaxResult = robotService.updateRobotAndBindChargerMapPoint(robotDb, batteryThresholdDb, robotBatteryThreshold, robotCodeDb);

@@ -26,7 +26,10 @@ public class Robot extends BaseBean {
     private String description;  //备注
 
     @Transient
-    private Integer batteryThreshold; //机器人电量阈值
+    private Integer lowBatteryThreshold; //机器人低电量阈值
+
+    @Transient
+    private Integer sufficientBatteryThreshold; //机器人足电量阈值
 
     private Boolean boxActivated; //启用和冻结（格子用的）
 
@@ -114,12 +117,20 @@ public class Robot extends BaseBean {
         this.boxActivated = boxActivated;
     }
 
-    public Integer getBatteryThreshold() {
-        return batteryThreshold;
+    public Integer getLowBatteryThreshold() {
+        return lowBatteryThreshold;
     }
 
-    public void setBatteryThreshold(Integer batteryThreshold) {
-        this.batteryThreshold = batteryThreshold;
+    public void setLowBatteryThreshold(Integer lowBatteryThreshold) {
+        this.lowBatteryThreshold = lowBatteryThreshold;
+    }
+
+    public Integer getSufficientBatteryThreshold() {
+        return sufficientBatteryThreshold;
+    }
+
+    public void setSufficientBatteryThreshold(Integer sufficientBatteryThreshold) {
+        this.sufficientBatteryThreshold = sufficientBatteryThreshold;
     }
 
     public Boolean getBusy() {

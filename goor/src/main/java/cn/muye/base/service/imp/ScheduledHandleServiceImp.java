@@ -302,7 +302,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         Robot robot = new Robot();
         robot.setName(robotInfoConfig.getRobotName());
         robot.setCode(robotInfoConfig.getRobotSn());
-        robot.setBatteryThreshold(robotInfoConfig.getRobotBatteryThreshold());
+        robot.setLowBatteryThreshold(robotInfoConfig.getLowBatteryThreshold());
         robot.setStoreId(robotInfoConfig.getRobotStoreId());
         robot.setTypeId(robotInfoConfig.getRobotTypeId());
         return robot;
