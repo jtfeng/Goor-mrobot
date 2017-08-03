@@ -82,7 +82,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public void rosHealthCheck() {
-//        logger.info("-->> Scheduled rosHealthCheck start");
+        logger.info("-->> Scheduled rosHealthCheck start");
         try {
             ros = applicationContext.getBean(Ros.class);
             if (null == ros) {
@@ -95,7 +95,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             //发布app_pub的获取当前地图消息
             Topic mapCurrentPubTopic = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
             mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
-
+            logger.info("心跳时间："+CacheInfoManager.getTopicHeartCheckCache());
+            logger.info("心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()));
 //            logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 ros.disconnect();
