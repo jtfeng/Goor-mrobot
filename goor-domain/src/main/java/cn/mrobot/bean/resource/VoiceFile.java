@@ -14,6 +14,8 @@ public class VoiceFile extends BaseBean {
 
     private String fileName;
 
+    private String description;
+
     public String getVoiceKey() {
         return voiceKey;
     }
@@ -28,5 +30,13 @@ public class VoiceFile extends BaseBean {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
