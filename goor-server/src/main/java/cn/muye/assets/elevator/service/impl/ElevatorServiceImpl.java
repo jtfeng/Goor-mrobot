@@ -40,6 +40,16 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
+    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor) {
+        return null;
+    }
+
+    @Override
+    public void updateElevatorLockState(Long elevatorId, Integer state) {
+        this.elevatorMapper.updateElevatorLockState(elevatorId, state);
+    }
+
+    @Override
     public void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //保存电梯信息
         save(elevator);

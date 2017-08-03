@@ -275,6 +275,26 @@ public class ElevatorController {
         }
     }
 
+    /**
+     * 更新电梯锁定状态
+     * @param elevatorId
+     * @param state
+     * @return
+     */
+    @RequestMapping(value = "/assets/updateElevatorLockState/{elevatorId}/{state}", method = RequestMethod.GET)
+    public AjaxResult updateElevatorLockState(
+            @PathVariable("elevatorId") String elevatorId,
+            @PathVariable("state") String state
+    ){
+        //Long elevatorId, Integer state
+        try {
+            elevatorService.updateElevatorLockState(Long.parseLong(elevatorId), Integer.parseInt(state));
+            return AjaxResult.success();
+        }catch (Exception e){
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
     public static void main(String[] args) {
         // TODO: 02/08/2017 电梯井 、电梯 、四个基准点的组合
     }

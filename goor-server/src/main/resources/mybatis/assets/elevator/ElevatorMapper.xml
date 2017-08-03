@@ -34,4 +34,9 @@
         </foreach>
     </insert>
 
+    <!-- 更新电梯锁状态 -->
+    <update id="updateElevatorLockState">
+        UPDATE goor.AS_ELEVATOR r SET r.LOCK_STATE = #{param2} WHERE r.ID = #{param1}
+    </update>
+
 </mapper>
