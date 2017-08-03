@@ -110,7 +110,13 @@ public class LogCollectServiceImpl implements LogCollectService {
         //获取电量状态
         chargeState = getChargeMessage(chargeInfo);
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
-        int batteryThreshold = robotConfig.getLowBatteryThreshold();
+        if(robotConfig == null){
+            return chargeState;
+        }
+        Integer batteryThreshold = robotConfig.getLowBatteryThreshold();
+        if(batteryThreshold == null){
+            return chargeState;
+        }
         //保存低电量警告
         int powerPercent = chargeInfo.getPowerPercent();
         if (powerPercent <= batteryThreshold) {
