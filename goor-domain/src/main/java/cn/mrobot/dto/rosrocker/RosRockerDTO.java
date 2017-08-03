@@ -21,6 +21,15 @@ public class RosRockerDTO implements Serializable {
     public RosRockerDTO() {
     }
 
+    @Override
+    public String toString() {
+        return "RosRockerDTO{" +
+                "robotId='" + robotId + '\'' +
+                ", linear=" + linear +
+                ", angular=" + angular +
+                '}';
+    }
+
     public RosRockerDTO(String robotId, Linear linear, Angular angular) {
         this.robotId = robotId;
         this.linear = linear;
@@ -64,6 +73,15 @@ public class RosRockerDTO implements Serializable {
         public void setZ(Double z) {
             this.z = z;
         }
+
+        @Override
+        public String toString() {
+            return "Linear{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    ", z=" + z +
+                    '}';
+        }
     }
 
     public static class Angular implements Serializable{
@@ -102,6 +120,15 @@ public class RosRockerDTO implements Serializable {
 
         public void setZ(Double z) {
             this.z = z;
+        }
+
+        @Override
+        public String toString() {
+            return "Angular{" +
+                    "x=" + x +
+                    ", y=" + y +
+                    ", z=" + z +
+                    '}';
         }
     }
 
