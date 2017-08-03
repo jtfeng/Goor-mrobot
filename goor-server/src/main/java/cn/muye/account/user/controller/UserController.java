@@ -334,9 +334,13 @@ public class UserController {
             String accessToken = doAuthorize(userName, password);
             //判断token不等于null，说明已经登录
             if (!StringUtil.isNullOrEmpty(accessToken)) {
-                session.setAttribute("access_token", accessToken);
                 //查询用户的
                 List<User> list = userService.getUser(userName, password);
+                if (list != null && list.size() > 0) {
+                    user = list.get(0);
+                    user.setAccessToken(accessToken);
+                    userService.updateUser(user);
+                }
                 if (list != null) {
                     user = list.get(0);
                     List<StationDTO4User> stationList = user.getStationList();
@@ -437,6 +441,10 @@ public class UserController {
         map.put("roleType", RoleTypeEnum.list());
         map.put("robotType", RobotTypeEnum.list());
         map.put("missionType", MissionTypeEnum.list());
+        map.put("missionListType", MissionListTypeEnum.list());
+        map.put("module", ModuleEnums.list());
+        map.put("rfidBraceletType", RfidBraceletTypeEnum.list());
+        map.put("stateField", StateFieldEnums.list());
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
