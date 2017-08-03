@@ -8,10 +8,14 @@ import cn.mrobot.bean.account.UserRoleXref;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
+import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
+import cn.mrobot.bean.state.enums.ModuleEnums;
+import cn.mrobot.bean.state.enums.StateFieldEnums;
 import cn.mrobot.dto.account.RoleDTO;
 import cn.mrobot.dto.account.UserDTO;
 import cn.mrobot.dto.area.station.StationDTO4User;
@@ -348,7 +352,7 @@ public class UserController {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("errorMessage===>{}", e);
         } finally {
         }
         return map;
@@ -370,7 +374,7 @@ public class UserController {
         params.put("grant_type", "password");
         String result = HttpClientUtil.executePost(null, "http://" + authServerHost + ":" + authServerPort + authServerApi, params, null, null, "application/x-www-form-urlencoded; charset=UTF-8", auth,"UTF-8", true);
         String accessToken = null;
-        if (StringUtil.isNullOrEmpty(result)) {
+        if (!StringUtil.isNullOrEmpty(result)) {
             JSONObject jsonObject = JSON.parseObject(result);
             accessToken = jsonObject.getString("access_token");
         }
