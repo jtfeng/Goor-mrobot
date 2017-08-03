@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.mission.task.JsonElevatorLock;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
@@ -21,7 +22,7 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
     BaseMessageService baseMessageService;
 
     @Override
-    public void handleX86ElevatorLock(MessageInfo messageInfo) {
+    public AjaxResult handleX86ElevatorLock(MessageInfo messageInfo) {
         logger.info(JsonUtils.toJson(
                 messageInfo,
                 new TypeToken<MessageInfo>(){}.getType()));
@@ -46,5 +47,6 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
             }
 
         }
+        return null;
     }
 }

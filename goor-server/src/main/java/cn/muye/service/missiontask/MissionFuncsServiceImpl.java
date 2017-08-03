@@ -79,8 +79,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     @Override
-    public boolean createMissionLists(Order order) {
-        boolean ret = false;
+    public AjaxResult createMissionLists(Order order) {
+        AjaxResult ret = null;
 
         logger.info("##############  createMissionLists #################");
 
@@ -115,16 +115,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         List<MissionListTask> listTasks =
                 new ArrayList<>();
         listTasks.add(missionListTask);
-        x86MissionDispatchService.sendX86MissionDispatch(
-                order.getRobot().getCode(),
-                getGoorMissionMsg(listTasks)
-        );
+
 
         logger.info("robot code is: " + order.getRobot().getCode() +
                 " , ####### tesk is: " + getGoorMissionMsg(listTasks));
         logger.info("##############  createMissionLists successed #################");
 
-        return true;
+        return x86MissionDispatchService.sendX86MissionDispatch(
+                order.getRobot().getCode(),
+                getGoorMissionMsg(listTasks)
+        );
     }
 
     /**

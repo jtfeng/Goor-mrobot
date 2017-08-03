@@ -1,5 +1,7 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
+
 import java.util.List;
 
 /**
@@ -7,7 +9,7 @@ import java.util.List;
  */
 public interface X86MissionQueueCancelService {
 
-    void sendX86MissionQueueCancel(
+    AjaxResult sendX86MissionQueueCancel(
             String robotCode,
             List<X86MissionQueueCancelServiceImpl.QueueCancelBody> bodyList);
 

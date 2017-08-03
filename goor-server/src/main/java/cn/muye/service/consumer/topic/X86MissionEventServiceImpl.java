@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.log.mission.JsonLogMission;
 import cn.mrobot.bean.log.mission.LogMission;
@@ -36,7 +37,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
     private MissionListTaskService missionListTaskService;
 
     @Override
-    public void handleX86MissionEvent(MessageInfo messageInfo) {
+    public AjaxResult handleX86MissionEvent(MessageInfo messageInfo) {
         logger.info(JsonUtils.toJson(
                 messageInfo,
                 new TypeToken<MessageInfo>(){}.getType()));
@@ -100,6 +101,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                 }
             }
         }
+        return null;
     }
 
     private String parsePoseData(MessageInfo messageInfo) {

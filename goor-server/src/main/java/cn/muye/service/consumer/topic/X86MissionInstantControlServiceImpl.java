@@ -1,5 +1,6 @@
 package cn.muye.service.consumer.topic;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
@@ -23,44 +24,44 @@ public class X86MissionInstantControlServiceImpl
     BaseMessageService baseMessageService;
 
     @Override
-    public void sendX86MissionInstantControlPause(String robotCode) {
-        send(robotCode, "pause");
+    public AjaxResult sendX86MissionInstantControlPause(String robotCode) {
+        return send(robotCode, "pause");
     }
 
     @Override
-    public void sendX86MissionInstantControlResume(String robotCode) {
-        send(robotCode, "resume");
+    public AjaxResult sendX86MissionInstantControlResume(String robotCode) {
+        return send(robotCode, "resume");
     }
 
     @Override
-    public void sendX86MissionInstantControlSkipMission(String robotCode) {
-        send(robotCode, "skipMission");
-
-    }
-
-    @Override
-    public void sendX86MissionInstantControlSkipMissionList(String robotCode) {
-        send(robotCode, "skipMissionList");
+    public AjaxResult sendX86MissionInstantControlSkipMission(String robotCode) {
+        return send(robotCode, "skipMission");
 
     }
 
     @Override
-    public void sendX86MissionInstantControlClear(String robotCode) {
-        send(robotCode, "clear");
+    public AjaxResult sendX86MissionInstantControlSkipMissionList(String robotCode) {
+        return send(robotCode, "skipMissionList");
 
     }
 
     @Override
-    public void sendX86MissionInstantControlStartNextMission(String robotCode) {
-        send(robotCode, "startNextMission");
+    public AjaxResult sendX86MissionInstantControlClear(String robotCode) {
+        return send(robotCode, "clear");
 
     }
 
-    void send(String robotCode, String command){
+    @Override
+    public AjaxResult sendX86MissionInstantControlStartNextMission(String robotCode) {
+        return send(robotCode, "startNextMission");
+
+    }
+
+    AjaxResult send(String robotCode, String command){
         MissionInstantControlBody body =
                 new MissionInstantControlBody();
         body.setCommand(command);
-        baseMessageService.sendRobotMessage(
+        return baseMessageService.sendRobotMessage(
                 robotCode,
                 TopicConstants.X86_MISSION_INSTANT_CONTROL,
                 JsonUtils.toJson(body,
