@@ -118,7 +118,7 @@ public class ScheduleTasks {
     public void missionStateCommonRequest() {
         logger.info("missionStateCommonRequest Scheduled send");
         try {
-            x86MissionCommonRequestService.sendX86MissionStateCommonRequest();
+            logger.info("result is: " + x86MissionCommonRequestService.sendX86MissionStateCommonRequest());
         } catch (Exception e) {
             logger.error("Scheduled collect base state error", e);
         }
