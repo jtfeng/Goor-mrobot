@@ -45,6 +45,7 @@ public class TopicConstants {
 	public static final String X86_MISSION_STATE_RESPONSE = "/x86_mission_state_response";//当前任务状态响应topic
 	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
 	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
+	public static final String X86_ELEVATOR_LOCK = "/x86_elevator_lock";//电梯锁定topic
 
 	public static final String ROS_PUB_YAOGAN_TOPIC = "android_joystick_cmd_vel";
 	public static final String ROS_SUB_YAOGAN_TOPIC = "~cmd_vel";
