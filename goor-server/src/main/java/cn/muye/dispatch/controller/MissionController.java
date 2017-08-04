@@ -558,9 +558,10 @@ public class MissionController {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能创建空任务！");
 			}
 			for(MissionItem missionItem : missionItemSet) {
+				Long featureItemId = missionItem.getFeatureItemId();
+				String data = missionItem.getData();
 				//跟点相关的指令，需要校验点是否存在
-				if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(missionItem.getFeatureItemId())) {
-					String data = missionItem.getData();
+				if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(featureItemId)) {
 					try {
 						Long pointId = JSON.parseObject(data).getLong(Constant.ID);
 						MapPoint mapPoint = pointService.findById(pointId);
@@ -570,6 +571,23 @@ public class MissionController {
 						missionItem.setData(JSON.toJSONString(mapPoint));
 					}
 					catch (Exception e) {
+						LOGGER.error(e.getMessage(),e);
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
+					}
+				}
+				//按时间长度充电任务，点数据校验
+				else if(featureItemId.equals(Constant.ORDER_TIME_CHARGE_ID)) {
+					JSONObject jsonObject = JSONObject.parseObject(data);
+					try {
+						JSONObject mapPointTemp =(JSONObject) jsonObject.get(Constant.ORDER_TIME_CHARGE_POINT);
+						MapPoint mapPoint = pointService.findById(Long.parseLong(mapPointTemp.get(Constant.ID).toString()));
+						if(mapPoint == null) {
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
+						}
+						missionItem.setData(JSON.toJSONString(mapPoint));
+					}
+					catch (Exception e) {
+						LOGGER.error(e.getMessage(),e);
 						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
 					}
 				}

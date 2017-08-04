@@ -73,8 +73,11 @@ public class Constant {
     //与地图点相关的指令列表
     public final static List<Long> ORDER_MAP_POINT_RELATE_LIST = Arrays.asList(
             1L,//单点导航
-            4L//自动充电
+            4L,//自动充电
+            5L//离开充电桩
     );
+
+
 
     public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
 
@@ -87,6 +90,10 @@ public class Constant {
     public final static long ORDER_LEAVE_CHARGE_ID = 5L;//离开充电桩任务ID
 
     public final static long ORDER_WAIT_ID = 6L;//等待任务ID
+
+    public final static long ORDER_TIME_CHARGE_ID = 7L;//带时间长度的充电任务ID
+
+    public final static String ORDER_TIME_CHARGE_POINT = "point"; // 导航目标点
 
     public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";
 
