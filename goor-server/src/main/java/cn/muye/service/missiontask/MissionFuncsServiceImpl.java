@@ -620,6 +620,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     ////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private int elevatorCount = 0;
 
     /**
      * 实例化电梯任务
@@ -643,30 +644,45 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(sigleNavTask);
 
         //加入check电梯状态任务
-        JsonMissionItemDataElevatorLock lock =
-                new JsonMissionItemDataElevatorLock();
-        lock.setElevator_id(1L);
-        MissionTask elevatorLockTask = getElevatorLockTask(
-                order, null, parentName,
-                lock
-        );
-        missionListTask.getMissionTasks().add(elevatorLockTask);
+//        JsonMissionItemDataElevatorLock lock =
+//                new JsonMissionItemDataElevatorLock();
+//        lock.setElevator_id(1L);
+//        MissionTask elevatorLockTask = getElevatorLockTask(
+//                order, null, parentName,
+//                lock
+//        );
+//        missionListTask.getMissionTasks().add(elevatorLockTask);
 
 
         //电梯任务，发送进入电梯到第几层
         JsonMissionItemDataElevator jsonMissionItemDataElevator =
                 new JsonMissionItemDataElevator();
         if (mPointAtts != null){
-            jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
+//            jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
             //暂时写死
-            jsonMissionItemDataElevator.setCurrent_floor(4);
-            MapPoint entryPoint = pointService.findById(1000L);
-            MapPoint setPosePoint = pointService.findById(1001L);
-            MapPoint backPoint = pointService.findById(1002L);
-            //存入
-            jsonMissionItemDataElevator.setEnter_point(changeToPoint(entryPoint));
-            jsonMissionItemDataElevator.setSet_pose_point(changeToPoint(setPosePoint));
-            jsonMissionItemDataElevator.setBack_point(changeToPoint(backPoint));
+            if (elevatorCount != 1){
+                jsonMissionItemDataElevator.setArrival_floor(1);
+                jsonMissionItemDataElevator.setCurrent_floor(4);
+                MapPoint entryPoint = pointService.findById(1000L);
+                MapPoint setPosePoint = pointService.findById(1001L);
+                MapPoint backPoint = pointService.findById(1002L);
+                //存入
+                jsonMissionItemDataElevator.setEnter_point(changeToPoint(entryPoint));
+                jsonMissionItemDataElevator.setSet_pose_point(changeToPoint(setPosePoint));
+                jsonMissionItemDataElevator.setBack_point(changeToPoint(backPoint));
+                elevatorCount++;
+            }else{
+                jsonMissionItemDataElevator.setArrival_floor(4);
+                jsonMissionItemDataElevator.setCurrent_floor(1);
+                MapPoint entryPoint = pointService.findById(1001L);
+                MapPoint setPosePoint = pointService.findById(1000L);
+                MapPoint backPoint = pointService.findById(1004L);
+                //存入
+                jsonMissionItemDataElevator.setEnter_point(changeToPoint(entryPoint));
+                jsonMissionItemDataElevator.setSet_pose_point(changeToPoint(setPosePoint));
+                jsonMissionItemDataElevator.setBack_point(changeToPoint(backPoint));
+                elevatorCount = 0;
+            }
         }else{
             logger.error("没有获取到电梯到达的楼层，请注意查看地图是否配置了楼层数据，或者电梯点后续是否没有设置到达点！");
         }
@@ -674,15 +690,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         MissionTask elevatorTask = getElevatorTask(order, mp, parentName, jsonMissionItemDataElevator);
         missionListTask.getMissionTasks().add(elevatorTask);
 
-        //加入check电梯状态解锁任务
-        JsonMissionItemDataElevatorUnlock unlock =
-                new JsonMissionItemDataElevatorUnlock();
-        unlock.setElevator_id(1L);
-        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
-                order, mp, parentName,
-                unlock
-        );
-        missionListTask.getMissionTasks().add(elevatorUnlockTask);
+//        //加入check电梯状态解锁任务
+//        JsonMissionItemDataElevatorUnlock unlock =
+//                new JsonMissionItemDataElevatorUnlock();
+//        unlock.setElevator_id(1L);
+//        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
+//                order, mp, parentName,
+//                unlock
+//        );
+//        missionListTask.getMissionTasks().add(elevatorUnlockTask);
 
 
     }
