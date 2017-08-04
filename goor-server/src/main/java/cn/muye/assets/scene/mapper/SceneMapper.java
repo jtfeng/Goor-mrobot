@@ -32,4 +32,6 @@ public interface SceneMapper extends MyMapper<Scene> {
     void setSceneState(String sceneName, Long storeId, Integer state);
 
     List<MapInfo> findMapBySceneName(String SceneName, Long storeId);
+
+    void setSceneStateForUpload(Long sceneId, Integer state);
 }
