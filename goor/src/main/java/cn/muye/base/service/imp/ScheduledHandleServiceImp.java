@@ -104,6 +104,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
                 topic.subscribe(checkHeartCallback);
                 topic.publish(new Message(TopicConstants.CHECK_HEART_MESSAGE));
+
                 TopicSubscribeInfo.reSubScribeTopic(ros);//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
             }
         } catch (Exception e) {
@@ -167,6 +168,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                     Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                     Message toSend = new Message(commonInfo.getPublishMessage());
                     echo.publish(toSend);
+
                     //更新发布状态，已经发送
                     message.setMessageStatusType(MessageStatusType.PUBLISH_ROS_MESSAGE.getIndex());
                     this.updateReceiveMessage(message);
@@ -197,6 +199,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                 Message toSend = new Message(commonInfo.getPublishMessage());
+                echo.unadvertise();
                 echo.publish(toSend);
 //                logger.info("-->> publishMessage commonInfo to ros success");
                 return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());

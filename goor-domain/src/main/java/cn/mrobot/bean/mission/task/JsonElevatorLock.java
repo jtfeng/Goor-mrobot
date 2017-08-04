@@ -11,6 +11,24 @@ public class JsonElevatorLock implements Serializable {
     String action;
     Long elevator_id;
     Integer result;
+    private Long sendTime;
+    private String uuid;
+
+    public Long getSendTime() {
+        return sendTime;
+    }
+
+    public void setSendTime(Long sendTime) {
+        this.sendTime = sendTime;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
 
     public String getAction() {
         return action;
