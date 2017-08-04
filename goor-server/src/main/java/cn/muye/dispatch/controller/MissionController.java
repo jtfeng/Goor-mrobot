@@ -479,6 +479,51 @@ public class MissionController {
 		}
 	}
 
+	/**
+	 * 美亚查询所有任务列表接口：分巡逻和充电
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = {"dispatch/missionList/listMeiYa"}, method = RequestMethod.GET)
+	@ResponseBody
+	public AjaxResult listMeiYaMissionList(HttpServletRequest request) {
+		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+
+			List<MissionList> missionListList = missionListService.list(storeId,scene.getId());
+
+			List<MissionList> patrols = new ArrayList<MissionList>();
+			List<MissionList> charges = new ArrayList<MissionList>();
+
+			if(missionListList == null) {
+				return AjaxResult.success(Collections.EMPTY_LIST);
+			}
+			for(MissionList missionList : missionListList) {
+				String type = missionList.getMissionListType();
+				if(type.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
+					patrols.add(missionList);
+				}
+				else if(type.equals(Constant.MISSION_LIST_TYPE_CHARGE)) {
+					charges.add(missionList);
+				}
+			}
+			Map result = new HashMap();
+			result.put("patrols",patrols);
+			result.put("charges",charges);
+
+			return AjaxResult.success(result);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+		}
+	}
+
 	@RequestMapping(value = {"dispatch/missionList/bindMission"}, method = RequestMethod.POST)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_mission_u')")
