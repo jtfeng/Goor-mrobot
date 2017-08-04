@@ -35,20 +35,20 @@
 
     <select id="findByElevatorPointCombinationId" resultMap="ElevatorMap" parameterType="java.lang.Long">
         SELECT r.*
-        FROM goor.AS_ELEVATOR r LEFT JOIN goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS ees ON r.ID = ees.ELEVATOR_ID
+        FROM AS_ELEVATOR r LEFT JOIN ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS ees ON r.ID = ees.ELEVATOR_ID
         WHERE ees.ELEVATORPOINTCOMBINATION_ID = #{0}
     </select>
 
     <delete id="deleteRelationsByElevatorId" parameterType="java.lang.Long">
-        DELETE FROM goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS WHERE ELEVATOR_ID = #{0}
+        DELETE FROM ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS WHERE ELEVATOR_ID = #{0}
     </delete>
 
     <select id="findByMapNameAndStoreId" resultMap="MapInfoMap">
-        SELECT i.* FROM goor.A_MAP_INFO i WHERE i.MAP_NAME = #{param1} AND i.STORE_ID = #{param2}
+        SELECT i.* FROM A_MAP_INFO i WHERE i.MAP_NAME = #{param1} AND i.STORE_ID = #{param2}
     </select>
 
     <insert id="insertRelationsByElevatorId">
-        INSERT INTO goor.ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS
+        INSERT INTO ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS
         (ELEVATOR_ID,ELEVATORPOINTCOMBINATION_ID)
         VALUES
         <foreach collection="param2" item="id" separator=",">
@@ -58,7 +58,7 @@
 
     <!-- 更新电梯锁状态 -->
     <update id="updateElevatorLockState">
-        UPDATE goor.AS_ELEVATOR r SET r.LOCK_STATE = #{param2} WHERE r.ID = #{param1}
+        UPDATE AS_ELEVATOR r SET r.LOCK_STATE = #{param2} WHERE r.ID = #{param1}
     </update>
 
 </mapper>
