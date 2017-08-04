@@ -87,9 +87,6 @@ public class MapPoint extends BaseBean {
 	@Column(name = "POINT_LEVEL")
 	@JSONField(name = "point_level")
 
-    @Transient
-    private MapInfo mapInfo;
-
 	private int pointLevel;
 
     private Long mapZipId;
@@ -236,11 +233,4 @@ public class MapPoint extends BaseBean {
         this.mapZipId = mapZipId;
     }
 
-    public MapInfo getMapInfo() {
-        return mapInfo;
-    }
-
-    public void setMapInfo(MapInfo mapInfo) {
-        this.mapInfo = mapInfo;
-    }
 }
