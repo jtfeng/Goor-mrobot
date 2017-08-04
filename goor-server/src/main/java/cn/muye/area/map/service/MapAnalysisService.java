@@ -117,41 +117,43 @@ public class MapAnalysisService {
      * @throws Exception
      */
     public void analysisFile(File mapFilePath, List<String> sceneNames, MapZip mapZip) throws Exception {
-        //更改当前数据库地图数据的状态，改为已删除状态
-        mapInfoService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID ,oldMapZipId, Constant.DELETE);
-        //更改数据库中导航目标点删除状态，改为已删除
-        pointService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, oldMapZipId, Constant.DELETE);
-        //更改数据库中关联关系表状态，改为已删除
-        sceneMapZipXREFService.updateDeleteFlag(oldMapZipId, Constant.DELETE);
+        //TODO   勿删
+//        //更改当前数据库地图数据的状态，改为已删除状态
+//        mapInfoService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID ,oldMapZipId, Constant.DELETE);
+//        //更改数据库中导航目标点删除状态，改为已删除
+//        pointService.updateDeleteFlag(SearchConstants.FAKE_MERCHANT_STORE_ID, oldMapZipId, Constant.DELETE);
+//        //更改数据库中关联关系表状态，改为已删除
+//        sceneMapZipXREFService.updateDeleteFlag(oldMapZipId, Constant.DELETE);
 
         String deviceId = mapZip.getDeviceId();
-        Long mapzipId = mapZip.getId();
+        Long mapZipId = mapZip.getId();
         LOGGER.info("解析导航目标点文件，地图文件地址=" + mapFilePath);
         if (!mapFilePath.exists()) {
             return;
         }
+        Date createTime = new Date();
         //场景文件夹
         for (int i = 0; i < sceneNames.size(); i++) {
             File sceneDir = new File(mapFilePath.getAbsolutePath() + File.separator +sceneNames.get(i));
             String sceneName = sceneDir.getName();
             //解析地图文件
-            analysisMapFile(sceneName, sceneDir.getAbsolutePath(), deviceId, mapzipId);
+            analysisMapFile(sceneName, sceneDir.getAbsolutePath(), deviceId, mapZipId,createTime);
             //解析导航点文件
-            analysisPointFile(sceneName, sceneDir.getAbsolutePath(), mapzipId);
+            analysisPointFile(sceneName, sceneDir.getAbsolutePath(), mapZipId,createTime);
         }
-        LOGGER.info("解析完成，删除作废的数据");
-
-        //删除状态为DELETE的地图信息
-        mapInfoService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
-        //删除状态为DELETE的导航点信息
-        pointService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
-        sceneMapZipXREFService.delete(Constant.DELETE);
+        //TODO   勿删
+//        LOGGER.info("解析完成");
+//        //删除状态为DELETE的地图信息
+//        mapInfoService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
+//        //删除状态为DELETE的导航点信息
+//        pointService.delete(SearchConstants.FAKE_MERCHANT_STORE_ID, Constant.DELETE);
+//        sceneMapZipXREFService.delete(Constant.DELETE);
     }
 
     /**
      * 解析地图文件
      */
-    private void analysisMapFile(String sceneName, String sceneDir, String deviceId, Long mapzipId) throws Exception {
+    private void analysisMapFile(String sceneName, String sceneDir, String deviceId, Long mapZipId, Date createTime) throws Exception {
         LOGGER.info("开始解析地图文件");
         File mapFilePath = FileUtils.getFile(sceneDir, Constant.MAP_FILE_PATH);
         if (!mapFilePath.exists()) {
@@ -168,13 +170,21 @@ public class MapAnalysisService {
             if (null == map || map.isEmpty()) {
                 continue;
             }
-            //遍历导航点
+            //同场景和地图如果有数据，则删除
+            List<MapInfo> mapInfoList = mapInfoService.getMapInfo(mapName,sceneName,SearchConstants.FAKE_MERCHANT_STORE_ID );
+            if(mapInfoList != null && mapInfoList.size() >0){
+                for(MapInfo mapInfo : mapInfoList){
+                    mapInfoService.deleteByPrimaryKey(mapInfo.getId());
+                }
+            }
+
+            //遍历地图
             MapInfo mapInfo = new MapInfo();
             mapInfo.setMapName(mapName);
             mapInfo.setSceneName(sceneName);
-            mapInfo.setMapZipId(mapzipId);
+            mapInfo.setMapZipId(mapZipId);
             mapInfo.setDeviceId(deviceId);
-            mapInfo.setCreateTime(new Date());
+            mapInfo.setCreateTime(createTime);
             mapInfo.setRos(JSON.toJSONString(map));
 
             File pgmFile = new File(mapFilePath.getAbsolutePath(), map.get("image").toString());
@@ -183,6 +193,7 @@ public class MapAnalysisService {
             mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
             CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
             mapInfoService.save(mapInfo);
+
             //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
             sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPDATE_STATE);
         }
@@ -191,7 +202,7 @@ public class MapAnalysisService {
     /**
      * 解析导航目标点文件
      */
-    private void analysisPointFile(String sceneName, String sceneDir,Long mapzipId) throws IllegalAccessException {
+    private void analysisPointFile(String sceneName, String sceneDir,Long mapZipId, Date createTime) throws IllegalAccessException {
         LOGGER.info("开始解析导航目标点文件");
         File pointFilePath = FileUtils.getFile(sceneDir, Constant.POINT_FILE_PATH);
         if (!pointFilePath.exists()) {
@@ -212,7 +223,7 @@ public class MapAnalysisService {
                 MapPoint mapPoint = new MapPoint();
                 mapPoint.setMapName(mapName);
                 mapPoint.setSceneName(sceneName);
-                mapPoint.setMapZipId(mapzipId);
+                mapPoint.setMapZipId(mapZipId);
                 Map.Entry entry = (Map.Entry) iterator.next();
                 mapPoint.setPointName(entry.getKey().toString());
                 Map valueMap = (Map) entry.getValue();
@@ -225,12 +236,20 @@ public class MapAnalysisService {
                         field.set(mapPoint, valueMap.get(field.getName()));
                     }
                 }
-                mapPoint.setCreateTime(new Date());
+                mapPoint.setCreateTime(createTime);
                 mapPoint.setMapPointTypeId(Integer.parseInt(valueMap.get("type").toString()));
                 mapPoint.setPointAlias(valueMap.get("alias").toString());
                 mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
                 mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getName());
-                pointService.save(mapPoint);
+
+                //根据场景名，地图名，点名称去数据库查询是否有点，如果有则更新，没有则新增
+                List<MapPoint> mapPointListDB = pointService.findByName(mapPoint.getPointName(),sceneName,mapName , SearchConstants.FAKE_MERCHANT_STORE_ID);
+                if(mapPointListDB != null && mapPointListDB.size() >0){
+                    mapPoint.setId(mapPointListDB.get(0).getId());
+                    pointService.update(mapPoint);
+                }else {
+                    pointService.save(mapPoint);
+                }
             }
         }
     }

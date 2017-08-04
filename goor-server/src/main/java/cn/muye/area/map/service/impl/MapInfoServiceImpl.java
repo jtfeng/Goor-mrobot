@@ -62,6 +62,11 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     @Override
+    public void deleteByPrimaryKey(Long id) {
+        mapInfoMapper.deleteByPrimaryKey(id);
+    }
+
+    @Override
     public void delete(long storeId, int deleteFlag) {
         Example example = new Example(MapInfo.class);
         example.createCriteria().andCondition("STORE_ID = " + storeId).andCondition("DELETE_FLAG=" + deleteFlag);
