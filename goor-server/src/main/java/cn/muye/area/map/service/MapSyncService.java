@@ -80,6 +80,10 @@ public class MapSyncService implements ApplicationContextAware {
      * @return
      */
     public String sendMapSyncMessage(List<Robot> robotList, MapZip mapZip) {
+        return sendMapSyncMessage(robotList, mapZip, 0L);
+    }
+
+    public String sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId) {
         try {
             if (null == applicationContext) {
                 LOGGER.error("applicationContext 为空");
