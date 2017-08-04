@@ -6,10 +6,12 @@ import java.util.regex.Pattern;
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.utils.HttpClientUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.account.user.service.UserService;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.BeansException;
@@ -29,6 +31,8 @@ public class AuthValidationExceptionFilter implements Filter,ApplicationContextA
 
     private String[] excludedPageArray;
     private String excludedPages;
+
+    private String authUserUri;
 
     private static ApplicationContext applicationContext;
 
@@ -54,21 +58,15 @@ public class AuthValidationExceptionFilter implements Filter,ApplicationContextA
             HttpServletRequest httpServletRequest = (HttpServletRequest) req;
             HttpServletResponse response = (HttpServletResponse) res;
             try {
-//                HttpSession session = httpServletRequest.getSession();
                 String accessTokenFromReq = httpServletRequest.getParameter("access_token");
-                User user = userService.getByAccessToken(accessTokenFromReq);
-//                String accessToken = (String) session.getAttribute("access_token");
-                if (user != null) {
-                    String accessToken = user.getAccessToken();
-                    if (!accessToken.equals(accessTokenFromReq)) { //说明已登录但请求的access_token有误，无权限
-                        response.setStatus(Constant.ERROR_CODE_NOT_AUTHORIZED);
-                        response.sendError(Constant.ERROR_CODE_NOT_AUTHORIZED, "您无权限");
-                    } else if (accessToken.equals(accessTokenFromReq)) {
-                    chain.doFilter(req, res);
-                    }
-                } else {
+                String result = HttpClientUtil.executeGet(null,authUserUri+"?access_token="+accessTokenFromReq , null, null, "UTF-8", true);
+                JSONObject jsonObject = JSON.parseObject(result);
+                String principal = jsonObject.getString("principal");
+                if (StringUtil.isNullOrEmpty(principal)) {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
                     response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
+                } else {
+                    chain.doFilter(req, res);
                 }
             } catch (Exception e) {
                 if (res instanceof HttpServletResponse) {
@@ -92,6 +90,7 @@ public class AuthValidationExceptionFilter implements Filter,ApplicationContextA
      */
     public void init(FilterConfig fConfig) throws ServletException {
         excludedPages = fConfig.getInitParameter("excludedUrl");
+        authUserUri = fConfig.getInitParameter("authUserUri");
         if (!StringUtil.isNullOrEmpty(excludedPages)) {
             excludedPageArray = excludedPages.split(",");
         }

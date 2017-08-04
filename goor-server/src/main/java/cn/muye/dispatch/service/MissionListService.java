@@ -36,6 +36,8 @@ public interface MissionListService {
 
 	List<MissionList> list(long storeId);
 
+	List<MissionList> list(long storeId,Long sceneId);
+
 	/**
 	 * 任务列表带任务带子任务新建或更新并绑定接口
 	 * @param missionList

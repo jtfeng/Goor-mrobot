@@ -149,6 +149,12 @@ public class MissionListServiceImpl implements MissionListService {
 		return bindMission(missionListMapper.listAll(storeId));
 	}
 
+	@Override
+	public List<MissionList> list(long storeId,Long sceneId) {
+		List<MissionList> missionLists = missionListMapper.list(null, /*deviceId,*/null,null,null,storeId,sceneId,null);
+		return bindMission(missionLists);
+	}
+
 	//查找出关联的任务
 	private List<MissionList> bindMission(List<MissionList> missionLists){
 		for(MissionList missionList : missionLists){

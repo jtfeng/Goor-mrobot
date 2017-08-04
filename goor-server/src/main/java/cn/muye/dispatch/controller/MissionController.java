@@ -479,6 +479,51 @@ public class MissionController {
 		}
 	}
 
+	/**
+	 * 美亚查询所有任务列表接口：分巡逻和充电
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = {"dispatch/missionList/listMeiYa"}, method = RequestMethod.GET)
+	@ResponseBody
+	public AjaxResult listMeiYaMissionList(HttpServletRequest request) {
+		try {
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			//从session取当前切换的场景
+			Scene scene = SessionUtil.getScene(request);
+			if(scene == null) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+			}
+
+			List<MissionList> missionListList = missionListService.list(storeId,scene.getId());
+
+			List<MissionList> patrols = new ArrayList<MissionList>();
+			List<MissionList> charges = new ArrayList<MissionList>();
+
+			if(missionListList == null) {
+				return AjaxResult.success(Collections.EMPTY_LIST);
+			}
+			for(MissionList missionList : missionListList) {
+				String type = missionList.getMissionListType();
+				if(type.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
+					patrols.add(missionList);
+				}
+				else if(type.equals(Constant.MISSION_LIST_TYPE_CHARGE)) {
+					charges.add(missionList);
+				}
+			}
+			Map result = new HashMap();
+			result.put("patrols",patrols);
+			result.put("charges",charges);
+
+			return AjaxResult.success(result);
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(), e);
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+		}
+	}
+
 	@RequestMapping(value = {"dispatch/missionList/bindMission"}, method = RequestMethod.POST)
 	@ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_mission_u')")
@@ -558,9 +603,10 @@ public class MissionController {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能创建空任务！");
 			}
 			for(MissionItem missionItem : missionItemSet) {
+				Long featureItemId = missionItem.getFeatureItemId();
+				String data = missionItem.getData();
 				//跟点相关的指令，需要校验点是否存在
-				if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(missionItem.getFeatureItemId())) {
-					String data = missionItem.getData();
+				if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(featureItemId)) {
 					try {
 						Long pointId = JSON.parseObject(data).getLong(Constant.ID);
 						MapPoint mapPoint = pointService.findById(pointId);
@@ -570,6 +616,23 @@ public class MissionController {
 						missionItem.setData(JSON.toJSONString(mapPoint));
 					}
 					catch (Exception e) {
+						LOGGER.error(e.getMessage(),e);
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
+					}
+				}
+				//按时间长度充电任务，点数据校验
+				else if(featureItemId.equals(Constant.ORDER_TIME_CHARGE_ID)) {
+					JSONObject jsonObject = JSONObject.parseObject(data);
+					try {
+						JSONObject mapPointTemp =(JSONObject) jsonObject.get(Constant.ORDER_TIME_CHARGE_POINT);
+						MapPoint mapPoint = pointService.findById(Long.parseLong(mapPointTemp.get(Constant.ID).toString()));
+						if(mapPoint == null) {
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
+						}
+						missionItem.setData(JSON.toJSONString(mapPoint));
+					}
+					catch (Exception e) {
+						LOGGER.error(e.getMessage(),e);
 						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
 					}
 				}

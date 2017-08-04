@@ -349,11 +349,6 @@ public class UserController {
             if (!StringUtil.isNullOrEmpty(accessToken)) {
                 //查询用户的
                 List<User> list = userService.getUser(userName, password);
-                if (list != null && list.size() > 0) {
-                    user = list.get(0);
-                    user.setAccessToken(accessToken);
-                    userService.updateUser(user);
-                }
                 if (list != null) {
                     user = list.get(0);
                     List<StationDTO4User> stationList = user.getStationList();
