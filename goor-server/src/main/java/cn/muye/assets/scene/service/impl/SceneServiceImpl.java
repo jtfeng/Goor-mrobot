@@ -63,7 +63,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public int saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
-        int insertRowsCount = sceneMapper.insert(scene);//数据库中插入这条场景记录
+        int insertRowsCount = this.save(scene);//数据库中插入这条场景记录
         bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
         //自动下发地图
@@ -74,8 +74,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         if (mapInfos.size() !=0 && robots.size()!= 0){
             //地图下发
-            mapSyncService.sendMapSyncMessage(robots,mapZipMapper
-                    .selectByPrimaryKey(mapInfos.get(0).getMapZipId()));
+            mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
         }
         return insertRowsCount;
     }
@@ -141,7 +140,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Preconditions.checkArgument(mapInfos.size()!=0, "该场景没有绑定地图，请绑定地图后重试!");
         MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
         sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
-        mapSyncService.sendMapSyncMessage(robots, mapZip);
+        mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
     }
 
     @Override
@@ -213,7 +212,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @throws Exception
      */
     @Override
-    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state) throws Exception {
+    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state, Long ... sceneId) throws Exception {
         Preconditions.checkNotNull(state);
         if (Scene.SCENE_STATE.UPDATE_STATE.equals(state)) {
             //标明状态为可更新状态
@@ -222,8 +221,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             }
         }
         if (Scene.SCENE_STATE.UPLOAD_SUCCESS.equals(state)){
-            //表明状态为上传成功状态
-            this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 1);
+            //表明状态为上传成功状态(需要针对某个具体场景)
+//            this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 1);
+            Preconditions.checkArgument(sceneId != null && sceneId.length == 1, "更改场景状态为上传成功时,场景ID编号缺失,请检查代码!");
+            this.sceneMapper.setSceneStateForUpload(sceneId[0],1);
         }
         return true;
     }
