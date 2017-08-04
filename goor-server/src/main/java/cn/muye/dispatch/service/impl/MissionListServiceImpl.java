@@ -1,6 +1,7 @@
 package cn.muye.dispatch.service.impl;
 
 import cn.mrobot.bean.mission.*;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dispatch.mapper.MissionListMissionXREFMapper;
@@ -182,7 +183,12 @@ public class MissionListServiceImpl implements MissionListService {
 		List<Long> bindList = new ArrayList<Long>();
 		if(missions != null && missions.size() > 0) {
 			for(Mission mission : missions) {
-				mission.setName(mission.getName() + now.getTime());
+				//如果mission名称为空，则取父级的名称加时间戳
+				String name = mission.getName();
+				if(name == null || name.equals("")) {
+					name = missionList.getName();
+				}
+				mission.setName(name + "_" + DateTimeUtils.getCurrentDateTimeString());
 				if (mission.getId() != null) {
 					Mission missionDB = missionService.get(mission.getId(),storeId);
 					//有id且数据库不存在的任务不做处理

@@ -3,14 +3,17 @@ package cn.muye.area.map.service;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.FileValidCreateUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.alibaba.fastjson.JSON;
@@ -44,10 +47,16 @@ public class MapSyncService implements ApplicationContextAware {
     private MapZipService mapZipService;
 
     @Autowired
+    private SceneService sceneService;
+
+    @Autowired
     private OffLineMessageService offLineMessageService;
 
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
+
+    @Value("${goor.push.http}")
+    private String DOWNLOAD_HTTP;
 
     public String syncMap(long storeId) {
         MapZip mapZip = mapZipService.latestZip(storeId);
@@ -64,6 +73,12 @@ public class MapSyncService implements ApplicationContextAware {
         return sendMapSyncMessage(robotList, mapZip);
     }
 
+    /**
+     * 同步地图
+     * @param robotList
+     * @param mapZip
+     * @return
+     */
     public String sendMapSyncMessage(List<Robot> robotList, MapZip mapZip) {
         try {
             if (null == applicationContext) {
@@ -79,7 +94,7 @@ public class MapSyncService implements ApplicationContextAware {
             CommonInfo commonInfo = new CommonInfo();
             commonInfo.setLocalFileName(mapZip.getFileName());
             commonInfo.setLocalPath(mapZip.getRobotPath());
-            commonInfo.setRemoteFileUrl(mapZip.getFileHttpPath());
+            commonInfo.setRemoteFileUrl(DOWNLOAD_HTTP + mapZip.getFilePath());
             commonInfo.setMD5(FileValidCreateUtil.fileMD5(DOWNLOAD_HOME + mapZip.getFilePath()));
 
             MessageInfo messageInfo = new MessageInfo();
@@ -92,9 +107,23 @@ public class MapSyncService implements ApplicationContextAware {
             for (int i = 0; i < robotList.size(); i++) {
 
                 String code = robotList.get(i).getCode();
+                //如果需要同步的机器为地图上传机器，则跳过
+                if(code.equals(mapZip.getDeviceId()))
+                    continue;
                 String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(code, true, MessageType.EXECUTOR_MAP.name());
                 AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
                 if (null != ajaxClientResult) {
+                    //推送成功，更新场景的状态
+                    if(ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS){
+                        String mapZipSceneName = mapZip.getSceneName();
+                        String[]sceneNames = mapZipSceneName.split(",");
+                        for(int j =0; j < sceneNames.length; j ++ ){
+                            String sceneName  = sceneNames[j];
+                            if(StringUtil.isNullOrEmpty(sceneName))
+                                continue;
+                            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS);
+                        }
+                    }
                     resultMap.put(code, ajaxClientResult);
                 } else {
                     resultMap.put(code, AjaxResult.failed("未获取到返回结果"));

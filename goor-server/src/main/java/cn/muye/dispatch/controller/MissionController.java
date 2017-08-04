@@ -546,7 +546,7 @@ public class MissionController {
 			String missionListName = missionList.getName();
 			missionListDB = missionListService.findByName(missionListName,storeId);
 			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务列表！");
 			}
 
 			//取第一个Mission做导航、语音、充电任务参数校验---------------------------------------
@@ -582,7 +582,7 @@ public class MissionController {
 					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，只能一个导航和一个等待任务！");
 				}
 
-				//取第二个mission做等待任务业务参数校验，如果第二个任务存在，再判断时
+				//取第二个mission做等待任务业务参数校验，如果第二个任务存在，再判断
 				if(missionList.getMissionList().size() ==2) {
 					Mission missionWait = missionList.getMissionList().get(1);
 					Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
@@ -798,7 +798,11 @@ public class MissionController {
 			//遍历发送机器人消息
 			for(String robotCode : robotCodesArray) {
 				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists);
-				if(ajaxResult.getCode() != AjaxResult.CODE_SUCCESS) {
+				//TODO 加延时判断，ajaxResult为空也是报错
+				if(ajaxResult == null) {
+					return AjaxResult.failed(AjaxResult.CODE_FAILED,"消息发送失败");
+				}
+				else if(ajaxResult.getCode() != AjaxResult.CODE_SUCCESS) {
 					//TODO 现在限定是一台机器人，将来多台，返回结果还需要Map形式
 					return ajaxResult;
 				}

@@ -16,7 +16,6 @@ import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.config.RobotInfoConfigService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
-import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Service;
@@ -41,8 +40,6 @@ public class ConsumerCommon {
     private ReceiveMessageService receiveMessageService;
     @Autowired
     private RobotInfoConfigService robotInfoConfigService;
-    @Autowired
-    private AppSubService appSubService;
 
     /**
      * 接收命令消息（无回执）

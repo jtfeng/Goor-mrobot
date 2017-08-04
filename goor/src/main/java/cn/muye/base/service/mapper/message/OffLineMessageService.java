@@ -39,11 +39,6 @@ public class OffLineMessageService {
     }
 
     public void update(OffLineMessage message) throws Exception{
-        List<RobotInfoConfig> configList = robotInfoConfigMapper.list();
-        if (configList != null && configList.size() > 0) {
-            RobotInfoConfig robotInfoConfig = configList.get(0);
-            message.setSenderId(robotInfoConfig.getRobotSn());
-        }
         message.setUpdateTime(new Date());
         offLineMessageMapper.update(message);
     }

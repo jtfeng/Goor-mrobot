@@ -140,7 +140,8 @@ public class HttpDownloader extends Thread {
             //移动文件到上层目录，删除地图文件夹下所有文件
             String moveFilePath = new File(localPath).getParent() + File.separator + commonInfo.getLocalFileName();
             logger.info("移动文件到上层目录。path= " + moveFilePath);
-            long copyTime = FileUtils.copyFile(new File(zipFilePath), new File(moveFilePath));
+            File newZipFile = new File(moveFilePath);
+            long copyTime = FileUtils.copyFile(new File(zipFilePath), newZipFile);
             if (copyTime <= 0) {
                 logger.info("移动文件出错 ");
             }
@@ -148,6 +149,8 @@ public class HttpDownloader extends Thread {
 
             boolean unzipFlag = ZipUtils.unzip(moveFilePath, localPath, false);
             if (unzipFlag) {
+                logger.info("解压完成。删除压缩包 ");
+                newZipFile.deleteOnExit();
                 //更改文件夹权限 将maps文件夹下所有文件的owner更改为robot
 //                String os = System.getProperty("os.name");
 //                logger.info("系统,更改权限，os=" + os);

@@ -1,16 +1,3 @@
-INSERT INTO ROBOT_INFO_CONFIG (
-  ROBOT_SN,
-  ROBOT_NAME,
-  ROBOT_TYPE_ID,
-  ROBOT_BATTERY_THRESHOLD,
-  ROBOT_STORE_ID
-)
-VALUES (
-'init_robot',
-'init_robot',
-1,
-50,
-100
-);
+
 
 
