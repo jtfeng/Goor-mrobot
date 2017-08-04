@@ -188,6 +188,12 @@ public class MapPoint extends BaseBean {
 
 		MapPoint mapPoint = (MapPoint) o;
 
+		if (mapPoint == null ||
+                mapPoint.getPointName() == null ||
+                mapPoint.getSceneName() == null ||
+                mapPoint.getMapName() == null){
+		    return false;
+        }
 		return mapPoint.getPointName().equals(pointName)
                 && mapPoint.getSceneName().equals(sceneName)
                 && mapPoint.getMapName().equals(mapName);
