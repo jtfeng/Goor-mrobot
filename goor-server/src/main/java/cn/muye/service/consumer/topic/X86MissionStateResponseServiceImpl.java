@@ -145,6 +145,7 @@ public class X86MissionStateResponseServiceImpl
                             }
                             if (id != null){
                                 //设置order detail的单子状态为完成
+                                logger.info("### set finishedDetailTask " + id);
                                 orderDetailService.finishedDetailTask(id);
                             }
                         }

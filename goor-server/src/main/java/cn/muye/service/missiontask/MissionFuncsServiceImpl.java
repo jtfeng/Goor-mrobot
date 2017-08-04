@@ -642,6 +642,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
         missionListTask.getMissionTasks().add(sigleNavTask);
 
+        //加入check电梯状态任务
+        JsonMissionItemDataElevatorLock lock =
+                new JsonMissionItemDataElevatorLock();
+        lock.setElevator_id(1L);
+        MissionTask elevatorLockTask = getElevatorLockTask(
+                order, null, parentName,
+                lock
+        );
+        missionListTask.getMissionTasks().add(elevatorLockTask);
+
+
         //电梯任务，发送进入电梯到第几层
         JsonMissionItemDataElevator jsonMissionItemDataElevator =
                 new JsonMissionItemDataElevator();
@@ -662,6 +673,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         MissionTask elevatorTask = getElevatorTask(order, mp, parentName, jsonMissionItemDataElevator);
         missionListTask.getMissionTasks().add(elevatorTask);
+
+        //加入check电梯状态解锁任务
+        JsonMissionItemDataElevatorUnlock unlock =
+                new JsonMissionItemDataElevatorUnlock();
+        unlock.setElevator_id(1L);
+        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
+                order, mp, parentName,
+                unlock
+        );
+        missionListTask.getMissionTasks().add(elevatorUnlockTask);
+
 
     }
 
@@ -1421,6 +1443,116 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         return itemTask;
     }
 
+    /**
+     * 电梯解锁
+     * @param mp
+     * @return
+     */
+    private MissionTask getElevatorUnlockTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataElevatorUnlock json) {
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "电梯解锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getElevatorUnlockItemTask(order, mp, parentName, json));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取电梯解锁ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getElevatorUnlockItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataElevatorUnlock json) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "电梯解锁Item");
+        itemTask.setName(MissionItemName_elevator_unlock);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataElevatorUnlock>(){}.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_elevator_unlock);
+
+        return itemTask;
+    }
+
+    /**
+     * 电梯加锁
+     * @param mp
+     * @return
+     */
+    private MissionTask getElevatorLockTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataElevatorLock json) {
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "电梯加锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getElevatorLockItemTask(order, mp, parentName, json));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取电梯加锁ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getElevatorLockItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataElevatorLock json) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "电梯加锁Item");
+        itemTask.setName(MissionItemName_elevator_lock);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataElevatorLock>(){}.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_elevator_lock);
+
+        return itemTask;
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////
     ////  missionItem,mission,missionList转成对应DTO和Task对象的方法
@@ -1466,6 +1598,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             data1.setY(mapPoint.getY());
             data1.setTh(mapPoint.getTh());
             data1.setMap(mapPoint.getMapName());
+            data1.setMap_name(mapPoint.getMapName());
+            data1.setScene_name(mapPoint.getSceneName());
             data = JSON.toJSONString(data1);
         }
 
@@ -1623,6 +1757,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String FeatureValue_unload = "unload";//卸货
     public static final String FeatureValue_finalUnload = "finalUnload";//终点卸货
     public static final String FeatureValue_elevator = "elevator";//电梯
+    public static final String FeatureValue_elevator_lock = "elevatorLock";
+    public static final String FeatureValue_elevator_unlock = "elevatorUnlock";
 
     public static final String MissionItemName_test = "fake";
 
@@ -1635,6 +1771,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionItemName_unload = "unload";
     public static final String MissionItemName_finalUnload = "finalUnload";
     public static final String MissionItemName_elevator = "elevator";
+    public static final String MissionItemName_elevator_lock = "elevatorLock";
+    public static final String MissionItemName_elevator_unlock = "elevatorUnlock";
 
     public static final String MissionListType_normal = "normal";
 
