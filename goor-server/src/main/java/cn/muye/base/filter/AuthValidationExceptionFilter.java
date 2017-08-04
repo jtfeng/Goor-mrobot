@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
  * @author ccoman
  *         TODO should this class extend something else that ExceptionTranslationFilter?
  */
-@Service
 public class AuthValidationExceptionFilter implements Filter,ApplicationContextAware {
 
     private String[] excludedPageArray;

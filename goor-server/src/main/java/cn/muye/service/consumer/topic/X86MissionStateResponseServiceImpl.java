@@ -101,6 +101,7 @@ public class X86MissionStateResponseServiceImpl
         if (jsonMissionStateResponse == null ||
                 jsonMissionStateResponse.getMission_list_id() == null ||
                 StringUtil.isEmpty(senderId)){
+            logger.info("### set finishedDetailTask 1 ");
             return;
         }
 
@@ -113,18 +114,28 @@ public class X86MissionStateResponseServiceImpl
             if (jsonMissionStateResponse.getRepeat_times() != null){
                 missionListTask.setRepeatTimesReal(jsonMissionStateResponse.getRepeat_times());
             }
+            logger.info("### set finishedDetailTask 2 ");
             missionListTaskService.save(missionListTask);
         }
 
+        if (jsonMissionStateResponse.getMission_list() == null){
+            logger.info("### jsonMissionStateResponse.getMission_list() is null ");
+        }else{
+            logger.info("### jsonMissionStateResponse.getMission_list() size is: " + jsonMissionStateResponse.getMission_list().size());
+        }
         //更新mission task state
         if (jsonMissionStateResponse.getMission_list() != null){
+            logger.info("### set finishedDetailTask 3 ");
             for (JsonMissionStateResponse.Mission_listEntity en:
                  jsonMissionStateResponse.getMission_list()) {
+                logger.info("### set finishedDetailTask 4 ");
                 if (en != null &&
                         en.getMission_id() != null){
+                    logger.info("### set finishedDetailTask 5 ，" + en.getMission_id());
                     MissionTask missionTask =
                             missionTaskService.findById(en.getMission_id());
                     if (missionTask != null){
+                        logger.info("### set finishedDetailTask 6 ");
                         if (!StringUtil.isEmpty(en.getState())){
                             missionTask.setState(en.getState());
                         }
@@ -132,14 +143,17 @@ public class X86MissionStateResponseServiceImpl
                             missionTask.setRepeatTimesReal(en.getRepeat_times());
                         }
                         missionTaskService.save(missionTask);
+                        logger.info("### set finishedDetailTask 7 ");
                         //判断当前如果关联了order detail,则置状态
                         if (MissionFuncsServiceImpl.MissionStateFinished.equalsIgnoreCase(en.getState()) &&
                                 !StringUtil.isNullOrEmpty(missionTask.getOrderDetailMission()) &&
                                 !MissionFuncsServiceImpl.str_zero.equalsIgnoreCase(missionTask.getOrderDetailMission())){
+                            logger.info("### set finishedDetailTask 8 ");
                             //
                             Long id = null;
                             try {
                                 id = Long.valueOf(missionTask.getOrderDetailMission());
+                                logger.info("### set finishedDetailTask 9 ");
                             } catch (NumberFormatException e) {
                                 logger.error("设置order detail失败。id转换失败。mission id is: "+ missionTask.getId());
                             }
@@ -153,13 +167,17 @@ public class X86MissionStateResponseServiceImpl
 
                     //更新mission item state
                     if (en.getMission_item_set() != null){
+                        logger.info("### set finishedDetailTask 10 ");
                         for (JsonMissionStateResponse.Mission_listEntity.Mission_item_setEntity item:
                              en.getMission_item_set()) {
+                            logger.info("### set finishedDetailTask 11 ");
                             if (item != null &&
                                     item.getMission_item_id() != null){
+                                logger.info("### set finishedDetailTask 12 ");
                                 MissionItemTask missionItemTask =
                                         missionItemTaskService.findById(item.getMission_item_id());
                                 if (missionItemTask != null){
+                                    logger.info("### set finishedDetailTask 13 ");
                                     if (!StringUtil.isEmpty(item.getState())){
                                         missionItemTask.setState(item.getState());
                                     }
