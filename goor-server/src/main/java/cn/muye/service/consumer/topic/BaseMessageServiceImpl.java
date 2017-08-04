@@ -233,6 +233,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
         info.setUuId(UUID.randomUUID().toString().replace("-", ""));
         info.setSendTime(new Date());
         info.setSenderId("goor-server");
+        info.setReceiverId("all");
         info.setMessageType(MessageType.EXECUTOR_COMMAND);//TODO 如果发送资源,注释此行，将此行下面第一行注释去掉
         info.setMessageText(JSON.toJSONString(commonInfo));//TODO 发送资源及rostopic命令
 
