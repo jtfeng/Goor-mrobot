@@ -112,22 +112,13 @@ public class MapSyncService implements ApplicationContextAware {
 
                 String code = robotList.get(i).getCode();
                 //如果需要同步的机器为地图上传机器，则跳过
-                if(code.equals(mapZip.getDeviceId()))
+                if (code.equals(mapZip.getDeviceId()))
                     continue;
                 String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(code, true, MessageType.EXECUTOR_MAP.name());
                 AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
-                if (null != ajaxClientResult) {
-                    //推送成功，更新场景的状态
-                    if(ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS){
-                        String mapZipSceneName = mapZip.getSceneName();
-                        String[]sceneNames = mapZipSceneName.split(",");
-                        for(int j =0; j < sceneNames.length; j ++ ){
-                            String sceneName  = sceneNames[j];
-                            if(StringUtil.isNullOrEmpty(sceneName))
-                                continue;
-                            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS);
-                        }
-                    }
+                if (null != ajaxClientResult && ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS) {
+                    //更新指定场景的state
+                    sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
                     resultMap.put(code, ajaxClientResult);
                 } else {
                     resultMap.put(code, AjaxResult.failed("未获取到返回结果"));
