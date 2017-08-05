@@ -115,7 +115,7 @@ public class X86MissionStateResponseServiceImpl
                 missionListTask.setRepeatTimesReal(jsonMissionStateResponse.getRepeat_times());
             }
             logger.info("### set finishedDetailTask 2 ");
-            missionListTaskService.save(missionListTask);
+            missionListTaskService.updateSelective(missionListTask);
         }
 
         if (jsonMissionStateResponse.getMission_list() == null){
@@ -142,7 +142,7 @@ public class X86MissionStateResponseServiceImpl
                         if (en.getRepeat_times() != null){
                             missionTask.setRepeatTimesReal(en.getRepeat_times());
                         }
-                        missionTaskService.save(missionTask);
+                        missionTaskService.updateSelective(missionTask);
                         logger.info("### set finishedDetailTask 7 ");
                         //判断当前如果关联了order detail,则置状态
                         if (MissionFuncsServiceImpl.MissionStateFinished.equalsIgnoreCase(en.getState()) &&
@@ -181,7 +181,7 @@ public class X86MissionStateResponseServiceImpl
                                     if (!StringUtil.isEmpty(item.getState())){
                                         missionItemTask.setState(item.getState());
                                     }
-                                    missionItemTaskService.save(missionItemTask);
+                                    missionItemTaskService.updateSelective(missionItemTask);
                                 }
                             }
                         }

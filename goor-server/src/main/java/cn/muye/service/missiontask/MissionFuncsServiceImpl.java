@@ -836,7 +836,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //
 //        missionListTask.getMissionTasks().add(waitingTask);
 
-        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_ARRIVE);
+        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
@@ -883,7 +883,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //
 //        missionListTask.getMissionTasks().add(waitingTask);
 
-        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD);
+        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //load任务，取代等待任务
@@ -936,11 +936,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //
 //        missionListTask.getMissionTasks().add(waitingTask);
 
-        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_ARRIVE);
+        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
         if (isSetOrderDetailMP){
             mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
         }
         missionListTask.getMissionTasks().add(mp3loadTask);
+
+        MissionTask mp3SignTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_MEDICINE_SIGN);
+        if (isSetOrderDetailMP){
+            mp3SignTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
+        missionListTask.getMissionTasks().add(mp3SignTask);
 
         //卸货任务，取代等待任务
         MissionTask unloadTask = getUnloadTask(order, mp, parentName);
@@ -1859,9 +1865,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     //音频定义
     public static final String MP3_DEFAULT = "default.mp3";//默认语音
-    public static final String MP3_ARRIVE = "arrive.mp3";//到站语音
-    public static final String MP3_LOAD = "load.mp3";//到站语音
-    public static final String MP3_CHARGE = "charge.mp3";//到站语音
+    public static final String MP3_TAKE_MEDICINE = "arrive_take_medicine.mp3";//请您取走药品
+    public static final String MP3_CABINET = "arrive_place_medicine_cabinet.mp3";//请您放置药柜
+    public static final String MP3_TAKE_CABINET = "arrive_take_medicine_cabinet.mp3";//请您取走药柜
+    public static final String MP3_TAKE_MEDICINE_SIGN = "take_medicine_sign.mp3";//请确认取走药品后，完成签收
+    public static final String MP3_CHARGE = "charge.mp3";//充电语音
 
     //Mission State
     public static final String MissionStateFinished = "finished";//已经完成
