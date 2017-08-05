@@ -10,6 +10,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.slam.SlamBody;
+import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
@@ -31,6 +32,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -38,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.*;
 
 /**
@@ -81,13 +82,16 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      *
      * @param robot
      */
-    public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer batteryThresholdDb, Integer robotBatteryThreshold, String robotCodeDb) throws RuntimeException {
+    public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientBatteryThreshold, String robotCodeDb) throws RuntimeException {
         List<MapPoint> list = robot.getChargerMapPointList();
         if (list != null && list.size() == 1) {
             bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
         }
-        if (robot.getOnline() != null && robot.getOnline() == false && batteryThresholdDb != null && !batteryThresholdDb.equals(robotBatteryThreshold)) {
-            robot.setLowBatteryThreshold(batteryThresholdDb);
+        if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
+            robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
+        }
+        if (sufficientBatteryThresholdDb != null && !sufficientBatteryThresholdDb.equals(sufficientBatteryThreshold)) {
+            robot.setSufficientBatteryThreshold(sufficientBatteryThreshold);
         }
         //更新机器人信息
         updateByStoreId(robot);
@@ -95,16 +99,20 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
         if (robotConfig != null && robot.getLowBatteryThreshold() != null) {
             robotConfig.setLowBatteryThreshold(robot.getLowBatteryThreshold());
+            robotConfig.setSufficientBatteryThreshold(robot.getSufficientBatteryThreshold());
             robotConfigService.update(robotConfig);
         }
         //向X86上同步修改后的机器人电量阈值信息
-        if (robot.getOnline() != null && robot.getOnline() == true && batteryThresholdDb != null && !batteryThresholdDb.equals(robotBatteryThreshold)) {
-            AjaxResult ajaxResult = syncRobotBatteryThresholdToRos(robot);
-            if (ajaxResult.isSuccess()) {
-                return AjaxResult.success("修改同步成功");
+        if (robot.getOnline() != null && robot.getOnline() == true) {
+            if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
+                robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
             }
+            if (sufficientBatteryThresholdDb != null && !sufficientBatteryThresholdDb.equals(sufficientBatteryThreshold)) {
+                robot.setSufficientBatteryThreshold(sufficientBatteryThreshold);
+            }
+            syncRobotBatteryThresholdToRos(robot);
         }
-        return AjaxResult.success("修改成功，机器人不在线，电量阈值无法修改");
+        return AjaxResult.success("修改成功");
     }
 
     /**
@@ -113,51 +121,31 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @param robotDb
      * @return
      */
-    private AjaxResult syncRobotBatteryThresholdToRos(Robot robotDb) throws RuntimeException {
-        try {
-            CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-            String uuid = UUID.randomUUID().toString().replace("-", "");
-            robotDb.setUuid(UUID.randomUUID().toString().replace("-", ""));
-            SlamBody slamBody = new SlamBody();
-            slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
-            slamBody.setUuid(uuid);
-            slamBody.setData(robotDb);
-            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-            messageInfo.setReceiverId(robotDb.getCode());
-            messageInfo.setSenderId("goor-server");
-            messageInfo.setMessageType(MessageType.ROBOT_INFO);
-            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-            AjaxResult result = messageSendHandleService.sendCommandMessage(true, true, robotDb.getCode(), messageInfo);
-            if (!result.isSuccess()) {
-                return AjaxResult.failed();
-            } else {
-                return AjaxResult.success();
+    private void syncRobotBatteryThresholdToRos(Robot robotDb) throws RuntimeException {
+        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+            try {
+                CommonInfo commonInfo = new CommonInfo();
+                commonInfo.setTopicName(topic);
+                commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+                String uuid = UUID.randomUUID().toString().replace("-", "");
+                robotDb.setUuid(UUID.randomUUID().toString().replace("-", ""));
+                SlamBody slamBody = new SlamBody();
+                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                slamBody.setUuid(uuid);
+                slamBody.setData(JsonUtils.toJson(robotDb,
+                        new TypeToken<Robot>() {
+                        }.getType()));
+                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+                MessageInfo messageInfo = new MessageInfo();
+                messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+                messageInfo.setReceiverId(robotDb.getCode());
+                messageInfo.setSenderId("goor-server");
+                messageInfo.setMessageType(MessageType.ROBOT_INFO);
+                messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+                messageSendHandleService.sendCommandMessage(true, false, robotDb.getCode(), messageInfo);
+            } catch (Exception e) {
+                LOGGER.error("发送错误", e);
             }
-//            long startTime = System.currentTimeMillis();
-//            LOGGER.info("start time" + startTime);
-//            for (int i = 0; i < 10; i++) {
-//                Thread.sleep(1000);
-//                //获取ROS的回执消息
-//                MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(messageInfo.getUuId());
-//                if (messageInfo1 != null && messageInfo1.isSuccess()) {
-//                    messageInfo.setSuccess(true);
-//                    break;
-//                }
-//            }
-//            long endTime = System.currentTimeMillis();
-//            LOGGER.info("end time" + (endTime - startTime));
-//            if (messageInfo.isSuccess()) {
-//                return AjaxResult.success();
-//            } else {
-//                throw new RuntimeException();
-//            }
-        } catch (Exception e) {
-            LOGGER.error("发送错误", e);
-            return AjaxResult.failed("系统内部错误");
         }
     }
 
@@ -300,6 +288,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         RobotConfig robotConfig = new RobotConfig();
         robotConfig.setLowBatteryThreshold(robot.getLowBatteryThreshold());
+        robotConfig.setSufficientBatteryThreshold(robot.getSufficientBatteryThreshold());
         robotConfig.setRobotId(robot.getId());
         robotConfig.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         robotConfig.setCreateTime(new Date());
@@ -344,7 +333,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (robotId != null) {
                     if (robotDb != null) {
                         robotNew.setOnline(true);
-                        updateRobotAndBindChargerMapPoint(robotNew, null, null, null);
+                        updateRobotAndBindChargerMapPoint(robotNew, null, null, null, null, null);
                         return AjaxResult.success(robotNew, "更新机器人状态成功");
                     } else {
                         robotNew.setId(null);
@@ -403,16 +392,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
                 String uuid = UUID.randomUUID().toString().replace("-", "");
                 robotNew.setUuid(uuid);
-                if (topic.equals(TopicConstants.TOPIC_TYPE_STRING)) {
-                    SlamBody slamBody = new SlamBody();
-                    slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
-                    slamBody.setUuid(uuid);
-                    slamBody.setData(robotNew);
-                    commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-                } else if (topic.equals(TopicConstants.X86_MISSION_COMMON_REQUEST)) {
-
-                }
-
+                SlamBody slamBody = new SlamBody();
+                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                slamBody.setUuid(uuid);
+                slamBody.setData(JsonUtils.toJson(robotNew,
+                        new TypeToken<Robot>() {
+                        }.getType()));
+                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
                 messageInfo.setReceiverId(robotNew.getCode());
@@ -425,36 +411,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             } finally {
             }
         }
-
-//        CommonInfo commonInfo = new CommonInfo();
-//        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-//        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-//        //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
-//        String uuid = UUID.randomUUID().toString().replace("-", "");
-//        robotNew.setUuid(uuid);
-//        SlamBody slamBody = new SlamBody();
-//        slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
-//        slamBody.setUuid(uuid);
-//        slamBody.setData(robotNew);
-//        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-//        MessageInfo messageInfo = new MessageInfo();
-//        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-//        messageInfo.setReceiverId(robotNew.getCode());
-//        messageInfo.setSenderId("goor-server");
-//        messageInfo.setMessageType(MessageType.ROBOT_INFO);
-//        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-//        messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
-//    } catch(
-//    Exception e)
-//
-//    {
-//        LOGGER.error("发送错误{}", e);
-//    } finally
-//
-//    {
-//    }
-
-}
+    }
 
     public void deleteRobotById(Long id) {
         myMapper.deleteByPrimaryKey(id);

@@ -17,6 +17,7 @@ import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.config.RobotInfoConfigService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Service;
 import edu.wpi.rail.jrosbridge.callback.ServiceCallback;
@@ -38,8 +39,6 @@ public class ConsumerCommon {
     private Ros ros;
     @Autowired
     private ReceiveMessageService receiveMessageService;
-    @Autowired
-    private RobotInfoConfigService robotInfoConfigService;
 
     /**
      * 接收命令消息（无回执）
@@ -96,12 +95,34 @@ public class ConsumerCommon {
         String pubDataStr = commonInfo.getPublishMessage();
         PubData pubData = JSON.parseObject(pubDataStr, PubData.class);
         SlamBody slamBody = JSON.parseObject(pubData.getData(), SlamBody.class);
-        Robot robot = (Robot) slamBody.getData();
+        JSONObject jsonObject = JSON.parseObject(slamBody.getData().toString());
+        Robot robot = convertRobotEntity(jsonObject);
         CacheInfoManager.removeRobotInfoConfigCache();
         CacheInfoManager.setRobotInfoConfigCache(robotToRobotInfoConfig(robot));
         //改数据库中的robotInfoConfig表的记录
 //        RobotInfoConfig robotInfoConfig = robotToRobotInfoConfig(robot);
 //        robotInfoConfigService.update(robotInfoConfig);
+    }
+
+    private Robot convertRobotEntity(JSONObject jsonObject) {
+        Robot robot = new Robot();
+        String uuid = jsonObject.getString(TopicConstants.ROBOT_KEY_UUID);
+        String name = jsonObject.getString(TopicConstants.ROBOT_KEY_NAME);
+        String code = jsonObject.getString(TopicConstants.ROBOT_KEY_CODE);
+        Integer typeId = jsonObject.getInteger(TopicConstants.ROBOT_KEY_TYPE_ID);
+        Integer lowBatteryThreshold = jsonObject.getInteger(TopicConstants.ROBOT_KEY_LOW_BATTERY_THRESHOLD);
+        Integer sufficientThreshold = jsonObject.getInteger(TopicConstants.ROBOT_KEY_SUFFICIENT_BATTERY_THRESHOLD);
+        Boolean isBusy = jsonObject.getBoolean(TopicConstants.ROBOT_KEY_IS_BUSY);
+        Boolean isOnline = jsonObject.getBoolean(TopicConstants.ROBOT_KEY_IS_ONLINE);
+        robot.setUuid(uuid);
+        robot.setName(name);
+        robot.setCode(code);
+        robot.setTypeId(typeId);
+        robot.setLowBatteryThreshold(lowBatteryThreshold);
+        robot.setSufficientBatteryThreshold(sufficientThreshold);
+        robot.setBusy(isBusy);
+        robot.setOnline(isOnline);
+        return robot;
     }
 
     /**

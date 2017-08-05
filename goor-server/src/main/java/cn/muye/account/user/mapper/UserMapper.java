@@ -23,6 +23,4 @@ public interface UserMapper extends MyMapper<User> {
     List<User> selectByHospitalAdmin(Map map);
 
     List<User> selectByStationAdmin(Map map);
-
-    User getByAccessToken(String accessToken);
 }
