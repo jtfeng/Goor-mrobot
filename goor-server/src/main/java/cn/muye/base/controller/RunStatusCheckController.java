@@ -16,8 +16,18 @@ public class RunStatusCheckController {
 
 	@RequestMapping(value = "checkOnLine")
 	@ResponseBody
-	public AjaxResult checkOnLine(HttpServletRequest request) {
+	public String checkOnLine(HttpServletRequest request) {
 		log.info("goor-server运行正常");
-		return AjaxResult.success();
+		return "1";
 	}
+
+	@RequestMapping(value = "checkRosBridge")
+	@ResponseBody
+	public String checkRosBridge(HttpServletRequest request) {
+//		if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_ROS_BRIDGE_MAX) {
+//			return "1";
+//		}
+		return "1";
+	}
+
 }
