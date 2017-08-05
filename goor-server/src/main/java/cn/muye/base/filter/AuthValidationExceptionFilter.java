@@ -26,23 +26,18 @@ import org.springframework.stereotype.Service;
  * @author ccoman
  *         TODO should this class extend something else that ExceptionTranslationFilter?
  */
-public class AuthValidationExceptionFilter implements Filter,ApplicationContextAware {
+@Service
+public class AuthValidationExceptionFilter implements Filter{
 
     private String[] excludedPageArray;
     private String excludedPages;
 
     private String authUserUri;
 
-    private static ApplicationContext applicationContext;
-
-    private UserService userService;
-
     protected static final Log LOGGER = LogFactory.getLog(AuthValidationExceptionFilter.class);
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
-        userService = applicationContext.getBean(UserService.class);
-
         boolean isExcludedPage = true;
         for (String page : excludedPageArray) {//判断是否在过滤url之外
             Pattern pattern = Pattern.compile(page);
@@ -96,8 +91,4 @@ public class AuthValidationExceptionFilter implements Filter,ApplicationContextA
         return;
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        AuthValidationExceptionFilter.applicationContext = applicationContext;
-    }
 }

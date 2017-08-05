@@ -10,7 +10,6 @@
         <result property="directLoginKey" column="DIRECT_LOGIN_KEY"/>
         <result property="roleId" column="ROLE_ID"/>
         <result property="storeId" column="STORE_ID"/>
-        <result property="accessToken" column="ACCESS_TOKEN"/>
     </resultMap>
 
     <select id="list" resultMap="userResult" parameterType="java.util.Map">
@@ -132,15 +131,4 @@
         </if>
     </select>
 
-    <select id="getByAccessToken" resultMap="userResult">
-        SELECT
-            u.ID,
-            u.USER_NAME,
-            u.PASSWORD,
-            u.ACTIVATED,
-            u.DIRECT_LOGIN_KEY,
-            u.ACCESS_TOKEN
-        FROM
-            AC_USER u WHERE u.ACCESS_TOKEN= #{accessToken}
-    </select>
 </mapper>

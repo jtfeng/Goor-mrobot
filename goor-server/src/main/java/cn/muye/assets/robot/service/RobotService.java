@@ -31,7 +31,7 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getByCode(String code, Long storeId);
 
-    AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer batteryThresholdDb, Integer robotBatteryThreshold, String robotCodeDb);
+    AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientRobotBatteryThreshold, String robotCodeDb);
 
     Robot getAvailableRobotByStationId(Long stationId, Integer typeId);
 
