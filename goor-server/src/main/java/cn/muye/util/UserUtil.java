@@ -5,7 +5,10 @@ import cn.mrobot.bean.account.UserStationXref;
 import cn.muye.account.role.service.UserStationXrefService;
 import cn.muye.account.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,7 +30,8 @@ public class UserUtil {
                 SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null){
             return null;
         }
-        Object object =  SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object object =  authentication.getPrincipal();
         User user = userService.getByUserName(object.toString());
         return user == null ? null : user;
     }
@@ -44,5 +48,19 @@ public class UserUtil {
             }
         }
         return null;
+    }
+
+    /**
+     * 获取当前用户的 token 值
+     * @return
+     */
+    public static String getUserTokenValue(){
+        if (SecurityContextHolder.getContext() == null ||
+                SecurityContextHolder.getContext().getAuthentication() == null ||
+                SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null){
+            return null;
+        }
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return ((OAuth2AuthenticationDetails)authentication.getDetails()).getTokenValue();
     }
 }

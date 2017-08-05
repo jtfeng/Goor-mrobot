@@ -92,10 +92,10 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                     //如果大于1分钟
                     if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
                         robotDb.setOnline(false);
-                        robotService.updateRobotAndBindChargerMapPoint(robotDb, null, null, null);
+                        robotService.updateRobotAndBindChargerMapPoint(robotDb, null, null, null, null, null);
                     } else {
                         robotDb.setOnline(true);
-                        robotService.updateRobotAndBindChargerMapPoint(robotDb, null, null, null);
+                        robotService.updateRobotAndBindChargerMapPoint(robotDb, null, null, null, null, null);
                     }
                 }
 

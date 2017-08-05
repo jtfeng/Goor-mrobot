@@ -28,6 +28,4 @@ public interface UserService extends BaseService<User> {
     void fakeDeleteById(Long id);
 
     User bindRole(String userId, String roleId);
-
-    User getByAccessToken(String accessToken);
 }

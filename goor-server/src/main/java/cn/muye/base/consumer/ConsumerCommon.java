@@ -11,6 +11,7 @@ import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
 import cn.mrobot.bean.state.StateCollectorResponse;
+import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.assets.goods.service.GoodsTypeService;
@@ -26,6 +27,7 @@ import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -148,29 +150,38 @@ public class ConsumerCommon {
         }
     }
 
+    /**
+     * 同步往ros的agent_pub扔机器人信息消息
+     *
+     * @param robotNew
+     */
     private void syncRosRobotConfig(Robot robotNew) {
-        try {
-            CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-            //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
-            String uuid = UUID.randomUUID().toString().replace("-", "");
-            robotNew.setUuid(uuid);
-            SlamBody slamBody = new SlamBody();
-            slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
-            slamBody.setUuid(uuid);
-            slamBody.setData(robotNew);
-            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-            messageInfo.setReceiverId(robotNew.getCode());
-            messageInfo.setSenderId("goor-server");
-            messageInfo.setMessageType(MessageType.ROBOT_INFO);
-            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-            messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
-        } catch (Exception e) {
-            logger.error("发送错误", e);
-        } finally {
+        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+            try {
+                CommonInfo commonInfo = new CommonInfo();
+                commonInfo.setTopicName(topic);
+                commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+                //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
+                String uuid = UUID.randomUUID().toString().replace("-", "");
+                robotNew.setUuid(uuid);
+                SlamBody slamBody = new SlamBody();
+                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                slamBody.setUuid(uuid);
+                slamBody.setData(JsonUtils.toJson(robotNew,
+                        new TypeToken<Robot>() {
+                        }.getType()));
+                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+                MessageInfo messageInfo = new MessageInfo();
+                messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+                messageInfo.setReceiverId(robotNew.getCode());
+                messageInfo.setSenderId("goor-server");
+                messageInfo.setMessageType(MessageType.ROBOT_INFO);
+                messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+                messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
+            } catch (Exception e) {
+                logger.error("发送错误", e);
+            } finally {
+            }
         }
     }
 
@@ -190,7 +201,7 @@ public class ConsumerCommon {
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     if (TopicConstants.DEBUG)
-                    logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
+                        logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
 
 //                else if(){
@@ -228,7 +239,7 @@ public class ConsumerCommon {
                     chargeInfo.setCreateTime(messageInfo.getSendTime());
                     chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
                     StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(deviceId);
-                    if(null != autoCharge){
+                    if (null != autoCharge) {
                         chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
                     }
                     CacheInfoManager.setRobotChargeInfoCache(deviceId, chargeInfo);

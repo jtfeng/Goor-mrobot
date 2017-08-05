@@ -1,6 +1,7 @@
 package cn.muye.assets.scene.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBracelet;
 import cn.mrobot.bean.assets.robot.Robot;
@@ -11,8 +12,14 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.assets.rfidbracelet.service.RfidBraceletService;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.util.SessionUtil;
+import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +29,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by admin on 2017/7/3.
@@ -42,20 +50,10 @@ public class SceneController {
     @RequestMapping(value = "/assets/scene/session/{sceneId}", method = RequestMethod.POST)
     public AjaxResult storeSceneInfoToSession(@PathVariable("sceneId") String sceneId, HttpServletRequest request) {
         try {
-            if (sceneId == null || "".equals(sceneId.trim())){
-                return AjaxResult.failed("请传入合法的 sceneId 值");
-            }
-            log.info("传入的场景 ID 编号为 ：" + sceneId);
-            Scene scene = sceneService.getSceneById(Long.parseLong(sceneId));
-            if (scene == null){
-                return AjaxResult.failed("指定场景编号的场景信息不存在，保存 session 信息失败");
-            }
-            request.getSession().setAttribute(Constant.SCENE_SESSION_TAG, scene);
-            Scene sceneTemp = (Scene) request.getSession().getAttribute(Constant.SCENE_SESSION_TAG);
-            log.info("传入 session 中的场景信息为：" + sceneTemp);
-            return AjaxResult.success(scene, "保存场景信息到 session 中成功!");
+            Scene scene = this.sceneService.storeSceneInfoToSession(sceneId, null);
+            return AjaxResult.success(scene, "保存场景信息到用户会话中成功!");
         }catch (Exception e){
-            return AjaxResult.failed(e, "保存场景信息到 session 中失败");
+            return AjaxResult.failed(e.getMessage());
         }
     }
 

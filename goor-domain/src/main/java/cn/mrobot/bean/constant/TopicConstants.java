@@ -45,6 +45,7 @@ public class TopicConstants {
 	public static final String X86_MISSION_STATE_RESPONSE = "/x86_mission_state_response";//当前任务状态响应topic
 	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
 	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
+	public static final String X86_ELEVATOR_LOCK = "/x86_elevator_lock";//电梯锁定topic
 
 	public static final String ROS_PUB_YAOGAN_TOPIC = "android_joystick_cmd_vel";
 	public static final String ROS_SUB_YAOGAN_TOPIC = "~cmd_vel";
@@ -97,6 +98,18 @@ public class TopicConstants {
 	public static final String MAP_NAME = "map_name";
 	public static final String POINTS = "points";
 
+	//机器人相关
+	public static final String ROBOT_KEY_UUID = "uuid";
+	public static final String ROBOT_KEY_NAME = "name";
+	public static final String ROBOT_KEY_CODE = "code";
+	public static final String ROBOT_KEY_TYPE_ID = "typeId";
+	public static final String ROBOT_KEY_LOW_BATTERY_THRESHOLD = "lowBatteryThreshold";
+	public static final String ROBOT_KEY_SUFFICIENT_BATTERY_THRESHOLD = "sufficientBatteryThreshold";
+//	public static final String ROBOT_KEY_BOX_ACTIVATED = "boxActivated";
+	public static final String ROBOT_KEY_IS_BUSY = "isBusy";
+	public static final String ROBOT_KEY_IS_ONLINE = "isOnline";
+	public static final String ROBOT_KEY_CHARGER_MAP_POINT_LIST = "chargerMapPointList";
+	public static final String ROBOT_KEY_PASSWORDS = "passwords";
 
 	//agent定义的topic
 	public static final String AGENT_LOCAL_MAP_UPLOAD = "agent_local_map_upload";
