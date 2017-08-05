@@ -363,7 +363,7 @@ public class UserController {
                         //todo 暂时写死 临时添加场景id( ?? 注意对应 id 场景不存在的情况)
 //                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
                         try {
-                            this.sceneService.storeSceneInfoToSession("14");
+                            this.sceneService.storeSceneInfoToSession("14", accessToken);
                         }catch (Exception e){
                             LOGGER.info(" * * * * * * 指定 sceneId 编号的场景信息不存在. * * * * * * ");
                         }

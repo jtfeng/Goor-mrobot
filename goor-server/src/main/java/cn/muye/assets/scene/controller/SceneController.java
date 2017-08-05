@@ -50,7 +50,7 @@ public class SceneController {
     @RequestMapping(value = "/assets/scene/session/{sceneId}", method = RequestMethod.POST)
     public AjaxResult storeSceneInfoToSession(@PathVariable("sceneId") String sceneId, HttpServletRequest request) {
         try {
-            Scene scene = this.sceneService.storeSceneInfoToSession(sceneId);
+            Scene scene = this.sceneService.storeSceneInfoToSession(sceneId, null);
             return AjaxResult.success(scene, "保存场景信息到用户会话中成功!");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());

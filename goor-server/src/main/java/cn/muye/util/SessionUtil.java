@@ -16,7 +16,8 @@ public class SessionUtil {
     /**
      * 定义一个存放场景信息的 Cache，Key 的结构为 ： token + ":" + 常量标识符
      */
-    public static final Cache<String, Scene> SCENE_LOADING_CACHE = CacheBuilder.newBuilder().maximumSize(100).expireAfterAccess(123, TimeUnit.MINUTES).build();
+    public static final Cache<String, Scene> SCENE_LOADING_CACHE = CacheBuilder.newBuilder().maximumSize(100)
+            .expireAfterWrite(123, TimeUnit.MINUTES).build();
 
     /**
      * 从session获取当前切换的场景
