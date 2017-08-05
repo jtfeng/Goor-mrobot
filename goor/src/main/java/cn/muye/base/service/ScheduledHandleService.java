@@ -7,21 +7,23 @@ import edu.wpi.rail.jrosbridge.Ros;
 
 public interface ScheduledHandleService {
 
-    void receiveMessage();
+    void receiveMessage() throws Exception;
 
-    void rosHealthCheck();
+    void rosHealthCheck() throws Exception;
 
-    void downloadResource();
+    void mqHealthCheck(String queueName) throws Exception;
 
-    AjaxResult downloadResource(Ros ros, MessageInfo messageInfo);
+    void downloadResource() throws Exception;
 
-    void publishMessage();
+    AjaxResult downloadResource(Ros ros, MessageInfo messageInfo) throws Exception;
 
-    AjaxResult publishMessage(Ros ros, MessageInfo messageInfo);
+    void publishMessage() throws Exception;
 
-    void executeTwentyThreeAtNightPerDay();
+    AjaxResult publishMessage(Ros ros, MessageInfo messageInfo) throws Exception;
 
-    void timeSynchronized(String localRobotSN);
+    void executeTwentyThreeAtNightPerDay() throws Exception;
+
+    void timeSynchronized(String localRobotSN) throws Exception;
 
     void sendRobotInfo() throws Exception;
 }

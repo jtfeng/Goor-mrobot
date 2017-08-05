@@ -13,10 +13,11 @@ public class ScheduledHandle {
 
     private final ScheduledExecutorService scheduledExecutor;
 
-    public ScheduledHandle(ScheduledExecutorService scheduledExecutor) {
+    public ScheduledHandle(ScheduledExecutorService scheduledExecutor, String queueName) {
         this.scheduledExecutor = scheduledExecutor;
         this.replyMessageScheduled();
         this.rosHealthCheckScheduled();
+        this.mqHealthCheckScheduled(queueName);
         this.downloadResourceScheduled();
         this.publishRosScheduled();
         this.executeTwentyThreeAtNightPerDay();
@@ -39,7 +40,7 @@ public class ScheduledHandle {
                     logger.error("schedule replyMessageScheduled exception", e);
                 }
             }
-        }, 100, 10, TimeUnit.SECONDS);
+        }, 101, 10, TimeUnit.SECONDS);
     }
 
     /**
@@ -57,7 +58,7 @@ public class ScheduledHandle {
                     logger.error("schedule sendRobotInfoScheduled exception", e);
                 }
             }
-        }, 90, 10, TimeUnit.SECONDS);
+        }, 92, 10, TimeUnit.SECONDS);
     }
 
     /**
@@ -75,7 +76,7 @@ public class ScheduledHandle {
                     logger.error("schedule downloadResourceScheduled exception", e);
                 }
             }
-        }, 105, 5, TimeUnit.SECONDS);
+        }, 103, 5, TimeUnit.SECONDS);
     }
 
 
@@ -94,7 +95,7 @@ public class ScheduledHandle {
                     logger.error("schedule publishRosScheduled exception", e);
                 }
             }
-        }, 110, 1, TimeUnit.SECONDS);
+        }, 114, 1, TimeUnit.SECONDS);
     }
 
     /**
@@ -112,7 +113,25 @@ public class ScheduledHandle {
                     logger.error("schedule rosHealthCheckScheduled exception", e);
                 }
             }
-        }, 20, 10, TimeUnit.SECONDS);
+        }, 25, 10, TimeUnit.SECONDS);
+    }
+
+    /**
+     * mq重连
+     */
+    public void mqHealthCheckScheduled(String queueName) {
+        scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.mqHealthCheck(queueName);
+                    logger.info("schedule mqHealthCheckScheduled");
+                } catch (Exception e) {
+                    logger.error("schedule mqHealthCheckScheduled exception", e);
+                }
+            }
+        }, 83, 10, TimeUnit.SECONDS);
     }
 
     /**

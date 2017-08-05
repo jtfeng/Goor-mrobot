@@ -1,5 +1,6 @@
 package cn.muye;
 
+import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.batch.ScheduledHandle;
 import com.github.pagehelper.PageHelper;
@@ -44,6 +45,9 @@ public class Application {
 
 	@Value("${lsub.name}")
 	private String lSubName;
+
+	@Value(TopicConstants.TOPIC_COMMAND)
+	private String topicCommandSN;
 
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
@@ -104,13 +108,13 @@ public class Application {
 
 	@Bean
 	public ScheduledExecutorService scheduledHandle() {
-		ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(6, new ThreadFactory() {
+		ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(7, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(r, "Application scheduledHandle");
 			}
 		});
-		new ScheduledHandle(scheduledExecutor);
+		new ScheduledHandle(scheduledExecutor, topicCommandSN);
 		return scheduledExecutor;
 	}
 
