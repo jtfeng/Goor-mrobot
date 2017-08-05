@@ -2,8 +2,11 @@ package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
@@ -12,6 +15,7 @@ import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import org.apache.log4j.Logger;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -32,8 +36,28 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private RobotService robotService;
 
+    private RabbitTemplate rabbitTemplate;
+
     public ScheduledHandleServiceImp() {
 
+    }
+
+    @Override
+    public void mqHealthCheck() throws Exception {
+        try {
+            logger.info("Scheduled mqHealthCheck start");
+            if(!getRabbitTemplate()){
+                return;
+            }
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setSendTime(new Date());
+            messageInfo.setSenderId("server");
+            messageInfo.setMessageType(MessageType.RABBITMQ_HEARTBEAT);
+            logger.info("开始发送goor-server心跳消息");
+            rabbitTemplate.convertAndSend(TopicConstants.TOPIC_SERVER_COMMAND, messageInfo);
+        } catch (final Exception e) {
+            logger.error("Scheduled mqHealthCheck exception", e);
+        }
     }
 
     @Override
@@ -77,6 +101,19 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
             }
         }
+    }
+
+    private boolean getRabbitTemplate(){
+        if(null == applicationContext){
+            logger.error("getRabbitTemplate applicationContext is null error");
+            return false;
+        }
+        rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+        if(null == rabbitTemplate){
+            logger.error("getRabbitTemplate rabbitTemplate is null error ");
+            return false;
+        }
+        return true;
     }
 
     @Override

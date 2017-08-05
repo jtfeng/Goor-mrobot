@@ -329,7 +329,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.TOPIC_SERVER_COMMAND)
     public void topicServerCommand(@Payload MessageInfo messageInfo) {
         try {
-            logger.info("topicServerCommand receive message");
+            logger.info("receive heartBeat message topicServerCommand receive message");
         } catch (Exception e) {
             logger.error("consumer topicServerCommand exception", e);
         }

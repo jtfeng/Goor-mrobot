@@ -16,6 +16,25 @@ public class ScheduledHandle {
         this.scheduledExecutor = scheduledExecutor;
         this.executeTwentyThreeAtNightPerDay();
         this.executeRobotHeartBeat();
+        this.mqHealthCheckScheduled();//执行心跳检查
+    }
+
+    /**
+     * mq重连
+     */
+    public void mqHealthCheckScheduled() {
+        scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.mqHealthCheck();
+                    logger.info("schedule mqHealthCheckScheduled");
+                } catch (Exception e) {
+                    logger.error("schedule mqHealthCheckScheduled exception", e);
+                }
+            }
+        }, 83, 10, TimeUnit.SECONDS);
     }
 
     /**
