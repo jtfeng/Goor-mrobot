@@ -26,6 +26,7 @@ import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
 import cn.muye.account.user.service.impl.UserServiceImpl;
 import cn.muye.area.station.service.StationService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
@@ -62,6 +63,9 @@ public class UserController {
 
     @Autowired
     private UserRoleXrefService userRoleXrefService;
+
+    @Autowired
+    private SceneService sceneService;
 
     @Value("${authServer.host}")
     private String authServerHost;
@@ -356,8 +360,13 @@ public class UserController {
                     map.put("access_token", accessToken);
                     if (stationList != null && stationList.size() > 0) {
                         session.setAttribute("stationId", user.getStationList().get(0).getId());
-                        //todo 暂时写死 临时添加场景id
-                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
+                        //todo 暂时写死 临时添加场景id( ?? 注意对应 id 场景不存在的情况)
+//                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
+                        try {
+                            this.sceneService.storeSceneInfoToSession("14");
+                        }catch (Exception e){
+                            LOGGER.info(" * * * * * * 指定 sceneId 编号的场景信息不存在. * * * * * * ");
+                        }
                         map.put("stationList", stationList);
                     }
                     return map;
