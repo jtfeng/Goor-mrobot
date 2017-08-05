@@ -71,7 +71,8 @@ public class RobotController {
         Long robotId = robot.getId();
         String robotName = robot.getName();
         String robotCode = robot.getCode();
-        Integer robotBatteryThreshold = robot.getLowBatteryThreshold();
+        Integer lowRobotBatteryThreshold = robot.getLowBatteryThreshold();
+        Integer sufficientBatteryThreshold = robot.getSufficientBatteryThreshold();
         List list = robot.getChargerMapPointList();
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
@@ -87,7 +88,8 @@ public class RobotController {
         if (robotId != null) { //修改
             Robot robotDb = robotService.getById(robotId);
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
-            int batteryThresholdDb = robotConfig.getLowBatteryThreshold();
+            Integer lowBatteryThresholdDb = robotConfig.getLowBatteryThreshold();
+            Integer sufficientBatteryThresholdDb = robotConfig.getSufficientBatteryThreshold();
             String robotCodeDb = robotDb.getCode();
             if (robotDb != null && robotCode == null) {
                 if (list != null) {
@@ -103,11 +105,11 @@ public class RobotController {
                     robotDb.setBoxActivated(robot.getBoxActivated());
                 }
                 robotDb.setUpdateTime(new Date());
-                if (robotBatteryThreshold != null) {
-                    robotDb.setLowBatteryThreshold(robotBatteryThreshold);
+                if (lowRobotBatteryThreshold != null) {
+                    robotDb.setLowBatteryThreshold(lowRobotBatteryThreshold);
                 }
                 try {
-                    ajaxResult = robotService.updateRobotAndBindChargerMapPoint(robotDb, batteryThresholdDb, robotBatteryThreshold, robotCodeDb);
+                    ajaxResult = robotService.updateRobotAndBindChargerMapPoint(robotDb, lowBatteryThresholdDb, sufficientBatteryThresholdDb, lowRobotBatteryThreshold, sufficientBatteryThreshold, robotCodeDb);
                 } catch (Exception e) {
                     LOGGER.error("{}", e);
                     return AjaxResult.failed("修改同步失败，回滚操作");
