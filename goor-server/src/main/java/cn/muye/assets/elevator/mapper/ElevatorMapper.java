@@ -17,4 +17,6 @@ public interface ElevatorMapper extends MyMapper<Elevator> {
     void updateElevatorLockState(Long elevatorId, Integer state);
 
     List<MapInfo> findByMapNameAndStoreId(String mapName, Long storeId);
+
+    List<Elevator> selectAllFlushCache();
 }

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import static com.google.common.base.Preconditions.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -46,7 +47,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Override
     public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor){
         Long storeId = 100L;
-        List<Elevator> elevators = Lists.newArrayList(this.listAll());
+        List<Elevator> elevators = this.elevatorMapper.selectAllFlushCache();
         bindElevatorShaft(elevators);
         bindElevatorPointCombination(elevators);
         elevators = elevators.stream().filter(new Predicate<Elevator>() {
