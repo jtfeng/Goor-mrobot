@@ -46,7 +46,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Override
     public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor){
         Long storeId = 100L;
-        List<Elevator> elevators = this.listAll();
+        List<Elevator> elevators = Lists.newArrayList(this.listAll());
         bindElevatorShaft(elevators);
         bindElevatorPointCombination(elevators);
         elevators = elevators.stream().filter(new Predicate<Elevator>() {
