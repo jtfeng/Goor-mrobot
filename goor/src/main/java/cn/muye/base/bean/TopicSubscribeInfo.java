@@ -74,6 +74,12 @@ public class TopicSubscribeInfo implements Serializable {
 		Topic stateCollectorsTopic = new Topic(ros, TopicConstants.STATE_COLLECTOR, TopicConstants.TOPIC_TYPE_STRING);
 		TopicCallback stateCollectorsCallback = new StateCollectorsListenerImpl();
 		stateCollectorsTopic.subscribe(stateCollectorsCallback);
+
+		//test
+		Topic dispatchTopic = new Topic(ros, TopicConstants.X86_MISSION_DISPATCH, TopicConstants.TOPIC_TYPE_STRING);
+		dispatchTopic.advertise();
+		TopicCallback dispatchCallback = new X86MissionDispatchListenerImpl();
+		dispatchTopic.subscribe(dispatchCallback);
 	}
 
 	public static boolean checkSubNameIsNeedConsumer(String message){

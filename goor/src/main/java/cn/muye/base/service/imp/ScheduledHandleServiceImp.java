@@ -127,7 +127,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             messageInfo.setSenderId(localRobotSN);
             messageInfo.setMessageType(MessageType.RABBITMQ_HEARTBEAT);
             logger.info("开始发送goor心跳消息");
-            rabbitTemplate.convertAndSend(queueName, messageInfo);
+            rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, queueName, messageInfo);
         } catch (final Exception e) {
             logger.error("Scheduled mqHealthCheck exception", e);
         }
@@ -220,7 +220,6 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                 Message toSend = new Message(commonInfo.getPublishMessage());
-                echo.unadvertise();
                 echo.publish(toSend);
 //                logger.info("-->> publishMessage commonInfo to ros success");
                 return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());
