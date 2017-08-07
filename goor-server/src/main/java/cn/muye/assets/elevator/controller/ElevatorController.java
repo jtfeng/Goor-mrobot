@@ -12,6 +12,8 @@ import cn.muye.assets.elevator.service.ElevatorShaftService;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,7 @@ public class ElevatorController {
     private ElevatorShaftService elevatorShaftService;
     @Autowired
     private ElevatorPointCombinationService elevatorPointCombinationService;
+    private static final Logger log = LoggerFactory.getLogger(ElevatorController.class);
 
     /**
      * 分页查询电梯井信息
@@ -43,6 +46,21 @@ public class ElevatorController {
             return AjaxResult.success(pageList, "查询电梯井信息成功");
         }catch (Exception e){
             return AjaxResult.failed(e,         "查询电梯井信息失败");
+        }
+    }
+
+    /**
+     * 查询全部电梯井信息
+     * @param whereRequest
+     * @return
+     */
+    @RequestMapping(value = "listAllElevator", method = RequestMethod.GET)
+    public AjaxResult listAllElevator(WhereRequest whereRequest){
+        try {
+            List<ElevatorShaft> list = elevatorShaftService.listAll();
+            return AjaxResult.success(list, "查询全部电梯井信息成功");
+        }catch (Exception e){
+            return AjaxResult.failed(e,     "查询全部电梯井信息失败");
         }
     }
 
@@ -159,14 +177,15 @@ public class ElevatorController {
         try {
             List<Long> combinationIds = Lists.newArrayList();
             checkNotNull(elevator.getElevatorshaftId(),"电梯必须绑定电梯井，请重新选择!");
-            for (ElevatorPointCombination combination:elevator.getElevatorPointCombinations()){
+            for (ElevatorPointCombination combination : elevator.getElevatorPointCombinations()) {
                 combinationIds.add(checkNotNull(combination.getId(), "ID编号必须存在，请重新检查!"));
             }
             //保存电梯信息以及电梯与点组合的对应关系
             elevatorService.createElevator(elevator, combinationIds);
-            return AjaxResult.success();
+            return AjaxResult.success("保存电梯信息成功");
         }catch (Exception e){
-            return AjaxResult.failed(e.getMessage());
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "保存电梯信息失败");
         }
     }
 
@@ -185,9 +204,10 @@ public class ElevatorController {
             }
             //更新电梯信息以及电梯与点组合的对应关系
             elevatorService.updateElevator(elevator, combinationIds);
-            return AjaxResult.success();
+            return AjaxResult.success("更新电梯信息成功");
         }catch (Exception e){
-            return AjaxResult.failed(e.getMessage());
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "更新电梯信息失败");
         }
     }
 
@@ -199,9 +219,10 @@ public class ElevatorController {
     public AjaxResult deleteElevator(@PathVariable("elevatorId") String elevatorId){
         try {
             elevatorService.deleteById(Long.parseLong(elevatorId));
-            return AjaxResult.success();
+            return AjaxResult.success("删除电梯信息成功");
         }catch (Exception e){
-            return AjaxResult.failed(e.getMessage());
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "删除电梯信息失败");
         }
     }
 
@@ -227,9 +248,10 @@ public class ElevatorController {
     public AjaxResult createElevatorShaft(@RequestBody ElevatorShaft elevatorShaft){
         try {
             elevatorShaftService.save(elevatorShaft);
-            return AjaxResult.success();
+            return AjaxResult.success("创建新的电梯井成功");
         }catch (Exception e){
-            return AjaxResult.failed(e.getMessage());
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "创建新的电梯井失败");
         }
     }
 
@@ -241,10 +263,11 @@ public class ElevatorController {
     @RequestMapping(value = "/assets/elevatorShaft", method = RequestMethod.PUT)
     public AjaxResult updateElevatorShaft(@RequestBody ElevatorShaft elevatorShaft){
         try {
-            elevatorShaftService.update(elevatorShaft);
-            return AjaxResult.success();
+            elevatorShaftService.updateSelective(elevatorShaft);
+            return AjaxResult.success("修改电梯井信息成功");
         }catch (Exception e){
-            return AjaxResult.failed(e.getMessage());
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "修改电梯井信息失败");
         }
     }
 
@@ -256,9 +279,10 @@ public class ElevatorController {
     public AjaxResult deleteElevatorShaft(@PathVariable("elevatorShaftId") String elevatorShaftId){
         try {
             elevatorShaftService.deleteById(Long.parseLong(elevatorShaftId));
-            return AjaxResult.success();
+            return AjaxResult.success("删除电梯井信息成功");
         }catch (Exception e){
-            return AjaxResult.failed(e.getMessage());
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "删除电梯井信息失败");
         }
     }
 

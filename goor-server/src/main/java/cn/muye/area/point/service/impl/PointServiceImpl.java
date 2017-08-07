@@ -115,16 +115,16 @@ public class PointServiceImpl implements PointService {
             Object mapPointTypeId = jsonObject.get(SearchConstants.SEARCH_POINT_TYPE);
             Object cloudMapPointTypeId = jsonObject.get(SearchConstants.SEARCH_CLOUD_POINT_TYPE);
             if (pointName != null) {
-                criteria.andCondition("POINT_NAME like %" + pointName + "%");
+                criteria.andCondition("POINT_NAME like '%" + pointName + "%'");
             }
             if (pointAlias != null) {
-                criteria.andCondition("POINT_ALIAS like %" + pointAlias + "%");
+                criteria.andCondition("POINT_ALIAS like '%" + pointAlias + "%'");
             }
             if (sceneName != null) {
-                criteria.andCondition("SCENE_NAME like %" + sceneName + "%");
+                criteria.andCondition("SCENE_NAME like '%" + sceneName + "%'");
             }
             if (mapName != null) {
-                criteria.andCondition("MAP_NAME like %" + mapName + "%");
+                criteria.andCondition("MAP_NAME like '%" + mapName + "%'");
             }
             if (mapPointTypeId != null) {
                 criteria.andCondition("MAP_POINT_TYPE_ID =" + mapPointTypeId);

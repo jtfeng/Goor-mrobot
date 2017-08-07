@@ -10,7 +10,7 @@ public interface RobotConfigService {
 
     void add(RobotConfig robotConfig);
 
-    void update(RobotConfig robotConfig);
+    int updateSelective(RobotConfig robotConfig);
 
     RobotConfig getByRobotId(Long robotId);
 }

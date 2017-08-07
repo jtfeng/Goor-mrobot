@@ -52,6 +52,8 @@ public class Robot extends BaseBean {
     @Transient
     private List<MapPoint> chargerMapPointList; //充电桩点LIST
 
+    private Integer robotIdForElevator; //机器人电梯编号（针对电梯使用）
+
     public List<RobotPassword> getPasswords() {
         return passwords;
     }
@@ -179,5 +181,13 @@ public class Robot extends BaseBean {
 
     public void setSceneId(Long sceneId) {
         this.sceneId = sceneId;
+    }
+
+    public Integer getRobotIdForElevator() {
+        return robotIdForElevator;
+    }
+
+    public void setRobotIdForElevator(Integer robotIdForElevator) {
+        this.robotIdForElevator = robotIdForElevator;
     }
 }

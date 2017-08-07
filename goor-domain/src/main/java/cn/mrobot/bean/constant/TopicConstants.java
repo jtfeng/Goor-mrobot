@@ -53,11 +53,11 @@ public class TopicConstants {
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
-	public static final String PUB_NAME_ROBOT_INFO = "robot_info"; //上报机器人信息(电量阈值)的pubName
-	public static final String SUB_NAME_ROBOT_INFO_REPLY = "robot_info_reply"; //应用那边同步机器人信息(电量阈值)结果的回执subName
+	public static final String PUB_NAME_ROBOT_INFO = "robot_info"; //下发机器人信息和应用请求机器人信息(电量阈值)的pubName
 	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
 	public static final String STATE_COLLECTOR = "/state_collector"; //状态机返回状态的topic
 	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic
+	public static final String ROBOTS_CURRENT_POSE = "robots_current_pose"; //所有机器人当前位置
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
 	public static final String ROBOT_CODE = "robot_code";//机器人主板编号

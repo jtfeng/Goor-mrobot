@@ -120,18 +120,22 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         save(elevator);
         //删除旧的关系
         elevatorMapper.deleteRelationsByElevatorId(elevator.getId());
-        //添加新的关系
-        elevatorMapper.insertRelationsByElevatorId(elevator.getId(), combinationIds);
+        if (combinationIds.size() != 0) {
+            //添加新的关系
+            elevatorMapper.insertRelationsByElevatorId(elevator.getId(), combinationIds);
+        }
     }
 
     @Override
     public void updateElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //更新电梯信息
-         update(elevator);
+        this.updateSelective(elevator);
         //删除旧的关系
         elevatorMapper.deleteRelationsByElevatorId(elevator.getId());
-        //添加新的关系
-        elevatorMapper.insertRelationsByElevatorId(elevator.getId(), combinationIds);
+        if (combinationIds.size() != 0) {
+            //添加新的关系
+            elevatorMapper.insertRelationsByElevatorId(elevator.getId(), combinationIds);
+        }
     }
 
     @Override
