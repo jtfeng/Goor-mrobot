@@ -214,10 +214,18 @@ public class ConsumerCommon {
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
                 String messageData = jsonObjectData.getString(TopicConstants.DATA);
+                Integer errorCode = jsonObjectData.getInteger(SearchConstants.SEARCH_ERROR_CODE);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     //将当前加载的地图信息存入缓存
                     CacheInfoManager.setMapCurrentCache(messageInfo);
+                    //将场景和对应的机器人放置在缓存中
+                   if (errorCode != null && errorCode == 0) {
+                       String mapData = jsonObjectData.getString(TopicConstants.DATA);
+                       JSONObject mapObject = JSON.parseObject(mapData);
+                       String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
+                       CacheInfoManager.setSceneRobotListCache(sceneName, messageInfo.getSenderId());
+                   }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
                     //保存电量信息
                     String deviceId = messageInfo.getSenderId();
@@ -407,7 +415,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_ROBOT_INFO)
     public void subscribeRobotInfo(@Payload MessageInfo messageInfo) {
         try {
-            logger.info("subscribeRobotInfo start");
+//            logger.info("subscribeRobotInfo start");
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 String robotStr = AES.decryptFromBase64(messageInfo.getMessageText(), Constant.AES_KEY);
                 Robot robotNew = JSON.parseObject(robotStr, Robot.class);

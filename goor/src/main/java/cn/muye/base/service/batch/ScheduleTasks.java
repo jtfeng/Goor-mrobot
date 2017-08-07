@@ -50,26 +50,21 @@ public class ScheduleTasks {
     @Value("${server.mapPath")
     private String mapPath;
 
-    //每10s发送未成功的消息
-//    @Scheduled(cron = "*/5 * *  * * * ")
-//    public void sendMessageSchedule() {
-//        logger.info("Scheduled send message start");
-//        try {
-//            List<OffLineMessage> list = offLineMessageService.listByIsSuccess(false);
-//            for (OffLineMessage message : list) {
-//                MessageInfo info = new MessageInfo(message);
-//                messageSendService.sendMessage(message.getReceiverId(), info);
-//            }
-//
-////            OffLineMessage message = offLineMessageService.getByIsSuccess(false);
-////            if(message != null && message.getId() != null){
-////                MessageInfo info = new MessageInfo(message);
-////                messageSendService.sendMessage(message.getReceiverId(), info);
-////            }
-//        } catch (Exception e) {
-//            logger.error("Scheduled send message error", e);
-//        }
-//    }
+    @Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
+    private String topicCommandAndReceiveSN;
+
+    //没5s发送一次心跳消息
+    @Scheduled(cron = "*/5 * *  * * * ")
+    public void mqHealthCheckScheduled() {
+        logger.info("Scheduled mqHealthCheckScheduled task start");
+        try {
+                ScheduledHandleService service = new ScheduledHandleServiceImp();
+                service.mqHealthCheck(topicCommandAndReceiveSN);
+                logger.info("schedule mqHealthCheckScheduled task end");
+        } catch (Exception e) {
+            logger.error("Scheduled send message error", e);
+        }
+    }
 
     //每10s发送回执消息
 //    @Scheduled(cron = "*/5 * *  * * * ")

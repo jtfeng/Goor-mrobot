@@ -48,10 +48,6 @@ public class ConsumerCommon {
     public void topicCommandMessage(@Payload MessageInfo messageInfo) {
         try {
             if (messageInfo != null) {
-                if(MessageType.RABBITMQ_HEARTBEAT.equals(messageInfo.getMessageType())){
-                    logger.info("成功接收goor心跳消息-->>"+messageInfo);
-                    return;
-                }
                 logger.info("topicCommandMessage=========" + messageInfo);
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
                 service.publishMessage(ros, messageInfo);
@@ -71,7 +67,10 @@ public class ConsumerCommon {
         try {
             if (messageInfo != null) {
                 logger.info("topicCommandAndReceiveMessage=========" + messageInfo);
-
+                if(MessageType.RABBITMQ_HEARTBEAT.equals(messageInfo.getMessageType())){
+                    logger.info("成功接收goor心跳消息-->>"+messageInfo);
+                    return AjaxResult.success();
+                }
                 //x86 开机定时时间同步
                 if (MessageType.TIME_SYNCHRONIZED.equals(messageInfo.getMessageType())) {
                     return clientTimeSynchronized(messageInfo);
