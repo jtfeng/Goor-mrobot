@@ -126,19 +126,6 @@ public class ConsumerCommon {
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.SUB_NAME_ROBOT_INFO_REPLY)) { //应用反馈给云端是否同步电量阈值成功
-                    //上报至云端
-                    MessageInfo cacheInfo = new MessageInfo();
-                    int errorCode = jsonObjectData.getInteger("error_code");
-                    String innerData = jsonObjectData.getString(TopicConstants.DATA);
-                    JSONObject innerJsonObjectData = JSON.parseObject(innerData);
-                    String uuid = innerJsonObjectData.getString(TopicConstants.UUID);
-                    if (errorCode == 0) {
-                        cacheInfo.setSuccess(true);
-                    } else {
-                        cacheInfo.setSuccess(false);
-                    }
-                    CacheInfoManager.setUUIDCache(uuid, cacheInfo);
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
                     String robotCode = messageInfo.getSenderId();
                     Robot robotDb = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
@@ -156,10 +143,10 @@ public class ConsumerCommon {
      * @param robotNew
      */
     private void syncRosRobotConfig(Robot robotNew) {
-        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+        for (int i = 0; i < 2; i++) {
             try {
                 CommonInfo commonInfo = new CommonInfo();
-                commonInfo.setTopicName(topic);
+                commonInfo.setTopicName(TopicConstants.AGENT_PUB);
                 commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
                 //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
                 String uuid = UUID.randomUUID().toString().replace("-", "");
@@ -427,6 +414,8 @@ public class ConsumerCommon {
                 CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), messageInfo.getSendTime().getTime());
                 robotService.autoRegister(robotNew);
             }
+        } catch (RuntimeException e) {
+            logger.error("机器人注册失败，回滚，错误信息==>{}", e);
         } catch (Exception e) {
             logger.error("consumer robotInfo exception", e);
         }

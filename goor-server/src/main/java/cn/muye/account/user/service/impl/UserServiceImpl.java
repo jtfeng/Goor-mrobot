@@ -111,10 +111,10 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
      */
     @Override
     public void updateUser(User user) {
-        userMapper.updateByPrimaryKey(user);
+        userMapper.updateByPrimaryKeySelective(user);
         //更新用户角色
         Long userId = user.getId();
-        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
+//        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
         Long roleId = user.getRoleId();
         List<StationDTO4User> stationList = user.getStationList();
         Role roleDb = roleService.getById(roleId);

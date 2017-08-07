@@ -267,6 +267,7 @@ public class HttpDownloader extends Thread {
         long timeStamp = -1;
         HttpURLConnection conn = null;
         try {
+            logger.info("文件http地址,remoteUrl=" + this.info.getPair().remoteUrl);
             URL url = new URL(this.info.getPair().remoteUrl);
             conn = (HttpURLConnection) url.openConnection();
             HttpDownloader.RetriveSingleStream.setHeader(conn);

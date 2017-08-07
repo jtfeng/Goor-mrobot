@@ -56,10 +56,10 @@ public class LogInfoServiceImpl implements LogInfoService {
                 criteria.andCondition("MODULE = " + module);
             }
             if (!StringUtil.isNullOrEmpty(mapName)) {
-                criteria.andCondition("MAP_NAME = " + mapName);
+                criteria.andCondition("MAP_NAME = '" + mapName+"'");
             }
             if (!StringUtil.isNullOrEmpty(sceneName)) {
-                criteria.andCondition("SCENE_NAME = " + sceneName);
+                criteria.andCondition("SCENE_NAME = '" + sceneName+"'");
             }
         }
         criteria.andCondition("STORE_ID=" + storeId);
