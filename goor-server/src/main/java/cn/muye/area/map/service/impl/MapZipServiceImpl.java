@@ -84,10 +84,10 @@ public class MapZipServiceImpl implements MapZipService {
             Object mapName = jsonObject.get(SearchConstants.SEARCH_MAP_NAME);
             Object sceneName = jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
             if (mapName != null) {
-                criteria.andCondition("MAP_NAME like %" + mapName + "%");
+                criteria.andCondition("MAP_NAME like '%" + mapName + "%'");
             }
             if (sceneName != null) {
-                criteria.andCondition("SCENE_NAME like %" + sceneName + "%");
+                criteria.andCondition("SCENE_NAME like '%" + sceneName + "%'");
             }
         }
         example.setOrderByClause("CREATE_TIME DESC");

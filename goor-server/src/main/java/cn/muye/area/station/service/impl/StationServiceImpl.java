@@ -61,7 +61,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
         //删除关联的点，然后重新添加关联的点
         stationMapPointXREFService.deleteByStationId(station.getId());
 
-        int num = myMapper.updateByPrimaryKey(station);
+        int num = myMapper.updateByPrimaryKeySelective(station);
 
         //重新关联点
         saveStationMapPointXREFByStation(station);
