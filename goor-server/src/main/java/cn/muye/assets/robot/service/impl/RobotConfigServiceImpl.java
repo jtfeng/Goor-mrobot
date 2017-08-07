@@ -3,6 +3,7 @@ package cn.muye.assets.robot.service.impl;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.muye.assets.robot.mapper.RobotConfigMapper;
 import cn.muye.assets.robot.service.RobotConfigService;
+import cn.muye.base.service.imp.BaseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,13 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class RobotConfigServiceImpl implements RobotConfigService {
+public class RobotConfigServiceImpl extends BaseServiceImpl<RobotConfig> implements RobotConfigService {
 
     @Autowired
     private RobotConfigMapper robotConfigMapper;
 
     /**
      * 新增机器人配置
+     *
      * @param robotConfig
      */
     public void add(RobotConfig robotConfig) {
@@ -27,14 +29,16 @@ public class RobotConfigServiceImpl implements RobotConfigService {
 
     /**
      * 修改机器人配置
+     *
      * @param robotConfig
      */
-    public void update(RobotConfig robotConfig) {
-        robotConfigMapper.updateByPrimaryKey(robotConfig);
+    public int updateSelective(RobotConfig robotConfig) {
+        return robotConfigMapper.updateByPrimaryKeySelective(robotConfig);
     }
 
     /**
      * 根据机器人ID查询配置
+     *
      * @param robotId
      * @return
      */

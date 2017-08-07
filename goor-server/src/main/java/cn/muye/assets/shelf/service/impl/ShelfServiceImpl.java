@@ -84,7 +84,7 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
     }
 
     public int update(Shelf shelfDb) {
-        return shelfMapper.updateByPrimaryKey(shelfDb);
+        return updateSelectiveByStoreId(shelfDb);
     }
 
     public int deleteById(Long id) {

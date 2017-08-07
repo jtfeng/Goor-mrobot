@@ -40,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
 import java.util.*;
 
 /**
@@ -100,10 +101,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         if (robotConfig != null && robot.getLowBatteryThreshold() != null) {
             robotConfig.setLowBatteryThreshold(robot.getLowBatteryThreshold());
             robotConfig.setSufficientBatteryThreshold(robot.getSufficientBatteryThreshold());
-            robotConfigService.update(robotConfig);
+            robotConfigService.updateSelective(robotConfig);
         }
         //向X86上同步修改后的机器人电量阈值信息
-        if (robot.getOnline() != null && robot.getOnline() == true) {
+        if (robot.getOnline() != null && robot.getOnline() == true && lowBatteryThresholdDb != null && lowRobotBatteryThreshold != null && sufficientBatteryThresholdDb != null && sufficientBatteryThreshold != null) {
             if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
                 robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
             }
@@ -122,10 +123,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     private void syncRobotBatteryThresholdToRos(Robot robotDb) throws RuntimeException {
-        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+        //给应用和任务管理器下发topic
+        for (int i = 0; i < 2; i++) {
             try {
                 CommonInfo commonInfo = new CommonInfo();
-                commonInfo.setTopicName(topic);
+                commonInfo.setTopicName(TopicConstants.AGENT_PUB);
                 commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
                 String uuid = UUID.randomUUID().toString().replace("-", "");
                 robotDb.setUuid(UUID.randomUUID().toString().replace("-", ""));
@@ -135,6 +137,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 slamBody.setData(JsonUtils.toJson(robotDb,
                         new TypeToken<Robot>() {
                         }.getType()));
+                slamBody.setErrorCode("0");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
@@ -147,16 +150,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 LOGGER.error("发送错误", e);
             }
         }
-    }
-
-    private boolean messageSave(MessageInfo messageInfo) throws Exception {
-        if (messageInfo == null
-                || StringUtil.isEmpty(messageInfo.getUuId() + "")) {
-            return false;
-        }
-        OffLineMessage message = new OffLineMessage(messageInfo);
-        offLineMessageService.save(message);//更新发送的消息
-        return true;
     }
 
     /**
@@ -279,7 +272,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
 
-    public void saveRobotAndBindChargerMapPoint(Robot robot) {
+    public void saveRobotAndBindChargerMapPoint(Robot robot) throws RuntimeException {
         super.save(robot);
         Long robotNewId = robot.getId();
         List list = robot.getChargerMapPointList();
@@ -297,6 +290,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         if (robot.getTypeId() != null) {
             robotPasswordService.saveRobotPassword(robot);
         }
+
     }
 
     /**
@@ -306,7 +300,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public AjaxResult autoRegister(Robot robotNew) {
+    public AjaxResult autoRegister(Robot robotNew) throws RuntimeException {
         try {
             if (robotNew != null) {
                 Long robotId = robotNew.getId();
@@ -384,10 +378,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @param robotNew
      */
     private void syncRosRobotConfig(Robot robotNew) {
-        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+        for (int i = 0; i < 2; i++) {
             try {
                 CommonInfo commonInfo = new CommonInfo();
-                commonInfo.setTopicName(topic);
+                commonInfo.setTopicName(TopicConstants.AGENT_PUB);
                 commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
                 //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
                 String uuid = UUID.randomUUID().toString().replace("-", "");
