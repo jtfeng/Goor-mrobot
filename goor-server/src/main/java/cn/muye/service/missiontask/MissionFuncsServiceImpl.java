@@ -34,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.*;
@@ -42,6 +43,7 @@ import java.util.*;
  * Created by abel on 17-7-13.
  */
 @Service
+@Transactional
 public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     protected static final Logger logger = LoggerFactory.getLogger(MissionFuncsServiceImpl.class);
@@ -159,11 +161,20 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             saveMissionListTask(missionListTask);
             listTasks.add(missionListTask);
         }
-
-        return x86MissionDispatchService.sendX86MissionDispatch(
+        AjaxResult ajaxResult = x86MissionDispatchService.sendX86MissionDispatch(
                 robotCode,
                 getGoorMissionMsg(listTasks)
         );
+        //TODO 加延时判断，ajaxResult为空也是报错
+        ajaxResult = (ajaxResult == null ? AjaxResult.failed(AjaxResult.CODE_FAILED,"消息发送失败") : ajaxResult);
+        if(ajaxResult.getCode() != AjaxResult.CODE_SUCCESS) {
+            //发送失败回滚数据库
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ajaxResult;
+        }
+        else {
+            return AjaxResult.success("消息发送成功");
+        }
     }
 
     @Override

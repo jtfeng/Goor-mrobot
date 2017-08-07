@@ -569,7 +569,8 @@ public class MissionController {
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
-			missionList.setSceneId(scene.getId());
+			Long sceneId = scene.getId();
+			missionList.setSceneId(sceneId);
 
 			//设置重复次数是1，执行1次
 			missionList.setRepeatCount(1);
@@ -596,6 +597,7 @@ public class MissionController {
 
 			//取第一个Mission做导航、语音、充电任务参数校验---------------------------------------
 			Mission mission = missionList.getMissionList().get(0);
+			mission.setSceneId(sceneId);
 
 			//校验点是否存在
 			Set<MissionItem> missionItemSet = mission.getMissionItemSet();
@@ -603,6 +605,7 @@ public class MissionController {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能创建空任务！");
 			}
 			for(MissionItem missionItem : missionItemSet) {
+				missionItem.setSceneId(sceneId);
 				Long featureItemId = missionItem.getFeatureItemId();
 				String data = missionItem.getData();
 				//跟点相关的指令，需要校验点是否存在
@@ -648,10 +651,17 @@ public class MissionController {
 				//取第二个mission做等待任务业务参数校验，如果第二个任务存在，再判断
 				if(missionList.getMissionList().size() ==2) {
 					Mission missionWait = missionList.getMissionList().get(1);
+					missionWait.setSceneId(sceneId);
+
 					Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
 					if(missionWaitItemSet == null
 							|| missionWaitItemSet.size() > 2) {
 						return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+					}
+
+					//对missionItem设置场景ID
+					for(MissionItem missionItem : missionWaitItemSet) {
+						missionItem.setSceneId(sceneId);
 					}
 				}
 			}
@@ -660,6 +670,17 @@ public class MissionController {
 				//TODO 美亚调度充电写死一个Mission
 				if(missionList.getMissionList() == null || missionList.getMissionList().size() != 1) {
 					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，充电任务只能有一个！");
+				}
+				Mission chargeMission = missionList.getMissionList().get(0);
+				Set<MissionItem> chargeMissionItems = chargeMission.getMissionItemSet();
+				if(chargeMissionItems == null || chargeMissionItems.size() > 2) {
+					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，充电任务只能有一个充电点和语音！");
+				}
+
+				//设置场景Id
+				chargeMission.setSceneId(sceneId);
+				for(MissionItem missionItem : chargeMissionItems) {
+					missionItem.setSceneId(sceneId);
 				}
 			}
 
@@ -715,7 +736,7 @@ public class MissionController {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到机器人或选择的机器人多于1台");
 			}
 
-			//TODO 机器人低电量不接收任务下单
+			//TODO 机器人低电量不接收任务下单，美亚应该不需要，因为美亚下发的都是定时巡逻任务，执行任务时的电量只有机器人知道
 
 			//从对照表找延迟时间
 //			Long delayTime = Constant.DEFAULT_DELAY_TIME;
@@ -860,18 +881,10 @@ public class MissionController {
 
 			//遍历发送机器人消息
 			for(String robotCode : robotCodesArray) {
+				//TODO 现在限定是一台机器人，将来多台，返回结果还需要Map形式
 				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists);
-				//TODO 加延时判断，ajaxResult为空也是报错
-				if(ajaxResult == null) {
-					return AjaxResult.failed(AjaxResult.CODE_FAILED,"消息发送失败");
-				}
-				else if(ajaxResult.getCode() != AjaxResult.CODE_SUCCESS) {
-					//TODO 现在限定是一台机器人，将来多台，返回结果还需要Map形式
-					return ajaxResult;
-				}
+				resp = ajaxResult;
 			}
-
-			resp = AjaxResult.success("消息发送成功");
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
 			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"出错");
