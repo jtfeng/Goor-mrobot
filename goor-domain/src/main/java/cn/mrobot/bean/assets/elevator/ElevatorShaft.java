@@ -1,6 +1,7 @@
 package cn.mrobot.bean.assets.elevator;
 
 import cn.mrobot.bean.base.BaseBean;
+
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.List;

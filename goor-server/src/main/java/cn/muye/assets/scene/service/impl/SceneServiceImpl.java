@@ -1,5 +1,6 @@
 package cn.muye.assets.scene.service.impl;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBracelet;
@@ -17,7 +18,11 @@ import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.util.SessionUtil;
+import cn.muye.util.UserUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +34,7 @@ import tk.mybatis.mapper.entity.Example;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by admin on 2017/7/3.
@@ -79,6 +85,16 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return insertRowsCount;
     }
 
+    @Override
+    public Scene storeSceneInfoToSession(String sceneId, String token) throws Exception {
+        Preconditions.checkArgument(sceneId != null && !"".equals(sceneId.trim()), "请传入合法的 sceneId 值");
+        log.info("传入的场景 ID 编号为 ：" + sceneId);
+        Scene scene = getSceneById(Long.parseLong(sceneId));
+        SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG, scene);
+        log.info("传入用户会话中的场景信息为：" + scene);
+        return scene;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     @Override
     public int updateScene(Scene scene) throws Exception {
@@ -92,6 +108,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Override
     public Scene getSceneById(Long id) throws Exception {
         Scene scene = sceneMapper.selectByPrimaryKey(id);
+        Preconditions.checkNotNull(scene, "传入指定编号的场景信息不存在，请检查!");
         scene.setRobots(this.sceneMapper.findRobotBySceneId(id));
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(id, scene.getStoreId());
         if (mapInfos != null && mapInfos.size() != 0) {

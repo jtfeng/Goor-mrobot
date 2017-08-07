@@ -58,7 +58,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void receiveMessage() {
+    public void receiveMessage() throws Exception {
         try {
             rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
@@ -81,7 +81,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void rosHealthCheck() {
+    public void rosHealthCheck() throws Exception {
         logger.info("-->> Scheduled rosHealthCheck start");
         try {
             ros = applicationContext.getBean(Ros.class);
@@ -113,7 +113,28 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void downloadResource() {
+    public void mqHealthCheck(String queueName) throws Exception {
+        try {
+            logger.info("Scheduled mqHealthCheck start queueName="+queueName);
+            if(!getRabbitTemplate()){
+                return;
+            }
+            if(!getLocalRobotSN()){
+                return;
+            }
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setSendTime(new Date());
+            messageInfo.setSenderId(localRobotSN);
+            messageInfo.setMessageType(MessageType.RABBITMQ_HEARTBEAT);
+            logger.info("开始发送goor心跳消息");
+            rabbitTemplate.convertAndSend(queueName, messageInfo);
+        } catch (final Exception e) {
+            logger.error("Scheduled mqHealthCheck exception", e);
+        }
+    }
+
+    @Override
+    public void downloadResource() throws Exception {
         try {
 //            logger.info("-->> Scheduled downloadResource start");
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
@@ -137,7 +158,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public AjaxResult downloadResource(Ros ros, MessageInfo messageInfo) {
+    public AjaxResult downloadResource(Ros ros, MessageInfo messageInfo) throws Exception {
         try {
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
             return DownloadHandle.downloadCheck(ros, messageInfo, receiveMessageService);
@@ -148,7 +169,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void publishMessage() {
+    public void publishMessage() throws Exception {
         try {
 //            logger.info("-->> Scheduled publishMessage start");
             ros = applicationContext.getBean(Ros.class);
@@ -184,7 +205,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public AjaxResult publishMessage(Ros ros, MessageInfo messageInfo) {
+    public AjaxResult publishMessage(Ros ros, MessageInfo messageInfo) throws Exception {
         try {
 //            logger.info("-->> parameter publishMessage start");
             CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
@@ -214,7 +235,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     @Override
-    public void executeTwentyThreeAtNightPerDay() {
+    public void executeTwentyThreeAtNightPerDay() throws Exception {
         logger.info("Scheduled executeTwentyThreeAtNightPerDay clear message start");
         try {
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
@@ -239,14 +260,27 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         }
     }
 
+    private boolean getRabbitTemplate(){
+        if(null == applicationContext){
+            logger.error("getRabbitTemplate applicationContext is null error");
+            return false;
+        }
+        rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+        if(null == rabbitTemplate){
+            logger.error("getRabbitTemplate rabbitTemplate is null error ");
+            return false;
+        }
+        return true;
+    }
+
     private boolean getLocalRobotSN() {
         if (null == applicationContext) {
-            logger.error("sendGoorMessage applicationContext is null error");
+            logger.error("getLocalRobotSN applicationContext is null error");
             return false;
         }
         localRobotSN = (String) applicationContext.getBean("localRobotSN");
         if (StringUtils.isEmpty(localRobotSN)) {
-            logger.error("sendGoorMessage localRobotSN is null error ");
+            logger.error("getLocalRobotSN localRobotSN is null error ");
             return false;
         }
         return true;

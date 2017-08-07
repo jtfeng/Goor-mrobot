@@ -25,7 +25,7 @@ public class Application {
 
     @Bean
     public ScheduledExecutorService scheduledHandle(){
-        ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(2, (e) -> new Thread(e, "Application scheduledHandle"));
+        ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(3, (e) -> new Thread(e, "Application scheduledHandle"));
         new ScheduledHandle(scheduledExecutor);
         return scheduledExecutor;
     }
