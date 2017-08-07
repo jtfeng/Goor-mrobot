@@ -46,8 +46,8 @@ public class Application {
 	@Value("${lsub.name}")
 	private String lSubName;
 
-	@Value(TopicConstants.TOPIC_COMMAND)
-	private String topicCommandSN;
+	@Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
+	private String topicCommandAndReceiveSN;
 
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
@@ -114,7 +114,7 @@ public class Application {
 				return new Thread(r, "Application scheduledHandle");
 			}
 		});
-		new ScheduledHandle(scheduledExecutor, topicCommandSN);
+		new ScheduledHandle(scheduledExecutor, topicCommandAndReceiveSN);
 		return scheduledExecutor;
 	}
 
