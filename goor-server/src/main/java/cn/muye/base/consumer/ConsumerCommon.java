@@ -146,28 +146,40 @@ public class ConsumerCommon {
      * @param robotNew
      */
     private void syncRosRobotConfig(Robot robotNew, String uuid) {
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        robotNew.setUuid(uuid);
+        SlamBody slamBody = new SlamBody();
+        slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
+        slamBody.setUuid(uuid);
+        slamBody.setMsg("success");
+        slamBody.setErrorCode("0");
+        slamBody.setData(JsonUtils.toJson(robotNew,
+                new TypeToken<Robot>() {
+                }.getType()));
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setReceiverId(robotNew.getCode());
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
         try {
-            CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-            robotNew.setUuid(uuid);
-            SlamBody slamBody = new SlamBody();
-            slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
-            slamBody.setUuid(uuid);
-            slamBody.setData(JsonUtils.toJson(robotNew,
-                    new TypeToken<Robot>() {
-                    }.getType()));
-            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-            messageInfo.setReceiverId(robotNew.getCode());
-            messageInfo.setSenderId("goor-server");
-            messageInfo.setMessageType(MessageType.ROBOT_INFO);
-            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-            logger.info("下发机器人{}电量信息成功===>",robotNew.getCode());
             messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
+            logger.info("下发机器人" + robotNew.getCode() + "电量阈值信息成功");
         } catch (Exception e) {
             logger.error("发送错误", e);
+            try {
+                slamBody.setMsg("查询错误");
+                slamBody.setErrorCode("1");
+                slamBody.setData("");
+                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+                messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+                messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
+            } catch (Exception e1) {
+                logger.error("错误{}",e1);
+            }
         } finally {
         }
     }
@@ -190,10 +202,6 @@ public class ConsumerCommon {
                     if (TopicConstants.DEBUG)
                         logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
-
-//                else if(){
-//
-//                }
             }
         } catch (Exception e) {
             logger.error("consumer directAppPub exception", e);
