@@ -47,6 +47,20 @@ public class ElevatorController {
     }
 
     /**
+     * 分页查询所有电梯信息
+     * @return
+     */
+    @RequestMapping(value = "listAllElevators", method = RequestMethod.GET)
+    public AjaxResult listAllElevators(){
+        try {
+            List<Elevator> list = elevatorService.listAll();
+            return AjaxResult.success(list, "查询全部电梯信息成功");
+        }catch (Exception e){
+            return AjaxResult.failed(e,         "查询全部电梯信息失败");
+        }
+    }
+
+    /**
      * 分页查询电梯信息
      * @param whereRequest
      * @return
