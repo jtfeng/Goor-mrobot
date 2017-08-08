@@ -37,7 +37,7 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getAvailableRobotByStationId(Long stationId, Integer typeId);
 
-    void bindChargerMapPoint(Long robotId, List<MapPoint> list);
+    List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list);
 
     List<MapPoint> getChargerMapPointByRobotCode(String robotCode, Long storeId);
 }
