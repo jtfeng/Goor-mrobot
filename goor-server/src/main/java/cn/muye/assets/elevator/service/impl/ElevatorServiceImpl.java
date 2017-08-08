@@ -129,7 +129,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
             }
         }
         if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)){
-            if (("1".equals(elevator.getLockState()))  && (!robotCode.equals(elevator.getRobotCode()))  ) {// 0表示解锁
+            if (("1".equals(elevator.getLockState()))  && (robotCode.equals(elevator.getRobotCode()))  ) {// 0表示解锁
                 elevator.setLockState("0");
                 elevator.setRobotCode(null);
                 updateSelective(elevator);
