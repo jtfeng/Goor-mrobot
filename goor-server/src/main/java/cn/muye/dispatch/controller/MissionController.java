@@ -75,7 +75,7 @@ public class MissionController {
 			}
 
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
@@ -175,7 +175,7 @@ public class MissionController {
 			}
 
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
@@ -225,7 +225,7 @@ public class MissionController {
 			}
 
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
@@ -373,7 +373,7 @@ public class MissionController {
 			}
 
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
@@ -427,7 +427,7 @@ public class MissionController {
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			//如果场景后台切换过，传入场景ID。
 			// 当whereRequest含场景ID条件时，则取该场景ID作为过滤条件；若whereRequest不含场景ID条件时，则取出入的场景ID作为过滤条件。
 			if(scene != null) {
@@ -491,7 +491,7 @@ public class MissionController {
 			//TODO 从session取当前切换门店的ID
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
@@ -565,7 +565,7 @@ public class MissionController {
 		AjaxResult resp;
 		try {
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
@@ -719,7 +719,7 @@ public class MissionController {
 		AjaxResult resp = AjaxResult.success();
 		try {
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene(request);
+			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
