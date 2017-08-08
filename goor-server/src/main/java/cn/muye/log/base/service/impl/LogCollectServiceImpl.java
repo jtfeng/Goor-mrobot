@@ -145,7 +145,7 @@ public class LogCollectServiceImpl implements LogCollectService {
             logInfo.setMessage(baseState);
             saveLogInfo(code, logInfo);
         } catch (Exception e) {
-            LOGGER.error("收集记录底盘日志,只记录触发状态. code=" + code, e);
+            LOGGER.error("收集底盘出错. code=" + code, e);
         }
     }
 

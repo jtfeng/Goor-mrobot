@@ -49,7 +49,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     /**
      * 状态机 module 的缓存
      */
-    private static ConcurrentHashMapCache<String, Boolean> stateModuleCache = new ConcurrentHashMapCache<String, Boolean>();
+    private static ConcurrentHashMapCache<String, Long> stateModuleCache = new ConcurrentHashMapCache<String, Long>();
 
 
     static {
@@ -62,7 +62,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         currentPoseSendTime.put(1, System.currentTimeMillis());
         uuidHandledCache.setMaxLifeTime(0);
 
-        stateModuleCache.setMaxLifeTime(2 * 1000); //存活时间 2s
+        stateModuleCache.setMaxLifeTime(60 * 1000); //存活时间 2s
     }
 
     private CacheInfoManager() {
@@ -124,16 +124,12 @@ public class CacheInfoManager implements ApplicationContextAware {
         CacheInfoManager.applicationContext = applicationContext;
     }
 
-    public static boolean getStateModuleCache(String module) {
-        Boolean flag = stateModuleCache.get(module);
-        return null == flag ? false :flag;
+    public static Long getStateModuleCache(String module) {
+       return stateModuleCache.get(module);
     }
 
     public static void setStateModuleCache(String module) {
-        if(stateModuleCache.ContainsKey(module)){
-            return;
-        }
-        stateModuleCache.put(module, true); //set默认为true
+        stateModuleCache.put(module, System.currentTimeMillis()); //set默认为true
     }
 
     public static boolean getUUIDHandledCache(String uuid) {
