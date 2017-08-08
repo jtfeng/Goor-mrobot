@@ -65,6 +65,8 @@ public class TopicConstants {
 
 	/* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
 	public static final String PICK_UP_PSWD_VERIFY = "pick_up_pswd_verify";
+	/* 17.8.7 Add By Abel. 更新取货密码信息*/
+	public static final String PICK_UP_PSWD_UPDATE = "pick_up_pswd_update";
 
 	//应用下发消息需要获取详细的货物类别信息
 	public static final String FETCH_DETAIL_GOODSTYPE = "fetch_detail_goodstype";

@@ -1274,7 +1274,7 @@ INSERT INTO `M_MERCHANT_STORE` VALUES ('8', 'aaa8', '');
 INSERT INTO `M_MERCHANT_STORE` VALUES ('9', 'aaa9', '');
 INSERT INTO `M_MERCHANT_STORE` VALUES ('10', 'aaa', '');
 INSERT INTO `M_MERCHANT_STORE` VALUES ('11', 'aaa2', null);
-INSERT INTO `M_MERCHANT_STORE` VALUES ('100', 'AGV测试门店', '');
+INSERT INTO `M_MERCHANT_STORE` VALUES ('100', '诺亞测试门店', '');
 
 -- ----------------------------
 -- Table structure for oauth_access_token
