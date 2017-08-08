@@ -13,6 +13,8 @@ import java.util.Map;
 public interface RobotMapper extends MyMapper<Robot> {
 
     List<Robot> listRobot(Map map);
+
+    Robot getRobotByCode(Map map);
 //
 //    Robot getById(Integer id);
 //

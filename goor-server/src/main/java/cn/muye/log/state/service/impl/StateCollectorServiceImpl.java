@@ -211,6 +211,8 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
+            if(field.getName().equals("state"))
+                continue;
             int value = (int) field.get(stateCollector);
             if (value == 1 && (!field.getName().equals(StateFieldEnums.POWER_ON.getName()))) { //排除开机。开机为1
                 stateDetailList.add(parseStateDetail(chPrefix, field, value, HAPPEN));
