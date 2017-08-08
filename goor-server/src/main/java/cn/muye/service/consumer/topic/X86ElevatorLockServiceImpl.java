@@ -43,15 +43,17 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
                 switch (jsonElevatorLock.getAction()){
                     case "lock":
                         //判断和返回加锁
-                        ret = elevatorService.updateElevatorLockState(
+                        ret = elevatorService.updateElevatorLockStateWithRobotCode(
                                 jsonElevatorLock.getElevator_id(),
-                                Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK
+                                Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK,
+                                baseMessageService.getSenderId(messageInfo)
                         );
                         break;
                     case "unlock":
-                        ret = elevatorService.updateElevatorLockState(
+                        ret = elevatorService.updateElevatorLockStateWithRobotCode(
                                 jsonElevatorLock.getElevator_id(),
-                                Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK
+                                Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK,
+                                baseMessageService.getSenderId(messageInfo)
                         );
                         break;
                         default:
@@ -75,6 +77,6 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
             }
 
         }
-        return null;
+        return AjaxResult.failed();
     }
 }
