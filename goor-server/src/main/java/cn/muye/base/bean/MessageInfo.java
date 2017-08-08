@@ -2,6 +2,7 @@ package cn.muye.base.bean;
 
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.utils.RandomUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
@@ -53,6 +54,13 @@ public class MessageInfo implements Serializable {
 
     private boolean success;//是否发送成功
 
+    public MessageInfo(String senderId, String receiverId, String messageText) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.messageText = messageText;
+        this.uuId = RandomUtil.getUUID();
+        this.sendTime = new Date();
+    }
 
     public MessageInfo(OffLineMessage message){
         BeanUtils.copyProperties(message, this);

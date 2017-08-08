@@ -91,7 +91,7 @@ public class OrderController extends BaseController {
             Long stationId = userUtil.getStationId();
             order.setStartStation(new Station(stationId));
             //注入场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             order.setScene(scene);
             //现在orderSetting后台默认注入默认配置
             if(order.getOrderSetting() == null){
