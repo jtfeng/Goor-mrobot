@@ -92,7 +92,9 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private void analysisBasDriverState(StateCollectorResponse stateCollectorResponse) {
         int moduleId = Integer.parseInt(stateCollectorResponse.getModule());
         StateCollectorBaseDriver stateCollectorBaseDriver = new StateCollectorBaseDriver();
-        String stateStr = StringUtil.parseToBit(stateCollectorResponse.getState()); //00011011
+        String state = stateCollectorResponse.getState();
+        stateCollectorBaseDriver.setState(state);
+        String stateStr = StringUtil.parseToBit(state); //00011011
         char[] chars = stateStr.toCharArray();
         int length = chars.length;
         stateCollectorBaseDriver.setDriverFlow(parseInt(chars[length - 1]));//驱动器过流  0：未触发  1：触发
@@ -115,7 +117,10 @@ public class StateCollectorServiceImpl implements StateCollectorService {
      */
     private void analysisBaseSystemState(StateCollectorResponse stateCollectorResponse) {
         StateCollectorBaseSystem stateCollectorBaseSystem = new StateCollectorBaseSystem();
-        String stateStr = StringUtil.parseToBit(stateCollectorResponse.getState()); //00011011
+        String state = stateCollectorResponse.getState();
+        stateCollectorBaseSystem.setState(state);
+
+        String stateStr = StringUtil.parseToBit(state); //00011011
         char[] chars = stateStr.toCharArray();
         int length = chars.length;
         stateCollectorBaseSystem.setRes(parseInt(chars[length - 1])); //res 0：未触发  1：触发
@@ -133,7 +138,9 @@ public class StateCollectorServiceImpl implements StateCollectorService {
      */
     private void analysisBaseMicroswitchAndAntiDroppingstate(StateCollectorResponse stateCollectorResponse) {
         StateCollectorBaseMicroSwitchAndAntiDropping baseMicroSwitchAndAntiDropping = new StateCollectorBaseMicroSwitchAndAntiDropping();
-        String stateStr = StringUtil.parseToBit(stateCollectorResponse.getState());
+        String state = stateCollectorResponse.getState();
+        baseMicroSwitchAndAntiDropping.setState(state);
+        String stateStr = StringUtil.parseToBit(state);
         char[] chars = stateStr.toCharArray();
         int length = chars.length;
         baseMicroSwitchAndAntiDropping.setLeftAntiDropping(parseInt(chars[length - 1]));//防跌落左传感器
