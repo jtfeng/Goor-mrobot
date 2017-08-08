@@ -161,13 +161,17 @@ public class FileUpladService {
     }
 
     public void sendTopic(String errorCode, String uuid, String message) {
-        //封装数据，通知Artmis地图上传成功
-        SlamBody slamBody = new SlamBody();
-        slamBody.setErrorCode(errorCode);
-        slamBody.setPubName(TopicConstants.AGENT_LOCAL_MAP_UPLOAD);
-        slamBody.setUuid(uuid);
-        slamBody.setMsg(message);
-        appSubService.sendTopic(TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING, slamBody);
+        try {
+            //封装数据，通知Artmis地图上传成功
+            SlamBody slamBody = new SlamBody();
+            slamBody.setErrorCode(errorCode);
+            slamBody.setPubName(TopicConstants.AGENT_LOCAL_MAP_UPLOAD);
+            slamBody.setUuid(uuid);
+            slamBody.setMsg(message);
+            appSubService.sendTopic(TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING, slamBody);
+        }catch (Exception e){
+            LOGGER.error("FileUpladService sendTopic Exception", e);
+        }
     }
 
     /**
@@ -175,7 +179,7 @@ public class FileUpladService {
      *
      * @return
      */
-    private Map<String, List<String>> getSceneMapName() {
+    private Map<String, List<String>> getSceneMapName() throws Exception {
         File file = new File(MAP_PATH);
         Map<String, List<String>> map = new HashMap<>();
         if (!file.exists()) {

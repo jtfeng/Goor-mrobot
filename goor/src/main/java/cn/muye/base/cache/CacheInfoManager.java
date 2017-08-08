@@ -24,6 +24,11 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<Integer, Long> topicHeartCheckCache = new ConcurrentHashMapCache<Integer, Long>();
 
     /**
+     * x86MissionTopicHeartCheck 的缓存
+     */
+    private static ConcurrentHashMapCache<Integer, Long> x86MissionTopicHeartCheckCache = new ConcurrentHashMapCache<Integer, Long>();
+
+    /**
      * 降低获取机器人当前位置信息 的缓存
      */
     private static ConcurrentHashMapCache<Integer, Long> currentPoseSendTime = new ConcurrentHashMapCache<Integer, Long>();
@@ -49,20 +54,22 @@ public class CacheInfoManager implements ApplicationContextAware {
     /**
      * 状态机 module 的缓存
      */
-    private static ConcurrentHashMapCache<String, Boolean> stateModuleCache = new ConcurrentHashMapCache<String, Boolean>();
+    private static ConcurrentHashMapCache<String, Long> stateModuleCache = new ConcurrentHashMapCache<String, Long>();
 
 
     static {
         topicHeartCheckCache.setMaxLifeTime(0);
+        x86MissionTopicHeartCheckCache.setMaxLifeTime(0);
         currentPoseSendTime.setMaxLifeTime(0);
         nameSubCache.setMaxLifeTime(0);
         nameLSubCache.setMaxLifeTime(0);
         robotInfoConfigCache.setMaxLifeTime(0);
         topicHeartCheckCache.put(1, System.currentTimeMillis());
+        x86MissionTopicHeartCheckCache.put(1, System.currentTimeMillis());
         currentPoseSendTime.put(1, System.currentTimeMillis());
         uuidHandledCache.setMaxLifeTime(0);
 
-        stateModuleCache.setMaxLifeTime(2 * 1000); //存活时间 2s
+        stateModuleCache.setMaxLifeTime(60 * 1000); //存活时间 2s
     }
 
     private CacheInfoManager() {
@@ -100,6 +107,15 @@ public class CacheInfoManager implements ApplicationContextAware {
         return topicHeartCheckCache.get(1);
     }
 
+    public static void setX86MissionTopicHeartCheckCache() {
+        x86MissionTopicHeartCheckCache.remove(1);
+        x86MissionTopicHeartCheckCache.put(1, System.currentTimeMillis());
+    }
+
+    public static Long getX86MissionTopicHeartCheckCache() {
+        return x86MissionTopicHeartCheckCache.get(1);
+    }
+
     public static void setCurrentPoseSendTime() {
         currentPoseSendTime.put(1, System.currentTimeMillis());
     }
@@ -124,16 +140,12 @@ public class CacheInfoManager implements ApplicationContextAware {
         CacheInfoManager.applicationContext = applicationContext;
     }
 
-    public static boolean getStateModuleCache(String module) {
-        Boolean flag = stateModuleCache.get(module);
-        return null == flag ? false :flag;
+    public static Long getStateModuleCache(String module) {
+       return stateModuleCache.get(module);
     }
 
     public static void setStateModuleCache(String module) {
-        if(stateModuleCache.ContainsKey(module)){
-            return;
-        }
-        stateModuleCache.put(module, true); //set默认为true
+        stateModuleCache.put(module, System.currentTimeMillis()); //set默认为true
     }
 
     public static boolean getUUIDHandledCache(String uuid) {

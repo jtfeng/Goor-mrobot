@@ -1,11 +1,9 @@
 package cn.muye.base.config;
 
-import cn.mrobot.bean.constant.TopicConstants;
-import cn.muye.base.bean.TopicSubscribeInfo;
-import cn.muye.base.listener.CheckHeartSubListenerImpl;
+import cn.muye.base.bean.RosHandlerImp;
+import cn.muye.base.bean.TopicHandleInfo;
 import edu.wpi.rail.jrosbridge.Ros;
-import edu.wpi.rail.jrosbridge.Topic;
-import edu.wpi.rail.jrosbridge.callback.TopicCallback;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * Created by enva on 2017/6/28.
  */
 @Configuration
+@Slf4j
 //@AutoConfigureAfter(RabbitTemplate.class)
 public class RosConfig {
 
@@ -24,10 +23,13 @@ public class RosConfig {
     public Ros ros() {
         Ros ros = new Ros(rosPath);
         ros.connect();
-        Topic checkHeartTopic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
-        TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
-        checkHeartTopic.subscribe(checkHeartCallback);
-        TopicSubscribeInfo.reSubScribeTopic(ros);
+        ros.addRosHandler(new RosHandlerImp());
+        try {
+            TopicHandleInfo.topicSubScribe(ros);
+            TopicHandleInfo.topicAdvertise(ros);
+        } catch (Exception e) {
+            log.error("rosConfig get x86_mission_dispatch error", e);
+        }
         return ros;
     }
 }

@@ -9,6 +9,7 @@ import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.FileValidCreateUtil;
 import cn.mrobot.utils.ZipUtils;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.file.FileHelper;
 import cn.muye.base.model.message.ReceiveMessage;
@@ -220,7 +221,7 @@ public class HttpDownloader extends Thread {
             logger.error("-->>download publishMessage start");
             CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
-                Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
                 Message toSend = new Message(commonInfo.getPublishMessage());
                 echo.publish(toSend);
 

@@ -2,7 +2,7 @@ package cn.muye.base.listener;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.SingleFactory;
-import cn.muye.base.bean.TopicSubscribeInfo;
+import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.producer.ProducerCommon;
 import cn.muye.base.service.FileUpladService;
@@ -37,29 +37,33 @@ public class AgentSubListenerImpl implements TopicCallback,ApplicationContextAwa
 
 	@Override
 	public void handleMessage(Message message) {
-        if (TopicConstants.DEBUG)
-		logger.info("From ROS ====== agent_sub topic  " + message.toString());
-		if(TopicSubscribeInfo.checkSubNameIsNeedConsumer(message.toString())){
-            if (TopicConstants.DEBUG)
-			logger.info(" ====== message.toString()===" + message.toString());
-			ProducerCommon msg = SingleFactory.getProducerCommon();
-			msg.sendAgentSubMessage(message.toString());
-		}
-		if(TopicSubscribeInfo.checkLocalSubNameNoNeedConsumer(message.toString())){
-			JsonObject jsonObject = message.toJsonObject();
-			String data = jsonObject.getString(TopicConstants.DATA);
-			JSONObject dataObject = JSON.parseObject(data);
-			String subName = dataObject.getString(TopicConstants.SUB_NAME);
-			String uuid = dataObject.getString(TopicConstants.UUID);
-			boolean handled = CacheInfoManager.getUUIDHandledCache(uuid);
-			if(handled)
-				logger.info(" UUID 请求已处理, uuid="+uuid);
-			if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName) && (!handled)) {
-				FileUpladService fileUpladService = applicationContext.getBean(FileUpladService.class);
-				fileUpladService.sendTopic("0", uuid,"请求接收成功");
-				fileUpladService.uploadMapFile(uuid);
-				CacheInfoManager.setUUIDHandledCache(uuid);
+		try {
+			if (TopicConstants.DEBUG)
+				logger.info("From ROS ====== agent_sub topic  " + message.toString());
+			if (TopicHandleInfo.checkSubNameIsNeedConsumer(message.toString())) {
+				if (TopicConstants.DEBUG)
+					logger.info(" ====== message.toString()===" + message.toString());
+				ProducerCommon msg = SingleFactory.getProducerCommon();
+				msg.sendAgentSubMessage(message.toString());
 			}
+			if (TopicHandleInfo.checkLocalSubNameNoNeedConsumer(message.toString())) {
+				JsonObject jsonObject = message.toJsonObject();
+				String data = jsonObject.getString(TopicConstants.DATA);
+				JSONObject dataObject = JSON.parseObject(data);
+				String subName = dataObject.getString(TopicConstants.SUB_NAME);
+				String uuid = dataObject.getString(TopicConstants.UUID);
+				boolean handled = CacheInfoManager.getUUIDHandledCache(uuid);
+				if (handled)
+					logger.info(" UUID 请求已处理, uuid=" + uuid);
+				if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName) && (!handled)) {
+					FileUpladService fileUpladService = applicationContext.getBean(FileUpladService.class);
+					fileUpladService.sendTopic("0", uuid, "请求接收成功");
+					fileUpladService.uploadMapFile(uuid);
+					CacheInfoManager.setUUIDHandledCache(uuid);
+				}
+			}
+		}catch (Exception e){
+			logger.error("AgentSubListenerImpl Exception", e);
 		}
 	}
 

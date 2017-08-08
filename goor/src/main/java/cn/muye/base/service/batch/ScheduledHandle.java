@@ -22,6 +22,7 @@ public class ScheduledHandle {
         this.publishRosScheduled();
         this.executeTwentyThreeAtNightPerDay();
         this.sendRobotInfo();
+        this.x86MissionRosHealthCheckScheduled();
     }
 
 
@@ -114,6 +115,24 @@ public class ScheduledHandle {
                 }
             }
         }, 25, 10, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 给任务管理器发送心跳
+     */
+    public void x86MissionRosHealthCheckScheduled() {
+        scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.x86MissionRosHealthCheck();
+                    logger.info("schedule x86MissionRosHealthCheckScheduled");
+                } catch (Exception e) {
+                    logger.error("schedule x86MissionRosHealthCheckScheduled exception", e);
+                }
+            }
+        }, 30, 5, TimeUnit.SECONDS);
     }
 
     /**

@@ -104,6 +104,9 @@ public class MapInfoController {
             }
 
             //根据机器人code获取地图信息
+            MapInfo mapInfo = getCurrentMapInfo(code);
+            if(null == mapInfo)
+                currentInfo.setPose("");  //没有地图不显示坐标
             currentInfo.setMapInfo(getCurrentMapInfo(code));
 
             //获取当前电量信息
