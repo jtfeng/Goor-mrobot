@@ -12,6 +12,7 @@ public class Elevator extends BaseBean {
     private String ip;
     private String lockState = "0";// 0表示 未锁定、1表示 已锁定
     private String info;
+    private String robotCode;
     private Long elevatorshaftId;
     private String robotCode;
     @Transient
