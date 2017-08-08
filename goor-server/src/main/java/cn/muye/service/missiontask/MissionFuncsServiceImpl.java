@@ -1586,6 +1586,21 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     ////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * 从MapPoint类，转换成激光导航的数据格式
+     * @param mapPoint
+     * @return
+     */
+    public JsonMissionItemDataLaserNavigation pointToJSONMissionItemDataLaserNavigation(MapPoint mapPoint) {
+        JsonMissionItemDataLaserNavigation data1 = new JsonMissionItemDataLaserNavigation();
+        data1.setX(mapPoint.getX());
+        data1.setY(mapPoint.getY());
+        data1.setTh(mapPoint.getTh());
+        data1.setMap(mapPoint.getMapName());
+        data1.setMap_name(mapPoint.getMapName());
+        data1.setScene_name(mapPoint.getSceneName());
+        return data1;
+    }
 
     /**
      * 从MissionItem转成missionItemDTO
@@ -1617,17 +1632,21 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         //只有导航相关的任务才需要转换点数据
         String data = missionItem.getData();
-        if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(missionItem.getFeatureItemId())) {
+        Long featureItemId = missionItem.getFeatureItemId();
+        if(Constant.ORDER_MAP_POINT_RELATE_LIST.contains(featureItemId)) {
             MapPoint mapPoint = JSON.parseObject(missionItem.getData(),MapPoint.class);
             //这里就是单点导航的数据格式存储地方,根据mp和数据格式定义来创建
-            JsonMissionItemDataLaserNavigation data1 = new JsonMissionItemDataLaserNavigation();
-            data1.setX(mapPoint.getX());
-            data1.setY(mapPoint.getY());
-            data1.setTh(mapPoint.getTh());
-            data1.setMap(mapPoint.getMapName());
-            data1.setMap_name(mapPoint.getMapName());
-            data1.setScene_name(mapPoint.getSceneName());
-            data = JSON.toJSONString(data1);
+            data = JSON.toJSONString(pointToJSONMissionItemDataLaserNavigation(mapPoint));
+        }
+        //带充电时长的数据结构
+        else if(featureItemId.equals(Constant.ORDER_TIME_CHARGE_ID)) {
+            JsonMissionItemDataTimeCharge timeCharge = JSON.parseObject(data,JsonMissionItemDataTimeCharge.class);
+            JsonMissionItemDataLaserNavigation point = timeCharge.getPoint();
+            //给兼容老的导航数据格式字段map赋值
+            if(point.getMap() == null || "".equals(point.getMap())) {
+                timeCharge.getPoint().setMap(timeCharge.getPoint().getMap_name());
+            }
+            data = JSON.toJSONString(timeCharge);
         }
 
         missionItemTask.setData(data);
