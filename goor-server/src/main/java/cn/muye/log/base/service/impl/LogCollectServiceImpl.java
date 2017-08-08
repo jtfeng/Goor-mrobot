@@ -139,9 +139,9 @@ public class LogCollectServiceImpl implements LogCollectService {
             if (StringUtil.isNullOrEmpty(baseState))
                 return;
             LogInfo logInfo = new LogInfo();
-            logInfo.setLogLevel(LogLevel.WARNING.getName());
+            logInfo.setLogLevel(LogLevel.INFO.getName());
             logInfo.setModule(ModuleEnums.BASE.getModuleId());
-            logInfo.setLogType(LogType.WARNING_BASE.getName());
+            logInfo.setLogType(LogType.INFO_BASE.getName());
             logInfo.setMessage(baseState);
             saveLogInfo(code, logInfo);
         } catch (Exception e) {
@@ -210,7 +210,7 @@ public class LogCollectServiceImpl implements LogCollectService {
         }
         String missionLog = stringBuffer.toString();
 
-        //校验是都已经存库
+        //校验是否已经存库
         String missionState = CacheInfoManager.getPersistMissionState(code);
         if(missionLog != null && missionLog.equals(missionState))
             return;
