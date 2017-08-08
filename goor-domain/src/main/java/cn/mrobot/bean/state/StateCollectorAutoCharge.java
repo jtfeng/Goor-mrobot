@@ -16,4 +16,18 @@ public class StateCollectorAutoCharge extends StateCollector {
         this.pluginStatus = pluginStatus;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        StateCollectorAutoCharge that = (StateCollectorAutoCharge) o;
+
+        return pluginStatus == that.pluginStatus;
+    }
+
+    @Override
+    public int hashCode() {
+        return pluginStatus;
+    }
 }

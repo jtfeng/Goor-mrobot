@@ -26,6 +26,9 @@ public class LogInfo extends BaseBean {
 	 */
 	private String logLevel;
 
+	//模块
+	private int module;  //ModuleEnums 枚举类
+
 	/**
 	 * 日志类型
 	 */
@@ -41,13 +44,7 @@ public class LogInfo extends BaseBean {
 	 */
 	private String sceneName;
 
-	private String baseState; //底盘状态
-
-	private String chargeState; //充电状态
-
-	private String missionState; //任务状态
-
-	private String navigationState; //导航状态
+	private String message; //具体信息
 
 	private String handlePerson;  //警告错误处理人
 
@@ -93,30 +90,6 @@ public class LogInfo extends BaseBean {
 		this.sceneName = sceneName;
 	}
 
-	public String getBaseState() {
-		return baseState;
-	}
-
-	public void setBaseState(String baseState) {
-		this.baseState = baseState;
-	}
-
-	public String getChargeState() {
-		return chargeState;
-	}
-
-	public void setChargeState(String chargeState) {
-		this.chargeState = chargeState;
-	}
-
-	public String getMissionState() {
-		return missionState;
-	}
-
-	public void setMissionState(String missionState) {
-		this.missionState = missionState;
-	}
-
 	public String getHandlePerson() {
 		return handlePerson;
 	}
@@ -133,11 +106,19 @@ public class LogInfo extends BaseBean {
 		this.handleTime = handleTime;
 	}
 
-	public String getNavigationState() {
-		return navigationState;
+	public String getMessage() {
+		return message;
 	}
 
-	public void setNavigationState(String navigationState) {
-		this.navigationState = navigationState;
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public int getModule() {
+		return module;
+	}
+
+	public void setModule(int module) {
+		this.module = module;
 	}
 }

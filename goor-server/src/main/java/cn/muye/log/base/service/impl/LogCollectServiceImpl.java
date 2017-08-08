@@ -77,92 +77,97 @@ public class LogCollectServiceImpl implements LogCollectService {
             return;
         }
         String code = robot.getCode();
-        String chargeState = collectChargeLog(robot);
-        String baseState = collectBaseLog(code);
-        String navigationState = collectNavigationLog(code);
-        String missionState = collectMissionLog(code);
-
-        if(StringUtil.isNullOrEmpty(chargeState) && StringUtil.isNullOrEmpty(baseState)
-                && StringUtil.isNullOrEmpty(navigationState) && StringUtil.isNullOrEmpty(missionState)){
-            return;
-        }
-        LogInfo logInfo = new LogInfo();
-        logInfo.setDeviceId(code);
-        logInfo.setLogLevel(LogLevel.INFO.getName());
-        logInfo.setChargeState(StringUtil.isNullOrEmpty(chargeState) ? "无" : chargeState);
-        logInfo.setBaseState(StringUtil.isNullOrEmpty(baseState) ? "无" : baseState);
-        logInfo.setMissionState(StringUtil.isNullOrEmpty(missionState) ? "无" : missionState);
-        logInfo.setNavigationState(StringUtil.isNullOrEmpty(navigationState) ? "无" : navigationState);
-
-        saveLogInfo(logInfo);
+        collectChargeLog(robot);
+        collectBaseLog(code);
+        collectNavigationLog(code);
+        collectMissionLog(code);
     }
 
     /**
      * 收集记录电量日志
      */
-    private String collectChargeLog(Robot robot) {
+    private void collectChargeLog(Robot robot) {
         String chargeState = "";
         String code = robot.getCode();
         ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(code);
         if (chargeInfo == null) {
-            return chargeState;
+            return;
         }
         //获取电量状态
         chargeState = getChargeMessage(chargeInfo);
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
-        if(robotConfig == null){
-            return chargeState;
+        if (robotConfig == null) {
+            return;
         }
         Integer batteryThreshold = robotConfig.getLowBatteryThreshold();
-        if(batteryThreshold == null){
-            return chargeState;
+        if (batteryThreshold == null) {
+            return;
         }
+        LogInfo logInfo = new LogInfo();
+        logInfo.setLogLevel(LogLevel.INFO.getName());
+        logInfo.setModule(ModuleEnums.CHARGE.getModuleId());
+        logInfo.setLogType(LogType.INFO_CHARGE.getName());
+        logInfo.setMessage(chargeState);
+        saveLogInfo(code, logInfo);
         //保存低电量警告
         int powerPercent = chargeInfo.getPowerPercent();
         if (powerPercent <= batteryThreshold) {
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("电量阈值：").append(batteryThreshold).append("%,当前电量：").append(powerPercent).append("%");
-            LogInfo logInfo = new LogInfo();
-            logInfo.setDeviceId(code);
-            logInfo.setLogLevel(LogLevel.WARNING.getName());
-            logInfo.setLogType(LogType.WARNING_LOWER_POWER.getName());
-            logInfo.setChargeState(stringBuffer.toString());
-            saveLogInfo(logInfo);
+            LogInfo warningLogInfo = new LogInfo();
+            warningLogInfo.setLogLevel(LogLevel.WARNING.getName());
+            warningLogInfo.setModule(ModuleEnums.CHARGE.getModuleId());
+            warningLogInfo.setLogType(LogType.WARNING_LOWER_POWER.getName());
+            warningLogInfo.setMessage(stringBuffer.toString());
+            saveLogInfo(code, warningLogInfo);
         }
-        return chargeState;
     }
 
     /**
      * 收集记录底盘日志,只记录触发状态
      */
-    private String collectBaseLog(String code) {
+    private void collectBaseLog(String code) {
         try {
             List<StateDetail> stateDetailList = stateCollectorService.getCurrentBaseState(code);
+            StringBuffer stringBuffer = new StringBuffer();
             if (stateDetailList != null && stateDetailList.size() > 0) {
-                StringBuffer stringBuffer = new StringBuffer();
                 for (StateDetail stateDetail : stateDetailList) {
                     stringBuffer.append(stateDetail.getCHName()).append(":").append(stateDetail.getCHValue()).append("; ");
                 }
-                return stringBuffer.toString();
             }
+            String baseState = stringBuffer.toString();
+            if (StringUtil.isNullOrEmpty(baseState))
+                return;
+            LogInfo logInfo = new LogInfo();
+            logInfo.setLogLevel(LogLevel.WARNING.getName());
+            logInfo.setModule(ModuleEnums.BASE.getModuleId());
+            logInfo.setLogType(LogType.WARNING_BASE.getName());
+            logInfo.setMessage(baseState);
+            saveLogInfo(code, logInfo);
         } catch (Exception e) {
             LOGGER.error("收集记录底盘日志,只记录触发状态. code=" + code, e);
         }
-        return "";
     }
 
     /**
      * 收集记录导航日志
      */
-    private String  collectNavigationLog(String code) {
+    private void collectNavigationLog(String code) {
         List<StateDetail> stateDetails = stateCollectorService.getCurrentNavigationState(code);
+        StringBuffer stringBuffer = new StringBuffer();
         if (null != stateDetails && stateDetails.size() > 0) {
             StateDetail stateDetail = stateDetails.get(0);
-            StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append(ModuleEnums.NAVIGATION.getModuleName()).append(":").append(stateDetail.getCHValue()).append(",");
-            return stringBuffer.toString();
         }
-        return "";
+        String navigationState = stringBuffer.toString();
+        if (StringUtil.isNullOrEmpty(navigationState))
+            return;
+        LogInfo logInfo = new LogInfo();
+        logInfo.setLogLevel(LogLevel.INFO.getName());
+        logInfo.setModule(ModuleEnums.NAVIGATION.getModuleId());
+        logInfo.setLogType(LogType.INFO_NAVIGATION.getName());
+        logInfo.setMessage(navigationState);
+        saveLogInfo(code, logInfo);
     }
 
     private String getChargeMessage(ChargeInfo chargeInfo) {
@@ -185,11 +190,10 @@ public class LogCollectServiceImpl implements LogCollectService {
     }
 
     //TODO
-    private String collectMissionLog(String code) {
+    private void collectMissionLog(String code) {
         List<StateDetail> stateDetailList = stateCollectorService.collectTaskLog(code);
-        if (stateDetailList == null || stateDetailList.size() <= 0) {
-            return "";
-        }
+        if (stateDetailList == null || stateDetailList.size() <= 0)
+            return;
         //按创建时间排序
         Collections.sort(stateDetailList, new Comparator() {
             @Override
@@ -204,13 +208,31 @@ public class LogCollectServiceImpl implements LogCollectService {
         for (StateDetail stateDetail : stateDetailList) {
             stringBuffer.append(stateDetail.getCHName()).append(" ").append(stateDetail.getCHValue()).append(",");
         }
-        return stringBuffer.toString();
+        String missionLog = stringBuffer.toString();
+
+        //校验是都已经存库
+        String missionState = CacheInfoManager.getPersistMissionState(code);
+        if(missionLog != null && missionLog.equals(missionState))
+            return;
+
+        if(StringUtil.isNullOrEmpty(missionLog))
+            return;
+        LogInfo logInfo = new LogInfo();
+        logInfo.setLogLevel(LogLevel.INFO.getName());
+        logInfo.setModule(ModuleEnums.MISSION.getModuleId());
+        logInfo.setLogType(LogType.INFO_SCHEDULE_TASK.getName());
+        logInfo.setMessage(missionLog);
+        saveLogInfo(code, logInfo);
+
+        //将已存库的任务状态放入缓存中，以便下一次比对
+        CacheInfoManager.setPersistMissionState(code, missionLog);
     }
 
-    private void saveLogInfo(LogInfo logInfo) {
+    private void saveLogInfo(String code, LogInfo logInfo) {
+        logInfo.setDeviceId(code);
         logInfo.setCreateTime(new Date());
         logInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(logInfo.getDeviceId());
+        MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
         if (currentMap != null && !StringUtil.isNullOrEmpty(currentMap.getMessageText())) {
             JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
             String data = jsonObject.getString(TopicConstants.DATA);
@@ -225,6 +247,4 @@ public class LogCollectServiceImpl implements LogCollectService {
         }
         logInfoService.save(logInfo);
     }
-
-
 }
