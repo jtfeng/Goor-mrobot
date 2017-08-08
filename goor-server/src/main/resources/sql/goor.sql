@@ -1115,10 +1115,8 @@ CREATE TABLE `LOG_INFO` (
   `LOG_TYPE` varchar(50) DEFAULT NULL COMMENT '日志类型',
   `MAP_NAME` varchar(50) DEFAULT NULL COMMENT '地图名称',
   `SCENE_NAME` varchar(50) DEFAULT NULL COMMENT '场景名称',
-  `BASE_STATE` TEXT DEFAULT NULL COMMENT '底盘状态',
-  `CHARGE_STATE` varchar(200) DEFAULT NULL COMMENT '充电状态',
-  `MISSION_STATE` TEXT DEFAULT NULL COMMENT '任务状态',
-  `NAVIGATION_STATE` varchar(200) DEFAULT NULL COMMENT '导航状态',
+  `MODULE` INT DEFAULT NULL COMMENT '模块',
+  `MESSAGE` TEXT DEFAULT NULL COMMENT '具体信息',
   `HANDLE_PERSON` varchar(50) DEFAULT NULL COMMENT '处理人',
   `HANDLE_TIME` datetime DEFAULT NULL COMMENT '处理时间',
   PRIMARY KEY (`ID`)
@@ -1639,3 +1637,90 @@ CREATE TABLE `VOICE_FILE` (
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
+-- Table structure for ELEVATOR
+-- ----------------------------
+DROP TABLE IF EXISTS `AS_ELEVATORSHAFT`;
+create table AS_ELEVATORSHAFT
+(
+  ID bigint auto_increment
+    primary key,
+  NAME varchar(50) null,
+  INFO varchar(100) null,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AS_ELEVATOR`;
+create table AS_ELEVATOR
+(
+  ID bigint auto_increment
+    primary key,
+  NAME varchar(50) null,
+  IP varchar(15) null,
+  LOCK_STATE int(1) null,
+  INFO varchar(100) null,
+  ELEVATORSHAFT_ID bigint null,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  ROBOT_CODE varchar(50) null comment '上锁或者解锁机器人的 code 编号',
+  constraint AS_ELEVATOR_AS_ELEVATORSHAFT_ID_fk
+  foreign key (ELEVATORSHAFT_ID) references AS_ELEVATORSHAFT (ID)
+    on update cascade on delete cascade
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+create index AS_ELEVATOR_AS_ELEVATORSHAFT_ID_fk on AS_ELEVATOR (ELEVATORSHAFT_ID);
+
+DROP TABLE IF EXISTS `AS_ELEVATORPOINTCOMBINATION`;
+create table AS_ELEVATORPOINTCOMBINATION
+(
+  ID bigint auto_increment
+    primary key,
+  NAME varchar(50) null,
+  INFO varchar(100) null,
+  WAIT_POINT bigint null,
+  GO_POINT bigint null,
+  OUT_POINT bigint null,
+  INNER_POINT bigint null,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  constraint AS_ELEVATORPOINTCOMBINATION_A_MAP_POINT_ID_fk
+  foreign key (WAIT_POINT) references A_MAP_POINT (ID)
+    on update cascade on delete cascade,
+  constraint fk_wpoint
+  foreign key (WAIT_POINT) references A_MAP_POINT (ID)
+    on update cascade on delete cascade,
+  constraint fk_gpoint
+  foreign key (GO_POINT) references A_MAP_POINT (ID)
+    on update cascade on delete cascade,
+  constraint fk_opoint
+  foreign key (OUT_POINT) references A_MAP_POINT (ID)
+    on update cascade on delete cascade,
+  constraint fk_ipoint
+  foreign key (INNER_POINT) references A_MAP_POINT (ID)
+    on update cascade on delete cascade
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+create index fk_gpoint on AS_ELEVATORPOINTCOMBINATION (GO_POINT);
+create index fk_ipoint on AS_ELEVATORPOINTCOMBINATION (INNER_POINT);
+create index fk_opoint on AS_ELEVATORPOINTCOMBINATION (OUT_POINT);
+create index fk_wpoint on AS_ELEVATORPOINTCOMBINATION (WAIT_POINT);
+
+DROP TABLE IF EXISTS `ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS`;
+create table ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS
+(
+  ID bigint auto_increment
+    primary key,
+  ELEVATOR_ID bigint null,
+  ELEVATORPOINTCOMBINATION_ID bigint null,
+  constraint fk_relation_elevatorid
+  foreign key (ELEVATOR_ID) references AS_ELEVATOR (ID)
+    on update cascade on delete cascade,
+  constraint fk_relation_combinationid
+  foreign key (ELEVATORPOINTCOMBINATION_ID) references AS_ELEVATORPOINTCOMBINATION (ID)
+    on update cascade on delete cascade
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+create index fk_relation_combinationid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATORPOINTCOMBINATION_ID);
+create index fk_relation_elevatorid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATOR_ID);

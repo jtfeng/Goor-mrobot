@@ -16,4 +16,18 @@ public class StateCollectorNavigation extends StateCollector {
         this.navigationTypeCode = navigationTypeCode;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        StateCollectorNavigation that = (StateCollectorNavigation) o;
+
+        return navigationTypeCode == that.navigationTypeCode;
+    }
+
+    @Override
+    public int hashCode() {
+        return navigationTypeCode;
+    }
 }

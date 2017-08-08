@@ -13,8 +13,9 @@ import java.util.Map;
 public enum ModuleEnums {
 
     NAVIGATION(100, "自动导航"),
-    CHARGE(200, "电量"),
-    BASE(300, "底盘");
+    CHARGE(200, "电池"),
+    BASE(300, "底盘"),
+    MISSION(400, "调度任务");
 
     private int moduleId;
 

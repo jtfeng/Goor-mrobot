@@ -123,13 +123,16 @@ public class ConsumerCommon {
                 String data = jsonObject.getString(TopicConstants.DATA);
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
+                String uuid = jsonObjectData.getString(TopicConstants.UUID);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
                     String robotCode = messageInfo.getSenderId();
-                    Robot robotDb = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
-                    syncRosRobotConfig(robotDb);
+                    Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    if (!StringUtil.isNullOrEmpty(uuid)) {
+                        syncRosRobotConfig(robotDb, uuid);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -142,33 +145,42 @@ public class ConsumerCommon {
      *
      * @param robotNew
      */
-    private void syncRosRobotConfig(Robot robotNew) {
-        for (int i = 0; i < 2; i++) {
+    private void syncRosRobotConfig(Robot robotNew, String uuid) {
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        robotNew.setUuid(uuid);
+        SlamBody slamBody = new SlamBody();
+        slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
+        slamBody.setUuid(uuid);
+        slamBody.setMsg("success");
+        slamBody.setErrorCode("0");
+        slamBody.setData(JsonUtils.toJson(robotNew,
+                new TypeToken<Robot>() {
+                }.getType()));
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setReceiverId(robotNew.getCode());
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+        try {
+            messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
+            logger.info("下发机器人" + robotNew.getCode() + "电量阈值信息成功");
+        } catch (Exception e) {
+            logger.error("发送错误", e);
             try {
-                CommonInfo commonInfo = new CommonInfo();
-                commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-                commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-                //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
-                String uuid = UUID.randomUUID().toString().replace("-", "");
-                robotNew.setUuid(uuid);
-                SlamBody slamBody = new SlamBody();
-                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
-                slamBody.setUuid(uuid);
-                slamBody.setData(JsonUtils.toJson(robotNew,
-                        new TypeToken<Robot>() {
-                        }.getType()));
+                slamBody.setMsg("查询错误");
+                slamBody.setErrorCode("1");
+                slamBody.setData("");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-                MessageInfo messageInfo = new MessageInfo();
-                messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-                messageInfo.setReceiverId(robotNew.getCode());
-                messageInfo.setSenderId("goor-server");
-                messageInfo.setMessageType(MessageType.ROBOT_INFO);
                 messageInfo.setMessageText(JSON.toJSONString(commonInfo));
                 messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
-            } catch (Exception e) {
-                logger.error("发送错误", e);
-            } finally {
+            } catch (Exception e1) {
+                logger.error("错误{}",e1);
             }
+        } finally {
         }
     }
 
@@ -190,10 +202,6 @@ public class ConsumerCommon {
                     if (TopicConstants.DEBUG)
                         logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 }
-
-//                else if(){
-//
-//                }
             }
         } catch (Exception e) {
             logger.error("consumer directAppPub exception", e);
@@ -220,12 +228,12 @@ public class ConsumerCommon {
                     //将当前加载的地图信息存入缓存
                     CacheInfoManager.setMapCurrentCache(messageInfo);
                     //将场景和对应的机器人放置在缓存中
-                   if (errorCode != null && errorCode == 0) {
-                       String mapData = jsonObjectData.getString(TopicConstants.DATA);
-                       JSONObject mapObject = JSON.parseObject(mapData);
-                       String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
-                       CacheInfoManager.setSceneRobotListCache(sceneName, messageInfo.getSenderId());
-                   }
+                    if (errorCode != null && errorCode == 0) {
+                        String mapData = jsonObjectData.getString(TopicConstants.DATA);
+                        JSONObject mapObject = JSON.parseObject(mapData);
+                        String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
+                        CacheInfoManager.setSceneRobotListCache(sceneName, messageInfo.getSenderId());
+                    }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
                     //保存电量信息
                     String deviceId = messageInfo.getSenderId();
