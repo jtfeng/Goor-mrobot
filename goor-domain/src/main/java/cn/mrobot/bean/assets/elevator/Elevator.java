@@ -11,6 +11,7 @@ public class Elevator extends BaseBean {
     private String ip;
     private String lockState = "0";
     private String info;
+    private String robotCode;
     private Long elevatorshaftId;
     @Transient
     private ElevatorShaft elevatorShaft;
@@ -24,6 +25,7 @@ public class Elevator extends BaseBean {
                 ", ip='" + ip + '\'' +
                 ", lockState='" + lockState + '\'' +
                 ", info='" + info + '\'' +
+                ", robotCode='" + robotCode + '\'' +
                 ", elevatorshaftId=" + elevatorshaftId +
                 ", elevatorShaft=" + elevatorShaft +
                 ", elevatorPointCombinations=" + elevatorPointCombinations +
@@ -84,6 +86,14 @@ public class Elevator extends BaseBean {
 
     public void setElevatorshaftId(Long elevatorshaftId) {
         this.elevatorshaftId = elevatorshaftId;
+    }
+
+    public String getRobotCode() {
+        return robotCode;
+    }
+
+    public void setRobotCode(String robotCode) {
+        this.robotCode = robotCode;
     }
 
     //电梯动作

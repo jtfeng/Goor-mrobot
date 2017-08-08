@@ -49,7 +49,6 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @return
      */
     List<Elevator> findByMapFloor(Long mapInfoId, Integer floor);
-
     /**
      * 根据地图名称以及门店编号查询对应的地图实体信息
      * @param mapName
@@ -57,4 +56,10 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @return
      */
      MapInfo findByMapNameAndStoreId(String mapName, Long storeId) throws Exception;
+
+    /**
+     * 更新电梯状态
+     * @param elevatorId
+     */
+    boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode);
 }
