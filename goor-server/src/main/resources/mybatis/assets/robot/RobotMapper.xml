@@ -9,11 +9,30 @@
         <result property="typeId" column="TYPE_ID"/>
         <result property="lowBatteryThreshold" column="LOW_BATTERY_THRESHOLD"/>
         <result property="sufficientBatteryThreshold" column="SUFFICIENT_BATTERY_THRESHOLD"/>
+        <result property="robotIdForElevator" column="ROBOT_ID_FOR_ELEVATOR"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
         <result property="isOnline" column="IS_ONLINE"/>
+        <result property="isBusy" column="IS_BUSY"/>
         <result property="sceneId" column="SCENE_ID"/>
         <result property="sceneName" column="SCENE_NAME"/>
+        <result property="storeId" column="STORE_ID"/>
+        <association property="passwords" javaType="cn.mrobot.bean.assets.robot.RobotPassword">
+            <id column="BOX_NUM" property="boxNum"/>
+            <result column="PASSWORD" property="password"/>
+        </association>
+        <association property="chargerMapPointList" javaType="cn.mrobot.bean.area.point.MapPoint">
+            <id column="endPointId" property="id"/>
+            <result column="endPointName" property="pointName"/>
+            <result column="endPointAlias" property="pointAlias"/>
+            <result column="endSceneName" property="sceneName"/>
+            <result column="endMapName" property="mapName"/>
+            <result column="endX" property="x"/>
+            <result column="endY" property="y"/>
+            <result column="endTh" property="th"/>
+            <result column="endPointLevel" property="pointLevel"/>
+            <result column="endMapPointTypeId" property="mapPointTypeId"/>
+        </association>
     </resultMap>
 
     <select id="listRobot" resultMap="robotResult" parameterType="java.util.Map">
@@ -27,6 +46,7 @@
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
             robot.IS_ONLINE,
+            robot.ROBOT_ID_FOR_ELEVATOR as robotIdForElevator,
             scene.ID as SCENE_ID,
             scene.NAME as SCENE_NAME
         FROM
@@ -49,6 +69,46 @@
             AND scene.NAME like CONCAT('%',#{sceneName},'%')
         </if>
         ORDER BY ID DESC
+    </select>
+
+    <select id="getRobotByCode" resultMap="robotResult" parameterType="java.util.Map">
+           SELECT
+                robot.ID,
+                robot.NAME,
+                robot.CODE,
+                config.LOW_BATTERY_THRESHOLD,
+                config.SUFFICIENT_BATTERY_THRESHOLD,
+                ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
+                robot.BOX_ACTIVATED,
+                robot.IS_ONLINE,
+                robot.IS_BUSY,
+                robot.STORE_ID as storeId,
+                robot.ROBOT_ID_FOR_ELEVATOR,
+                pwd.BOX_NUM as boxNum,
+                pwd.PASSWORD as password,
+                ps.id AS "startPointId",
+                ps.point_name AS "startPointName",
+                ps.point_alias AS "startPointAlias",
+                ps.scene_name AS "startSceneName",
+                ps.map_name AS "startMapName",
+                ps.point_level AS "startPointLevel",
+                ps.th AS "startTh",
+                ps.x AS "startX",
+                ps.y AS "startY",
+                ps.map_point_type_id AS "startMapPointTypeId"
+              FROM AS_ROBOT robot
+            LEFT JOIN AS_ROBOT_TYPE type ON robot.TYPE_ID = type.ID
+            LEFT JOIN AS_ROBOT_CONFIG config ON robot.ID = config.ROBOT_ID
+            LEFT JOIN AS_ROBOT_PASSWORD pwd ON robot.ID = pwd.ROBOT_ID
+            LEFT JOIN AS_ROBOT_CHARGER_MAP_POINT_XREF robotChargerMapPointXref ON robotChargerMapPointXref.ROBOT_ID = robot.ID
+            LEFT JOIN A_MAP_POINT ps ON robotChargerMapPointXref.CHARGER_MAP_POINT_ID = ps.ID
+        WHERE 1=1
+        <if test="code != null">
+            AND robot.CODE = #{code}
+        </if>
+        <if test="storeId != null">
+            AND robot.STORE_ID = #{storeId}
+        </if>
     </select>
 
 </mapper>
