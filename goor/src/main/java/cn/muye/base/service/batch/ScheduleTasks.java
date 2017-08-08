@@ -109,7 +109,7 @@ public class ScheduleTasks {
 
 
     //每30秒触发  获取电量信息，存入数据库
-    @Scheduled(cron = "*/30 * * * * *") //test cron
+    @Scheduled(cron = "0 */2 * * * *") //test cron
     public void getChargeAndPosition() {
         try {
             logger.info("定时获取电量信息");

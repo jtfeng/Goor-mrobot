@@ -43,6 +43,12 @@ public interface ElevatorService extends BaseService<Elevator> {
     boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action);
 
     /**
+     * 更新电梯状态
+     * @param elevatorId
+     */
+    boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode);
+
+    /**
      * 根据地图楼层查询电梯信息（ Abel 使用）
      * @param mapInfoId
      * @param floor

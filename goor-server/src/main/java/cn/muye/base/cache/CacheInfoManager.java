@@ -1,9 +1,9 @@
 package cn.muye.base.cache;
 
 import cn.mrobot.bean.area.map.MapInfo;
-import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.state.*;
 import cn.mrobot.utils.FileUtils;
 import cn.muye.area.map.service.MapInfoService;
@@ -66,6 +66,8 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, StateCollectorBaseSystem> baseSystemCache = new ConcurrentHashMapCache<>();//底盘系统状态
     private static ConcurrentHashMapCache<String, StateCollectorNavigation> navigationCache = new ConcurrentHashMapCache<>();//导航状态
 
+    private static ConcurrentHashMapCache<String,  String> persistMissionState = new ConcurrentHashMapCache<>();//已经存库的任务状态
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -78,6 +80,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         robotChargeInfoCache.setMaxLifeTime(10 * 60 * 1000);
         webSocketSessionCache.setMaxLifeTime(0);
         sceneRobotListCache.setMaxLifeTime(0);
+        persistMissionState.setMaxLifeTime(0);
 
         //状态机缓存
         autoChargeCache.setMaxLifeTime(60 * 1000);
@@ -269,4 +272,14 @@ public class CacheInfoManager implements ApplicationContextAware {
         robotCodeList.add(robotCode);
         sceneRobotListCache.put(sceneName, robotCodeList);
     }
+
+    //已经存库的任务状态
+    public static void setPersistMissionState(String deviceId,  String missionState) {
+        persistMissionState.put(deviceId, missionState);
+    }
+
+    public static String getPersistMissionState(String deviceId) {
+        return persistMissionState.get(deviceId);
+    }
+
 }

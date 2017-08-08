@@ -115,6 +115,31 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
+    public synchronized boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
+        checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
+        Elevator elevator = super.findById(elevatorId);
+        if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)){
+            if ("1".equals(elevator.getLockState())){// 1表示上锁
+                return false;
+            }else {
+                elevator.setLockState("1");
+                elevator.setRobotCode(robotCode);
+                updateSelective(elevator);
+                return true;
+            }
+        }
+        if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)){
+            if (("1".equals(elevator.getLockState()))  && (!robotCode.equals(elevator.getRobotCode()))  ) {// 0表示解锁
+                elevator.setLockState("0");
+                elevator.setRobotCode(null);
+                updateSelective(elevator);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     public void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //保存电梯信息
         save(elevator);

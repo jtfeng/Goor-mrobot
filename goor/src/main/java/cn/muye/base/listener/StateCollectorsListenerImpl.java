@@ -29,15 +29,26 @@ public class StateCollectorsListenerImpl implements TopicCallback {
     public void handleMessage(Message message) {
         if (TopicConstants.DEBUG)
             logger.info("From ROS ====== state_collectors topic  " + message.toString());
-        if (!StringUtil.isNullOrEmpty(message.toString())) {
-            JSONObject jsonObject = JSON.parseObject(message.toString());
-            String data = jsonObject.getString(TopicConstants.DATA);
-            StateCollectorResponse stateCollectorResponse = JSON.parseObject(data, StateCollectorResponse.class);
-            if(!CacheInfoManager.getStateModuleCache(stateCollectorResponse.getModule())){
-                //往云端推送
-                ProducerCommon msg = SingleFactory.getProducerCommon();
-                msg.sendStateCollectorMessage(message.toString());
+        try {
+            if (!StringUtil.isNullOrEmpty(message.toString())) {
+                JSONObject jsonObject = JSON.parseObject(message.toString());
+                String data = jsonObject.getString(TopicConstants.DATA);
+                StateCollectorResponse stateCollectorResponse = JSON.parseObject(data, StateCollectorResponse.class);
+                String module = stateCollectorResponse.getModule();
+                Long lastUploadTime = CacheInfoManager.getStateModuleCache(module);
+                lastUploadTime = lastUploadTime == null ? 0 : lastUploadTime;
+                //超过2秒，则往云端推送
+                Long intervalTime = System.currentTimeMillis() - lastUploadTime;
+                if (intervalTime >= 2 * 1000) {
+                    //往云端推送
+                    ProducerCommon msg = SingleFactory.getProducerCommon();
+                    msg.sendStateCollectorMessage(message.toString());
+                    CacheInfoManager.setStateModuleCache(module);
+                }
+
             }
+        } catch (Exception e) {
+            logger.error("StateCollectorsListenerImpl error", e);
         }
     }
 }

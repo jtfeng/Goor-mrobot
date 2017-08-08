@@ -22,8 +22,6 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -132,7 +130,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 String uuid = UUID.randomUUID().toString().replace("-", "");
                 robotDb.setUuid(UUID.randomUUID().toString().replace("-", ""));
                 SlamBody slamBody = new SlamBody();
-                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
                 slamBody.setUuid(uuid);
                 slamBody.setData(JsonUtils.toJson(robotDb,
                         new TypeToken<Robot>() {
@@ -387,7 +385,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 String uuid = UUID.randomUUID().toString().replace("-", "");
                 robotNew.setUuid(uuid);
                 SlamBody slamBody = new SlamBody();
-                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
                 slamBody.setUuid(uuid);
                 slamBody.setData(JsonUtils.toJson(robotNew,
                         new TypeToken<Robot>() {
@@ -439,5 +437,14 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Robot getByCodeByXml(String code, Long storeId) {
+        Map map = Maps.newHashMap();
+        map.put("code", code);
+        map.put("storeId", storeId);
+        Robot robot = robotMapper.getRobotByCode(map);
+        return robot;
     }
 }
