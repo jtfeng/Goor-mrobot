@@ -104,7 +104,7 @@ public class ScheduleTasks {
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
     //每分钟触发,记录底盘，自动导航，电量信息日志
-    @Scheduled(cron = "0 */10 * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     public void collectBaseState() {
         logger.info("Scheduled log");
         try {
