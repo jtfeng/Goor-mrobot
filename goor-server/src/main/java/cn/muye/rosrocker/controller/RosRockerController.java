@@ -2,29 +2,20 @@ package cn.muye.rosrocker.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
-import cn.mrobot.bean.base.PubBean;
-import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.dto.rosrocker.RosRockerDTO;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
-import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
-import cn.muye.rosrocker.bean.RosRockerPubBean;
 import com.alibaba.fastjson.JSON;
 import static com.google.common.base.Preconditions.*;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,7 +56,7 @@ public class RosRockerController {
             RosRockerDTO dto = new RosRockerDTO(String.valueOf(robotId),
                     new RosRockerDTO.Linear (obj.getLinearVelocityX()/2,-obj.getLinearVelocityY()/2,0.0),
                     new RosRockerDTO.Angular(0.0,0.0,-obj.getAngularVelocityZ()/2));
-            sendDetailMessage(String.valueOf(robotId), TopicConstants.ROS_PUB_YAOGAN_TOPIC, TopicConstants.ROS_YAOGAN_TOPIC_TYPE, JSON.toJSONString(dto));
+            sendDetailMessage(String.valueOf(robotId), TopicConstants.ANDROID_JOYSTICK_CMD_VEL, TopicConstants.ROS_YAOGAN_TOPIC_TYPE, JSON.toJSONString(dto));
             Thread.sleep(500);
             return AjaxResult.success();
         }catch (Exception e){
