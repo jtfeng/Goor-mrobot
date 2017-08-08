@@ -1,4 +1,4 @@
-package cn.muye.base.consumer.service;
+package cn.muye.service;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
