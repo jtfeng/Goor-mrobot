@@ -58,7 +58,7 @@ public class MissionItemServiceImpl implements MissionItemService {
 	@Override
 	public List<MissionItem> list(WhereRequest whereRequest,Long storeId) {
 		List<MissionItem> missionChainList = new ArrayList<>();
-		if (whereRequest.getQueryObj() != null) {
+		if (whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null ) {
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 //			Object missionChainId = map.get(SearchConstants.SEARCH_MISSION_CHAIN_ID);
 			Object name = map.get(SearchConstants.SEARCH_NAME);

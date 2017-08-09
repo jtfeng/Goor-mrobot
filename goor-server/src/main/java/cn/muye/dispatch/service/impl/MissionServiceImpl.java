@@ -168,7 +168,8 @@ public class MissionServiceImpl implements MissionService {
 	@Override
 	public List<Mission> list(WhereRequest whereRequest,long storeId) {
 		List<Mission> missionList = new ArrayList<>();
-		if (whereRequest != null && whereRequest.getQueryObj() != null) {
+
+		if (whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null) {
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 //			Object missionMainId = map.get(SearchConstants.SEARCH_MISSION_MAIN_ID);
 			Object name = map.get(SearchConstants.SEARCH_NAME);
@@ -178,7 +179,6 @@ public class MissionServiceImpl implements MissionService {
 			Object typeId = map.get(SearchConstants.SEARCH_MISSION_TYPE_ID);
 			Object sceneId = map.get(SearchConstants.SEARCH_SCENE_ID);
 //			Object priority = map.get(SearchConstants.SEARCH_PRIORITY);
-
 			missionList = missionMapper.list(/*missionMainId, */name, beginDate, endDate, sceneName, typeId/*, priority*/,storeId,sceneId);
 		}else {
 			missionList = missionMapper.listAll(storeId);
