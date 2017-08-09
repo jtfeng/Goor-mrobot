@@ -113,7 +113,7 @@ public class X86MissionStateResponseServiceImpl
             if (jsonMissionStateResponse.getRepeat_times() != null){
                 missionListTask.setRepeatTimesReal(jsonMissionStateResponse.getRepeat_times());
             }
-            missionListTaskService.save(missionListTask);
+            missionListTaskService.updateSelective(missionListTask);
         }
 
         //更新mission task state
@@ -131,7 +131,7 @@ public class X86MissionStateResponseServiceImpl
                         if (en.getRepeat_times() != null){
                             missionTask.setRepeatTimesReal(en.getRepeat_times());
                         }
-                        missionTaskService.save(missionTask);
+                        missionTaskService.updateSelective(missionTask);
                         //判断当前如果关联了order detail,则置状态
                         if (MissionFuncsServiceImpl.MissionStateFinished.equalsIgnoreCase(en.getState()) &&
                                 !StringUtil.isNullOrEmpty(missionTask.getOrderDetailMission()) &&
@@ -163,7 +163,7 @@ public class X86MissionStateResponseServiceImpl
                                     if (!StringUtil.isEmpty(item.getState())){
                                         missionItemTask.setState(item.getState());
                                     }
-                                    missionItemTaskService.save(missionItemTask);
+                                    missionItemTaskService.updateSelective(missionItemTask);
                                 }
                             }
                         }

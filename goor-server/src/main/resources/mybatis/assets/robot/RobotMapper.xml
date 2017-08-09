@@ -21,7 +21,7 @@
             <id column="BOX_NUM" property="boxNum"/>
             <result column="PASSWORD" property="password"/>
         </association>
-        <association property="chargerMapPointList" javaType="cn.mrobot.bean.area.point.MapPoint">
+        <collection property="chargerMapPointList" ofType="cn.mrobot.bean.area.point.MapPoint">
             <id column="endPointId" property="id"/>
             <result column="endPointName" property="pointName"/>
             <result column="endPointAlias" property="pointAlias"/>
@@ -32,7 +32,7 @@
             <result column="endTh" property="th"/>
             <result column="endPointLevel" property="pointLevel"/>
             <result column="endMapPointTypeId" property="mapPointTypeId"/>
-        </association>
+        </collection>
     </resultMap>
 
     <select id="listRobot" resultMap="robotResult" parameterType="java.util.Map">
@@ -86,16 +86,16 @@
                 robot.ROBOT_ID_FOR_ELEVATOR,
                 pwd.BOX_NUM as boxNum,
                 pwd.PASSWORD as password,
-                ps.id AS "startPointId",
-                ps.point_name AS "startPointName",
-                ps.point_alias AS "startPointAlias",
-                ps.scene_name AS "startSceneName",
-                ps.map_name AS "startMapName",
-                ps.point_level AS "startPointLevel",
-                ps.th AS "startTh",
-                ps.x AS "startX",
-                ps.y AS "startY",
-                ps.map_point_type_id AS "startMapPointTypeId"
+                ps.id AS "endPointId",
+                ps.point_name AS endPointName,
+                ps.point_alias AS endPointAlias,
+                ps.scene_name AS endSceneName,
+                ps.map_name AS endMapName,
+                ps.point_level AS endPointLevel,
+                ps.th AS endTh,
+                ps.x AS endX,
+                ps.y AS endY,
+                ps.map_point_type_id AS endMapPointTypeId
               FROM AS_ROBOT robot
             LEFT JOIN AS_ROBOT_TYPE type ON robot.TYPE_ID = type.ID
             LEFT JOIN AS_ROBOT_CONFIG config ON robot.ID = config.ROBOT_ID

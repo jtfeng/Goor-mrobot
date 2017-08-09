@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamBody;
+import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.service.FileUpladService;
 import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
@@ -106,7 +107,7 @@ public class ExampleController {
         echo.publish(toSend);*/
 
         //        //TODO 模拟应用发布查询云端站数据接口
-        Topic echo = new Topic(ros, TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING);
+        Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.AGENT_SUB);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.PUB_NAME, "station_list_get");
         jsonObject.put(TopicConstants.DATA, "{\"robot_code\": \"cookyPlus1301chay\"}");

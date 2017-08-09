@@ -108,7 +108,7 @@ public class Application {
 
 	@Bean
 	public ScheduledExecutorService scheduledHandle() {
-		ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(7, new ThreadFactory() {
+		ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(8, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(r, "Application scheduledHandle");

@@ -5,7 +5,6 @@ import cn.mrobot.bean.constant.Constant;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,28 +19,14 @@ public class SessionUtil {
             .expireAfterWrite(123, TimeUnit.MINUTES).build();
 
     /**
-     * 从session获取当前切换的场景
-     * @param request
+     * 从cache获取当前切换的场景
      * @return
      * @throws Exception
      */
-    public static Scene getScene(HttpServletRequest request) throws Exception {
+    public static Scene getScene() throws Exception {
          return SCENE_LOADING_CACHE.getIfPresent(UserUtil.getUserTokenValue()+":"+Constant.SCENE_SESSION_TAG);
     }
 
-    /**
-     * 从session获取当前stationId
-     * @param request
-     * @return
-     * @throws Exception
-     */
-    public static Long getStationId(HttpServletRequest request) throws Exception {
-        Object o = request.getSession().getAttribute(Constant.SESSION_STATION_ID);
-        if(o == null) {
-            return null;
-        }
-        return (Long) o;
-    }
 
 
 }

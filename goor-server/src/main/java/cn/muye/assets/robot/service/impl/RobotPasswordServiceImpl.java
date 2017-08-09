@@ -1,9 +1,9 @@
 package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.assets.robot.RobotType;
 import cn.mrobot.bean.assets.robot.RobotPassword;
-import cn.mrobot.utils.AutoNumUtil;
+import cn.mrobot.bean.assets.robot.RobotType;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.mapper.RobotTypeMapper;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -39,7 +39,7 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
             robotPassWord.setStoreId(robot.getStoreId());
             robotPassWord.setBoxNum(i);
             robotPassWord.setRobotId(robot.getId());
-            robotPassWord.setPassword(AutoNumUtil.createRandomVcode(4));
+            robotPassWord.setPassword(Constant.PRIMARY_PWD);
             addList.add(robotPassWord);
         }
         myMapper.insertList(addList);
@@ -59,6 +59,8 @@ public class RobotPasswordServiceImpl extends BaseServiceImpl<RobotPassword> imp
         for (RobotPassword robotPassword : robotPasswordList) {
             super.updateSelectiveByStoreId(robotPassword);
         }
+        //修改密码 需要通知x86 todo
+
     }
 
     @Override

@@ -105,4 +105,6 @@ public class Constant {
 
     public static final String SESSION_STATION_ID = "stationId";
 
+    //添加初始密码 默认
+    public static final String PRIMARY_PWD = "0000";
 }
