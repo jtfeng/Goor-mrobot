@@ -93,12 +93,12 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         Role roleDb = roleService.getById(user.getRoleId());
         user.setRoleName(roleDb.getCnName());
         //如果角色是站管理员
-        /*if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+        if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
             //删掉之前的user绑定station
             userStationXrefService.deleteByUserId(userId);
             List<StationDTO4User> stationIdList = user.getStationList();
             saveUserStationXref(stationIdList, userId);
-        }*/
+        }
         //todo 这段保存用户站点关系的代码暂时启用，以后用户还是可以绑定多个站的
         userStationXrefService.deleteByUserId(userId);
         List<StationDTO4User> stationIdList = user.getStationList();
@@ -114,39 +114,39 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         userMapper.updateByPrimaryKeySelective(user);
         //更新用户角色
         Long userId = user.getId();
-//        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
+        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
         Long roleId = user.getRoleId();
         List<StationDTO4User> stationList = user.getStationList();
         Role roleDb = roleService.getById(roleId);
-        if(roleDb != null) {
+        if (roleDb != null) {
             user.setRoleName(roleDb.getCnName());
             //todo 暂时先删除用户站关联
             userStationXrefService.deleteByUserId(userId);
             saveUserStationXref(stationList, userId);
-        /*if (userRoleXrefDb != null) {
-            ////如果原来角色是3，变更角色是2就需要把user_station_xref的记录删掉
-            if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
-                userStationXrefService.deleteByUserId(userId);
+            if (userRoleXrefDb != null) {
+                ////如果原来角色是3，变更角色是2就需要把user_station_xref的记录删掉
+                if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
+                    userStationXrefService.deleteByUserId(userId);
+                }
+                if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
+                    userStationXrefService.deleteByUserId(userId);
+                    saveUserStationXref(stationList, userId);
+                }
+                ////如果原来角色是2，变更角色是3就需要增加一条user_station_xref的记录
+                if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
+                    saveUserStationXref(stationList, userId);
+                }
+                userRoleXrefDb.setRoleId(roleId);
+                userRoleXrefService.update(userRoleXrefDb);
+            } else {
+                userRoleXrefDb = new UserRoleXref();
+                userRoleXrefDb.setUserId(userId);
+                userRoleXrefDb.setRoleId(roleId);
+                userRoleXrefService.save(userRoleXrefDb);
+                if (roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
+                    saveUserStationXref(stationList, userId);
+                }
             }
-            if (userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
-                userStationXrefService.deleteByUserId(userId);
-                saveUserStationXref(stationList, userId);
-            }
-            ////如果原来角色是2，变更角色是3就需要增加一条user_station_xref的记录
-            if (userRoleXrefDb != null && userRoleXrefDb.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
-                saveUserStationXref(stationList, userId);
-            }
-            userRoleXrefDb.setRoleId(roleId);
-            userRoleXrefService.update(userRoleXrefDb);
-        } else {
-            userRoleXrefDb = new UserRoleXref();
-            userRoleXrefDb.setUserId(userId);
-            userRoleXrefDb.setRoleId(roleId);
-            userRoleXrefService.save(userRoleXrefDb);
-            if (roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null && stationList.size() > 0) {
-                saveUserStationXref(stationList, userId);
-            }
-        }*/
         }
 
     }
@@ -169,11 +169,11 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Override
     public List<User> list(WhereRequest whereRequest, User user) {
-        PageHelper.startPage(whereRequest.getPage(),whereRequest.getPageSize());
+        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
         Map map = new HashMap<>();
         if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
             JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
-            String name = (String)jsonObject.get(SearchConstants.SEARCH_NAME);
+            String name = (String) jsonObject.get(SearchConstants.SEARCH_NAME);
             if (!StringUtil.isNullOrEmpty(name)) {
                 map.put("name", name);
             }
@@ -182,44 +182,44 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         if (user != null) {
             //如果是超级管理员
             if (user.getRoleId() != null) {
-              if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
-                  //todo 以后从切换门店的Session里拿
-                  Long storeId = user.getStoreId();
-                  map.put("storeId", storeId);
-                  userList = userMapper.selectBySuperAdmin(map);
-              } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
-                  //只拿自己和storeId相同的站管理员
-                  Long storeId = user.getStoreId();
-                  //加上所有role_id是3的storeId等于storeId的
-                  map.put("userId", user.getId());
-                  map.put("storeId", storeId);
-                  map.put("roleId", Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
-                  userList = userMapper.selectByHospitalAdmin(map);
-              } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
-                  //只拿自己
-                  map.put("userId", user.getId());
-                  userList = userMapper.selectByStationAdmin(map);
-              } else {
-              }
-              }
-            }
-            if (userList != null && userList.size() > 0) {
-                for (User u : userList) {
-                    List<StationDTO4User> stationList = new ArrayList<>();
-                    List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
-                    UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
-                    if (xref != null) {
-                        Role roleDb = roleService.getById(xref.getRoleId());
-                        if (roleDb != null) {
-                            u.setRoleId(roleDb.getId());
-                            u.setRoleName(roleDb.getCnName());
-                        }
-                    }
-                    addToStationList(userStationXrefDbList, stationList);
-                    u.setStationList(stationList);
+                if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
+                    //todo 以后从切换门店的Session里拿
+                    Long storeId = user.getStoreId();
+                    map.put("storeId", storeId);
+                    userList = userMapper.selectBySuperAdmin(map);
+                } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
+                    //只拿自己和storeId相同的站管理员
+                    Long storeId = user.getStoreId();
+                    //加上所有role_id是3的storeId等于storeId的
+                    map.put("userId", user.getId());
+                    map.put("storeId", storeId);
+                    map.put("roleId", Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
+                    userList = userMapper.selectByHospitalAdmin(map);
+                } else if (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+                    //只拿自己
+                    map.put("userId", user.getId());
+                    userList = userMapper.selectByStationAdmin(map);
+                } else {
                 }
             }
-            return userList;
+        }
+        if (userList != null && userList.size() > 0) {
+            for (User u : userList) {
+                List<StationDTO4User> stationList = new ArrayList<>();
+                List<UserStationXref> userStationXrefDbList = userStationXrefService.getByUserId(u.getId());
+                UserRoleXref xref = userRoleXrefService.getByUserId(u.getId());
+                if (xref != null) {
+                    Role roleDb = roleService.getById(xref.getRoleId());
+                    if (roleDb != null) {
+                        u.setRoleId(roleDb.getId());
+                        u.setRoleName(roleDb.getCnName());
+                    }
+                }
+                addToStationList(userStationXrefDbList, stationList);
+                u.setStationList(stationList);
+            }
+        }
+        return userList;
     }
 
     /**
@@ -237,7 +237,6 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     /**
-     *
      * @param station
      * @return
      */

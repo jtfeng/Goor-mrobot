@@ -10,7 +10,6 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
@@ -108,14 +107,10 @@ public class UserController {
             if (roleId == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
             }
-            /*
             if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null && user.getStationList().size() > 0) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
             }
-            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (user.getStationList() == null || user.getStationList().size() == 0)) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空");
-            }*/
-            if (roleId != null && (stationList == null || (stationList != null && (stationList.size() > 1 || stationList.size() == 0)))) {
+            if (roleId != null && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (stationList == null || (stationList != null && (stationList.size() > 1 || stationList.size() == 0)))) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空或者不能绑定多个站");
             }
             if (roleId != null && roleId.equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
@@ -131,10 +126,10 @@ public class UserController {
             //todo StoreId暂时用100去代替，以后用session里获取
             if (directLoginKey != null) {
                 User userDbByDirectKey = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
-                Long userDbByDirectKeyId = userDbByDirectKey.getId();
-                Integer directLoginKeyDb = userDbByDirectKey.getDirectLoginKey();
-                if (userDbByDirectKey != null && directLoginKey != null && directLoginKeyDb.equals(directLoginKey) && !userDbByDirectKeyId.equals(userId)) {
-                    return AjaxResult.failed("4位快捷码重复");
+                if (userDbByDirectKey != null) {
+                    if (directLoginKey != null && userDbByDirectKey.getDirectLoginKey().equals(directLoginKey) && !userDbByDirectKey.getId().equals(userId)) {
+                        return AjaxResult.failed("4位快捷码重复");
+                    }
                 }
             }
             if (userId == null) {

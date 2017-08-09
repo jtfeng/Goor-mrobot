@@ -1,13 +1,10 @@
 package cn.muye.log.elevator.service;
 
 import cn.mrobot.bean.log.elevator.LogElevator;
-import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.log.elevator.mapper.LogElevatorMapper;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageRowBounds;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,8 +21,10 @@ import java.util.List;
 public class LogElevatorServiceImpl
         extends BaseServiceImpl<LogElevator>
         implements LogElevatorService {
+
     @Autowired
     private LogElevatorMapper logElevatorMapper;
+
     @Override
     public List<LogElevator> listPageByTimeDesc(int page, int pageSize) {
         PageHelper.startPage(page,pageSize);
