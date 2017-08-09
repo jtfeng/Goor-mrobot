@@ -5,7 +5,6 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.elevator.ElevatorShaft;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
@@ -13,20 +12,18 @@ import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.elevator.service.ElevatorShaftService;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import static com.google.common.base.Preconditions.*;
-
-import java.util.Date;
 import java.util.List;
 
 @RestController
 public class ElevatorController {
 
+    @Autowired
+    private MapPointMapper mapPointMapper;
     @Autowired
     private ElevatorService elevatorService;
     @Autowired
@@ -55,8 +52,8 @@ public class ElevatorController {
      * 查询全部电梯井信息
      * @return
      */
-    @RequestMapping(value = "listAllElevator", method = RequestMethod.GET)
-    public AjaxResult listAllElevator(){
+    @RequestMapping(value = "listAllElevatorShaft", method = RequestMethod.GET)
+    public AjaxResult listAllElevatorShaft(){
         try {
             List<ElevatorShaft> list = elevatorShaftService.listAll();
             return AjaxResult.success(list, "查询全部电梯井信息成功");
@@ -65,8 +62,19 @@ public class ElevatorController {
         }
     }
 
-    @Autowired
-    private MapPointMapper mapPointMapper;
+    /**
+     * 查询全部电梯信息
+     * @return
+     */
+    @RequestMapping(value = "listAllElevator", method = RequestMethod.GET)
+    public AjaxResult listAllElevator(){
+        try {
+            List<Elevator> list = elevatorService.listAll();
+            return AjaxResult.success(list, "查询全部电梯信息成功");
+        }catch (Exception e){
+            return AjaxResult.failed(e,     "查询全部电梯信息失败");
+        }
+    }
 
     /**
      * 查询全部的地图点信息
@@ -76,9 +84,9 @@ public class ElevatorController {
     public AjaxResult listAllMapPoints(){
         try {
             List<MapPoint> mapPoints = this.mapPointMapper.selectAll();
-            return AjaxResult.success(mapPoints, "查询全部电梯井信息成功");
+            return AjaxResult.success(mapPoints, "查询全部地图点信息成功");
         }catch (Exception e){
-            return AjaxResult.failed(e,     "查询全部电梯井信息失败");
+            return AjaxResult.failed(e,          "查询全部地图点信息失败");
         }
     }
 
@@ -90,9 +98,9 @@ public class ElevatorController {
     public AjaxResult listAllElevatorPointCombinations(){
         try {
             List< ElevatorPointCombination> combinations = this.elevatorPointCombinationService.listAll();
-            return AjaxResult.success(combinations, "查询全部电梯井信息成功");
+            return AjaxResult.success(combinations, "查询全部四点组合信息成功");
         }catch (Exception e){
-            return AjaxResult.failed(e,     "查询全部电梯井信息失败");
+            return AjaxResult.failed(e,             "查询全部四点组合信息失败");
         }
     }
 
