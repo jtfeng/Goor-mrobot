@@ -243,6 +243,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             Long robotId = robot.getId();
             RobotConfig robotConfigDb = robotConfigService.getByRobotId(robotId);
             robot.setLowBatteryThreshold(robotConfigDb != null ? robotConfigDb.getLowBatteryThreshold() : null);
+            robot.setSufficientBatteryThreshold(robotConfigDb != null ? robotConfigDb.getSufficientBatteryThreshold() : null);
             List<RobotPassword> robotPasswordList = robotPasswordService.listRobotPassword(robotId);
             robot.setPasswords(robotPasswordList);
             List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);

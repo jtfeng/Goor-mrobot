@@ -46,7 +46,7 @@
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
             robot.IS_ONLINE,
-            robot.ROBOT_ID_FOR_ELEVATOR as robotIdForElevator,
+            robot.ROBOT_ID_FOR_ELEVATOR,
             scene.ID as SCENE_ID,
             scene.NAME as SCENE_NAME
         FROM
@@ -76,6 +76,7 @@
                 robot.ID,
                 robot.NAME,
                 robot.CODE,
+                robot.ROBOT_ID_FOR_ELEVATOR,
                 config.LOW_BATTERY_THRESHOLD,
                 config.SUFFICIENT_BATTERY_THRESHOLD,
                 ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
