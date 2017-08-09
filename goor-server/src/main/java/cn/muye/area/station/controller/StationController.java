@@ -75,7 +75,6 @@ public class StationController {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部查询出错");
         }
-
     }
 
     /**
