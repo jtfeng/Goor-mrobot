@@ -77,18 +77,18 @@ public class CacheInfoManager implements ApplicationContextAware {
         robotAutoRegisterTimeCache.setMaxLifeTime(0);
         UUIDCache.setMaxLifeTime(60 * 1000);//设置超时时间60秒
 
-        robotChargeInfoCache.setMaxLifeTime(10 * 60 * 1000);
+        robotChargeInfoCache.setMaxLifeTime(0);
         webSocketSessionCache.setMaxLifeTime(0);
         sceneRobotListCache.setMaxLifeTime(0);
         persistMissionState.setMaxLifeTime(0);
 
-        //状态机缓存
-        autoChargeCache.setMaxLifeTime(60 * 1000);
-        leftBaseDriverCache.setMaxLifeTime(60 * 1000);
-        rightBaseDriverCache.setMaxLifeTime(60 * 1000);
-        baseMicroSwitchAndAntiCache.setMaxLifeTime(60 * 1000);
-        baseSystemCache.setMaxLifeTime(60 * 1000);
-        navigationCache.setMaxLifeTime(60 * 1000);
+        //状态机缓存  存储端判断如果状态有改变则存入
+        autoChargeCache.setMaxLifeTime(0);
+        leftBaseDriverCache.setMaxLifeTime(0);
+        rightBaseDriverCache.setMaxLifeTime(0);
+        baseMicroSwitchAndAntiCache.setMaxLifeTime(0);
+        baseSystemCache.setMaxLifeTime(0);
+        navigationCache.setMaxLifeTime(0);
     }
 
     private CacheInfoManager() {

@@ -24,7 +24,6 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
-import cn.muye.base.service.mapper.message.OffLineMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
@@ -33,7 +32,6 @@ import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,10 +80,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             list = bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
             robot.setChargerMapPointList(list);
         }
-        if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
+        if (lowBatteryThresholdDb == null || lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
             robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
         }
-        if (sufficientBatteryThresholdDb != null && !sufficientBatteryThresholdDb.equals(sufficientBatteryThreshold)) {
+        if (sufficientBatteryThresholdDb == null || sufficientBatteryThresholdDb != null && !sufficientBatteryThresholdDb.equals(sufficientBatteryThreshold)) {
             robot.setSufficientBatteryThreshold(sufficientBatteryThreshold);
         }
         //更新机器人信息
@@ -245,6 +243,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             Long robotId = robot.getId();
             RobotConfig robotConfigDb = robotConfigService.getByRobotId(robotId);
             robot.setLowBatteryThreshold(robotConfigDb != null ? robotConfigDb.getLowBatteryThreshold() : null);
+            robot.setSufficientBatteryThreshold(robotConfigDb != null ? robotConfigDb.getSufficientBatteryThreshold() : null);
             List<RobotPassword> robotPasswordList = robotPasswordService.listRobotPassword(robotId);
             robot.setPasswords(robotPasswordList);
             List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
@@ -391,6 +390,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 slamBody.setData(JsonUtils.toJson(robotNew,
                         new TypeToken<Robot>() {
                         }.getType()));
+                slamBody.setErrorCode("0");
+                slamBody.setMsg("机器人"+ robotNew.getCode() + "注册成功");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
