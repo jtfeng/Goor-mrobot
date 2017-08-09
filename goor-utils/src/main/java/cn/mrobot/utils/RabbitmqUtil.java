@@ -18,6 +18,7 @@ public final class RabbitmqUtil {
         try {
             Map<String, Object> args = new HashMap<String, Object>();
             args.put("x-max-length", 1000);//最大消息条数
+            args.put("x-message-ttl", 5000);//队列最大保留时间
             return args;
         } catch (Exception e) {
             logger.error("getRabbitMQArguments Exception", e);
