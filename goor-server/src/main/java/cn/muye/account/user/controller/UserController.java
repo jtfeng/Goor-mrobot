@@ -330,8 +330,8 @@ public class UserController {
     @RequestMapping(value = {"account/user/logOut"}, method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult logOut(HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        session.removeAttribute("access_token");
+//        HttpSession session = request.getSession();
+//        session.removeAttribute("access_token");
         return AjaxResult.success("注销成功");
     }
 
@@ -359,7 +359,6 @@ public class UserController {
                     map.put("user", entityToDto(user, SOURCE_TYPE_OTHER));
                     map.put("access_token", accessToken);
                     if (stationList != null && stationList.size() > 0) {
-                        session.setAttribute("stationId", user.getStationList().get(0).getId());
                         //todo 暂时写死 临时添加场景id( ?? 注意对应 id 场景不存在的情况)
 //                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
                         try {

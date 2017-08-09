@@ -122,18 +122,22 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
         }
 
         List<Station> stationList = new ArrayList<Station>();
-        if (whereRequest != null && whereRequest.getQueryObj() != null) {
+        if (whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null) {
             JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
-            Object name = map.get(SearchConstants.SEARCH_NAME);
+
             //TODO 方法一：　测试用多表联查查数据库,缺点是pageHelper分页条数会按照leftjoin查询条数去算，不准确
             /*result = myMapper.list(name);*/
 
             //方法二：用公共mapper逐条查询，然后再for循环遍历关系表得到point序列，再更新到对象中
             Example example = new Example(Station.class);
             Example.Criteria criteria = example.createCriteria();
-            criteria.andCondition("NAME like", "%" + name + "%")
-                    .andCondition("ACTIVE =", Constant.NORMAL)
+
+            criteria.andCondition("ACTIVE =", Constant.NORMAL)
                     .andCondition("STORE_ID =", storeId);
+            Object name = map.get(SearchConstants.SEARCH_NAME);
+            if(name != null) {
+                criteria.andCondition("NAME like", "%" + name + "%");
+            }
             if(sceneId != null) {
                 criteria.andCondition("SCENE_ID =", sceneId);
             }

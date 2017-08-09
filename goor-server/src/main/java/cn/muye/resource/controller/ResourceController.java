@@ -9,7 +9,6 @@ import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.resource.Resource;
 import cn.mrobot.bean.resource.VoiceFile;
 import cn.mrobot.utils.MD5Utils;
-import cn.mrobot.utils.RandomUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -152,17 +150,21 @@ public class ResourceController extends BaseController {
             //commonInfo.setTopicName("/enva_test");
             //commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
             //commonInfo.setPublishMessage(JSON.toJSONString(commonInfo));
-
-            MessageInfo info = new MessageInfo();
-            info.setUuId(RandomUtil.getUUID());
-            info.setSendTime(new Date());
-            info.setSenderId(Constant.GOOR_SERVER);
-            info.setReceiverId(robot.getCode());
-            info.setMessageType(MessageType.EXECUTOR_RESOURCE);
-            info.setMessageText(JSON.toJSONString(commonInfo));
-
+            MessageInfo info = new MessageInfo(Constant.GOOR_SERVER, robot.getCode(),JSON.toJSONString(commonInfo));
             String backResultResourceRoutingKey = RabbitMqBean.getRoutingKey(info.getReceiverId(), true, MessageType.EXECUTOR_RESOURCE.name());
-            return (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultResourceRoutingKey, info);
+            logger.info("资源开始推送，推送机器人编号为"+ robot.getCode());
+            AjaxResult ajaxResult = (AjaxResult)rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultResourceRoutingKey, info);
+            if(ajaxResult == null){
+                logger.info("资源推送连接客户端失败");
+                return AjaxResult.failed("资源推送连接客户端失败");
+            }else {
+                if(ajaxResult.isSuccess()){
+                    logger.info("资源推送成功");
+                }else {
+                    logger.info("资源推送失败，原因为"+ ajaxResult.getMessage());
+                }
+                return ajaxResult;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("系统内部出错");

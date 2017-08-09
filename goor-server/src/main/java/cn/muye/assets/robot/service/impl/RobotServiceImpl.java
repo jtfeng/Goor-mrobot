@@ -60,9 +60,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     private StationRobotXREFService stationRobotXREFService;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Autowired
     private RobotChargerMapPointXREFService robotChargerMapPointXREFService;
 
     @Autowired
@@ -71,8 +68,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Autowired
     private RobotMapper robotMapper;
 
-    @Autowired
-    private OffLineMessageService offLineMessageService;
     @Autowired
     private MessageSendHandleService messageSendHandleService;
 
@@ -84,7 +79,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientBatteryThreshold, String robotCodeDb) throws RuntimeException {
         List<MapPoint> list = robot.getChargerMapPointList();
         if (list != null && list.size() == 1) {
-            bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
+            list = bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
+            robot.setChargerMapPointList(list);
         }
         if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
             robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
@@ -111,7 +107,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
             syncRobotBatteryThresholdToRos(robot);
         }
-        return AjaxResult.success("修改成功");
+        return AjaxResult.success(robot, "修改成功");
     }
 
     /**
@@ -178,18 +174,23 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
     @Override
-    public void bindChargerMapPoint(Long robotId, List<MapPoint> list) {
+    public List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list) {
+        List listMapPoint = null;
         if (robotId != null) {
             robotChargerMapPointXREFService.deleteByRobotId(robotId);
             if (list != null && list.size() > 0) {
                 for (MapPoint mapPoint : list) {
+                    Long mapPointId = mapPoint.getId();
                     RobotChargerMapPointXREF xref = new RobotChargerMapPointXREF();
                     xref.setRobotId(robotId);
-                    xref.setChargerMapPointId(mapPoint.getId());
+                    xref.setChargerMapPointId(mapPointId);
                     robotChargerMapPointXREFService.save(xref);
+                    MapPoint mapPointDb = pointService.findById(mapPointId);
+                    listMapPoint = Lists.newArrayList(mapPointDb);
                 }
             }
         }
+        return listMapPoint;
     }
 
     /**

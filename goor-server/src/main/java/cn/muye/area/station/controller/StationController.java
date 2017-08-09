@@ -57,7 +57,7 @@ public class StationController {
     private AjaxResult pageStation(WhereRequest whereRequest,HttpServletRequest request) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -75,7 +75,6 @@ public class StationController {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部查询出错");
         }
-
     }
 
     /**
@@ -94,7 +93,7 @@ public class StationController {
         Station station = null;
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -119,7 +118,7 @@ public class StationController {
     public AjaxResult deleteMapPoint(@PathVariable long id,HttpServletRequest request) throws Exception {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -150,7 +149,7 @@ public class StationController {
     public AjaxResult saveOrUpdateStation(@ApiParam(value = "站") @RequestBody Station station,HttpServletRequest request) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
