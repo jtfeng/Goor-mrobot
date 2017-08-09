@@ -38,6 +38,6 @@ public class UserRoleXrefServiceImpl implements UserRoleXrefService {
 
     @Override
     public void update(UserRoleXref userRoleXref) {
-        userRoleXrefMapper.updateByPrimaryKey(userRoleXref);
+        userRoleXrefMapper.updateByPrimaryKeySelective(userRoleXref);
     }
 }

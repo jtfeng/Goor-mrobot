@@ -2,6 +2,7 @@ package cn.muye.publisher;
 
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.charge.service.ChargeInfoService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
 
@@ -43,13 +45,17 @@ public class AppSubService implements ApplicationContextAware {
      * @param topicType
      * @param data
      */
-    public void sendTopic(String topicName, String topicType, Object data) {
+    public void sendTopic(String topicName, String topicType, Object data) throws Exception {
         getRos();
-        if (null == ros) {
+        if (null == ros || StringUtils.isEmpty(topicName) || StringUtils.isEmpty(topicType)) {
             LOGGER.error("-->> ros is not connect");
             return;
         }
-        Topic echo = new Topic(ros, topicName, topicType);
+        if (StringUtils.isEmpty(topicName) || StringUtils.isEmpty(topicType)) {
+            LOGGER.error("-->> topicName and topicType is null");
+            return;
+        }
+        Topic echo = TopicHandleInfo.getTopic(ros, topicName);
 
         JSONObject messageObject = new JSONObject();
         messageObject.put(TopicConstants.DATA, JSON.toJSONString(data));

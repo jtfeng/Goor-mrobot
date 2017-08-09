@@ -3,20 +3,22 @@ package cn.mrobot.bean.assets.elevator;
 import cn.mrobot.bean.base.BaseBean;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.ArrayList;
 import java.util.List;
 
 @Table(name = "AS_ELEVATOR")
 public class Elevator extends BaseBean {
     private String name;
     private String ip;
-    private String lockState = "0";
+    private String lockState = "0";// 0表示 未锁定、1表示 已锁定
     private String info;
     private String robotCode;
     private Long elevatorshaftId;
+    private String robotCode;
     @Transient
     private ElevatorShaft elevatorShaft;
     @Transient
-    private List<ElevatorPointCombination> elevatorPointCombinations;
+    private List<ElevatorPointCombination> elevatorPointCombinations = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -27,6 +29,7 @@ public class Elevator extends BaseBean {
                 ", info='" + info + '\'' +
                 ", robotCode='" + robotCode + '\'' +
                 ", elevatorshaftId=" + elevatorshaftId +
+                ", robotCode='" + robotCode + '\'' +
                 ", elevatorShaft=" + elevatorShaft +
                 ", elevatorPointCombinations=" + elevatorPointCombinations +
                 '}';

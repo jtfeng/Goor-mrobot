@@ -112,8 +112,11 @@ public class MapSyncService implements ApplicationContextAware {
 
                 String code = robotList.get(i).getCode();
                 //如果需要同步的机器为地图上传机器，则跳过
-                if (code.equals(mapZip.getDeviceId()))
+                if (code.equals(mapZip.getDeviceId())) {
+                    LOGGER.info("需同步的机器人code为上传地图的机器人code，不进行同步，code=" + code);
                     continue;
+                }
+
                 String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(code, true, MessageType.EXECUTOR_MAP.name());
                 AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
                 if (null != ajaxClientResult && ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS) {

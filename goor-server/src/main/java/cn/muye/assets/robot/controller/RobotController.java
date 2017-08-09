@@ -19,7 +19,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Date;
 import java.util.List;
 
@@ -73,6 +72,15 @@ public class RobotController {
         String robotCode = robot.getCode();
         Integer lowRobotBatteryThreshold = robot.getLowBatteryThreshold();
         Integer sufficientBatteryThreshold = robot.getSufficientBatteryThreshold();
+        Integer robotIdForElevator = robot.getRobotIdForElevator();
+        if (robotIdForElevator != null) {
+            String robotIdForElevatorStr = String.valueOf(robotIdForElevator);
+            String regex = "^[10]{8}";
+            boolean flag = robotIdForElevatorStr.matches(regex);
+            if (!flag) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "电梯编号必须为8位二进制");
+            }
+        }
         List list = robot.getChargerMapPointList();
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
@@ -88,8 +96,12 @@ public class RobotController {
         if (robotId != null) { //修改
             Robot robotDb = robotService.getById(robotId);
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
-            Integer lowBatteryThresholdDb = robotConfig.getLowBatteryThreshold();
-            Integer sufficientBatteryThresholdDb = robotConfig.getSufficientBatteryThreshold();
+            Integer lowBatteryThresholdDb = null;
+            Integer sufficientBatteryThresholdDb = null;
+            if (robotConfig != null) {
+                lowBatteryThresholdDb = robotConfig.getLowBatteryThreshold();
+                sufficientBatteryThresholdDb = robotConfig.getSufficientBatteryThreshold();
+            }
             String robotCodeDb = robotDb.getCode();
             if (robotDb != null && robotCode == null) {
                 if (list != null) {
@@ -108,6 +120,7 @@ public class RobotController {
                 if (lowRobotBatteryThreshold != null) {
                     robotDb.setLowBatteryThreshold(lowRobotBatteryThreshold);
                 }
+                robotDb.setRobotIdForElevator(robotIdForElevator);
                 try {
                     ajaxResult = robotService.updateRobotAndBindChargerMapPoint(robotDb, lowBatteryThresholdDb, sufficientBatteryThresholdDb, lowRobotBatteryThreshold, sufficientBatteryThreshold, robotCodeDb);
                 } catch (Exception e) {

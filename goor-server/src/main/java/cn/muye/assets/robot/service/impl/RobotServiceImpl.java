@@ -22,8 +22,6 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -40,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
 import java.util.*;
 
 /**
@@ -61,9 +60,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     private StationRobotXREFService stationRobotXREFService;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Autowired
     private RobotChargerMapPointXREFService robotChargerMapPointXREFService;
 
     @Autowired
@@ -72,8 +68,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Autowired
     private RobotMapper robotMapper;
 
-    @Autowired
-    private OffLineMessageService offLineMessageService;
     @Autowired
     private MessageSendHandleService messageSendHandleService;
 
@@ -85,7 +79,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientBatteryThreshold, String robotCodeDb) throws RuntimeException {
         List<MapPoint> list = robot.getChargerMapPointList();
         if (list != null && list.size() == 1) {
-            bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
+            list = bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
+            robot.setChargerMapPointList(list);
         }
         if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
             robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
@@ -100,10 +95,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         if (robotConfig != null && robot.getLowBatteryThreshold() != null) {
             robotConfig.setLowBatteryThreshold(robot.getLowBatteryThreshold());
             robotConfig.setSufficientBatteryThreshold(robot.getSufficientBatteryThreshold());
-            robotConfigService.update(robotConfig);
+            robotConfigService.updateSelective(robotConfig);
         }
         //向X86上同步修改后的机器人电量阈值信息
-        if (robot.getOnline() != null && robot.getOnline() == true) {
+        if (robot.getOnline() != null && robot.getOnline() == true && lowBatteryThresholdDb != null && lowRobotBatteryThreshold != null && sufficientBatteryThresholdDb != null && sufficientBatteryThreshold != null) {
             if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
                 robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
             }
@@ -112,7 +107,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
             syncRobotBatteryThresholdToRos(robot);
         }
-        return AjaxResult.success("修改成功");
+        return AjaxResult.success(robot, "修改成功");
     }
 
     /**
@@ -122,19 +117,21 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     private void syncRobotBatteryThresholdToRos(Robot robotDb) throws RuntimeException {
-        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+        //给应用和任务管理器下发topic
+        for (int i = 0; i < 2; i++) {
             try {
                 CommonInfo commonInfo = new CommonInfo();
-                commonInfo.setTopicName(topic);
+                commonInfo.setTopicName(TopicConstants.AGENT_PUB);
                 commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
                 String uuid = UUID.randomUUID().toString().replace("-", "");
                 robotDb.setUuid(UUID.randomUUID().toString().replace("-", ""));
                 SlamBody slamBody = new SlamBody();
-                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
                 slamBody.setUuid(uuid);
                 slamBody.setData(JsonUtils.toJson(robotDb,
                         new TypeToken<Robot>() {
                         }.getType()));
+                slamBody.setErrorCode("0");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
@@ -147,16 +144,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 LOGGER.error("发送错误", e);
             }
         }
-    }
-
-    private boolean messageSave(MessageInfo messageInfo) throws Exception {
-        if (messageInfo == null
-                || StringUtil.isEmpty(messageInfo.getUuId() + "")) {
-            return false;
-        }
-        OffLineMessage message = new OffLineMessage(messageInfo);
-        offLineMessageService.save(message);//更新发送的消息
-        return true;
     }
 
     /**
@@ -187,18 +174,23 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
     @Override
-    public void bindChargerMapPoint(Long robotId, List<MapPoint> list) {
+    public List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list) {
+        List listMapPoint = null;
         if (robotId != null) {
             robotChargerMapPointXREFService.deleteByRobotId(robotId);
             if (list != null && list.size() > 0) {
                 for (MapPoint mapPoint : list) {
+                    Long mapPointId = mapPoint.getId();
                     RobotChargerMapPointXREF xref = new RobotChargerMapPointXREF();
                     xref.setRobotId(robotId);
-                    xref.setChargerMapPointId(mapPoint.getId());
+                    xref.setChargerMapPointId(mapPointId);
                     robotChargerMapPointXREFService.save(xref);
+                    MapPoint mapPointDb = pointService.findById(mapPointId);
+                    listMapPoint = Lists.newArrayList(mapPointDb);
                 }
             }
         }
+        return listMapPoint;
     }
 
     /**
@@ -279,7 +271,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
 
-    public void saveRobotAndBindChargerMapPoint(Robot robot) {
+    public void saveRobotAndBindChargerMapPoint(Robot robot) throws RuntimeException {
         super.save(robot);
         Long robotNewId = robot.getId();
         List list = robot.getChargerMapPointList();
@@ -297,6 +289,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         if (robot.getTypeId() != null) {
             robotPasswordService.saveRobotPassword(robot);
         }
+
     }
 
     /**
@@ -306,7 +299,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public AjaxResult autoRegister(Robot robotNew) {
+    public AjaxResult autoRegister(Robot robotNew) throws RuntimeException {
         try {
             if (robotNew != null) {
                 Long robotId = robotNew.getId();
@@ -384,16 +377,16 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @param robotNew
      */
     private void syncRosRobotConfig(Robot robotNew) {
-        for (String topic : Constant.BATTERY_THRESHOLD_TOPICS) {
+        for (int i = 0; i < 2; i++) {
             try {
                 CommonInfo commonInfo = new CommonInfo();
-                commonInfo.setTopicName(topic);
+                commonInfo.setTopicName(TopicConstants.AGENT_PUB);
                 commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
                 //todo 暂时用唐林的SlamBody的结构，之后如果可复用，建议把名字换成通用的
                 String uuid = UUID.randomUUID().toString().replace("-", "");
                 robotNew.setUuid(uuid);
                 SlamBody slamBody = new SlamBody();
-                slamBody.setPubName(TopicConstants.PUB_NAME_ROBOT_INFO);
+                slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
                 slamBody.setUuid(uuid);
                 slamBody.setData(JsonUtils.toJson(robotNew,
                         new TypeToken<Robot>() {
@@ -445,5 +438,14 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Robot getByCodeByXml(String code, Long storeId) {
+        Map map = Maps.newHashMap();
+        map.put("code", code);
+        map.put("storeId", storeId);
+        Robot robot = robotMapper.getRobotByCode(map);
+        return robot;
     }
 }

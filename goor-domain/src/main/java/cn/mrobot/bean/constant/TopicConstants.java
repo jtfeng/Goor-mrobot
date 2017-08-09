@@ -28,6 +28,9 @@ public class TopicConstants {
 	public static final String PUB_NAME = "pub_name";
 	public static final String SUB_NAME = "sub_name";
 
+	public static final String DIRECTION_PONG = "pong";
+	public static final String DIRECTION = "direction";
+
 	public static final String UUID = "uuid";//与ros通信的uuid
 	public static final String CODE = "code";//与ros通信的code
 
@@ -46,18 +49,19 @@ public class TopicConstants {
 	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
 	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
 	public static final String X86_ELEVATOR_LOCK = "/x86_elevator_lock";//电梯锁定topic
+	public static final String X86_MISSION_HEARTBEAT = "/x86_mission_heartbeat";//x86 mission心跳topic
 
-	public static final String ROS_PUB_YAOGAN_TOPIC = "android_joystick_cmd_vel";
+	public static final String ANDROID_JOYSTICK_CMD_VEL = "/android_joystick_cmd_vel";//摇杆topic
 	public static final String ROS_SUB_YAOGAN_TOPIC = "~cmd_vel";
 	public static final String ROS_YAOGAN_TOPIC_TYPE = "geometry_msgs/Twist";
 
 	//ros topic pub/sub  name
 	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
-	public static final String PUB_NAME_ROBOT_INFO = "robot_info"; //上报机器人信息(电量阈值)的pubName
-	public static final String SUB_NAME_ROBOT_INFO_REPLY = "robot_info_reply"; //应用那边同步机器人信息(电量阈值)结果的回执subName
+	public static final String PUB_SUB_NAME_ROBOT_INFO = "robot_info"; //下发机器人信息和应用请求机器人信息(电量阈值)的pubName
 	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
 	public static final String STATE_COLLECTOR = "/state_collector"; //状态机返回状态的topic
 	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic
+	public static final String ROBOTS_CURRENT_POSE = "robots_current_pose"; //所有机器人当前位置
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
 	public static final String ROBOT_CODE = "robot_code";//机器人主板编号
@@ -81,7 +85,7 @@ public class TopicConstants {
 	public static final String CHECK_HEART_TOPIC = "/checkHeartTopic";
 	public static final String CHECK_HEART_MESSAGE = "{\"data\": \"heart\"}";
 	public static final Long CHECK_HEART_TOPIC_MAX = 30000L;//30秒
-	public static final Long CHECK_ROS_BRIDGE_MAX = 120000L;//120秒,检查rosbridge启动情况
+	public static final Long CHECK_ROS_BRIDGE_MAX = 90000L;//120秒,检查rosbridge启动情况
 
 
 	//导航返回的 code 标识

@@ -1,6 +1,7 @@
 package cn.muye.base.service.batch;
 
 import cn.mrobot.utils.DateTimeUtils;
+import cn.muye.area.pose.service.CurrentPoseService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -33,6 +34,9 @@ public class ScheduleTasks {
 
     @Autowired
     private LogCollectService logCollectService;
+
+    @Autowired
+    private CurrentPoseService currentPoseService;
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -100,7 +104,7 @@ public class ScheduleTasks {
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
     //每分钟触发,记录底盘，自动导航，电量信息日志
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     public void collectBaseState() {
         logger.info("Scheduled log");
         try {
@@ -123,18 +127,16 @@ public class ScheduleTasks {
             logger.error("Scheduled collect base state error", e);
         }
     }
-
     /**
-     * 每秒发送机器人当前的位置信息给工控，工控做机器人排队
+     * 每秒发送机器人当前的位置信息给工控，工控做机器人排队(暂定2s/次)
      */
-    @Scheduled(cron = "*/1 * * * * ?")
+    @Scheduled(cron = "*/2 * * * * ?")
     public void sendCurrentPose() {
-//        logger.info(" Scheduled send current pose");
-//        try {
-//            x86MissionCommonRequestService.sendX86MissionStateCommonRequest();
-//        } catch (Exception e) {
-//            logger.error("Scheduled send current pose error", e);
-//        }
+        try {
+            currentPoseService.sendCurrentPose();
+        } catch (Exception e) {
+            logger.error("Scheduled send robots current pose error", e);
+        }
     }
 
 }

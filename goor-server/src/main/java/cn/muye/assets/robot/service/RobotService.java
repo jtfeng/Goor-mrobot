@@ -31,11 +31,13 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getByCode(String code, Long storeId);
 
+    Robot getByCodeByXml(String code, Long storeId);
+
     AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientRobotBatteryThreshold, String robotCodeDb);
 
     Robot getAvailableRobotByStationId(Long stationId, Integer typeId);
 
-    void bindChargerMapPoint(Long robotId, List<MapPoint> list);
+    List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list);
 
     List<MapPoint> getChargerMapPointByRobotCode(String robotCode, Long storeId);
 }

@@ -3,6 +3,9 @@ package cn.muye.base.service.imp;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.base.PubBean;
+import cn.mrobot.bean.base.PubData;
+import cn.mrobot.bean.base.PubX86HeartBeat;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
@@ -11,7 +14,8 @@ import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.bean.TopicSubscribeInfo;
+import cn.muye.base.bean.SingleFactory;
+import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.download.DownloadHandle;
 import cn.muye.base.listener.CheckHeartSubListenerImpl;
@@ -89,11 +93,11 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 logger.error("-->> ros is not connect");
                 return;
             }
-            Topic topic = new Topic(ros, TopicConstants.CHECK_HEART_TOPIC, TopicConstants.TOPIC_TYPE_STRING);
+            Topic topic = TopicHandleInfo.getTopic(ros, TopicConstants.CHECK_HEART_TOPIC);
             topic.publish(new Message(TopicConstants.CHECK_HEART_MESSAGE));//如果已经订阅了，会自动执行订阅方法
 
             //发布app_pub的获取当前地图消息
-            Topic mapCurrentPubTopic = new Topic(ros, TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING);
+            Topic mapCurrentPubTopic = TopicHandleInfo.getTopic(ros, TopicConstants.APP_PUB);
             mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
             logger.info("心跳时间："+CacheInfoManager.getTopicHeartCheckCache());
             logger.info("心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()));
@@ -101,14 +105,36 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 ros.disconnect();
                 ros.connect();
-                TopicCallback checkHeartCallback = new CheckHeartSubListenerImpl();
-                topic.subscribe(checkHeartCallback);
+//                topic.subscribe(new CheckHeartSubListenerImpl());
+                logger.info("心跳重新连接->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+                TopicHandleInfo.topicSubScribe(ros);//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
+                TopicHandleInfo.topicAdvertise(ros);
                 topic.publish(new Message(TopicConstants.CHECK_HEART_MESSAGE));
-
-                TopicSubscribeInfo.reSubScribeTopic(ros);//TODO 业务topic subscribe,添加topic时，此处需要添加，以保证断网后能重新订阅到
             }
         } catch (Exception e) {
             logger.error("-->> Scheduled rosHealthCheck Exception", e);
+        }
+    }
+
+    @Override
+    public void x86MissionRosHealthCheck() throws Exception {
+        logger.info("-->> Scheduled x86MissionRosHealthCheck start");
+        try {
+            ros = applicationContext.getBean(Ros.class);
+            if (null == ros) {
+                logger.error("-->> ros is not connect");
+                return;
+            }
+            Topic x86MissionHeartBeatTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_HEARTBEAT);
+            x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));//如果已经订阅了，会自动执行订阅方法
+
+            logger.info("x86Mission心跳时间："+CacheInfoManager.getX86MissionTopicHeartCheckCache());
+            logger.info("x86Mission心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()));
+            if ((System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
+                x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));
+            }
+        } catch (Exception e) {
+            logger.error("-->> Scheduled x86MissionRosHealthCheck Exception", e);
         }
     }
 
@@ -127,7 +153,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             messageInfo.setSenderId(localRobotSN);
             messageInfo.setMessageType(MessageType.RABBITMQ_HEARTBEAT);
             logger.info("开始发送goor心跳消息");
-            rabbitTemplate.convertAndSend(queueName, messageInfo);
+            rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, queueName, messageInfo);
         } catch (final Exception e) {
             logger.error("Scheduled mqHealthCheck exception", e);
         }
@@ -186,7 +212,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                     return;
                 }
                 if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
-                    Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                    Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
                     Message toSend = new Message(commonInfo.getPublishMessage());
                     echo.publish(toSend);
 
@@ -218,9 +244,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             }
             long end = System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache();
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
-                Topic echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
                 Message toSend = new Message(commonInfo.getPublishMessage());
-                echo.unadvertise();
                 echo.publish(toSend);
 //                logger.info("-->> publishMessage commonInfo to ros success");
                 return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());

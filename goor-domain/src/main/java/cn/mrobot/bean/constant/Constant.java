@@ -105,6 +105,6 @@ public class Constant {
 
     public static final String SESSION_STATION_ID = "stationId";
 
-    public static final String[] BATTERY_THRESHOLD_TOPICS = {TopicConstants.AGENT_PUB, TopicConstants.X86_MISSION_COMMON_REQUEST};
-
+    //添加初始密码 默认
+    public static final String PRIMARY_PWD = "0000";
 }

@@ -48,8 +48,8 @@ public class Application {
 	@Value("${lsub.name}")
 	private String lSubName;
 
-	@Value(TopicConstants.TOPIC_COMMAND)
-	private String topicCommandSN;
+	@Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
+	private String topicCommandAndReceiveSN;
 
 	@Value("${local.robot.fileCachePath}")
 	private String fileCachePath;
@@ -131,13 +131,13 @@ public class Application {
 
 	@Bean
 	public ScheduledExecutorService scheduledHandle() {
-		ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(7, new ThreadFactory() {
+		ScheduledExecutorService scheduledExecutor = Executors.newScheduledThreadPool(8, new ThreadFactory() {
 			@Override
 			public Thread newThread(Runnable r) {
 				return new Thread(r, "Application scheduledHandle");
 			}
 		});
-		new ScheduledHandle(scheduledExecutor, topicCommandSN);
+		new ScheduledHandle(scheduledExecutor, topicCommandAndReceiveSN);
 		return scheduledExecutor;
 	}
 

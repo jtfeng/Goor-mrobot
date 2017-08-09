@@ -11,6 +11,8 @@ public interface ScheduledHandleService {
 
     void rosHealthCheck() throws Exception;
 
+    void x86MissionRosHealthCheck() throws Exception;
+
     void mqHealthCheck(String queueName) throws Exception;
 
     void downloadResource() throws Exception;

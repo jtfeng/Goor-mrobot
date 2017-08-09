@@ -2,7 +2,7 @@ package cn.muye.base.listener;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.SingleFactory;
-import cn.muye.base.bean.TopicSubscribeInfo;
+import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.producer.ProducerCommon;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
 import edu.wpi.rail.jrosbridge.messages.Message;
@@ -21,13 +21,17 @@ public class AppPubListenerImpl implements TopicCallback {
 	private static Logger logger = Logger.getLogger(AppPubListenerImpl.class);
 	@Override
 	public void handleMessage(Message message) {
-        if (TopicConstants.DEBUG)
-		logger.info("From ROS ====== app_pub topic  " + message.toString());
-		if(TopicSubscribeInfo.checkPubNameIsNeedConsumer(message.toString())){
-            if (TopicConstants.DEBUG)
-			logger.info(" ====== message.toString()===" + message.toString());
-			ProducerCommon msg = SingleFactory.getProducerCommon();
-			msg.sendAppPubMessage(message.toString());
+		try {
+			if (TopicConstants.DEBUG)
+				logger.info("From ROS ====== app_pub topic  " + message.toString());
+			if (TopicHandleInfo.checkPubNameIsNeedConsumer(message.toString())) {
+				if (TopicConstants.DEBUG)
+					logger.info(" ====== message.toString()===" + message.toString());
+				ProducerCommon msg = SingleFactory.getProducerCommon();
+				msg.sendAppPubMessage(message.toString());
+			}
+		}catch (Exception e){
+			logger.error("AppPubListenerImpl", e);
 		}
 	}
 
