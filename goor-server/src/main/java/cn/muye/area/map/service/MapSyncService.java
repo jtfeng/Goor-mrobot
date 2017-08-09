@@ -75,6 +75,7 @@ public class MapSyncService implements ApplicationContextAware {
 
     /**
      * 同步地图
+     *
      * @param robotList
      * @param mapZip
      * @return
@@ -85,6 +86,14 @@ public class MapSyncService implements ApplicationContextAware {
 
     public String sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId) {
         try {
+            if (robotList.size() == 1) {
+                Robot robot = robotList.get(0);
+                //如果需要同步地图的机器人是上传地图的机器人，则直接更新场景的状态
+                if (robot.getCode().equals(mapZip.getDeviceId())) {
+                    sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
+                    return "";
+                }
+            }
             if (null == applicationContext) {
                 LOGGER.error("applicationContext 为空");
                 return "";
