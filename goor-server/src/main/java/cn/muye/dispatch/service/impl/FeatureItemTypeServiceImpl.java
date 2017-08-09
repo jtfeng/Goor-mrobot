@@ -48,7 +48,7 @@ public class FeatureItemTypeServiceImpl implements FeatureItemTypeService {
 	@Override
 	public List<FeatureItemType> list(WhereRequest whereRequest) {
 		List<FeatureItemType> featureItemTypeList = new ArrayList<>();
-		if (whereRequest.getQueryObj() != null) {
+		if (whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null) {
 			JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
 			Object name = jsonObject.get(SearchConstants.SEARCH_NAME);
 			Object featureItemId = jsonObject.get(SearchConstants.SEARCH_FEATURE_ITEM_ID);

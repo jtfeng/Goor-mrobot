@@ -126,7 +126,7 @@ public class MissionListServiceImpl implements MissionListService {
 	@Override
     public List<MissionList> list(WhereRequest whereRequest,long storeId) {
 		List<MissionList> missionListList = new ArrayList<>();
-		if(whereRequest != null && whereRequest.getQueryObj() != null){
+		if(whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null){
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 			Object name = map.get(SearchConstants.SEARCH_NAME);
 //			Object deviceId = map.get(SearchConstants.SEARCH_DEVICE_ID);
