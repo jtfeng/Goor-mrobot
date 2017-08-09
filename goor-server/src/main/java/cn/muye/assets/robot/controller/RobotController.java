@@ -92,7 +92,7 @@ public class RobotController {
         if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
         }
-        AjaxResult ajaxResult = null;
+        AjaxResult ajaxResult;
         if (robotId != null) { //修改
             Robot robotDb = robotService.getById(robotId);
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
