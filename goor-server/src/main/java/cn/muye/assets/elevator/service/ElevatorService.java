@@ -62,10 +62,4 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @return
      */
      MapInfo findByMapNameAndStoreId(String mapName, Long storeId) throws Exception;
-
-    /**
-     * 更新电梯状态
-     * @param elevatorId
-     */
-    boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode);
 }
