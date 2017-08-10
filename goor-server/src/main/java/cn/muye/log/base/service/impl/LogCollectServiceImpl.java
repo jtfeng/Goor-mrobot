@@ -128,11 +128,11 @@ public class LogCollectServiceImpl implements LogCollectService {
      */
     private void collectBaseLog(String code) {
         try {
-            List<StateDetail> stateDetailList = stateCollectorService.getCurrentBaseState(code);
+            List<StateDetail> stateDetailList = stateCollectorService.getCurrentBaseState(true, code);
             StringBuffer stringBuffer = new StringBuffer();
             if (stateDetailList != null && stateDetailList.size() > 0) {
                 for (StateDetail stateDetail : stateDetailList) {
-                    stringBuffer.append(stateDetail.getCHName()).append(":").append(stateDetail.getCHValue()).append("; ");
+                    stringBuffer.append(stateDetail.getCHName()).append(":").append(stateDetail.getCHValue()).append(", ");
                 }
             }
             String baseState = stringBuffer.toString();

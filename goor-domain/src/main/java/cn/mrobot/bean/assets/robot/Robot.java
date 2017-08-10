@@ -2,8 +2,8 @@ package cn.mrobot.bean.assets.robot;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import com.alibaba.fastjson.annotation.JSONField;
-
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -50,7 +50,10 @@ public class Robot extends BaseBean {
     private List<RobotPassword> passwords; //机器人抽屉密码
 
     @Transient
-    private List<MapPoint> chargerMapPointList; //充电桩点LIST
+    private List<MapPoint> originChargerMapPointList; //充电桩点LIST (数据库里查出来的充电桩点)
+
+    @Transient
+    private List<JsonMissionItemDataLaserNavigation> chargerMapPointList; //充电桩点LIST(转换成任务管理需要的数据格式)
 
     private Integer robotIdForElevator; //机器人电梯编号（针对电梯使用）
 
@@ -143,11 +146,19 @@ public class Robot extends BaseBean {
         isBusy = busy;
     }
 
-    public List<MapPoint> getChargerMapPointList() {
+    public List<MapPoint> getOriginChargerMapPointList() {
+        return originChargerMapPointList;
+    }
+
+    public void setOriginChargerMapPointList(List<MapPoint> originChargerMapPointList) {
+        this.originChargerMapPointList = originChargerMapPointList;
+    }
+
+    public List<JsonMissionItemDataLaserNavigation> getChargerMapPointList() {
         return chargerMapPointList;
     }
 
-    public void setChargerMapPointList(List<MapPoint> chargerMapPointList) {
+    public void setChargerMapPointList(List<JsonMissionItemDataLaserNavigation> chargerMapPointList) {
         this.chargerMapPointList = chargerMapPointList;
     }
 

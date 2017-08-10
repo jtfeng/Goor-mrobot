@@ -126,7 +126,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 return;
             }
             Topic x86MissionHeartBeatTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_HEARTBEAT);
-            x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));//如果已经订阅了，会自动执行订阅方法
+            x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));
 
             logger.info("x86Mission心跳时间："+CacheInfoManager.getX86MissionTopicHeartCheckCache());
             logger.info("x86Mission心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()));

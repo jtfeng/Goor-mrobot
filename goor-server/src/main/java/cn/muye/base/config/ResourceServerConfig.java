@@ -14,7 +14,6 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/account/user/login").permitAll()
                 .antMatchers("/account/user/login/pad").permitAll()
-                .antMatchers("/account/user/logOut").permitAll()
                 .antMatchers("/resources/static/**").permitAll()
                 .antMatchers("/services/**").permitAll()
                 .antMatchers("/check**").permitAll()

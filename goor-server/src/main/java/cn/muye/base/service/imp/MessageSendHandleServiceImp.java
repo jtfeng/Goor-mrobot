@@ -150,7 +150,6 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
             log.error("发送的messageInfo参数错误,必须包含uuId，receiverId,messageType,messageText，取消发送");
             return false;
         }
-        log.error("发送的messageInfo参数正确，继续以下操作");
         return true;
     }
 

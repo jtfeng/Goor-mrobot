@@ -48,7 +48,7 @@
     </delete>
 
     <select id="findByMapNameAndStoreId" resultMap="MapInfoMap">
-        SELECT i.* FROM A_MAP_INFO i WHERE i.MAP_NAME = #{param1} AND i.STORE_ID = #{param2}
+        SELECT i.* FROM A_MAP_INFO i WHERE i.MAP_NAME = #{param1} AND i.STORE_ID = #{param2} AND i.SCENE_NAME = #{param3}
     </select>
 
     <insert id="insertRelationsByElevatorId">

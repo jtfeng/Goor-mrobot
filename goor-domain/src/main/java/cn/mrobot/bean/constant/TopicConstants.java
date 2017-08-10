@@ -85,8 +85,7 @@ public class TopicConstants {
 	public static final String CHECK_HEART_TOPIC = "/checkHeartTopic";
 	public static final String CHECK_HEART_MESSAGE = "{\"data\": \"heart\"}";
 	public static final Long CHECK_HEART_TOPIC_MAX = 30000L;//30秒
-	public static final Long CHECK_ROS_BRIDGE_MAX = 90000L;//120秒,检查rosbridge启动情况
-
+	public static final Long CHECK_ROS_BRIDGE_MAX = 600000L;//120秒,检查rosbridge启动情况
 
 	//导航返回的 code 标识
 	private static int MOTION_MOVING = 1;

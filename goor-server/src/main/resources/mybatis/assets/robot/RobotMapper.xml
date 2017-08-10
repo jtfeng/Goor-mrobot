@@ -21,7 +21,7 @@
             <id column="BOX_NUM" property="boxNum"/>
             <result column="PASSWORD" property="password"/>
         </association>
-        <collection property="chargerMapPointList" ofType="cn.mrobot.bean.area.point.MapPoint">
+        <collection property="originChargerMapPointList" ofType="cn.mrobot.bean.area.point.MapPoint">
             <id column="endPointId" property="id"/>
             <result column="endPointName" property="pointName"/>
             <result column="endPointAlias" property="pointAlias"/>
@@ -109,6 +109,9 @@
         </if>
         <if test="storeId != null">
             AND robot.STORE_ID = #{storeId}
+        </if>
+        <if test="robotId != null">
+            AND robot.ID = #{robotId}
         </if>
     </select>
 

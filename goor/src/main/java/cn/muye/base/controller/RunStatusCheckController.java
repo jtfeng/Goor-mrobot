@@ -20,23 +20,24 @@ public class RunStatusCheckController {
 
 	@RequestMapping(value = "checkOnLine")
 	@ResponseBody
-	public String checkOnLine(HttpServletRequest request) {
+	public int checkOnLine(HttpServletRequest request) {
 		log.info("goor运行正常");
-		return "1";
+		return 1;
 	}
 
 	@RequestMapping(value = "checkRosBridge")
 	@ResponseBody
-	public String checkRosBridge(HttpServletRequest request) {
-		if ((System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()) > TopicConstants.CHECK_ROS_BRIDGE_MAX) {
-			return "0";
+	public int checkRosBridge(HttpServletRequest request) {
+		if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX
+				&& (System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()) > TopicConstants.CHECK_ROS_BRIDGE_MAX) {
+			return 0;
 		}
-		return "1";
+		return 1;
 	}
 
 	@RequestMapping(value = "checkRosBridge111")
 	@ResponseBody
-	public String checkRosBridge111(HttpServletRequest request) {
-		return "0";
+	public int checkRosBridge111(HttpServletRequest request) {
+		return 0;
 	}
 }
