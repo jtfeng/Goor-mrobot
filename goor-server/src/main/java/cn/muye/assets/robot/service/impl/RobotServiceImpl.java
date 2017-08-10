@@ -88,7 +88,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robot.setSufficientBatteryThreshold(sufficientBatteryThreshold);
         }
         //更新机器人信息
-        updateByStoreId(robot);
+        updateSelectiveByStoreId(robot);
         //更新机器人配置信息
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
         if (robotConfig != null && robot.getLowBatteryThreshold() != null) {
@@ -168,10 +168,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
             }
         }
-        /*if (availableRobot != null) {
+        if (availableRobot != null) {
             availableRobot.setBusy(true);
-            updateRobotAndBindChargerMapPoint(availableRobot, null, null, null);
-        }*/
+            super.updateSelective(availableRobot);
+        }
         return availableRobot;
     }
 

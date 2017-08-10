@@ -14,7 +14,6 @@ import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
-import cn.muye.base.service.mapper.config.RobotInfoConfigService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -115,16 +114,16 @@ public class ConsumerCommon {
         Integer typeId = jsonObject.getInteger(TopicConstants.ROBOT_KEY_TYPE_ID);
         Integer lowBatteryThreshold = jsonObject.getInteger(TopicConstants.ROBOT_KEY_LOW_BATTERY_THRESHOLD);
         Integer sufficientThreshold = jsonObject.getInteger(TopicConstants.ROBOT_KEY_SUFFICIENT_BATTERY_THRESHOLD);
-        Boolean isBusy = jsonObject.getBoolean(TopicConstants.ROBOT_KEY_IS_BUSY);
-        Boolean isOnline = jsonObject.getBoolean(TopicConstants.ROBOT_KEY_IS_ONLINE);
+        Boolean busy = jsonObject.getBoolean(TopicConstants.ROBOT_KEY_BUSY);
+        Boolean online = jsonObject.getBoolean(TopicConstants.ROBOT_KEY_ONLINE);
         robot.setUuid(uuid);
         robot.setName(name);
         robot.setCode(code);
         robot.setTypeId(typeId);
         robot.setLowBatteryThreshold(lowBatteryThreshold);
         robot.setSufficientBatteryThreshold(sufficientThreshold);
-        robot.setBusy(isBusy);
-        robot.setOnline(isOnline);
+        robot.setBusy(busy);
+        robot.setOnline(online);
         return robot;
     }
 

@@ -36,9 +36,9 @@ public class Robot extends BaseBean {
     @JSONField(format = "yyyy-MM-dd")
     private Date updateTime; //修改时间
 
-    private Boolean isBusy = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
+    private Boolean busy = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
 
-    private Boolean isOnline = Boolean.TRUE; //在线状态
+    private Boolean online = Boolean.TRUE; //在线状态
 
     @Transient
     private String sceneName; //场景名
@@ -138,14 +138,6 @@ public class Robot extends BaseBean {
         this.sufficientBatteryThreshold = sufficientBatteryThreshold;
     }
 
-    public Boolean getBusy() {
-        return isBusy;
-    }
-
-    public void setBusy(Boolean busy) {
-        isBusy = busy;
-    }
-
     public List<MapPoint> getOriginChargerMapPointList() {
         return originChargerMapPointList;
     }
@@ -160,14 +152,6 @@ public class Robot extends BaseBean {
 
     public void setChargerMapPointList(List<JsonMissionItemDataLaserNavigation> chargerMapPointList) {
         this.chargerMapPointList = chargerMapPointList;
-    }
-
-    public Boolean getOnline() {
-        return isOnline;
-    }
-
-    public void setOnline(Boolean online) {
-        isOnline = online;
     }
 
     public String getSceneName() {
@@ -200,5 +184,21 @@ public class Robot extends BaseBean {
 
     public void setRobotIdForElevator(Integer robotIdForElevator) {
         this.robotIdForElevator = robotIdForElevator;
+    }
+
+    public Boolean getBusy() {
+        return busy;
+    }
+
+    public void setBusy(Boolean busy) {
+        this.busy = busy;
+    }
+
+    public Boolean getOnline() {
+        return online;
+    }
+
+    public void setOnline(Boolean online) {
+        this.online = online;
     }
 }
