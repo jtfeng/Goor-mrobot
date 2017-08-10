@@ -686,9 +686,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
                     mPointAtts.currentFloor);
-            List<Elevator> nextElevator = elevatorService.findByMapFloor(
-                    mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
@@ -706,14 +703,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         order, epc.getwPoint(), parentName);
                                 missionListTask.getMissionTasks().add(sigleNavTask);
                                 //加入check电梯状态任务
-                                JsonMissionItemDataElevatorLock lock =
-                                        new JsonMissionItemDataElevatorLock();
-                                lock.setElevator_id(ev.getId());
-                                MissionTask elevatorLockTask = getElevatorLockTask(
-                                        order, epc.getwPoint(), parentName,
-                                        lock
-                                );
-                                missionListTask.getMissionTasks().add(elevatorLockTask);
+//                                JsonMissionItemDataElevatorLock lock =
+//                                        new JsonMissionItemDataElevatorLock();
+//                                lock.setElevator_id(ev.getId());
+//                                lock.setInterval_time(30);
+//                                MissionTask elevatorLockTask = getElevatorLockTask(
+//                                        order, epc.getwPoint(), parentName,
+//                                        lock
+//                                );
+//                                missionListTask.getMissionTasks().add(elevatorLockTask);
                                 elevatorid = ev.getId();
 
                                 jsonMissionItemDataElevator
@@ -727,6 +725,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     }
                 }
             }
+            List<Elevator> nextElevator = elevatorService.findByMapFloor(
+                    mPointAtts.nextMapId,
+                    mPointAtts.nextFloor);
             if (nextElevator != null){
                 for (Elevator ev :
                         nextElevator) {
@@ -766,14 +767,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(elevatorTask);
 
         //加入check电梯状态解锁任务
-        JsonMissionItemDataElevatorUnlock unlock =
-                new JsonMissionItemDataElevatorUnlock();
-        unlock.setElevator_id(elevatorid);
-        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
-                order, mp, parentName,
-                unlock
-        );
-        missionListTask.getMissionTasks().add(elevatorUnlockTask);
+//        JsonMissionItemDataElevatorUnlock unlock =
+//                new JsonMissionItemDataElevatorUnlock();
+//        unlock.setElevator_id(elevatorid);
+//        unlock.setInterval_time(30);
+//        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
+//                order, mp, parentName,
+//                unlock
+//        );
+//        missionListTask.getMissionTasks().add(elevatorUnlockTask);
 
     }
 

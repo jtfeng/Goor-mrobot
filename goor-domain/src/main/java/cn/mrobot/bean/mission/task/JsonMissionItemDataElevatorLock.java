@@ -9,6 +9,15 @@ public class JsonMissionItemDataElevatorLock implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long elevator_id;
+    private Integer interval_time;
+
+    public Integer getInterval_time() {
+        return interval_time;
+    }
+
+    public void setInterval_time(Integer interval_time) {
+        this.interval_time = interval_time;
+    }
 
     public Long getElevator_id() {
         return elevator_id;

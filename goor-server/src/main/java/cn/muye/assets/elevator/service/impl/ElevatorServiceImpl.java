@@ -46,6 +46,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
 
     @Override
     public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor){
+        log.info("###################  mapinfoid: " + mapInfoId + ", floor: " + floor);
         Long storeId = 100L;
         List<Elevator> elevators = this.elevatorMapper.selectAllFlushCache();
         bindElevatorShaft(elevators);
