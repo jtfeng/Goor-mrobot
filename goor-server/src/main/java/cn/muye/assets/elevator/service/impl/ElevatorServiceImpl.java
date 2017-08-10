@@ -65,7 +65,11 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                         public boolean test(ElevatorPointCombination combination) {
                             boolean isPassed = false;
                             try {
-                                MapInfo mapInfo = findByMapNameAndStoreId(combination.getgPoint().getMapName(), combination.getStoreId());
+                                MapInfo mapInfo = findByMapNameAndStoreId(
+                                        combination.getgPoint().getMapName(),
+                                        combination.getStoreId(),
+                                        combination.getgPoint().getSceneName()
+                                );
                                 isPassed = mapInfoId.equals(mapInfo.getId()) && floor.equals(mapInfo.getFloor());
                             }catch (Exception e){
                                 e.printStackTrace();
@@ -86,8 +90,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public MapInfo findByMapNameAndStoreId(String mapName, Long storeId) throws Exception {
-        List<MapInfo> mapInfos = this.elevatorMapper.findByMapNameAndStoreId(mapName, storeId);
+    public MapInfo findByMapNameAndStoreId(String mapName, Long storeId, String sceneName) throws Exception {
+        List<MapInfo> mapInfos = this.elevatorMapper.findByMapNameAndStoreId(mapName, storeId, sceneName);
         checkArgument(mapInfos != null && mapInfos.size() == 1, "同一门店下不能有重名地图，请检查!");
         return mapInfos.get(0);
     }
