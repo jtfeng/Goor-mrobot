@@ -1,6 +1,7 @@
 package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
@@ -8,6 +9,7 @@ import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
 import cn.mrobot.bean.state.StateCollectorResponse;
@@ -27,6 +29,7 @@ import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -35,8 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
-
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -129,7 +132,7 @@ public class ConsumerCommon {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
                     String robotCode = messageInfo.getSenderId();
-                    Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
                     if (!StringUtil.isNullOrEmpty(uuid)) {
                         syncRosRobotConfig(robotDb, uuid);
                     }
@@ -155,6 +158,7 @@ public class ConsumerCommon {
         slamBody.setUuid(uuid);
         slamBody.setMsg("success");
         slamBody.setErrorCode("0");
+        convertChargerMapPointToJsonMissionItemDataLaserNavigation(robotNew);
         slamBody.setData(JsonUtils.toJson(robotNew,
                 new TypeToken<Robot>() {
                 }.getType()));
@@ -181,6 +185,32 @@ public class ConsumerCommon {
                 logger.error("错误{}",e1);
             }
         } finally {
+        }
+    }
+
+    /**
+     * 充电桩点List转换导航点的List
+     * @param robotNew
+     */
+    private void convertChargerMapPointToJsonMissionItemDataLaserNavigation(Robot robotNew) {
+        if (robotNew != null && robotNew.getOriginChargerMapPointList() != null) {
+            List<MapPoint> originChargerMapPointList = robotNew.getOriginChargerMapPointList();
+            List<JsonMissionItemDataLaserNavigation> list = Lists.newArrayList();
+            if (originChargerMapPointList != null && originChargerMapPointList.size() > 0) {
+                for (MapPoint mapPoint : originChargerMapPointList) {
+                    String mapName = mapPoint.getMapName();
+                    JsonMissionItemDataLaserNavigation jsonMissionItemDataLaserNavigation = new JsonMissionItemDataLaserNavigation();
+                    jsonMissionItemDataLaserNavigation.setMap(mapName);
+                    jsonMissionItemDataLaserNavigation.setMap_name(mapName);
+                    jsonMissionItemDataLaserNavigation.setScene_name(mapPoint.getSceneName());
+                    jsonMissionItemDataLaserNavigation.setX(mapPoint.getX());
+                    jsonMissionItemDataLaserNavigation.setY(mapPoint.getY());
+                    jsonMissionItemDataLaserNavigation.setTh(mapPoint.getTh());
+                    list.add(jsonMissionItemDataLaserNavigation);
+                }
+            }
+            robotNew.setChargerMapPointList(null);
+            robotNew.setChargerMapPointList(list);
         }
     }
 

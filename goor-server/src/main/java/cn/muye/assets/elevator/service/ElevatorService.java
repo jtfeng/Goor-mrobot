@@ -62,5 +62,5 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @param storeId
      * @return
      */
-     MapInfo findByMapNameAndStoreId(String mapName, Long storeId) throws Exception;
+     MapInfo findByMapNameAndStoreId(String mapName, Long storeId, String sceneName) throws Exception;
 }
