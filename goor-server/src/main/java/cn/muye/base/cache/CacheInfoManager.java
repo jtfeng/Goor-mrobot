@@ -210,11 +210,11 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     //右驱状态缓存
     public static void setRightBaseDriverCache(String deviceId, StateCollectorBaseDriver stateCollectorBaseDriver) {
-        leftBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
+        rightBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
     }
 
     public static StateCollectorBaseDriver getRightBaseDriverCache(String deviceId) {
-        return leftBaseDriverCache.get(deviceId);
+        return rightBaseDriverCache.get(deviceId);
     }
 
     //微动开关与防跌落状态缓存

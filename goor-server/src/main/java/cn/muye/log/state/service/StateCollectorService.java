@@ -25,7 +25,7 @@ import java.util.List;
 public interface StateCollectorService {
 
 
-    void handleStateCollector(StateCollectorResponse stateCollectorResponse);
+    void handleStateCollector(StateCollectorResponse stateCollectorResponse) throws Exception;
 
     /**
      * 获取当前状态，只保留触发的状态
@@ -41,7 +41,7 @@ public interface StateCollectorService {
      * @param code
      * @return
      */
-    List<StateDetail> getCurrentBaseState(String code) throws IllegalAccessException;
+    List<StateDetail> getCurrentBaseState(boolean toDatabase, String code) throws IllegalAccessException;
 
 
     /**

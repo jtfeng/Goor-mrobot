@@ -41,7 +41,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private MissionFuncsService missionFuncsService;
 
     @Override
-    public void handleStateCollector(StateCollectorResponse stateCollectorResponse) {
+    public void handleStateCollector(StateCollectorResponse stateCollectorResponse) throws Exception {
         String module = stateCollectorResponse.getModule();
         int moduleId = Integer.parseInt(module);
         switch (moduleId) {
@@ -69,30 +69,46 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     /**
      * 解析导航状态数据
      */
-    private void analysisNavigationState(StateCollectorResponse stateCollectorResponse) {
+    private void analysisNavigationState(StateCollectorResponse stateCollectorResponse) throws Exception {
         StateCollectorNavigation stateCollectorNavigation = new StateCollectorNavigation();
         stateCollectorNavigation.setCreateTime(stateCollectorResponse.getTime());
-        stateCollectorNavigation.setNavigationTypeCode(Integer.parseInt(stateCollectorResponse.getState()));
-        CacheInfoManager.setNavigationCache(stateCollectorResponse.getSenderId(), stateCollectorNavigation);
+        String state = stateCollectorResponse.getState();
+        stateCollectorNavigation.setState(state);
+        stateCollectorNavigation.setNavigationTypeCode(Integer.parseInt(state));
+        String deviceId = stateCollectorResponse.getSenderId();
+        StateCollectorNavigation stateCollectorNavigationCache = CacheInfoManager.getNavigationCache(deviceId);
+        if (null == stateCollectorNavigationCache || !state.equals(stateCollectorNavigationCache.getState())) {
+            stateCollectorNavigation.setDatabaseFlag(true);
+            CacheInfoManager.setNavigationCache(deviceId, stateCollectorNavigation);
+        }
     }
 
     /**
      * 解析自动回充状态数据
      */
-    private void analysisAutoChargingState(StateCollectorResponse stateCollectorResponse) {
+    private void analysisAutoChargingState(StateCollectorResponse stateCollectorResponse) throws Exception {
         StateCollectorAutoCharge stateCollectorAutoCharge = new StateCollectorAutoCharge();
+        String state = stateCollectorResponse.getState();
+        stateCollectorAutoCharge.setState(state);
         stateCollectorAutoCharge.setCreateTime(stateCollectorResponse.getTime());
-        stateCollectorAutoCharge.setPluginStatus(Integer.parseInt(stateCollectorResponse.getState()));
-        CacheInfoManager.setAutoChargeCache(stateCollectorResponse.getSenderId(), stateCollectorAutoCharge);
+        stateCollectorAutoCharge.setPluginStatus(Integer.parseInt(state));
+        String deviceId = stateCollectorResponse.getSenderId();
+        StateCollectorAutoCharge stateCollectorAutoChargeCache = CacheInfoManager.getAutoChargeCache(deviceId);
+        if (null == stateCollectorAutoChargeCache || !state.equals(stateCollectorAutoChargeCache.getState())) {
+            stateCollectorAutoCharge.setDatabaseFlag(true);
+            CacheInfoManager.setAutoChargeCache(stateCollectorResponse.getSenderId(), stateCollectorAutoCharge);
+        }
     }
 
     /**
      * 解析驱动器状态数据
      */
-    private void analysisBasDriverState(StateCollectorResponse stateCollectorResponse) {
+    private void analysisBasDriverState(StateCollectorResponse stateCollectorResponse) throws Exception {
         int moduleId = Integer.parseInt(stateCollectorResponse.getModule());
         StateCollectorBaseDriver stateCollectorBaseDriver = new StateCollectorBaseDriver();
         String state = stateCollectorResponse.getState();
+        if ("00".equals(state) || "0".equals(state))//过滤都未触发的状态
+            return;
         stateCollectorBaseDriver.setState(state);
         String stateStr = StringUtil.parseToBit(state); //00011011
         char[] chars = stateStr.toCharArray();
@@ -106,16 +122,24 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         stateCollectorBaseDriver.setPWMControllBreak(parseInt(chars[length - 7]));//PWM控制断线
         String deviceId = stateCollectorResponse.getSenderId();
         if (moduleId == MODULE_BASE_LEFT) {
-            CacheInfoManager.setLeftBaseDriverCache(deviceId, stateCollectorBaseDriver);
+            StateCollectorBaseDriver stateCollectorBaseDriverCache = CacheInfoManager.getLeftBaseDriverCache(deviceId);
+            if (null == stateCollectorBaseDriverCache || !state.equals(stateCollectorBaseDriverCache.getState())) {
+                stateCollectorBaseDriver.setDatabaseFlag(true);
+                CacheInfoManager.setLeftBaseDriverCache(deviceId, stateCollectorBaseDriver);
+            }
         } else if (moduleId == MODULE_BASE_RIGHT) {
-            CacheInfoManager.setRightBaseDriverCache(deviceId, stateCollectorBaseDriver);
+            StateCollectorBaseDriver stateCollectorBaseDriverCache = CacheInfoManager.getRightBaseDriverCache(deviceId);
+            if (null == stateCollectorBaseDriverCache || !state.equals(stateCollectorBaseDriverCache.getState())) {
+                stateCollectorBaseDriver.setDatabaseFlag(true);
+                CacheInfoManager.setRightBaseDriverCache(deviceId, stateCollectorBaseDriver);
+            }
         }
     }
 
     /**
      * 解析底盘系统状态数据
      */
-    private void analysisBaseSystemState(StateCollectorResponse stateCollectorResponse) {
+    private void analysisBaseSystemState(StateCollectorResponse stateCollectorResponse) throws Exception {
         StateCollectorBaseSystem stateCollectorBaseSystem = new StateCollectorBaseSystem();
         String state = stateCollectorResponse.getState();
         stateCollectorBaseSystem.setState(state);
@@ -130,15 +154,22 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         stateCollectorBaseSystem.setSwitchEmergencyStop(parseInt(chars[length - 5]));//开关急停
         stateCollectorBaseSystem.setUnderVoltageEmergencyStop(parseInt(chars[length - 6]));//欠压停机
         stateCollectorBaseSystem.setOverSpeedEmergencyStop(parseInt(chars[length - 7]));//过速停机
-        CacheInfoManager.setBaseSystemCache(stateCollectorResponse.getSenderId(), stateCollectorBaseSystem);
+        String deviceId = stateCollectorResponse.getSenderId();
+        StateCollectorBaseSystem stateCollectorBaseSystemCache = CacheInfoManager.getBaseSystemCache(deviceId);
+        if (null == stateCollectorBaseSystemCache || !state.equals(stateCollectorBaseSystemCache.getState())) {
+            stateCollectorBaseSystem.setDatabaseFlag(true);
+            CacheInfoManager.setBaseSystemCache(deviceId, stateCollectorBaseSystem);
+        }
     }
 
     /**
      * 解析防碰撞传感器,与防跌落传感器状态数据 x000x000  (x为占位符吗，始终为0，从左到右依次是左、中、右传感器)
      */
-    private void analysisBaseMicroswitchAndAntiDroppingstate(StateCollectorResponse stateCollectorResponse) {
+    private void analysisBaseMicroswitchAndAntiDroppingstate(StateCollectorResponse stateCollectorResponse) throws Exception {
         StateCollectorBaseMicroSwitchAndAntiDropping baseMicroSwitchAndAntiDropping = new StateCollectorBaseMicroSwitchAndAntiDropping();
         String state = stateCollectorResponse.getState();
+        if ("00".equals(state) || "0".equals(state))//过滤都未触发的状态
+            return;
         baseMicroSwitchAndAntiDropping.setState(state);
         String stateStr = StringUtil.parseToBit(state);
         char[] chars = stateStr.toCharArray();
@@ -149,18 +180,23 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         baseMicroSwitchAndAntiDropping.setLeftBaseMicroSwitch(parseInt(chars[length - 5])); //防碰撞左开关
         baseMicroSwitchAndAntiDropping.setMiddleBaseMicroSwitch(parseInt(chars[length - 6]));//防碰撞中开关
         baseMicroSwitchAndAntiDropping.setRightBaseMicroSwitch(parseInt(chars[length - 7]));//防碰撞右开关
-        CacheInfoManager.setBaseMicroSwitchAndAntiCache(stateCollectorResponse.getSenderId(), baseMicroSwitchAndAntiDropping);
+        String deviceId = stateCollectorResponse.getSenderId();
+        StateCollectorBaseMicroSwitchAndAntiDropping switchAndAntiDroppingCache = CacheInfoManager.getBaseMicroSwitchAndAntiCache(deviceId);
+        if (null == switchAndAntiDroppingCache || !state.equals(switchAndAntiDroppingCache.getState())) {
+            baseMicroSwitchAndAntiDropping.setDatabaseFlag(true);
+            CacheInfoManager.setBaseMicroSwitchAndAntiCache(deviceId, baseMicroSwitchAndAntiDropping);
+        }
     }
 
     /**
      * 获取当前状态，只保留触发的状态
      *
      * @param code
-     * @return
+     * @RETURN
      */
     @Override
     public List<StateDetail> getCurrentTriggeredState(String code) throws IllegalAccessException {
-        List<StateDetail> baseStateList = getCurrentBaseState(code);
+        List<StateDetail> baseStateList = getCurrentBaseState(false, code);
         List<StateDetail> navigationStateList = getCurrentNavigationState(code);
         if (baseStateList == null) {
             return navigationStateList;
@@ -176,31 +212,102 @@ public class StateCollectorServiceImpl implements StateCollectorService {
      * @return
      */
     @Override
-    public List<StateDetail> getCurrentBaseState(String code) throws IllegalAccessException {
-
+    public List<StateDetail> getCurrentBaseState(boolean toDatabase, String code) throws IllegalAccessException {
         List<StateDetail> baseStateList = new ArrayList<>();
 
         //添加传感器状体日志
-        StateCollectorBaseMicroSwitchAndAntiDropping baseMicroSwitchAndAntiDropping = CacheInfoManager.getBaseMicroSwitchAndAntiCache(code);
-        List<StateDetail> baseMicroSwitchAndAntiDroppingList = getHappenState("", StateCollectorBaseMicroSwitchAndAntiDropping.class, baseMicroSwitchAndAntiDropping);
+        List<StateDetail> baseMicroSwitchAndAntiDroppingList = getMicroSwitchAndAntiState(toDatabase, code);
         baseStateList.addAll(baseMicroSwitchAndAntiDroppingList);
 
         //添加底盘系统日志
-        StateCollectorBaseSystem baseSystem = CacheInfoManager.getBaseSystemCache(code);
-        List<StateDetail> baseSystemList = getHappenState("", StateCollectorBaseSystem.class, baseSystem);
+        List<StateDetail> baseSystemList = getBaseSystemState(toDatabase, code);
         baseStateList.addAll(baseSystemList);
 
         //添加左驱动日志
-        StateCollectorBaseDriver leftBaseDriver = CacheInfoManager.getLeftBaseDriverCache(code);
-        List<StateDetail> leftBaseDriverList = getHappenState("左驱动", StateCollectorBaseDriver.class, leftBaseDriver);
+        List<StateDetail> leftBaseDriverList = getLeftBaseDriverState(toDatabase, code);
         baseStateList.addAll(leftBaseDriverList);
 
         //添加右驱动日志
-        StateCollectorBaseDriver rightBaseDriver = CacheInfoManager.getRightBaseDriverCache(code);
-        List<StateDetail> rightBaseDriverList = getHappenState("右驱动", StateCollectorBaseDriver.class, rightBaseDriver);
+        List<StateDetail> rightBaseDriverList = getRightBaseDriverState(toDatabase, code);
         baseStateList.addAll(rightBaseDriverList);
 
         return baseStateList;
+    }
+
+    //添加传感器状态日志
+    private List<StateDetail> getMicroSwitchAndAntiState(boolean toDatabase, String code) throws IllegalAccessException {
+        StateCollectorBaseMicroSwitchAndAntiDropping baseMicroSwitchAndAntiDropping = CacheInfoManager.getBaseMicroSwitchAndAntiCache(code);
+        if(null == baseMicroSwitchAndAntiDropping){
+            return new ArrayList<>();
+        }
+        List<StateDetail> baseMicroSwitchAndAntiDroppingList = getHappenState("", StateCollectorBaseMicroSwitchAndAntiDropping.class, baseMicroSwitchAndAntiDropping);
+        if (toDatabase) {
+            if (baseMicroSwitchAndAntiDropping.isDatabaseFlag()) {
+                baseMicroSwitchAndAntiDropping.setDatabaseFlag(false);
+                CacheInfoManager.setBaseMicroSwitchAndAntiCache(code, baseMicroSwitchAndAntiDropping);
+                return baseMicroSwitchAndAntiDroppingList;
+            } else {
+                return new ArrayList<>();
+            }
+        }
+        return baseMicroSwitchAndAntiDroppingList;
+    }
+
+    // 添加底盘系统日志
+    private List<StateDetail> getBaseSystemState(boolean toDatabase, String code) throws IllegalAccessException {
+        StateCollectorBaseSystem baseSystem = CacheInfoManager.getBaseSystemCache(code);
+        if(null == baseSystem){
+            return new ArrayList<>();
+        }
+        List<StateDetail> baseSystemList = getHappenState("", StateCollectorBaseSystem.class, baseSystem);
+        if (toDatabase) {
+            if (baseSystem.isDatabaseFlag()) {
+                baseSystem.setDatabaseFlag(false);
+                CacheInfoManager.setBaseSystemCache(code, baseSystem);
+                return baseSystemList;
+            } else {
+                return new ArrayList<>();
+            }
+        }
+        return baseSystemList;
+    }
+
+    // 添加左驱动日志
+    private List<StateDetail> getLeftBaseDriverState(boolean toDatabase, String code) throws IllegalAccessException {
+        StateCollectorBaseDriver leftBaseDriver = CacheInfoManager.getLeftBaseDriverCache(code);
+        if(null == leftBaseDriver){
+            return new ArrayList<>();
+        }
+        List<StateDetail> leftBaseDriverList = getHappenState("左驱动", StateCollectorBaseDriver.class, leftBaseDriver);
+        if (toDatabase) {
+            if (leftBaseDriver.isDatabaseFlag()) {
+                leftBaseDriver.setDatabaseFlag(false);
+                CacheInfoManager.setLeftBaseDriverCache(code, leftBaseDriver);
+                return leftBaseDriverList;
+            } else {
+                return new ArrayList<>();
+            }
+        }
+        return leftBaseDriverList;
+    }
+
+    // 添加右驱动日志
+    private List<StateDetail> getRightBaseDriverState(boolean toDatabase, String code) throws IllegalAccessException {
+        StateCollectorBaseDriver rightBaseDriver = CacheInfoManager.getRightBaseDriverCache(code);
+        if(null == rightBaseDriver){
+            return new ArrayList<>();
+        }
+        List<StateDetail> rightBaseDriverList = getHappenState("右驱动", StateCollectorBaseDriver.class, rightBaseDriver);
+        if (toDatabase) {
+            if (rightBaseDriver.isDatabaseFlag()) {
+                rightBaseDriver.setDatabaseFlag(false);
+                CacheInfoManager.setRightBaseDriverCache(code, rightBaseDriver);
+                return rightBaseDriverList;
+            } else {
+                return new ArrayList<>();
+            }
+        }
+        return rightBaseDriverList;
     }
 
     private <T extends StateCollector> List<StateDetail> getHappenState(String chPrefix, Class<T> clazz, StateCollector stateCollector) throws IllegalAccessException {
@@ -211,7 +318,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
-            if(field.getName().equals("state"))
+            if (field.getName().equals("state"))
                 continue;
             int value = (int) field.get(stateCollector);
             if (value == 1 && (!field.getName().equals(StateFieldEnums.POWER_ON.getName()))) { //排除开机。开机为1
@@ -261,6 +368,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
 
     /**
      * 添加任务状态日志
+     *
      * @param code
      * @return
      */
@@ -268,18 +376,17 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     public List<StateDetail> collectTaskLog(String code) {
         List<StateDetail> stateDetailList = new ArrayList<>();
         List<MissionTask> missionTaskList = missionFuncsService.getMissionTaskStatus(code);
-        if(missionTaskList == null || stateDetailList.size() <0){
+        if (missionTaskList == null || stateDetailList.size() < 0) {
             return stateDetailList;
         }
-        for(MissionTask missionTask : missionTaskList){
+        for (MissionTask missionTask : missionTaskList) {
             StateDetail stateDetail = new StateDetail();
             stateDetail.setCreateTime(missionTask.getCreateTime());
-            String dateStr = DateTimeUtils.getDefaultDateString(missionTask.getCreateTime());
-            stateDetail.setCHName(dateStr + " "+missionTask.getName());
+            stateDetail.setCHName(missionTask.getName());
             String state = missionTask.getState();
-            if (StringUtil.isNullOrEmpty(state)){
+            if (StringUtil.isNullOrEmpty(state)) {
                 stateDetail.setCHValue(MissionState.STATE_INIT.getName());
-            }else {
+            } else {
                 stateDetail.setCHValue(MissionState.getMissionState(state).getName());
             }
             stateDetailList.add(stateDetail);
