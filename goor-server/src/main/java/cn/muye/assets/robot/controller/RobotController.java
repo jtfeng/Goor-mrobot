@@ -37,9 +37,6 @@ public class RobotController {
     private RobotPasswordService robotPasswordService;
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    @Autowired
     private RobotConfigService robotConfigService;
 
     /**
@@ -81,7 +78,7 @@ public class RobotController {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "电梯编号必须为8位二进制");
             }
         }
-        List list = robot.getChargerMapPointList();
+        List list = robot.getOriginChargerMapPointList();
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
         if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
@@ -94,7 +91,7 @@ public class RobotController {
         }
         AjaxResult ajaxResult;
         if (robotId != null) { //修改
-            Robot robotDb = robotService.getById(robotId);
+            Robot robotDb = robotService.getByCodeByXml(null, SearchConstants.FAKE_MERCHANT_STORE_ID, robotId);
             RobotConfig robotConfig = robotConfigService.getByRobotId(robotId);
             Integer lowBatteryThresholdDb = null;
             Integer sufficientBatteryThresholdDb = null;
@@ -105,7 +102,7 @@ public class RobotController {
             String robotCodeDb = robotDb.getCode();
             if (robotDb != null && robotCode == null) {
                 if (list != null) {
-                    robotDb.setChargerMapPointList(robot.getChargerMapPointList());
+                    robotDb.setOriginChargerMapPointList(robot.getOriginChargerMapPointList());
                 }
                 if (robotName != null) {
                     robotDb.setName(robotName);
