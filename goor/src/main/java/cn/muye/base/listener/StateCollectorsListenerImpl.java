@@ -39,7 +39,7 @@ public class StateCollectorsListenerImpl implements TopicCallback {
                 lastUploadTime = lastUploadTime == null ? 0 : lastUploadTime;
                 //超过2秒，则往云端推送
                 Long intervalTime = System.currentTimeMillis() - lastUploadTime;
-                if (intervalTime >= 2 * 1000) {
+                if (intervalTime >= 5 * 1000) {
                     //往云端推送
                     ProducerCommon msg = SingleFactory.getProducerCommon();
                     msg.sendStateCollectorMessage(message.toString());
