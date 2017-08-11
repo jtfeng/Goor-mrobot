@@ -75,7 +75,7 @@ public class MapInfoServiceImpl implements MapInfoService {
 
     @Override
     public void update(MapInfo mapInfo) {
-        mapInfoMapper.updateByPrimaryKey(mapInfo);
+        mapInfoMapper.updateByPrimaryKeySelective(mapInfo);
     }
 
     @Override
