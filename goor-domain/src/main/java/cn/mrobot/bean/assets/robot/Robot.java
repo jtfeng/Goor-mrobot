@@ -27,6 +27,10 @@ public class Robot extends BaseBean {
 
     private String status; //机器人状态（充电中...）
 
+    private boolean emergencyStopState; //机器人急停状态（true:急停拍下  false:急停未拍下）
+
+    private boolean lowPowerState; //机器人低电量状态（true:机器人电量低于阈值  false:机器人电量高于阈值）
+
     @Transient
     private Integer lowBatteryThreshold; //机器人低电量阈值
 
@@ -210,5 +214,21 @@ public class Robot extends BaseBean {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public boolean isEmergencyStopState() {
+        return emergencyStopState;
+    }
+
+    public void setEmergencyStopState(boolean emergencyStopState) {
+        this.emergencyStopState = emergencyStopState;
+    }
+
+    public boolean isLowPowerState() {
+        return lowPowerState;
+    }
+
+    public void setLowPowerState(boolean lowPowerState) {
+        this.lowPowerState = lowPowerState;
     }
 }
