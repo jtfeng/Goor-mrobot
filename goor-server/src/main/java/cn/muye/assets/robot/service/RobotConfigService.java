@@ -13,4 +13,6 @@ public interface RobotConfigService {
     int updateSelective(RobotConfig robotConfig);
 
     RobotConfig getByRobotId(Long robotId);
+
+    Integer getLowBatteryThreshold(String code, long storeId);
 }
