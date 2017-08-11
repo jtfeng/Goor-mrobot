@@ -2,8 +2,8 @@ package cn.mrobot.bean.assets.robot;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import com.alibaba.fastjson.annotation.JSONField;
-
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +25,12 @@ public class Robot extends BaseBean {
 
     private String description;  //备注
 
+    private String status; //机器人状态（充电中...）
+
+    private boolean emergencyStopState; //机器人急停状态（true:急停拍下  false:急停未拍下）
+
+    private boolean lowPowerState; //机器人低电量状态（true:机器人电量低于阈值  false:机器人电量高于阈值）
+
     @Transient
     private Integer lowBatteryThreshold; //机器人低电量阈值
 
@@ -36,9 +42,9 @@ public class Robot extends BaseBean {
     @JSONField(format = "yyyy-MM-dd")
     private Date updateTime; //修改时间
 
-    private Boolean isBusy = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
+    private Boolean busy = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
 
-    private Boolean isOnline = Boolean.TRUE; //在线状态
+    private Boolean online = Boolean.TRUE; //在线状态
 
     @Transient
     private String sceneName; //场景名
@@ -50,7 +56,10 @@ public class Robot extends BaseBean {
     private List<RobotPassword> passwords; //机器人抽屉密码
 
     @Transient
-    private List<MapPoint> chargerMapPointList; //充电桩点LIST
+    private List<MapPoint> originChargerMapPointList; //充电桩点LIST (数据库里查出来的充电桩点)
+
+    @Transient
+    private List<JsonMissionItemDataLaserNavigation> chargerMapPointList; //充电桩点LIST(转换成任务管理需要的数据格式)
 
     private Integer robotIdForElevator; //机器人电梯编号（针对电梯使用）
 
@@ -135,28 +144,20 @@ public class Robot extends BaseBean {
         this.sufficientBatteryThreshold = sufficientBatteryThreshold;
     }
 
-    public Boolean getBusy() {
-        return isBusy;
+    public List<MapPoint> getOriginChargerMapPointList() {
+        return originChargerMapPointList;
     }
 
-    public void setBusy(Boolean busy) {
-        isBusy = busy;
+    public void setOriginChargerMapPointList(List<MapPoint> originChargerMapPointList) {
+        this.originChargerMapPointList = originChargerMapPointList;
     }
 
-    public List<MapPoint> getChargerMapPointList() {
+    public List<JsonMissionItemDataLaserNavigation> getChargerMapPointList() {
         return chargerMapPointList;
     }
 
-    public void setChargerMapPointList(List<MapPoint> chargerMapPointList) {
+    public void setChargerMapPointList(List<JsonMissionItemDataLaserNavigation> chargerMapPointList) {
         this.chargerMapPointList = chargerMapPointList;
-    }
-
-    public Boolean getOnline() {
-        return isOnline;
-    }
-
-    public void setOnline(Boolean online) {
-        isOnline = online;
     }
 
     public String getSceneName() {
@@ -189,5 +190,45 @@ public class Robot extends BaseBean {
 
     public void setRobotIdForElevator(Integer robotIdForElevator) {
         this.robotIdForElevator = robotIdForElevator;
+    }
+
+    public Boolean getBusy() {
+        return busy;
+    }
+
+    public void setBusy(Boolean busy) {
+        this.busy = busy;
+    }
+
+    public Boolean getOnline() {
+        return online;
+    }
+
+    public void setOnline(Boolean online) {
+        this.online = online;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public boolean isEmergencyStopState() {
+        return emergencyStopState;
+    }
+
+    public void setEmergencyStopState(boolean emergencyStopState) {
+        this.emergencyStopState = emergencyStopState;
+    }
+
+    public boolean isLowPowerState() {
+        return lowPowerState;
+    }
+
+    public void setLowPowerState(boolean lowPowerState) {
+        this.lowPowerState = lowPowerState;
     }
 }

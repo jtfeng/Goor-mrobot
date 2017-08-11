@@ -6,8 +6,6 @@ package cn.mrobot.bean.state;
  */
 public class StateCollectorBaseMicroSwitchAndAntiDropping  extends StateCollector{
 
-    private String state;
-
     private int leftAntiDropping;//防跌落左传感器
 
     private int middleAntiDropping;//防跌落中传感器
@@ -68,26 +66,4 @@ public class StateCollectorBaseMicroSwitchAndAntiDropping  extends StateCollecto
         this.rightAntiDropping = rightAntiDropping;
     }
 
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        StateCollectorBaseMicroSwitchAndAntiDropping that = (StateCollectorBaseMicroSwitchAndAntiDropping) o;
-
-        return state == that.state;
-    }
-
-    @Override
-    public int hashCode() {
-        return state != null ? state.hashCode() : 0;
-    }
 }

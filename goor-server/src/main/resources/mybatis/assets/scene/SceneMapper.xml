@@ -10,7 +10,7 @@
         <result property="batteryThreshold" column="BATTERY_THRESHOLD"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
-        <result property="isOnline" column="IS_ONLINE"/>
+        <result property="online" column="ONLINE"/>
         <result property="sceneId" column="SCENE_ID"/>
         <result property="sceneName" column="SCENE_NAME"/>
     </resultMap>
@@ -33,7 +33,7 @@
             robot.CODE,
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
-            robot.IS_ONLINE
+            robot.ONLINE
         FROM AS_ROBOT robot LEFT JOIN SCENES_ROBOTS_RELATIONS r ON robot.ID = r.ROBOT_ID
         WHERE r.SCENE_ID = #{0}
     </select>

@@ -1,13 +1,17 @@
 package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
 import cn.mrobot.bean.state.StateCollectorResponse;
@@ -15,6 +19,7 @@ import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.assets.goods.service.GoodsTypeService;
+import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
@@ -27,6 +32,7 @@ import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -37,6 +43,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -60,6 +67,9 @@ public class ConsumerCommon {
 
     @Autowired
     private RobotService robotService;
+
+    @Autowired
+    private RobotConfigService robotConfigService;
 
     @Autowired
     private GoodsTypeService goodsTypeService;
@@ -129,7 +139,7 @@ public class ConsumerCommon {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
                     String robotCode = messageInfo.getSenderId();
-                    Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                    Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
                     if (!StringUtil.isNullOrEmpty(uuid)) {
                         syncRosRobotConfig(robotDb, uuid);
                     }
@@ -155,6 +165,7 @@ public class ConsumerCommon {
         slamBody.setUuid(uuid);
         slamBody.setMsg("success");
         slamBody.setErrorCode("0");
+        convertChargerMapPointToJsonMissionItemDataLaserNavigation(robotNew);
         slamBody.setData(JsonUtils.toJson(robotNew,
                 new TypeToken<Robot>() {
                 }.getType()));
@@ -178,9 +189,36 @@ public class ConsumerCommon {
                 messageInfo.setMessageText(JSON.toJSONString(commonInfo));
                 messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
             } catch (Exception e1) {
-                logger.error("错误{}",e1);
+                logger.error("错误{}", e1);
             }
         } finally {
+        }
+    }
+
+    /**
+     * 充电桩点List转换导航点的List
+     *
+     * @param robotNew
+     */
+    private void convertChargerMapPointToJsonMissionItemDataLaserNavigation(Robot robotNew) {
+        if (robotNew != null && robotNew.getOriginChargerMapPointList() != null) {
+            List<MapPoint> originChargerMapPointList = robotNew.getOriginChargerMapPointList();
+            List<JsonMissionItemDataLaserNavigation> list = Lists.newArrayList();
+            if (originChargerMapPointList != null && originChargerMapPointList.size() > 0) {
+                for (MapPoint mapPoint : originChargerMapPointList) {
+                    String mapName = mapPoint.getMapName();
+                    JsonMissionItemDataLaserNavigation jsonMissionItemDataLaserNavigation = new JsonMissionItemDataLaserNavigation();
+                    jsonMissionItemDataLaserNavigation.setMap(mapName);
+                    jsonMissionItemDataLaserNavigation.setMap_name(mapName);
+                    jsonMissionItemDataLaserNavigation.setScene_name(mapPoint.getSceneName());
+                    jsonMissionItemDataLaserNavigation.setX(mapPoint.getX());
+                    jsonMissionItemDataLaserNavigation.setY(mapPoint.getY());
+                    jsonMissionItemDataLaserNavigation.setTh(mapPoint.getTh());
+                    list.add(jsonMissionItemDataLaserNavigation);
+                }
+            }
+            robotNew.setChargerMapPointList(null);
+            robotNew.setChargerMapPointList(list);
         }
     }
 
@@ -235,18 +273,7 @@ public class ConsumerCommon {
                         CacheInfoManager.setSceneRobotListCache(sceneName, messageInfo.getSenderId());
                     }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
-                    //保存电量信息
-                    String deviceId = messageInfo.getSenderId();
-                    ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
-                    chargeInfo.setDeviceId(deviceId);
-                    chargeInfo.setCreateTime(messageInfo.getSendTime());
-                    chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                    StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(deviceId);
-                    if (null != autoCharge) {
-                        chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
-                    }
-                    CacheInfoManager.setRobotChargeInfoCache(deviceId, chargeInfo);
-                    chargeInfoService.save(chargeInfo);
+                    saveChargeStatus(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
                 }
             }
         } catch (Exception e) {
@@ -364,7 +391,8 @@ public class ConsumerCommon {
 
         } else if (MessageType.REPLY.equals(messageInfo.getMessageType())) {
             OffLineMessage message = new OffLineMessage();
-            message.setMessageStatusType(messageInfo.getMessageStatusType().getIndex());//如果是回执，将对方传过来的信息带上
+            MessageStatusType messageStatusType = messageInfo.getMessageStatusType();
+            message.setMessageStatusType(messageStatusType == null ? null : messageStatusType.getIndex());//如果是回执，将对方传过来的信息带上
             message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
             message.setSuccess(true);//接收到回执，发送消息成功
             message.setUuId(messageInfo.getUuId());//更新的主键
@@ -437,4 +465,38 @@ public class ConsumerCommon {
         }
     }
 
+    private void saveChargeStatus(String code, Date sendTime, String messageData) {
+        //保存电量信息
+        ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
+        chargeInfo.setDeviceId(code);
+        chargeInfo.setCreateTime(sendTime);
+        chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(code);
+        if (null != autoCharge) {
+            chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
+        }
+        CacheInfoManager.setRobotChargeInfoCache(code, chargeInfo);
+        chargeInfoService.save(chargeInfo);
+
+        //保存低电量警告
+        int powerPercent = chargeInfo.getPowerPercent();
+        Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (null == robot)
+            return;
+
+        RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
+        if (null == robotConfig)
+            return;
+        Integer lowBatteryThreshold = robotConfig.getLowBatteryThreshold();
+        if (lowBatteryThreshold == null)
+            return;
+
+        if (powerPercent <= lowBatteryThreshold) {
+            //跟新机器人低电量状态
+            Robot saveRobot = new Robot();
+            robot.setId(robot.getId());
+            robot.setLowPowerState(true);
+            robotService.updateSelective(saveRobot);
+        }
+    }
 }

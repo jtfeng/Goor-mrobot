@@ -7,6 +7,8 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.*;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataTimeCharge;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
@@ -632,7 +634,8 @@ public class MissionController {
 						if(mapPoint == null) {
 							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
 						}
-						missionItem.setData(JSON.toJSONString(mapPoint));
+						jsonObject.put(Constant.ORDER_TIME_CHARGE_POINT,mapPoint);
+						missionItem.setData(JSON.toJSONString(jsonObject));
 					}
 					catch (Exception e) {
 						LOGGER.error(e.getMessage(),e);

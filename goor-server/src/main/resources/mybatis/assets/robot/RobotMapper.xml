@@ -12,8 +12,8 @@
         <result property="robotIdForElevator" column="ROBOT_ID_FOR_ELEVATOR"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
-        <result property="isOnline" column="IS_ONLINE"/>
-        <result property="isBusy" column="IS_BUSY"/>
+        <result property="online" column="ONLINE"/>
+        <result property="busy" column="BUSY"/>
         <result property="sceneId" column="SCENE_ID"/>
         <result property="sceneName" column="SCENE_NAME"/>
         <result property="storeId" column="STORE_ID"/>
@@ -21,7 +21,7 @@
             <id column="BOX_NUM" property="boxNum"/>
             <result column="PASSWORD" property="password"/>
         </association>
-        <collection property="chargerMapPointList" ofType="cn.mrobot.bean.area.point.MapPoint">
+        <collection property="originChargerMapPointList" ofType="cn.mrobot.bean.area.point.MapPoint">
             <id column="endPointId" property="id"/>
             <result column="endPointName" property="pointName"/>
             <result column="endPointAlias" property="pointAlias"/>
@@ -45,7 +45,7 @@
             config.SUFFICIENT_BATTERY_THRESHOLD,
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
-            robot.IS_ONLINE,
+            robot.ONLINE,
             robot.ROBOT_ID_FOR_ELEVATOR,
             scene.ID as SCENE_ID,
             scene.NAME as SCENE_NAME
@@ -81,8 +81,8 @@
                 config.SUFFICIENT_BATTERY_THRESHOLD,
                 ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
                 robot.BOX_ACTIVATED,
-                robot.IS_ONLINE,
-                robot.IS_BUSY,
+                robot.ONLINE,
+                robot.BUSY,
                 robot.STORE_ID as storeId,
                 robot.ROBOT_ID_FOR_ELEVATOR,
                 pwd.BOX_NUM as boxNum,
@@ -109,6 +109,9 @@
         </if>
         <if test="storeId != null">
             AND robot.STORE_ID = #{storeId}
+        </if>
+        <if test="robotId != null">
+            AND robot.ID = #{robotId}
         </if>
     </select>
 

@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.HttpClientUtil;
 import cn.mrobot.utils.StringUtil;
-import cn.muye.account.user.service.UserService;
+import cn.muye.base.cache.CacheInfoManager;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.logging.Log;
@@ -31,12 +31,15 @@ public class AuthValidationExceptionFilter implements Filter{
 
     private String authUserUri;
 
+    private static final int LOGGED_IN = 1; //已登录
+    private static final int LOGGED_OUT = 0; //未登录
+
     protected static final Log LOGGER = LogFactory.getLog(AuthValidationExceptionFilter.class);
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         boolean isExcludedPage = true;
-        for (String page : excludedPageArray) {//判断是否在过滤url之外
+        for (String page : excludedPageArray) { //判断是否在过滤url之外
             Pattern pattern = Pattern.compile(page);
             Matcher matcher = pattern.matcher(((HttpServletRequest) req).getServletPath());
             boolean rs = matcher.find();
@@ -53,11 +56,17 @@ public class AuthValidationExceptionFilter implements Filter{
                 String result = HttpClientUtil.executeGet(null,authUserUri+"?access_token="+accessTokenFromReq , null, null, "UTF-8", true);
                 JSONObject jsonObject = JSON.parseObject(result);
                 String principal = jsonObject.getString("principal");
+                String userName = JSON.parseObject(principal).getString("username");
                 if (StringUtil.isNullOrEmpty(principal)) {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
                     response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
                 } else {
-                    chain.doFilter(req, res);
+                    if (CacheInfoManager.getUserLoginStatusCache(userName) != null) {
+                        chain.doFilter(req, res);
+                    } else {
+                        response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
+                        response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
+                    }
                 }
             } catch (Exception e) {
                 if (res instanceof HttpServletResponse) {

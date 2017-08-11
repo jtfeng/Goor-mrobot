@@ -9,6 +9,7 @@ import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
@@ -75,10 +76,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @param robot
      */
     public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientBatteryThreshold, String robotCodeDb) throws RuntimeException {
-        List<MapPoint> list = robot.getChargerMapPointList();
+        List<MapPoint> list = robot.getOriginChargerMapPointList();
         if (list != null && list.size() == 1) {
-            list = bindChargerMapPoint(robot.getId(), robot.getChargerMapPointList());
-            robot.setChargerMapPointList(list);
+            list = bindChargerMapPoint(robot.getId(), robot.getOriginChargerMapPointList());
+            robot.setOriginChargerMapPointList(list);
         }
         if (lowBatteryThresholdDb == null || lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
             robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
@@ -87,7 +88,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robot.setSufficientBatteryThreshold(sufficientBatteryThreshold);
         }
         //更新机器人信息
-        updateByStoreId(robot);
+        updateSelectiveByStoreId(robot);
         //更新机器人配置信息
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
         if (robotConfig != null && robot.getLowBatteryThreshold() != null) {
@@ -126,10 +127,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 SlamBody slamBody = new SlamBody();
                 slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
                 slamBody.setUuid(uuid);
+                convertChargerMapPointToJsonMissionItemDataLaserNavigation(robotDb);
                 slamBody.setData(JsonUtils.toJson(robotDb,
                         new TypeToken<Robot>() {
                         }.getType()));
+                LOGGER.info("下发机器人信息json串=>", slamBody.getData());
                 slamBody.setErrorCode("0");
+                slamBody.setMsg("success");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
@@ -164,10 +168,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
             }
         }
-        /*if (availableRobot != null) {
+        if (availableRobot != null) {
             availableRobot.setBusy(true);
-            updateRobotAndBindChargerMapPoint(availableRobot, null, null, null);
-        }*/
+            super.updateSelective(availableRobot);
+        }
         return availableRobot;
     }
 
@@ -253,7 +257,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (mapPoint != null)
                     mapPointList.add(mapPoint);
             });
-            robot.setChargerMapPointList(mapPointList);
+            robot.setOriginChargerMapPointList(mapPointList);
         });
         return list;
     }
@@ -387,11 +391,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 SlamBody slamBody = new SlamBody();
                 slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
                 slamBody.setUuid(uuid);
+                convertChargerMapPointToJsonMissionItemDataLaserNavigation(robotNew);
                 slamBody.setData(JsonUtils.toJson(robotNew,
                         new TypeToken<Robot>() {
                         }.getType()));
                 slamBody.setErrorCode("0");
-                slamBody.setMsg("机器人"+ robotNew.getCode() + "注册成功");
+                slamBody.setMsg("success");
+                slamBody.setMsg("机器人" + robotNew.getCode() + "注册成功");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
@@ -404,6 +410,32 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 LOGGER.error("发送错误{}", e);
             } finally {
             }
+        }
+    }
+
+    /**
+     * 充电桩点List转换导航点的List
+     * @param robotNew
+     */
+    private void convertChargerMapPointToJsonMissionItemDataLaserNavigation(Robot robotNew) {
+        if (robotNew != null && robotNew.getOriginChargerMapPointList() != null) {
+            List<MapPoint> originChargerMapPointList = robotNew.getOriginChargerMapPointList();
+            List<JsonMissionItemDataLaserNavigation> list = Lists.newArrayList();
+            if (originChargerMapPointList != null && originChargerMapPointList.size() > 0) {
+                for (MapPoint mapPoint : originChargerMapPointList) {
+                    String mapName = mapPoint.getMapName();
+                    JsonMissionItemDataLaserNavigation jsonMissionItemDataLaserNavigation = new JsonMissionItemDataLaserNavigation();
+                    jsonMissionItemDataLaserNavigation.setMap(mapName);
+                    jsonMissionItemDataLaserNavigation.setMap_name(mapName);
+                    jsonMissionItemDataLaserNavigation.setScene_name(mapPoint.getSceneName());
+                    jsonMissionItemDataLaserNavigation.setX(mapPoint.getX());
+                    jsonMissionItemDataLaserNavigation.setY(mapPoint.getY());
+                    jsonMissionItemDataLaserNavigation.setTh(mapPoint.getTh());
+                    list.add(jsonMissionItemDataLaserNavigation);
+                }
+            }
+            robotNew.setChargerMapPointList(null);
+            robotNew.setChargerMapPointList(list);
         }
     }
 
@@ -442,10 +474,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
     @Override
-    public Robot getByCodeByXml(String code, Long storeId) {
+    public Robot getByCodeByXml(String code, Long storeId, Long robotId) {
         Map map = Maps.newHashMap();
         map.put("code", code);
         map.put("storeId", storeId);
+        map.put("robotId", robotId);
         Robot robot = robotMapper.getRobotByCode(map);
         return robot;
     }

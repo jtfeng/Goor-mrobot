@@ -6,8 +6,6 @@ package cn.mrobot.bean.state;
  */
 public class StateCollectorBaseDriver extends StateCollector{
 
-    private String state;
-
     private int driverFlow;//驱动器过流
 
     private int driverError;//编码器错误
@@ -78,26 +76,4 @@ public class StateCollectorBaseDriver extends StateCollector{
         this.PWMControllBreak = PWMControllBreak;
     }
 
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        StateCollectorBaseDriver that = (StateCollectorBaseDriver) o;
-
-        return state != null ? state.equals(that.state) : that.state == null;
-    }
-
-    @Override
-    public int hashCode() {
-        return state != null ? state.hashCode() : 0;
-    }
 }

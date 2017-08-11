@@ -3,7 +3,6 @@ package cn.muye.base.cache;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.state.*;
 import cn.mrobot.utils.FileUtils;
 import cn.muye.area.map.service.MapInfoService;
@@ -14,7 +13,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-
 import javax.websocket.Session;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -68,6 +66,8 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     private static ConcurrentHashMapCache<String,  String> persistMissionState = new ConcurrentHashMapCache<>();//已经存库的任务状态
 
+    private static ConcurrentHashMapCache<String, Integer> userLoginStatusCache = new ConcurrentHashMapCache<>();//用户登录状态
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -89,6 +89,9 @@ public class CacheInfoManager implements ApplicationContextAware {
         baseMicroSwitchAndAntiCache.setMaxLifeTime(0);
         baseSystemCache.setMaxLifeTime(0);
         navigationCache.setMaxLifeTime(0);
+
+        //用户登录状态
+        userLoginStatusCache.setMaxLifeTime(0);
     }
 
     private CacheInfoManager() {
@@ -207,11 +210,11 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     //右驱状态缓存
     public static void setRightBaseDriverCache(String deviceId, StateCollectorBaseDriver stateCollectorBaseDriver) {
-        leftBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
+        rightBaseDriverCache.put(deviceId, stateCollectorBaseDriver);
     }
 
     public static StateCollectorBaseDriver getRightBaseDriverCache(String deviceId) {
-        return leftBaseDriverCache.get(deviceId);
+        return rightBaseDriverCache.get(deviceId);
     }
 
     //微动开关与防跌落状态缓存
@@ -282,4 +285,15 @@ public class CacheInfoManager implements ApplicationContextAware {
         return persistMissionState.get(deviceId);
     }
 
+    public static Integer getUserLoginStatusCache(String key) {
+        return userLoginStatusCache.get(key);
+    }
+
+    public static void removeUserLoginStatusCache(String key) {
+        userLoginStatusCache.remove(key);
+    }
+
+    public static void setUserLoginStatusCache(String key,  Integer status) {
+        userLoginStatusCache.put(key, status);
+    }
 }

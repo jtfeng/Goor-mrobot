@@ -85,8 +85,7 @@ public class TopicConstants {
 	public static final String CHECK_HEART_TOPIC = "/checkHeartTopic";
 	public static final String CHECK_HEART_MESSAGE = "{\"data\": \"heart\"}";
 	public static final Long CHECK_HEART_TOPIC_MAX = 30000L;//30秒
-	public static final Long CHECK_ROS_BRIDGE_MAX = 90000L;//120秒,检查rosbridge启动情况
-
+	public static final Long CHECK_ROS_BRIDGE_MAX = 600000L;//120秒,检查rosbridge启动情况
 
 	//导航返回的 code 标识
 	private static int MOTION_MOVING = 1;
@@ -112,8 +111,8 @@ public class TopicConstants {
 	public static final String ROBOT_KEY_LOW_BATTERY_THRESHOLD = "lowBatteryThreshold";
 	public static final String ROBOT_KEY_SUFFICIENT_BATTERY_THRESHOLD = "sufficientBatteryThreshold";
 //	public static final String ROBOT_KEY_BOX_ACTIVATED = "boxActivated";
-	public static final String ROBOT_KEY_IS_BUSY = "isBusy";
-	public static final String ROBOT_KEY_IS_ONLINE = "isOnline";
+	public static final String ROBOT_KEY_BUSY = "busy";
+	public static final String ROBOT_KEY_ONLINE = "online";
 	public static final String ROBOT_KEY_CHARGER_MAP_POINT_LIST = "chargerMapPointList";
 	public static final String ROBOT_KEY_PASSWORDS = "passwords";
 

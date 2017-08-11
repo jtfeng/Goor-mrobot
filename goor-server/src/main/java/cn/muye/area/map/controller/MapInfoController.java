@@ -89,6 +89,9 @@ public class MapInfoController {
 
             //获取开机状态
             Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            if(null == robot){
+                return AjaxResult.failed("机器人不存在");
+            }
             currentInfo.setOnline(robot.getOnline());
             if(!robot.getOnline()){
                 LOGGER.info("机器人（" + code + "）不在线");
