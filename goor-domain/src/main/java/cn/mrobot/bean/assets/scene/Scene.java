@@ -16,7 +16,7 @@ public class Scene extends BaseBean{
 
     private String name;
     private String intro;
-    private Integer state = 0;//0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新
+    private Integer state;//0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新
 
     public Scene() {
     }
