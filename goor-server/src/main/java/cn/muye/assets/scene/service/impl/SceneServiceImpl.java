@@ -81,7 +81,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         if (mapInfos.size() !=0 && robots.size()!= 0){
             //地图下发
-            mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+                }
+            }).start();
         }
         return insertRowsCount;
     }

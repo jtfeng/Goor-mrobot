@@ -7,8 +7,6 @@ package cn.mrobot.bean.state;
  */
 public class StateCollectorBaseSystem extends StateCollector{
 
-    private String state;
-
     private int res;
 
     private int powerOn;//开机
@@ -79,26 +77,4 @@ public class StateCollectorBaseSystem extends StateCollector{
         this.overSpeedEmergencyStop = overSpeedEmergencyStop;
     }
 
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        StateCollectorBaseSystem that = (StateCollectorBaseSystem) o;
-
-        return state == that.state;
-    }
-
-    @Override
-    public int hashCode() {
-        return state != null ? state.hashCode() : 0;
-    }
 }

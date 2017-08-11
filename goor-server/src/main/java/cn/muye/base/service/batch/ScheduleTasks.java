@@ -104,7 +104,7 @@ public class ScheduleTasks {
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
     //每分钟触发,记录底盘，自动导航，电量信息日志
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "0 */3 * * * ?")
     public void collectBaseState() {
         logger.info("Scheduled log");
         try {
@@ -127,16 +127,17 @@ public class ScheduleTasks {
             logger.error("Scheduled collect base state error", e);
         }
     }
-    /**
-     * 每秒发送机器人当前的位置信息给工控，工控做机器人排队(暂定2s/次)
-     */
-    @Scheduled(cron = "*/2 * * * * ?")
-    public void sendCurrentPose() {
-        try {
-            currentPoseService.sendCurrentPose();
-        } catch (Exception e) {
-            logger.error("Scheduled send robots current pose error", e);
-        }
-    }
+    //TODO 暂时注释
+//    /**
+//     * 每秒发送机器人当前的位置信息给工控，工控做机器人排队(暂定2s/次)
+//     */
+//    @Scheduled(cron = "*/2 * * * * ?")
+//    public void sendCurrentPose() {
+//        try {
+//            currentPoseService.sendCurrentPose();
+//        } catch (Exception e) {
+//            logger.error("Scheduled send robots current pose error", e);
+//        }
+//    }
 
 }
