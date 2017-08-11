@@ -25,6 +25,8 @@ public class Robot extends BaseBean {
 
     private String description;  //备注
 
+    private String status; //机器人状态（充电中...）
+
     @Transient
     private Integer lowBatteryThreshold; //机器人低电量阈值
 
@@ -200,5 +202,13 @@ public class Robot extends BaseBean {
 
     public void setOnline(Boolean online) {
         this.online = online;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
