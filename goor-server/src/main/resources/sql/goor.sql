@@ -557,7 +557,9 @@ CREATE TABLE `AS_ROBOT` (
   `BUSY` bit(1) DEFAULT b'0' COMMENT '状态(0-空闲， 1-占用)',
   `ONLINE` bit(1) DEFAULT b'1' COMMENT '是否在线',
   `ROBOT_ID_FOR_ELEVATOR` int(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
-  `STATUS` varchar(255) DEFAULT NULL COMMENT '状态'
+  `STATUS` varchar(255) DEFAULT NULL COMMENT '状态',
+  `EMERGENCY_STOP_STATE` bit(1) DEFAULT b'1' NULL COMMENT '机器人急停状态（true:急停拍下  false:急停未拍下）',
+  `LOW_POWER_STATE` bit(1) DEFAULT b'1' COMMENT '机器人低电量状态（true:机器人电量低于阈值  false:机器人电量高于阈值）',
   PRIMARY KEY (`ID`),
   KEY `TYPE` (`TYPE_ID`),
   CONSTRAINT `AS_ROBOT_ibfk_1` FOREIGN KEY (`TYPE_ID`) REFERENCES `AS_ROBOT_TYPE` (`ID`)
@@ -1121,6 +1123,16 @@ CREATE TABLE `LOG_INFO` (
   `HANDLE_PERSON` varchar(50) DEFAULT NULL COMMENT '处理人',
   `HANDLE_TIME` datetime DEFAULT NULL COMMENT '处理时间',
   PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for LOG_INFO_XREF
+-- ----------------------------
+DROP TABLE IF EXISTS `LOG_INFO_XREF`;
+CREATE TABLE `LOG_INFO_XREF` (
+  `FOREIGN_KEY` varchar(50) DEFAULT NULL COMMENT '通过ModuleEnums和id进行拼接',
+  `LOG_INFO_ID` bigint(11) DEFAULT NULL COMMENT 'LogInfo ID'
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 -- ----------------------------

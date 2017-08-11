@@ -27,6 +27,11 @@ public class LogInfoServiceImpl implements LogInfoService {
     private LogInfoMapper logInfoMapper;
 
     @Override
+    public LogInfo findById(Long id) {
+        return logInfoMapper.selectByPrimaryKey(id);
+    }
+
+    @Override
     public void save(LogInfo logInfo) {
         logInfoMapper.insert(logInfo);
     }
