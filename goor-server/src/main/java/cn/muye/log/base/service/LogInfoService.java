@@ -24,6 +24,8 @@ import java.util.List;
  */
 public interface LogInfoService {
 
+    LogInfo findById(Long id);
+
     void save(LogInfo logInfo);
 
     List<LogInfo> lists(WhereRequest whereRequest, Long storeId);

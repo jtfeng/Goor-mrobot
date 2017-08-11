@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -142,7 +143,7 @@ public class MapZipController {
             for (int i = 0; i < deviceIds.size(); i++) {
                 robotList.add(robotService.getById(deviceIds.get(i)));
             }
-            String result;
+            Map<String, AjaxResult> result;
             if (robotList.size() <= 0 || robotList.isEmpty()) {
                 result = mapSyncService.syncMap(mapZip, SearchConstants.FAKE_MERCHANT_STORE_ID);
             } else {

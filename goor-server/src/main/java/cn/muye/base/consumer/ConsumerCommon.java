@@ -3,11 +3,13 @@ package cn.muye.base.consumer;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
@@ -17,6 +19,7 @@ import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.assets.goods.service.GoodsTypeService;
+import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
@@ -38,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
+
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -63,6 +67,9 @@ public class ConsumerCommon {
 
     @Autowired
     private RobotService robotService;
+
+    @Autowired
+    private RobotConfigService robotConfigService;
 
     @Autowired
     private GoodsTypeService goodsTypeService;
@@ -182,7 +189,7 @@ public class ConsumerCommon {
                 messageInfo.setMessageText(JSON.toJSONString(commonInfo));
                 messageSendHandleService.sendCommandMessage(true, false, robotNew.getCode(), messageInfo);
             } catch (Exception e1) {
-                logger.error("错误{}",e1);
+                logger.error("错误{}", e1);
             }
         } finally {
         }
@@ -190,6 +197,7 @@ public class ConsumerCommon {
 
     /**
      * 充电桩点List转换导航点的List
+     *
      * @param robotNew
      */
     private void convertChargerMapPointToJsonMissionItemDataLaserNavigation(Robot robotNew) {
@@ -265,18 +273,7 @@ public class ConsumerCommon {
                         CacheInfoManager.setSceneRobotListCache(sceneName, messageInfo.getSenderId());
                     }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
-                    //保存电量信息
-                    String deviceId = messageInfo.getSenderId();
-                    ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
-                    chargeInfo.setDeviceId(deviceId);
-                    chargeInfo.setCreateTime(messageInfo.getSendTime());
-                    chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                    StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(deviceId);
-                    if (null != autoCharge) {
-                        chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
-                    }
-                    CacheInfoManager.setRobotChargeInfoCache(deviceId, chargeInfo);
-                    chargeInfoService.save(chargeInfo);
+                    saveChargeStatus(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
                 }
             }
         } catch (Exception e) {
@@ -394,7 +391,8 @@ public class ConsumerCommon {
 
         } else if (MessageType.REPLY.equals(messageInfo.getMessageType())) {
             OffLineMessage message = new OffLineMessage();
-            message.setMessageStatusType(messageInfo.getMessageStatusType().getIndex());//如果是回执，将对方传过来的信息带上
+            MessageStatusType messageStatusType = messageInfo.getMessageStatusType();
+            message.setMessageStatusType(messageStatusType == null ? null : messageStatusType.getIndex());//如果是回执，将对方传过来的信息带上
             message.setRelyMessage(messageInfo.getRelyMessage());//回执消息入库
             message.setSuccess(true);//接收到回执，发送消息成功
             message.setUuId(messageInfo.getUuId());//更新的主键
@@ -467,4 +465,38 @@ public class ConsumerCommon {
         }
     }
 
+    private void saveChargeStatus(String code, Date sendTime, String messageData) {
+        //保存电量信息
+        ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
+        chargeInfo.setDeviceId(code);
+        chargeInfo.setCreateTime(sendTime);
+        chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(code);
+        if (null != autoCharge) {
+            chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
+        }
+        CacheInfoManager.setRobotChargeInfoCache(code, chargeInfo);
+        chargeInfoService.save(chargeInfo);
+
+        //保存低电量警告
+        int powerPercent = chargeInfo.getPowerPercent();
+        Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (null == robot)
+            return;
+
+        RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
+        if (null == robotConfig)
+            return;
+        Integer lowBatteryThreshold = robotConfig.getLowBatteryThreshold();
+        if (lowBatteryThreshold == null)
+            return;
+
+        if (powerPercent <= lowBatteryThreshold) {
+            //跟新机器人低电量状态
+            Robot saveRobot = new Robot();
+            robot.setId(robot.getId());
+            robot.setLowPowerState(true);
+            robotService.updateSelective(saveRobot);
+        }
+    }
 }
