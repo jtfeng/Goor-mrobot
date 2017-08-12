@@ -29,6 +29,7 @@ public class Scene extends BaseBean{
     private String mapSceneName;
     @Transient
     private List<Robot> robots;
+    private String mapSyncResult;
 
     public String getName() {
         return name;
@@ -70,6 +71,14 @@ public class Scene extends BaseBean{
         this.robots = robots;
     }
 
+    public String getMapSyncResult() {
+        return mapSyncResult;
+    }
+
+    public void setMapSyncResult(String mapSyncResult) {
+        this.mapSyncResult = mapSyncResult;
+    }
+
     @Override
     public String toString() {
         return "Scene{" +
@@ -78,6 +87,7 @@ public class Scene extends BaseBean{
                 ", state=" + state +
                 ", mapSceneName='" + mapSceneName + '\'' +
                 ", robots=" + robots +
+                ", mapSyncResult=" + mapSyncResult +
                 '}';
     }
 

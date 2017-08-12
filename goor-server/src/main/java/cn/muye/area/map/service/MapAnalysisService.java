@@ -195,7 +195,7 @@ public class MapAnalysisService {
             mapInfoService.save(mapInfo);
 
             //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
-            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPDATE_STATE);
+            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPDATE_STATE,"");
         }
     }
 
