@@ -93,11 +93,11 @@
     </insert>
 
     <update id="setSceneState">
-        UPDATE AS_SCENE SET STATE = #{param3} WHERE ID IN (SELECT SCENE_ID FROM SCENES_MAPS_RELATIONS WHERE MAP_SCENENAME = #{param1}) AND STORE_ID = #{param2}
+        UPDATE AS_SCENE SET STATE = #{param3},MAP_SYNC_RESULT = #{param4} WHERE ID IN (SELECT SCENE_ID FROM SCENES_MAPS_RELATIONS WHERE MAP_SCENENAME = #{param1}) AND STORE_ID = #{param2}
     </update>
 
     <update id="setSceneStateForUpload">
-        UPDATE goor.AS_SCENE SET STATE = #{param2} WHERE ID = #{param1}
+        UPDATE goor.AS_SCENE SET STATE = #{param2},MAP_SYNC_RESULT = #{param3} WHERE ID = #{param1}
     </update>
 
 </mapper>

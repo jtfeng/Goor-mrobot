@@ -2,13 +2,9 @@ package cn.muye.assets.scene.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.scene.Scene;
-import cn.mrobot.bean.log.LogInfo;
-import cn.mrobot.bean.log.LogInfoXREF;
-import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.log.base.service.LogInfoService;
-import cn.muye.log.base.service.LogInfoXREFService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by admin on 2017/7/3.
@@ -28,12 +25,6 @@ public class SceneController {
     private static final Logger log = LoggerFactory.getLogger(SceneController.class);
     @Autowired
     private SceneService sceneService;
-
-    @Autowired
-    private LogInfoXREFService logInfoXREFService;
-
-    @Autowired
-    private LogInfoService logInfoService;
 
     /**
      * 传入一个 session ID，将场景对应的信息存入到 session
@@ -132,32 +123,16 @@ public class SceneController {
         // TODO: 20/07/2017 需要测试地图与机器人之间的同步
         try {
             sceneService.sendSyncMapMessageToRobots(Long.parseLong(sceneId));
-            return AjaxResult.success();
+            return AjaxResult.success("操作成功");
         } catch (Exception e) {
             return AjaxResult.failed();
         }
-    }
 
-    @RequestMapping(value = "/assets/scene/syncresult/{sceneId}", method = RequestMethod.GET)
-    public AjaxResult getSyncMapResult(@PathVariable("sceneId") String sceneId) {
-        try {
-            LogInfoXREF logInfoXREF = logInfoXREFService.getByKey(ModuleEnums.SCENE, Long.parseLong(sceneId));
-            if (null == logInfoXREF) {
-                return AjaxResult.success("未查询到日志信息");
-            }
-            LogInfo logInfo = logInfoService.findById(logInfoXREF.getLogInfoId());
-            if (null == logInfo) {
-                return AjaxResult.success("未查询到日志信息");
-            }
-            return AjaxResult.success(logInfo.getMessage(),"查询成功");
-        } catch (Exception e) {
-            return AjaxResult.failed();
-        }
     }
 
     @RequestMapping(value = "/assets/scene/checkSceneIsNeedToBeUpdated", method = RequestMethod.GET)
     public Object checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception {
-        this.sceneService.checkSceneIsNeedToBeUpdated(mapSceneName, storeId, Scene.SCENE_STATE.UPDATE_STATE);
+        this.sceneService.checkSceneIsNeedToBeUpdated(mapSceneName, storeId, Scene.SCENE_STATE.UPDATE_STATE,"");
         return Arrays.asList("ok", "jay");
     }
 }

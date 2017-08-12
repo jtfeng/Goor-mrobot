@@ -1127,15 +1127,6 @@ CREATE TABLE `LOG_INFO` (
 
 
 -- ----------------------------
--- Table structure for LOG_INFO_XREF
--- ----------------------------
-DROP TABLE IF EXISTS `LOG_INFO_XREF`;
-CREATE TABLE `LOG_INFO_XREF` (
-  `FOREIGN_KEY` varchar(50) DEFAULT NULL COMMENT '通过ModuleEnums和id进行拼接',
-  `LOG_INFO_ID` bigint(11) DEFAULT NULL COMMENT 'LogInfo ID'
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
-
--- ----------------------------
 -- Table structure for LOG_MISSION
 -- ----------------------------
 DROP TABLE IF EXISTS `LOG_MISSION`;

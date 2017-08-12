@@ -165,6 +165,8 @@ public class StateCollectorServiceImpl implements StateCollectorService {
             //更新机器人急停状态
             Robot robot = new Robot();
             Robot robotDB = robotService.getByCode(deviceId, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            if(robot == null)
+                return;
             robot.setId(robotDB.getId());
             robot.setEmergencyStopState(true);
             robotService.updateSelective(robot);
