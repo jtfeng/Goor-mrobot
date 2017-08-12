@@ -134,7 +134,7 @@ public class PointServiceImpl implements PointService {
             }
         }
         criteria.andCondition("STORE_ID = " + storeId);
-        condition.setOrderByClause("SCENE_NAME, MAP_NAME ASC");
+        condition.setOrderByClause("SCENE_NAME, MAP_NAME,POINT_NAME ASC");
 
         return pointMapper.selectByExample(condition);
     }
