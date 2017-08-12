@@ -83,7 +83,7 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public void update(MapPoint mapPoint) {
-        pointMapper.updateByPrimaryKey(mapPoint);
+        pointMapper.updateByPrimaryKeySelective(mapPoint);
     }
 
     @Override

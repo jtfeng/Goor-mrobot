@@ -1,4 +1,4 @@
-package cn.muye.account.role.mapper;
+package cn.muye.account.user.mapper;
 
 import cn.mrobot.bean.account.UserStationXref;
 import cn.muye.util.MyMapper;

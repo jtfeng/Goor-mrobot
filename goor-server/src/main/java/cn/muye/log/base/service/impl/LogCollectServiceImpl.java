@@ -3,23 +3,17 @@ package cn.muye.log.base.service.impl;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.charge.ChargeInfo;
-import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.log.LogInfo;
-import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.bean.StateDetail;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
-import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.log.base.LogInfoUtils;
 import cn.muye.log.base.service.LogCollectService;
-import cn.muye.log.base.service.LogInfoService;
 import cn.muye.log.state.service.StateCollectorService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +21,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,9 +37,6 @@ public class LogCollectServiceImpl implements LogCollectService {
 
     @Autowired
     private RobotConfigService robotConfigService;
-
-    @Autowired
-    private LogInfoService logInfoService;
 
     @Autowired
     private StateCollectorService stateCollectorService;
@@ -87,39 +77,29 @@ public class LogCollectServiceImpl implements LogCollectService {
      * 收集记录电量日志
      */
     private void collectChargeLog(Robot robot) {
-        String chargeState = "";
+
         String code = robot.getCode();
+        RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
+        if (null == robotConfig)
+            return;
+
         ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(code);
         if (chargeInfo == null) {
             return;
         }
-        //获取电量状态
-        chargeState = getChargeMessage(chargeInfo);
-        RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
-        if (robotConfig == null) {
+        //保存电量信息
+        LogInfoUtils.info(code, ModuleEnums.CHARGE, LogType.INFO_CHARGE, getChargeMessage(chargeInfo));
+
+        //获取低电量阈值
+        Integer lowBatteryThreshold = robotConfig.getLowBatteryThreshold();
+        if (lowBatteryThreshold == null)
             return;
-        }
-        Integer batteryThreshold = robotConfig.getLowBatteryThreshold();
-        if (batteryThreshold == null) {
-            return;
-        }
-        LogInfo logInfo = new LogInfo();
-        logInfo.setLogLevel(LogLevel.INFO.getName());
-        logInfo.setModule(ModuleEnums.CHARGE.getModuleId());
-        logInfo.setLogType(LogType.INFO_CHARGE.getName());
-        logInfo.setMessage(chargeState);
-        saveLogInfo(code, logInfo);
         //保存低电量警告
         int powerPercent = chargeInfo.getPowerPercent();
-        if (powerPercent <= batteryThreshold) {
+        if (powerPercent <= lowBatteryThreshold) {
             StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append("电量阈值：").append(batteryThreshold).append("%,当前电量：").append(powerPercent).append("%");
-            LogInfo warningLogInfo = new LogInfo();
-            warningLogInfo.setLogLevel(LogLevel.WARNING.getName());
-            warningLogInfo.setModule(ModuleEnums.CHARGE.getModuleId());
-            warningLogInfo.setLogType(LogType.WARNING_LOWER_POWER.getName());
-            warningLogInfo.setMessage(stringBuffer.toString());
-            saveLogInfo(code, warningLogInfo);
+            stringBuffer.append("电量阈值：").append(lowBatteryThreshold).append("%,当前电量：").append(powerPercent).append("%");
+            LogInfoUtils.warn(code, ModuleEnums.CHARGE, LogType.WARNING_LOWER_POWER, stringBuffer.toString());
         }
     }
 
@@ -138,12 +118,7 @@ public class LogCollectServiceImpl implements LogCollectService {
             String baseState = stringBuffer.toString();
             if (StringUtil.isNullOrEmpty(baseState))
                 return;
-            LogInfo logInfo = new LogInfo();
-            logInfo.setLogLevel(LogLevel.INFO.getName());
-            logInfo.setModule(ModuleEnums.BASE.getModuleId());
-            logInfo.setLogType(LogType.INFO_BASE.getName());
-            logInfo.setMessage(baseState);
-            saveLogInfo(code, logInfo);
+            LogInfoUtils.info(code, ModuleEnums.BASE, LogType.INFO_BASE, baseState);
         } catch (Exception e) {
             LOGGER.error("收集底盘出错. code=" + code, e);
         }
@@ -162,12 +137,7 @@ public class LogCollectServiceImpl implements LogCollectService {
         String navigationState = stringBuffer.toString();
         if (StringUtil.isNullOrEmpty(navigationState))
             return;
-        LogInfo logInfo = new LogInfo();
-        logInfo.setLogLevel(LogLevel.INFO.getName());
-        logInfo.setModule(ModuleEnums.NAVIGATION.getModuleId());
-        logInfo.setLogType(LogType.INFO_NAVIGATION.getName());
-        logInfo.setMessage(navigationState);
-        saveLogInfo(code, logInfo);
+        LogInfoUtils.info(code, ModuleEnums.NAVIGATION, LogType.INFO_NAVIGATION, navigationState);
     }
 
     private String getChargeMessage(ChargeInfo chargeInfo) {
@@ -212,39 +182,13 @@ public class LogCollectServiceImpl implements LogCollectService {
 
         //校验是否已经存库
         String missionState = CacheInfoManager.getPersistMissionState(code);
-        if(missionLog != null && missionLog.equals(missionState))
+        if (missionLog != null && missionLog.equals(missionState))
             return;
 
-        if(StringUtil.isNullOrEmpty(missionLog))
+        if (StringUtil.isNullOrEmpty(missionLog))
             return;
-        LogInfo logInfo = new LogInfo();
-        logInfo.setLogLevel(LogLevel.INFO.getName());
-        logInfo.setModule(ModuleEnums.MISSION.getModuleId());
-        logInfo.setLogType(LogType.INFO_SCHEDULE_TASK.getName());
-        logInfo.setMessage(missionLog);
-        saveLogInfo(code, logInfo);
-
+        LogInfoUtils.info(code, ModuleEnums.MISSION, LogType.INFO_SCHEDULE_TASK, missionLog);
         //将已存库的任务状态放入缓存中，以便下一次比对
         CacheInfoManager.setPersistMissionState(code, missionLog);
-    }
-
-    private void saveLogInfo(String code, LogInfo logInfo) {
-        logInfo.setDeviceId(code);
-        logInfo.setCreateTime(new Date());
-        logInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
-        if (currentMap != null && !StringUtil.isNullOrEmpty(currentMap.getMessageText())) {
-            JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
-            String data = jsonObject.getString(TopicConstants.DATA);
-            JSONObject object = JSON.parseObject(data);
-            Integer currentMapCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
-            if (currentMapCode != null && currentMapCode == 0) {
-                String mapData = object.getString(TopicConstants.DATA);
-                JSONObject mapObject = JSON.parseObject(mapData);
-                logInfo.setMapName(mapObject.getString(TopicConstants.MAP_NAME));
-                logInfo.setSceneName(mapObject.getString(TopicConstants.SCENE_NAME));
-            }
-        }
-        logInfoService.save(logInfo);
     }
 }

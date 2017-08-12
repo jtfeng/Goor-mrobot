@@ -69,6 +69,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public int saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
+        scene.setState(0);//代表正在上传
         int insertRowsCount = this.save(scene);//数据库中插入这条场景记录
         bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
@@ -80,7 +81,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         if (mapInfos.size() !=0 && robots.size()!= 0){
             //地图下发
-            mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+                }
+            }).start();
         }
         return insertRowsCount;
     }
@@ -102,7 +108,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         scene.setCreateTime(new Date());
         bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
         bindSceneAndMapRelations(scene);//更新场景与地图之间的绑定关系
-        return sceneMapper.updateByPrimaryKey(scene) ;//更新对应的场景信息
+        return updateSelective(scene) ;//更新对应的场景信息
     }
 
     @Override

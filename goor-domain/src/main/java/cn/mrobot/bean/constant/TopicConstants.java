@@ -111,8 +111,8 @@ public class TopicConstants {
 	public static final String ROBOT_KEY_LOW_BATTERY_THRESHOLD = "lowBatteryThreshold";
 	public static final String ROBOT_KEY_SUFFICIENT_BATTERY_THRESHOLD = "sufficientBatteryThreshold";
 //	public static final String ROBOT_KEY_BOX_ACTIVATED = "boxActivated";
-	public static final String ROBOT_KEY_IS_BUSY = "isBusy";
-	public static final String ROBOT_KEY_IS_ONLINE = "isOnline";
+	public static final String ROBOT_KEY_BUSY = "busy";
+	public static final String ROBOT_KEY_ONLINE = "online";
 	public static final String ROBOT_KEY_CHARGER_MAP_POINT_LIST = "chargerMapPointList";
 	public static final String ROBOT_KEY_PASSWORDS = "passwords";
 

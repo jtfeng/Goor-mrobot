@@ -56,11 +56,11 @@ public class AuthValidationExceptionFilter implements Filter{
                 String result = HttpClientUtil.executeGet(null,authUserUri+"?access_token="+accessTokenFromReq , null, null, "UTF-8", true);
                 JSONObject jsonObject = JSON.parseObject(result);
                 String principal = jsonObject.getString("principal");
-                String userName = JSON.parseObject(principal).getString("username");
                 if (StringUtil.isNullOrEmpty(principal)) {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
                     response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
                 } else {
+                    String userName = JSON.parseObject(principal).getString("username");
                     if (CacheInfoManager.getUserLoginStatusCache(userName) != null) {
                         chain.doFilter(req, res);
                     } else {
