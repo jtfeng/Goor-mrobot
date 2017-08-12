@@ -1,4 +1,4 @@
-package cn.muye.account.role.service;
+package cn.muye.account.user.service;
 
 import cn.mrobot.bean.account.UserStationXref;
 
