@@ -10,16 +10,13 @@ import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.FileValidCreateUtil;
-import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.log.base.LogInfoUtils;
-import cn.muye.log.base.service.LogInfoXREFService;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,16 +45,7 @@ public class MapSyncService implements ApplicationContextAware {
     private RobotService robotService;
 
     @Autowired
-    private MapZipService mapZipService;
-
-    @Autowired
     private SceneService sceneService;
-
-    @Autowired
-    private OffLineMessageService offLineMessageService;
-
-    @Autowired
-    private LogInfoXREFService logInfoXREFService;
 
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
@@ -92,7 +80,7 @@ public class MapSyncService implements ApplicationContextAware {
                 Robot robot = robotList.get(0);
                 //如果需要同步地图的机器人是上传地图的机器人，则直接更新场景的状态
                 if (robot.getCode().equals(mapZip.getDeviceId())) {
-                    sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
+                    sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS,"", sceneId);
                     return null;
                 }
             }
@@ -128,6 +116,7 @@ public class MapSyncService implements ApplicationContextAware {
                 String code = robot.getCode();
                 //如果需要同步的机器为地图上传机器，则跳过
                 if (code.equals(mapZip.getDeviceId())) {
+                    stringBuffer.append(code).append(":").append("地图上传机器人").append(",");
                     LOGGER.info("需同步的机器人code为上传地图的机器人code，不进行同步，code=" + code);
                     continue;
                 }
@@ -144,10 +133,8 @@ public class MapSyncService implements ApplicationContextAware {
             }
 
             //更新指定场景的state
-            sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
+            sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS,stringBuffer.toString(), sceneId);
             Long logInfoId = LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
-            //保存场景操作和日志的关联关系
-            logInfoXREFService.save(ModuleEnums.SCENE, sceneId, logInfoId);
             return resultMap;
         } catch (Exception e) {
             LOGGER.error("发送地图更新信息失败", e);
