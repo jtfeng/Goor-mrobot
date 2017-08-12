@@ -15,6 +15,7 @@ import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.service.PickUpPswdVerifyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -216,6 +217,9 @@ public class ConsumerCommon {
         }
     }
 
+    @Autowired
+    PickUpPswdVerifyService pickUpPswdVerifyService;
+
     /**
      * 接收云端发送至x86消息，不往ros发送消息，只处理agent业务（有回执）
      * @param messageInfo
@@ -227,6 +231,23 @@ public class ConsumerCommon {
             if (messageInfo != null) {
                 logger.info("topicClientAndReceiveMessage=========" + messageInfo);
                 //TODO 业务需求,请调用各自的处理类
+                if (!StringUtils.isEmpty(messageInfo.getMessageText())) {
+                    JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+                    String data = jsonObject.getString(TopicConstants.DATA);
+                    JSONObject jsonObjectData = JSON.parseObject(data);
+                    String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
+                    //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
+
+                    if (!StringUtil.isEmpty(messageName)) {
+                        switch (messageName) {
+                            case TopicConstants.PICK_UP_PSWD_VERIFY:
+                            /* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
+                                return pickUpPswdVerifyService.handlePickUpPswdVerify(messageInfo);
+                            default:
+                                break;
+                        }
+                    }
+                }
             }
         }catch (Exception e){
             logger.error("topicClientAndReceiveMessage Exception", e);

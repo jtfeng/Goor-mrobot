@@ -9,6 +9,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.log.mission.service.LogMissionService;
 import cn.muye.service.consumer.topic.BaseMessageService;
+import cn.muye.service.consumer.topic.X86ElevatorLockService;
 import cn.muye.service.consumer.topic.X86MissionStateResponseService;
 import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
@@ -35,6 +36,15 @@ public class LogMissionController {
 
     @Autowired
     LogMissionService logMissionService;
+
+
+    //{"senderId":"SNtest","messageText":"","sendTime":"Aug 4, 2017 5:40:00 PM","success":true}
+    //{"data":""}
+    //data就是约定的json对象字串
+
+    //{"action": "lock","elevator_id": 1,"sendTime": 1501748933017,"uuid": "e7981721296445c9865e3dfcbbcaf98d"}
+
+
 
 
     @PostMapping()
@@ -134,6 +144,61 @@ public class LogMissionController {
                 x86MissionStateResponseService.handleX86MissionStateResponse(messageInfo);
             }
             return AjaxResult.success("成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    @Autowired
+    X86ElevatorLockService x86ElevatorLockService;
+
+    @PostMapping("/elevator/lock")
+    @ApiOperation(
+            value = "test",
+            notes = "test")
+    public AjaxResult elevatorLock(
+            @ApiParam(
+                    required = true,
+                    name = "body",
+                    value = "入参对象")
+            @RequestBody String body) {
+        try {
+            body = "{\"senderId\":\"SNtest\",\"messageText\":\"{\\\"data\\\":\\\"{\\\\\\\"action\\\\\\\": \\\\\\\"lock\\\\\\\",\\\\\\\"elevator_id\\\\\\\": 1,\\\\\\\"sendTime\\\\\\\": 1501748933017,\\\\\\\"uuid\\\\\\\": \\\\\\\"e7981721296445c9865e3dfcbbcaf98d\\\\\\\"}\\\"}\",\"sendTime\":\"Aug 4, 2017 5:40:00 PM\",\"success\":true}";
+            MessageInfo messageInfo =
+                    (MessageInfo) JsonUtils.fromJson(
+                            body,
+                            new TypeToken<MessageInfo>(){}.getType());
+            if (messageInfo != null){
+                return x86ElevatorLockService.handleX86ElevatorLock(messageInfo);
+            }
+            return AjaxResult.failed("失败");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    @PostMapping("/elevator/unlock")
+    @ApiOperation(
+            value = "test",
+            notes = "test")
+    public AjaxResult elevatorUnlock(
+            @ApiParam(
+                    required = true,
+                    name = "body",
+                    value = "入参对象")
+            @RequestBody String body) {
+        try {
+            body = "{\"senderId\":\"SNtest\",\"messageText\":\"{\\\"data\\\":\\\"{\\\\\\\"action\\\\\\\": \\\\\\\"unlock\\\\\\\",\\\\\\\"elevator_id\\\\\\\": 1,\\\\\\\"sendTime\\\\\\\": 1501748933017,\\\\\\\"uuid\\\\\\\": \\\\\\\"e7981721296445c9865e3dfcbbcaf98d\\\\\\\"}\\\"}\",\"sendTime\":\"Aug 4, 2017 5:40:00 PM\",\"success\":true}";
+            MessageInfo messageInfo =
+                    (MessageInfo) JsonUtils.fromJson(
+                            body,
+                            new TypeToken<MessageInfo>(){}.getType());
+            if (messageInfo != null){
+                return x86ElevatorLockService.handleX86ElevatorLock(messageInfo);
+            }
+            return AjaxResult.failed("失败");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed(e.getMessage());
