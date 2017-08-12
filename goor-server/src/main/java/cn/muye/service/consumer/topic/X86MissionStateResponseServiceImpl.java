@@ -82,8 +82,8 @@ public class X86MissionStateResponseServiceImpl
                         handleStatePaused(jsonMissionStateResponse,
                                 baseMessageService.getSenderId(messageInfo));
                         break;
-                        default:
-                            break;
+                    default:
+                        break;
                 }
             }
         }
@@ -119,7 +119,7 @@ public class X86MissionStateResponseServiceImpl
         //更新mission task state
         if (jsonMissionStateResponse.getMission_list() != null){
             for (JsonMissionStateResponse.Mission_listEntity en:
-                 jsonMissionStateResponse.getMission_list()) {
+                    jsonMissionStateResponse.getMission_list()) {
                 if (en != null &&
                         en.getMission_id() != null){
                     MissionTask missionTask =
@@ -154,7 +154,7 @@ public class X86MissionStateResponseServiceImpl
                     //更新mission item state
                     if (en.getMission_item_set() != null){
                         for (JsonMissionStateResponse.Mission_listEntity.Mission_item_setEntity item:
-                             en.getMission_item_set()) {
+                                en.getMission_item_set()) {
                             if (item != null &&
                                     item.getMission_item_id() != null){
                                 MissionItemTask missionItemTask =

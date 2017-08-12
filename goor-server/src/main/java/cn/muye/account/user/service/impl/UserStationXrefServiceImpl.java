@@ -1,8 +1,8 @@
-package cn.muye.account.role.service.impl;
+package cn.muye.account.user.service.impl;
 
 import cn.mrobot.bean.account.UserStationXref;
-import cn.muye.account.role.mapper.UserStationXrefMapper;
-import cn.muye.account.role.service.UserStationXrefService;
+import cn.muye.account.user.mapper.UserStationXrefMapper;
+import cn.muye.account.user.service.UserStationXrefService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

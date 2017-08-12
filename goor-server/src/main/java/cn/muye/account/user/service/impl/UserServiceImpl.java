@@ -6,7 +6,7 @@ import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.role.service.RoleService;
-import cn.muye.account.role.service.UserStationXrefService;
+import cn.muye.account.user.service.UserStationXrefService;
 import cn.muye.account.user.mapper.UserMapper;
 import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;

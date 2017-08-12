@@ -26,6 +26,7 @@ public class Elevator extends BaseBean {
                 ", ip='" + ip + '\'' +
                 ", lockState='" + lockState + '\'' +
                 ", info='" + info + '\'' +
+                ", robotCode='" + robotCode + '\'' +
                 ", elevatorshaftId=" + elevatorshaftId +
                 ", robotCode='" + robotCode + '\'' +
                 ", elevatorShaft=" + elevatorShaft +

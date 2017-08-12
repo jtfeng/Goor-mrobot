@@ -2,13 +2,12 @@ package cn.muye.util;
 
 import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.account.UserStationXref;
-import cn.muye.account.role.service.UserStationXrefService;
+import cn.muye.account.user.service.UserStationXrefService;
 import cn.muye.account.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

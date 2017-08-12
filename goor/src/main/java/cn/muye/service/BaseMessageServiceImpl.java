@@ -1,4 +1,4 @@
-package cn.muye.base.consumer.service;
+package cn.muye.service;
 
 import cn.mrobot.bean.base.TCPubBean;
 import cn.mrobot.bean.constant.TopicConstants;
@@ -27,6 +27,27 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     private MsgSendAsyncTask msgSendAsyncTask;
 
     /**
+     * 获取data
+     * @param messageInfo
+     * @return
+     */
+    @Override
+    public String getData(MessageInfo messageInfo){
+        JSONObject requestDataObject =
+                JSON.parseObject(messageInfo.getMessageText());
+        if (requestDataObject == null){
+            return "";
+        }
+        String ret = null;
+        try {
+            ret = requestDataObject.getString(TopicConstants.DATA);
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return ret;
+    }
+
+    /**
      * 获取消息里的data
      * @param messageInfo
      * @return
@@ -41,6 +62,10 @@ public class BaseMessageServiceImpl implements BaseMessageService {
         String ret = null;
         try {
             ret = requestDataObject.getString(TopicConstants.DATA);
+            JSONObject jsonObjectData = JSON.parseObject(ret);
+            if (jsonObjectData != null){
+                ret = jsonObjectData.getString(TopicConstants.DATA);
+            }
         } catch (Exception e) {
             logger.error(e);
         }
@@ -58,13 +83,14 @@ public class BaseMessageServiceImpl implements BaseMessageService {
             return "";
         }
 
-        String data = getPubData(messageInfo);
-
-        if (StringUtil.isEmpty(data)){
+        JSONObject requestDataObject =
+                JSON.parseObject(messageInfo.getMessageText());
+        if (requestDataObject == null){
             return "";
         }
 
-        JSONObject jsonObjectData = JSON.parseObject(data);
+        JSONObject jsonObjectData = JSON.parseObject(
+                requestDataObject.getString(TopicConstants.DATA));
 
         String ret = "";
         try {
@@ -90,6 +116,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
 
         return messageInfo.getSenderId();
     }
+
 
     @Value("${local.robot.SN}")
     private String localRobotSN;

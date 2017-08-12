@@ -4,6 +4,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.batch.ScheduledHandle;
 import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.StringUtil;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.log4j.Logger;
@@ -23,6 +24,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
+import java.io.File;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +50,9 @@ public class Application {
 
 	@Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
 	private String topicCommandAndReceiveSN;
+
+	@Value("${local.robot.fileCachePath}")
+	private String fileCachePath;
 
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource")
@@ -94,6 +99,24 @@ public class Application {
 			CacheInfoManager.setNameLSubCache(subName);
 		}
 		return lSubName;
+	}
+
+	@Bean
+	public File fileCachePath(){
+		String path = fileCachePath;
+		if (StringUtil.isEmpty(fileCachePath)){
+			path = "/mnt/fileCachePath";
+		}
+		File file = new File(path);
+		try {
+			if (!file.exists()){
+                file.mkdirs();
+            }
+		} catch (Exception e) {
+			file = new File("/tmp");
+			e.printStackTrace();
+		}
+		return file;
 	}
 
 	@Bean
