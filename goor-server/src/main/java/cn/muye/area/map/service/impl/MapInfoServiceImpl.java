@@ -99,6 +99,7 @@ public class MapInfoServiceImpl implements MapInfoService {
             }
         }
         criteria.andCondition("STORE_ID = " + storeId + "");
+        example.setOrderByClause("SCENE_NAME, MAP_NAME ASC ");
         return parseLocalPath(mapInfoMapper.selectByExample(example));
     }
 
