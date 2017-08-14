@@ -53,8 +53,8 @@ public class SceneController {
     public AjaxResult createScene(@RequestBody Scene scene) {
         // TODO: 21/07/2017 创建新场景
         try {
-            sceneService.saveScene(scene);
-            return AjaxResult.success(scene, "新增场景信息成功!");
+            Object taskResult = sceneService.saveScene(scene);
+            return AjaxResult.success(taskResult, "新增场景信息成功!");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage(), "新增场景信息失败");
         }
@@ -120,10 +120,9 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene/sync/{sceneId}", method = RequestMethod.GET)
     public AjaxResult sendSyncMapMessageToRobots(@PathVariable("sceneId") String sceneId) {
-        // TODO: 20/07/2017 需要测试地图与机器人之间的同步
         try {
-            sceneService.sendSyncMapMessageToRobots(Long.parseLong(sceneId));
-            return AjaxResult.success("操作成功");
+            Object taskResult = sceneService.sendSyncMapMessageToRobots(Long.parseLong(sceneId));
+            return AjaxResult.success(taskResult, "操作成功");
         } catch (Exception e) {
             return AjaxResult.failed();
         }

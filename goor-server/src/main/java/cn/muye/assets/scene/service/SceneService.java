@@ -16,7 +16,7 @@ public interface SceneService extends BaseService<Scene> {
 
     List<Scene> list() throws Exception;
 
-    int saveScene(Scene scene) throws Exception;
+    Object saveScene(Scene scene) throws Exception;
 
     Scene getSceneById(Long id) throws Exception;
 
@@ -30,7 +30,7 @@ public interface SceneService extends BaseService<Scene> {
 
     int insertSceneAndRobotRelations(Long sceneId, List<Long> robotIds) throws Exception;
 
-    void sendSyncMapMessageToRobots(Long sceneId) throws Exception;
+    Object sendSyncMapMessageToRobots(Long sceneId) throws Exception;
 
     void deleteRobotAndSceneRelations(Long sceneId) throws Exception;
 
