@@ -24,7 +24,8 @@ public class SessionUtil {
      * @throws Exception
      */
     public static Scene getScene() throws Exception {
-         return SCENE_LOADING_CACHE.getIfPresent(UserUtil.getUserTokenValue()+":"+Constant.SCENE_SESSION_TAG);
+//         return SCENE_LOADING_CACHE.getIfPresent(UserUtil.getUserTokenValue()+":"+Constant.SCENE_SESSION_TAG);
+        return SCENE_LOADING_CACHE.getIfPresent("sdfdsfdfdsf1231234"+":"+Constant.SCENE_SESSION_TAG);
     }
 
 
