@@ -57,7 +57,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public int saveScene(Scene scene) throws Exception {
+    public Object saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
         scene.setState(0);//代表正在上传
@@ -70,16 +70,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         for (Robot robot : scene.getRobots()){
             robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
         }
+        Object taskResult = null;
         if (mapInfos.size() !=0 && robots.size()!= 0){
-            //地图下发
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
-                }
-            }).start();
+            taskResult = mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
         }
-        return insertRowsCount;
+        return taskResult;
     }
 
     @Override
@@ -143,18 +138,18 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     @Override
-    public void sendSyncMapMessageToRobots(Long sceneId) throws Exception {
+    public Object sendSyncMapMessageToRobots(Long sceneId) throws Exception {
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
         List<Robot> robots     = this.sceneMapper.findRobotBySceneId(sceneId);
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
         if (robots.size() == 0 || mapInfos.size() == 0){
-            return;
+            return null;
         }
         Preconditions.checkNotNull(mapInfos);
         Preconditions.checkArgument(mapInfos.size()!=0, "该场景没有绑定地图，请绑定地图后重试!");
         MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
         sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0,"");//将状态更改为正在上传
-        mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
+        return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
     }
 
     @Override
