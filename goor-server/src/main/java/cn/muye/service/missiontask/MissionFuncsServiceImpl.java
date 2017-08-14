@@ -407,7 +407,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
                                 addElevatorPoint(mp, mapPoints, mpAttrs);
                                 //判断当前点的属性，根据属性加入相应的任务
-                                switch (MapPointType.getType(mp.getMapPointTypeId())){
+                                /*switch (MapPointType.getType(mp.getMapPointTypeId())){
                                     case ELEVATOR:
                                     case ELEVATOR_WAIT:
                                     default:
@@ -420,7 +420,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         mpAttrs.put(mp, atts);
                                         logger.info("###### order detail station is ok ");
                                         break;
-                                }
+                                }*/
                                 break;
                             }
                         }
