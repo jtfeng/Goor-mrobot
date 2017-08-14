@@ -28,7 +28,7 @@ public interface MissionListService {
 
     MissionList get(long id,long storeId);
 
-	MissionList findByName(String name,long storeId);
+	MissionList findByName(String name,long storeId,Long sceneId);
 
 	void delete(MissionList missionList,long storeId);
 

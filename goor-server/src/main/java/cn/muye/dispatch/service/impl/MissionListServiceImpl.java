@@ -112,8 +112,8 @@ public class MissionListServiceImpl implements MissionListService {
     }
 
 	@Override
-	public MissionList findByName(String name,long storeId) {
-		return missionListMapper.findByName(name,storeId);
+	public MissionList findByName(String name,long storeId,Long sceneId) {
+		return missionListMapper.findByName(name,storeId,sceneId);
 	}
 
 	@Override

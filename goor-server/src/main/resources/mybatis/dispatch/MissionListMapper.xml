@@ -121,8 +121,11 @@
     <select id="findByName" resultMap="missionList">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM D_MISSION_LIST
-        WHERE NAME = #{name} AND STORE_ID = #{storeId}
+        FROM D_MISSION_LIST d
+        WHERE d.NAME = #{name} AND d.STORE_ID = #{storeId}
+        <if test="sceneId != null">
+            AND d.SCENE_ID = #{sceneId}
+        </if>
     </select>
 
     <delete id="delete" parameterType="long">
@@ -155,7 +158,7 @@
         <if test="missionListType != null">
             AND d.MISSION_LIST_TYPE = #{missionListType}
         </if>
-        ORDER BY NAME ASC
+        ORDER BY CREATE_TIME DESC
     </select>
 
     <select id="listAll" resultMap="missionList">
@@ -163,7 +166,7 @@
         <include refid="Base_Column_List"/>
         FROM D_MISSION_LIST d
         WHERE STORE_ID = #{storeId}
-        ORDER BY NAME
+        ORDER BY CREATE_TIME DESC
     </select>
 
 </mapper>
