@@ -3,6 +3,7 @@ package cn.mrobot.bean.log;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,7 +49,7 @@ public class LogInfo extends BaseBean {
 
 	private String handlePerson;  //警告错误处理人
 
-	private String handleTime; //警告错误处理时间
+	private Date handleTime; //警告错误处理时间
 
 	public String getDeviceId() {
 		return deviceId;
@@ -98,11 +99,11 @@ public class LogInfo extends BaseBean {
 		this.handlePerson = handlePerson;
 	}
 
-	public String getHandleTime() {
+	public Date getHandleTime() {
 		return handleTime;
 	}
 
-	public void setHandleTime(String handleTime) {
+	public void setHandleTime(Date handleTime) {
 		this.handleTime = handleTime;
 	}
 

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +25,11 @@ public class LogInfoServiceImpl implements LogInfoService {
 
     @Autowired
     private LogInfoMapper logInfoMapper;
+
+    @Override
+    public LogInfo findById(Long id) {
+        return logInfoMapper.selectByPrimaryKey(id);
+    }
 
     @Override
     public void save(LogInfo logInfo) {
@@ -65,5 +71,10 @@ public class LogInfoServiceImpl implements LogInfoService {
         criteria.andCondition("STORE_ID=" + storeId);
         example.setOrderByClause("CREATE_TIME DESC");
         return logInfoMapper.selectByExample(example);
+    }
+
+    @Override
+    public int update(LogInfo logInfo) {
+        return logInfoMapper.updateByPrimaryKeySelective(logInfo);
     }
 }

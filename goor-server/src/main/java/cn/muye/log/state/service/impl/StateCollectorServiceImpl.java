@@ -1,14 +1,16 @@
 package cn.muye.log.state.service.impl;
 
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.mission.MissionState;
 import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.state.*;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.bean.state.enums.NavigationType;
 import cn.mrobot.bean.state.enums.StateFieldEnums;
-import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.bean.StateDetail;
+import cn.muye.assets.robot.service.RobotService;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.missiontask.MissionFuncsService;
@@ -37,8 +39,13 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private static final String HAPPEN = "触发";
     private static final String UNHAPPEN = "未触发";
 
+    private static final int HAPPEN_INT = 1;
+
     @Autowired
     private MissionFuncsService missionFuncsService;
+
+    @Autowired
+    private RobotService robotService;
 
     @Override
     public void handleStateCollector(StateCollectorResponse stateCollectorResponse) throws Exception {
@@ -142,6 +149,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private void analysisBaseSystemState(StateCollectorResponse stateCollectorResponse) throws Exception {
         StateCollectorBaseSystem stateCollectorBaseSystem = new StateCollectorBaseSystem();
         String state = stateCollectorResponse.getState();
+        String deviceId = stateCollectorResponse.getSenderId();
         stateCollectorBaseSystem.setState(state);
 
         String stateStr = StringUtil.parseToBit(state); //00011011
@@ -151,10 +159,22 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         stateCollectorBaseSystem.setPowerOn(parseInt(chars[length - 2]));//开机
         stateCollectorBaseSystem.setNormal(parseInt(chars[length - 3]));//正常
         stateCollectorBaseSystem.setIOEmergencyStop(parseInt(chars[length - 4]));//IO急停
-        stateCollectorBaseSystem.setSwitchEmergencyStop(parseInt(chars[length - 5]));//开关急停
+        int emergencyStopState = parseInt(chars[length - 5]);
+        stateCollectorBaseSystem.setSwitchEmergencyStop(emergencyStopState);//开关急停
+        if(HAPPEN_INT == emergencyStopState){
+            //更新机器人急停状态
+            Robot robot = new Robot();
+            Robot robotDB = robotService.getByCode(deviceId, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            if(robot == null)
+                return;
+            robot.setId(robotDB.getId());
+            robot.setEmergencyStopState(true);
+            robotService.updateSelective(robot);
+        }
+
         stateCollectorBaseSystem.setUnderVoltageEmergencyStop(parseInt(chars[length - 6]));//欠压停机
         stateCollectorBaseSystem.setOverSpeedEmergencyStop(parseInt(chars[length - 7]));//过速停机
-        String deviceId = stateCollectorResponse.getSenderId();
+
         StateCollectorBaseSystem stateCollectorBaseSystemCache = CacheInfoManager.getBaseSystemCache(deviceId);
         if (null == stateCollectorBaseSystemCache || !state.equals(stateCollectorBaseSystemCache.getState())) {
             stateCollectorBaseSystem.setDatabaseFlag(true);

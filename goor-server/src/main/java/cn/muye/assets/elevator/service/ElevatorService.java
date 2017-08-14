@@ -55,7 +55,6 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @return
      */
     List<Elevator> findByMapFloor(Long mapInfoId, Integer floor);
-
     /**
      * 根据地图名称以及门店编号查询对应的地图实体信息
      * @param mapName

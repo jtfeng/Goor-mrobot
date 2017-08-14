@@ -15,7 +15,8 @@ public enum ModuleEnums {
     NAVIGATION(100, "自动导航"),
     CHARGE(200, "电池"),
     BASE(300, "底盘"),
-    MISSION(400, "调度任务");
+    MISSION(400, "调度任务"),
+    SCENE(500, "场景");
 
     private int moduleId;
 

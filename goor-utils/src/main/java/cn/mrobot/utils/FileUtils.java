@@ -180,6 +180,26 @@ public class FileUtils {
     }
 
     /**
+     * 向文件覆盖写入内容
+     *
+     * @param file
+     * @param conent
+     */
+    public static void writeToFile(String file, String conent) {
+        try {
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(file, false)));
+            try {
+                out.write(conent);
+            } finally {
+                out.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 读取文本文件内容到一个字符串中
      *
      * @param file

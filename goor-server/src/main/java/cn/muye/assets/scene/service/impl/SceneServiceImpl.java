@@ -3,17 +3,12 @@ package cn.muye.assets.scene.service.impl;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
-import cn.mrobot.bean.assets.rfidbracelet.RfidBracelet;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapZipMapper;
-import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.map.service.MapSyncService;
-import cn.muye.assets.rfidbracelet.controller.RfidBraceletController;
-import cn.muye.assets.rfidbracelet.mapper.RfidBraceletMapper;
-import cn.muye.assets.rfidbracelet.service.RfidBraceletService;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
@@ -21,20 +16,16 @@ import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.google.common.base.Preconditions;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 
 /**
  * Created by admin on 2017/7/3.
@@ -81,7 +72,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         if (mapInfos.size() !=0 && robots.size()!= 0){
             //地图下发
-            mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+                }
+            }).start();
         }
         return insertRowsCount;
     }
@@ -157,7 +153,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Preconditions.checkNotNull(mapInfos);
         Preconditions.checkArgument(mapInfos.size()!=0, "该场景没有绑定地图，请绑定地图后重试!");
         MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
-        sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
+        sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0,"");//将状态更改为正在上传
         mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
     }
 
@@ -230,19 +226,19 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @throws Exception
      */
     @Override
-    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state, Long ... sceneId) throws Exception {
+    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state,String mapSyncResult, Long ... sceneId) throws Exception {
         Preconditions.checkNotNull(state);
         if (Scene.SCENE_STATE.UPDATE_STATE.equals(state)) {
             //标明状态为可更新状态
             if (this.sceneMapper.checkMapInfo(mapSceneName, Long.parseLong(storeId)) != 0) {
-                this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 3);
+                this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 3,mapSyncResult);
             }
         }
         if (Scene.SCENE_STATE.UPLOAD_SUCCESS.equals(state)){
             //表明状态为上传成功状态(需要针对某个具体场景)
 //            this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 1);
             Preconditions.checkArgument(sceneId != null && sceneId.length == 1, "更改场景状态为上传成功时,场景ID编号缺失,请检查代码!");
-            this.sceneMapper.setSceneStateForUpload(sceneId[0],1);
+            this.sceneMapper.setSceneStateForUpload(sceneId[0],1,mapSyncResult);
         }
         return true;
     }
