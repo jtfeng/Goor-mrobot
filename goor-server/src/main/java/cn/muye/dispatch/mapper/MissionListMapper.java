@@ -25,7 +25,8 @@ public interface MissionListMapper {
 					@Param("storeId")long storeId);
 
 	MissionList findByName(@Param("name")String name,
-						   @Param("storeId")long storeId);
+						   @Param("storeId")long storeId,
+						   @Param("sceneId")Long sceneId);
 
 	void delete(@Param("id")long id,
 				@Param("storeId")long storeId);

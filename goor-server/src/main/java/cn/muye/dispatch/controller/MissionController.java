@@ -367,20 +367,21 @@ public class MissionController {
 //	@PreAuthorize("hasAuthority('mrc_missionList_u')")
 	public AjaxResult saveOrUpdateMissionList(@RequestBody MissionList missionList, HttpServletRequest request) throws Exception {
 		try {
-			//TODO 从session取当前切换门店的ID
-			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
-			String missionListName = missionList.getName();
-			MissionList missionListDB = missionListService.findByName(missionListName,storeId);
-			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
-			}
-
 			//从session取当前切换的场景
 			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
-			missionList.setSceneId(scene.getId());
+			Long sceneId = scene.getId();
+			missionList.setSceneId(sceneId);
+
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+			String missionListName = missionList.getName();
+			MissionList missionListDB = missionListService.findByName(missionListName,storeId,sceneId);
+			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "当前场景下已存在相同名称的任务串！");
+			}
 
 			String msg = "";
 			if (missionList.getId() != null) {
@@ -601,7 +602,7 @@ public class MissionController {
 
 			//校验数据库是否重名
 			String missionListName = missionList.getName();
-			missionListDB = missionListService.findByName(missionListName,storeId);
+			missionListDB = missionListService.findByName(missionListName,storeId,sceneId);
 			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务列表！");
 			}
