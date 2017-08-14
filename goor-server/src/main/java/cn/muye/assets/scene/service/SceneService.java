@@ -20,7 +20,7 @@ public interface SceneService extends BaseService<Scene> {
 
     Scene getSceneById(Long id) throws Exception;
 
-    int updateScene(Scene scene) throws Exception;
+    Object updateScene(Scene scene) throws Exception;
 
     int deleteSceneById(Long id) throws Exception;
 
