@@ -629,6 +629,8 @@ public class MissionController {
 							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
 						}
 						missionItem.setData(JSON.toJSONString(mapPoint));
+						//任务所属地图名称
+						missionList.setMapName(mapPoint.getMapName());
 					}
 					catch (Exception e) {
 						LOGGER.error(e.getMessage(),e);
@@ -646,6 +648,8 @@ public class MissionController {
 						}
 						jsonObject.put(Constant.ORDER_TIME_CHARGE_POINT,mapPoint);
 						missionItem.setData(JSON.toJSONString(jsonObject));
+						//任务所属地图名称
+						missionList.setMapName(mapPoint.getMapName());
 					}
 					catch (Exception e) {
 						LOGGER.error(e.getMessage(),e);
