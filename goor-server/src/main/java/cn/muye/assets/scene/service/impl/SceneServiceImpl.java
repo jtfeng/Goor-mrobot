@@ -3,12 +3,14 @@ package cn.muye.assets.scene.service.impl;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapSyncService;
+import cn.muye.area.map.service.RobotMapZipXREFService;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
@@ -16,6 +18,7 @@ import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +52,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private RobotMapper robotMapper;
     @Autowired
     private MapZipMapper mapZipMapper;
-
+    @Autowired
+    private RobotMapZipXREFService robotMapZipXREFService;
     @Override
     public List<Scene> list() throws Exception {
         return sceneMapper.selectAll();
@@ -130,7 +134,17 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public List<Scene> listScenes(WhereRequest whereRequest) throws Exception {
         List<Scene> scenes = listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(),Scene.class,"ID DESC");
         for (Scene scene : scenes){
-            scene.setRobots(      this.sceneMapper.findRobotBySceneId(scene.getId()));//设置绑定的机器人信息
+            List<Robot> robotListDB = this.sceneMapper.findRobotBySceneId(scene.getId());
+            List<Robot> robotList = Lists.newArrayList();
+            for (int i = 0; i < robotListDB.size(); i++) {
+                Robot robot = robotListDB.get(i);
+                List<RobotMapZipXREF> robotMapZipXREFList = robotMapZipXREFService.findByRobotId(robot.getId());
+                boolean result = (robotMapZipXREFList == null || robotMapZipXREFList.size() <= 0) ? true : robotMapZipXREFList.get(0).isSuccess();
+                robot.setMapSyncResult(result);
+                robotList.add(robot);
+            }
+
+            scene.setRobots(robotList);//设置绑定的机器人信息
             List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(scene.getId(), scene.getStoreId());
             if (mapInfos != null && mapInfos.size() != 0) {
                 scene.setMapSceneName(mapInfos.get(0).getSceneName());//设置绑定的场景名城
@@ -160,7 +174,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Preconditions.checkNotNull(mapInfos);
         Preconditions.checkArgument(mapInfos.size()!=0, "该场景没有绑定地图，请绑定地图后重试!");
         MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
-        sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0,"");//将状态更改为正在上传
+        sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
         return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
     }
 
@@ -233,19 +247,19 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @throws Exception
      */
     @Override
-    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state,String mapSyncResult, Long ... sceneId) throws Exception {
+    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state, Long ... sceneId) throws Exception {
         Preconditions.checkNotNull(state);
         if (Scene.SCENE_STATE.UPDATE_STATE.equals(state)) {
             //标明状态为可更新状态
             if (this.sceneMapper.checkMapInfo(mapSceneName, Long.parseLong(storeId)) != 0) {
-                this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 3,mapSyncResult);
+                this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 3);
             }
         }
         if (Scene.SCENE_STATE.UPLOAD_SUCCESS.equals(state)){
             //表明状态为上传成功状态(需要针对某个具体场景)
 //            this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 1);
             Preconditions.checkArgument(sceneId != null && sceneId.length == 1, "更改场景状态为上传成功时,场景ID编号缺失,请检查代码!");
-            this.sceneMapper.setSceneStateForUpload(sceneId[0],1,mapSyncResult);
+            this.sceneMapper.setSceneStateForUpload(sceneId[0],1);
         }
         return true;
     }

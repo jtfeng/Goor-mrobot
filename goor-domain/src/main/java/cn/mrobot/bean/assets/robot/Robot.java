@@ -53,6 +53,9 @@ public class Robot extends BaseBean {
     private Long sceneId; //场景ID
 
     @Transient
+    private boolean mapSyncResult; //地图同步结果
+
+    @Transient
     private List<RobotPassword> passwords; //机器人抽屉密码
 
     @Transient
@@ -230,5 +233,13 @@ public class Robot extends BaseBean {
 
     public void setLowPowerState(boolean lowPowerState) {
         this.lowPowerState = lowPowerState;
+    }
+
+    public boolean isMapSyncResult() {
+        return mapSyncResult;
+    }
+
+    public void setMapSyncResult(boolean mapSyncResult) {
+        this.mapSyncResult = mapSyncResult;
     }
 }
