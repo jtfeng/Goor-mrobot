@@ -17,10 +17,10 @@
         <result property="sceneId" column="SCENE_ID"/>
         <result property="sceneName" column="SCENE_NAME"/>
         <result property="storeId" column="STORE_ID"/>
-        <association property="passwords" javaType="cn.mrobot.bean.assets.robot.RobotPassword">
+        <collection property="passwords" ofType="cn.mrobot.bean.assets.robot.RobotPassword">
             <id column="BOX_NUM" property="boxNum"/>
             <result column="PASSWORD" property="password"/>
-        </association>
+        </collection>
         <collection property="originChargerMapPointList" ofType="cn.mrobot.bean.area.point.MapPoint">
             <id column="endPointId" property="id"/>
             <result column="endPointName" property="pointName"/>
