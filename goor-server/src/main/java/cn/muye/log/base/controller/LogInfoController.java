@@ -131,9 +131,10 @@ public class LogInfoController {
             return AjaxResult.failed(1, "日志导出错误");
         } finally {
             try {
-                if (null != printer)
+                if (null != printer) {
                     printer.flush();
-                printer.close();
+                    printer.close();
+                }
                 if (null != out)
                     out.close();
             } catch (Exception e) {
