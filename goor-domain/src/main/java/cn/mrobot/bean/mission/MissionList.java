@@ -52,6 +52,8 @@ public class MissionList extends BaseBean{
 
 	private Integer priority;//优先级
 
+	private String mapName;//任务所属地图名
+
 	public static class Builder {
 
 		private String name;  //总任务名称
@@ -66,6 +68,7 @@ public class MissionList extends BaseBean{
 		private Integer priority;//优先级
 		private String missionListType;
 		private List<Mission> missionList;
+		private String mapName;//任务所属地图名
 
 		public Builder name(String name) {
 			this.name = name;
@@ -127,6 +130,11 @@ public class MissionList extends BaseBean{
 			return this;
 		}
 
+		public Builder mapName(String mapName) {
+			this.mapName = mapName;
+			return this;
+		}
+
 		public MissionList build() {
 			return new MissionList(this);
 		}
@@ -148,6 +156,7 @@ public class MissionList extends BaseBean{
 		missionList = builder.missionList;
 		missionListType = builder.missionListType;
 		sceneId = builder.sceneId;
+		mapName = builder.mapName;
 	}
 
 	public Long getId() {
@@ -244,5 +253,13 @@ public class MissionList extends BaseBean{
 
 	public void setSceneId(Long sceneId) {
 		this.sceneId = sceneId;
+	}
+
+	public String getMapName() {
+		return mapName;
+	}
+
+	public void setMapName(String mapName) {
+		this.mapName = mapName;
 	}
 }

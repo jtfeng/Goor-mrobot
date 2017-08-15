@@ -129,6 +129,7 @@ public class MissionListServiceImpl implements MissionListService {
 		if(whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null){
 			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
 			Object name = map.get(SearchConstants.SEARCH_NAME);
+			Object mapName = map.get(SearchConstants.SEARCH_MAP_NAME);
 //			Object deviceId = map.get(SearchConstants.SEARCH_DEVICE_ID);
 			Object beginDate = map.get(SearchConstants.SEARCH_BEGIN_DATE);
 			Object endDate = map.get(SearchConstants.SEARCH_END_DATE);
@@ -136,7 +137,7 @@ public class MissionListServiceImpl implements MissionListService {
 			Object sceneId = map.get(SearchConstants.SEARCH_SCENE_ID);
 			Object missionListType = map.get(SearchConstants.SEARCH_MISSION_LIST_TYPE);
 
-			missionListList = missionListMapper.list(name, /*deviceId,*/beginDate,endDate,priority,storeId,sceneId,missionListType);
+			missionListList = missionListMapper.list(name, mapName,/*deviceId,*/beginDate,endDate,priority,storeId,sceneId,missionListType);
 		}else {
 			missionListList = missionListMapper.listAll(storeId);
 		}
@@ -151,7 +152,7 @@ public class MissionListServiceImpl implements MissionListService {
 
 	@Override
 	public List<MissionList> list(long storeId,Long sceneId) {
-		List<MissionList> missionLists = missionListMapper.list(null, /*deviceId,*/null,null,null,storeId,sceneId,null);
+		List<MissionList> missionLists = missionListMapper.list(null, null,/*deviceId,*/null,null,null,storeId,sceneId,null);
 		return bindMission(missionLists);
 	}
 
