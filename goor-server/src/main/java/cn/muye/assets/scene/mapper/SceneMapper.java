@@ -29,9 +29,9 @@ public interface SceneMapper extends MyMapper<Scene> {
 
     int checkMapLegal(String mapSceneName, Long storeId);
 
-    void setSceneState(String sceneName, Long storeId, Integer state, String mapSyncResult);
+    void setSceneState(String sceneName, Long storeId, Integer state);
 
     List<MapInfo> findMapBySceneName(String SceneName, Long storeId);
 
-    void setSceneStateForUpload(Long sceneId, Integer state, String mapSyncResult);
+    void setSceneStateForUpload(Long sceneId, Integer state);
 }

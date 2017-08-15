@@ -1125,6 +1125,16 @@ CREATE TABLE `LOG_INFO` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
+-- ----------------------------
+-- Table structure for SCENE_ROBOT_MAPZIP_XREF
+-- ----------------------------
+DROP TABLE IF EXISTS `ROBOT_MAPZIP_XREF`;
+CREATE TABLE `ROBOT_MAPZIP_XREF` (
+  `ROBOT_ID` bigint(20)  COMMENT '机器人ID',
+  `LAST_MAP_ZIP_ID` bigint(20)  COMMENT '上一次地图压缩包ID',
+  `NEW_MAP_ZIP_ID` bigint(20)  COMMENT '新地图压缩包ID',
+  `SUCCESS` bit(1)  COMMENT '是否成功'
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for LOG_MISSION

@@ -131,7 +131,7 @@ public class SceneController {
 
     @RequestMapping(value = "/assets/scene/checkSceneIsNeedToBeUpdated", method = RequestMethod.GET)
     public Object checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception {
-        this.sceneService.checkSceneIsNeedToBeUpdated(mapSceneName, storeId, Scene.SCENE_STATE.UPDATE_STATE,"");
+        this.sceneService.checkSceneIsNeedToBeUpdated(mapSceneName, storeId, Scene.SCENE_STATE.UPDATE_STATE);
         return Arrays.asList("ok", "jay");
     }
 }
