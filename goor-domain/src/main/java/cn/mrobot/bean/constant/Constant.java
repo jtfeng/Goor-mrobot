@@ -42,6 +42,9 @@ public class Constant {
 	public final static Integer FILE_FAIL = 1;  //传输失败
 	public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
 
+    public final static String EXPORT_DIR_NAME = "export"; //导出文件夹路径
+    public final static String LOG_DIR_NAME= "log"; //日志文件夹路径
+
     public static final String AUTHORIZE_USERNAME = "web";
 
     public static final String AUTHORIZE_PASSWORD = "web_secret";

@@ -2,6 +2,7 @@ package cn.muye.area.map.service;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
@@ -47,6 +48,9 @@ public class MapSyncService implements ApplicationContextAware {
     @Autowired
     private SceneService sceneService;
 
+    @Autowired
+    private RobotMapZipXREFService robotMapZipXREFService;
+
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
 
@@ -80,7 +84,7 @@ public class MapSyncService implements ApplicationContextAware {
                 Robot robot = robotList.get(0);
                 //如果需要同步地图的机器人是上传地图的机器人，则直接更新场景的状态
                 if (robot.getCode().equals(mapZip.getDeviceId())) {
-                    sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS,"", sceneId);
+                    sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
                     return null;
                 }
             }
@@ -108,6 +112,8 @@ public class MapSyncService implements ApplicationContextAware {
             messageInfo.setMessageType(MessageType.EXECUTOR_MAP);
             Map<String, AjaxResult> resultMap = new HashMap<>();
             StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("压缩包名称：").append(mapZip.getFileName()).append(",");
+            Long mapZipId = mapZip.getId();
             for (int i = 0; i < robotList.size(); i++) {
 
                 Robot robot = robotList.get(i);
@@ -123,18 +129,24 @@ public class MapSyncService implements ApplicationContextAware {
 
                 String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(code, true, MessageType.EXECUTOR_MAP.name());
                 AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
+
+                //保存关联关系
+                RobotMapZipXREF robotMapZipXREF = null;
                 if (null != ajaxClientResult && ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS) {
                     resultMap.put(code, ajaxClientResult);
+                    robotMapZipXREF = new RobotMapZipXREF.Builder().newMapZipId(mapZipId).success(true).robotId(robot.getId()).build();
                     stringBuffer.append(code).append(":").append("同步成功").append(",");
                 } else {
                     resultMap.put(code, AjaxResult.failed("未获取到返回结果"));
+                    robotMapZipXREF = new RobotMapZipXREF.Builder().newMapZipId(mapZipId).success(false).robotId(robot.getId()).build();
                     stringBuffer.append(code).append(":").append("未获取到返回结果").append(",");
                 }
+                robotMapZipXREFService.saveOrUpdate(robotMapZipXREF);
             }
 
             //更新指定场景的state
-            sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS,stringBuffer.toString(), sceneId);
-            Long logInfoId = LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return resultMap;
         } catch (Exception e) {
             LOGGER.error("发送地图更新信息失败", e);
