@@ -34,6 +34,7 @@ public interface MissionListMapper {
 	List<MissionList> listAll(long storeId);
 
 	List<MissionList> list(@Param("name") Object name,
+						   @Param("mapName") Object mapName,
                            /*@Param("deviceId") Object deviceId,*/
                            @Param("beginDate") Object beginDate,
                            @Param("endDate") Object endDate,
