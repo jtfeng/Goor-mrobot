@@ -80,7 +80,13 @@ public class Constant {
             5L//离开充电桩
     );
 
+    //MissionItemTask列表用于取货校验员工工号
+    public final static List<String> MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = Arrays.asList(
+            "load",
+            "finalUnload"
+    );
 
+    public final static String MISSION_ITEM_TASK_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = "unload";
 
     public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
 
