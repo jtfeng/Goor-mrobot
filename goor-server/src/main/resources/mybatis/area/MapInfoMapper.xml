@@ -49,4 +49,25 @@
         MAP_ZIP_ID = #{mapZipId}
     </update>
 
+    <select id="selectSceneName" resultType="String">
+        SELECT SCENE_NAME
+        FROM A_MAP_INFO
+        WHERE STORE_ID = #{storeId}
+        GROUP BY SCENE_NAME
+    </select>
+
+    <select id="selectMapNameBySceneName" resultType="String">
+        SELECT MAP_NAME
+        FROM A_MAP_INFO a
+        <where>
+            <if test = "sceneName != null">
+                AND a.SCENE_NAME = #{sceneName}
+            </if>
+            <if test = "storeId != null">
+                AND a.STORE_ID = #{storeId}
+            </if>
+        </where>
+        GROUP BY MAP_NAME
+    </select>
+
 </mapper>
