@@ -69,7 +69,7 @@ public class Constant {
     public final static String MISSION_LIST_TYPE_PATROL = "patrol"; //巡逻任务-美亚
     public final static String MISSION_LIST_TYPE_CHARGE = "charge"; //充电任务-美亚
 
-    public final static Long CHECK_IF_OFFLINE_TIME = 300000L; //5分钟=30000毫秒
+    public final static Long CHECK_IF_OFFLINE_TIME = 60000L; //5分钟=30000毫秒
 
     public final static Long LEAVE_CHARGER_DELAY_TIME = 60000L; //1分钟=60000毫秒
 
