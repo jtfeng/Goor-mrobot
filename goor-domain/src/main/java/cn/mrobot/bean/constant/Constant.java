@@ -33,14 +33,17 @@ public class Constant {
 
     public static final String FLAGS = ".flags";
 
-	public static final String FILE_IS_EXIST = "fileIsExist";//文件是否存在
+    public static final String FILE_IS_EXIST = "fileIsExist";//文件是否存在
 
-	public static final String GOOR_SERVER = "goor-server";
+    public static final String GOOR_SERVER = "goor-server";
 
-	//文件上传状态
-	public final static Integer FILE_OK = 0; //传输成功
-	public final static Integer FILE_FAIL = 1;  //传输失败
-	public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
+    //文件上传状态
+    public final static Integer FILE_OK = 0; //传输成功
+    public final static Integer FILE_FAIL = 1;  //传输失败
+    public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
+
+    public final static String EXPORT_DIR_NAME = "export"; //导出文件夹路径
+    public final static String LOG_DIR_NAME= "log"; //日志文件夹路径
 
     public static final String AUTHORIZE_USERNAME = "web";
 
@@ -66,7 +69,7 @@ public class Constant {
     public final static String MISSION_LIST_TYPE_PATROL = "patrol"; //巡逻任务-美亚
     public final static String MISSION_LIST_TYPE_CHARGE = "charge"; //充电任务-美亚
 
-    public final static Long CHECK_IF_OFFLINE_TIME = 300000L; //5分钟=30000毫秒
+    public final static Long CHECK_IF_OFFLINE_TIME = 60000L; //5分钟=30000毫秒
 
     public final static Long LEAVE_CHARGER_DELAY_TIME = 60000L; //1分钟=60000毫秒
 
@@ -77,7 +80,13 @@ public class Constant {
             5L//离开充电桩
     );
 
+    //MissionItemTask列表用于取货校验员工工号
+    public final static List<String> MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = Arrays.asList(
+            "load",
+            "finalUnload"
+    );
 
+    public final static String MISSION_ITEM_TASK_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = "unload";
 
     public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
 
@@ -107,4 +116,7 @@ public class Constant {
 
     //添加初始密码 默认
     public static final String PRIMARY_PWD = "0000";
+
+    //默认机器人类型
+    public static final Integer ROBOT_PRIMARY_TYPE_ID = 1;
 }

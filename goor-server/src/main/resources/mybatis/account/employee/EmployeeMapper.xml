@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.account.employee.mapper.EmployeeMapper">
+
+    <resultMap id="employeeResult" type="cn.mrobot.bean.account.Employee">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="code" column="CODE"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="storeId" column="STORE_ID"/>
+        <collection property="stationList" ofType="cn.mrobot.bean.area.station.Station">
+            <id column="NAME" property="name"/>
+            <result property="id" column="ID"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectEmployeeNumberByMissionItemId" resultMap="employeeResult" parameterType="java.util.Map">
+        SELECT
+            employee.ID,
+            employee.CODE
+        FROM AC_EMPLOYEE employee
+          LEFT JOIN AC_EMPLOYEE_STATION_XREF empStation ON employee.ID = empStation.EMPLOYEE_ID
+          LEFT JOIN OR_ORDER_DETAIL orderDetail ON orderDetail.STATION_ID = empStation.STATION_ID
+          LEFT JOIN TASK_MISSION mission ON mission.ORDER_DETAIL_MISSION = orderDetail.ID
+          LEFT JOIN TASK_MISSION_ITEM item ON item.MISSION_ID = mission.ID
+        WHERE 1=1
+        <if test="code != null">
+            AND employee.CODE = #{code}
+        </if>
+        <if test="missionItemId != null">
+            AND item.ID = #{missionItemId}
+        </if>
+    </select>
+
+</mapper>

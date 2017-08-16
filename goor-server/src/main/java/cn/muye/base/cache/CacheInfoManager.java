@@ -5,6 +5,7 @@ import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.state.*;
 import cn.mrobot.utils.FileUtils;
+import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.MessageInfo;
 import com.google.common.collect.Lists;
@@ -135,8 +136,8 @@ public class CacheInfoManager implements ApplicationContextAware {
             return null;
         }
         MapInfo mapInfo = mapOriginalCache.get(key);
+        mapInfoService = applicationContext.getBean(MapInfoService.class);
         if (mapInfo == null) {
-            mapInfoService = applicationContext.getBean(MapInfoService.class);
             String[] names = FileUtils.resolveMapAndSceneName(key);
             if (names.length != 3) {
                 return null;
@@ -147,6 +148,12 @@ public class CacheInfoManager implements ApplicationContextAware {
                 mapOriginalCache.put(key, mapInfo);
             }
             return mapInfo;
+        }else if (StringUtil.isNullOrEmpty(mapInfo.getPngDesigned())){
+            //如果美画图为空，进行数据库查询
+            List<MapInfo> mapInfoList = mapInfoService.getMapInfo(mapInfo.getMapName(),mapInfo.getSceneName(),mapInfo.getStoreId());
+            if (mapInfoList.size() > 0){
+                mapInfo.setPngDesigned(mapInfoList.get(0).getPngDesigned());
+            }
         }
         return mapInfo;
     }

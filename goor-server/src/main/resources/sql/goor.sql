@@ -493,6 +493,26 @@ CREATE TABLE `APP_CONFIG` (
 INSERT INTO `APP_CONFIG` VALUES ('1', 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7iViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2fBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/jMv2Ggb2XAeZhlLD28fHwIDAQAB', 'http://push.myee7.com/allocServer/', 'http://push.myee7.com/pushServer/api/admin/push.json', 'goor-server', 'ubuntu_1', 'goor-server', 'goor-server', 'goor-server', 'goor-server', 'goor-server', '192.168.3.51');
 
 -- ----------------------------
+-- Table structure for AS_DOOR
+-- ----------------------------
+DROP TABLE IF EXISTS `AS_DOOR`;
+CREATE TABLE `AS_DOOR` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(50) DEFAULT NULL COMMENT '名称',
+  `IP` varchar(15) DEFAULT NULL COMMENT '门控制器IP地址',
+  `LOCK_STATE` int(1) DEFAULT NULL COMMENT '锁定状态',
+  `INFO` varchar(100) DEFAULT NULL COMMENT '备注',
+  `CREATED_BY` bigint(20) DEFAULT NULL COMMENT '创建用户',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '所属门店ID',
+  `ROBOT_CODE` varchar(50) DEFAULT NULL COMMENT '上锁或者解锁机器人的 code 编号',
+  `WAIT_POINT` bigint(20) DEFAULT NULL,
+  `GO_POINT` bigint(20) DEFAULT NULL,
+  `OUT_POINT` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
 -- Table structure for AS_GOODS_TYPE
 -- ----------------------------
 DROP TABLE IF EXISTS `AS_GOODS_TYPE`;
@@ -1053,6 +1073,7 @@ DROP TABLE IF EXISTS `D_MISSION_LIST`;
 CREATE TABLE `D_MISSION_LIST` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `NAME` varchar(256) DEFAULT NULL COMMENT '名称',
+  `MAP_NAME` varchar(256) DEFAULT NULL COMMENT '任务所属地图名称',
   `DESCRIPTION` varchar(256) DEFAULT NULL COMMENT '描述',
   `MISSION_LIST_TYPE` varchar(256) DEFAULT NULL COMMENT '描述',
   `CREATE_TIME` datetime NOT NULL COMMENT '创建时间',
@@ -1125,6 +1146,16 @@ CREATE TABLE `LOG_INFO` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
+-- ----------------------------
+-- Table structure for SCENE_ROBOT_MAPZIP_XREF
+-- ----------------------------
+DROP TABLE IF EXISTS `ROBOT_MAPZIP_XREF`;
+CREATE TABLE `ROBOT_MAPZIP_XREF` (
+  `ROBOT_ID` bigint(20)  COMMENT '机器人ID',
+  `LAST_MAP_ZIP_ID` bigint(20)  COMMENT '上一次地图压缩包ID',
+  `NEW_MAP_ZIP_ID` bigint(20)  COMMENT '新地图压缩包ID',
+  `SUCCESS` bit(1)  COMMENT '是否成功'
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Table structure for LOG_MISSION
@@ -1728,3 +1759,36 @@ create table ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 create index fk_relation_combinationid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATORPOINTCOMBINATION_ID);
 create index fk_relation_elevatorid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATOR_ID);
+
+DROP TABLE IF EXISTS `AS_ROADPATH`;
+create table AS_ROADPATH
+(
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  PATH_NAME varchar(50) null,
+  PATTERN varchar(50) null,
+  DATA varchar(200) null,
+  CLOUD_SCENE_ID bigint null,
+  START_POINT bigint null,
+  END_POINT bigint null,
+  WEIGHT bigint null
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AS_ROADPATHPOINT`;
+create table AS_ROADPATHPOINT
+(
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  POINT_ID bigint null,
+  NEXT_POINT_ID bigint null,
+  START_FLAG int(1) default '0' null,
+  END_FLAG int(1) default '0' null,
+  ROAD_PATH_ID bigint null,
+  PREV_POINT_ID bigint null
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;

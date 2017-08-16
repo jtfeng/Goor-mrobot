@@ -1,5 +1,6 @@
 package cn.muye.account.employee.service;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.account.Employee;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
@@ -7,7 +8,7 @@ import cn.muye.base.service.BaseService;
 import java.util.List;
 
 /**
- * Created by admin on 2017/8/11.
+ * Created by ray on 2017/8/11.
  */
 public interface EmployeeService extends BaseService<Employee> {
 
@@ -18,4 +19,6 @@ public interface EmployeeService extends BaseService<Employee> {
     Employee getByCode(String code);
 
     List<Employee> list(WhereRequest whereRequest);
+
+    AjaxResult verifyEmplyeeNumber(String code, Long missionItemId);
 }

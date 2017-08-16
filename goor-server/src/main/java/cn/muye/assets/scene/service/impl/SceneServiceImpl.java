@@ -3,12 +3,14 @@ package cn.muye.assets.scene.service.impl;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
+import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapSyncService;
+import cn.muye.area.map.service.RobotMapZipXREFService;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
@@ -16,6 +18,7 @@ import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +52,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private RobotMapper robotMapper;
     @Autowired
     private MapZipMapper mapZipMapper;
+    @Autowired
+    private RobotMapZipXREFService robotMapZipXREFService;
 
     @Override
     public List<Scene> list() throws Exception {
@@ -57,7 +62,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public int saveScene(Scene scene) throws Exception {
+    public synchronized Object saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
         scene.setState(0);//代表正在上传
@@ -70,16 +75,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         for (Robot robot : scene.getRobots()){
             robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
         }
+        Object taskResult = null;
         if (mapInfos.size() !=0 && robots.size()!= 0){
-            //地图下发
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
-                }
-            }).start();
+            taskResult = mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
         }
-        return insertRowsCount;
+        return taskResult;
     }
 
     @Override
@@ -94,12 +94,27 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public int updateScene(Scene scene) throws Exception {
+    public synchronized Object updateScene(Scene scene) throws Exception {
+        Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
         scene.setStoreId(STORE_ID);//设置默认的门店编号
         scene.setCreateTime(new Date());
+        scene.setState(0);//代表正在上传
+        scene.setMapSceneName(existScene.getMapSceneName());// 重新设置旧的地图场景名称
         bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
-        bindSceneAndMapRelations(scene);//更新场景与地图之间的绑定关系
-        return updateSelective(scene) ;//更新对应的场景信息
+        // 更新的时候不修改场景与地图之间的对应关系
+//        bindSceneAndMapRelations(scene);//更新场景与地图之间的绑定关系
+        updateSelective(scene) ;//更新对应的场景信息
+        //自动下发地图
+        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
+        List<Robot> robots = new ArrayList<>();
+        for (Robot robot : scene.getRobots()){
+            robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
+        }
+        Object taskResult = null;
+        if (mapInfos.size() !=0 && robots.size()!= 0){
+            taskResult = mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+        }
+        return taskResult;
     }
 
     @Override
@@ -123,7 +138,17 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public List<Scene> listScenes(WhereRequest whereRequest) throws Exception {
         List<Scene> scenes = listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(),Scene.class,"ID DESC");
         for (Scene scene : scenes){
-            scene.setRobots(      this.sceneMapper.findRobotBySceneId(scene.getId()));//设置绑定的机器人信息
+            List<Robot> robotListDB = this.sceneMapper.findRobotBySceneId(scene.getId());
+            List<Robot> robotList = Lists.newArrayList();
+            for (int i = 0; i < robotListDB.size(); i++) {
+                Robot robot = robotListDB.get(i);
+                List<RobotMapZipXREF> robotMapZipXREFList = robotMapZipXREFService.findByRobotId(robot.getId());
+                boolean result = (robotMapZipXREFList == null || robotMapZipXREFList.size() <= 0) ? true : robotMapZipXREFList.get(0).isSuccess();
+                robot.setMapSyncResult(result);
+                robotList.add(robot);
+            }
+
+            scene.setRobots(robotList);//设置绑定的机器人信息
             List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(scene.getId(), scene.getStoreId());
             if (mapInfos != null && mapInfos.size() != 0) {
                 scene.setMapSceneName(mapInfos.get(0).getSceneName());//设置绑定的场景名城
@@ -143,18 +168,18 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     @Override
-    public void sendSyncMapMessageToRobots(Long sceneId) throws Exception {
+    public Object sendSyncMapMessageToRobots(Long sceneId) throws Exception {
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
         List<Robot> robots     = this.sceneMapper.findRobotBySceneId(sceneId);
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
         if (robots.size() == 0 || mapInfos.size() == 0){
-            return;
+            return null;
         }
         Preconditions.checkNotNull(mapInfos);
         Preconditions.checkArgument(mapInfos.size()!=0, "该场景没有绑定地图，请绑定地图后重试!");
         MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
-        sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0,"");//将状态更改为正在上传
-        mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
+        sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
+        return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
     }
 
     @Override
@@ -226,19 +251,19 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @throws Exception
      */
     @Override
-    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state,String mapSyncResult, Long ... sceneId) throws Exception {
+    public boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state, Long ... sceneId) throws Exception {
         Preconditions.checkNotNull(state);
         if (Scene.SCENE_STATE.UPDATE_STATE.equals(state)) {
             //标明状态为可更新状态
             if (this.sceneMapper.checkMapInfo(mapSceneName, Long.parseLong(storeId)) != 0) {
-                this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 3,mapSyncResult);
+                this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 3);
             }
         }
         if (Scene.SCENE_STATE.UPLOAD_SUCCESS.equals(state)){
             //表明状态为上传成功状态(需要针对某个具体场景)
 //            this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 1);
             Preconditions.checkArgument(sceneId != null && sceneId.length == 1, "更改场景状态为上传成功时,场景ID编号缺失,请检查代码!");
-            this.sceneMapper.setSceneStateForUpload(sceneId[0],1,mapSyncResult);
+            this.sceneMapper.setSceneStateForUpload(sceneId[0],1);
         }
         return true;
     }
