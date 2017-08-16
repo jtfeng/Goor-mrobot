@@ -487,6 +487,24 @@ public class MissionController {
 	 * 美亚查询所有任务列表接口：分巡逻和充电
 	 * @param request
 	 * @return
+	 *
+	 [
+		a1{
+		mapName:"a1"
+		partrols:[]
+		charge:[]
+		}
+		a2{
+		mapName:"a2"
+		partrols:[]
+		charge:[]
+		}
+		a3:{
+		mapName:"a3"
+		partrols:[]
+		charge:[]
+		}
+	]
 	 */
 	@RequestMapping(value = {"dispatch/missionList/listMeiYa"}, method = RequestMethod.GET)
 	@ResponseBody
