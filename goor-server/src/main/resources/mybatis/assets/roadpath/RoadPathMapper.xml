@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.assets.roadpath.mapper.RoadPathMapper">
+
+    <select id="findMapSceneName" parameterType="java.lang.Long" resultType="java.lang.String">
+        SELECT MAP_SCENENAME FROM SCENES_MAPS_RELATIONS WHERE SCENE_ID = #{0}
+    </select>
+
+</mapper>
