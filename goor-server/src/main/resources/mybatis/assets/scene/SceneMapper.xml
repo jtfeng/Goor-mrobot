@@ -38,6 +38,21 @@
         WHERE r.SCENE_ID = #{0}
     </select>
 
+    <select id="findRobotBySceneIdAndRobotIds" resultMap="RobotSimpleMap">
+        SELECT
+        robot.ID,
+        robot.NAME,
+        robot.CODE,
+        ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
+        robot.BOX_ACTIVATED,
+        robot.ONLINE
+        FROM AS_ROBOT robot LEFT JOIN SCENES_ROBOTS_RELATIONS r ON robot.ID = r.ROBOT_ID
+        WHERE r.SCENE_ID = #{sceneId} AND r.ROBOT_ID in
+        <foreach item="item" index="index" collection="robotIds" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <select id="findMapBySceneId" resultMap="MapInfoSimpleMap" parameterType="java.lang.Long">
         SELECT i.*
         FROM A_MAP_INFO i LEFT JOIN SCENES_MAPS_RELATIONS smr ON i.SCENE_NAME = smr.MAP_SCENENAME
