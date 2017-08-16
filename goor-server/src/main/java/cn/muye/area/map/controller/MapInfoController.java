@@ -95,7 +95,6 @@ public class MapInfoController {
             currentInfo.setOnline(robot.getOnline());
             if(!robot.getOnline()){
                 LOGGER.info("机器人（" + code + "）不在线");
-                return AjaxResult.success(currentInfo,"获取当前信息成功");
             }
 
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
