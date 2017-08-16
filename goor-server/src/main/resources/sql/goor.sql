@@ -1761,30 +1761,34 @@ create index fk_relation_combinationid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELA
 create index fk_relation_elevatorid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATOR_ID);
 
 DROP TABLE IF EXISTS `AS_ROADPATH`;
-CREATE TABLE AS_ROADPATH
+create table AS_ROADPATH
 (
-  ID             BIGINT AUTO_INCREMENT
-    PRIMARY KEY,
-  CREATED_BY     BIGINT       NULL,
-  CREATE_TIME    DATETIME     NULL,
-  STORE_ID       BIGINT       NULL,
-  PATH_NAME      VARCHAR(50)  NULL,
-  PATTERN        VARCHAR(50)  NULL,
-  DATA           VARCHAR(200) NULL,
-  CLOUD_SCENE_ID BIGINT       NULL
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  PATH_NAME varchar(50) null,
+  PATTERN varchar(50) null,
+  DATA varchar(200) null,
+  CLOUD_SCENE_ID bigint null,
+  START_POINT bigint null,
+  END_POINT bigint null,
+  WEIGHT bigint null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `AS_ROADPATHPOINT`;
-CREATE TABLE AS_ROADPATHPOINT
+create table AS_ROADPATHPOINT
 (
-  ID            BIGINT AUTO_INCREMENT
-    PRIMARY KEY,
-  CREATED_BY    BIGINT             NULL,
-  CREATE_TIME   DATETIME           NULL,
-  STORE_ID      BIGINT             NULL,
-  POINT_ID      BIGINT             NULL,
-  NEXT_POINT_ID BIGINT             NULL,
-  START_FLAG    INT(1) DEFAULT '0' NULL,
-  END_FLAG      INT(1) DEFAULT '0' NULL,
-  ROAD_PATH_ID  BIGINT             NULL
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  POINT_ID bigint null,
+  NEXT_POINT_ID bigint null,
+  START_FLAG int(1) default '0' null,
+  END_FLAG int(1) default '0' null,
+  ROAD_PATH_ID bigint null,
+  PREV_POINT_ID bigint null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
