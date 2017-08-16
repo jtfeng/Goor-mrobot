@@ -26,10 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by admin on 2017/7/3.
@@ -174,6 +171,24 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public Object sendSyncMapMessageToRobots(Long sceneId) throws Exception {
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
         List<Robot> robots     = this.sceneMapper.findRobotBySceneId(sceneId);
+        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
+        if (robots.size() == 0 || mapInfos.size() == 0){
+            return null;
+        }
+        Preconditions.checkNotNull(mapInfos);
+        Preconditions.checkArgument(mapInfos.size()!=0, "该场景没有绑定地图，请绑定地图后重试!");
+        MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
+        sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
+        return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
+    }
+
+    @Override
+    public Object sendSyncMapMessageToSpecialRobots(Map<String, Object> params) throws Exception {
+        Long sceneId = Long.valueOf(String.valueOf(Preconditions.checkNotNull(params.get("sceneId"), "场景 ID 不允许为空!")));
+        List<Long> robotIds = (List<Long>)Preconditions.checkNotNull(params.get("robotIds"), "传入的机器人 ID 编号信息数组不能为空");
+        Preconditions.checkArgument(robotIds.size() != 0, "传入的机器人编号数组信息不可以为空");
+        Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
+        List<Robot> robots     = this.sceneMapper.findRobotBySceneIdAndRobotIds(params);
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
         if (robots.size() == 0 || mapInfos.size() == 0){
             return null;
