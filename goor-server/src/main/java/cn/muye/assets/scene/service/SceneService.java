@@ -32,6 +32,8 @@ public interface SceneService extends BaseService<Scene> {
 
     Object sendSyncMapMessageToRobots(Long sceneId) throws Exception;
 
+    Object sendSyncMapMessageToSpecialRobots(Map<String, Object> params) throws Exception;
+
     void deleteRobotAndSceneRelations(Long sceneId) throws Exception;
 
     void deleteMapAndSceneRelations(Long sceneId) throws Exception;

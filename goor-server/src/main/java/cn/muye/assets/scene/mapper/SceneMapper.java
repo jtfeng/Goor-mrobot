@@ -6,6 +6,7 @@ import cn.mrobot.bean.assets.scene.Scene;
 import cn.muye.util.MyMapper;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SceneMapper extends MyMapper<Scene> {
 
@@ -14,6 +15,8 @@ public interface SceneMapper extends MyMapper<Scene> {
     int insertSceneAndRobotRelations(Long sceneId, List<Long> robotIds);
 
     List<Robot> findRobotBySceneId(Long sceneId);
+
+    List<Robot> findRobotBySceneIdAndRobotIds(Map<String, Object> params);
 
     List<MapInfo> findMapBySceneId(Long sceneId, Long storeId);
 
