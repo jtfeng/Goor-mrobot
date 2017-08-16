@@ -33,14 +33,14 @@ public class Constant {
 
     public static final String FLAGS = ".flags";
 
-	public static final String FILE_IS_EXIST = "fileIsExist";//文件是否存在
+    public static final String FILE_IS_EXIST = "fileIsExist";//文件是否存在
 
-	public static final String GOOR_SERVER = "goor-server";
+    public static final String GOOR_SERVER = "goor-server";
 
-	//文件上传状态
-	public final static Integer FILE_OK = 0; //传输成功
-	public final static Integer FILE_FAIL = 1;  //传输失败
-	public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
+    //文件上传状态
+    public final static Integer FILE_OK = 0; //传输成功
+    public final static Integer FILE_FAIL = 1;  //传输失败
+    public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
 
     public final static String EXPORT_DIR_NAME = "export"; //导出文件夹路径
     public final static String LOG_DIR_NAME= "log"; //日志文件夹路径
@@ -110,4 +110,7 @@ public class Constant {
 
     //添加初始密码 默认
     public static final String PRIMARY_PWD = "0000";
+
+    //默认机器人类型
+    public static final Integer ROBOT_PRIMARY_TYPE_ID = 1;
 }

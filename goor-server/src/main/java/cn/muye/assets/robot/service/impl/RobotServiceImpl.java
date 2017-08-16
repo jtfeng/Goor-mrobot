@@ -312,9 +312,17 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 Long robotStoreId = robotNew.getStoreId();
                 Integer lowBatteryThreshold = robotNew.getLowBatteryThreshold();
                 Integer sufficientBatteryThreshold = robotNew.getSufficientBatteryThreshold();
-                //todo 按照robotCode的规范来赋值typeId
+                List<RobotPassword> passwordList = robotNew.getPasswords();
+                //todo 按照robotCode的规范来赋值typeId,本次暂时写死
                 if (!StringUtil.isNullOrEmpty(robotCode) && robotTypeId == null) {
-
+                    robotNew.setTypeId(Constant.ROBOT_PRIMARY_TYPE_ID);
+                }
+                if (passwordList == null || passwordList.size() == 0) {
+                    passwordList = Lists.newArrayList();
+                    RobotPassword robotPassword = new RobotPassword();
+                    robotPassword.setPassword(Constant.PRIMARY_PWD);
+                    passwordList.add(robotPassword);
+                    robotNew.setPasswords(passwordList);
                 }
                 if (!StringUtil.isNullOrEmpty(robotCode) && StringUtil.isNullOrEmpty(robotName)) {
                     robotNew.setName(robotCode);
