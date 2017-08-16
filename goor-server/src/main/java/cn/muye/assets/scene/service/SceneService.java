@@ -16,11 +16,11 @@ public interface SceneService extends BaseService<Scene> {
 
     List<Scene> list() throws Exception;
 
-    int saveScene(Scene scene) throws Exception;
+    Object saveScene(Scene scene) throws Exception;
 
     Scene getSceneById(Long id) throws Exception;
 
-    int updateScene(Scene scene) throws Exception;
+    Object updateScene(Scene scene) throws Exception;
 
     int deleteSceneById(Long id) throws Exception;
 
@@ -30,7 +30,7 @@ public interface SceneService extends BaseService<Scene> {
 
     int insertSceneAndRobotRelations(Long sceneId, List<Long> robotIds) throws Exception;
 
-    void sendSyncMapMessageToRobots(Long sceneId) throws Exception;
+    Object sendSyncMapMessageToRobots(Long sceneId) throws Exception;
 
     void deleteRobotAndSceneRelations(Long sceneId) throws Exception;
 
@@ -42,7 +42,7 @@ public interface SceneService extends BaseService<Scene> {
 
     void bindSceneAndRobotRelations(Scene scene) throws Exception;
 
-    boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state, String mapSyncResult, Long ... sceneId) throws Exception;
+    boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state, Long ... sceneId) throws Exception;
 
     Scene storeSceneInfoToSession(String sceneId, String token) throws Exception;
 }

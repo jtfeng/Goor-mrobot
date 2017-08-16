@@ -1,7 +1,5 @@
 package cn.mrobot.bean.state.enums;
 
-import cn.mrobot.bean.mission.MissionListTypeEnum;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +47,15 @@ public enum ModuleEnums {
             resultList.add(toDTO(c)) ;
         }
         return resultList;
+    }
+
+    public static ModuleEnums getModuleEnums(int moduleId){
+        for(ModuleEnums moduleEnums : ModuleEnums.values()){
+            if(moduleEnums.getModuleId() == moduleId){
+                return moduleEnums;
+            }
+        }
+        return null;
     }
 
     private static Map toDTO(ModuleEnums c) {

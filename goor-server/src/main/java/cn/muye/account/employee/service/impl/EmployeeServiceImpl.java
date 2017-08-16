@@ -1,8 +1,11 @@
 package cn.muye.account.employee.service.impl;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.account.Employee;
 import cn.mrobot.bean.account.EmployeeStationXref;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.employee.mapper.EmployeeMapper;
 import cn.muye.account.employee.mapper.EmployeeStationXrefMapper;
@@ -10,14 +13,17 @@ import cn.muye.account.employee.service.EmployeeService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.util.UserUtil;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by ray.fu on 2017/8/11.
@@ -32,7 +38,8 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     private EmployeeStationXrefMapper employeeStationXrefMapper;
     @Autowired
     private StationService stationService;
-
+    @Autowired
+    private MissionItemTaskService missionItemTaskService;
 
     @Autowired
     private UserUtil userUtil;
@@ -81,16 +88,12 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     }
 
     @Override
-    public Employee getByCode(String code) {
-        Example example = new Example(Employee.class);
-        Example.Criteria criteria = example.createCriteria().andCondition("CODE = ", code);
-        criteria.andCondition("STORE_ID = ", SearchConstants.FAKE_MERCHANT_STORE_ID);
-        List<Employee> list = employeeMapper.selectByExample(example);
-        if (list != null && list.size() > 0) {
-            return list.get(0);
-        } else {
-            return null;
-        }
+    public Employee getByCode(String code) throws RuntimeException {
+        Employee employee = new Employee();
+        employee.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        employee.setCode(code);
+        Employee employeeDb = employeeMapper.selectOne(employee);
+        return employeeDb;
     }
 
     @Override
@@ -112,6 +115,31 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             }
         }
         return employeeDbList;
+    }
+
+    @Override
+    public AjaxResult verifyEmplyeeNumber(String code, Long missionItemId) {
+        MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
+        if (missionItemTaskListDb != null && (Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName()))) {
+            Employee employee = new Employee();
+            employee.setCode(code);
+            Employee employeeDb = employeeMapper.selectOne(employee);
+            if (employeeDb != null) {
+                return AjaxResult.success();
+            } else {
+                return AjaxResult.failed("没有权限");
+            }
+        }
+        if (missionItemTaskListDb != null && missionItemTaskListDb.getName().equals(Constant.MISSION_ITEM_TASK_CONCERN_STATION_NAMES_FOR_EMP_NUMBER)) {
+            Map map = Maps.newHashMap();
+            map.put("code", code);
+            map.put("missionItemId", missionItemId);
+            List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
+            if (employeeListDb != null && employeeListDb.size() > 0) {
+                return AjaxResult.success();
+            }
+        }
+        return AjaxResult.failed("没有权限");
     }
 
 }
