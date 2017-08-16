@@ -129,6 +129,25 @@ public class SceneController {
 
     }
 
+    /**
+     * 同步地图与机器人之间的信息
+     *
+     * @return
+     */
+    @RequestMapping(value = "/assets/scene/sync/specialRobots", method = RequestMethod.POST)
+    public AjaxResult sendSyncMapMessageToSpecialRobots(@RequestBody Map<String, Object> body) {
+        try {
+            //sceneId
+            //robotIds
+            log.info(String.format("接收到的参数为：%s", body.toString()));
+            Object taskResult = sceneService.sendSyncMapMessageToSpecialRobots(body);
+            return AjaxResult.success(taskResult, "操作成功");
+        } catch (Exception e) {
+            return AjaxResult.failed();
+        }
+
+    }
+
     @RequestMapping(value = "/assets/scene/checkSceneIsNeedToBeUpdated", method = RequestMethod.GET)
     public Object checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception {
         this.sceneService.checkSceneIsNeedToBeUpdated(mapSceneName, storeId, Scene.SCENE_STATE.UPDATE_STATE);
