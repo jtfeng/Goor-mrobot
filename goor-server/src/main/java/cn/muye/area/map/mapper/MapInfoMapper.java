@@ -4,6 +4,8 @@ import cn.mrobot.bean.area.map.MapInfo;
 import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * Created with IntelliJ IDEA.
  * Project Name : Goor-mrobot
@@ -16,4 +18,9 @@ import org.apache.ibatis.annotations.Param;
 public interface MapInfoMapper extends MyMapper<MapInfo> {
 
     void updateDeleteFlag(@Param("storeId") long storeId, @Param("mapZipId") long mapZipId, @Param("deleteFlag") int deleteFlag);
+
+    List<String> selectSceneName(long storeId);
+
+    List<String> selectMapNameBySceneName(@Param("sceneName") String sceneName,
+                                          @Param("storeId") long storeId);
 }
