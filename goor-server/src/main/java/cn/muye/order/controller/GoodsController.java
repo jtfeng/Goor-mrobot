@@ -236,6 +236,10 @@ public class GoodsController extends BaseController {
             goods.setDeleteStatus(Boolean.FALSE);
             goods.setGoodTypeId(type);
             List<Goods> goodsList = goodsService.listQueryPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),goods,"CREATE_TIME DESC");
+            goodsList.forEach(goodsItem -> {
+                GoodsType goodsType = goodsTypeService.findById(goodsItem.getGoodTypeId());
+                goodsItem.setGoodsTypeName(goodsType.getName());
+            });
             PageInfo<Goods> pageResult = new PageInfo<>(goodsList);
             return AjaxResult.success(pageResult, "分页查询货物类型成功");
         } catch (Exception e) {
