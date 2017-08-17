@@ -3,9 +3,11 @@ package cn.muye.order.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.order.Goods;
+import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.GoodsService;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -91,6 +93,83 @@ public class GoodsController extends BaseController {
         }
     }
 
+    //-------------------货物类型------------------------------------
+    /**
+     * 新增货物类型
+     * @param goodsType
+     * @return
+     */
+    @RequestMapping(value = "goodsType",method = RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult saveGoodsType(@RequestBody GoodsType goodsType){
+        try {
+            goodsTypeService.save(goodsType);
+            return AjaxResult.success(goodsType, "保存货物类型成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("保存货物类型出错");
+        }
+    }
+
+    /**
+     * 修改货物类型
+     * @param goodsType
+     * @return
+     */
+    @RequestMapping(value = "goodsType",method = RequestMethod.PUT)
+    @ResponseBody
+    public AjaxResult updateGoodsType(@RequestBody GoodsType goodsType){
+        try {
+            goodsTypeService.updateSelectiveByStoreId(goodsType);
+            return AjaxResult.success(goodsType, "修改货物类型成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("修改货物类型出错");
+        }
+    }
+
+    /**
+     * 删除货物类型
+     * 逻辑删除
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "goodsType",method = RequestMethod.DELETE)
+    @ResponseBody
+    public AjaxResult deleteGoodsType(@RequestParam("id") Long id){
+        try {
+            GoodsType goodsType = new GoodsType();
+            goodsType.setId(id);
+            goodsType.setDeleteStatus(Boolean.TRUE);
+            goodsTypeService.updateSelectiveByStoreId(goodsType);
+            return AjaxResult.success("删除货物类型成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("删除货物类型出错");
+        }
+    }
+
+    /**
+     * 分页查询货物类型
+     * @param whereRequest
+     * @return
+     */
+    @RequestMapping(value = "listPageGoodsType",method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listPageGoodsType(WhereRequest whereRequest){
+        try {
+            GoodsType goodsType = new GoodsType();
+            goodsType.setDeleteStatus(Boolean.FALSE);
+            List<GoodsType> goodsTypes = goodsTypeService.listQueryPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),goodsType,"CREATE_TIME DESC");
+            PageInfo<GoodsType> pageResult = new PageInfo<>(goodsTypes);
+            return AjaxResult.success(pageResult, "分页查询货物类型成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("分页查询货物类型出错");
+        }
+    }
+
+    //-------------------货物--------------------------
     /**
      * 新增货物
      * @param goods
@@ -140,6 +219,32 @@ public class GoodsController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("删除货物出错");
+        }
+    }
+
+    /**
+     * 分页查询货物类型
+     * @param whereRequest
+     * @return
+     */
+    @RequestMapping(value = "listPageGoods",method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listPageGoods(@RequestParam(required = false,value = "type")Long type,
+                                    WhereRequest whereRequest){
+        try {
+            Goods goods = new Goods();
+            goods.setDeleteStatus(Boolean.FALSE);
+            goods.setGoodTypeId(type);
+            List<Goods> goodsList = goodsService.listQueryPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),goods,"CREATE_TIME DESC");
+            goodsList.forEach(goodsItem -> {
+                GoodsType goodsType = goodsTypeService.findById(goodsItem.getGoodTypeId());
+                goodsItem.setGoodsTypeName(goodsType.getName());
+            });
+            PageInfo<Goods> pageResult = new PageInfo<>(goodsList);
+            return AjaxResult.success(pageResult, "分页查询货物类型成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("分页查询货物类型出错");
         }
     }
 

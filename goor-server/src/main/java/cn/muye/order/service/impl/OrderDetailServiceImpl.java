@@ -1,7 +1,5 @@
 package cn.muye.order.service.impl;
 
-import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.utils.WhereRequest;
@@ -39,13 +37,19 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     }
 
     @Override
-    public void finishedDetailTask(Long id) {
+    public void finishedDetailTask(Long id, Integer type) {
         OrderDetail orderDetail  = new OrderDetail(id);
-        orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_DONE);
+        if(type == OrderConstant.ORDER_DETAIL_STATUS_GET){
+            orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_GET);
+        }else if(type == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+            orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_SIGN);
+        }else {
+            return;
+        }
         orderDetail.setFinishDate(new Date());
-        myMapper.updateByPrimaryKeySelective(orderDetail);
+        updateSelective(orderDetail);
         //更新后检测order 状态
-        OrderDetail getOrderDetail = super.findById(id);
+        /*OrderDetail getOrderDetail = super.findById(id);
         int undoneCount = orderDetailMapper.countUndoneDetail(getOrderDetail.getOrderId());
         if(undoneCount == 0){
             Order order = orderMapper.getById(getOrderDetail.getOrderId());
@@ -56,7 +60,7 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
             robot.setId(order.getRobot().getId());
             robot.setBusy(Boolean.FALSE);
             robotService.updateSelective(robot);
-        }
+        }*/
     }
 
     @Override
