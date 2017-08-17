@@ -495,7 +495,6 @@ INSERT INTO `APP_CONFIG` VALUES ('1', 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCgh
 -- ----------------------------
 -- Table structure for AS_DOOR
 -- ----------------------------
-DROP TABLE IF EXISTS `AS_DOOR`;
 CREATE TABLE `AS_DOOR` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `NAME` varchar(50) DEFAULT NULL COMMENT '名称',
@@ -509,8 +508,13 @@ CREATE TABLE `AS_DOOR` (
   `WAIT_POINT` bigint(20) DEFAULT NULL,
   `GO_POINT` bigint(20) DEFAULT NULL,
   `OUT_POINT` bigint(20) DEFAULT NULL,
+  `SCENE_ID` bigint(20) DEFAULT NULL COMMENT '所属云端场景ID',
+  `SCENE_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图场景名',
+  `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
+  `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+
 
 -- ----------------------------
 -- Table structure for AS_GOODS_TYPE
