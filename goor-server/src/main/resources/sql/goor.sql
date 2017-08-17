@@ -493,6 +493,30 @@ CREATE TABLE `APP_CONFIG` (
 INSERT INTO `APP_CONFIG` VALUES ('1', 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7iViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2fBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/jMv2Ggb2XAeZhlLD28fHwIDAQAB', 'http://push.myee7.com/allocServer/', 'http://push.myee7.com/pushServer/api/admin/push.json', 'goor-server', 'ubuntu_1', 'goor-server', 'goor-server', 'goor-server', 'goor-server', 'goor-server', '192.168.3.51');
 
 -- ----------------------------
+-- Table structure for AS_DOOR
+-- ----------------------------
+CREATE TABLE `AS_DOOR` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(50) DEFAULT NULL COMMENT '名称',
+  `IP` varchar(15) DEFAULT NULL COMMENT '门控制器IP地址',
+  `LOCK_STATE` int(1) DEFAULT NULL COMMENT '锁定状态',
+  `INFO` varchar(100) DEFAULT NULL COMMENT '备注',
+  `CREATED_BY` bigint(20) DEFAULT NULL COMMENT '创建用户',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '所属门店ID',
+  `ROBOT_CODE` varchar(50) DEFAULT NULL COMMENT '上锁或者解锁机器人的 code 编号',
+  `WAIT_POINT` bigint(20) DEFAULT NULL,
+  `GO_POINT` bigint(20) DEFAULT NULL,
+  `OUT_POINT` bigint(20) DEFAULT NULL,
+  `SCENE_ID` bigint(20) DEFAULT NULL COMMENT '所属云端场景ID',
+  `SCENE_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图场景名',
+  `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
+  `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+
+
+-- ----------------------------
 -- Table structure for AS_GOODS_TYPE
 -- ----------------------------
 DROP TABLE IF EXISTS `AS_GOODS_TYPE`;
@@ -965,9 +989,9 @@ CREATE TABLE `D_FEATURE_ITEM` (
   `NAME` varchar(256) DEFAULT NULL COMMENT '名称',
   `VALUE` varchar(256) DEFAULT NULL COMMENT '值',
   `DESCRIPTION` varchar(256) DEFAULT NULL COMMENT '描述',
-  `DATA_MODEL` varchar(256) DEFAULT NULL COMMENT '数据模板，方便前端用户输入',
+  `DATA_MODEL` varchar(1000) DEFAULT NULL COMMENT '数据模板，方便前端用户输入',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of D_FEATURE_ITEM
@@ -978,12 +1002,14 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('3', 'MP3语音', 'mp3', 'MP3语音命令',
 INSERT INTO `D_FEATURE_ITEM` VALUES ('4', '自动充电', 'gotoCharge', '自动回充', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('5', '离开充电桩', 'leaveCharge', '离开充电桩', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('6', '等待任务', 'wait', '等待任务', '{\"waitTime\":10000}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('7', '充电任务', 'charge', '带时间长度的充电任务', '{\"chargeTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('7', '带时间长度充电任务', 'charge', '带时间长度的充电任务', '{\"chargeTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('8', '装货', 'load', '装货架任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('9', '卸货', 'unload', '卸货架任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('10', '终点卸货任务', 'finalUnload', '终点卸货任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{}');
-
+INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{\"current_floor\":4,\"arrival_floor\":1,\"enter_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"set_pose_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"back_point\":{{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('12', '门', 'door', '自动门', '{\"waitTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('13', '电梯加锁任务', 'elevatorLock', '电梯加锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('14', '电梯解锁任务', 'elevatorUnlock', '电梯解锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
@@ -1741,30 +1767,34 @@ create index fk_relation_combinationid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELA
 create index fk_relation_elevatorid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATOR_ID);
 
 DROP TABLE IF EXISTS `AS_ROADPATH`;
-CREATE TABLE AS_ROADPATH
+create table AS_ROADPATH
 (
-  ID             BIGINT AUTO_INCREMENT
-    PRIMARY KEY,
-  CREATED_BY     BIGINT       NULL,
-  CREATE_TIME    DATETIME     NULL,
-  STORE_ID       BIGINT       NULL,
-  PATH_NAME      VARCHAR(50)  NULL,
-  PATTERN        VARCHAR(50)  NULL,
-  DATA           VARCHAR(200) NULL,
-  CLOUD_SCENE_ID BIGINT       NULL
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  PATH_NAME varchar(50) null,
+  PATTERN varchar(50) null,
+  DATA varchar(200) null,
+  CLOUD_SCENE_ID bigint null,
+  START_POINT bigint null,
+  END_POINT bigint null,
+  WEIGHT bigint null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `AS_ROADPATHPOINT`;
-CREATE TABLE AS_ROADPATHPOINT
+create table AS_ROADPATHPOINT
 (
-  ID            BIGINT AUTO_INCREMENT
-    PRIMARY KEY,
-  CREATED_BY    BIGINT             NULL,
-  CREATE_TIME   DATETIME           NULL,
-  STORE_ID      BIGINT             NULL,
-  POINT_ID      BIGINT             NULL,
-  NEXT_POINT_ID BIGINT             NULL,
-  START_FLAG    INT(1) DEFAULT '0' NULL,
-  END_FLAG      INT(1) DEFAULT '0' NULL,
-  ROAD_PATH_ID  BIGINT             NULL
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  POINT_ID bigint null,
+  NEXT_POINT_ID bigint null,
+  START_FLAG int(1) default '0' null,
+  END_FLAG int(1) default '0' null,
+  ROAD_PATH_ID bigint null,
+  PREV_POINT_ID bigint null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
