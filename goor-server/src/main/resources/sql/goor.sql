@@ -985,9 +985,9 @@ CREATE TABLE `D_FEATURE_ITEM` (
   `NAME` varchar(256) DEFAULT NULL COMMENT '名称',
   `VALUE` varchar(256) DEFAULT NULL COMMENT '值',
   `DESCRIPTION` varchar(256) DEFAULT NULL COMMENT '描述',
-  `DATA_MODEL` varchar(256) DEFAULT NULL COMMENT '数据模板，方便前端用户输入',
+  `DATA_MODEL` varchar(1000) DEFAULT NULL COMMENT '数据模板，方便前端用户输入',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of D_FEATURE_ITEM
@@ -998,12 +998,14 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('3', 'MP3语音', 'mp3', 'MP3语音命令',
 INSERT INTO `D_FEATURE_ITEM` VALUES ('4', '自动充电', 'gotoCharge', '自动回充', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('5', '离开充电桩', 'leaveCharge', '离开充电桩', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('6', '等待任务', 'wait', '等待任务', '{\"waitTime\":10000}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('7', '充电任务', 'charge', '带时间长度的充电任务', '{\"chargeTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('7', '带时间长度充电任务', 'charge', '带时间长度的充电任务', '{\"chargeTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('8', '装货', 'load', '装货架任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('9', '卸货', 'unload', '卸货架任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('10', '终点卸货任务', 'finalUnload', '终点卸货任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{}');
-
+INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{\"current_floor\":4,\"arrival_floor\":1,\"enter_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"set_pose_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"back_point\":{{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('12', '门', 'door', '自动门', '{\"waitTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('13', '电梯加锁任务', 'elevatorLock', '电梯加锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('14', '电梯解锁任务', 'elevatorUnlock', '电梯解锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
