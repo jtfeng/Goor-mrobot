@@ -41,6 +41,8 @@ public interface PointService {
 
     List<MapPoint> list(WhereRequest whereRequest, long storeId);
 
+    List<MapPoint> listBySceneId(WhereRequest whereRequest, Long storeId);
+
     @Deprecated
     void handle(SlamResponseBody slamResponseBody);
 

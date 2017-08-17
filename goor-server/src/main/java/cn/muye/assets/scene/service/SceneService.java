@@ -1,7 +1,6 @@
 package cn.muye.assets.scene.service;
 
-import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.assets.rfidbracelet.RfidBracelet;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
@@ -19,6 +18,8 @@ public interface SceneService extends BaseService<Scene> {
     Object saveScene(Scene scene) throws Exception;
 
     Scene getSceneById(Long id) throws Exception;
+
+    List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Long cloudMapPointTypeId) throws Exception;
 
     Object updateScene(Scene scene) throws Exception;
 

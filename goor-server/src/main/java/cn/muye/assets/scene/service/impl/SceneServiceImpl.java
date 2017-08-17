@@ -1,9 +1,9 @@
 package cn.muye.assets.scene.service.impl;
 
-import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
@@ -12,6 +12,7 @@ import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.RobotMapZipXREFService;
 import cn.muye.assets.robot.mapper.RobotMapper;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.service.imp.BaseServiceImpl;
@@ -42,6 +43,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private static final Long STORE_ID = 100L;
     @Autowired
     private MapSyncService mapSyncService;
+    @Autowired
+    private RobotService robotService;
 
     @Autowired
     private SceneMapper sceneMapper;
@@ -121,6 +124,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             scene.setMapSceneName(mapInfos.get(0).getSceneName());
         }
         return scene;
+    }
+
+    @Override
+    public List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Long cloudMapPointTypeId) throws Exception {
+        List<MapPoint> mapPointListDb = sceneMapper.findMapPointBySceneId(sceneId, storeId, cloudMapPointTypeId);
+        return mapPointListDb;
     }
 
     @Override
@@ -242,6 +251,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             for (Robot robot : robots) {
                 if (this.sceneMapper.checkRobotLegal(robot.getId()) > 0 && this.sceneMapper.checkRobot(robot.getId()) == 0) {
                     //机器人合法并且机器人没有绑定到已有场景的条件
+                    robotService.bindChargerMapPoint(robot.getId(), null);
                     ids.add(robot.getId());
                 }
             }

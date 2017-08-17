@@ -25,7 +25,23 @@
         <result column="PNG_DESIGNED" property="pngDesigned" jdbcType="VARCHAR"/>
         <result column="MAP_ZIP_ID" property="mapZipId" jdbcType="BIGINT"/>
     </resultMap>
-
+    <resultMap id="MapPointSimpleMap" type="cn.mrobot.bean.area.point.MapPoint">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="pointName" column="POINT_NAME"/>
+        <result property="pointAlias" column="POINT_ALIAS"/>
+        <result property="sceneName" column="SCENE_NAME"/>
+        <result property="mapName" column="MAP_NAME"/>
+        <result property="x" column="X"/>
+        <result property="y" column="Y"/>
+        <result property="th" column="TH"/>
+        <result property="pointLevel" column="POINT_LEVEL"/>
+        <result property="mapPointTypeId" column="MAP_POINT_TYPE_ID"/>
+        <result property="ICPointType" column="IC_POINT_TYPE"/>
+        <result property="cloudMapPointTypeId" column="CLOUD_POINT_TYPE_ID"/>
+    </resultMap>
     <select id="findRobotBySceneId" resultMap="RobotSimpleMap" parameterType="java.lang.Long">
         SELECT
             robot.ID,
@@ -57,6 +73,13 @@
         SELECT i.*
         FROM A_MAP_INFO i LEFT JOIN SCENES_MAPS_RELATIONS smr ON i.SCENE_NAME = smr.MAP_SCENENAME
         WHERE smr.SCENE_ID = #{param1} AND i.STORE_ID = #{param2}
+    </select>
+
+    <!-- 根据场景ID查询充电桩点 -->
+    <select id="findMapPointBySceneId" resultMap="MapPointSimpleMap" parameterType="java.lang.Long">
+        SELECT i.* FROM A_MAP_POINT i LEFT JOIN SCENES_MAPS_RELATIONS smr ON i.SCENE_NAME = smr.MAP_SCENENAME
+        WHERE smr.SCENE_ID = #{param1} AND i.STORE_ID = #{param2} AND i.CLOUD_POINT_TYPE_ID = #{param3}
+        ORDER  BY  SCENE_NAME, MAP_NAME,POINT_NAME ASC
     </select>
 
     <select id="findMapBySceneName" resultMap="MapInfoSimpleMap">

@@ -15,6 +15,7 @@
         <result property="repeatCount" column="REPEAT_COUNT"/>
         <result property="startTime" column="START_TIME"/>
         <result property="priority" column="PRIORITY"/>
+        <result property="mapName" column="MAP_NAME"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -22,6 +23,7 @@
         STORE_ID,
         SCENE_ID,
         NAME,
+        MAP_NAME,
         DESCRIPTION,
         MISSION_LIST_TYPE,
         CREATE_TIME,
@@ -38,6 +40,7 @@
         STORE_ID,
         SCENE_ID,
         NAME,
+        MAP_NAME,
         DESCRIPTION,
         MISSION_LIST_TYPE,
         CREATE_TIME,
@@ -51,6 +54,7 @@
         #{storeId},
         #{sceneId},
         #{name},
+        #{mapName},
         #{description},
         #{missionListType},
         #{createTime},
@@ -70,6 +74,9 @@
         <trim prefix="set" suffixOverrides=",">
             <if test="name != null">
                 NAME = #{name},
+            </if>
+            <if test="mapName != null">
+                MAP_NAME = #{mapName},
             </if>
             <if test="description != null">
                 DESCRIPTION = #{description},
@@ -139,6 +146,9 @@
         WHERE STORE_ID = #{storeId}
         <if test="name != null">
             AND d.NAME like CONCAT('%',#{name},'%')
+        </if>
+        <if test="mapName != null">
+            AND d.MAP_NAME like CONCAT('%',#{mapName},'%')
         </if>
         <!--<if test="deviceId != null">
             AND d.DEVICE_ID = #{deviceId}
