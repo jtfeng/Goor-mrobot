@@ -12,6 +12,7 @@ import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.RobotMapZipXREFService;
 import cn.muye.assets.robot.mapper.RobotMapper;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.service.imp.BaseServiceImpl;
@@ -45,6 +46,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private static final Long STORE_ID = 100L;
     @Autowired
     private MapSyncService mapSyncService;
+    @Autowired
+    private RobotService robotService;
 
     @Autowired
     private SceneMapper sceneMapper;
@@ -230,6 +233,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             for (Robot robot : robots) {
                 if (this.sceneMapper.checkRobotLegal(robot.getId()) >0 && this.sceneMapper.checkRobot(robot.getId()) == 0) {
                     //机器人合法并且机器人没有绑定到已有场景的条件
+                    robotService.bindChargerMapPoint(robot.getId(), null);
                     ids.add(robot.getId());
                 }
             }
