@@ -1,6 +1,7 @@
 package cn.muye.assets.scene.mapper;
 
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.muye.util.MyMapper;
@@ -19,6 +20,8 @@ public interface SceneMapper extends MyMapper<Scene> {
     List<Robot> findRobotBySceneIdAndRobotIds(Map<String, Object> params);
 
     List<MapInfo> findMapBySceneId(Long sceneId, Long storeId);
+
+    List<MapPoint> findMapPointBySceneId(Long sceneId, Long storeId, Long cloudMapPointTypeId);
 
     void deleteRobotAndSceneRelations(Long sceneId);
 
