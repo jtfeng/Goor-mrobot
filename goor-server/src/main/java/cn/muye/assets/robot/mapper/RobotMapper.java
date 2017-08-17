@@ -15,16 +15,4 @@ public interface RobotMapper extends MyMapper<Robot> {
     List<Robot> listRobot(Map map);
 
     Robot getRobotByCode(Map map);
-//
-//    Robot getById(Integer id);
-//
-//    void update(Robot robotDb);
-//
-//    void save(Robot robot);
-//
-//    void deleteById(Integer id);
-//
-//    Robot getByName(String name);
-//
-//    Robot getByCode(String code);
 }
