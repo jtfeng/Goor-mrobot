@@ -9,6 +9,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataTimeCharge;
+import cn.mrobot.dto.mission.MissionListMeiYaDTO;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
@@ -486,6 +487,24 @@ public class MissionController {
 	 * 美亚查询所有任务列表接口：分巡逻和充电
 	 * @param request
 	 * @return
+	 *
+	 [
+		a1{
+		mapName:"a1"
+		partrols:[]
+		charge:[]
+		}
+		a2{
+		mapName:"a2"
+		partrols:[]
+		charge:[]
+		}
+		a3:{
+		mapName:"a3"
+		partrols:[]
+		charge:[]
+		}
+	]
 	 */
 	@RequestMapping(value = {"dispatch/missionList/listMeiYa"}, method = RequestMethod.GET)
 	@ResponseBody
@@ -501,25 +520,33 @@ public class MissionController {
 
 			List<MissionList> missionListList = missionListService.list(storeId,scene.getId());
 
-			List<MissionList> patrols = new ArrayList<MissionList>();
-			List<MissionList> charges = new ArrayList<MissionList>();
-
 			if(missionListList == null) {
 				return AjaxResult.success(Collections.EMPTY_LIST);
 			}
+
+			Map<String,MissionListMeiYaDTO> result = new HashMap<String,MissionListMeiYaDTO>();
+			//第一层循环，取所有的地图名，取所有的巡逻任务和充电任务
 			for(MissionList missionList : missionListList) {
+				String mapName = missionList.getMapName();
+				if(mapName == null || "".equals(mapName)) {
+					continue;
+				}
+				//先取对象
+				MissionListMeiYaDTO missionListMeiYaDTO = result.get(mapName);
+				if(missionListMeiYaDTO == null) {
+					missionListMeiYaDTO = new MissionListMeiYaDTO();
+					missionListMeiYaDTO.setMapName(mapName);
+				}
+
 				String type = missionList.getMissionListType();
 				if(type.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
-					patrols.add(missionList);
+					missionListMeiYaDTO.getPatrols().add(missionList);
 				}
 				else if(type.equals(Constant.MISSION_LIST_TYPE_CHARGE)) {
-					charges.add(missionList);
+					missionListMeiYaDTO.getCharges().add(missionList);
 				}
+				result.put(mapName,missionListMeiYaDTO);
 			}
-			Map result = new HashMap();
-			result.put("patrols",patrols);
-			result.put("charges",charges);
-
 			return AjaxResult.success(result);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
@@ -620,6 +647,8 @@ public class MissionController {
 							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
 						}
 						missionItem.setData(JSON.toJSONString(mapPoint));
+						//任务所属地图名称
+						missionList.setMapName(mapPoint.getMapName());
 					}
 					catch (Exception e) {
 						LOGGER.error(e.getMessage(),e);
@@ -637,6 +666,8 @@ public class MissionController {
 						}
 						jsonObject.put(Constant.ORDER_TIME_CHARGE_POINT,mapPoint);
 						missionItem.setData(JSON.toJSONString(jsonObject));
+						//任务所属地图名称
+						missionList.setMapName(mapPoint.getMapName());
 					}
 					catch (Exception e) {
 						LOGGER.error(e.getMessage(),e);

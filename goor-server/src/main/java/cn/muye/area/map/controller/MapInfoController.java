@@ -2,10 +2,12 @@ package cn.muye.area.map.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.FileUtils;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.service.MapInfoService;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -80,6 +83,30 @@ public class MapInfoController {
         }
     }
 
+    /**
+     * 级联查询目标点，场景名 -》 地图名
+     * 如果传入sceneName，则查询该场景下的地图
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "area/mapinfo/cascade", method = RequestMethod.GET)
+    @ResponseBody
+//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
+    public AjaxResult cascadeMapPoint(@RequestParam("level") int level, @RequestParam(value = "sceneName", required = false) String sceneName) {
+        try {
+            List<CascadePoint> cascadeSceneMapNameList = mapInfoService.cascadeSceneMapName(level, sceneName);
+            if (null == cascadeSceneMapNameList && !StringUtil.isNullOrEmpty(sceneName)) {
+                LOGGER.info("指定场景名sceneName = " + sceneName + "不存在");
+                return AjaxResult.success(new ArrayList<>());
+            }
+            return AjaxResult.success(cascadeSceneMapNameList);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
+
+
     @RequestMapping(value = "area/mapinfo/getCurrentInfo", method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult getCurrentInfo(HttpServletRequest request, @RequestParam("code") String code) {
@@ -95,7 +122,6 @@ public class MapInfoController {
             currentInfo.setOnline(robot.getOnline());
             if(!robot.getOnline()){
                 LOGGER.info("机器人（" + code + "）不在线");
-                return AjaxResult.success(currentInfo,"获取当前信息成功");
             }
 
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
