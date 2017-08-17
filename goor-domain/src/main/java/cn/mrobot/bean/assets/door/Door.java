@@ -1,8 +1,10 @@
 package cn.mrobot.bean.assets.door;
 
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Created by chay on 2017/8/16.
@@ -19,6 +21,42 @@ public class Door  extends BaseBean {
     private String ip;
     private String info;
     private String robotCode;//被哪个机器人锁住
+    private Long sceneId;//所属云端场景ID
+    private String sceneName;//地图场景名
+    private String mapName;//地图名
+    private int active;//假删除标志：0 未删除，1 已删除
+
+    @Transient
+    private MapPoint wPoint;//等门点，加锁任务
+    @Transient
+    private MapPoint gPoint;//进门点,执行开门任务
+    @Transient
+    private MapPoint oPoint;//出门点，解锁任务
+
+    @Override
+    public String toString() {
+        return "Door{" +
+                "name='" + name + '\'' +
+                ", lockState='" + lockState + '\'' +
+                ", waitPoint=" + waitPoint +
+                ", goPoint=" + goPoint +
+                ", id=" + id +
+                ", storeId=" + storeId +
+                ", outPoint=" + outPoint +
+                ", createdBy=" + createdBy +
+                ", ip='" + ip + '\'' +
+                ", info='" + info + '\'' +
+                ", robotCode='" + robotCode + '\'' +
+                ", createTime=" + createTime +
+                ", sceneId=" + sceneId +
+                ", sceneName='" + sceneName + '\'' +
+                ", mapName='" + mapName + '\'' +
+                ", active=" + active +
+                ", wPoint=" + wPoint +
+                ", gPoint=" + gPoint +
+                ", oPoint=" + oPoint +
+                '}';
+    }
 
     public String getName() {
         return name;
@@ -82,5 +120,61 @@ public class Door  extends BaseBean {
 
     public void setRobotCode(String robotCode) {
         this.robotCode = robotCode;
+    }
+
+    public MapPoint getwPoint() {
+        return wPoint;
+    }
+
+    public void setwPoint(MapPoint wPoint) {
+        this.wPoint = wPoint;
+    }
+
+    public MapPoint getgPoint() {
+        return gPoint;
+    }
+
+    public void setgPoint(MapPoint gPoint) {
+        this.gPoint = gPoint;
+    }
+
+    public MapPoint getoPoint() {
+        return oPoint;
+    }
+
+    public void setoPoint(MapPoint oPoint) {
+        this.oPoint = oPoint;
+    }
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
+    }
+
+    public String getSceneName() {
+        return sceneName;
+    }
+
+    public void setSceneName(String sceneName) {
+        this.sceneName = sceneName;
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public void setActive(int active) {
+        this.active = active;
     }
 }
