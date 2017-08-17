@@ -66,17 +66,22 @@ public class EmployeeController {
     @RequestMapping(value = {"account/employee"}, method = RequestMethod.PUT)
     @ResponseBody
     public AjaxResult updateEmployee(@RequestBody Employee employee) {
-        String code = employee.getCode();
-        Long id = employee.getId();
-        String name = employee.getName();
-        if (id == null || StringUtil.isNullOrEmpty(code) || StringUtil.isNullOrEmpty(name)) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"员工参数有误");
+        try {
+            String code = employee.getCode();
+            Long id = employee.getId();
+            String name = employee.getName();
+            if (id == null || StringUtil.isNullOrEmpty(code) || StringUtil.isNullOrEmpty(name)) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"员工参数有误");
+            }
+            Employee employeeDb = employeeService.getByCode(code);
+            if (employeeDb != null && employeeDb.getCode()!= null && employeeDb.getCode().equals(code) && !employeeDb.getId().equals(id)) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "员工工号重复");
+            }
+            employeeService.updateEmployee(employee);
+        } catch (Exception e) {
+            LOGGER.error("修改报错===>{}", e);
+        } finally {
         }
-        Employee employeeDb = employeeService.getByCode(code);
-        if (employeeDb != null && employeeDb.getCode()!= null && employeeDb.getCode().equals(code) && !employeeDb.getId().equals(id)) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "员工工号重复");
-        }
-        employeeService.updateEmployee(employee);
         return AjaxResult.success(employee, "修改成功");
     }
 
