@@ -1,9 +1,9 @@
 package cn.muye.assets.scene.service.impl;
 
-import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
@@ -126,6 +126,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             scene.setMapSceneName(mapInfos.get(0).getSceneName());
         }
         return scene;
+    }
+
+    @Override
+    public List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Long cloudMapPointTypeId) throws Exception {
+        List<MapPoint> mapPointListDb = sceneMapper.findMapPointBySceneId(sceneId, storeId, cloudMapPointTypeId);
+        return mapPointListDb;
     }
 
     @Override

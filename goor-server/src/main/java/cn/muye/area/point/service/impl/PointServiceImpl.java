@@ -11,6 +11,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.mapper.PointMapper;
 import cn.muye.area.point.service.PointService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -42,6 +43,9 @@ public class PointServiceImpl implements PointService {
     private static Logger LOGGER = LoggerFactory.getLogger(PointServiceImpl.class);
     @Autowired
     private PointMapper pointMapper;
+    @Autowired
+    private SceneService sceneService;
+
 
     private static final int LEVEL_ONE = 1;
     private static final int LEVEL_TWO = 2;
@@ -137,6 +141,23 @@ public class PointServiceImpl implements PointService {
         condition.setOrderByClause("SCENE_NAME, MAP_NAME,POINT_NAME ASC");
 
         return pointMapper.selectByExample(condition);
+    }
+
+    @Override
+    public List<MapPoint> listBySceneId(WhereRequest whereRequest, Long storeId) {
+        List<MapPoint> mapPointList = null;
+        if (whereRequest != null && whereRequest.getQueryObj() != null) {
+            JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
+            Long cloudMapPointTypeId = Long.valueOf(jsonObject.getString(SearchConstants.SEARCH_CLOUD_POINT_TYPE));
+            Long sceneId = jsonObject.getLong(SearchConstants.SEARCH_SCENE_ID);
+            try {
+                mapPointList = sceneService.listMapPointIdBySceneId(sceneId, storeId, cloudMapPointTypeId);
+            } catch (Exception e) {
+                LOGGER.error("PointServiceImpl类的listBySceneId方法，报错{}", e);
+            } finally {
+            }
+        }
+        return mapPointList;
     }
 
     @Override
