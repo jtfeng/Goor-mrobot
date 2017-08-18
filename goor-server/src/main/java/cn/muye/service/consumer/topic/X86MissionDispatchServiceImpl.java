@@ -23,6 +23,7 @@ public class X86MissionDispatchServiceImpl
     public AjaxResult sendX86MissionDispatch(
             String robotCode,
             String missionListData) {
+        logger.info("X86MissionDispatchServiceImpl: " + missionListData);
         return baseMessageService.sendRobotMessage(
                 robotCode,
                 TopicConstants.X86_MISSION_DISPATCH,

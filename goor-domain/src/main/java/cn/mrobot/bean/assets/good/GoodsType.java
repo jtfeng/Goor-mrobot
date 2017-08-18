@@ -17,8 +17,18 @@ public class GoodsType extends BaseBean{
 
     private String description;
 
+    private Boolean deleteStatus = Boolean.FALSE;
+
     @Transient
     private List<Goods> goodsList;
+
+    public Boolean getDeleteStatus() {
+        return deleteStatus;
+    }
+
+    public void setDeleteStatus(Boolean deleteStatus) {
+        this.deleteStatus = deleteStatus;
+    }
 
     public List<Goods> getGoodsList() {
         return goodsList;

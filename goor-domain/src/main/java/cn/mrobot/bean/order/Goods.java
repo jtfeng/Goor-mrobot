@@ -3,6 +3,7 @@ package cn.mrobot.bean.order;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Created by Selim on 2017/7/6.
@@ -18,6 +19,17 @@ public class Goods extends BaseBean {
 
     //关联大项
     private Long goodTypeId;
+
+    @Transient
+    private String goodsTypeName;
+
+    public String getGoodsTypeName() {
+        return goodsTypeName;
+    }
+
+    public void setGoodsTypeName(String goodsTypeName) {
+        this.goodsTypeName = goodsTypeName;
+    }
 
     public Goods() {
     }

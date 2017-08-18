@@ -48,6 +48,7 @@ public class ElevatorClientAsyncTask {
                     //打印客户端的消息
                     if (TopicConstants.DEBUG)
                     logger.info("Remote Address: " + client.getRemoteSocketAddress() + " ,taskElevatorTcpSerClient get message...:" + HexStringUtil.bytesToHexString(buf));
+
                     //处理消息，并发送通知
                     LogElevator logElevator = new LogElevator();
                     logElevator.setAddr(client.getRemoteSocketAddress().toString());
@@ -55,6 +56,9 @@ public class ElevatorClientAsyncTask {
                     if (!StringUtil.isEmpty(logElevator.getValue())){
                         logElevator.setValue(logElevator.getValue().toUpperCase());
                     }
+                    if (TopicConstants.DEBUG)
+                        logger.info("VALUE is: " + logElevator.getValue());
+
                     if (logElevatorService != null){
                         try {
                             logElevatorService.save(logElevator);

@@ -12,8 +12,8 @@ import java.util.List;
 public interface OrderDetailService extends BaseService<OrderDetail> {
     List<OrderDetail> listOrderDetailByOrderId(Long orderId);
 
-    //到站完成任务时需调用此service
-    void finishedDetailTask(Long id);
+    //到站完成任务时需调用此service type为区分到达和签收
+    void finishedDetailTask(Long id, Integer type);
 
     //护士站分页显示
     List<OrderDetail> listStationTasks(Long stationId, WhereRequest whereRequest);
