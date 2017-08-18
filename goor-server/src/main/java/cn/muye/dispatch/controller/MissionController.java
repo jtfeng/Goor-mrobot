@@ -722,6 +722,9 @@ public class MissionController {
 		try {
 
 			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
+			if(robotCodesArray == null || robotCodesArray.length == 0) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"机器人不存在");
+			}
 
 			//TODO 从session取当前切换门店的ID
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
@@ -731,7 +734,12 @@ public class MissionController {
 
 			//通过总任务ID列表得到总任务
 			MissionList missionList = new MissionList();
-			missionList.setMissionListType(Constant.MISSION_LIST_TYPE_PATROL);
+			missionList.setMissionListType(Constant.MISSION_LIST_TYPE_NORMAL);
+			missionList.setIntervalTime(0L);
+			missionList.setStartTime(0L);
+			missionList.setStopTime(0L);
+			missionList.setRepeatCount(1);
+			missionList.setPriority(0);
 			missionList.setMissionList(new ArrayList<Mission>());
 			missionList.setName("测试" + currentDateTimeString);
 			List<Mission> missions = new ArrayList<>();
@@ -781,11 +789,14 @@ public class MissionController {
 			}
 			missionList.setSceneId(scene.getId());
 
-			if(robotIds.length <= 0 || robotIds.length <= 0) {
+			if(robotIds == null || robotIds.length <= 0) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
 			}
 
 			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
+			if(robotCodesArray == null || robotCodesArray.length == 0) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"机器人不存在");
+			}
 			//TODO 暂时限定只能发送到1台机器人
 			if(robotCodesArray == null
 					|| robotCodesArray.length != 1) {
