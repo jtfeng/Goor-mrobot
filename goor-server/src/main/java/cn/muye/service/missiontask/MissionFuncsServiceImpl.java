@@ -907,6 +907,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         missionListTask.getMissionTasks().add(loadTask);
 
+        //装载完毕语音任务
+        MissionTask mp3loadFinishTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD_FINISH);
+        missionListTask.getMissionTasks().add(mp3loadFinishTask);
+
         //语音任务，我要出发了？
 //        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
 //        missionListTask.getMissionTasks().add(voiceTask);
@@ -1937,6 +1941,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MP3_TAKE_CABINET = "arrive_take_medicine_cabinet.mp3";//请您取走药柜
     public static final String MP3_TAKE_MEDICINE_SIGN = "take_medicine_sign.mp3";//请确认取走药品后，完成签收
     public static final String MP3_CHARGE = "charge.mp3";//充电语音
+    public static final String MP3_LOAD_FINISH = "load_finish.mp3";//装货完毕语音
 
     //Mission State
     public static final String MissionStateFinished = "finished";//已经完成
