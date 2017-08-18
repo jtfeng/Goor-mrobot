@@ -7,6 +7,7 @@ import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
+import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.bean.mission.task.*;
@@ -630,12 +631,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     );
                     break;
                 case MPointType_CHONGDIAN:
-                    initMissionTaskChongDian(
-                            missionListTask,
-                            order,
-                            mp,
-                            mPointAtts
-                    );
+                    //暂时取消充电任务
+//                    initMissionTaskChongDian(
+//                            missionListTask,
+//                            order,
+//                            mp,
+//                            mPointAtts
+//                    );
                     break;
                 case MPointType_ELEVATOR:
                     initMissionTaskElevator(
@@ -962,7 +964,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(mp3SignTask);
 
         //卸货任务，取代等待任务
-        MissionTask unloadTask = getUnloadTask(order, mp, parentName);
+        MissionTask unloadTask = getUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
         if (isSetOrderDetailMP){
             unloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
         }
@@ -1377,7 +1379,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "装货Item");
         itemTask.setName(MissionItemName_load);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("");
+//        JsonMissionItemDataLoad json =
+//                new JsonMissionItemDataLoad();
+//        json.setShelf(order.getShelf());
+//        itemTask.setData(JsonUtils.toJson(json,
+//                new TypeToken<JsonMissionItemDataLoad>(){}.getType()));
+        if (order.getShelf() != null){
+            itemTask.setData(JsonUtils.toJson(order.getShelf(),
+                    new TypeToken<Shelf>(){}.getType()));
+        }else{
+            itemTask.setData("");
+        }
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_load);
 
@@ -1387,12 +1399,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     /**
      * 卸货
      * @param mp
+     * @param orderDetailMP
      * @return
      */
     private MissionTask getUnloadTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionTask missionTask = new MissionTask();
         if (order.getScene() != null) {
             missionTask.setSceneId(order.getScene().getId());
@@ -1406,7 +1420,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
-        missionItemTasks.add(getUnloadItemTask(order, mp, parentName));
+        missionItemTasks.add(getUnloadItemTask(order, mp, parentName, orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
 
@@ -1416,12 +1430,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     /**
      * 获取卸货ITEM任务
      * @param mp
+     * @param orderDetailMP
      * @return
      */
     private MissionItemTask getUnloadItemTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionItemTask itemTask = new MissionItemTask();
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
@@ -1429,7 +1445,26 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "卸货Item");
         itemTask.setName(MissionItemName_unload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("");
+        JsonMissionItemDataUnload json =
+                new JsonMissionItemDataUnload();
+        if (!StringUtil.isNullOrEmpty(orderDetailMP) &&
+                !str_zero.equalsIgnoreCase(orderDetailMP)){
+            Long id = Long.valueOf(orderDetailMP);
+            if (id != null && order.getDetailList() != null){
+                for (OrderDetail de :
+                        order.getDetailList()) {
+                    if (de != null &&
+                            Objects.equals(id, de.getId())){
+                        //填充货物信息
+                        json.setGoodsInfos(de.getGoodsInfoList());
+                        break;
+                    }
+                }
+            }
+        }
+
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataUnload>(){}.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_unload);
 
