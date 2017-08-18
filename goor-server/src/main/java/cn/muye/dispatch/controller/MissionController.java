@@ -735,6 +735,67 @@ public class MissionController {
 		return resp;
 	}
 
+	//TODO  测试
+	/**
+	 * 发送调度任务，由多个任务列表拼接组成
+	 * @param robotIds
+	 * @param missionListIds
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = {"dispatch/missionList/sendDispatchTest"}, method = RequestMethod.GET)
+	@ResponseBody
+//    @PreAuthorize("hasAuthority('mrc_navigation_u')")
+	public AjaxResult sendNavigation(
+			@RequestParam Long[] robotIds,
+			@RequestParam Long[] missionListIds,
+			HttpServletRequest request) {
+		AjaxResult resp = AjaxResult.success();
+		try {
+
+			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
+			if(robotCodesArray == null || robotCodesArray.length == 0) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"机器人不存在");
+			}
+
+			//TODO 从session取当前切换门店的ID
+			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
+			List<MissionList> missionLists = new ArrayList<MissionList>();
+			String currentDateTimeString = DateTimeUtils.getCurrentDateTimeString();
+
+			//通过总任务ID列表得到总任务
+			MissionList missionList = new MissionList();
+			missionList.setMissionListType(Constant.MISSION_LIST_TYPE_NORMAL);
+			missionList.setIntervalTime(0L);
+			missionList.setStartTime(0L);
+			missionList.setStopTime(0L);
+			missionList.setRepeatCount(1);
+			missionList.setPriority(0);
+			missionList.setMissionList(new ArrayList<Mission>());
+			missionList.setName("测试" + currentDateTimeString);
+			List<Mission> missions = new ArrayList<>();
+			for( Long id : missionListIds ) {
+				MissionList missionListTemp = missionListService.get(id,storeId);
+				//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
+				List<Mission> missionsTemp = missionListTemp.getMissionList();
+				missions.addAll(missionsTemp);
+			}
+			missionList.setMissionList(missions);
+			missionLists.add(missionList);
+			//遍历发送机器人消息
+			for(String robotCode : robotCodesArray) {
+				//TODO 现在限定是一台机器人，将来多台，返回结果还需要Map形式
+				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists);
+				resp = ajaxResult;
+			}
+		} catch (Exception e) {
+			LOGGER.error(e.getMessage(),e);
+			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"出错");
+		}
+		return resp;
+	}
+
 	/**
 	 * 发送调度任务，由多个任务列表拼接组成
 	 * @param robotIds
@@ -760,11 +821,14 @@ public class MissionController {
 			}
 			missionList.setSceneId(scene.getId());
 
-			if(robotIds.length <= 0 || robotIds.length <= 0) {
+			if(robotIds == null || robotIds.length <= 0) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
 			}
 
 			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
+			if(robotCodesArray == null || robotCodesArray.length == 0) {
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"机器人不存在");
+			}
 			//TODO 暂时限定只能发送到1台机器人
 			if(robotCodesArray == null
 					|| robotCodesArray.length != 1) {
