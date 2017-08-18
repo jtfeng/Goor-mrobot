@@ -89,10 +89,19 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
 
     @Override
     public Employee getByCode(String code) throws RuntimeException {
+//        Example example = new Example(Employee.class);
+//        Example.Criteria criteria = example.createCriteria().andCondition("CODE = ", code);
+//        criteria.andCondition("STORE_ID = ", SearchConstants.FAKE_MERCHANT_STORE_ID);
         Employee employee = new Employee();
         employee.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         employee.setCode(code);
+//        List<Employee> list = employeeMapper.selectByExample(example);
         Employee employeeDb = employeeMapper.selectOne(employee);
+//        if (list != null && list.size() > 0) {
+//            return list.get(0);
+//        } else {
+//            return null;
+//        }
         return employeeDb;
     }
 

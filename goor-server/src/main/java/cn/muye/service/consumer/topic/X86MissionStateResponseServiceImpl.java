@@ -5,6 +5,7 @@ import cn.mrobot.bean.log.mission.JsonMissionStateResponse;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
+import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
@@ -146,7 +147,7 @@ public class X86MissionStateResponseServiceImpl
                             if (id != null){
                                 //设置order detail的单子状态为完成
                                 logger.info("### set finishedDetailTask " + id);
-                                orderDetailService.finishedDetailTask(id);
+                                orderDetailService.finishedDetailTask(id, OrderConstant.ORDER_DETAIL_STATUS_GET);
                             }
                         }
                     }

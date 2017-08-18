@@ -53,7 +53,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         List<OrderDetail> orderDetailList = order.getDetailList();
         orderDetailList.forEach(orderDetail -> {
             orderDetail.setOrderId(order.getId());
-            orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_UNDONE);
+            orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
             orderDetailService.save(orderDetail);
             //保存货物信息
             orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
