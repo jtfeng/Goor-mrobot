@@ -11,6 +11,6 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     void createRoadPath(Map<String, Object> body) throws Exception;
 
-    List<RoadPathDetail> findRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, Long cloudSceneId) throws Exception;
+    List<RoadPathDetail> findRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName) throws Exception;
 
 }
