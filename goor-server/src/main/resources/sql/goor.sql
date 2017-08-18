@@ -129,22 +129,22 @@ CREATE TABLE `A_STATION` (
 -- ----------------------------
 -- Records of A_STATION
 -- ----------------------------
-INSERT INTO `A_STATION` VALUES ('1', '二楼202病房', '', '1', '101', '100', '2017-07-05 14:08:14');
-INSERT INTO `A_STATION` VALUES ('2', '四楼牙科a', '', '3', '100', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('4', '三楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('5', '二楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('6', '一楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('7', '四楼污物发送处', '', '1', '100', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('8', '三楼洁物发送处', '', '1', '100', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('9', '二楼核磁共振室', '', '3', '100', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('13', '一楼心电图室', '', '1', '102', '100', '2017-06-23 19:23:24');
-INSERT INTO `A_STATION` VALUES ('14', '四楼401病房a', null, '1', '102', '100', '2017-06-30 15:41:51');
-INSERT INTO `A_STATION` VALUES ('15', '三楼301病房a', null, '1', '101', '100', '2017-07-01 18:09:56');
-INSERT INTO `A_STATION` VALUES ('16', '二楼201病房', null, '1', '101', '100', '2017-07-05 14:08:14');
-INSERT INTO `A_STATION` VALUES ('17', 'ceshi1', '', '1', '100', '100', '2017-07-06 16:10:49');
-INSERT INTO `A_STATION` VALUES ('18', 'ceshi2', 'ceshi2备注', '2', '100', '100', '2017-07-06 16:22:36');
-INSERT INTO `A_STATION` VALUES ('19', 'ceshi3', '', '1', '100', '100', '2017-07-06 16:26:03');
-INSERT INTO `A_STATION` VALUES ('20', 'ceshi4', 'ss', '1', '100', '100', '2017-07-06 16:30:36');
+-- INSERT INTO `A_STATION` VALUES ('1', '二楼202病房', '', '1', '101', '100', '2017-07-05 14:08:14');
+-- INSERT INTO `A_STATION` VALUES ('2', '四楼牙科a', '', '3', '100', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('4', '三楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('5', '二楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('6', '一楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('7', '四楼污物发送处', '', '1', '100', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('8', '三楼洁物发送处', '', '1', '100', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('9', '二楼核磁共振室', '', '3', '100', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('13', '一楼心电图室', '', '1', '102', '100', '2017-06-23 19:23:24');
+-- INSERT INTO `A_STATION` VALUES ('14', '四楼401病房a', null, '1', '102', '100', '2017-06-30 15:41:51');
+-- INSERT INTO `A_STATION` VALUES ('15', '三楼301病房a', null, '1', '101', '100', '2017-07-01 18:09:56');
+-- INSERT INTO `A_STATION` VALUES ('16', '二楼201病房', null, '1', '101', '100', '2017-07-05 14:08:14');
+-- INSERT INTO `A_STATION` VALUES ('17', 'ceshi1', '', '1', '100', '100', '2017-07-06 16:10:49');
+-- INSERT INTO `A_STATION` VALUES ('18', 'ceshi2', 'ceshi2备注', '2', '100', '100', '2017-07-06 16:22:36');
+-- INSERT INTO `A_STATION` VALUES ('19', 'ceshi3', '', '1', '100', '100', '2017-07-06 16:26:03');
+-- INSERT INTO `A_STATION` VALUES ('20', 'ceshi4', 'ss', '1', '100', '100', '2017-07-06 16:30:36');
 
 -- ----------------------------
 -- Table structure for A_STATION_MAP_POINT_XREF
@@ -495,6 +495,7 @@ INSERT INTO `APP_CONFIG` VALUES ('1', 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCgh
 -- ----------------------------
 -- Table structure for AS_DOOR
 -- ----------------------------
+DROP TABLE IF EXISTS `AS_DOOR`;
 CREATE TABLE `AS_DOOR` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `NAME` varchar(50) DEFAULT NULL COMMENT '名称',
@@ -512,6 +513,7 @@ CREATE TABLE `AS_DOOR` (
   `SCENE_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图场景名',
   `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
   `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
+  `DOOR_ORDER_TYPE` varchar(255) DEFAULT NULL COMMENT '门对应的任务类型：比如普通导航，沿线导航，固定路径导航',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
@@ -607,24 +609,24 @@ CREATE TABLE `AS_ROBOT_CONFIG` (
 -- ----------------------------
 -- Records of AS_ROBOT_CONFIG
 -- ----------------------------
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('16', '314', '50', '2017-07-03 17:00:50', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('17', '315', '30', '2017-07-03 17:00:26', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('18', '316', '30', '2017-07-03 17:02:09', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('19', '317', '30', '2017-07-03 17:02:14', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('20', '318', '30', '2017-07-03 17:02:19', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('21', '319', '30', '2017-07-03 17:02:27', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('22', '320', '30', '2017-07-03 17:02:32', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('23', '321', '30', '2017-07-03 17:02:40', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('24', '322', '30', '2017-07-03 17:02:47', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('25', '323', '30', '2017-07-03 17:02:56', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('26', '324', '30', '2017-07-03 17:27:52', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('27', '325', '30', '2017-07-03 17:27:59', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('28', '326', '30', '2017-07-08 16:45:50', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('29', '327', '30', '2017-07-08 16:48:34', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('30', '328', '30', '2017-07-08 16:52:00', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('31', '329', '30', '2017-07-11 20:02:47', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('32', '330', '30', '2017-07-11 20:04:23', '1', '100');
-INSERT INTO `AS_ROBOT_CONFIG` VALUES ('33', '331', '30', '2017-07-11 20:19:35', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('16', '314', '50', '2017-07-03 17:00:50', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('17', '315', '30', '2017-07-03 17:00:26', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('18', '316', '30', '2017-07-03 17:02:09', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('19', '317', '30', '2017-07-03 17:02:14', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('20', '318', '30', '2017-07-03 17:02:19', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('21', '319', '30', '2017-07-03 17:02:27', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('22', '320', '30', '2017-07-03 17:02:32', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('23', '321', '30', '2017-07-03 17:02:40', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('24', '322', '30', '2017-07-03 17:02:47', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('25', '323', '30', '2017-07-03 17:02:56', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('26', '324', '30', '2017-07-03 17:27:52', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('27', '325', '30', '2017-07-03 17:27:59', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('28', '326', '30', '2017-07-08 16:45:50', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('29', '327', '30', '2017-07-08 16:48:34', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('30', '328', '30', '2017-07-08 16:52:00', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('31', '329', '30', '2017-07-11 20:02:47', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('32', '330', '30', '2017-07-11 20:04:23', '1', '100');
+-- INSERT INTO `AS_ROBOT_CONFIG` VALUES ('33', '331', '30', '2017-07-11 20:19:35', '1', '100');
 
 -- ----------------------------
 -- Table structure for AS_ROBOT_PASSWORD
@@ -808,6 +810,22 @@ CREATE TABLE `AS_ROBOT_TYPE` (
 INSERT INTO `AS_ROBOT_TYPE` VALUES ('1', '拖车式', '1');
 INSERT INTO `AS_ROBOT_TYPE` VALUES ('2', '柜式', '2');
 INSERT INTO `AS_ROBOT_TYPE` VALUES ('3', '抽屉式', '10');
+
+-- ----------------------------
+-- Table structure for AS_SCENE
+-- ----------------------------
+DROP TABLE IF EXISTS `AS_SCENE`;
+CREATE TABLE `AS_SCENE` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(50) DEFAULT NULL,
+  `ALIAS_NAME` varchar(50) DEFAULT NULL,
+  `INTRO` varchar(100) DEFAULT NULL,
+  `STORE_ID` bigint(20) DEFAULT NULL,
+  `CREATED_BY` bigint(20) DEFAULT NULL,
+  `CREATE_TIME` datetime DEFAULT NULL,
+  `STATE` int(11) DEFAULT NULL COMMENT '0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='场景信息表';
 
 -- ----------------------------
 -- Table structure for AS_SHELF
@@ -1007,11 +1025,13 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('8', '装货', 'load', '装货架任务', '
 INSERT INTO `D_FEATURE_ITEM` VALUES ('9', '卸货', 'unload', '卸货架任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('10', '终点卸货任务', 'finalUnload', '终点卸货任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{\"current_floor\":4,\"arrival_floor\":1,\"enter_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"set_pose_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"back_point\":{{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('12', '门', 'door', '自动门', '{\"waitTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('12', '门', 'door', '自动门', '{\"waitTime\":10,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('13', '电梯加锁任务', 'elevatorLock', '电梯加锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('14', '电梯解锁任务', 'elevatorUnlock', '电梯解锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('15', '沿线导航', 'laneNavigation', '沿线导航', '{\"x\":1.2,\"y\":2.0,\"th\":1.57,\"map\":\"floor1\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('16', '沿固定路径导航', 'pathNavigation', '沿固定路径导航', '{\"scene_name\":\"example\",\"id\":1}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('17', '沿线导航门', 'laneDoor', '沿线导航门', '{\"waitTime\":10,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('18', '沿固定路径导航门', 'pathDoor', '沿固定路径导航门', '{\"waitTime\":10,\"scene_name\":\"example\",\"id\":1}');
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
