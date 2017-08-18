@@ -25,6 +25,7 @@ public class Door  extends BaseBean {
     private String sceneName;//地图场景名
     private String mapName;//地图名
     private int active;//假删除标志：0 未删除，1 已删除
+    private String doorOrderType;//门对应的任务类型：比如普通导航，沿线导航，固定路径导航
 
     @Transient
     private MapPoint wPoint;//等门点，加锁任务
@@ -52,6 +53,7 @@ public class Door  extends BaseBean {
                 ", sceneName='" + sceneName + '\'' +
                 ", mapName='" + mapName + '\'' +
                 ", active=" + active +
+                ", doorOrderType='" + doorOrderType + '\'' +
                 ", wPoint=" + wPoint +
                 ", gPoint=" + gPoint +
                 ", oPoint=" + oPoint +
@@ -176,5 +178,13 @@ public class Door  extends BaseBean {
 
     public void setActive(int active) {
         this.active = active;
+    }
+
+    public String getDoorOrderType() {
+        return doorOrderType;
+    }
+
+    public void setDoorOrderType(String doorOrderType) {
+        this.doorOrderType = doorOrderType;
     }
 }
