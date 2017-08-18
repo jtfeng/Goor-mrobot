@@ -39,6 +39,9 @@ public enum MapPointType {
 	ELEVATOR_START(13, "开始电梯任务点", 2, 0.1,0),//工控 2普通目标点
 	ELEVATOR_INNER(14, "电梯内部点", 2, 0.1,0),//工控 2普通目标点
 	ELEVATOR_END(15, "电梯任务结束点", 2, 0.1,0),//工控 2普通目标点
+	DOOR_WAIT(16, "门任务等待点", 2, 0.1,0),//工控 2普通目标点
+	DOOR_START(17, "门任务开始点", 2, 0.1,0),//工控 2普通目标点
+	DOOR_END(18, "门任务结束点", 2, 0.1,0),//工控 2普通目标点
 	;
 
 	private String value;
