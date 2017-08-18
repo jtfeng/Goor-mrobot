@@ -5,8 +5,8 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.order.*;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -16,6 +16,7 @@ import cn.muye.base.controller.BaseController;
 import cn.muye.order.bean.GoodsInfoVO;
 import cn.muye.order.bean.OrderDetailVO;
 import cn.muye.order.bean.OrderPageInfoVO;
+import cn.muye.order.bean.OrderTransferVO;
 import cn.muye.order.service.GoodsService;
 import cn.muye.order.service.OrderDetailService;
 import cn.muye.order.service.OrderService;
@@ -130,26 +131,7 @@ public class OrderController extends BaseController {
         }
     }
 
-    /**
-     * 获取当前用户 查询到的任务列表
-     * @param session
-     * @return
-     */
-    @RequestMapping(value = "listStationTasks", method = RequestMethod.GET)
-    @ResponseBody
-    public AjaxResult listStationTasks(HttpSession session,WhereRequest whereRequest){
-        try {
-            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
-            List<OrderDetail> orderDetailList = orderDetailService.listStationTasks(stationId, whereRequest);
-            List<OrderDetailVO> orderDetailVOs = orderDetailList.stream().map(orderDetail -> generateOrderDetailVO(orderDetail)).collect(Collectors.toList());
-            PageInfo<OrderDetailVO> detailPageInfo = new PageInfo<>(orderDetailVOs);
-            return AjaxResult.success(detailPageInfo, "查询任务列表进展成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return AjaxResult.failed("查询任务列表进展失败");
-        }
 
-    }
 
     /**
      * 获取下单页面的信息
@@ -175,24 +157,85 @@ public class OrderController extends BaseController {
 
     }
 
+    /**
+     * 获取当前用户 查询到的任务列表
+     * @param session
+     * @return
+     */
+    @RequestMapping(value = "listStationTasks", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listStationTasks(HttpSession session,WhereRequest whereRequest){
+        try {
+            Long stationId = userUtil.getStationId();
+            List<OrderDetail> orderDetailList = orderDetailService.listStationTasks(stationId, whereRequest);
+            List<OrderDetailVO> orderDetailVOs = orderDetailList.stream().map(orderDetail -> generateOrderDetailVO(orderDetail)).collect(Collectors.toList());
+            PageInfo<OrderDetailVO> detailPageInfo = new PageInfo<>(orderDetailVOs);
+            return AjaxResult.success(detailPageInfo, "查询任务列表进展成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("查询任务列表进展失败");
+        }
+
+    }
+
     //转化为试图任务列表
     private OrderDetailVO generateOrderDetailVO(OrderDetail orderDetail){
         OrderDetailVO orderDetailVO = new OrderDetailVO();
         Order findOrder = orderService.getOrder(orderDetail.getOrderId());
         if(findOrder!= null){
-            orderDetailVO.setNeedSign(findOrder.getOrderSetting().getNeedSign());
-            orderDetailVO.setRobot(findOrder.getRobot());
-            orderDetailVO.setStartStation(findOrder.getStartStation());
+            orderDetailVO.setStartStationName(stationService.findById(findOrder.getStartStation().getId()).getName());
+            orderDetailVO.setRobotCode(findOrder.getRobot().getCode());
+            //根据order封装
+            List<OrderDetail> detailList = findOrder.getDetailList();
+            List<OrderTransferVO> transferVOs = detailList.stream()
+                    .filter(detail -> detail.getId() <= orderDetail.getId())
+                    .map(detail -> generateTransferVO(detail))
+                    .collect(Collectors.toList());
+            orderDetailVO.setTransferVOList(transferVOs);
+            //获取标头
+            int index = -1;
+            StringBuffer transferInfo = new StringBuffer();
+            for(int i = 0 ; i < transferVOs.size(); i++){
+                if(transferVOs.get(i).getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
+                    index = i;
+                    break;
+                }
+            }
+            if(index == -1){
+                //无运输状态的点，取最后一个点
+                OrderTransferVO orderTransferVO = transferVOs.get(transferVOs.size()-1);
+                getTransferInfo(orderTransferVO, transferInfo);
+            }else if(index == 0){
+                //起始即为未运输，取第一个点
+                OrderTransferVO orderTransferVO = transferVOs.get(0);
+                getTransferInfo(orderTransferVO, transferInfo);
+            }else{
+                //取上一个点进行判断
+                OrderTransferVO orderTransferVO = transferVOs.get(index - 1);
+                getTransferInfo(orderTransferVO, transferInfo);
+            }
+            orderDetailVO.setTransferInfo(transferInfo.toString());
         }
         OrderDetail orderDetailInfo = orderDetailService.getOrderDetailInfo(orderDetail.getId());
         if(orderDetailInfo!= null && orderDetailInfo.getGoodsInfoList()!=null){
-            List<GoodsInfoVO> goodsInfoVOList = orderDetailInfo.getGoodsInfoList().stream().map(goodsInfo -> generateGoodsInfoVO(goodsInfo, findOrder)).collect(Collectors.toList());
+            List<GoodsInfoVO> goodsInfoVOList = orderDetailInfo.getGoodsInfoList().stream()
+                    .map(goodsInfo -> generateGoodsInfoVO(goodsInfo, findOrder))
+                    .collect(Collectors.toList());
             orderDetailVO.setGoodsInfoList(goodsInfoVOList);
         }
-        orderDetailVO.setBeginDate(orderDetailInfo.getCreateTime());
-        orderDetailVO.setFinishDate(orderDetailInfo.getFinishDate());
         orderDetailVO.setStatus(orderDetailInfo.getStatus());
         return orderDetailVO;
+    }
+
+    private StringBuffer getTransferInfo(OrderTransferVO orderTransferVO, StringBuffer transferInfo){
+        if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
+            transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
+        }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
+            transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+        }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+            transferInfo.append("当前小车正在签收" + orderTransferVO.getStationName());
+        }
+        return transferInfo;
     }
 
 
@@ -207,6 +250,17 @@ public class OrderController extends BaseController {
             goodsInfoVO.setPassword(robotPasswordService.getPwdByRobotId(order.getRobot().getId()));
         }
         return goodsInfoVO;
+    }
+
+    private OrderTransferVO generateTransferVO(OrderDetail detail){
+        OrderTransferVO orderTransferVO = new OrderTransferVO();
+        Station station = stationService.findById(detail.getStationId());
+        orderTransferVO.setStationName(station == null ? null : station.getName());
+        orderTransferVO.setStatus(detail.getStatus());
+        if(detail.getFinishDate()!=null){
+            orderTransferVO.setFinishDate(DateTimeUtils.getDefaultDateString(detail.getFinishDate()));
+        }
+        return orderTransferVO;
     }
 
 }

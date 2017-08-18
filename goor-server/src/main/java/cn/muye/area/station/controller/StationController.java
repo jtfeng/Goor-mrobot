@@ -172,6 +172,7 @@ public class StationController {
             Long id = station.getId();
             if (stationDbList != null
                     && (size > 1
+                    || (size == 1 && id == null)
                     || (size == 1 && id != null && !stationDbList.get(0).getId().equals(id)))) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "站名称重复");
             }
