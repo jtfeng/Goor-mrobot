@@ -12,7 +12,6 @@ import javax.persistence.Transient;
  */
 @Table(name = "AS_DOOR")
 public class Door  extends BaseBean {
-
     private String name;
     private String lockState = "0";// 0表示 未锁定、1表示 已锁定
     private Long waitPoint;//等门点，加锁任务
@@ -25,7 +24,7 @@ public class Door  extends BaseBean {
     private String sceneName;//地图场景名
     private String mapName;//地图名
     private int active;//假删除标志：0 未删除，1 已删除
-    private String doorOrderType;//门对应的任务类型：比如普通导航，沿线导航，固定路径导航
+    private String doorOrderType;//门对应的任务类型：比如普通导航door，沿线导航laneDoor，固定路径导航pathDoor
 
     @Transient
     private MapPoint wPoint;//等门点，加锁任务
