@@ -1,8 +1,10 @@
 package cn.muye.assets.door.service.impl;
 
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.door.Door;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.point.service.PointService;
 import cn.muye.assets.door.mapper.DoorMapper;
 import cn.muye.assets.door.service.DoorService;
 import cn.muye.base.bean.SearchConstants;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.generator.MapperPlugin;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +30,8 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
     private static final Logger log = LoggerFactory.getLogger(DoorServiceImpl.class);
     @Autowired
     private DoorMapper myMapper;
+    @Autowired
+    private PointService pointService;
 
     @Override
     public int save(Door door) {
@@ -53,7 +58,7 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
         if (temp == null || temp.size() <= 0) {
             return null;
         }
-        return temp.get(0);
+        return bindPoint(temp.get(0));
     }
 
     @Override
@@ -104,7 +109,7 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
             stationList = myMapper.selectByExample(example);
         }
 
-        return stationList;
+        return listSetPoints(stationList);
     }
 
     /**
@@ -114,19 +119,56 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
      */
     private List<Door> listSetPoints(List<Door> doorList) {
         for(Door door:doorList) {
-
+            bindPoint(door);
         }
         return doorList;
     }
 
+    /**
+     * 从数据库查出对应点
+     * @param door
+     * @return
+     */
+    private Door bindPoint(Door door) {
+        if(door.getWaitPoint() != null) {
+            MapPoint wP = pointService.findById(door.getWaitPoint());
+            door.setwPoint(wP);
+        }
+        if(door.getGoPoint() != null) {
+            MapPoint gP = pointService.findById(door.getGoPoint());
+            door.setgPoint(gP);
+        }
+        if(door.getOutPoint() != null) {
+            MapPoint oP = pointService.findById(door.getOutPoint());
+            door.setoPoint(oP);
+        }
+        return door;
+    }
+
     @Override
-    public List<Door> listByName(String name,long storeId,long sceneId) {
+    public List<Door> listByName(String name,long storeId,Long sceneId) {
         Example example = new Example(Door.class);
-        example.createCriteria().andCondition("NAME =", name)
-                .andCondition("SCENE_ID =", sceneId)
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("NAME =", name)
                 .andCondition("STORE_ID =", storeId)
                 .andCondition("ACTIVE =", Constant.NORMAL);
-        return myMapper.selectByExample(example);
+        if(sceneId != null) {
+            criteria.andCondition("SCENE_ID =", sceneId);
+        }
+        return listSetPoints(myMapper.selectByExample(example));
+    }
+
+    @Override
+    public List<Door> listByWaitPoint(long waitPointId, long storeId,Long sceneId) {
+        Example example = new Example(Door.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("WAIT_POINT =", waitPointId)
+                .andCondition("STORE_ID =", storeId)
+                .andCondition("ACTIVE =", Constant.NORMAL);
+        if(sceneId != null) {
+            criteria.andCondition("SCENE_ID =", sceneId);
+        }
+        return listSetPoints(myMapper.selectByExample(example));
     }
 
     @Override
