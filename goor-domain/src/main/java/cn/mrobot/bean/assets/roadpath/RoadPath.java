@@ -27,8 +27,6 @@ public class RoadPath extends BaseBean{
     private String pathId;
     //路径类型（此处暂定为 0 表示云端配置 1 代表工控上传）
     private Integer pathType;
-    //所关联的路径锁对象
-    private Long pathLock;
 
     public RoadPath(){}
 
@@ -112,14 +110,6 @@ public class RoadPath extends BaseBean{
         this.pathType = pathType;
     }
 
-    public Long getPathLock() {
-        return pathLock;
-    }
-
-    public void setPathLock(Long pathLock) {
-        this.pathLock = pathLock;
-    }
-
     @Override
     public String toString() {
         return "RoadPath{" +
@@ -133,7 +123,6 @@ public class RoadPath extends BaseBean{
                 ", mapName='" + mapName + '\'' +
                 ", pathId='" + pathId + '\'' +
                 ", pathType=" + pathType +
-                ", pathLock=" + pathLock +
                 '}';
     }
 }
