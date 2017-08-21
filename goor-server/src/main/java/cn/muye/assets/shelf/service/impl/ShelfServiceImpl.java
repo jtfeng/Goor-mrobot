@@ -53,6 +53,20 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
         return list;
     }
 
+    /**
+     * 接口查询所有的货架信息 ， 为应用提供
+     * @return
+     */
+    @Override
+    public List<Shelf> listAllShelfs() {
+        List<Shelf> shelves = this.shelfMapper.selectAll();
+        for (Shelf shelf:shelves){
+            //查询每一个货架所绑定的所有货物类别信息
+            shelf.setGoodTypes(shelfMapper.findGoodsTypeByShelfId(shelf.getId()));
+        }
+        return shelves;
+    }
+
     public Shelf getByName(String name) {
         Shelf shelf = new Shelf();
         shelf.setName(name);

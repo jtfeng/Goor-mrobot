@@ -8,6 +8,7 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
+import cn.muye.area.station.mapper.StationMapper;
 import cn.muye.area.station.service.StationMapPointXREFService;
 import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.area.station.service.StationService;
@@ -47,6 +48,8 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     protected StationRobotXREFService stationRobotXREFService;
     @Autowired
     protected RobotService robotService;
+    @Autowired
+    private StationMapper stationMapper;
 
     @Override
     public int save(Station station) {
@@ -237,5 +240,9 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
         }
     }
 
+    @Override
+    public List<Station> findStationsByRobotCode(String robotCode) {
+        return this.stationMapper.findStationsByRobotCode(robotCode);
+    }
 }
 

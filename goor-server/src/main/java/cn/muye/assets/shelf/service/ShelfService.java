@@ -37,6 +37,12 @@ public interface ShelfService extends BaseService<Shelf> {
      * @return
      */
     int insertShelfAndGoodsTypeRelations(Long shelfId, List<Long> goodsTypeIds);
+
+    /**
+     * 接口查询所有的货架信息 ， 为应用提供
+     * @return
+     */
+    List<Shelf> listAllShelfs();
 }
 
 

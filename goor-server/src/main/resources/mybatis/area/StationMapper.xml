@@ -24,6 +24,15 @@
         <result property="mapPointTypeId" column="MAP_POINT_TYPE_ID"/>
     </resultMap>
 
+    <select id="findStationsByRobotCode" resultMap="station" parameterType="java.lang.String">
+        SELECT s.*, p.ID AS POINT_ID, p.POINT_NAME, p.POINT_ALIAS, p.SCENE_NAME, p.MAP_NAME, p.X, p.Y, p.TH, p.MAP_POINT_TYPE_ID
+        FROM A_STATION s LEFT JOIN AC_STATION_ROBOT_XREF sr ON s.ID = sr.STATION_ID
+            LEFT JOIN AS_ROBOT r ON sr.ROBOT_ID = r.ID
+            LEFT JOIN A_STATION_MAP_POINT_XREF smp ON s.ID = smp.STATION_ID
+            LEFT JOIN A_MAP_POINT p ON smp.MAP_POINT_ID = p.ID
+        WHERE r.CODE = #{0}
+    </select>
+
     <sql id="Base_Column_List">
         ID,
         NAME,

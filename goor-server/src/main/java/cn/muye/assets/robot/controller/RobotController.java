@@ -169,12 +169,25 @@ public class RobotController {
         }
     }
 
+    /**
+     * 所有设置机器人的通用密码（当前的处理模式是 设置过程可能不成功，若设置失败，则继续使用旧密码）
+     * @param newPassword
+     * @return
+     */
+    public AjaxResult setRobotPassword(String newPassword) {
+        try {
+            this.robotService.setRobotPassword(newPassword);
+            return AjaxResult.success();
+        }catch (Exception e){
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
     //整合到新增和修改接口了
 //    @RequestMapping(value = {"assets/robot/bindChargerMapPoint"}, method = RequestMethod.POST)
 //    @ApiOperation(value = "机器人绑充电桩", httpMethod = "POST", notes = "机器人绑充电桩")
 //    @ResponseBody
 //    public AjaxResult bindChargerMapPoint(@RequestBody Robot robot) {
-//
 //    }
 
 }

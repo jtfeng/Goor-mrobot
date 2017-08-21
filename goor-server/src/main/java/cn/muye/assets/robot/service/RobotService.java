@@ -40,4 +40,11 @@ public interface RobotService extends BaseService<Robot>{
     List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list);
 
     List<MapPoint> getChargerMapPointByRobotCode(String robotCode, Long storeId);
+
+    /**
+     * 为机器人设置通用密码
+     */
+    void setRobotPassword(String newPassword);
+
+    boolean checkPasswordIsValid(String robotCode, String password);
 }

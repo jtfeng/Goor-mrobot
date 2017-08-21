@@ -23,11 +23,13 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
+import static com.google.common.base.Preconditions.*;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.reflect.TypeToken;
@@ -38,6 +40,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -502,5 +507,105 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         map.put("robotId", robotId);
         Robot robot = robotMapper.getRobotByCode(map);
         return robot;
+    }
+
+    @Override
+    public void setRobotPassword(String newPassword) {
+        List<Robot> allRobots = this.robotMapper.selectAll();
+        // 实例化一个线程池 ， 后台发送消息并且轮询监听数据回执情况（线程池的各项配置可以根据特定的机器配置来确定的 ， 可以优化）
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+                10,
+                20,
+                1,
+                TimeUnit.MINUTES,
+                new ArrayBlockingQueue<Runnable>(100));
+        for (Robot robot : allRobots) {
+            checkNotNull(robot.getCode(), String.format("数据库编号为 %s 的机器人的机器人编号不存在，请检查解决后重试!",
+                    String.valueOf(robot.getId())));
+        }
+        for (Robot robot : allRobots) {
+            // 利用线程池逐一完成密码下发任务
+            executor.submit(new SendPasswordToSpecialRobotThread(robot, newPassword));
+        }
+    }
+    private static final String PASSWORD = "password";
+    private static final String SENDER = "goor-server";
+    private static Map<String, ReentrantLock> LOCK_DATA = Maps.newHashMap();
+    private synchronized void lock(Map<String, ReentrantLock> LOCK_DATA, String robotCode) {
+        LOCK_DATA.putIfAbsent(robotCode, new ReentrantLock());
+        LOCK_DATA.get(robotCode).lock();
+    }
+    private synchronized void unlock(Map<String, ReentrantLock> LOCK_DATA, String robotCode) {
+        LOCK_DATA.get(robotCode).unlock();
+    }
+    private class SendPasswordToSpecialRobotThread extends Thread {
+        private String password;
+        private Robot robot ;
+        private SendPasswordToSpecialRobotThread(Robot robot, String password){
+            this.robot = robot;
+            this.password = password;
+        }
+        @Override
+        public void run() {
+            try {
+                lock(LOCK_DATA, robot.getCode());
+
+                String uuid = UUID.randomUUID().toString().replace("-", "");
+                CommonInfo commonInfo = new CommonInfo();
+                // TODO: 此处 TopicName 与 TopicType需要进一步确定
+                commonInfo.setTopicName(TopicConstants.X86_MISSION_INSTANT_CONTROL);
+                commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+                // TODO: 此处 TopicName 与 TopicType需要进一步确定
+                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, Object>() {{
+                    put(PASSWORD, password);// TODO: 此处 设置密码的数据格式也需要进一步确定
+                }}))));
+                MessageInfo info = new MessageInfo();
+                info.setUuId(uuid);
+                info.setSendTime(new Date());
+                info.setSenderId(SENDER);
+                info.setReceiverId(robot.getCode());
+                info.setMessageType(MessageType.EXECUTOR_COMMAND);
+                info.setMessageText(JSON.toJSONString(commonInfo));
+                AjaxResult result = messageSendHandleService.sendCommandMessage(true, true, robot.getCode(), info);
+                if (!result.isSuccess()) {
+                    LOGGER.info(String.format("编号为 %s 的机器人下发新密码 %s 失败!", String.valueOf(robot.getCode()), password));
+                }
+                for (int i = 0; i < 500; i++) {
+                    Thread.sleep(1000);
+                    MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(info.getUuId());
+                    if (messageInfo1 != null && messageInfo1.isSuccess()) {
+                        info.setSuccess(true);
+                        break;
+                    }
+                }
+                if (info.isSuccess()) {
+                    // 将数据库中的机器人密码更新为本次更新的密码
+                    robot.setPassword(password);
+                    updateSelective(robot);
+                } else {
+                    LOGGER.info(String.format("编号为 %s 的机器人下发新密码 %s 失败!", String.valueOf(robot.getCode()), password));
+                }
+
+                unlock(LOCK_DATA, robot.getCode());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 为应用提供一个验证 操作密码 是否合法的操作接口 （ 应用获取云端配置的操作密码 ）
+     * @param robotCode
+     * @param password
+     * @return
+     */
+    @Override
+    public boolean checkPasswordIsValid(String robotCode, String password) {
+        checkNotNull(robotCode, "验证机器人编号不允许为空，请重新输入!!");
+        checkNotNull(password,  "验证密码不允许为空，请重新输入!");
+        Example example = new Example(Robot.class);
+        example.createCriteria().andCondition(" CODE = ", robotCode);
+        Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
+        return password.equals(robot.getPassword());
     }
 }

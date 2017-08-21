@@ -55,6 +55,8 @@ public class Robot extends BaseBean {
     @Transient
     private boolean mapSyncResult; //地图同步结果
 
+    private String password; // 机器人密码
+
     @Transient
     private List<RobotPassword> passwords; //机器人抽屉密码
 
@@ -241,5 +243,13 @@ public class Robot extends BaseBean {
 
     public void setMapSyncResult(boolean mapSyncResult) {
         this.mapSyncResult = mapSyncResult;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

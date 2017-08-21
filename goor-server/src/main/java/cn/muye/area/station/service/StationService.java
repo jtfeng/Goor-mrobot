@@ -45,5 +45,7 @@ public interface StationService extends BaseService<Station>{
 	int delete(Station station);
 
 	void bindRobots(Station station);
+
+	List<Station> findStationsByRobotCode(String robotCode);
 }
 
