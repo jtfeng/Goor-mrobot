@@ -1,6 +1,7 @@
 package cn.muye.area.point.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.utils.StringUtil;
@@ -17,7 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created with IntelliJ IDEA.
@@ -56,8 +59,11 @@ public class PointController {
             if (mapPoint.getId() != null) {
                 MapPoint mapPointDB = pointService.findById(mapPoint.getId());
                 if (null == mapPointDB) {
-                    mapPointDB = new MapPoint();
+                    return AjaxResult.failed(1, "导航目标点不存在");
                 }
+                mapPointDB.setX(mapPoint.getX());
+                mapPointDB.setY(mapPoint.getY());
+                mapPointDB.setTh(mapPoint.getTh());
                 mapPointDB.setPointAlias(mapPoint.getPointAlias());
                 mapPointDB.setCloudMapPointTypeId(mapPoint.getCloudMapPointTypeId());
                 pointService.update(mapPointDB);
@@ -155,6 +161,54 @@ public class PointController {
                 return AjaxResult.success(new ArrayList<>());
             }
             return AjaxResult.success(cascadeMapPointList);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
+
+    //TODO  测试添加导航点
+    /**
+     * 级联查询目标点，地图名->目标点类型->目标点
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "area/point/test", method = RequestMethod.GET)
+    @ResponseBody
+//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
+    public AjaxResult test(@RequestParam("count") int count) {
+        try {
+            MapPoint mapPoint = new MapPoint();
+            mapPoint.setMapName("jelynn");
+            mapPoint.setSceneName("jelynn");
+            mapPoint.setMapZipId(318L);
+            mapPoint.setCreateTime(new Date());
+            mapPoint.setMapPointTypeId(2);
+            mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getName());
+
+            double x = 1.15461245;
+            int num = 10;
+            double y = 1.1781545;
+            Random random = new Random(2);
+            for (int i = 0; i < count; i++) {
+                mapPoint.setX(x);
+                for (int j = 0; j < count; j++) {
+                    mapPoint.setPointName("G" + num);
+                    mapPoint.setPointAlias("G" + num);
+
+                    mapPoint.setY(y);
+                    mapPoint.setTh(random.nextDouble());
+                    mapPoint.setId(null);
+                    pointService.save(mapPoint);
+                    num ++;
+                    y = y + 0.020000000;
+                }
+                x += 0.020000000;
+            }
+
+            return AjaxResult.success();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统错误");
