@@ -11,10 +11,13 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
 import cn.mrobot.bean.state.StateCollectorResponse;
+import cn.mrobot.bean.websocket.WSMessage;
+import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
@@ -27,6 +30,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.base.websoket.WebSocketInit;
 import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
@@ -80,6 +84,8 @@ public class ConsumerCommon {
     @Autowired
     private MessageSendHandleService messageSendHandleService;
 
+    @Autowired
+    private WebSocketInit webSocketInit;
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -492,11 +498,15 @@ public class ConsumerCommon {
             return;
 
         if (powerPercent <= lowBatteryThreshold) {
-            //跟新机器人低电量状态
+            //更新机器人低电量状态
             Robot saveRobot = new Robot();
             robot.setId(robot.getId());
             robot.setLowPowerState(true);
             robotService.updateSelective(saveRobot);
+            //向websocket推送低电量警告
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("当前电量：").append(powerPercent).append(",电量阈值").append(lowBatteryThreshold);
+            webSocketInit.sendAll(new WSMessage.Builder().title(LogType.WARNING_LOWER_POWER.getValue()).messageType(WSMessageType.WARNING).body(stringBuffer.toString()).userId("server").build());
         }
     }
 }
