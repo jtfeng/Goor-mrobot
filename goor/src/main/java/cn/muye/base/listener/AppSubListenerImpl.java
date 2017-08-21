@@ -37,10 +37,6 @@ public class AppSubListenerImpl implements TopicCallback, ApplicationContextAwar
 				ProducerCommon msg = SingleFactory.getProducerCommon();
 				msg.sendAppSubMessage(message.toString());
 			}
-			if (TopicHandleInfo.checkLocalSubNameNoNeedConsumer(message.toString())) {
-				AppSubService appSubService = applicationContext.getBean(AppSubService.class);
-				appSubService.handleLocalTopic(message);
-			}
 		}catch (Exception e){
 			logger.error("AppSubListenerImpl error", e);
 		}
