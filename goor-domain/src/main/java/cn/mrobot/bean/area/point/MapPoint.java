@@ -166,6 +166,8 @@ public class MapPoint extends BaseBean {
 	}
 
     public int getValue() {
+        if(null == id)
+            return 0;
         return  new Long(id).intValue();
     }
 
