@@ -11,14 +11,16 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
 import cn.mrobot.bean.state.StateCollectorResponse;
+import cn.mrobot.bean.websocket.WSMessage;
+import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
-import cn.muye.account.employee.service.EmployeeService;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
@@ -28,6 +30,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.base.websoket.WebSocketInit;
 import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
@@ -82,8 +85,7 @@ public class ConsumerCommon {
     private MessageSendHandleService messageSendHandleService;
 
     @Autowired
-    private EmployeeService employeeService;
-
+    private WebSocketInit webSocketInit;
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -138,70 +140,19 @@ public class ConsumerCommon {
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
                 String uuid = jsonObjectData.getString(TopicConstants.UUID);
-                String robotCode = messageInfo.getSenderId();
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
+                    String robotCode = messageInfo.getSenderId();
                     Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
                     if (!StringUtil.isNullOrEmpty(uuid)) {
                         syncRosRobotConfig(robotDb, uuid);
                     }
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)) {
-                    String jsonData = jsonObjectData.getString(TopicConstants.DATA);
-                    JSONObject employeeObj = JSON.parseObject(jsonData);
-                    String empNo = employeeObj.getString("empNo");
-                    Long missionItemId = employeeObj.getLong("missionItemId");
-                    AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(empNo, missionItemId);
-                    replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.isSuccess(), uuid);
                 }
             }
         } catch (Exception e) {
             logger.error("consumer directAgentSub exception", e);
-        }
-    }
-
-    /**
-     * 给应用回执校验员工工号结果
-     *
-     * @param robotCode
-     * @param msg
-     * @param flag
-     * @param uuid
-     */
-    private void replyVerification(String robotCode, String msg, Boolean flag, String uuid) {
-        CommonInfo commonInfo = new CommonInfo();
-        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-        SlamBody slamBody = new SlamBody();
-        slamBody.setPubName(TopicConstants.VERIFY_EMPLYEE_NUMBER);
-        slamBody.setUuid(uuid);
-        slamBody.setMsg(msg);
-        slamBody.setErrorCode(flag? "0" : "1");
-        slamBody.setData("");
-        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-        MessageInfo messageInfo = new MessageInfo();
-        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-        messageInfo.setReceiverId(robotCode);
-        messageInfo.setSenderId("goor-server");
-        messageInfo.setMessageType(MessageType.ROBOT_INFO);
-        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-        try {
-            messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
-            logger.info("下发机器人" + robotCode + "员工校验信息成功");
-        } catch (Exception e) {
-            logger.error("发送错误", e);
-            try {
-                slamBody.setMsg("查询错误");
-                slamBody.setErrorCode("1");
-                slamBody.setData("");
-                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-                messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-                messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
-            } catch (Exception e1) {
-                logger.error("错误{}", e1);
-            }
-        } finally {
         }
     }
 
@@ -547,11 +498,15 @@ public class ConsumerCommon {
             return;
 
         if (powerPercent <= lowBatteryThreshold) {
-            //跟新机器人低电量状态
+            //更新机器人低电量状态
             Robot saveRobot = new Robot();
             robot.setId(robot.getId());
             robot.setLowPowerState(true);
             robotService.updateSelective(saveRobot);
+            //向websocket推送低电量警告
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append("当前电量：").append(powerPercent).append(",电量阈值").append(lowBatteryThreshold);
+            webSocketInit.sendAll(new WSMessage.Builder().title(LogType.WARNING_LOWER_POWER.getValue()).messageType(WSMessageType.WARNING).body(stringBuffer.toString()).userId("server").build());
         }
     }
 }
