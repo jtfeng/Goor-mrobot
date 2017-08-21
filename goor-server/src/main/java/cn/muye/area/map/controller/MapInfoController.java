@@ -99,26 +99,26 @@ public class MapInfoController {
     }
 
 
-    @Autowired
-    private WebSocketInit webSocketInit;
-    /**
-     * 级联查询目标点，场景名 -》 地图名
-     * 如果传入sceneName，则查询该场景下的地图
-     * @return
-     * @throws Exception
-     */
-    @RequestMapping(value = "area/test/websocket", method = RequestMethod.GET)
-    @ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-    public AjaxResult testWebsocket(@RequestParam("message") String message) {
-        try {
-            webSocketInit.sendAll(new WSMessage("低电量警告", WSMessageType.WARNING,message,"server"));
-            return AjaxResult.success();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
-        }
-    }
+//    @Autowired
+//    private WebSocketInit webSocketInit;
+//    /**
+//     * 级联查询目标点，场景名 -》 地图名
+//     * 如果传入sceneName，则查询该场景下的地图
+//     * @return
+//     * @throws Exception
+//     */
+//    @RequestMapping(value = "area/test/websocket", method = RequestMethod.GET)
+//    @ResponseBody
+////	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
+//    public AjaxResult testWebsocket(@RequestParam("message") String message) {
+//        try {
+//            webSocketInit.sendAll(new WSMessage("低电量警告", WSMessageType.WARNING,message,"server"));
+//            return AjaxResult.success();
+//        } catch (Exception e) {
+//            LOGGER.error(e.getMessage(), e);
+//            return AjaxResult.failed("系统错误");
+//        }
+//    }
 
     @RequestMapping(value = "area/mapinfo/getCurrentInfo", method = RequestMethod.GET)
     @ResponseBody
