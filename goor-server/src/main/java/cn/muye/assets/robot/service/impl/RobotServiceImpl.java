@@ -369,21 +369,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
                 Robot robotDb = getByCode(robotCode, robotStoreId);
                 if (robotDb == null) {
-                    //判断是否有重复的名称
-                    Robot robotDbByName = getByName(robotName);
-                    if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
-                        return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
-                    }
-                    //判断是否有重复的编号
-                    if (!robotDb.getId().equals(robotId)) {
-                        return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
-                    }
                     saveRobotAndBindChargerMapPoint(robotNew);
                     //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
                     syncRosRobotConfig(robotNew);
                     return AjaxResult.success(robotNew, "注册成功");
                 } else {
-                    return AjaxResult.failed("注册失败");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号重复,注册失败");
                 }
             } else {
                 return AjaxResult.failed("注册失败");
