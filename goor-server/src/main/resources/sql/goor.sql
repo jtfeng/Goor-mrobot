@@ -514,6 +514,7 @@ CREATE TABLE `AS_DOOR` (
   `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
   `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
   `DOOR_ORDER_TYPE` varchar(255) DEFAULT NULL COMMENT '门对应的任务类型：比如普通导航，沿线导航，固定路径导航',
+  `PATH_ID` bigint(20) DEFAULT NULL COMMENT '工控路径ID',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 
@@ -1010,7 +1011,7 @@ CREATE TABLE `D_FEATURE_ITEM` (
   `DESCRIPTION` varchar(256) DEFAULT NULL COMMENT '描述',
   `DATA_MODEL` varchar(1000) DEFAULT NULL COMMENT '数据模板，方便前端用户输入',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of D_FEATURE_ITEM
@@ -1022,18 +1023,17 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('4', '自动充电', 'gotoCharge', '自动�
 INSERT INTO `D_FEATURE_ITEM` VALUES ('5', '离开充电桩', 'leaveCharge', '离开充电桩', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('6', '等待任务', 'wait', '等待任务', '{\"waitTime\":10000}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('7', '带时间长度充电任务', 'charge', '带时间长度的充电任务', '{\"chargeTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('8', '装货', 'load', '装货架任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('9', '卸货', 'unload', '卸货架任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('8', '装货', 'load', '装货架任务', '{\\\"code\\\":\\\"test0\\\",\\\"rfid\\\":\\\"tes0\\\",\\\"type\\\":\\\"test0\\\",\\\"name\\\":\\\"test0\\\",\\\"id\\\":1,\\\"storeId\\\":100,\\\"createdBy\\\":1,\\\"createTime\\\":\\\"Jul 3, 2017 8:30:31 PM\\\"}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('9', '卸货', 'unload', '卸货架任务', '{\\\"goodsInfos\\\":[{\\\"id\\\":38,\\\"num\\\":1,\\\"goods\\\":{\\\"name\\\":\\\"大箱\\\",\\\"unit\\\":\\\"个\\\",\\\"deleteStatus\\\":false,\\\"id\\\":1}},{\\\"id\\\":39,\\\"num\\\":1,\\\"goods\\\":{\\\"name\\\":\\\"中箱\\\",\\\"unit\\\":\\\"个\\\",\\\"deleteStatus\\\":false,\\\"id\\\":2}},{\\\"id\\\":40,\\\"num\\\":1,\\\"goods\\\":{\\\"name\\\":\\\"小箱\\\",\\\"unit\\\":\\\"个\\\",\\\"deleteStatus\\\":false,\\\"id\\\":3}}]}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('10', '终点卸货任务', 'finalUnload', '终点卸货任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{\"current_floor\":4,\"arrival_floor\":1,\"enter_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"set_pose_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"back_point\":{{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('12', '门', 'door', '自动门', '{\"waitTime\":10,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('12', '门', 'door', '自动门', '{\"waitTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('13', '电梯加锁任务', 'elevatorLock', '电梯加锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('14', '电梯解锁任务', 'elevatorUnlock', '电梯解锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('15', '沿线导航', 'laneNavigation', '沿线导航', '{\"x\":1.2,\"y\":2.0,\"th\":1.57,\"map\":\"floor1\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('16', '沿固定路径导航', 'pathNavigation', '沿固定路径导航', '{\"scene_name\":\"example\",\"id\":1}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('17', '沿线导航门', 'laneDoor', '沿线导航门', '{\"waitTime\":10,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('18', '沿固定路径导航门', 'pathDoor', '沿固定路径导航门', '{\"waitTime\":10,\"scene_name\":\"example\",\"id\":1}');
-
+INSERT INTO `D_FEATURE_ITEM` VALUES ('18', '沿固定路径导航门', 'pathDoor', '沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
 -- ----------------------------

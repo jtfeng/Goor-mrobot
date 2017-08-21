@@ -3,6 +3,7 @@ package cn.muye.area.map.service;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.bean.CurrentInfo;
 
 import java.util.List;
 
@@ -36,5 +37,7 @@ public interface MapInfoService {
     List<MapInfo> getMapInfo(WhereRequest whereRequest, long storeId);
 
     List<CascadePoint> cascadeSceneMapName(int level, String sceneName);
+
+    CurrentInfo getCurrentInfo(String code) throws Exception;
 
 }
