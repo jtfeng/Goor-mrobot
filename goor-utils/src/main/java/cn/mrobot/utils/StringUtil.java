@@ -400,7 +400,7 @@ public class StringUtil {
     }
 
     /**
-     * 判断字符串转为二进制字符串（包含十六进制）
+     * 将十六进制字符串转为8位二进制字符串
      */
     public static String parseToBit(String str) {
         String regex = "[a-f0-9A-F]*";
@@ -438,5 +438,22 @@ public class StringUtil {
 
     public static void main(String[] args) {
         System.out.println(parseToBit("1b"));
+    }
+
+    public static String intToBit(int value, int length) {
+        String binStr = Integer.toBinaryString(value);
+        int binStrLength = binStr.length();
+        if (binStrLength < length) {
+            //小于length位，拼接0
+            int diff = length - binStrLength;
+            StringBuilder stringBuilder = new StringBuilder();
+            for (int i = diff; i <= diff; i--) {
+                if (i > 0)
+                    stringBuilder.append("0");
+                else break;
+            }
+            binStr = stringBuilder.toString() + binStr;
+        }
+        return binStr;
     }
 }

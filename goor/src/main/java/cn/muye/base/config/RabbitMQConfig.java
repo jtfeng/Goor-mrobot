@@ -203,6 +203,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue directPower() {
+        return new Queue(TopicConstants.DIRECT_POWER,false,false,true, RabbitmqUtil.getRabbitMQArguments());
+    }
+
+    @Bean
     public Queue directX86MissionQueueResponse() {
         return new Queue(TopicConstants.DIRECT_X86_MISSION_QUEUE_RESPONSE,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
