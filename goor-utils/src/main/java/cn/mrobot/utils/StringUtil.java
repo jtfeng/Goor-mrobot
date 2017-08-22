@@ -420,7 +420,7 @@ public class StringUtil {
                     stringBuffer.append(append0(binStr));
                 }
             }
-        }else {
+        } else {
             stringBuffer.append("输入参数错误");
         }
         return stringBuffer.toString();
@@ -455,5 +455,14 @@ public class StringUtil {
             binStr = stringBuilder.toString() + binStr;
         }
         return binStr;
+    }
+
+    public static boolean isJSON(String message) {
+        try {
+            JSONObject jsonObject = JSONObject.parseObject(message);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

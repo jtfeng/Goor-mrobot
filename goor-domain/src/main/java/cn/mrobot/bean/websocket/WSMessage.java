@@ -12,17 +12,19 @@ public class WSMessage implements Serializable {
 
     private String title;
     private Object body;
-    private String userId;
+    private String deviceId;
+    private String module;
     private WSMessageType messageType;
 
     public WSMessage() {
     }
 
-    public WSMessage(String title, WSMessageType messageType, Object body, String userId) {
+    public WSMessage(String title, WSMessageType messageType, Object body, String deviceId, String module) {
         this.title = title;
         this.messageType = messageType;
         this.body = body;
-        this.userId = userId;
+        this.deviceId = deviceId;
+        this.module = module;
     }
 
     public WSMessageType getMessageType() {
@@ -41,12 +43,12 @@ public class WSMessage implements Serializable {
         this.body = body;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getDeviceId() {
+        return deviceId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
     }
 
     public String getTitle() {
@@ -59,6 +61,14 @@ public class WSMessage implements Serializable {
 
     public boolean is(WSMessageType messageType) {
         return this.messageType == messageType;
+    }
+
+    public String getModule() {
+        return module;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
     }
 
     public static WSMessage parse(String text) throws InvalidMessageException {
@@ -83,7 +93,8 @@ public class WSMessage implements Serializable {
         private WSMessageType messageType = WSMessageType.NOTIFICATION;
         private String title;
         private Object body;
-        private String userId;
+        private String deviceId;
+        private String module;
 
         public Builder title(String title) {
             this.title = title;
@@ -100,8 +111,13 @@ public class WSMessage implements Serializable {
             return this;
         }
 
-        public Builder userId(String userId) {
-            this.userId = userId;
+        public Builder deviceId(String deviceId) {
+            this.deviceId = deviceId;
+            return this;
+        }
+
+        public Builder module(String module) {
+            this.module = module;
             return this;
         }
 
@@ -114,8 +130,9 @@ public class WSMessage implements Serializable {
             WSMessage message = new WSMessage();
             message.setTitle(title);
             message.setMessageType(messageType);
-            message.setUserId(userId);
+            message.setDeviceId(deviceId);
             message.setBody(body);
+            message.setModule(module);
             return message;
         }
     }

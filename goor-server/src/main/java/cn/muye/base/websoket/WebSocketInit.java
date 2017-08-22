@@ -1,6 +1,5 @@
 package cn.muye.base.websoket;
 
-import cn.mrobot.bean.websocket.WSMessage;
 import cn.muye.base.cache.CacheInfoManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -18,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Created by enva on 17/07/20.
  */
 @CrossOrigin
-@ServerEndpoint(value = "/ws",encoders = {ServerEncoder.class})
+@ServerEndpoint(value = "/goor/ws")
 @Component
 @Slf4j
 public class WebSocketInit implements ApplicationContextAware {
@@ -28,6 +27,7 @@ public class WebSocketInit implements ApplicationContextAware {
 
     //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
     private static CopyOnWriteArraySet<WebSocketInit> webSocketSets = new CopyOnWriteArraySet<WebSocketInit>();
+    private static final String HEART = "heart";
 
     private static ApplicationContext applicationContext;
     private WebSocketReceiveMessage webSocketReceiveMessage;
@@ -69,11 +69,11 @@ public class WebSocketInit implements ApplicationContextAware {
     @OnMessage
     public void onMessage(String message, Session session) {
         log.info("receive webSocket client message:" + message);
-        if (null == session || null == session.getUserPrincipal() || null == session.getUserPrincipal().getName()) {
-            log.error("ws onMessage error, get userName is null");
-            return;
-        }
         try {
+            //过滤心跳数据
+            if (message.indexOf(HEART) >= 0) {
+                return;
+            }
             if (null == applicationContext) {
                 return;
             }
@@ -81,8 +81,7 @@ public class WebSocketInit implements ApplicationContextAware {
             if (null == webSocketReceiveMessage) {
                 return;
             }
-            webSocketReceiveMessage.receiveWebSocketMessage(session.getUserPrincipal().getName(), message);
-//            webSocketReceiveMessage.receiveWebSocketMessage("1", message);//测试用
+            webSocketReceiveMessage.receiveWebSocketMessage(message);
         } catch (Exception e) {
             log.error("receive message exception", e);
         }
@@ -90,8 +89,6 @@ public class WebSocketInit implements ApplicationContextAware {
 
     /**
      * 发生错误时调用
-     *
-     * @OnError
      */
     @OnError
     public void onError(Session session, Throwable error) {
@@ -104,31 +101,23 @@ public class WebSocketInit implements ApplicationContextAware {
         log.info("onError close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
     }
 
-    public void sendMessage(WSMessage message) throws IOException, EncodeException {
-        this.session.getBasicRemote().sendObject(message);
-        //this.session.getAsyncRemote().sendText(message);
-    }
-
-
     /**
      * 向所有用户发送
      *
      * @param message
      */
-    public void sendAll(WSMessage message) {
+    public void sendAll(String message) {
         for (WebSocketInit webSocketInit : webSocketSets) {
             try {
-                webSocketInit.sendMessage(message);
-            } catch (IOException e) {
-                log.debug("Chat Error: Failed to send message to client", e);
+                webSocketInit.session.getBasicRemote().sendText(message);
+            } catch (Exception e) {
+                log.debug("群发消息异常", e);
                 webSocketSets.remove(webSocketInit);
                 try {
                     webSocketInit.session.close();
                 } catch (IOException e1) {
-                    log.error("websocket session 关闭异常",e);
+                    log.error("websocket session 关闭异常", e);
                 }
-            } catch (EncodeException e) {
-                log.error("群发消息异常",e);
             }
         }
 
