@@ -36,6 +36,7 @@ public class FilterConfig {
                 put("excludedUrl", "/account/user/logOut," +
                 "/account/user/login/pad," +
                         "/account/user/login," +
+                                "/goor/ws,"+
                         "/services/,/check*");
             }
         });
