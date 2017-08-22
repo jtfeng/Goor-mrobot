@@ -44,6 +44,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Base64Utils;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
@@ -324,6 +325,42 @@ public class ConsumerCommon {
     }
 
     /**
+     * 透传ros发布的topic：power
+     * 按照 ChargeInfo 解析数据
+     * <p>
+     * power status store in a 8-bit coded unsigned int
+     * charging status store in the 5th bit
+     * 1 = on charging
+     * 0 = not charging
+     *
+     * @param messageInfo goor上传的信息
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_POWER)
+    public void directPower(@Payload MessageInfo messageInfo) {
+        try {
+            String messageText = messageInfo.getMessageText();
+            JSONObject jsonObject = JSON.parseObject(messageText);
+            String raw_data = jsonObject.getString("data");
+            byte[] bytes = Base64Utils.decode(raw_data.getBytes());
+            int[] ret = new int[bytes.length];
+            for (int i = 0; i < bytes.length; i++) {
+                ret[i] = bytes[i] & 0xFF;
+            }
+
+            ChargeInfo chargeInfo = new ChargeInfo();
+            chargeInfo.setPowerPercent(ret[0]);
+            String binStr = StringUtil.intToBit(ret[1], 8); //转成8位二进制数据
+            chargeInfo.setChargingStatus(Integer.parseInt(binStr.charAt(3) + ""));
+            chargeInfo.setDeviceId(messageInfo.getSenderId());
+            chargeInfo.setCreateTime(messageInfo.getSendTime());
+            chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            saveAndCheckChargeInfo(messageInfo.getSenderId(), chargeInfo);
+        } catch (Exception e) {
+            logger.error("consumer directPower exception", e);
+        }
+    }
+
+    /**
      * 接收 x86 agent 发布过来的消息，理论不接收ros消息，牵涉到ros消息的，请使用topic透传，只和agent通信（无回执）
      *
      * @param messageInfo
@@ -477,6 +514,10 @@ public class ConsumerCommon {
         chargeInfo.setDeviceId(code);
         chargeInfo.setCreateTime(sendTime);
         chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        saveAndCheckChargeInfo(code, chargeInfo);
+    }
+
+    private void saveAndCheckChargeInfo(String code, ChargeInfo chargeInfo) {
         StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(code);
         if (null != autoCharge) {
             chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
@@ -504,9 +545,18 @@ public class ConsumerCommon {
             robot.setLowPowerState(true);
             robotService.updateSelective(saveRobot);
             //向websocket推送低电量警告
-            StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append("当前电量：").append(powerPercent).append(",电量阈值").append(lowBatteryThreshold);
-            webSocketInit.sendAll(new WSMessage.Builder().title(LogType.WARNING_LOWER_POWER.getValue()).messageType(WSMessageType.WARNING).body(stringBuffer.toString()).userId("server").build());
+            //判断是否接收到前端停止发送的请求
+            Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(LogType.WARNING_LOWER_POWER, code);
+            if (flag == null || !flag){
+                String body = "机器人" + code + "当前电量：" + powerPercent + ",电量阈值:" + lowBatteryThreshold;
+                WSMessage ws = new WSMessage.Builder().
+                        title(LogType.WARNING_LOWER_POWER.getValue())
+                        .messageType(WSMessageType.WARNING)
+                        .body(body)
+                        .deviceId(code)
+                        .module(LogType.WARNING_LOWER_POWER.getName()).build();
+                webSocketInit.sendAll(JSON.toJSONString(ws));
+            }
         }
     }
 }
