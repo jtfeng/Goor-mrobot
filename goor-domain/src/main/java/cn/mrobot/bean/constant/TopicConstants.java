@@ -62,8 +62,7 @@ public class TopicConstants {
 	public static final String STATE_COLLECTOR = "/state_collector"; //状态机返回状态的topic
 	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic
 	public static final String ROBOTS_CURRENT_POSE = "robots_current_pose"; //所有机器人当前位置
-	public static final String VERIFY_EMPLYEE_NUMBER = "verify_emplyee_number"; //员工工号取货校验
-
+	public static final String POWER = "/power"; //机器人电量
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
 	public static final String ROBOT_CODE = "robot_code";//机器人主板编号
@@ -141,6 +140,7 @@ public class TopicConstants {
 	//定义Queue
 	//客户端上报队列
 	public static final String DIRECT_CURRENT_POSE = "direct.current_pose";
+	public static final String DIRECT_POWER = "direct.power";
 	public static final String DIRECT_APP_PUB = "direct.app_pub";
 	public static final String DIRECT_APP_SUB = "direct.app_sub";
 	public static final String DIRECT_AGENT_PUB = "direct.agent_pub";

@@ -46,6 +46,26 @@ public class ProducerCommon implements ApplicationContextAware {
     }
 
     /**
+     * 发布当前电量
+     * @param text
+     */
+    public void sendPowerMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_POWER, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendCurrentPoseMessage error",e);
+        }
+    }
+
+    /**
      * 发布app_sub topic的消息
      * @param text
      */
