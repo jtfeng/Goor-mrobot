@@ -22,6 +22,8 @@ public class Shelf extends BaseBean {
 
     private String description; //货架备注
 
+    private Long sceneId; //场景ID
+
     @Transient
     private List<GoodsType> goodTypes;//可装配的货物类型
 
@@ -79,5 +81,13 @@ public class Shelf extends BaseBean {
 
     public void setGoodTypes(List<GoodsType> goodTypes) {
         this.goodTypes = goodTypes;
+    }
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
     }
 }

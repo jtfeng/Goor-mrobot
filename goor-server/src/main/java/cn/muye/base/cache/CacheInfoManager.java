@@ -191,15 +191,41 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static Session getWebSocketSessionCache(String userName) {
+        if (userName == null)
+            return null;
         return webSocketSessionCache.get(userName);
+    }
+
+    public static Map<String, Session> getWebSocketSessionCache() {
+        Map<String, Session> webSocketSessionList = new HashMap<>();
+        Iterator iterator = webSocketSessionCache.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            String key = entry.getKey();
+            ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
+            Session session = (Session) valueEntry.getValue();
+            webSocketSessionList.put(key, session);
+        }
+        return webSocketSessionList;
     }
 
     public static int getWebSocketSessionCacheSize() {
         return webSocketSessionCache.size();
     }
 
-    public static void removeWebSocketSessionCache(String userName) {
-        webSocketSessionCache.remove(userName);
+    public static void removeWebSocketSessionCache(Session session) {
+        if (null ==  session)
+            return;
+        Iterator iterator = webSocketSessionCache.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
+            String key = entry.getKey();
+            Session sessionCache = (Session) valueEntry.getValue();
+            if (sessionCache.equals(session)) {
+                webSocketSessionCache.remove(key);
+            }
+        }
     }
 
     //自动回充缓存

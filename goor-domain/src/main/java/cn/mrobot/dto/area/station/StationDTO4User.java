@@ -9,6 +9,8 @@ public class StationDTO4User {
 
     private String name;
 
+    private Long sceneId;
+
     public Long getId() {
         return id;
     }
@@ -23,5 +25,13 @@ public class StationDTO4User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
     }
 }

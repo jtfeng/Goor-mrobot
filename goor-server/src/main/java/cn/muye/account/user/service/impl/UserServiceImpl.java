@@ -244,6 +244,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         StationDTO4User stationDTO4User = new StationDTO4User();
         stationDTO4User.setId(station.getId());
         stationDTO4User.setName(station.getName());
+        stationDTO4User.setSceneId(station.getSceneId());
         return stationDTO4User;
     }
 
