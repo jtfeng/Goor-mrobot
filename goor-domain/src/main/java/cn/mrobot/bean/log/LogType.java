@@ -27,6 +27,7 @@ public enum LogType {
 	INFO_USER_OPERATE("INFO_USER_OPERATE", "用户操作"),  //用户操作
 	INFO_NAVIGATION("INFO_NAVIGATION", "导航"),  //用户操作
 	INFO_BASE("INFO_BASE", "底盘"),  //用户操作
+	INFO_CURRENT_POSE("INFO_CURRENT_POSE", "当前位置"),  //当前位置
 
 	WARNING_BASE("WARNING_BASE", "底盘警告"),  //机器人静止被推动警告
 	WARNING_LOWER_POWER("WARNING_LOWER_POWER", "机器人低电量警告"),  //机器人低电量警告
