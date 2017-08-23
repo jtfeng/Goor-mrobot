@@ -770,16 +770,21 @@ public class MissionController {
 			missionList.setIntervalTime(0L);
 			missionList.setStartTime(0L);
 			missionList.setStopTime(0L);
-			missionList.setRepeatCount(1);
+//			missionList.setRepeatCount(1);
 			missionList.setPriority(0);
 			missionList.setMissionList(new ArrayList<Mission>());
 			missionList.setName("测试" + currentDateTimeString);
 			List<Mission> missions = new ArrayList<>();
+			//missionList的重复次数根据最后一个任务来
 			for( Long id : missionListIds ) {
 				MissionList missionListTemp = missionListService.get(id,storeId);
+				if(missionListTemp == null) {
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"ID为"+ id +"的任务不存在");
+				}
 				//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
 				List<Mission> missionsTemp = missionListTemp.getMissionList();
 				missions.addAll(missionsTemp);
+				missionList.setRepeatCount(missionListTemp.getRepeatCount());
 			}
 			missionList.setMissionList(missions);
 			missionLists.add(missionList);
