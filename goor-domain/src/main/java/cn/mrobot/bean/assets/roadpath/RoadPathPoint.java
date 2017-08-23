@@ -1,11 +1,8 @@
 package cn.mrobot.bean.assets.roadpath;
 
-import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import java.util.List;
 
 @Table(name = "AS_ROADPATHPOINT")
 public class RoadPathPoint extends BaseBean{
