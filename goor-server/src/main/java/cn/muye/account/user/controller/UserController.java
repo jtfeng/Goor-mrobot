@@ -10,6 +10,7 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
@@ -28,6 +29,7 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -40,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -253,7 +256,7 @@ public class UserController {
             User userDb = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (userDb != null) {
                 Map map = doLogin(userDb.getUserName(), userDb.getPassword());
-                return doCheckLogin(map);
+                return doCheckLoginPad(map);
             } else {
                 return AjaxResult.failed("用户不存在");
             }
@@ -270,7 +273,28 @@ public class UserController {
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
             return AjaxResult.success(map, "登录成功");
-        } else if (userDTO != null && stationList == null){
+        } else if (userDTO != null && stationList == null) {
+            return AjaxResult.failed("账号异常，请联系客服");
+        } else {
+            return AjaxResult.failed("用户名或密码错误");
+        }
+    }
+
+    private AjaxResult doCheckLoginPad(Map map) {
+        UserDTO userDTO = (UserDTO) map.get("user");
+        List<StationDTO4User> stationList = (List<StationDTO4User>) map.get("stationList");
+        if (userDTO != null && stationList != null) {
+            //如果不是站管理员就不让其登录
+            if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, "不是站管理员不能登录");
+            }
+            Scene scene = new Scene();
+            scene.setId(stationList.get(0).getSceneId());
+            SessionUtil.SCENE_LOADING_CACHE.put(map.get("access_token") + ":" + Constant.SCENE_SESSION_TAG, scene);
+            //写入枚举
+            map.put("enums", getAllEnums(userDTO));
+            return AjaxResult.success(map, "登录成功");
+        } else if (userDTO != null && stationList == null) {
             return AjaxResult.failed("账号异常，请联系客服");
         } else {
             return AjaxResult.failed("用户名或密码错误");
@@ -279,6 +303,7 @@ public class UserController {
 
     /**
      * 获取常量接口
+     *
      * @return
      */
     @RequestMapping(value = {"getAllEnum"}, method = RequestMethod.GET)
@@ -319,6 +344,7 @@ public class UserController {
 
     /**
      * 注销接口
+     *
      * @return
      */
     @RequestMapping(value = {"account/user/logOut"}, method = RequestMethod.GET)
@@ -357,7 +383,7 @@ public class UserController {
 //                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
                         try {
                             this.sceneService.storeSceneInfoToSession("14", accessToken);
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             LOGGER.info(" * * * * * * 指定 sceneId 编号的场景信息不存在. * * * * * * ");
                         }
                         map.put("stationList", stationList);
@@ -386,7 +412,7 @@ public class UserController {
         params.put("username", username);
         params.put("password", pwd);
         params.put("grant_type", "password");
-        String result = HttpClientUtil.executePost(null, "http://" + authServerHost + ":" + authServerPort + authServerApi, params, null, null, "application/x-www-form-urlencoded; charset=UTF-8", auth,"UTF-8", true);
+        String result = HttpClientUtil.executePost(null, "http://" + authServerHost + ":" + authServerPort + authServerApi, params, null, null, "application/x-www-form-urlencoded; charset=UTF-8", auth, "UTF-8", true);
         String accessToken = null;
         if (!StringUtil.isNullOrEmpty(result)) {
             JSONObject jsonObject = JSON.parseObject(result);
@@ -397,6 +423,7 @@ public class UserController {
 
     /**
      * 根据调用方法的源头不一样来给stationList不同的值
+     *
      * @param user
      * @param sourceType
      * @return
@@ -410,11 +437,11 @@ public class UserController {
         userDTO.setActivated(user.getActivated());
         List<StationDTO4User> stationDTO4UserList = new ArrayList<>();
         if (sourceType == SOURCE_TYPE_LIST) {
-            if (user.getRoleId() != null && (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) || user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))))  {
+            if (user.getRoleId() != null && (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) || user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption())))) {
                 userDTO.setStationList(stationDTO4UserList);
             }
         } else {
-            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())))  {
+            if (user.getRoleId() != null && user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
                 List<Station> stationList = stationService.list(null, user.getStoreId(), null);
                 if (stationList != null && stationList.size() > 0) {
                     for (Station station : stationList) {
@@ -472,7 +499,7 @@ public class UserController {
                 listNew.add(entityToDTO(role1));
                 listNew.add(entityToDTO(role2));
                 map.put("roleCreateLimit", listNew);
-            } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))){
+            } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
                 Role role = new Role();
                 role.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
                 role.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
@@ -497,6 +524,7 @@ public class UserController {
 
     /**
      * 角色实体转DTO
+     *
      * @param role
      * @return
      */
