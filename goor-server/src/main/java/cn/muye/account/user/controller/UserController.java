@@ -288,9 +288,6 @@ public class UserController {
             if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "不是站管理员不能登录");
             }
-            Scene scene = new Scene();
-            scene.setId(stationList.get(0).getSceneId());
-            SessionUtil.SCENE_LOADING_CACHE.put(map.get("access_token") + ":" + Constant.SCENE_SESSION_TAG, scene);
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
             return AjaxResult.success(map, "登录成功");
@@ -382,7 +379,7 @@ public class UserController {
                         //todo 暂时写死 临时添加场景id( ?? 注意对应 id 场景不存在的情况)
 //                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
                         try {
-                            this.sceneService.storeSceneInfoToSession("14", accessToken);
+                            this.sceneService.storeSceneInfoToSession(String.valueOf(stationList.get(0).getSceneId()), accessToken);
                         } catch (Exception e) {
                             LOGGER.info(" * * * * * * 指定 sceneId 编号的场景信息不存在. * * * * * * ");
                         }
