@@ -15,16 +15,18 @@ public class WSMessage implements Serializable {
     private String deviceId;
     private String module;
     private WSMessageType messageType;
+    private String userId;
 
     public WSMessage() {
     }
 
-    public WSMessage(String title, WSMessageType messageType, Object body, String deviceId, String module) {
+    public WSMessage(String title, WSMessageType messageType, Object body, String deviceId, String module,String userId) {
         this.title = title;
         this.messageType = messageType;
         this.body = body;
         this.deviceId = deviceId;
         this.module = module;
+        this.userId = userId;
     }
 
     public WSMessageType getMessageType() {
@@ -71,6 +73,14 @@ public class WSMessage implements Serializable {
         this.module = module;
     }
 
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
     public static WSMessage parse(String text) throws InvalidMessageException {
         try {
             return JSON.parseObject(text, WSMessage.class);
@@ -95,6 +105,7 @@ public class WSMessage implements Serializable {
         private Object body;
         private String deviceId;
         private String module;
+        private String userId;
 
         public Builder title(String title) {
             this.title = title;
@@ -121,6 +132,12 @@ public class WSMessage implements Serializable {
             return this;
         }
 
+        public Builder userId(String userId) {
+            this.userId = userId;
+            return this;
+        }
+
+
         public Builder json(Object data) {
             this.body = JSON.toJSONString(data, SerializerFeature.DisableCircularReferenceDetect);
             return this;
@@ -133,6 +150,7 @@ public class WSMessage implements Serializable {
             message.setDeviceId(deviceId);
             message.setBody(body);
             message.setModule(module);
+            message.setUserId(userId);
             return message;
         }
     }

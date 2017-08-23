@@ -21,6 +21,8 @@ import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
+import cn.muye.area.map.bean.CurrentInfo;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
@@ -30,7 +32,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
-import cn.muye.base.websoket.WebSocketInit;
+import cn.muye.base.websoket.WebSocketSendMessage;
 import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
@@ -86,7 +88,11 @@ public class ConsumerCommon {
     private MessageSendHandleService messageSendHandleService;
 
     @Autowired
-    private WebSocketInit webSocketInit;
+    private MapInfoService mapInfoService;
+
+    @Autowired
+    private WebSocketSendMessage webSocketSendMessage;
+
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -319,6 +325,8 @@ public class ConsumerCommon {
     public void directCurrentPose(@Payload MessageInfo messageInfo) {
         try {
             CacheInfoManager.setMessageCache(messageInfo);
+            //当前位置信息改变，向WebSocket推送消息
+            sendCurrentInfoWebSocket(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCurrentPose exception", e);
         }
@@ -547,7 +555,7 @@ public class ConsumerCommon {
             //向websocket推送低电量警告
             //判断是否接收到前端停止发送的请求
             Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(LogType.WARNING_LOWER_POWER, code);
-            if (flag == null || !flag){
+            if (flag == null || !flag) {
                 String body = "机器人" + code + "当前电量：" + powerPercent + ",电量阈值:" + lowBatteryThreshold;
                 WSMessage ws = new WSMessage.Builder().
                         title(LogType.WARNING_LOWER_POWER.getValue())
@@ -555,8 +563,33 @@ public class ConsumerCommon {
                         .body(body)
                         .deviceId(code)
                         .module(LogType.WARNING_LOWER_POWER.getName()).build();
-                webSocketInit.sendAll(JSON.toJSONString(ws));
+                try {
+                    webSocketSendMessage.sendWebSocketMessage(ws);
+                } catch (Exception e) {
+                    logger.error("发送低电量报警异常", e);
+                }
+
             }
+        }
+    }
+
+    /**
+     * 向WebSocket推送当前位置
+     *
+     * @param messageInfo
+     */
+    private void sendCurrentInfoWebSocket(MessageInfo messageInfo) {
+        try {
+            String deviceId = messageInfo.getSenderId();
+            CurrentInfo currentInfo = mapInfoService.getCurrentInfo(deviceId);
+            WSMessage ws = new WSMessage.Builder()
+                    .messageType(WSMessageType.POSE)
+                    .body(currentInfo)
+                    .deviceId(deviceId)
+                    .module(LogType.INFO_CURRENT_POSE.getName()).build();
+            webSocketSendMessage.sendWebSocketMessage(ws);
+        } catch (Exception e) {
+            logger.error("发送当前位置信息出错", e);
         }
     }
 }
