@@ -47,4 +47,6 @@ public interface RobotService extends BaseService<Robot>{
     void setRobotPassword(String newPassword);
 
     boolean checkPasswordIsValid(String robotCode, String password);
+
+    void setRobotBusyAndOnline(String robotCode, Boolean busy, Boolean online);
 }
