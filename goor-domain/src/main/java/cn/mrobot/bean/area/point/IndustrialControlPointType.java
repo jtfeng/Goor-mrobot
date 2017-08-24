@@ -1,5 +1,10 @@
 package cn.mrobot.bean.area.point;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by Jelynn on 2017/7/24.
  */
@@ -42,5 +47,16 @@ public enum  IndustrialControlPointType {
             }
         }
         return null;
+    }
+
+    public static List list() {
+        List<Map> resultList = new ArrayList<Map>();
+        for (IndustrialControlPointType c : IndustrialControlPointType.values()) {
+            Map result = new HashMap<String,Object>();
+            result.put("name",c.getName());
+            result.put("value",c.getValue());
+            resultList.add(result) ;
+        }
+        return resultList;
     }
 }
