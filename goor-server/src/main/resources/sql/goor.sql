@@ -591,7 +591,7 @@ CREATE TABLE `AS_ROBOT` (
   KEY `TYPE` (`TYPE_ID`),
   CONSTRAINT `AS_ROBOT_ibfk_1` FOREIGN KEY (`TYPE_ID`) REFERENCES `AS_ROBOT_TYPE` (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=388 DEFAULT CHARSET=utf8;
-ALTER TABLE AS_ROBOT ADD password VARCHAR(50) NULL;
+ALTER TABLE AS_ROBOT ADD PASSWORD VARCHAR(50) NULL;
 
 -- ----------------------------
 -- Table structure for AS_ROBOT_CONFIG
@@ -1037,6 +1037,7 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('17', '沿线导航门', 'laneDoor', '沿�
 INSERT INTO `D_FEATURE_ITEM` VALUES ('18', '沿固定路径导航门', 'pathDoor', '沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('19', '仙知导航', 'seerNavigation', '仙知沿固定路径导航', '{\"scene_name\":\"example\",\"id\":1}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('20', '仙知导航门', 'seerDoor', '仙知沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('21', '不需货架的装货', 'loadNoShelf', '不需货架的装货', '{}');
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
