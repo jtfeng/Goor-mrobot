@@ -599,4 +599,27 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
         return password.equals(robot.getPassword());
     }
+
+    @Override
+    public void setRobotBusyAndOnline(String robotCode, Boolean busy, Boolean online) {
+        checkNotNull(robotCode, "机器人编号不允许为空!!");
+        if (StringUtil.isEmpty(robotCode)){
+            return;
+        }
+        Example example = new Example(Robot.class);
+        example.createCriteria().andCondition(" CODE = ", robotCode);
+        Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
+        if (robot != null) {
+            if (busy != null){
+                robot.setBusy(busy);
+            }
+            if (online != null){
+                robot.setOnline(online);
+            }
+            if (busy != null ||
+                    online != null){
+                super.updateSelective(robot);
+            }
+        }
+    }
 }
