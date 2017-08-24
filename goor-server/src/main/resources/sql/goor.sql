@@ -591,6 +591,7 @@ CREATE TABLE `AS_ROBOT` (
   KEY `TYPE` (`TYPE_ID`),
   CONSTRAINT `AS_ROBOT_ibfk_1` FOREIGN KEY (`TYPE_ID`) REFERENCES `AS_ROBOT_TYPE` (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=388 DEFAULT CHARSET=utf8;
+ALTER TABLE AS_ROBOT ADD PASSWORD VARCHAR(50) NULL;
 
 -- ----------------------------
 -- Table structure for AS_ROBOT_CONFIG
@@ -842,6 +843,7 @@ CREATE TABLE `AS_SHELF` (
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '用户id',
   `CREATED_BY` bigint(20) DEFAULT NULL COMMENT '创建人',
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
+  `SCENE_ID` bigint(20) DEFAULT NULL COMMENT '场景ID',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8;
 
@@ -1035,6 +1037,7 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('17', '沿线导航门', 'laneDoor', '沿�
 INSERT INTO `D_FEATURE_ITEM` VALUES ('18', '沿固定路径导航门', 'pathDoor', '沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('19', '仙知导航', 'seerNavigation', '仙知沿固定路径导航', '{\"scene_name\":\"example\",\"id\":1}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('20', '仙知导航门', 'seerDoor', '仙知沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('21', '不需货架的装货', 'loadNoShelf', '不需货架的装货', '{}');
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
@@ -1790,3 +1793,42 @@ create table ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 create index fk_relation_combinationid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATORPOINTCOMBINATION_ID);
 create index fk_relation_elevatorid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATOR_ID);
+
+DROP TABLE IF EXISTS `AS_ROADPATH`;
+create table AS_ROADPATH
+(
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  PATH_NAME varchar(50) null,
+  PATTERN varchar(50) null,
+  DATA varchar(200) null,
+  START_POINT bigint null,
+  END_POINT bigint null,
+  WEIGHT bigint null,
+  SCENE_NAME varchar(50) null,
+  MAP_NAME varchar(50) null,
+  PATH_ID varchar(32) null,
+  PATH_TYPE int(1) null
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AS_ROADPATHPOINT`;
+create table AS_ROADPATHPOINT
+(
+  ID bigint auto_increment
+    primary key,
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  POINT_ID bigint null,
+  NEXT_POINT_ID bigint null,
+  START_FLAG int(1) default '0' null,
+  END_FLAG int(1) default '0' null,
+  ROAD_PATH_ID bigint null,
+  PREV_POINT_ID bigint null
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ALTER TABLE AS_ROADPATHPOINT
+  ADD CONSTRAINT AS_ROADPATHPOINT_AS_ROADPATH_ID_fk
+FOREIGN KEY (ROAD_PATH_ID) REFERENCES AS_ROADPATH (ID) ON DELETE CASCADE ON UPDATE CASCADE;
