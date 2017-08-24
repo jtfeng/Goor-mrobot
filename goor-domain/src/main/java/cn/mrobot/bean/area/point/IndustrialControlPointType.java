@@ -17,11 +17,11 @@ public enum  IndustrialControlPointType {
 
     private int value;
 
-    private String name;
+    private String caption;
 
-    private IndustrialControlPointType(int value, String name) {
+    private IndustrialControlPointType(int value, String caption) {
         this.value = value;
-        this.name = name;
+        this.caption = caption;
     }
 
     public int getValue() {
@@ -32,17 +32,17 @@ public enum  IndustrialControlPointType {
         this.value = value;
     }
 
-    public String getName() {
-        return name;
+    public String getCaption() {
+        return caption;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCaption(String caption) {
+        this.caption = caption;
     }
 
-    public static IndustrialControlPointType getType(int caption) {
+    public static IndustrialControlPointType getType(int value) {
         for (IndustrialControlPointType c : IndustrialControlPointType.values()) {
-            if (c.getValue() == caption) {
+            if (c.getValue() == value) {
                 return c;
             }
         }
@@ -53,8 +53,9 @@ public enum  IndustrialControlPointType {
         List<Map> resultList = new ArrayList<Map>();
         for (IndustrialControlPointType c : IndustrialControlPointType.values()) {
             Map result = new HashMap<String,Object>();
-            result.put("name",c.getName());
+            result.put("name",c);
             result.put("value",c.getValue());
+            result.put("caption",c.getCaption());
             resultList.add(result) ;
         }
         return resultList;
