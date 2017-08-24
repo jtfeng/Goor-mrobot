@@ -1035,7 +1035,7 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('15', '沿线导航', 'laneNavigation', '�
 INSERT INTO `D_FEATURE_ITEM` VALUES ('16', '沿固定路径导航', 'pathNavigation', '沿固定路径导航', '{\"scene_name\":\"example\",\"id\":1}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('17', '沿线导航门', 'laneDoor', '沿线导航门', '{\"waitTime\":10,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('18', '沿固定路径导航门', 'pathDoor', '沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('19', '仙知导航', 'seerNavigation', '仙知沿固定路径导航', '{\"scene_name\":\"example\",\"id\":1}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('19', '仙知导航', 'seerNavigation', '仙知沿固定路径导航', '{\"target_id\":\"LM2\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('20', '仙知导航门', 'seerDoor', '仙知沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('21', '不需货架的装货', 'loadNoShelf', '不需货架的装货', '{}');
 
