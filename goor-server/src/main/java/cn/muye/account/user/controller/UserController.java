@@ -5,6 +5,7 @@ import cn.mrobot.bean.account.Role;
 import cn.mrobot.bean.account.RoleTypeEnum;
 import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.account.UserRoleXref;
+import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
@@ -470,6 +471,7 @@ public class UserController {
      */
     public final static Map getAllEnums(UserDTO userDTO) {
         Map map = new HashMap();
+        map.put("ICPointType", IndustrialControlPointType.list());
         map.put("mapPointType", MapPointType.list());
         map.put("stationType", StationType.list());
         map.put("roleType", RoleTypeEnum.list());
