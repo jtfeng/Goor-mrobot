@@ -5,7 +5,10 @@ import cn.mrobot.bean.account.Employee;
 import cn.mrobot.bean.account.EmployeeStationXref;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.mission.FeatureItem;
 import cn.mrobot.bean.mission.task.MissionItemTask;
+import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.account.employee.mapper.EmployeeMapper;
 import cn.muye.account.employee.mapper.EmployeeStationXrefMapper;
@@ -13,6 +16,8 @@ import cn.muye.account.employee.service.EmployeeService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.dispatch.service.FeatureItemService;
+import cn.muye.log.base.LogInfoUtils;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.util.UserUtil;
 import com.google.common.collect.Lists;
@@ -40,7 +45,8 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     private StationService stationService;
     @Autowired
     private MissionItemTaskService missionItemTaskService;
-
+    @Autowired
+    private FeatureItemService featureItemService;
     @Autowired
     private UserUtil userUtil;
 
@@ -129,6 +135,8 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     @Override
     public AjaxResult verifyEmplyeeNumber(String code, Long missionItemId) {
         MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
+        //记录日志.单独开前程，避免影响主线程
+        new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
         if (missionItemTaskListDb != null && (Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName()))) {
             Employee employee = new Employee();
             employee.setCode(code);
@@ -151,4 +159,13 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
         return AjaxResult.failed("没有权限");
     }
 
+    private void saveLogInfo(String code, MissionItemTask missionItemTaskListDb) {
+        if (missionItemTaskListDb == null)
+            return;
+        String featureValue = missionItemTaskListDb.getFeatureValue();
+        FeatureItem featureItem = featureItemService.findByValue(featureValue);
+        if (featureItem == null)
+            return;
+        LogInfoUtils.info("工号"+code, ModuleEnums.MISSION, LogType.INFO_EXECUTE_TASK, featureItem.getName());
+    }
 }

@@ -27,36 +27,42 @@ import java.util.List;
 @Service
 public class FeatureItemServiceImpl implements FeatureItemService {
 
-	@Autowired
+    @Autowired
     protected FeatureItemMapper featureItemMapper;
 
-	@Override
-	public long save(FeatureItem featureItem) {
-		return featureItemMapper.save(featureItem);
-	}
+    @Override
+    public long save(FeatureItem featureItem) {
+        return featureItemMapper.save(featureItem);
+    }
 
-	@Override
-	public FeatureItem get(long id) {
-		return featureItemMapper.get(id);
-	}
+    @Override
+    public FeatureItem get(long id) {
+        return featureItemMapper.get(id);
+    }
 
-	@Override
-	public List<FeatureItem> validate(String name, String value) {
-		return featureItemMapper.validate(name, value);
-	}
+    @Override
+    public List<FeatureItem> validate(String name, String value) {
+        return featureItemMapper.validate(name, value);
+    }
 
-	@Override
-	public List<FeatureItem> list(WhereRequest whereRequest) {
-		List<FeatureItem> featureItemList = new ArrayList<>();
-		if(whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null){
-			JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
-			Object name = map.get(SearchConstants.SEARCH_NAME);
-			featureItemList = featureItemMapper.list(name);
-		}else {
-			featureItemList = featureItemMapper.list(null);
-		}
+    @Override
+    public FeatureItem findByValue(String value) {
+        List<FeatureItem> featureItemList = featureItemMapper.findByValue(value);
+        return (featureItemList == null || featureItemList.size() <= 0) ? null : featureItemList.get(0);
+    }
 
-		return featureItemList;
-	}
+    @Override
+    public List<FeatureItem> list(WhereRequest whereRequest) {
+        List<FeatureItem> featureItemList = new ArrayList<>();
+        if (whereRequest != null && whereRequest.getQueryObj() != null && JSON.parseObject(whereRequest.getQueryObj()) != null) {
+            JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
+            Object name = map.get(SearchConstants.SEARCH_NAME);
+            featureItemList = featureItemMapper.list(name);
+        } else {
+            featureItemList = featureItemMapper.list(null);
+        }
+
+        return featureItemList;
+    }
 }
 
