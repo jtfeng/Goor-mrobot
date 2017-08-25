@@ -172,27 +172,38 @@ public class DoorController {
     }
 
     /**
-     * 校验door绑定的点是否都存在
+     * 校验door绑定的点是否都存在，且三个点必须在同一个地图
      *
      * @param door
      * @return
      */
     private boolean isPointExist(Door door) {
+        MapPoint goPointDB = null;
         if(door.getGoPoint() != null) {
-            MapPoint mapPointDB = pointService.findById(door.getGoPoint());
-            if (mapPointDB == null) {
+            goPointDB = pointService.findById(door.getGoPoint());
+            if (goPointDB == null) {
                 return false;
             }
         }
+        MapPoint outPointDB = null;
         if(door.getOutPoint() != null) {
-            MapPoint mapPointDB = pointService.findById(door.getOutPoint());
-            if (mapPointDB == null) {
+            outPointDB = pointService.findById(door.getOutPoint());
+            if (outPointDB == null) {
+                return false;
+            }
+            //校验out点和go点是不是在同一个地图
+            if(outPointDB.getMapName() == null || !outPointDB.getMapName().equals(goPointDB.getMapName()) ) {
                 return false;
             }
         }
+        MapPoint waitPointDB = null;
         if(door.getWaitPoint() != null) {
-            MapPoint mapPointDB = pointService.findById(door.getWaitPoint());
-            if (mapPointDB == null) {
+            waitPointDB = pointService.findById(door.getWaitPoint());
+            if (waitPointDB == null) {
+                return false;
+            }
+            //校验out点和wait点是不是在同一个地图
+            if(waitPointDB.getMapName() == null || !waitPointDB.getMapName().equals(outPointDB.getMapName()) ) {
                 return false;
             }
         }

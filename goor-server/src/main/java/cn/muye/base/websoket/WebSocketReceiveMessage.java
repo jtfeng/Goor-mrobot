@@ -8,6 +8,8 @@ import cn.muye.base.cache.CacheInfoManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.websocket.Session;
+
 /**
  * Created by enva on 17/07/20.
  */
@@ -21,17 +23,19 @@ public class WebSocketReceiveMessage {
      * @param receiveMessage
      * @throws Exception
      */
-    public void receiveWebSocketMessage(String receiveMessage) throws Exception {
+    public void receiveWebSocketMessage(String receiveMessage, Session session) throws Exception {
         if (StringUtil.isEmpty(receiveMessage)) {
             return;
         }
         //TODO 处理具体业务逻辑,特殊情况下走此方法，一般情况下请走http访问接口的方式，不要走此方法，统一访问入口
-        if(StringUtil.isJSON(receiveMessage)){
+        if (StringUtil.isJSON(receiveMessage)) {
             WSMessage wsMessage = WSMessage.parse(receiveMessage);
             if (null == wsMessage)
                 return;
             WSMessageType wsMessageType = wsMessage.getMessageType();
             switch (wsMessageType) {
+                case REGISTER:
+                    handleRegister(wsMessage, session);
                 case POSE:
                     break;
                 case WARNING:
@@ -43,6 +47,17 @@ public class WebSocketReceiveMessage {
                     break;
             }
         }
+    }
+
+    /**
+     * 处理注册信息
+     *
+     * @param wsMessage
+     */
+    private void handleRegister(WSMessage wsMessage, Session session) {
+        String userId = wsMessage.getUserId();
+        userId = userId != null ? userId :session.getId();
+        CacheInfoManager.setWebSocketSessionCache(userId, session);
     }
 
     /**
@@ -65,6 +80,6 @@ public class WebSocketReceiveMessage {
     }
 
     private void stopSendingLowerMessage(LogType logType, WSMessage wsMessage) {
-        CacheInfoManager.setStopSendWebSocketDevice(logType,wsMessage.getDeviceId() );
+        CacheInfoManager.setStopSendWebSocketDevice(logType, wsMessage.getDeviceId());
     }
 }
