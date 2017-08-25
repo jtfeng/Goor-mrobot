@@ -69,6 +69,11 @@ public class TopicHandleInfo implements Serializable {
 		Topic stateCollectorsTopic = TopicHandleInfo.getTopic(ros, TopicConstants.STATE_COLLECTOR);
 		stateCollectorsTopic.unsubscribe();
 		stateCollectorsTopic.subscribe(new StateCollectorsListenerImpl());
+		//接收电量信息
+		Topic powerTopic = TopicHandleInfo.getTopic(ros, TopicConstants.POWER);
+		powerTopic.unsubscribe();
+		powerTopic.subscribe(new PowerListenerImpl());
+
 	}
 
 	public static void topicAdvertise(Ros ros){
@@ -327,6 +332,13 @@ public class TopicHandleInfo implements Serializable {
 				return SingleFactory.state_collector(ros);
 			} catch (Exception e) {
 				log.error("getTopic STATE_COLLECTOR Object error", e);
+			}
+		}
+		if(topicName.equals(TopicConstants.POWER)){
+			try {
+				return SingleFactory.power(ros);
+			} catch (Exception e) {
+				log.error("getTopic POWER Object error", e);
 			}
 		}
 		return null;

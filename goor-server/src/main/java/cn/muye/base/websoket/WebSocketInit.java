@@ -1,6 +1,5 @@
 package cn.muye.base.websoket;
 
-import cn.mrobot.bean.websocket.WSMessage;
 import cn.muye.base.cache.CacheInfoManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -18,7 +17,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * Created by enva on 17/07/20.
  */
 @CrossOrigin
-@ServerEndpoint(value = "/ws",encoders = {ServerEncoder.class})
+@ServerEndpoint(value = "/goor/ws")
 @Component
 @Slf4j
 public class WebSocketInit implements ApplicationContextAware {
@@ -26,13 +25,11 @@ public class WebSocketInit implements ApplicationContextAware {
     //静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
     private static int onlineCount = 0;
 
-    //concurrent包的线程安全Set，用来存放每个客户端对应的MyWebSocket对象。
-    private static CopyOnWriteArraySet<WebSocketInit> webSocketSets = new CopyOnWriteArraySet<WebSocketInit>();
+    private static final String HEART = "heart";
 
     private static ApplicationContext applicationContext;
     private WebSocketReceiveMessage webSocketReceiveMessage;
     private Session session;
-    private WebSocketSendMessage webSocketSendMessage;
 
     /**
      * 连接建立成功调用的方法
@@ -40,7 +37,6 @@ public class WebSocketInit implements ApplicationContextAware {
     @OnOpen
     public void onOpen(Session session) throws Exception {
         this.session = session;
-        webSocketSets.add(this);     //加入set中
         addOnlineCount();           //在线数加1
         System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
     }
@@ -50,14 +46,9 @@ public class WebSocketInit implements ApplicationContextAware {
      */
     @OnClose
     public void onClose(Session session) {
-        webSocketSets.remove(this);  //从set中删除
         subOnlineCount();           //在线数减1
         log.error("webSocket onClose");
-        if (null == session || null == session.getUserPrincipal() || null == session.getUserPrincipal().getName()) {
-            log.error("ws onClose error, get userName is null");
-            return;
-        }
-        CacheInfoManager.removeWebSocketSessionCache(session.getUserPrincipal().getName());
+        CacheInfoManager.removeWebSocketSessionCache(session);
         log.info("close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
     }
 
@@ -69,11 +60,11 @@ public class WebSocketInit implements ApplicationContextAware {
     @OnMessage
     public void onMessage(String message, Session session) {
         log.info("receive webSocket client message:" + message);
-        if (null == session || null == session.getUserPrincipal() || null == session.getUserPrincipal().getName()) {
-            log.error("ws onMessage error, get userName is null");
-            return;
-        }
         try {
+            //过滤心跳数据
+            if (message.indexOf(HEART) >= 0) {
+                return;
+            }
             if (null == applicationContext) {
                 return;
             }
@@ -81,8 +72,7 @@ public class WebSocketInit implements ApplicationContextAware {
             if (null == webSocketReceiveMessage) {
                 return;
             }
-            webSocketReceiveMessage.receiveWebSocketMessage(session.getUserPrincipal().getName(), message);
-//            webSocketReceiveMessage.receiveWebSocketMessage("1", message);//测试用
+            webSocketReceiveMessage.receiveWebSocketMessage(message, session);
         } catch (Exception e) {
             log.error("receive message exception", e);
         }
@@ -90,8 +80,6 @@ public class WebSocketInit implements ApplicationContextAware {
 
     /**
      * 发生错误时调用
-     *
-     * @OnError
      */
     @OnError
     public void onError(Session session, Throwable error) {
@@ -100,38 +88,8 @@ public class WebSocketInit implements ApplicationContextAware {
             log.error("ws onError error, get userName is null");
             return;
         }
-        CacheInfoManager.removeWebSocketSessionCache(session.getUserPrincipal().getName());
+        CacheInfoManager.removeWebSocketSessionCache(session);
         log.info("onError close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
-    }
-
-    public void sendMessage(WSMessage message) throws IOException, EncodeException {
-        this.session.getBasicRemote().sendObject(message);
-        //this.session.getAsyncRemote().sendText(message);
-    }
-
-
-    /**
-     * 向所有用户发送
-     *
-     * @param message
-     */
-    public void sendAll(WSMessage message) {
-        for (WebSocketInit webSocketInit : webSocketSets) {
-            try {
-                webSocketInit.sendMessage(message);
-            } catch (IOException e) {
-                log.debug("Chat Error: Failed to send message to client", e);
-                webSocketSets.remove(webSocketInit);
-                try {
-                    webSocketInit.session.close();
-                } catch (IOException e1) {
-                    log.error("websocket session 关闭异常",e);
-                }
-            } catch (EncodeException e) {
-                log.error("群发消息异常",e);
-            }
-        }
-
     }
 
     @Override

@@ -58,6 +58,17 @@
         </where>
     </select>
 
+    <select id="findByValue" resultMap="featureItem">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM D_FEATURE_ITEM
+        <where>
+            <if test="value != null ">
+                AND VALUE = #{value}
+            </if>
+        </where>
+    </select>
+
     <select id="list" resultMap="featureItem">
         SELECT
         <include refid="Base_Column_List"/>

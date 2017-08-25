@@ -69,6 +69,9 @@ public class PointController {
                 pointService.update(mapPointDB);
                 return AjaxResult.success(mapPointDB);
             } else {
+                mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                mapPoint.setCreateTime(new Date());
+                mapPoint.setCreatedBy(SearchConstants.FAKE_MERCHANT_STORE_ID);
                 pointService.save(mapPoint);
                 return AjaxResult.success(mapPoint);
             }
@@ -186,7 +189,7 @@ public class PointController {
             mapPoint.setCreateTime(new Date());
             mapPoint.setMapPointTypeId(2);
             mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getName());
+            mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getCaption());
 
             double x = 1.15461245;
             int num = 10;

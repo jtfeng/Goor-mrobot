@@ -3,6 +3,7 @@ package cn.muye.base.cache;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.*;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
@@ -65,9 +66,11 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, StateCollectorBaseSystem> baseSystemCache = new ConcurrentHashMapCache<>();//底盘系统状态
     private static ConcurrentHashMapCache<String, StateCollectorNavigation> navigationCache = new ConcurrentHashMapCache<>();//导航状态
 
-    private static ConcurrentHashMapCache<String,  String> persistMissionState = new ConcurrentHashMapCache<>();//已经存库的任务状态
+    private static ConcurrentHashMapCache<String, String> persistMissionState = new ConcurrentHashMapCache<>();//已经存库的任务状态
 
     private static ConcurrentHashMapCache<String, Integer> userLoginStatusCache = new ConcurrentHashMapCache<>();//用户登录状态
+
+    private static ConcurrentHashMapCache<String, Boolean> stopSendWebSocketDevice = new ConcurrentHashMapCache<>();//停止发送WebSocket机器编号
 
     static {
 
@@ -93,6 +96,8 @@ public class CacheInfoManager implements ApplicationContextAware {
 
         //用户登录状态
         userLoginStatusCache.setMaxLifeTime(0);
+
+        stopSendWebSocketDevice.setMaxLifeTime(0);
     }
 
     private CacheInfoManager() {
@@ -148,10 +153,10 @@ public class CacheInfoManager implements ApplicationContextAware {
                 mapOriginalCache.put(key, mapInfo);
             }
             return mapInfo;
-        }else if (StringUtil.isNullOrEmpty(mapInfo.getPngDesigned())){
+        } else if (StringUtil.isNullOrEmpty(mapInfo.getPngDesigned())) {
             //如果美画图为空，进行数据库查询
-            List<MapInfo> mapInfoList = mapInfoService.getMapInfo(mapInfo.getMapName(),mapInfo.getSceneName(),mapInfo.getStoreId());
-            if (mapInfoList.size() > 0){
+            List<MapInfo> mapInfoList = mapInfoService.getMapInfo(mapInfo.getMapName(), mapInfo.getSceneName(), mapInfo.getStoreId());
+            if (mapInfoList.size() > 0) {
                 mapInfo.setPngDesigned(mapInfoList.get(0).getPngDesigned());
             }
         }
@@ -186,15 +191,41 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static Session getWebSocketSessionCache(String userName) {
+        if (userName == null)
+            return null;
         return webSocketSessionCache.get(userName);
+    }
+
+    public static Map<String, Session> getWebSocketSessionCache() {
+        Map<String, Session> webSocketSessionList = new HashMap<>();
+        Iterator iterator = webSocketSessionCache.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            String key = entry.getKey();
+            ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
+            Session session = (Session) valueEntry.getValue();
+            webSocketSessionList.put(key, session);
+        }
+        return webSocketSessionList;
     }
 
     public static int getWebSocketSessionCacheSize() {
         return webSocketSessionCache.size();
     }
 
-    public static void removeWebSocketSessionCache(String userName) {
-        webSocketSessionCache.remove(userName);
+    public static void removeWebSocketSessionCache(Session session) {
+        if (null ==  session)
+            return;
+        Iterator iterator = webSocketSessionCache.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
+            String key = entry.getKey();
+            Session sessionCache = (Session) valueEntry.getValue();
+            if (sessionCache.equals(session)) {
+                webSocketSessionCache.remove(key);
+            }
+        }
     }
 
     //自动回充缓存
@@ -255,7 +286,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         Map<String, List<String>> sceneRobotCodeList = new HashMap<>();
         Iterator iterator = sceneRobotListCache.iterator();
         while (iterator.hasNext()) {
-            Map.Entry<String,  ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String,  ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             String key = entry.getKey();
             ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
             List<String> robotCodeList = (List<String>) valueEntry.getValue();
@@ -267,7 +298,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     public static void setSceneRobotListCache(String sceneName, String robotCode) {
         Iterator iterator = sceneRobotListCache.iterator();
         while (iterator.hasNext()) {
-            Map.Entry<String,  ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String,  ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
             List<String> robotCodeList = (List<String>) valueEntry.getValue();
             //判断机器是否在缓存中
@@ -284,7 +315,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     //已经存库的任务状态
-    public static void setPersistMissionState(String deviceId,  String missionState) {
+    public static void setPersistMissionState(String deviceId, String missionState) {
         persistMissionState.put(deviceId, missionState);
     }
 
@@ -300,7 +331,17 @@ public class CacheInfoManager implements ApplicationContextAware {
         userLoginStatusCache.remove(key);
     }
 
-    public static void setUserLoginStatusCache(String key,  Integer status) {
+    public static void setUserLoginStatusCache(String key, Integer status) {
         userLoginStatusCache.put(key, status);
+    }
+
+    public static void setStopSendWebSocketDevice(LogType logType, String deviceId) {
+        String key = logType.getName() + "_" + deviceId;
+        stopSendWebSocketDevice.put(key, true);
+    }
+
+    public static Boolean getStopSendWebSocketDevice(LogType logType, String deviceId) {
+        String key = logType.getName() + "_" + deviceId;
+        return stopSendWebSocketDevice.get(key);
     }
 }

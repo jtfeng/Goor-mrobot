@@ -8,6 +8,7 @@ import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
@@ -45,6 +46,9 @@ public class X86MissionStateResponseServiceImpl
     @Autowired
     OrderDetailService orderDetailService;
 
+    @Autowired
+    RobotService robotService;
+
     @Override
     public AjaxResult handleX86MissionStateResponse(MessageInfo messageInfo) {
         logger.info(JsonUtils.toJson(
@@ -60,26 +64,36 @@ public class X86MissionStateResponseServiceImpl
                 switch (jsonMissionStateResponse.getState()){
                     case JsonMissionStateResponse.state_waiting:
                         //当前无任务执行
+                        robotService.setRobotBusyAndOnline(baseMessageService.getSenderId(messageInfo),
+                                false, true);
                         handleStateWaiting(jsonMissionStateResponse,
                                 baseMessageService.getSenderId(messageInfo));
                         break;
                     case JsonMissionStateResponse.state_canceled:
                         //被取消
+                        robotService.setRobotBusyAndOnline(baseMessageService.getSenderId(messageInfo),
+                                false, true);
                         handleStateCanceled(jsonMissionStateResponse,
                                 baseMessageService.getSenderId(messageInfo));
                         break;
                     case JsonMissionStateResponse.state_executing:
                         //正在执行
+                        robotService.setRobotBusyAndOnline(baseMessageService.getSenderId(messageInfo),
+                                true, true);
                         handleStateExecuting(jsonMissionStateResponse,
                                 baseMessageService.getSenderId(messageInfo));
                         break;
                     case JsonMissionStateResponse.state_finished:
                         //已经完成
+                        robotService.setRobotBusyAndOnline(baseMessageService.getSenderId(messageInfo),
+                                false, true);
                         handleStateFinished(jsonMissionStateResponse,
                                 baseMessageService.getSenderId(messageInfo));
                         break;
                     case JsonMissionStateResponse.state_paused:
                         //暂停中
+                        robotService.setRobotBusyAndOnline(baseMessageService.getSenderId(messageInfo),
+                                true, true);
                         handleStatePaused(jsonMissionStateResponse,
                                 baseMessageService.getSenderId(messageInfo));
                         break;

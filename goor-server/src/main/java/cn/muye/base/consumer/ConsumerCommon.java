@@ -21,6 +21,9 @@ import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
+import cn.muye.account.employee.service.EmployeeService;
+import cn.muye.area.map.bean.CurrentInfo;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
@@ -30,7 +33,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
-import cn.muye.base.websoket.WebSocketInit;
+import cn.muye.base.websoket.WebSocketSendMessage;
 import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
@@ -44,6 +47,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Base64Utils;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
@@ -85,7 +89,14 @@ public class ConsumerCommon {
     private MessageSendHandleService messageSendHandleService;
 
     @Autowired
-    private WebSocketInit webSocketInit;
+    private MapInfoService mapInfoService;
+
+    @Autowired
+    private WebSocketSendMessage webSocketSendMessage;
+
+    @Autowired
+    private EmployeeService employeeService;
+
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -140,21 +151,73 @@ public class ConsumerCommon {
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.SUB_NAME);
                 String uuid = jsonObjectData.getString(TopicConstants.UUID);
+                String robotCode = messageInfo.getSenderId();
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
                 if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
                     logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
-                    String robotCode = messageInfo.getSenderId();
                     Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
                     if (!StringUtil.isNullOrEmpty(uuid)) {
                         syncRosRobotConfig(robotDb, uuid);
                     }
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)) {
+                    String jsonData = jsonObjectData.getString(TopicConstants.DATA);
+                    JSONObject employeeObj = JSON.parseObject(jsonData);
+                    String empNo = employeeObj.getString("empNo");
+                    Long missionItemId = employeeObj.getLong("missionItemId");
+                    AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(empNo, missionItemId);
+                    replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.isSuccess(), uuid);
                 }
             }
         } catch (Exception e) {
             logger.error("consumer directAgentSub exception", e);
         }
     }
+
+    /**
+     * 给应用回执校验员工工号结果
+     *
+     * @param robotCode
+     * @param msg
+     * @param flag
+     * @param uuid
+     */
+    private void replyVerification(String robotCode, String msg, Boolean flag, String uuid) {
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        SlamBody slamBody = new SlamBody();
+        slamBody.setPubName(TopicConstants.VERIFY_EMPLYEE_NUMBER);
+        slamBody.setUuid(uuid);
+        slamBody.setMsg(msg);
+        slamBody.setErrorCode(flag? "0" : "1");
+        slamBody.setData("");
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setReceiverId(robotCode);
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+        try {
+            messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
+            logger.info("下发机器人" + robotCode + "员工校验信息成功");
+        } catch (Exception e) {
+            logger.error("发送错误", e);
+            try {
+                slamBody.setMsg("查询错误");
+                slamBody.setErrorCode("1");
+                slamBody.setData("");
+                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+                messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+                messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
+            } catch (Exception e1) {
+                logger.error("错误{}", e1);
+            }
+        } finally {
+        }
+    }
+
 
     /**
      * 同步往ros的agent_pub扔机器人信息消息
@@ -318,8 +381,46 @@ public class ConsumerCommon {
     public void directCurrentPose(@Payload MessageInfo messageInfo) {
         try {
             CacheInfoManager.setMessageCache(messageInfo);
+            //当前位置信息改变，向WebSocket推送消息
+            sendCurrentInfoWebSocket(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCurrentPose exception", e);
+        }
+    }
+
+    /**
+     * 透传ros发布的topic：power
+     * 按照 ChargeInfo 解析数据
+     * <p>
+     * power status store in a 8-bit coded unsigned int
+     * charging status store in the 5th bit
+     * 1 = on charging
+     * 0 = not charging
+     *
+     * @param messageInfo goor上传的信息
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_POWER)
+    public void directPower(@Payload MessageInfo messageInfo) {
+        try {
+            String messageText = messageInfo.getMessageText();
+            JSONObject jsonObject = JSON.parseObject(messageText);
+            String raw_data = jsonObject.getString("data");
+            byte[] bytes = Base64Utils.decode(raw_data.getBytes());
+            int[] ret = new int[bytes.length];
+            for (int i = 0; i < bytes.length; i++) {
+                ret[i] = bytes[i] & 0xFF;
+            }
+
+            ChargeInfo chargeInfo = new ChargeInfo();
+            chargeInfo.setPowerPercent(ret[0]);
+            String binStr = StringUtil.intToBit(ret[1], 8); //转成8位二进制数据
+            chargeInfo.setChargingStatus(Integer.parseInt(binStr.charAt(3) + ""));
+            chargeInfo.setDeviceId(messageInfo.getSenderId());
+            chargeInfo.setCreateTime(messageInfo.getSendTime());
+            chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            saveAndCheckChargeInfo(messageInfo.getSenderId(), chargeInfo);
+        } catch (Exception e) {
+            logger.error("consumer directPower exception", e);
         }
     }
 
@@ -477,6 +578,10 @@ public class ConsumerCommon {
         chargeInfo.setDeviceId(code);
         chargeInfo.setCreateTime(sendTime);
         chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        saveAndCheckChargeInfo(code, chargeInfo);
+    }
+
+    private void saveAndCheckChargeInfo(String code, ChargeInfo chargeInfo) {
         StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(code);
         if (null != autoCharge) {
             chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
@@ -504,9 +609,43 @@ public class ConsumerCommon {
             robot.setLowPowerState(true);
             robotService.updateSelective(saveRobot);
             //向websocket推送低电量警告
-            StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append("当前电量：").append(powerPercent).append(",电量阈值").append(lowBatteryThreshold);
-            webSocketInit.sendAll(new WSMessage.Builder().title(LogType.WARNING_LOWER_POWER.getValue()).messageType(WSMessageType.WARNING).body(stringBuffer.toString()).userId("server").build());
+            //判断是否接收到前端停止发送的请求
+            Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(LogType.WARNING_LOWER_POWER, code);
+            if (flag == null || !flag) {
+                String body = "机器人" + code + "当前电量：" + powerPercent + ",电量阈值:" + lowBatteryThreshold;
+                WSMessage ws = new WSMessage.Builder().
+                        title(LogType.WARNING_LOWER_POWER.getValue())
+                        .messageType(WSMessageType.WARNING)
+                        .body(body)
+                        .deviceId(code)
+                        .module(LogType.WARNING_LOWER_POWER.getName()).build();
+                try {
+                    webSocketSendMessage.sendWebSocketMessage(ws);
+                } catch (Exception e) {
+                    logger.error("发送低电量报警异常", e);
+                }
+
+            }
+        }
+    }
+
+    /**
+     * 向WebSocket推送当前位置
+     *
+     * @param messageInfo
+     */
+    private void sendCurrentInfoWebSocket(MessageInfo messageInfo) {
+        try {
+            String deviceId = messageInfo.getSenderId();
+            CurrentInfo currentInfo = mapInfoService.getCurrentInfo(deviceId);
+            WSMessage ws = new WSMessage.Builder()
+                    .messageType(WSMessageType.POSE)
+                    .body(currentInfo)
+                    .deviceId(deviceId)
+                    .module(LogType.INFO_CURRENT_POSE.getName()).build();
+            webSocketSendMessage.sendWebSocketMessage(ws);
+        } catch (Exception e) {
+            logger.error("发送当前位置信息出错", e);
         }
     }
 }

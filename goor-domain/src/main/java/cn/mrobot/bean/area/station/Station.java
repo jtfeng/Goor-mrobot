@@ -76,6 +76,9 @@ public class Station extends BaseBean{
     @Transient
     private List<Robot> robotList;
 
+    @Transient
+    private List<Station> accessArriveStationIdList;
+
     public String getName() {
         return name;
     }
@@ -122,5 +125,13 @@ public class Station extends BaseBean{
 
     public void setRobotList(List<Robot> robotList) {
         this.robotList = robotList;
+    }
+
+    public List<Station> getAccessArriveStationIdList() {
+        return accessArriveStationIdList;
+    }
+
+    public void setAccessArriveStationIdList(List<Station> accessArriveStationIdList) {
+        this.accessArriveStationIdList = accessArriveStationIdList;
     }
 }

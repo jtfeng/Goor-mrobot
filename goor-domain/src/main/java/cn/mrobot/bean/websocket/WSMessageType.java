@@ -8,7 +8,7 @@ public enum  WSMessageType {
     NOTIFICATION,
     WARNING,
     POSE,
-    PING;
+    STOP_SENDING;
 
     public boolean is(String msgType) {
         return name().equalsIgnoreCase(msgType);

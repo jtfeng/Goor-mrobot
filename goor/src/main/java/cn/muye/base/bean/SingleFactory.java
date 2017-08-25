@@ -4,7 +4,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.producer.ProducerCommon;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
-import edu.wpi.rail.jrosbridge.messages.Message;
+import edu.wpi.rail.jrosbridge.messages.std.UInt8MultiArray;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -36,6 +36,7 @@ public class SingleFactory {
     private static volatile Topic state_collector;
     private static volatile Topic checkHeartTopic;
     private static volatile Topic x86_mission_heartbeat;
+    private static volatile Topic power;
 
     static Lock lock_msg=new ReentrantLock();
     static Lock lock_x86_mission_dispatch=new ReentrantLock();
@@ -56,6 +57,7 @@ public class SingleFactory {
     static Lock lock_state_collector=new ReentrantLock();
     static Lock lock_checkHeartTopic=new ReentrantLock();
     static Lock lock_x86_mission_heartbeat=new ReentrantLock();
+    static Lock lock_power=new ReentrantLock();
 
     public static ProducerCommon getProducerCommon() {
         if (msg == null) {
@@ -408,6 +410,28 @@ public class SingleFactory {
             }
         }
         return state_collector;
+    }
+
+
+    public static Topic power(Ros ros) throws Exception {
+        if (power == null) {
+            if(null == ros){
+                log.error("get power ros is null error, return null");
+                return power;
+            }
+            lock_power.lock();
+            try {
+                if (power == null) {
+                    power = new Topic(ros, TopicConstants.POWER, UInt8MultiArray.TYPE);
+                    log.info("get topic power="+power);
+                }
+            }catch (Exception e){
+                log.error("get power error", e);
+            }finally {
+                lock_power.unlock();
+            }
+        }
+        return power;
     }
 
     public static Topic checkHeartTopic(Ros ros) throws Exception {
