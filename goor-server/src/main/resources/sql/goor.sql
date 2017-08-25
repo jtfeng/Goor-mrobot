@@ -293,6 +293,23 @@ INSERT INTO `AC_STATION_ROBOT_XREF` VALUES ('29', '20', '314');
 INSERT INTO `AC_STATION_ROBOT_XREF` VALUES ('30', '20', '315');
 
 -- ----------------------------
+-- Table structure for AC_STATION_ROBOT_XREF
+-- ----------------------------
+DROP TABLE IF EXISTS `A_STATION_STATION_XREF`;
+
+CREATE TABLE `A_STATION_STATION_XREF` (
+  `ORIGIN_STATION_ID` bigint(20) DEFAULT NULL COMMENT '发货站点ID',
+  `DESTINATION_STATION_ID` bigint(20) DEFAULT NULL COMMENT '可到达站ID'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of a_station_station_xref
+-- ----------------------------
+INSERT INTO `A_STATION_STATION_XREF` VALUES ('2', '4');
+INSERT INTO `A_STATION_STATION_XREF` VALUES ('2', '5');
+INSERT INTO `A_STATION_STATION_XREF` VALUES ('2', '7');
+
+-- ----------------------------
 -- Table structure for AC_USER
 -- ----------------------------
 -- ----------------------------
