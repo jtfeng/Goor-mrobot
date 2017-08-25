@@ -213,6 +213,9 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 }
                 if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                     Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
+                    if(null == echo){
+                        echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                    }
                     Message toSend = new Message(commonInfo.getPublishMessage());
                     echo.publish(toSend);
 
@@ -242,9 +245,11 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 logger.warn("-->> publishMessage commonInfo is null");
                 return AjaxResult.failed(MessageStatusType.PARAMETER_ERROR.getName());
             }
-            long end = System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache();
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
+                if(null == echo){
+                    echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                }
                 Message toSend = new Message(commonInfo.getPublishMessage());
                 echo.publish(toSend);
 //                logger.info("-->> publishMessage commonInfo to ros success");
