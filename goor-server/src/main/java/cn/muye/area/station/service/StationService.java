@@ -47,5 +47,7 @@ public interface StationService extends BaseService<Station>{
 	void bindRobots(Station station);
 
 	List<Station> findStationsByRobotCode(String robotCode);
+
+	List<Station> listAccessStationByStationId(Long stationId, Long sceneId);
 }
 

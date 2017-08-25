@@ -4,6 +4,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationMapPointXREF;
 import cn.mrobot.bean.area.station.StationRobotXREF;
+import cn.mrobot.bean.area.station.StationStationXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
@@ -12,6 +13,7 @@ import cn.muye.area.station.mapper.StationMapper;
 import cn.muye.area.station.service.StationMapPointXREFService;
 import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.area.station.service.StationService;
+import cn.muye.area.station.service.StationStationXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
@@ -26,6 +28,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -46,6 +49,8 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     protected PointService pointService;
     @Autowired
     protected StationRobotXREFService stationRobotXREFService;
+    @Autowired
+    protected StationStationXREFService stationStationXREFService;
     @Autowired
     protected RobotService robotService;
     @Autowired
@@ -189,11 +194,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
                 if (resultMapPoint != null && resultMapPoint.size() > 0) {
                     station.setMapPoints(resultMapPoint);
                 }
-
-            }
-        }
-        if (stationList != null && stationList.size() > 0) {
-            for (Station station : stationList) {
+                //组装绑定的机器人List
                 List<Robot> robotList = Lists.newArrayList();
                 List<StationRobotXREF> stationRobotXrefDbList = stationRobotXREFService.getByStationId(station.getId());
                 if (stationRobotXrefDbList != null && stationRobotXrefDbList.size() > 0) {
@@ -203,6 +204,16 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
                     }
                 }
                 station.setRobotList(robotList);
+                //组装绑定的可到达站List
+                List<Station> accessArriveStationList = Lists.newArrayList();
+                List<StationStationXREF> stationStationXREFList = stationStationXREFService.list(station.getId());
+                if (stationStationXREFList != null && stationStationXREFList.size() > 0) {
+                    for (StationStationXREF xref : stationStationXREFList) {
+                        Station stationDb = stationMapper.selectByPrimaryKey(xref.getDestinationStationId());
+                        accessArriveStationList.add(stationDb);
+                    }
+                }
+                station.setAccessArriveStationIdList(accessArriveStationList);
             }
         }
         return stationList;
@@ -243,6 +254,15 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     @Override
     public List<Station> findStationsByRobotCode(String robotCode) {
         return this.stationMapper.findStationsByRobotCode(robotCode);
+    }
+
+    @Override
+    public List<Station> listAccessStationByStationId(Long stationId, Long sceneId) {
+        List<StationStationXREF> xrefList = stationStationXREFService.list(stationId);
+        List<Long> stationIdList = xrefList.stream().map(xref -> xref.getDestinationStationId()).collect(Collectors.toList());
+        Example example = new Example(Station.class);
+        example.createCriteria().andCondition("ID in", stationIdList).andCondition("SCENE_ID =", sceneId);
+        return stationMapper.selectByExample(example);
     }
 }
 
