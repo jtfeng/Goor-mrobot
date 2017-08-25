@@ -222,6 +222,9 @@ public class HttpDownloader extends Thread {
             CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
+                if(null == echo){
+                    echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                }
                 Message toSend = new Message(commonInfo.getPublishMessage());
                 echo.publish(toSend);
 
@@ -291,9 +294,9 @@ public class HttpDownloader extends Thread {
                         + fileLength);
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            logger.error("-->> getInitedCheckPoint MalformedURLException", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("-->> getInitedCheckPoint IOException", e);
         } finally {
             if (conn != null) {
                 conn.disconnect();
