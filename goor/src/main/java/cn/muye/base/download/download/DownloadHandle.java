@@ -17,7 +17,7 @@ import java.io.File;
 public class DownloadHandle {
 	private static Logger logger = Logger.getLogger(DownloadHandle.class);
 	
-	public static AjaxResult downloadCheck(Ros ros, MessageInfo messageInfo, ReceiveMessageService receiveMessageService){
+	public static AjaxResult downloadCheck(Ros ros, MessageInfo messageInfo, ReceiveMessageService receiveMessageService) throws Exception{
 		if(StringUtil.isEmpty(messageInfo) || StringUtil.isNullOrEmpty(messageInfo.getMessageText())){
 			logger.error("messageInfo or messageText is null");
 			reSendRelyMessage(messageInfo, receiveMessageService);
@@ -42,7 +42,7 @@ public class DownloadHandle {
 	}
 
 	// 传入数据库有问题的数据，直接更新数据库，进入删除状态,将MessageStatusType.CANCEL_MESSAGE,如果无状态消息就直接给webSocket发消息
-	private static void reSendRelyMessage(MessageInfo messageInfo, ReceiveMessageService receiveMessageService){
+	private static void reSendRelyMessage(MessageInfo messageInfo, ReceiveMessageService receiveMessageService) throws Exception{
 			messageInfo.setMessageStatusType(MessageStatusType.CANCEL_MESSAGE);
 			ReceiveMessage msg = new ReceiveMessage(messageInfo);
 			msg.setRelyMessage("parameter error");
@@ -58,7 +58,7 @@ public class DownloadHandle {
 	/**
 	 * 新建目录
 	 */
-	private static void newFilePath(String localPath){
+	private static void newFilePath(String localPath) throws Exception{
 		File f = new File(localPath);
 		f.mkdirs();
 	}

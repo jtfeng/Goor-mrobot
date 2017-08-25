@@ -52,7 +52,9 @@ public class AppSubService implements ApplicationContextAware {
             return;
         }
         Topic echo = TopicHandleInfo.getTopic(ros, topicName);
-
+        if(null == echo){
+            echo = new Topic(ros, topicName, topicType);
+        }
         JSONObject messageObject = new JSONObject();
         messageObject.put(TopicConstants.DATA, JSON.toJSONString(data));
         Message toSend = new Message(JSON.toJSONString(messageObject));
