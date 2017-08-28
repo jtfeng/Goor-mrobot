@@ -170,7 +170,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
                 Robot robotDb = getById(robotId);
-                if (robotDb != null && robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId)) {
+                if (robotDb != null && robotDb.getBusy() == false && robotDb.getOnline() == true && robotDb.getTypeId().equals(typeId)) {
                     availableRobot = robotDb;
                     break;
                 }
@@ -244,7 +244,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             String name = (String) jsonObject.get(SearchConstants.SEARCH_NAME);
             String sceneId = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_ID);
             String sceneName = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
-            int type = Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE));
+            Integer type = jsonObject.get(SearchConstants.SEARCH_TYPE)!= null ? Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE)) : null;
             map.put("name", name);
             map.put("sceneId", sceneId);
             map.put("sceneName", sceneName);
@@ -504,21 +504,25 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     public void setRobotPassword(String newPassword) {
         List<Robot> allRobots = this.robotMapper.selectAll();
         // 实例化一个线程池 ， 后台发送消息并且轮询监听数据回执情况（线程池的各项配置可以根据特定的机器配置来确定的 ， 可以优化）
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                10,
-                20,
-                1,
-                TimeUnit.MINUTES,
-                new ArrayBlockingQueue<Runnable>(100));
         for (Robot robot : allRobots) {
             checkNotNull(robot.getCode(), String.format("数据库编号为 %s 的机器人的机器人编号不存在，请检查解决后重试!",
                     String.valueOf(robot.getId())));
         }
         for (Robot robot : allRobots) {
             // 利用线程池逐一完成密码下发任务
-            executor.submit(new SendPasswordToSpecialRobotThread(robot, newPassword));
+            try {
+                executor.submit(new SendPasswordToSpecialRobotThread(robot, newPassword));
+            }catch (Exception e){
+                LOGGER.info("当前提交的密码设置请求已经超过最大限制次数!");
+            }
         }
     }
+    private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            10,
+            20,
+            1,
+            TimeUnit.MINUTES,
+            new ArrayBlockingQueue<Runnable>(100));
     private static final String PASSWORD = "password";
     private static final String SENDER = "goor-server";
     private static Map<String, ReentrantLock> LOCK_DATA = Maps.newHashMap();
