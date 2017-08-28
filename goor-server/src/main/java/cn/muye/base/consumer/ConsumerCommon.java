@@ -554,22 +554,19 @@ public class ConsumerCommon {
             robotService.updateSelective(saveRobot);
             //向websocket推送低电量警告
             //判断是否接收到前端停止发送的请求
-            Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(LogType.WARNING_LOWER_POWER, code);
-            if (flag == null || !flag) {
-                String body = "机器人" + code + "当前电量：" + powerPercent + ",电量阈值:" + lowBatteryThreshold;
-                WSMessage ws = new WSMessage.Builder().
-                        title(LogType.WARNING_LOWER_POWER.getValue())
-                        .messageType(WSMessageType.WARNING)
-                        .body(body)
-                        .deviceId(code)
-                        .module(LogType.WARNING_LOWER_POWER.getName()).build();
-                try {
-                    webSocketSendMessage.sendWebSocketMessage(ws);
-                } catch (Exception e) {
-                    logger.error("发送低电量报警异常", e);
-                }
-
+            String body = "机器人" + code + "当前电量：" + powerPercent + ",电量阈值:" + lowBatteryThreshold;
+            WSMessage ws = new WSMessage.Builder().
+                    title(LogType.WARNING_LOWER_POWER.getValue())
+                    .messageType(WSMessageType.WARNING)
+                    .body(body)
+                    .deviceId(code)
+                    .module(LogType.WARNING_LOWER_POWER.getName()).build();
+            try {
+                webSocketSendMessage.sendWebSocketMessage(ws);
+            } catch (Exception e) {
+                logger.error("发送低电量报警异常", e);
             }
+
         }
     }
 
