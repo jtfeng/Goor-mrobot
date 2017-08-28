@@ -16,6 +16,7 @@ public class WSMessage implements Serializable {
     private String module;
     private WSMessageType messageType;
     private String userId; //机器人code，多个以逗号隔开
+    private String uuid;
 
     public WSMessage() {
     }
@@ -81,6 +82,14 @@ public class WSMessage implements Serializable {
         this.userId = userId;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public static WSMessage parse(String text) throws InvalidMessageException {
         try {
             return JSON.parseObject(text, WSMessage.class);
@@ -106,6 +115,7 @@ public class WSMessage implements Serializable {
         private String deviceId;
         private String module;
         private String userId;
+        private String uuid;
 
         public Builder title(String title) {
             this.title = title;
@@ -137,6 +147,10 @@ public class WSMessage implements Serializable {
             return this;
         }
 
+        public Builder uuid(String uuid) {
+            this.uuid = uuid;
+            return this;
+        }
 
         public Builder json(Object data) {
             this.body = JSON.toJSONString(data, SerializerFeature.DisableCircularReferenceDetect);
@@ -151,6 +165,7 @@ public class WSMessage implements Serializable {
             message.setBody(body);
             message.setModule(module);
             message.setUserId(userId);
+            message.setUuid(uuid);
             return message;
         }
     }
