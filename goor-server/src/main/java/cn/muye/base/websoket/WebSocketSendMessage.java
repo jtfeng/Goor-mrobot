@@ -28,16 +28,16 @@ public class WebSocketSendMessage {
      * @throws Exception
      */
     public void sendWebSocketMessage(WSMessage wsMessage) throws Exception {
-        String userId = wsMessage.getUserId();
+        String deviceId = wsMessage.getDeviceId();
         //校验是否前端发送了停止接收请求
-        Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(wsMessage.getModule(), wsMessage.getDeviceId());
+        Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(wsMessage.getModule(), deviceId);
         if (flag != null && flag) {
             log.info(wsMessage.getDeviceId() + "停止接收" + wsMessage.getModule() + "信息");
             return;
         }
         //校验前端是否需要接收此类型的信息
         if (CacheInfoManager.haveSpecificType(wsMessage.getDeviceId(), wsMessage.getModule())){
-            Session session = CacheInfoManager.getWebSocketSessionCache(userId);
+            Session session = CacheInfoManager.getWebSocketSessionCache(deviceId);
             sendWebSocketMessage(wsMessage, session);
         }
     }
