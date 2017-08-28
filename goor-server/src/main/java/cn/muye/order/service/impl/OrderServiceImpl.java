@@ -80,7 +80,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public AjaxResult savePathOrder(Order order) {
         //保存订单
         preInject(order);
-        order.setStatus(OrderConstant.ORDER_STATUS_UNDONE);
+//        order.setStatus(OrderConstant.ORDER_STATUS_UNDONE);
         orderMapper.saveOrder(order);
         //保存订单详情
         List<OrderDetail> orderDetailList = order.getDetailList();

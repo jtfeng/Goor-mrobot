@@ -2597,6 +2597,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         MapPoint temp1 = new MapPoint();
                                         mpAttrs.put(copyValue(temp1,point), atts1);
                                         logger.info("###### addPathRoadPathPoint elevator_end is ok ");
+                                        break;
+                                    case DOOR_END:
+                                        //添加沿线导航任务
+                                        mapPoints.add(point);
+                                        //标记该点的属性
+                                        MPointAtts atts2 = new MPointAtts();
+                                        atts2.type = MPointType_DOOR_END;
+                                        MapPoint temp2 = new MapPoint();
+                                        mpAttrs.put(copyValue(temp2,point), atts2);
+                                        logger.info("###### addPathRoadPathPoint door_end is ok ");
+                                        break;
                                     default:
                                         break;
                                 }
@@ -2615,7 +2626,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     /**
      * 判断新增电梯任务
-     * @param mp
+     * @param finalTargetMp
+     * @param currentMp
      * @param mapPoints
      * @param mpAttrs
      */
@@ -2831,6 +2843,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             mPointAtts
                     );
                     break;
+                case MPointType_DOOR_END:
+                    initPathMissionTaskDoorEnd(
+                            missionListTask,
+                            order,
+                            startMp,
+                            mp,
+                            mPointAtts
+                    );
+                    break;
                 default:
                     break;
             }
@@ -2934,6 +2955,29 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         }
 
 
+    }
+
+    /**
+     * 实例化门结束任务
+     * @param missionListTask
+     * @param order
+     * @param mp
+     * @param mPointAtts
+     */
+    private void initPathMissionTaskDoorEnd(
+            MissionListTask missionListTask,
+            Order order,
+            MapPoint startMp,
+            MapPoint mp,
+            MPointAtts mPointAtts) {
+
+        logger.info("### initPathMissionTaskDoorEnd ");
+
+        String parentName = "门结束任务-";
+
+        //单点路径导航任务，当前路径导航到充电点
+        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
+        missionListTask.getMissionTasks().add(sigleNavTask);
     }
 
 
@@ -3058,7 +3102,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     }
 
     /**
-     * 实例化充电任务
+     * 实例化电梯结束任务
      * @param missionListTask
      * @param order
      * @param mp
@@ -3288,6 +3332,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MPointType_ELEVATOR = "elevator";//电梯点
     public static final String MPointType_ELEVATOR_END = "elevator_end";//电梯结束点
     public static final String MPointType_DOOR = "door";//门任务等待点
+    public static final String MPointType_DOOR_END = "door_end";//门任务结束点
     public static final String MPointType_UNDEFINED = "undefined";//未定义
 
     public static final String FeatureValue_test = "test";//测试命令
