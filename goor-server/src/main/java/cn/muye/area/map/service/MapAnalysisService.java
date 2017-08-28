@@ -240,7 +240,7 @@ public class MapAnalysisService {
                 mapPoint.setMapPointTypeId(Integer.parseInt(valueMap.get("type").toString()));
                 mapPoint.setPointAlias(valueMap.get("alias").toString());
                 mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getName());
+                mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getCaption());
 
                 //根据场景名，地图名，点名称去数据库查询是否有点，如果有则更新，没有则新增
                 List<MapPoint> mapPointListDB = pointService.findByName(mapPoint.getPointName(),sceneName,mapName , SearchConstants.FAKE_MERCHANT_STORE_ID);

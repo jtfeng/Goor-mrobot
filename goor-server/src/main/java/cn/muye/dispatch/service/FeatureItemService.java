@@ -23,6 +23,8 @@ public interface FeatureItemService {
 
 	List<FeatureItem> validate(String name, String value);
 
+	FeatureItem findByValue(String value);
+
 	List<FeatureItem> list(WhereRequest whereRequest);
 }
 

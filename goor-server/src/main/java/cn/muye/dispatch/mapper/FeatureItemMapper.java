@@ -2,6 +2,7 @@ package cn.muye.dispatch.mapper;
 
 
 import cn.mrobot.bean.mission.FeatureItem;
+import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -15,13 +16,15 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-public interface FeatureItemMapper{
+public interface FeatureItemMapper extends MyMapper<FeatureItem>{
 
 	long save(FeatureItem featureItem);
 
 	FeatureItem get(long id);
 
 	List<FeatureItem> validate(@Param("name") String name, @Param("value") String value);
+
+	List<FeatureItem> findByValue(@Param("value") String value);
 
 	List<FeatureItem> list(@Param("name") Object name);
 }

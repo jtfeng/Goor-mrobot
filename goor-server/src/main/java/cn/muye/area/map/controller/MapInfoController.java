@@ -129,7 +129,7 @@ public class MapInfoController {
                LOGGER.error("未获取到当前位置信息");
                return AjaxResult.failed("未获取到当前位置信息");
            }
-            return AjaxResult.failed(currentInfo, "获取成功");
+            return AjaxResult.success(currentInfo, "获取成功");
         } catch (Exception e) {
             LOGGER.error("getCurrentInfo exception", e);
             return AjaxResult.failed("获取机器人状态信息出错");
