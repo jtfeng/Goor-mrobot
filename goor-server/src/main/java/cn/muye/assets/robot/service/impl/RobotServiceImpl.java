@@ -170,7 +170,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
                 Robot robotDb = getById(robotId);
-                if (robotDb != null && robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId)) {
+                if (robotDb != null && robotDb.getBusy() == false && robotDb.getOnline() == true && robotDb.getTypeId().equals(typeId)) {
                     availableRobot = robotDb;
                     break;
                 }
@@ -244,7 +244,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             String name = (String) jsonObject.get(SearchConstants.SEARCH_NAME);
             String sceneId = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_ID);
             String sceneName = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
-            int type = Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE));
+            Integer type = jsonObject.get(SearchConstants.SEARCH_TYPE)!= null ? Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE)) : null;
             map.put("name", name);
             map.put("sceneId", sceneId);
             map.put("sceneName", sceneName);
