@@ -54,7 +54,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     /**
      * webSocket根据用户名来缓存Session 的缓存
      */
-    private static ConcurrentHashMapCache<String, Session> webSocketSessionCache = new ConcurrentHashMapCache<String, Session>();
+    private static ConcurrentHashMapCache<String, Session> webSocketSessionCache = new ConcurrentHashMapCache<String, Session>(); //key ： 机器人code
     /*场景和机器人列表，key为场景，value为机器人编号列表*/
     private static ConcurrentHashMapCache<String, List<String>> sceneRobotListCache = new ConcurrentHashMapCache<String, List<String>>();
 
@@ -71,6 +71,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, Integer> userLoginStatusCache = new ConcurrentHashMapCache<>();//用户登录状态
 
     private static ConcurrentHashMapCache<String, Boolean> stopSendWebSocketDevice = new ConcurrentHashMapCache<>();//停止发送WebSocket机器编号
+    private static ConcurrentHashMapCache<String, List<String>> specificTypeDevice = new ConcurrentHashMapCache<>();//指定接收特定类型websocket信息的机器人code
 
     static {
 
@@ -98,6 +99,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         userLoginStatusCache.setMaxLifeTime(0);
 
         stopSendWebSocketDevice.setMaxLifeTime(0);
+        specificTypeDevice.setMaxLifeTime(0);  //websocket关闭的时候清理session对应的数据
     }
 
     private CacheInfoManager() {
@@ -214,7 +216,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static void removeWebSocketSessionCache(Session session) {
-        if (null ==  session)
+        if (null == session)
             return;
         Iterator iterator = webSocketSessionCache.iterator();
         while (iterator.hasNext()) {
@@ -335,13 +337,33 @@ public class CacheInfoManager implements ApplicationContextAware {
         userLoginStatusCache.put(key, status);
     }
 
-    public static void setStopSendWebSocketDevice(LogType logType, String deviceId) {
-        String key = logType.getName() + "_" + deviceId;
+    public static void setStopSendWebSocketDevice(String module, String deviceId) {
+        String key = module + "_" + deviceId;
         stopSendWebSocketDevice.put(key, true);
     }
 
-    public static Boolean getStopSendWebSocketDevice(LogType logType, String deviceId) {
-        String key = logType.getName() + "_" + deviceId;
+    public static Boolean getStopSendWebSocketDevice(String module, String deviceId) {
+        String key = module + "_" + deviceId;
         return stopSendWebSocketDevice.get(key);
+    }
+
+    public static boolean haveSpecificType(String deviceId, String specificType) {
+        List<String> deviceIds = specificTypeDevice.get(specificType);
+        return deviceIds != null && deviceIds.contains(deviceId);
+    }
+
+    public static void setSpecificTypeDeviceId(String deviceId, String specificType) {
+        List<String> deviceIds = specificTypeDevice.get(specificType);
+        if (deviceIds == null){
+            deviceIds =  Lists.newArrayList();
+            deviceIds.add(deviceId);
+        }else if (!deviceIds.contains(deviceId)){
+            deviceIds.add(deviceId);
+        }
+        specificTypeDevice.put(specificType, deviceIds);
+    }
+
+    public static void removeSpecificTypeDeviceId(String key) {
+        specificTypeDevice.remove(key);
     }
 }

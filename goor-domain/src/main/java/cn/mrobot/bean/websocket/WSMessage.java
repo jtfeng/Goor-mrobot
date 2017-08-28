@@ -12,10 +12,10 @@ public class WSMessage implements Serializable {
 
     private String title;
     private Object body;
-    private String deviceId;
+    private String deviceId; //机器人code，多个以逗号隔开
     private String module;
     private WSMessageType messageType;
-    private String userId;
+    private String userId; //机器人code，多个以逗号隔开
 
     public WSMessage() {
     }
