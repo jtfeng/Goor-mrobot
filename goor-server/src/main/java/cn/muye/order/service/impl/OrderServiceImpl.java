@@ -71,6 +71,39 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         return generateMissionList(order.getId());
     }
 
+    /**
+     * 优先固定路径导航订单
+     * @param order
+     * @return
+     */
+    @Override
+    public AjaxResult savePathOrder(Order order) {
+        //保存订单
+        preInject(order);
+        order.setStatus(OrderConstant.ORDER_STATUS_UNDONE);
+        orderMapper.saveOrder(order);
+        //保存订单详情
+        List<OrderDetail> orderDetailList = order.getDetailList();
+        orderDetailList.forEach(orderDetail -> {
+            orderDetail.setOrderId(order.getId());
+            orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
+            orderDetailService.save(orderDetail);
+            //保存货物信息
+            orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
+                goodsInfo.setOrderDetailId(orderDetail.getId());
+                goodsInfoMapper.insert(goodsInfo);
+            });
+        });
+        //在这里调用任务生成器
+        Order sqlOrder = getOrder(order.getId());
+//        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
+        AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder);
+        if(!ajaxResult.isSuccess()){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return ajaxResult;
+    }
+
     @Override
     public Order getOrder(Long id) {
         Order getOrder = orderMapper.getById(id);

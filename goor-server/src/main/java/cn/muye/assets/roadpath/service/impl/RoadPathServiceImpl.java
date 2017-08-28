@@ -141,6 +141,44 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
+    public List<RoadPathDetail> listRoadPathDetailByStartAndEndPointType(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception {
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("START_POINT = ", startPoint)
+                .andCondition("END_POINT = ", endPoint);
+        if (sceneName != null) {
+            criteria.andCondition("SCENE_NAME = ", sceneName);
+        }
+        if (mapName != null) {
+            criteria.andCondition("MAP_NAME = ", mapName);
+        }
+        if(pathType != null) {
+            criteria.andCondition("PATH_TYPE = ", pathType);
+        }
+        List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
+        return packageRoadPathDetail(roadPaths);
+    }
+
+    @Override
+    public List<RoadPath> listRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception {
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("START_POINT = ", startPoint)
+                .andCondition("END_POINT = ", endPoint);
+        if (sceneName != null) {
+            criteria.andCondition("SCENE_NAME = ", sceneName);
+        }
+        if (mapName != null) {
+            criteria.andCondition("MAP_NAME = ", mapName);
+        }
+        if(pathType != null) {
+            criteria.andCondition("PATH_TYPE = ", pathType);
+        }
+        List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
+        return roadPaths;
+    }
+
+    @Override
     public List<RoadPathDetail> listRoadPaths(WhereRequest whereRequest) throws Exception {
         List<RoadPath> roadPaths = listPageByStoreIdAndOrder(
                 whereRequest.getPage(),
@@ -159,15 +197,24 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
 
             List<MapPoint> relatePoints = Lists.newArrayList();
-            RoadPathPoint begin = this.roadPathMapper.findBeginRoadPathPoint(roadPath.getId()).get(0);// 起始点
-            relatePoints.add(this.mapPointMapper.selectByPrimaryKey(begin.getPointId()));// 加入第一个点
-            RoadPathPoint nextRoadPathPointInfo = begin; // 表示下一个 引用点
-            while ((nextRoadPathPointInfo = (nextRoadPathPointInfo.getNextPointId() == null ? null :
-                    this.roadPathMapper.findSpecifyRoadPathPoint(roadPath.getId(), nextRoadPathPointInfo.getNextPointId()).get(0))) != null) {
-                relatePoints.add(this.mapPointMapper.selectByPrimaryKey(nextRoadPathPointInfo.getPointId()));// 加入第一个点
+            log.info("packageRoadPathDetail: start- " + roadPath.getStartPoint()
+                    + ",end- " + roadPath.getEndPoint()
+                    + ",roadPathId- " + roadPath.getId());
+            RoadPathPoint begin = null;// 起始点
+            try {
+                begin = this.roadPathMapper.findBeginRoadPathPoint(roadPath.getId()).get(0);
+                relatePoints.add(this.mapPointMapper.selectByPrimaryKey(begin.getPointId()));// 加入第一个点
+                RoadPathPoint nextRoadPathPointInfo = begin; // 表示下一个 引用点
+                while ((nextRoadPathPointInfo = (nextRoadPathPointInfo.getNextPointId() == null ? null :
+                        this.roadPathMapper.findSpecifyRoadPathPoint(roadPath.getId(), nextRoadPathPointInfo.getNextPointId()).get(0))) != null) {
+                    relatePoints.add(this.mapPointMapper.selectByPrimaryKey(nextRoadPathPointInfo.getPointId()));// 加入第一个点
+                }
+                roadPathDetail.setRelatePoints(relatePoints);
+                roadPathDetails.add(roadPathDetail);
+            } catch (Exception e) {
+                log.error(e.getMessage(),e);
+                continue;
             }
-            roadPathDetail.setRelatePoints(relatePoints);
-            roadPathDetails.add(roadPathDetail);
         }
         return roadPathDetails;
     }

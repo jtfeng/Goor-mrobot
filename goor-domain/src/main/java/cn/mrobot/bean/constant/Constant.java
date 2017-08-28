@@ -12,6 +12,9 @@ public class Constant {
     public final static Integer NORMAL = 0; //正常值
     public final static Integer DELETE = 1;  //删除
 
+    //PathType
+    public final static Integer PATH_TYPE_CLOUD = 0; //云端路径
+    public final static Integer PATH_TYPE_X86 = 1;  //工控路径
 
     public static final String UTF_8 = "UTF-8";
 
@@ -69,6 +72,8 @@ public class Constant {
     public final static String MISSION_LIST_TYPE_PATROL = "patrol"; //巡逻任务-美亚
     public final static String MISSION_LIST_TYPE_CHARGE = "charge"; //充电任务-美亚
     public final static String MISSION_LIST_TYPE_NORMAL = "normal"; //普通任务——任务管理器
+
+    public final static String ORDER_NAV_TYPE_PATH = "path";//下单优先执行的导航类型-固定路径导航
 
     public final static Long CHECK_IF_OFFLINE_TIME = 60000L; //5分钟=30000毫秒
 

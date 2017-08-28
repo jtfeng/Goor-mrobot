@@ -21,6 +21,13 @@ public interface MissionFuncsService {
     AjaxResult createMissionLists(Order order);
 
     /**
+     * 根据订单数据创建任务列表,导航用固定路径导航
+     * @param order
+     * @return
+     */
+    AjaxResult createMissionListsPathNav(Order order);
+
+    /**
      * 获取任务下发的消息对象json字串
      * @param listTasks
      * @return

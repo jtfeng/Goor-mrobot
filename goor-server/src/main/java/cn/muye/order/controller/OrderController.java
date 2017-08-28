@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.order.*;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
@@ -85,8 +86,7 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrder(@RequestBody Order order){
-
+    public AjaxResult saveOrder(@RequestBody Order order,@RequestParam(required = false) String orderNavType){
         Robot arrangeRobot = null;
         try {
             //注入发起站
@@ -122,7 +122,13 @@ public class OrderController extends BaseController {
             //存在机器人，订单直接下单
             order.setRobot(arrangeRobot);
             order.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
-            AjaxResult ajaxResult = orderService.saveOrder(order);
+            AjaxResult ajaxResult = AjaxResult.failed("订单生成异常");
+            if(orderNavType != null && orderNavType.equals(Constant.ORDER_NAV_TYPE_PATH)) {
+                ajaxResult = orderService.savePathOrder(order);
+            }
+            else {
+                ajaxResult = orderService.saveOrder(order);
+            }
             //若未成功， 机器人状态也回滚
             if(!ajaxResult.isSuccess()){
                 if(arrangeRobot != null){

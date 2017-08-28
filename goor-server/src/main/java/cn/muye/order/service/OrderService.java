@@ -12,6 +12,8 @@ public interface OrderService {
 
     AjaxResult saveOrder(Order order);
 
+    AjaxResult savePathOrder(Order order);
+
     Order getOrder(Long id);
 
     void checkWaitOrders();
