@@ -1,6 +1,7 @@
 package cn.muye.base.websoket;
 
 import cn.mrobot.bean.websocket.WSMessage;
+import cn.mrobot.utils.StringUtil;
 import cn.muye.base.cache.CacheInfoManager;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import java.util.Map;
 @Component
 public class WebSocketSendMessage {
 
+
     /**
      * webSocket发送消息方法，向web页面推送消息
      *
@@ -25,16 +27,36 @@ public class WebSocketSendMessage {
      * @return
      * @throws Exception
      */
-    public boolean sendWebSocketMessage(WSMessage wsMessage) throws Exception {
+    public void sendWebSocketMessage(WSMessage wsMessage) throws Exception {
         String userId = wsMessage.getUserId();
-        Session session = CacheInfoManager.getWebSocketSessionCache(userId);
+        //校验是否前端发送了停止接收请求
+        Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(wsMessage.getModule(), wsMessage.getDeviceId());
+        if (flag != null && flag) {
+            log.info(wsMessage.getDeviceId() + "停止接收" + wsMessage.getModule() + "信息");
+            return;
+        }
+        //校验前端是否需要接收此类型的信息
+        if (CacheInfoManager.haveSpecificType(wsMessage.getDeviceId(), wsMessage.getModule())){
+            Session session = CacheInfoManager.getWebSocketSessionCache(userId);
+            sendWebSocketMessage(wsMessage, session);
+        }
+    }
+
+    /**
+     * webSocket发送消息方法，向web页面推送消息
+     *
+     * @param wsMessage
+     * @return
+     * @throws Exception
+     */
+    public void sendWebSocketMessage(WSMessage wsMessage, Session session) throws Exception {
         if (null != session) {
             sendMessage(session, JSON.toJSONString(wsMessage));
         } else {
             sendAll(JSON.toJSONString(wsMessage));
         }
-        return false;
     }
+
 
     private void sendMessage(Session session, String message) {
         try {
@@ -69,5 +91,4 @@ public class WebSocketSendMessage {
             }
         }
     }
-
 }

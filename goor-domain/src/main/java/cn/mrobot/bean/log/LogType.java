@@ -11,8 +11,9 @@ import cn.mrobot.bean.enums.GoorEnum;
  * Describe:
  * Version:1.0
  */
-public enum LogType {
+public enum LogType{
 
+	INFO("INFO", "INFO信息"),  //所有INFO信息  与LogLevel有重复，添加此条主要是为了websocket信息的种类取值统一
 	INFO_LOGIN("INFO_LOGIN", "站登录信息"),  //站登录信息
 	INFO_SCHEDULE_TASK("INFO_SCHEDULE_TASK", "站发起的调度信息日志(历史调度信息)"), //站发起的调度信息日志(历史调度信息)
 	INFO_CALL("INFO_CALL", "分站呼叫记录日志"), //分站呼叫记录日志
@@ -29,10 +30,11 @@ public enum LogType {
 	INFO_BASE("INFO_BASE", "底盘"),  //用户操作
 	INFO_CURRENT_POSE("INFO_CURRENT_POSE", "当前位置"),  //当前位置
 
+	WARNING("WARNING", "WARNING信息"),  //所有WARNING信息  与LogLevel有重复，添加此条主要是为了websocket信息的种类取值统一
 	WARNING_BASE("WARNING_BASE", "底盘警告"),  //机器人静止被推动警告
 	WARNING_LOWER_POWER("WARNING_LOWER_POWER", "机器人低电量警告"),  //机器人低电量警告
 	WARNING_FORCE_RUN("WARNING_FORCE_RUN", "机器人静止被推动警告"),  //机器人静止被推动警告
-	WARNING_OUT_OF_MAP("WARNING_OUT_OF_MAP", "机器人脱离已知地图区域警告;"),  //机器人脱离已知地图区域警告;
+	WARNING_OUT_OF_MAP("WARNING_OUT_OF_MAP", "机器人脱离已知地图区域警告"),  //机器人脱离已知地图区域警告;
 	WARNING_ROBOT_FELL("WARNING_ROBOT_FELL", "机器人摔倒警告"),  //机器人摔倒警告
 	WARNING_PEOPLE_ON_CAR("WARNING_PEOPLE_ON_CAR", "人搭乘小车警告"),  //人搭乘小车警告
 	WARNING_BUMP("WARNING_BUMP", "颠簸警告"),  //颠簸警告
