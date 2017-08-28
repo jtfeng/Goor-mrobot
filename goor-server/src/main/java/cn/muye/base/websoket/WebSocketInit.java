@@ -49,9 +49,6 @@ public class WebSocketInit implements ApplicationContextAware {
     @OnClose
     public void onClose(Session session) {
         subOnlineCount();           //在线数减1
-        log.error("webSocket onClose");
-        CacheInfoManager.removeWebSocketSessionCache(session);
-        log.info("close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
         //去除当前设定的机器人接收指定类型信息
         Map<String, Session> sessionMap = CacheInfoManager.getWebSocketSessionCache();
         Iterator iterator = sessionMap.entrySet().iterator();
@@ -62,6 +59,9 @@ public class WebSocketInit implements ApplicationContextAware {
                 CacheInfoManager.removeSpecificTypeDeviceId(key);
             }
         }
+        log.error("webSocket onClose");
+        CacheInfoManager.removeWebSocketSessionCache(session);
+        log.info("close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
     }
 
     /**
