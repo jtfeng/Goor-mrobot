@@ -24,6 +24,8 @@ public class OrderSetting extends BaseBean{
 
     private RobotType robotType;  //机器人类型
 
+    private Boolean needShelf = Boolean.FALSE;  //默认不需要货架
+
     private Boolean needSign = Boolean.FALSE;  //是否需要签收 false 不需要 true 需要
 
     private Boolean defaultSetting = Boolean.FALSE; //是否为默认设置
@@ -31,6 +33,14 @@ public class OrderSetting extends BaseBean{
     private Boolean deleteStatus = Boolean.FALSE; //是否已删除 默认初始不删除
 
     public OrderSetting() {
+    }
+
+    public Boolean getNeedShelf() {
+        return needShelf;
+    }
+
+    public void setNeedShelf(Boolean needShelf) {
+        this.needShelf = needShelf;
     }
 
     public OrderSetting(Long id) {

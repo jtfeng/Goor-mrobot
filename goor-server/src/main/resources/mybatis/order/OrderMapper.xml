@@ -7,7 +7,6 @@
         o.order_setting_id AS "orderSetting.id",
         o.robot_id AS "robot.id",
         o.start_station_id AS "startStation.id",
-        o.need_shelf AS "needShelf",
         o.shelf_id AS "shelf.id",
         o.scene_id AS "scene.id",
         o.status AS "status",
@@ -31,7 +30,6 @@
         order_setting_id,
         robot_id,
         start_station_id,
-        need_shelf,
         shelf_id,
         scene_id,
         status,
@@ -42,7 +40,6 @@
         #{orderSetting.id},
         #{robot.id},
         #{startStation.id},
-        #{needShelf},
         #{shelf.id},
         #{scene.id},
         #{status},
@@ -64,9 +61,6 @@
             <if test="startStation != null and startStation.id != null and startStation.id != ''" >
                 start_station_id = #{startStation.id},
             </if>
-            <if test="needShelf != null" >
-                need_shelf = #{needShelf},
-            </if>
             <if test="shelf != null and shelf.id != null and shelf.id != ''" >
                 shelf_id = #{shelf.id},
             </if>
@@ -79,6 +73,33 @@
         </set>
         WHERE id = #{id}
     </update>
+
+
+    <select id="listByDomain" resultType="cn.mrobot.bean.order.Order">
+        select
+        <include refid="orderColumn" />
+        from OR_ORDER o
+        <where>
+            <if test="orderSetting != null and orderSetting.id != null and orderSetting.id != ''" >
+                order_setting_id = #{orderSetting.id},
+            </if>
+            <if test="robot != null and robot.id != null and robot.id != ''" >
+                robot_id = #{robot.id},
+            </if>
+            <if test="startStation != null and startStation.id != null and startStation.id != ''" >
+                start_station_id = #{startStation.id},
+            </if>
+            <if test="shelf != null and shelf.id != null and shelf.id != ''" >
+                shelf_id = #{shelf.id},
+            </if>
+            <if test="scene != null and scene.id != null and scene.id != ''" >
+                scene_id = #{scene.id},
+            </if>
+            <if test="status != null" >
+                status = #{status}
+            </if>
+        </where>
+    </select>
 
 
 </mapper>

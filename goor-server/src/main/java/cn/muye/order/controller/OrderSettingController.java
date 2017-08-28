@@ -1,15 +1,14 @@
 package cn.muye.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.order.OrderSetting;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.OrderSettingService;
+import cn.muye.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -21,6 +20,8 @@ public class OrderSettingController extends BaseController{
 
     @Autowired
     private OrderSettingService orderSettingService;
+    @Autowired
+    private UserUtil userUtil;
 
     /**
      * 通过id获取 订单配置
@@ -45,9 +46,9 @@ public class OrderSettingController extends BaseController{
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult listAvailableOrderSetting(HttpSession session){
+    public AjaxResult listAvailableOrderSetting(){
         try {
-            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
+            Long stationId = userUtil.getStationId();
             List<OrderSetting> orderSetting = orderSettingService.listAvailableOrderSettingByStationId(stationId);
             return AjaxResult.success(orderSetting);
         } catch (Exception e) {
@@ -63,9 +64,9 @@ public class OrderSettingController extends BaseController{
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting,HttpSession session){
+    public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting){
         try {
-            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
+            Long stationId = userUtil.getStationId();
             if(stationId == null){
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "session内无法获取站id");
             }
@@ -110,9 +111,9 @@ public class OrderSettingController extends BaseController{
      */
     @RequestMapping(value = "updateDefault" , method = RequestMethod.PUT)
     @ResponseBody
-    public AjaxResult updateDefaultOrderSetting(@RequestParam("id") Long id, HttpSession session){
+    public AjaxResult updateDefaultOrderSetting(@RequestParam("id") Long id){
         try {
-            Long stationId = (Long)session.getAttribute(Constant.SESSION_STATION_ID);
+            Long stationId = userUtil.getStationId();
             List<OrderSetting> settingList = orderSettingService.listAvailableOrderSettingByStationId(stationId);
             settingList.forEach(orderSetting -> {
                if(orderSetting.getId() == id ){

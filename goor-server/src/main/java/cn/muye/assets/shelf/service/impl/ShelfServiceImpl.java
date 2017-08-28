@@ -6,7 +6,6 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.shelf.mapper.ShelfMapper;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.base.service.BaseService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
@@ -68,6 +67,14 @@ public class ShelfServiceImpl extends BaseServiceImpl<Shelf> implements ShelfSer
             shelf.setGoodTypes(shelfMapper.findGoodsTypeByShelfId(shelf.getId()));
         }
         return shelves;
+    }
+
+    @Override
+    public List<Shelf> listBySceneAndStoreId(Long sceneId) {
+        Shelf shelf = new Shelf();
+        shelf.setSceneId(sceneId);
+        shelf.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        return myMapper.select(shelf);
     }
 
     public Shelf getByName(String name) {

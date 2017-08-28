@@ -1,12 +1,13 @@
 package cn.mrobot.bean.order;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * Created by Selim on 2017/7/6.
  */
 @Table(name = "OR_GOODS_INFO")
-public class GoodsInfo{
+public class GoodsInfo implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

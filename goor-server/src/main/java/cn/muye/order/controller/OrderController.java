@@ -28,13 +28,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
 
 /**
  * Created by Selim on 2017/7/8.
+ * 订单管理
+ *
  */
 @Controller
 @RequestMapping("order")
@@ -84,11 +85,11 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrder(@RequestBody Order order,HttpServletRequest request){
+    public AjaxResult saveOrder(@RequestBody Order order){
+
         Robot arrangeRobot = null;
         try {
             //注入发起站
-            //Long stationId = SessionUtil.getStationId(request);
             Long stationId = userUtil.getStationId();
             order.setStartStation(new Station(stationId));
             //注入场景
@@ -100,17 +101,27 @@ public class OrderController extends BaseController {
                 order.setOrderSetting(orderSetting);
             }
             OrderSetting setting = orderSettingService.getById(order.getOrderSetting().getId());
+            //货架判定
+            if(setting.getNeedShelf()){
+                if(order.getShelf()== null || order.getShelf().getId() == null){
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "默认配置必须传入货架编号");
+                }else {
+                    //todo 货架是否被占用？
+                }
+            }
             Integer robotTypeId = setting.getRobotType().getId();
             //根据 站点id 和 机器人类型 自动选择机器人
             arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
             if(arrangeRobot == null){
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"现在暂无可调用机器");
+                //暂无可用机器人，反馈成功
+                //order.setStatus(OrderConstant.ORDER_STATUS_WAIT);
+                //orderService.saveWaitOrder(order);
+                //return AjaxResult.success("订单已接收，等待机器分配");
+                return AjaxResult.failed("暂无可用机器人");
             }
-            //是否需要货架判定
-            if(order.getShelf()!= null && order.getShelf().getId() != null){
-                order.setNeedShelf(Boolean.TRUE);
-            }
+            //存在机器人，订单直接下单
             order.setRobot(arrangeRobot);
+            order.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
             AjaxResult ajaxResult = orderService.saveOrder(order);
             //若未成功， 机器人状态也回滚
             if(!ajaxResult.isSuccess()){
@@ -129,6 +140,7 @@ public class OrderController extends BaseController {
             }
             return AjaxResult.failed("提交订单出现异常，订单失败");
         }
+
     }
 
 
@@ -142,9 +154,13 @@ public class OrderController extends BaseController {
     @ResponseBody
     public AjaxResult getOrderPageInfo(@RequestParam("type") Long type){
         try {
+            Station station = stationService.findById(userUtil.getStationId());
+            if(station == null){
+                return AjaxResult.failed("未获取到用户的关联站点");
+            }
             List<Goods> goodsList = goodsService.listGoodsByType(type);
-            List<Station> stationList = stationService.listAllByStoreId(Station.class);
-            List<Shelf> shelfList = shelfService.listAllByStoreId(Shelf.class);
+            List<Station> stationList = stationService.listAccessStationByStationId(station.getId(),station.getSceneId());
+            List<Shelf> shelfList = shelfService.listBySceneAndStoreId(station.getSceneId());
             OrderPageInfoVO orderPageInfoVO = new OrderPageInfoVO();
             orderPageInfoVO.setGoodsList(goodsList);
             orderPageInfoVO.setShelfList(shelfList);
@@ -201,18 +217,35 @@ public class OrderController extends BaseController {
                     break;
                 }
             }
+            OrderTransferVO orderTransferVO = null;
             if(index == -1){
                 //无运输状态的点，取最后一个点
-                OrderTransferVO orderTransferVO = transferVOs.get(transferVOs.size()-1);
-                getTransferInfo(orderTransferVO, transferInfo);
+                orderTransferVO = transferVOs.get(transferVOs.size()-1);
+                if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
+                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+                    transferInfo.append("当前已签收,站点为" + orderTransferVO.getStationName());
+                }
             }else if(index == 0){
                 //起始即为未运输，取第一个点
-                OrderTransferVO orderTransferVO = transferVOs.get(0);
-                getTransferInfo(orderTransferVO, transferInfo);
+                orderTransferVO = transferVOs.get(0);
+                if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
+                    transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
+                }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
+                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+                    transferInfo.append("当前已签收,站点为" + orderTransferVO.getStationName());
+                }
             }else{
                 //取上一个点进行判断
-                OrderTransferVO orderTransferVO = transferVOs.get(index - 1);
-                getTransferInfo(orderTransferVO, transferInfo);
+                orderTransferVO = transferVOs.get(index - 1);
+                if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
+                    transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
+                }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
+                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+                    transferInfo.append("当前小车正在前往" + transferVOs.get(index).getStationName());
+                }
             }
             orderDetailVO.setTransferInfo(transferInfo.toString());
         }
@@ -227,24 +260,12 @@ public class OrderController extends BaseController {
         return orderDetailVO;
     }
 
-    private StringBuffer getTransferInfo(OrderTransferVO orderTransferVO, StringBuffer transferInfo){
-        if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
-            transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
-        }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
-            transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
-        }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
-            transferInfo.append("当前小车正在签收" + orderTransferVO.getStationName());
-        }
-        return transferInfo;
-    }
-
-
     private GoodsInfoVO generateGoodsInfoVO(GoodsInfo goodsInfo, Order order){
         GoodsInfoVO goodsInfoVO = new GoodsInfoVO();
         goodsInfoVO.setBoxNum(goodsInfo.getBoxNum());
         goodsInfoVO.setGoods(goodsInfo.getGoods());
         goodsInfoVO.setNum(goodsInfo.getNum());
-        if(order.getNeedShelf()){
+        if(order.getOrderSetting().getNeedShelf()){
             goodsInfoVO.setPassword(robotPasswordService.getPwdByRobotIdAndBoxNum(order.getRobot().getId(), goodsInfo.getBoxNum()));
         }else {
             goodsInfoVO.setPassword(robotPasswordService.getPwdByRobotId(order.getRobot().getId()));

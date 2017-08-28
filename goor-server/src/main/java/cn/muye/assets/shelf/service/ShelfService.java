@@ -1,12 +1,7 @@
 package cn.muye.assets.shelf.service;
 
 import cn.mrobot.bean.assets.shelf.Shelf;
-import cn.muye.assets.shelf.mapper.ShelfMapper;
 import cn.muye.base.service.BaseService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 
@@ -43,6 +38,8 @@ public interface ShelfService extends BaseService<Shelf> {
      * @return
      */
     List<Shelf> listAllShelfs();
+
+    List<Shelf> listBySceneAndStoreId(Long sceneId);
 }
 
 
