@@ -510,7 +510,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         for (Robot robot : allRobots) {
             // 利用线程池逐一完成密码下发任务
-            executor.submit(new SendPasswordToSpecialRobotThread(robot, newPassword));
+            try {
+                executor.submit(new SendPasswordToSpecialRobotThread(robot, newPassword));
+            }catch (Exception e){
+                LOGGER.info("当前提交的密码设置请求已经超过最大限制次数!");
+            }
         }
     }
     private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
