@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.Set;
 
 /**
  * Created by enva on 17/07/20.
@@ -43,23 +42,24 @@ public class WebSocketInit implements ApplicationContextAware {
         System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
     }
 
+    //TODO
     /**
      * 连接关闭调用的方法
      */
     @OnClose
     public void onClose(Session session) {
+        log.error("webSocket onClose");
         subOnlineCount();           //在线数减1
         //去除当前设定的机器人接收指定类型信息
-        Map<String, Session> sessionMap = CacheInfoManager.getWebSocketSessionCache();
+        Map<String, Set<Session>> sessionMap = CacheInfoManager.getWebSocketSessionCache();
         Iterator iterator = sessionMap.entrySet().iterator();
         while (iterator.hasNext()){
-            Map.Entry<String, Session> entry = (Map.Entry<String, Session>) iterator.next();
+            Map.Entry<String, Set<Session>> entry = (Map.Entry<String, Set<Session>>) iterator.next();
             if (entry.getValue().equals(session)){
                 String key = entry.getKey();
                 CacheInfoManager.removeSpecificTypeDeviceId(key);
             }
         }
-        log.error("webSocket onClose");
         CacheInfoManager.removeWebSocketSessionCache(session);
         log.info("close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
     }
