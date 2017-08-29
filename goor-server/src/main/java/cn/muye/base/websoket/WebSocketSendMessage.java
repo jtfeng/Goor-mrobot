@@ -1,7 +1,6 @@
 package cn.muye.base.websoket;
 
 import cn.mrobot.bean.websocket.WSMessage;
-import cn.mrobot.utils.StringUtil;
 import cn.muye.base.cache.CacheInfoManager;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +10,7 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by enva on 17/07/20.
@@ -37,8 +37,10 @@ public class WebSocketSendMessage {
         }
         //校验前端是否需要接收此类型的信息
         if (CacheInfoManager.haveSpecificType(wsMessage.getDeviceId(), wsMessage.getModule())){
-            Session session = CacheInfoManager.getWebSocketSessionCache(deviceId);
-            sendWebSocketMessage(wsMessage, session);
+            Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(deviceId);
+            for(Session session : sessionSet){
+                sendWebSocketMessage(wsMessage, session);
+            }
         }
     }
 
@@ -49,7 +51,7 @@ public class WebSocketSendMessage {
      * @return
      * @throws Exception
      */
-    public void sendWebSocketMessage(WSMessage wsMessage, Session session) throws Exception {
+    protected void sendWebSocketMessage(WSMessage wsMessage, Session session) throws Exception {
         if (null != session) {
             sendMessage(session, JSON.toJSONString(wsMessage));
         } else {
@@ -72,14 +74,18 @@ public class WebSocketSendMessage {
      * @param message
      */
     private void sendAll(String message) {
-        Map<String, Session> sessionMap = CacheInfoManager.getWebSocketSessionCache();
+        Map<String, Set<Session>> sessionMap = CacheInfoManager.getWebSocketSessionCache();
         Iterator iterator = sessionMap.entrySet().iterator();
         while (iterator.hasNext()) {
             Session session = null;
             try {
-                Map.Entry<String, Session> entry = (Map.Entry<String, Session>) iterator.next();
-                session = entry.getValue();
-                sendMessage(session, message);
+                Map.Entry<String, Set<Session>> entry = (Map.Entry<String, Set<Session>>) iterator.next();
+                Set<Session> sessionSet = entry.getValue();
+                Iterator sessionIterator = sessionSet.iterator();
+                while (sessionIterator.hasNext()){
+                    session = (Session) sessionIterator.next();
+                    sendMessage(session, message);
+                }
             } catch (Exception e) {
                 log.debug("群发消息异常", e);
                 CacheInfoManager.removeWebSocketSessionCache(session);

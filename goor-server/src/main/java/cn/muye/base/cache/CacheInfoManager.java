@@ -10,16 +10,14 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.MessageInfo;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import javax.websocket.Session;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class CacheInfoManager implements ApplicationContextAware {
@@ -54,7 +52,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     /**
      * webSocket根据用户名来缓存Session 的缓存
      */
-    private static ConcurrentHashMapCache<String, Session> webSocketSessionCache = new ConcurrentHashMapCache<String, Session>(); //key ： 机器人code
+    private static ConcurrentHashMapCache<String, Set<Session>> webSocketSessionCache = new ConcurrentHashMapCache<String, Set<Session>>(); //key ： 机器人code
     /*场景和机器人列表，key为场景，value为机器人编号列表*/
     private static ConcurrentHashMapCache<String, List<String>> sceneRobotListCache = new ConcurrentHashMapCache<String, List<String>>();
 
@@ -71,7 +69,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, Integer> userLoginStatusCache = new ConcurrentHashMapCache<>();//用户登录状态
 
     private static ConcurrentHashMapCache<String, Boolean> stopSendWebSocketDevice = new ConcurrentHashMapCache<>();//停止发送WebSocket机器编号
-    private static ConcurrentHashMapCache<String, List<String>> specificTypeDevice = new ConcurrentHashMapCache<>();//指定接收特定类型websocket信息的机器人code
+    private static ConcurrentHashMapCache<String, Set<String>> specificTypeDevice = new ConcurrentHashMapCache<>();//指定接收特定类型websocket信息的机器人code
 
     static {
 
@@ -189,24 +187,29 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static void setWebSocketSessionCache(String userName, Session session) {
-        webSocketSessionCache.put(userName, session);
+        Set<Session> sessionSet =  getWebSocketSessionCache(userName);
+        if (null == sessionSet){
+            sessionSet = Sets.newHashSet();
+        }
+        sessionSet.add(session);
+        webSocketSessionCache.put(userName, sessionSet);
     }
 
-    public static Session getWebSocketSessionCache(String userName) {
+    public static Set<Session> getWebSocketSessionCache(String userName) {
         if (userName == null)
             return null;
         return webSocketSessionCache.get(userName);
     }
 
-    public static Map<String, Session> getWebSocketSessionCache() {
-        Map<String, Session> webSocketSessionList = new HashMap<>();
+    public static Map<String, Set<Session>> getWebSocketSessionCache() {
+        Map<String, Set<Session>> webSocketSessionList = new HashMap<>();
         Iterator iterator = webSocketSessionCache.iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             String key = entry.getKey();
             ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
-            Session session = (Session) valueEntry.getValue();
-            webSocketSessionList.put(key, session);
+            Set<Session> sessionSet = (Set<Session>) valueEntry.getValue();
+            webSocketSessionList.put(key, sessionSet);
         }
         return webSocketSessionList;
     }
@@ -223,9 +226,10 @@ public class CacheInfoManager implements ApplicationContextAware {
             Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
             String key = entry.getKey();
-            Session sessionCache = (Session) valueEntry.getValue();
-            if (sessionCache.equals(session)) {
-                webSocketSessionCache.remove(key);
+            Set<Session> sessionCache = (Set<Session>) valueEntry.getValue();
+            if (sessionCache.contains(session)) {
+                sessionCache.remove(session);
+                webSocketSessionCache.put(key, sessionCache);
             }
         }
     }
@@ -348,18 +352,16 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static boolean haveSpecificType(String deviceId, String specificType) {
-        List<String> deviceIds = specificTypeDevice.get(specificType);
+        Set<String> deviceIds = specificTypeDevice.get(specificType);
         return deviceIds != null && deviceIds.contains(deviceId);
     }
 
     public static void setSpecificTypeDeviceId(String deviceId, String specificType) {
-        List<String> deviceIds = specificTypeDevice.get(specificType);
+        Set<String> deviceIds = specificTypeDevice.get(specificType);
         if (deviceIds == null){
-            deviceIds =  Lists.newArrayList();
-            deviceIds.add(deviceId);
-        }else if (!deviceIds.contains(deviceId)){
-            deviceIds.add(deviceId);
+            deviceIds = Sets.newHashSet();
         }
+        deviceIds.add(deviceId);
         specificTypeDevice.put(specificType, deviceIds);
     }
 
