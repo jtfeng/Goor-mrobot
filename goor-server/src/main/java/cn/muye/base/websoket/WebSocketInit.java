@@ -42,7 +42,6 @@ public class WebSocketInit implements ApplicationContextAware {
         System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
     }
 
-    //TODO
     /**
      * 连接关闭调用的方法
      */
@@ -51,15 +50,15 @@ public class WebSocketInit implements ApplicationContextAware {
         log.error("webSocket onClose");
         subOnlineCount();           //在线数减1
         //去除当前设定的机器人接收指定类型信息
-        Map<String, Set<Session>> sessionMap = CacheInfoManager.getWebSocketSessionCache();
-        Iterator iterator = sessionMap.entrySet().iterator();
-        while (iterator.hasNext()){
-            Map.Entry<String, Set<Session>> entry = (Map.Entry<String, Set<Session>>) iterator.next();
-            if (entry.getValue().equals(session)){
-                String key = entry.getKey();
-                CacheInfoManager.removeSpecificTypeDeviceId(key);
-            }
-        }
+//        Map<String, Set<Session>> sessionMap = CacheInfoManager.getWebSocketSessionCache();
+//        Iterator iterator = sessionMap.entrySet().iterator();
+//        while (iterator.hasNext()){
+//            Map.Entry<String, Set<Session>> entry = (Map.Entry<String, Set<Session>>) iterator.next();
+//            if (entry.getValue().equals(session)){
+//                String key = entry.getKey();
+//                CacheInfoManager.removeSpecificTypeDeviceId(key);
+//            }
+//        }
         CacheInfoManager.removeWebSocketSessionCache(session);
         log.info("close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
     }
