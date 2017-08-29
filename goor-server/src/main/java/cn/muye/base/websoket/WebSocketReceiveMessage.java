@@ -41,7 +41,7 @@ public class WebSocketReceiveMessage {
             switch (wsMessageType) {
                 case REGISTER:
                     handleRegister(wsMessage, session);
-                    handleSpecificType(wsMessage);
+                    handleSpecificType(wsMessage, session);
                     break;
                 case POSE:
                     break;
@@ -64,7 +64,7 @@ public class WebSocketReceiveMessage {
      *
      * @param wsMessage 消息内容
      */
-    private void handleSpecificType(WSMessage wsMessage) {
+    private void handleSpecificType(WSMessage wsMessage, Session session) {
         String moduleStr = wsMessage.getModule();
         String[] modules = splitStr(moduleStr);
         String userIdStr = wsMessage.getUserId();
