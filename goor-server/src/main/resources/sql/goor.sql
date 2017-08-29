@@ -1017,6 +1017,9 @@ CREATE TABLE `D_FEATURE_ITEM` (
 -- ----------------------------
 -- Records of D_FEATURE_ITEM
 -- ----------------------------
+-- ----------------------------
+-- Records of D_FEATURE_ITEM
+-- ----------------------------
 INSERT INTO `D_FEATURE_ITEM` VALUES ('1', '单点导航', 'laserNavigation', '单点导航', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('2', 'TTS语音', 'voice_tts', 'TTS语音命令', '{\"voiceContent\":\"要说的话\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('3', 'MP3语音', 'mp3', 'MP3语音命令', '{\"fileName\":\"要播放的语音文件名\"}');
@@ -1036,8 +1039,19 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('16', '沿固定路径导航', 'pathNavigat
 INSERT INTO `D_FEATURE_ITEM` VALUES ('17', '沿线导航门', 'laneDoor', '沿线导航门', '{\"waitTime\":10,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('18', '沿固定路径导航门', 'pathDoor', '沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('19', '仙知导航', 'seerNavigation', '仙知沿固定路径导航', '{\"target_id\":\"LM2\"}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('20', '仙知导航门', 'seerDoor', '仙知沿固定路径导航门', '{\"waitTime\":10,\"path\":{\"scene_name\":\"example\",\"id\":1}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('20', '仙知导航门', 'seerDoor', '仙知沿固定路径导航门', '{\"waitTime\":10,\"target_id\":\"LM2\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('21', '不需货架的装货', 'loadNoShelf', '不需货架的装货', '{}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('22', '门加锁任务', 'doorLock', '门加锁任务', '{\"door_id\":1, \"interval_time\":30}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('23', '门解锁任务', 'doorUnlock', '门解锁任务', '{\"door_id\":1, \"interval_time\":30}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('24', '路径加锁任务', 'pathLock', '路径加锁任务', '{\"path_id\":1, \"interval_time\":30}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('25', '路径解锁任务', 'pathUnlock', '路径解锁任务', '{\"path_id\":1, \"interval_time\":30}');
+
+
+
+
+
+
+
 
 -- ----------------------------
 -- Table structure for D_FEATURE_ITEM_TYPE
