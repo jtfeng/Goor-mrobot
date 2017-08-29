@@ -493,33 +493,6 @@ CREATE TABLE `APP_CONFIG` (
 INSERT INTO `APP_CONFIG` VALUES ('1', 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7iViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2fBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/jMv2Ggb2XAeZhlLD28fHwIDAQAB', 'http://push.myee7.com/allocServer/', 'http://push.myee7.com/pushServer/api/admin/push.json', 'goor-server', 'ubuntu_1', 'goor-server', 'goor-server', 'goor-server', 'goor-server', 'goor-server', '192.168.3.51');
 
 -- ----------------------------
--- Table structure for AS_DOOR
--- ----------------------------
-DROP TABLE IF EXISTS `AS_DOOR`;
-CREATE TABLE `AS_DOOR` (
-  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
-  `NAME` varchar(50) DEFAULT NULL COMMENT '名称',
-  `IP` varchar(15) DEFAULT NULL COMMENT '门控制器IP地址',
-  `LOCK_STATE` int(1) DEFAULT NULL COMMENT '锁定状态',
-  `INFO` varchar(100) DEFAULT NULL COMMENT '备注',
-  `CREATED_BY` bigint(20) DEFAULT NULL COMMENT '创建用户',
-  `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
-  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '所属门店ID',
-  `ROBOT_CODE` varchar(50) DEFAULT NULL COMMENT '上锁或者解锁机器人的 code 编号',
-  `WAIT_POINT` bigint(20) DEFAULT NULL,
-  `GO_POINT` bigint(20) DEFAULT NULL,
-  `OUT_POINT` bigint(20) DEFAULT NULL,
-  `SCENE_ID` bigint(20) DEFAULT NULL COMMENT '所属云端场景ID',
-  `SCENE_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图场景名',
-  `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
-  `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
-  `DOOR_ORDER_TYPE` varchar(255) DEFAULT NULL COMMENT '门对应的任务类型：比如普通导航，沿线导航，固定路径导航',
-  `PATH_ID` bigint(20) DEFAULT NULL COMMENT '工控路径ID',
-  PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
-
-
--- ----------------------------
 -- Table structure for AS_GOODS_TYPE
 -- ----------------------------
 DROP TABLE IF EXISTS `AS_GOODS_TYPE`;

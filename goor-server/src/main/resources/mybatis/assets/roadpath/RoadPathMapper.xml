@@ -2,8 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.muye.assets.roadpath.mapper.RoadPathMapper">
 
+
+    <resultMap id="RoadPathPointSimpleMap" type="cn.mrobot.bean.assets.roadpath.RoadPathPoint">
+        <result column="NEXT_POINT_ID" property="nextPointId" jdbcType="BIGINT"/>
+        <result column="PREV_POINT_ID" property="prevPointId" jdbcType="BIGINT"/>
+        <result column="POINT_ID" property="pointId" jdbcType="BIGINT"/>
+    </resultMap>
+
+
     <select id="findMapSceneName" parameterType="java.lang.Long" resultType="java.lang.String">
         SELECT MAP_SCENENAME FROM SCENES_MAPS_RELATIONS WHERE SCENE_ID = #{0}
+    </select>
+
+    <select id="findBeginRoadPathPoint" parameterType="java.lang.Long" resultMap="RoadPathPointSimpleMap">
+        SELECT NEXT_POINT_ID, PREV_POINT_ID, POINT_ID FROM AS_ROADPATHPOINT WHERE START_FLAG = 1 AND ROAD_PATH_ID = #{0}
+    </select>
+
+    <select id="findSpecifyRoadPathPoint" resultMap="RoadPathPointSimpleMap">
+        SELECT NEXT_POINT_ID, PREV_POINT_ID, POINT_ID FROM AS_ROADPATHPOINT WHERE ROAD_PATH_ID = #{param1} AND POINT_ID = #{param2}
     </select>
 
 </mapper>

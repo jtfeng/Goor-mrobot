@@ -45,14 +45,10 @@ public class RoadPathController {
      * 根据 开始点 和 结束点 查询路径
      * @return
      */
-    @GetMapping("/asset/roadPath/{startPoint}/{endPoint}/{sceneName}/{mapName}")
-    public AjaxResult findRoadPathByStartAndEndPoint(
-            @PathVariable("startPoint") Long startPoint,
-            @PathVariable("endPoint") Long endPoint,
-            @PathVariable("sceneName") String sceneName,
-            @PathVariable("mapName") String mapName){
+    @GetMapping("/asset/roadPath/{cloudSceneId}/{startPoint}/{endPoint}")
+    public AjaxResult findRoadPathByStartAndEndPoint(@PathVariable("startPoint") Long startPoint, @PathVariable("endPoint") Long endPoint, @PathVariable("cloudSceneId") Long cloudSceneId){
         try {
-            List<RoadPathDetail> roadPathDetails = this.roadPathService.findRoadPathByStartAndEndPoint(startPoint, endPoint, sceneName, mapName);
+            List<RoadPathDetail> roadPathDetails = this.roadPathService.findRoadPathByStartAndEndPoint(startPoint, endPoint, cloudSceneId);
             return AjaxResult.success(roadPathDetails);
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
