@@ -877,7 +877,7 @@ public class MissionController {
 			if(missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
 				//通过总任务ID列表得到总任务
 				missionList.setMissionList(new ArrayList<Mission>());
-				missionList.setName(name + currentDateTimeString);
+				missionList.setName(name/* + "_" + currentDateTimeString*/);
 				List<Mission> missions = missionList.getMissionList();
 				for( Long id : missionListIds ) {
 					MissionList missionListTemp = missionListService.get(id,storeId);
