@@ -118,7 +118,7 @@ public class ScheduleTasks {
     @Autowired
     X86MissionCommonRequestService x86MissionCommonRequestService;
 
-    @Scheduled(cron = "*/30 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     public void missionStateCommonRequest() {
         logger.info("missionStateCommonRequest Scheduled send");
         try {
