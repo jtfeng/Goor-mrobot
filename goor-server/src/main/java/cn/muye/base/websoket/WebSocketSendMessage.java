@@ -19,27 +19,23 @@ import java.util.Set;
 @Component
 public class WebSocketSendMessage {
 
-
     /**
      * webSocket发送消息方法，向web页面推送消息
      *
      * @param wsMessage
-     * @return
      * @throws Exception
      */
     public void sendWebSocketMessage(WSMessage wsMessage) throws Exception {
         String deviceId = wsMessage.getDeviceId();
-        //校验是否前端发送了停止接收请求
-        Boolean flag = CacheInfoManager.getStopSendWebSocketDevice(wsMessage.getModule(), deviceId);
-        if (flag != null && flag) {
-            log.info(wsMessage.getDeviceId() + "停止接收" + wsMessage.getModule() + "信息");
+        //根据机器人code或者站编号 获取session
+        Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(deviceId);
+        if (sessionSet == null)
             return;
-        }
-        //校验前端是否需要接收此类型的信息
-        if (CacheInfoManager.haveSpecificType(wsMessage.getDeviceId(), wsMessage.getModule())){
-            Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(deviceId);
-            for(Session session : sessionSet){
+        for (Session session : sessionSet) {
+            if (CacheInfoManager.isWebSocketClientReceiveModule(session,wsMessage.getDeviceId(), wsMessage.getModule())) {
                 sendWebSocketMessage(wsMessage, session);
+            } else {
+                log.info(wsMessage.getDeviceId() + "停止接收(未设置接收) " + wsMessage.getModule() + " 信息");
             }
         }
     }
@@ -48,7 +44,6 @@ public class WebSocketSendMessage {
      * webSocket发送消息方法，向web页面推送消息
      *
      * @param wsMessage
-     * @return
      * @throws Exception
      */
     protected void sendWebSocketMessage(WSMessage wsMessage, Session session) throws Exception {
@@ -82,7 +77,7 @@ public class WebSocketSendMessage {
                 Map.Entry<String, Set<Session>> entry = (Map.Entry<String, Set<Session>>) iterator.next();
                 Set<Session> sessionSet = entry.getValue();
                 Iterator sessionIterator = sessionSet.iterator();
-                while (sessionIterator.hasNext()){
+                while (sessionIterator.hasNext()) {
                     session = (Session) sessionIterator.next();
                     sendMessage(session, message);
                 }
@@ -90,7 +85,8 @@ public class WebSocketSendMessage {
                 log.debug("群发消息异常", e);
                 CacheInfoManager.removeWebSocketSessionCache(session);
                 try {
-                    session.close();
+                    if (null != session)
+                        session.close();
                 } catch (IOException e1) {
                     log.error("websocket session 关闭异常", e);
                 }
