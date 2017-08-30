@@ -47,7 +47,7 @@ public class ScheduleTasks {
     @Value("${local.robot.SN}")
     private String localRobotSN;
 
-    @Value("${server.mapPath")
+    @Value("${server.mapPath}")
     private String mapPath;
 
     @Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
@@ -134,7 +134,7 @@ public class ScheduleTasks {
     }
 
     //每天检查一次地图文件夹下是否有zip文件，有就删掉
-    @Scheduled(cron = "0 0 12 * * *") //test cron
+    @Scheduled(cron = "0 0 */2 * * *")
     public void deleteZipMapFile() {
         logger.info("Scheduled delete Zip map file");
         try {
