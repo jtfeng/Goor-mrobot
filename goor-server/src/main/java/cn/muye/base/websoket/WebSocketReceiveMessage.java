@@ -49,11 +49,8 @@ public class WebSocketReceiveMessage {
                     break;
                 case NOTIFICATION:
                     break;
-//                case SPECIFIC_TYPE:
-//                    handleSpecificType(wsMessage);
-//                    break;
                 case STOP_SENDING:
-                    handleStopSending(wsMessage);
+                    handleStopSending(wsMessage, session);
                     break;
             }
         }
@@ -61,17 +58,18 @@ public class WebSocketReceiveMessage {
 
     /**
      * 处理客户端在指定消息类型请求
-     *
+     * 添加session和指定类型的关联关系，当机器人发送信息时需要根据session校验当前客户端是否需要此类型的信息，
+     * 当Websocket客户端关闭的时候需要根据session清除对应的type
      * @param wsMessage 消息内容
      */
     private void handleSpecificType(WSMessage wsMessage, Session session) {
-        String moduleStr = wsMessage.getModule();
-        String[] modules = splitStr(moduleStr);
         String userIdStr = wsMessage.getUserId();
         String[] userIds = splitStr(userIdStr);
-        for (String module : modules){
-            for (String userId : userIds){
-                CacheInfoManager.setSpecificTypeDeviceId(userId, module);
+        String moduleStr = wsMessage.getModule();
+        String[] modules = splitStr(moduleStr);
+        for (String userId : userIds){
+            for (String module : modules){
+                CacheInfoManager.setWebSocketClientReceiveModule(session, userId, module);
             }
         }
     }
@@ -104,12 +102,15 @@ public class WebSocketReceiveMessage {
      *
      * @param wsMessage
      */
-    private void handleStopSending(WSMessage wsMessage) {
+    private void handleStopSending(WSMessage wsMessage, Session session) {
         String userIdStr = wsMessage.getUserId();
         String[] userIds = splitStr(userIdStr);
-        for (String userId : userIds) {
-            if (!StringUtil.isNullOrEmpty(userId))
-                CacheInfoManager.setStopSendWebSocketDevice(wsMessage.getModule(), userId);
+        String moduleStr = wsMessage.getModule();
+        String[] modules = splitStr(moduleStr);
+        for (String userId : userIds){
+            for (String module : modules){
+                CacheInfoManager.removeWebSocketClientReceiveModule(session,userId, module);
+            }
         }
     }
 
