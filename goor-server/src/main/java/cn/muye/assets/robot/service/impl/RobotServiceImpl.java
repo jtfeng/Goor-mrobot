@@ -37,8 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Ray.Fu on 2017/6/12.
@@ -69,6 +70,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     @Autowired
     private MessageSendHandleService messageSendHandleService;
+
+    public static final Lock lock1 = new ReentrantLock();
 
     /**
      * 更新机器人
@@ -274,6 +277,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
 
+    /**
+     * 新增机器人信息
+     *
+     * @param robot
+     * @throws RuntimeException
+     */
     public void saveRobotAndBindChargerMapPoint(Robot robot) throws RuntimeException {
         super.save(robot);
         Long robotNewId = robot.getId();
@@ -292,7 +301,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         if (robot.getTypeId() != null) {
             robotPasswordService.saveRobotPassword(robot);
         }
-
     }
 
     /**
@@ -303,6 +311,29 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      */
     @Override
     public AjaxResult autoRegister(Robot robotNew) throws RuntimeException {
+        if (lock1.tryLock()) {
+            try {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                }
+                if (lock1.tryLock()) {
+                    try {
+                        return doingAutoRegister(robotNew);
+                    } finally {
+                        lock1.unlock();
+                    }
+                }
+            } finally {
+                lock1.unlock();
+            }
+        } else {
+            return AjaxResult.failed("其他线程正在注册，请稍后...");
+        }
+        return null;
+    }
+
+    private AjaxResult doingAutoRegister(Robot robotNew) {
         try {
             if (robotNew != null) {
                 Long robotId = robotNew.getId();
@@ -333,44 +364,17 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (sufficientBatteryThreshold == null) {
                     robotNew.setSufficientBatteryThreshold(Constant.ROBOT_SUFFICIENT_BATTERY_THRESHOLD_DEFAULT);
                 }
+                if (StringUtil.isNullOrEmpty(robotCode)) {
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号不能为空");
+                }
                 Robot robotDb = getByCode(robotCode, robotStoreId);
-                if (robotId != null) {
-                    if (robotDb != null) {
-                        robotNew.setOnline(true);
-                        updateRobotAndBindChargerMapPoint(robotNew, null, null, null, null, null);
-                        return AjaxResult.success(robotNew, "更新机器人状态成功");
-                    } else {
-                        robotNew.setId(null);
-                        saveRobotAndBindChargerMapPoint(robotNew);
-                        return AjaxResult.success(robotNew, "注册成功");
-                    }
-                } else {
-                    if (StringUtil.isNullOrEmpty(robotCode)) {
-                        return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号不能为空");
-                    }
-//                if (robotTypeId == null || robotTypeId <= 0 || robotTypeId > RobotTypeEnum.DRAWER.getCaption()) {
-//                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人类型有误");
-//                }
-//                if (StringUtil.isNullOrEmpty(robotName) || StringUtil.isNullOrEmpty(robotCode)) {
-//                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人名称或编号不能为空");
-//                }
-//                if (robotNew.getBatteryThreshold() == null) {
-//                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人电量阈值不能为空");
-//                }
-                    //判断是否有重复的名称
-                    Robot robotDbByName = getByName(robotName);
-                    if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
-                        return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
-                    }
-                    //判断是否有重复的编号
-                    Robot robotDbByCode = getByCode(robotCode, robotStoreId);
-                    if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
-                        return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
-                    }
+                if (robotDb == null) {
                     saveRobotAndBindChargerMapPoint(robotNew);
                     //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
                     syncRosRobotConfig(robotNew);
                     return AjaxResult.success(robotNew, "注册成功");
+                } else {
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号重复,注册失败");
                 }
             } else {
                 return AjaxResult.failed("注册失败");

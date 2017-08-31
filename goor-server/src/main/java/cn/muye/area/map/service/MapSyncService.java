@@ -80,11 +80,15 @@ public class MapSyncService implements ApplicationContextAware {
 
     public Map<String, AjaxResult> sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId) {
         try {
+            LOGGER.info("开始同步地图,robotList.size()=" + robotList.size() + ",sceneId=" + sceneId + ",mapZip.getFileName()=" + mapZip.getFileName());
+            Long mapZipId = mapZip.getId();
             if (robotList.size() == 1) {
                 Robot robot = robotList.get(0);
                 //如果需要同步地图的机器人是上传地图的机器人，则直接更新场景的状态
                 if (robot.getCode().equals(mapZip.getDeviceId())) {
                     sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
+                    saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
+                    LOGGER.info("机器人列表为1，且机器人code = " + robot.getCode() + ", 为上传地图的机器人，不进行同步");
                     return null;
                 }
             }
@@ -113,7 +117,7 @@ public class MapSyncService implements ApplicationContextAware {
             Map<String, AjaxResult> resultMap = new HashMap<>();
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("压缩包名称：").append(mapZip.getFileName()).append(",");
-            Long mapZipId = mapZip.getId();
+            LOGGER.info("压缩包名称：" + mapZip.getFileName());
             for (int i = 0; i < robotList.size(); i++) {
 
                 Robot robot = robotList.get(i);
@@ -124,6 +128,7 @@ public class MapSyncService implements ApplicationContextAware {
                 if (code.equals(mapZip.getDeviceId())) {
                     stringBuffer.append(code).append(":").append("地图上传机器人").append(",");
                     LOGGER.info("需同步的机器人code为上传地图的机器人code，不进行同步，code=" + code);
+                    saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
                     continue;
                 }
 
@@ -131,17 +136,17 @@ public class MapSyncService implements ApplicationContextAware {
                 AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
 
                 //保存关联关系
-                RobotMapZipXREF robotMapZipXREF = null;
                 if (null != ajaxClientResult && ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS) {
                     resultMap.put(code, ajaxClientResult);
-                    robotMapZipXREF = new RobotMapZipXREF.Builder().newMapZipId(mapZipId).success(true).robotId(robot.getId()).build();
+                    saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
                     stringBuffer.append(code).append(":").append("同步成功").append(",");
+                    LOGGER.info("机器人" + code + "同步成功");
                 } else {
                     resultMap.put(code, AjaxResult.failed("未获取到返回结果"));
-                    robotMapZipXREF = new RobotMapZipXREF.Builder().newMapZipId(mapZipId).success(false).robotId(robot.getId()).build();
+                    saveOrUpdateMapZipXREF(mapZipId, false, robot.getId());
                     stringBuffer.append(code).append(":").append("未获取到返回结果").append(",");
+                    LOGGER.info("机器人" + code + "同步失败或未获取到返回结果");
                 }
-                robotMapZipXREFService.saveOrUpdate(robotMapZipXREF);
             }
 
             //更新指定场景的state
@@ -152,6 +157,11 @@ public class MapSyncService implements ApplicationContextAware {
             LOGGER.error("发送地图更新信息失败", e);
         }
         return null;
+    }
+
+    private void saveOrUpdateMapZipXREF(Long newMapZipId, boolean result, Long robotId) {
+        RobotMapZipXREF robotMapZipXREF = new RobotMapZipXREF.Builder().newMapZipId(newMapZipId).success(result).robotId(robotId).build();
+        robotMapZipXREFService.saveOrUpdate(robotMapZipXREF);
     }
 
     @Override

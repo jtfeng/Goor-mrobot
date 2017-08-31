@@ -70,6 +70,13 @@ public class FileUpladService {
                 File uploadFile = new File(MAP_PATH);
                 if (!uploadFile.exists()) {
                     LOGGER.error("文件夹不存在, path= " + MAP_PATH);
+                    sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图文件夹不存在");
+                    return;
+                }
+
+                if (uploadFile.isDirectory() && uploadFile.listFiles().length <=0) {
+                    LOGGER.error("文件夹为空, path= " + MAP_PATH);
+                    sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图文件夹为空文件夹");
                     return;
                 }
 

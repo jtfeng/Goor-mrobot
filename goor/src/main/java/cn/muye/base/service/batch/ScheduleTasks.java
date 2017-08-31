@@ -47,7 +47,7 @@ public class ScheduleTasks {
     @Value("${local.robot.SN}")
     private String localRobotSN;
 
-    @Value("${server.mapPath")
+    @Value("${server.mapPath}")
     private String mapPath;
 
     @Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
@@ -108,17 +108,17 @@ public class ScheduleTasks {
     }
 
 
-    //每5分钟触发  获取电量信息，存入数据库
-    @Scheduled(cron = "0 */5 * * * *") //test cron
-    public void getChargeAndPosition() {
-        try {
-            logger.info("定时获取电量信息");
-            SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.CHARGING_STATUS_INQUIRY);
-            appSubService.sendTopic(TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING, slamRequestBody);
-        } catch (Exception e) {
-            logger.error("获取电量信息或当前位置信息出错", e);
-        }
-    }
+//    //每5分钟触发  获取电量信息，存入数据库
+//    @Scheduled(cron = "0 */5 * * * *") //test cron
+//    public void getChargeAndPosition() {
+//        try {
+//            logger.info("定时获取电量信息");
+//            SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.CHARGING_STATUS_INQUIRY);
+//            appSubService.sendTopic(TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING, slamRequestBody);
+//        } catch (Exception e) {
+//            logger.error("获取电量信息或当前位置信息出错", e);
+//        }
+//    }
 
     //默认开机10分钟后请求时间同步，不关机情况下每天同步一次
     @Scheduled(initialDelay = 600000, fixedRate = 24 * 60 * 60 * 1000)
@@ -134,7 +134,7 @@ public class ScheduleTasks {
     }
 
     //每天检查一次地图文件夹下是否有zip文件，有就删掉
-    @Scheduled(cron = "0 0 12 * * *") //test cron
+    @Scheduled(cron = "0 0 */2 * * *")
     public void deleteZipMapFile() {
         logger.info("Scheduled delete Zip map file");
         try {

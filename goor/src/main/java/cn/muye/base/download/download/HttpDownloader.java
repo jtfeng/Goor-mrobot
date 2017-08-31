@@ -142,16 +142,14 @@ public class HttpDownloader extends Thread {
             String moveFilePath = new File(localPath).getParent() + File.separator + commonInfo.getLocalFileName();
             logger.info("移动文件到上层目录。path= " + moveFilePath);
             File newZipFile = new File(moveFilePath);
-            long copyTime = FileUtils.copyFile(new File(zipFilePath), newZipFile);
-            if (copyTime <= 0) {
-                logger.info("移动文件出错 ");
-            }
+            FileUtils.copyFile(new File(zipFilePath), newZipFile);
+            logger.info("移动文件成功 ");
             FileUtils.deleteDir(new File(localPath));
 
             boolean unzipFlag = ZipUtils.unzip(moveFilePath, localPath, false);
             if (unzipFlag) {
                 logger.info("解压完成。删除压缩包 ");
-                newZipFile.deleteOnExit();
+                newZipFile.delete();
                 //更改文件夹权限 将maps文件夹下所有文件的owner更改为robot
 //                String os = System.getProperty("os.name");
 //                logger.info("系统,更改权限，os=" + os);
@@ -222,6 +220,9 @@ public class HttpDownloader extends Thread {
             CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(), CommonInfo.class);
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
+                if(null == echo){
+                    echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
+                }
                 Message toSend = new Message(commonInfo.getPublishMessage());
                 echo.publish(toSend);
 
@@ -291,9 +292,9 @@ public class HttpDownloader extends Thread {
                         + fileLength);
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            logger.error("-->> getInitedCheckPoint MalformedURLException", e);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("-->> getInitedCheckPoint IOException", e);
         } finally {
             if (conn != null) {
                 conn.disconnect();

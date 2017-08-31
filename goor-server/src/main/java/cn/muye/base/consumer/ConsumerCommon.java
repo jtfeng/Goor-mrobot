@@ -11,13 +11,18 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
 import cn.mrobot.bean.state.StateCollectorResponse;
+import cn.mrobot.bean.websocket.WSMessage;
+import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
+import cn.muye.area.map.bean.CurrentInfo;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
@@ -27,6 +32,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.base.websoket.WebSocketSendMessage;
 import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
@@ -40,6 +46,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Base64Utils;
 import org.thymeleaf.util.StringUtils;
 
 import java.util.Date;
@@ -79,6 +86,12 @@ public class ConsumerCommon {
 
     @Autowired
     private MessageSendHandleService messageSendHandleService;
+
+    @Autowired
+    private MapInfoService mapInfoService;
+
+    @Autowired
+    private WebSocketSendMessage webSocketSendMessage;
 
     /**
      * 透传ros发布的topic：agent_pub
@@ -312,8 +325,46 @@ public class ConsumerCommon {
     public void directCurrentPose(@Payload MessageInfo messageInfo) {
         try {
             CacheInfoManager.setMessageCache(messageInfo);
+            //当前位置信息改变，向WebSocket推送消息
+            sendCurrentInfoWebSocket(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directCurrentPose exception", e);
+        }
+    }
+
+    /**
+     * 透传ros发布的topic：power
+     * 按照 ChargeInfo 解析数据
+     * <p>
+     * power status store in a 8-bit coded unsigned int
+     * charging status store in the 5th bit
+     * 1 = on charging
+     * 0 = not charging
+     *
+     * @param messageInfo goor上传的信息
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_POWER)
+    public void directPower(@Payload MessageInfo messageInfo) {
+        try {
+            String messageText = messageInfo.getMessageText();
+            JSONObject jsonObject = JSON.parseObject(messageText);
+            String raw_data = jsonObject.getString("data");
+            byte[] bytes = Base64Utils.decode(raw_data.getBytes());
+            int[] ret = new int[bytes.length];
+            for (int i = 0; i < bytes.length; i++) {
+                ret[i] = bytes[i] & 0xFF;
+            }
+
+            ChargeInfo chargeInfo = new ChargeInfo();
+            chargeInfo.setPowerPercent(ret[0]);
+            String binStr = StringUtil.intToBit(ret[1], 8); //转成8位二进制数据
+            chargeInfo.setChargingStatus(Integer.parseInt(binStr.charAt(3) + ""));
+            chargeInfo.setDeviceId(messageInfo.getSenderId());
+            chargeInfo.setCreateTime(messageInfo.getSendTime());
+            chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            saveAndCheckChargeInfo(messageInfo.getSenderId(), chargeInfo);
+        } catch (Exception e) {
+            logger.error("consumer directPower exception", e);
         }
     }
 
@@ -471,6 +522,10 @@ public class ConsumerCommon {
         chargeInfo.setDeviceId(code);
         chargeInfo.setCreateTime(sendTime);
         chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        saveAndCheckChargeInfo(code, chargeInfo);
+    }
+
+    private void saveAndCheckChargeInfo(String code, ChargeInfo chargeInfo) {
         StateCollectorAutoCharge autoCharge = CacheInfoManager.getAutoChargeCache(code);
         if (null != autoCharge) {
             chargeInfo.setAutoCharging(autoCharge.getPluginStatus());
@@ -492,11 +547,46 @@ public class ConsumerCommon {
             return;
 
         if (powerPercent <= lowBatteryThreshold) {
-            //跟新机器人低电量状态
+            //更新机器人低电量状态
             Robot saveRobot = new Robot();
             robot.setId(robot.getId());
             robot.setLowPowerState(true);
             robotService.updateSelective(saveRobot);
+            //向websocket推送低电量警告
+            //判断是否接收到前端停止发送的请求
+            String body = "机器人" + code + "当前电量：" + powerPercent + ",电量阈值:" + lowBatteryThreshold;
+            WSMessage ws = new WSMessage.Builder().
+                    title(LogType.WARNING_LOWER_POWER.getValue())
+                    .messageType(WSMessageType.WARNING)
+                    .body(body)
+                    .deviceId(code)
+                    .module(LogType.WARNING_LOWER_POWER.getName()).build();
+            try {
+                webSocketSendMessage.sendWebSocketMessage(ws);
+            } catch (Exception e) {
+                logger.error("发送低电量报警异常", e);
+            }
+
+        }
+    }
+
+    /**
+     * 向WebSocket推送当前位置
+     *
+     * @param messageInfo
+     */
+    private void sendCurrentInfoWebSocket(MessageInfo messageInfo) {
+        try {
+            String deviceId = messageInfo.getSenderId();
+            CurrentInfo currentInfo = mapInfoService.getCurrentInfo(deviceId);
+            WSMessage ws = new WSMessage.Builder()
+                    .messageType(WSMessageType.POSE)
+                    .body(currentInfo)
+                    .deviceId(deviceId)
+                    .module(LogType.INFO_CURRENT_POSE.getName()).build();
+            webSocketSendMessage.sendWebSocketMessage(ws);
+        } catch (Exception e) {
+            logger.error("发送当前位置信息出错", e);
         }
     }
 }

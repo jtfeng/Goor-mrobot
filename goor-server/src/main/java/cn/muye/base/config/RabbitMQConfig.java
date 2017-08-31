@@ -100,6 +100,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue directPower() {
+        return new Queue(TopicConstants.DIRECT_POWER,false,false,true, RabbitmqUtil.getRabbitMQArguments());
+    }
+
+    @Bean
     public Queue directRobotAutoRegister() {
         return new Queue(TopicConstants.DIRECT_COMMAND_ROBOT_INFO,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
