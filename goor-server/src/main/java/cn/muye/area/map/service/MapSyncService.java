@@ -80,6 +80,7 @@ public class MapSyncService implements ApplicationContextAware {
 
     public Map<String, AjaxResult> sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId) {
         try {
+            LOGGER.info("开始同步地图,robotList.size()=" + robotList.size() + ",sceneId=" + sceneId + ",mapZip.getFileName()=" + mapZip.getFileName());
             Long mapZipId = mapZip.getId();
             if (robotList.size() == 1) {
                 Robot robot = robotList.get(0);
@@ -87,6 +88,7 @@ public class MapSyncService implements ApplicationContextAware {
                 if (robot.getCode().equals(mapZip.getDeviceId())) {
                     sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
                     saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
+                    LOGGER.info("机器人列表为1，且机器人code = " + robot.getCode() + ", 为上传地图的机器人，不进行同步");
                     return null;
                 }
             }
@@ -115,6 +117,7 @@ public class MapSyncService implements ApplicationContextAware {
             Map<String, AjaxResult> resultMap = new HashMap<>();
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("压缩包名称：").append(mapZip.getFileName()).append(",");
+            LOGGER.info("压缩包名称：" + mapZip.getFileName());
             for (int i = 0; i < robotList.size(); i++) {
 
                 Robot robot = robotList.get(i);
@@ -137,10 +140,12 @@ public class MapSyncService implements ApplicationContextAware {
                     resultMap.put(code, ajaxClientResult);
                     saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
                     stringBuffer.append(code).append(":").append("同步成功").append(",");
+                    LOGGER.info("机器人" + code + "同步成功");
                 } else {
                     resultMap.put(code, AjaxResult.failed("未获取到返回结果"));
                     saveOrUpdateMapZipXREF(mapZipId, false, robot.getId());
                     stringBuffer.append(code).append(":").append("未获取到返回结果").append(",");
+                    LOGGER.info("机器人" + code + "同步失败或未获取到返回结果");
                 }
             }
 
