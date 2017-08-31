@@ -632,13 +632,35 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public boolean checkPasswordIsValid(String robotCode, String password) {
+    public boolean checkPasswordIsValid(String uuid, String robotCode, String password) {
         checkNotNull(robotCode, "验证机器人编号不允许为空，请重新输入!!");
         checkNotNull(password,  "验证密码不允许为空，请重新输入!");
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition(" CODE = ", robotCode);
         Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
-        return password.equals(robot.getPassword());
+        boolean result = password.equals(robot.getPassword());
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>(){{
+            put("sub_name", TopicConstants.PUB_SUB_NAME_CHECK_OPERATE_PWD);
+            put("uuid", uuid);
+            put("msg", result ? "success" : "error");
+            put("error_code", result ? "0" : "-1");
+        }}))));
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setReceiverId(robotCode);
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+        try {
+            messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+
     }
 
     @Override

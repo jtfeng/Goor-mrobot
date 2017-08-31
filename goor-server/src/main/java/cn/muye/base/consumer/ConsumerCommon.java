@@ -167,6 +167,9 @@ public class ConsumerCommon {
                     Long missionItemId = employeeObj.getLong("missionItemId");
                     AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(empNo, missionItemId);
                     replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.isSuccess(), uuid);
+                } else if (!StringUtils.isEmpty(messageName)  &&  messageName.equals(TopicConstants.PUB_SUB_NAME_CHECK_OPERATE_PWD)) {
+                    // 应用验证机器人密码是否正确的方法
+                    robotService.checkPasswordIsValid(uuid, robotCode, jsonObjectData.getJSONObject(TopicConstants.DATA).getString("input_pwd"));
                 }
             }
         } catch (Exception e) {
