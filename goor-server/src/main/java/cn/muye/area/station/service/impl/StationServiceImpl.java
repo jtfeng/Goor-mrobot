@@ -25,7 +25,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -200,7 +199,9 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
                 if (stationRobotXrefDbList != null && stationRobotXrefDbList.size() > 0) {
                     for (StationRobotXREF xref : stationRobotXrefDbList) {
                         Robot robotDb = robotService.getById(xref.getRobotId());
-                        robotList.add(robotDb);
+                        if (robotDb != null) {
+                            robotList.add(robotDb);
+                        }
                     }
                 }
                 station.setRobotList(robotList);
@@ -210,7 +211,9 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
                 if (stationStationXREFList != null && stationStationXREFList.size() > 0) {
                     for (StationStationXREF xref : stationStationXREFList) {
                         Station stationDb = stationMapper.selectByPrimaryKey(xref.getDestinationStationId());
-                        accessArriveStationList.add(stationDb);
+                        if (stationDb != null) {
+                            accessArriveStationList.add(stationDb);
+                        }
                     }
                 }
                 station.setAccessArriveStationIdList(accessArriveStationList);

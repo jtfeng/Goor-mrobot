@@ -183,6 +183,52 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return availableRobot;
     }
 
+    /**
+     * 根据站查询可调用的机器人数量
+     * @param stationId
+     * @return
+     */
+    @Override
+    public Map getCountAvailableRobotByStationId(Long stationId) {
+        List<StationRobotXREF> list = stationRobotXREFService.getByStationId(stationId);
+        Map<String, Integer> availableRobotCountMap = Maps.newHashMap();
+        int trailerCount = 0;
+        int cabinetCount = 0;
+        int drawerCount = 0;
+        int cookyCount = 0;
+        int cookyPlusCount = 0;
+        int carsonCount = 0;
+        if (list != null && list.size() > 0) {
+            for (StationRobotXREF xref : list) {
+                Long robotId = xref.getRobotId();
+                Robot robotDb = getById(robotId);
+                //todo 暂时先不考虑低电量和紧急制动状态
+                if (robotDb != null && robotDb.getBusy() == false && robotDb.getOnline() == true) {
+                    if (robotDb.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
+                        trailerCount++;
+                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {
+                        cabinetCount++;
+                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.DRAWER.getCaption())) {
+                        drawerCount++;
+                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKY.getCaption())) {
+                        cookyCount++;
+                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKYPLUS.getCaption())) {
+                        cookyPlusCount++;
+                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.CARSON.getCaption())) {
+                        carsonCount++;
+                    }
+                }
+            }
+            availableRobotCountMap.put(RobotTypeEnum.TRAILER.name(), trailerCount);
+            availableRobotCountMap.put(RobotTypeEnum.CABINET.name(), cabinetCount);
+            availableRobotCountMap.put(RobotTypeEnum.DRAWER.name(), drawerCount);
+            availableRobotCountMap.put(RobotTypeEnum.COOKY.name(), cookyCount);
+            availableRobotCountMap.put(RobotTypeEnum.COOKYPLUS.name(), cookyPlusCount);
+            availableRobotCountMap.put(RobotTypeEnum.CARSON.name(), carsonCount);
+        }
+        return availableRobotCountMap;
+    }
+
     @Override
     public List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list) {
         List listMapPoint = null;

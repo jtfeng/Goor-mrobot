@@ -331,4 +331,12 @@ public class StationController {
         return AjaxResult.success(station,"绑定成功");
     }
 
+    //测试用的不要提交
+//    @RequestMapping(value = {"area/station/test"}, method = RequestMethod.GET)
+//    @ResponseBody
+//    public AjaxResult listByStationId(@RequestParam("id") Long stationId) {
+//        List<Station> stationList = stationService.listAccessStationByStationId(stationId);
+//        return AjaxResult.success(stationList);
+//    }
+
 }
