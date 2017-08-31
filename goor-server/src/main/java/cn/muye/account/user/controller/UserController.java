@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -228,11 +227,11 @@ public class UserController {
     @RequestMapping(value = {"account/user/login"}, method = RequestMethod.POST)
     @ApiOperation(value = "登录接口", httpMethod = "POST", notes = "登录接口")
     @ResponseBody
-    public AjaxResult login(@RequestBody User userParam, HttpServletResponse response) {
+    public AjaxResult login(@RequestBody User userParam) {
         if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
         }
-        Map map = doLogin(userParam.getUserName(), userParam.getPassword(), response);
+        Map map = doLogin(userParam.getUserName(), userParam.getPassword());
         return doCheckLogin(map);
     }
 
@@ -245,7 +244,7 @@ public class UserController {
     @RequestMapping(value = {"account/user/login/pad"}, method = RequestMethod.POST)
     @ApiOperation(value = "PAD登录接口", httpMethod = "POST", notes = "PAD登录接口")
     @ResponseBody
-    public AjaxResult directKeyLogin(@RequestBody User userParam, HttpServletResponse response) {
+    public AjaxResult directKeyLogin(@RequestBody User userParam) {
         try {
             if (userParam.getDirectLoginKey() == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
@@ -254,7 +253,7 @@ public class UserController {
             //todo StoreId暂时用100去代替，以后用session里获取
             User userDb = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (userDb != null) {
-                Map map = doLogin(userDb.getUserName(), userDb.getPassword(), response);
+                Map map = doLogin(userDb.getUserName(), userDb.getPassword());
                 return doCheckLoginPad(map);
             } else {
                 return AjaxResult.failed("用户不存在");
@@ -358,7 +357,7 @@ public class UserController {
      * @param password
      * @return
      */
-    private Map<String, Object> doLogin(String userName, String password, HttpServletResponse response) {
+    private Map<String, Object> doLogin(String userName, String password) {
         //调auth_server的token接口
         User user;
         Map map = new HashMap();
@@ -373,9 +372,7 @@ public class UserController {
                     user = list.get(0);
                     List<StationDTO4User> stationList = user.getStationList();
                     map.put("user", entityToDto(user, SOURCE_TYPE_OTHER));
-                    //将access_token放header
-                    response.setHeader("access_token", accessToken);
-//                    map.put("access_token", accessToken);
+                    map.put("access_token", accessToken);
                     if (stationList != null && stationList.size() > 0) {
                         //todo 暂时写死 临时添加场景id( ?? 注意对应 id 场景不存在的情况)
 //                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
