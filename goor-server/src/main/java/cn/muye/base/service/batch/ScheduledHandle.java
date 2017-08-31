@@ -60,7 +60,7 @@ public class ScheduledHandle {
     }
 
     /**
-     * 判断是否机器人在线
+     * 判断是否机器人在线，以及跟往webSocket上报当前护士站可用机器人数量
      */
     public void executeRobotHeartBeat() {
         scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -68,6 +68,7 @@ public class ScheduledHandle {
             public void run() {
                 try {
                     ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    //里面加上往webSocket上报当前护士站可用机器人数量的代码
                     service.executeRobotHeartBeat();
                 } catch (Exception e) {
                     logger.error("schedule publishRosScheduled exception", e);

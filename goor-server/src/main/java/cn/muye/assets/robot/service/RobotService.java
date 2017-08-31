@@ -5,8 +5,8 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
-
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Ray.Fu on 2017/6/21.
@@ -36,6 +36,13 @@ public interface RobotService extends BaseService<Robot>{
     AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientRobotBatteryThreshold, String robotCodeDb);
 
     Robot getAvailableRobotByStationId(Long stationId, Integer typeId);
+
+    /**
+     * 根据站ID获取可用机器人数量
+     * @param stationId
+     * @return
+     */
+    Map getCountAvailableRobotByStationId(Long stationId);
 
     List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list);
 

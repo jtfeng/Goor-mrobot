@@ -9,7 +9,8 @@ public enum  WSMessageType {
     SPECIFIC_TYPE,
     WARNING,
     POSE,
-    STOP_SENDING;
+    STOP_SENDING,
+    AVAILABLE_ROBOT_COUNT;
 
     public boolean is(String msgType) {
         return name().equalsIgnoreCase(msgType);
