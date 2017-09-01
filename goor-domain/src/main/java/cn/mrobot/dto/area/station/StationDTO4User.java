@@ -1,5 +1,9 @@
 package cn.mrobot.dto.area.station;
 
+import cn.mrobot.bean.assets.robot.Robot;
+
+import java.util.List;
+
 /**
  * Created by Ray.Fu on 2017/7/4.
  */
@@ -10,6 +14,8 @@ public class StationDTO4User {
     private String name;
 
     private Long sceneId;
+
+    private List<Robot> robotList;
 
     public Long getId() {
         return id;
@@ -33,5 +39,13 @@ public class StationDTO4User {
 
     public void setSceneId(Long sceneId) {
         this.sceneId = sceneId;
+    }
+
+    public List<Robot> getRobotList() {
+        return robotList;
+    }
+
+    public void setRobotList(List<Robot> robotList) {
+        this.robotList = robotList;
     }
 }
