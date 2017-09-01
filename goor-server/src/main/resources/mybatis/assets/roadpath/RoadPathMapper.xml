@@ -14,6 +14,10 @@
         SELECT MAP_SCENENAME FROM SCENES_MAPS_RELATIONS WHERE SCENE_ID = #{0}
     </select>
 
+    <select id="findRoadPathPointByRoadPath" parameterType="java.lang.Long" resultMap="RoadPathPointSimpleMap">
+        SELECT * FROM AS_ROADPATHPOINT WHERE ROAD_PATH_ID = #{0} ORDER BY ID ASC
+    </select>
+
     <select id="findBeginRoadPathPoint" parameterType="java.lang.Long" resultMap="RoadPathPointSimpleMap">
         SELECT NEXT_POINT_ID, PREV_POINT_ID, POINT_ID FROM AS_ROADPATHPOINT WHERE START_FLAG = 1 AND ROAD_PATH_ID = #{0}
     </select>
