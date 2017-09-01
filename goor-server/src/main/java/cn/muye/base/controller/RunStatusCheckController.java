@@ -30,6 +30,12 @@ public class RunStatusCheckController {
 		return 1;
 	}
 
+	@RequestMapping(value = "getServerVersion")
+	@ResponseBody
+	public AjaxResult getVersion(HttpServletRequest request) {
+		return AjaxResult.success("Ver0.0.0.1003");
+	}
+
 	@RequestMapping(value = "checkRosBridge111")
 	@ResponseBody
 	public int checkRosBridge111(HttpServletRequest request) {

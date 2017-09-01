@@ -142,7 +142,7 @@ public class MissionListTaskController {
             if (!result.isSuccess()) {
                 return AjaxResult.failed(String.format("%s 指令调用失败，请重试", command));
             }
-            for (int i = 0; i < 500; i++) {
+            for (int i = 0; i < 30; i++) {
                 Thread.sleep(1000);
                 MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(info.getUuId());
                 if (messageInfo1 != null && messageInfo1.isSuccess()) {
