@@ -6,6 +6,7 @@ package cn.mrobot.bean.websocket;
 public enum  WSMessageType {
     REGISTER,
     NOTIFICATION,
+    SPECIFIC_TYPE,
     WARNING,
     POSE,
     STOP_SENDING;

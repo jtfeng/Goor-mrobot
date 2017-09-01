@@ -6,6 +6,8 @@ import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.cache.CacheInfoManager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
@@ -16,6 +18,9 @@ import javax.websocket.Session;
 @Component
 @Slf4j
 public class WebSocketReceiveMessage {
+
+    @Autowired
+    private WebSocketSendMessage webSocketSendMessage; //暂时这样做
 
     /**
      * 接收webSocket客户端发过来的消息
@@ -36,6 +41,8 @@ public class WebSocketReceiveMessage {
             switch (wsMessageType) {
                 case REGISTER:
                     handleRegister(wsMessage, session);
+                    handleSpecificType(wsMessage, session);
+                    break;
                 case POSE:
                     break;
                 case WARNING:
@@ -43,8 +50,26 @@ public class WebSocketReceiveMessage {
                 case NOTIFICATION:
                     break;
                 case STOP_SENDING:
-                    handleStopSending(wsMessage);
+                    handleStopSending(wsMessage, session);
                     break;
+            }
+        }
+    }
+
+    /**
+     * 处理客户端在指定消息类型请求
+     * 添加session和指定类型的关联关系，当机器人发送信息时需要根据session校验当前客户端是否需要此类型的信息，
+     * 当Websocket客户端关闭的时候需要根据session清除对应的type
+     * @param wsMessage 消息内容
+     */
+    private void handleSpecificType(WSMessage wsMessage, Session session) {
+        String userIdStr = wsMessage.getUserId();
+        String[] userIds = splitStr(userIdStr);
+        String moduleStr = wsMessage.getModule();
+        String[] modules = splitStr(moduleStr);
+        for (String userId : userIds){
+            for (String module : modules){
+                CacheInfoManager.setWebSocketClientReceiveModule(session, userId, module);
             }
         }
     }
@@ -54,10 +79,22 @@ public class WebSocketReceiveMessage {
      *
      * @param wsMessage
      */
-    private void handleRegister(WSMessage wsMessage, Session session) {
-        String userId = wsMessage.getUserId();
-        userId = userId != null ? userId :session.getId();
-        CacheInfoManager.setWebSocketSessionCache(userId, session);
+    private void handleRegister(WSMessage wsMessage, Session session) throws Exception {
+        String userIdStr = wsMessage.getUserId();
+        String[] userIds = splitStr(userIdStr);
+        if (userIds.length > 0) {
+            for (String userId : userIds) {
+                if (!StringUtil.isNullOrEmpty(userId)) {
+                    CacheInfoManager.setWebSocketSessionCache(userId, session);
+                }
+            }
+            wsMessage.setBody(true);
+            webSocketSendMessage.sendWebSocketMessage(wsMessage, session);
+        } else {
+            //推送前端注册失败，userId为空
+            wsMessage.setBody(false);
+            webSocketSendMessage.sendWebSocketMessage(wsMessage);
+        }
     }
 
     /**
@@ -65,21 +102,21 @@ public class WebSocketReceiveMessage {
      *
      * @param wsMessage
      */
-    private void handleStopSending(WSMessage wsMessage) {
-        String module = wsMessage.getModule();
-        LogType logType = LogType.getLogType(module);
-        if (logType == null)
-            return;
-        switch (logType) {
-            case WARNING_LOWER_POWER:
-                stopSendingLowerMessage(logType, wsMessage);
-                break;
-            default:
-                break;
+    private void handleStopSending(WSMessage wsMessage, Session session) {
+        String userIdStr = wsMessage.getUserId();
+        String[] userIds = splitStr(userIdStr);
+        String moduleStr = wsMessage.getModule();
+        String[] modules = splitStr(moduleStr);
+        for (String userId : userIds){
+            for (String module : modules){
+                CacheInfoManager.removeWebSocketClientReceiveModule(session,userId, module);
+            }
         }
     }
 
-    private void stopSendingLowerMessage(LogType logType, WSMessage wsMessage) {
-        CacheInfoManager.setStopSendWebSocketDevice(logType, wsMessage.getDeviceId());
+    private String[] splitStr(String str) {
+        if (!StringUtil.isNullOrEmpty(str))
+            return str.split(",");
+        return new String[0];
     }
 }

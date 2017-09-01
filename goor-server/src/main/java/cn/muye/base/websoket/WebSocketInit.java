@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
-import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Created by enva on 17/07/20.
@@ -46,9 +44,12 @@ public class WebSocketInit implements ApplicationContextAware {
      */
     @OnClose
     public void onClose(Session session) {
-        subOnlineCount();           //在线数减1
         log.error("webSocket onClose");
+        subOnlineCount();           //在线数减1
+        //websocket关闭时，去掉客户端的关联信息
         CacheInfoManager.removeWebSocketSessionCache(session);
+        //删除该客户端关联的接收类型信息
+        CacheInfoManager.removeWebSocketClientFromModule(session);
         log.info("close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
     }
 
@@ -59,7 +60,7 @@ public class WebSocketInit implements ApplicationContextAware {
      */
     @OnMessage
     public void onMessage(String message, Session session) {
-        log.info("receive webSocket client message:" + message);
+        log.info("接收到 webSocket 客户端 message:" + message);
         try {
             //过滤心跳数据
             if (message.indexOf(HEART) >= 0) {

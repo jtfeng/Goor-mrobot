@@ -10,6 +10,7 @@ import javax.websocket.Session;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by enva on 17/07/20.
@@ -22,19 +23,37 @@ public class WebSocketSendMessage {
      * webSocket发送消息方法，向web页面推送消息
      *
      * @param wsMessage
-     * @return
      * @throws Exception
      */
-    public boolean sendWebSocketMessage(WSMessage wsMessage) throws Exception {
-        String userId = wsMessage.getUserId();
-        Session session = CacheInfoManager.getWebSocketSessionCache(userId);
+    public void sendWebSocketMessage(WSMessage wsMessage) throws Exception {
+        String deviceId = wsMessage.getDeviceId();
+        //根据机器人code或者站编号 获取session
+        Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(deviceId);
+        if (sessionSet == null)
+            return;
+        for (Session session : sessionSet) {
+            if (CacheInfoManager.isWebSocketClientReceiveModule(session,wsMessage.getDeviceId(), wsMessage.getModule())) {
+                sendWebSocketMessage(wsMessage, session);
+            } else {
+                log.info(wsMessage.getDeviceId() + "停止接收(未设置接收) " + wsMessage.getModule() + " 信息");
+            }
+        }
+    }
+
+    /**
+     * webSocket发送消息方法，向web页面推送消息
+     *
+     * @param wsMessage
+     * @throws Exception
+     */
+    protected void sendWebSocketMessage(WSMessage wsMessage, Session session) throws Exception {
         if (null != session) {
             sendMessage(session, JSON.toJSONString(wsMessage));
         } else {
             sendAll(JSON.toJSONString(wsMessage));
         }
-        return false;
     }
+
 
     private void sendMessage(Session session, String message) {
         try {
@@ -50,24 +69,28 @@ public class WebSocketSendMessage {
      * @param message
      */
     private void sendAll(String message) {
-        Map<String, Session> sessionMap = CacheInfoManager.getWebSocketSessionCache();
+        Map<String, Set<Session>> sessionMap = CacheInfoManager.getWebSocketSessionCache();
         Iterator iterator = sessionMap.entrySet().iterator();
         while (iterator.hasNext()) {
             Session session = null;
             try {
-                Map.Entry<String, Session> entry = (Map.Entry<String, Session>) iterator.next();
-                session = entry.getValue();
-                sendMessage(session, message);
+                Map.Entry<String, Set<Session>> entry = (Map.Entry<String, Set<Session>>) iterator.next();
+                Set<Session> sessionSet = entry.getValue();
+                Iterator sessionIterator = sessionSet.iterator();
+                while (sessionIterator.hasNext()) {
+                    session = (Session) sessionIterator.next();
+                    sendMessage(session, message);
+                }
             } catch (Exception e) {
                 log.debug("群发消息异常", e);
                 CacheInfoManager.removeWebSocketSessionCache(session);
                 try {
-                    session.close();
+                    if (null != session)
+                        session.close();
                 } catch (IOException e1) {
                     log.error("websocket session 关闭异常", e);
                 }
             }
         }
     }
-
 }

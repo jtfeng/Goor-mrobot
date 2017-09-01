@@ -7,15 +7,18 @@ import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.bean.order.OrderSetting;
 import cn.mrobot.bean.slam.SlamBody;
+import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
+import cn.muye.log.base.LogInfoUtils;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.service.missiontask.MissionFuncsService;
 import com.alibaba.fastjson.JSON;
@@ -148,6 +151,7 @@ public class MissionListTaskController {
                 }
             }
             if (info.isSuccess()) {
+                LogInfoUtils.info(robotCode, ModuleEnums.MISSION, LogType.INFO_USER_OPERATE, String.format("%s 指令调用成功!", command));
                 return AjaxResult.success(String.format("%s 指令调用成功!", command));
             } else {
                 return AjaxResult.failed(String.format("%s 指令调用失败，请重试", command));

@@ -95,12 +95,15 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Transactional(rollbackFor = Exception.class)
     @Override
     public synchronized Object updateScene(Scene scene) throws Exception {
+        Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
         scene.setStoreId(STORE_ID);//设置默认的门店编号
         scene.setCreateTime(new Date());
         scene.setState(0);//代表正在上传
+        scene.setMapSceneName(existScene.getMapSceneName());// 重新设置旧的地图场景名称
         bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
-        bindSceneAndMapRelations(scene);//更新场景与地图之间的绑定关系
-        updateSelective(scene);//更新对应的场景信息
+        // 更新的时候不修改场景与地图之间的对应关系
+//        bindSceneAndMapRelations(scene);//更新场景与地图之间的绑定关系
+        updateSelective(scene) ;//更新对应的场景信息
         //自动下发地图
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
         List<Robot> robots = new ArrayList<>();
