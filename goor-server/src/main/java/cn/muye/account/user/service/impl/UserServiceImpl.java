@@ -2,6 +2,7 @@ package cn.muye.account.user.service.impl;
 
 import cn.mrobot.bean.account.*;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
@@ -10,7 +11,9 @@ import cn.muye.account.user.service.UserStationXrefService;
 import cn.muye.account.user.mapper.UserMapper;
 import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
+import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.area.station.service.StationService;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSONObject;
@@ -19,8 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by Ray.Fu on 2017/6/22.
@@ -43,6 +46,12 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     @Autowired
     private StationService stationService;
+
+    @Autowired
+    private StationRobotXREFService stationRobotXREFService;
+
+    @Autowired
+    private RobotService robotService;
 
     private static final int ACTIVATED = 1; //有效
 
@@ -231,6 +240,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         if (userStationXrefDbList != null && userStationXrefDbList.size() > 0) {
             for (UserStationXref ux : userStationXrefDbList) {
                 Station stationDb = stationService.findById(ux.getStationId());
+                List<StationRobotXREF> xrefList = stationRobotXREFService.getByStationId(ux.getStationId());
+                stationDb.setRobotList(xrefList.stream().map(obj -> robotService.findById(obj.getRobotId())).collect(Collectors.toList()));
                 stationList.add(stationToDTO(stationDb));
             }
         }
@@ -245,6 +256,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         stationDTO4User.setId(station.getId());
         stationDTO4User.setName(station.getName());
         stationDTO4User.setSceneId(station.getSceneId());
+        stationDTO4User.setRobotList(station.getRobotList());
         return stationDTO4User;
     }
 

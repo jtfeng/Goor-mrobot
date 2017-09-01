@@ -118,7 +118,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         if (stationList != null && stationList.size() > 0) {
             for (Station station : stationList) {
                 Map map = robotService.getCountAvailableRobotByStationId(station.getId());
-                WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName()).messageType(WSMessageType.AVAILABLE_ROBOT_COUNT).body(map).deviceId(String.valueOf(station.getId())).build();
+                WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName()).messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
                 try {
                     webSocketSendMessage.sendWebSocketMessage(ws);
                 } catch (Exception e) {
