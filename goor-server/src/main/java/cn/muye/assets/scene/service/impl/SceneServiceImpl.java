@@ -18,6 +18,7 @@ import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -77,6 +78,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         Object taskResult = null;
         if (mapInfos.size() !=0 && robots.size()!= 0){
+            log.info("场景同步地图");
             taskResult = mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
         }
         return taskResult;
@@ -95,23 +97,28 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Transactional(rollbackFor = Exception.class)
     @Override
     public synchronized Object updateScene(Scene scene) throws Exception {
+        log.info("更新场景信息，scene="+ JSON.toJSONString(scene));
         Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
         scene.setStoreId(STORE_ID);//设置默认的门店编号
         scene.setCreateTime(new Date());
         scene.setState(0);//代表正在上传
-        scene.setMapSceneName(existScene.getMapSceneName());// 重新设置旧的地图场景名称
+//        scene.setMapSceneName(existScene.getMapSceneName());// 重新设置旧的地图场景名称
         bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
         // 更新的时候不修改场景与地图之间的对应关系
 //        bindSceneAndMapRelations(scene);//更新场景与地图之间的绑定关系
         updateSelective(scene) ;//更新对应的场景信息
         //自动下发地图
+        log.info("更新场景信息，scene.getMapSceneName()="+scene.getMapSceneName()+", scene.getStoreId()"+scene.getStoreId());
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
+        log.info("更新场景信息，mapInfos="+JSON.toJSONString(mapInfos));
         List<Robot> robots = new ArrayList<>();
         for (Robot robot : scene.getRobots()){
             robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
         }
         Object taskResult = null;
+        log.info("更新场景信息，mapInfos.size()="+mapInfos.size()+", robots.size()="+robots.size());
         if (mapInfos.size() !=0 && robots.size()!= 0){
+            log.info("场景同步地图");
             taskResult = mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
         }
         return taskResult;

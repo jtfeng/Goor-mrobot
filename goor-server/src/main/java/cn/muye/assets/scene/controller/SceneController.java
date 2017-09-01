@@ -70,6 +70,7 @@ public class SceneController {
     public AjaxResult updateScene(@RequestBody Scene scene) {
         // TODO: 21/07/2017 更新指定的场景信息
         try {
+            log.info("更新指定的场景信息");
             Object taskResult = sceneService.updateScene(scene);
             return AjaxResult.success(taskResult, "修改场景信息成功！");
         } catch (Exception e) {
