@@ -555,15 +555,18 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     String.valueOf(robot.getId())));
         }
         for (Robot robot : allRobots) {
-            // 利用线程池逐一完成密码下发任务
-            try {
-                executor.submit(new SendPasswordToSpecialRobotThread(robot, newPassword));
-            }catch (Exception e){
-                LOGGER.info("当前提交的密码设置请求已经超过最大限制次数!");
-            }
+//            try {
+//                executor.submit(new SendPasswordToSpecialRobotThread(robot, newPassword));
+//            }catch (Exception e){
+//            }
+            //调整最新策略，更新机器人密码的时候，现在只是云端本身的操作，只修改本地的数据库，本地数据库密码用作密码校验。
+            robot.setPassword(newPassword);
+            updateSelective(robot);
         }
     }
-    private static ThreadPoolExecutor executor = new ThreadPoolExecutor(
+
+    //TODO: 任一时刻只有一个机器人密码修改的操作，其余的必须等待上一次任务处理完成才能够触发下一次的任务
+    private ThreadPoolExecutor executor = new ThreadPoolExecutor(
             10,
             20,
             1,
@@ -571,14 +574,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             new ArrayBlockingQueue<Runnable>(100));
     private static final String PASSWORD = "password";
     private static final String SENDER = "goor-server";
-    private static Map<String, ReentrantLock> LOCK_DATA = Maps.newHashMap();
-    private synchronized void lock(Map<String, ReentrantLock> LOCK_DATA, String robotCode) {
-        LOCK_DATA.putIfAbsent(robotCode, new ReentrantLock());
-        LOCK_DATA.get(robotCode).lock();
-    }
-    private synchronized void unlock(Map<String, ReentrantLock> LOCK_DATA, String robotCode) {
-        LOCK_DATA.get(robotCode).unlock();
-    }
     private class SendPasswordToSpecialRobotThread extends Thread {
         private String password;
         private Robot robot ;
@@ -589,8 +584,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         @Override
         public void run() {
             try {
-                lock(LOCK_DATA, robot.getCode());
-
                 String uuid = UUID.randomUUID().toString().replace("-", "");
                 CommonInfo commonInfo = new CommonInfo();
                 // TODO: 此处 TopicName 与 TopicType需要进一步确定
@@ -611,7 +604,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (!result.isSuccess()) {
                     LOGGER.info(String.format("编号为 %s 的机器人下发新密码 %s 失败!", String.valueOf(robot.getCode()), password));
                 }
-                for (int i = 0; i < 500; i++) {
+                for (int i = 0; i < 300; i++) {
                     Thread.sleep(1000);
                     MessageInfo messageInfo1 = CacheInfoManager.getUUIDCache(info.getUuId());
                     if (messageInfo1 != null && messageInfo1.isSuccess()) {
@@ -626,8 +619,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 } else {
                     LOGGER.info(String.format("编号为 %s 的机器人下发新密码 %s 失败!", String.valueOf(robot.getCode()), password));
                 }
-
-                unlock(LOCK_DATA, robot.getCode());
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -641,13 +632,35 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public boolean checkPasswordIsValid(String robotCode, String password) {
+    public boolean checkPasswordIsValid(String uuid, String robotCode, String password) {
         checkNotNull(robotCode, "验证机器人编号不允许为空，请重新输入!!");
         checkNotNull(password,  "验证密码不允许为空，请重新输入!");
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition(" CODE = ", robotCode);
         Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
-        return password.equals(robot.getPassword());
+        boolean result = password.equals(robot.getPassword());
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>(){{
+            put("sub_name", TopicConstants.PUB_SUB_NAME_CHECK_OPERATE_PWD);
+            put("uuid", uuid);
+            put("msg", result ? "success" : "error");
+            put("error_code", result ? "0" : "-1");
+        }}))));
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setReceiverId(robotCode);
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+        try {
+            messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+
     }
 
     @Override

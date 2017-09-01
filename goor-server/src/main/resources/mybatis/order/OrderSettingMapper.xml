@@ -9,6 +9,7 @@
         <result property="packageType" column="packageType" />
         <result property="robotType.id" column="robotType.id" />
         <result property="needSign" column="needSign" />
+        <result property="needShelf" column="needShelf" />
         <result property="defaultSetting" column="defaultSetting" />
         <result property="storeId" column="storeId" />
         <result property="createBy" column="createBy" />
@@ -49,6 +50,7 @@
         os.station_id AS "stationId",
         os.package_type AS "packageType",
         os.robot_type_id AS "robotType.id",
+        os.need_shelf AS "needShelf",
         os.need_sign AS "needSign",
         os.default_setting AS "defaultSetting",
         os.store_id AS "storeId",
@@ -122,6 +124,7 @@
         package_type,
         robot_type_id,
         need_sign,
+        need_shelf,
         default_setting,
         delete_status,
         store_id,
@@ -136,6 +139,7 @@
         #{packageType},
         #{robotType.id},
         #{needSign},
+        #{needShelf},
         #{defaultSetting},
         #{deleteStatus},
         #{storeId},
@@ -170,6 +174,9 @@
             </if>
             <if test="needSign != null" >
                 need_sign = #{needSign},
+            </if>
+            <if test="needShelf != null" >
+                need_shelf = #{needShelf},
             </if>
             <if test="defaultSetting != null" >
                 default_setting = #{defaultSetting},

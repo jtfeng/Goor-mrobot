@@ -1,6 +1,7 @@
 package cn.muye.order.service;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.order.Order;
 
 /**
@@ -17,4 +18,6 @@ public interface OrderService {
     Order getOrder(Long id);
 
     void checkWaitOrders();
+
+    void backToStartPoint(String robotCode, MapPoint mapPoint);
 }

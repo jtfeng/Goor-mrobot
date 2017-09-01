@@ -174,6 +174,9 @@ public class RobotController {
      * @param newPassword
      * @return
      */
+    @RequestMapping(value = {"assets/setNewRobotPassword"}, method = RequestMethod.GET)
+    @ApiOperation(value = "设置所有机器人操作的通用密码", httpMethod = "GET", notes = "设置所有机器人操作的通用密码")
+    @ResponseBody
     public AjaxResult setRobotPassword(String newPassword) {
         try {
             this.robotService.setRobotPassword(newPassword);

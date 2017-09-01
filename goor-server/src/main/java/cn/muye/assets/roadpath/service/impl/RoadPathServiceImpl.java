@@ -193,6 +193,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         for (RoadPath roadPath : roadPaths) {
             RoadPathDetail roadPathDetail = new RoadPathDetail();
             BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
+
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
             roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
 
@@ -200,14 +201,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             log.info("packageRoadPathDetail: start- " + roadPath.getStartPoint()
                     + ",end- " + roadPath.getEndPoint()
                     + ",roadPathId- " + roadPath.getId());
-            RoadPathPoint begin = null;// 起始点
             try {
-                begin = this.roadPathMapper.findBeginRoadPathPoint(roadPath.getId()).get(0);
-                relatePoints.add(this.mapPointMapper.selectByPrimaryKey(begin.getPointId()));// 加入第一个点
-                RoadPathPoint nextRoadPathPointInfo = begin; // 表示下一个 引用点
-                while ((nextRoadPathPointInfo = (nextRoadPathPointInfo.getNextPointId() == null ? null :
-                        this.roadPathMapper.findSpecifyRoadPathPoint(roadPath.getId(), nextRoadPathPointInfo.getNextPointId()).get(0))) != null) {
-                    relatePoints.add(this.mapPointMapper.selectByPrimaryKey(nextRoadPathPointInfo.getPointId()));// 加入第一个点
+                for (RoadPathPoint roadPathPoint : this.roadPathMapper.findRoadPathPointByRoadPath(roadPath.getId())){
+                    relatePoints.add(this.mapPointMapper.selectByPrimaryKey(roadPathPoint.getPointId()));
                 }
                 roadPathDetail.setRelatePoints(relatePoints);
                 roadPathDetails.add(roadPathDetail);

@@ -64,6 +64,7 @@ public class TopicConstants {
 	public static final String ROBOTS_CURRENT_POSE = "robots_current_pose"; //所有机器人当前位置
 	public static final String VERIFY_EMPLYEE_NUMBER = "verify_emplyee_number"; //员工工号取货校验
 	public static final String POWER = "/power"; //机器人电量
+	public static final String PUB_SUB_NAME_CHECK_OPERATE_PWD = "check_operate_pwd"; // 应用请求操作机器人密码校验的 PUB 和 SUB 名称
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
 	public static final String ROBOT_CODE = "robot_code";//机器人主板编号
