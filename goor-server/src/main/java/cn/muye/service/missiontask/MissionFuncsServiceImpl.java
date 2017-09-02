@@ -2720,6 +2720,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         roadPaths) {
                     if (rp != null) {
                         MapPoint temp = new MapPoint();
+                        copyValue(temp,point);
                         temp.setSceneName(rp.getSceneName());
                         mapPoints.add(temp);
                         //标记该点的属性
