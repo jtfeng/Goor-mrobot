@@ -37,6 +37,7 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import java.io.*;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -239,7 +240,7 @@ public class HttpClientUtil {
             InputStreamEntity inEntity = new InputStreamEntity(in, localFile.length(), null);
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(600000).setConnectTimeout(5000).build();
             HttpPost httpPost = new HttpPost(remoteFileUrl);
-            httpPost.addHeader("otherInfo", otherInfo);
+            httpPost.addHeader("otherInfo", URLEncoder.encode(otherInfo, "UTF-8"));
             httpPost.setEntity(inEntity);
             httpPost.setConfig(requestConfig);
             httpResponse = httpClient.execute(httpPost);
