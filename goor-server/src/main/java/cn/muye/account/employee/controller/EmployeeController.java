@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -28,7 +28,7 @@ public class EmployeeController {
 
     @RequestMapping(value = {"account/employee"}, method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult addEmployee(@RequestBody Employee employee) {
+    public AjaxResult addEmployee(@RequestBody Employee employee, HttpServletRequest request) {
         try{
             //校验员工工号是否重复
             String code = employee.getCode();
@@ -43,7 +43,7 @@ public class EmployeeController {
             if (employeeDb != null && employeeDb.getCode() != null && employeeDb.getCode().equals(code)) {
                 return AjaxResult.failed(employee, "员工编号重复");
             }
-            employeeService.addEmployee(employee);
+            employeeService.addEmployee(employee, request);
         } catch (RuntimeException e) {
             LOGGER.error("{}", e);
             return AjaxResult.failed(employee,"新增失败");

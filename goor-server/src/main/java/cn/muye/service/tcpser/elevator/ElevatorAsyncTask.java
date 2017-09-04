@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -37,12 +38,12 @@ public class ElevatorAsyncTask {
     ElevatorClientAsyncTask elevatorClientAsyncTask;
 
     @Async("elevatorTcpSerAsync")
-    public Future<String> taskElevatorTcpSer() throws InterruptedException{
+    public Future<String> taskElevatorTcpSer(HttpServletRequest request) throws InterruptedException{
         try {
             //等待客户端的连接
             while (true){
                 Socket client = serverSocket.accept();
-                elevatorClientAsyncTask.taskElevatorTcpSerClient(client);
+                elevatorClientAsyncTask.taskElevatorTcpSerClient(client, request);
             }
         } catch (IOException e) {
             e.printStackTrace();

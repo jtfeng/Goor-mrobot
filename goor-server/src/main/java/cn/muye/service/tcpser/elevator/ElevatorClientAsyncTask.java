@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.Future;
@@ -28,7 +29,7 @@ public class ElevatorClientAsyncTask {
     }
 
     @Async("elevatorTcpSerClientAsync")
-    public Future<String> taskElevatorTcpSerClient(Socket client) throws InterruptedException{
+    public Future<String> taskElevatorTcpSerClient(Socket client, HttpServletRequest request) throws InterruptedException{
         logger.info("Remote Address: " + client.getRemoteSocketAddress() + "taskElevatorTcpSerClient. One Client connected...");
         InputStream inputStream;
         try {
@@ -61,7 +62,7 @@ public class ElevatorClientAsyncTask {
 
                     if (logElevatorService != null){
                         try {
-                            logElevatorService.save(logElevator);
+                            logElevatorService.save(logElevator, request);
                         } catch (Exception e) {
                             e.printStackTrace();
                             logger.info(e.getMessage());

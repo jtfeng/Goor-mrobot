@@ -52,15 +52,20 @@ public class AuthValidationExceptionFilter implements Filter{
             HttpServletRequest httpServletRequest = (HttpServletRequest) req;
             HttpServletResponse response = (HttpServletResponse) res;
             try {
-                String accessTokenFromReq = httpServletRequest.getParameter("access_token");
-                String result = HttpClientUtil.executeGet(null,authUserUri+"?access_token="+accessTokenFromReq , null, null, "UTF-8", true);
+                String accessTokenFromReq = httpServletRequest.getHeader("access_token");
+//                String accessTokenFromReq = httpServletRequest.getParameter("access_token");
+                String result = HttpClientUtil.executeGet(null, accessTokenFromReq, authUserUri , null, null, "UTF-8", true);
                 JSONObject jsonObject = JSON.parseObject(result);
                 String principal = jsonObject.getString("principal");
                 if (StringUtil.isNullOrEmpty(principal)) {
+                    CacheInfoManager.removeLoggedUserCache(accessTokenFromReq);
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
                     response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
                 } else {
                     String userName = JSON.parseObject(principal).getString("username");
+                    if (StringUtil.isNullOrEmpty(CacheInfoManager.getLoggedUserCache(accessTokenFromReq))) {
+                        CacheInfoManager.setLoggedUserCache(accessTokenFromReq, userName);
+                    }
                     if (CacheInfoManager.getUserLoginStatusCache(userName) != null) {
                         chain.doFilter(req, res);
                     } else {

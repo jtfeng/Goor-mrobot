@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +55,8 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     private static Logger LOGGER = Logger.getLogger(EmployeeServiceImpl.class);
 
     @Override
-    public void addEmployee(Employee employee) throws RuntimeException {
-        employee.setCreatedBy(userUtil.getCurrentUserId());
+    public void addEmployee(Employee employee, HttpServletRequest request) throws RuntimeException {
+        employee.setCreatedBy(userUtil.getCurrentUserId(request));
         employee.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         employee.setCreateTime(new Date());
         employeeMapper.insert(employee);

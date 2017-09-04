@@ -120,7 +120,7 @@ public class HttpClientUtil {
      * @throws ClientProtocolException
      * @throws IOException
      */
-    public static String executeGet(CloseableHttpClient httpClient, String url, String reffer, String cookie, String charset, boolean closeHttpClient) throws IOException {
+    public static String executeGet(CloseableHttpClient httpClient, String accessToken, String url, String reffer, String cookie, String charset, boolean closeHttpClient) throws IOException {
         CloseableHttpResponse httpResponse = null;
         try {
             if (httpClient == null) {
@@ -129,6 +129,9 @@ public class HttpClientUtil {
             HttpGet get = new HttpGet(url);
             if (cookie != null && !"".equals(cookie)) {
                 get.setHeader("Cookie", cookie);
+            }
+            if (accessToken != null && !"".equals(accessToken)) {
+                get.setHeader("Authorization", "bearer " + accessToken);
             }
             if (reffer != null && !"".equals(reffer)) {
                 get.setHeader("Reffer", reffer);

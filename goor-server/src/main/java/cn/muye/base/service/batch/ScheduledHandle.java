@@ -60,7 +60,7 @@ public class ScheduledHandle {
     }
 
     /**
-     * 判断是否机器人在线，以及跟往webSocket上报当前护士站可用机器人数量
+     * 判断是否机器人在线(1次/秒)，以及跟往webSocket上报当前护士站可用机器人数量
      */
     public void executeRobotHeartBeat() {
         scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
@@ -74,7 +74,7 @@ public class ScheduledHandle {
                     logger.error("schedule publishRosScheduled exception", e);
                 }
             }
-        }, 60, 60, TimeUnit.SECONDS);
+        }, 60, 1, TimeUnit.SECONDS);
     }
 
 }

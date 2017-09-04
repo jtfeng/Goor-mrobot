@@ -5,6 +5,8 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -19,9 +21,9 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getById(Long id);
 
-    void saveRobotAndBindChargerMapPoint(Robot robot);
+    void saveRobotAndBindChargerMapPoint(Robot robot, HttpServletRequest request);
 
-    AjaxResult autoRegister(Robot robotNew);
+    AjaxResult autoRegister(Robot robotNew, HttpServletRequest request);
 
     void deleteRobotById(Long id);
 
@@ -35,7 +37,7 @@ public interface RobotService extends BaseService<Robot>{
 
     AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientRobotBatteryThreshold, String robotCodeDb);
 
-    Robot getAvailableRobotByStationId(Long stationId, Integer typeId);
+    Robot getAvailableRobotByStationId(Long stationId, Integer typeId) throws RuntimeException;
 
     /**
      * 根据站ID获取可用机器人数量

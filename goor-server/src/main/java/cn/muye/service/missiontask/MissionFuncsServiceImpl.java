@@ -36,6 +36,7 @@ import cn.muye.mission.service.MissionTaskService;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.reflect.TypeToken;
+import org.apache.http.protocol.HTTP;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -91,7 +93,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     @Override
-    public AjaxResult createMissionLists(Order order) {
+    public AjaxResult createMissionLists(Order order, HttpServletRequest request) {
 
         logger.info("##############  createMissionLists #################");
 
@@ -119,7 +121,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         initMissionListTask(missionListTask, order, mapPoints, mpAttrs);
 
         //任务列表实例化完成，将数据存储到数据库
-        saveMissionListTask(missionListTask);
+        saveMissionListTask(missionListTask, request);
 
         //下发任务到机器人任务管理器
         List<MissionListTask> listTasks =
@@ -154,7 +156,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      *
      */
     public AjaxResult createMissionListTasksByMissionLists(String robotCode,
-                                                           List<MissionList> missionLists) throws Exception{
+                                                           List<MissionList> missionLists, HttpServletRequest request) throws Exception{
         if(missionLists == null || missionLists.size() <= 0
                 || robotCode == null ) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
@@ -169,7 +171,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             //missionList转化成missionListTask
             MissionListTask missionListTask = missionListToTask(missionList,robotCode);
             //任务列表实例化完成，将数据存储到数据库
-            saveMissionListTask(missionListTask);
+            saveMissionListTask(missionListTask, request);
             listTasks.add(missionListTask);
         }
         AjaxResult ajaxResult = x86MissionDispatchService.sendX86MissionDispatch(
@@ -330,13 +332,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * 将任务列表存储到数据库
      * @param missionListTask
      */
-    private void saveMissionListTask(MissionListTask missionListTask) {
+    private void saveMissionListTask(MissionListTask missionListTask, HttpServletRequest request) {
         if (missionListTask == null){
             return;
         }
 
         //保存任务列表
-        missionListTaskService.save(missionListTask);
+        missionListTaskService.save(missionListTask, request);
         if (missionListTask.getId() == null){
             return;
         }
@@ -347,7 +349,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 if (mt != null) {
                     mt.setMissionListId(missionListTask.getId());
                     //保存任务节点
-                    missionTaskService.save(mt);
+                    missionTaskService.save(mt, request);
                     if (mt.getId() != null &&
                             mt.getMissionItemTasks() != null){
                         for (MissionItemTask mit :
@@ -356,7 +358,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 mit.setMissionListId(mt.getMissionListId());
                                 mit.setMissionId(mt.getId());
                                 //保存任务item节点
-                                missionItemTaskService.save(mit);
+                                missionItemTaskService.save(mit, request);
                             }
                         }
                     }
@@ -2428,7 +2430,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     @Override
-    public AjaxResult createMissionListsPathNav(Order order) {
+    public AjaxResult createMissionListsPathNav(Order order, HttpServletRequest request) {
 
         logger.info("##############  createMissionListsPathNav #################");
 
@@ -2456,7 +2458,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         initPathMissionListTask(missionListTask, order, mapPoints, mpAttrs);
 
         //任务列表实例化完成，将数据存储到数据库
-        saveMissionListTask(missionListTask);
+        saveMissionListTask(missionListTask, request);
 
         //下发任务到机器人任务管理器
         List<MissionListTask> listTasks =

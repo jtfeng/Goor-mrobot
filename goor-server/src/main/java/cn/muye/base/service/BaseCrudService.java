@@ -2,6 +2,7 @@ package cn.muye.base.service;
 
 import cn.mrobot.bean.base.BaseBean;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public interface BaseCrudService<T extends BaseBean> {
 
-    int save(T entity);
+    int save(T entity, HttpServletRequest request);
 
     int delete(T entity);
 

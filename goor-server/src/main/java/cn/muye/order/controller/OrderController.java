@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -86,14 +87,14 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrder(@RequestBody Order order,@RequestParam(required = false) String orderNavType){
+    public AjaxResult saveOrder(@RequestBody Order order,@RequestParam(required = false) String orderNavType, HttpServletRequest request){
         Robot arrangeRobot = null;
         try {
             //注入发起站
-            Long stationId = userUtil.getStationId();
+            Long stationId = userUtil.getStationId(request);
             order.setStartStation(new Station(stationId));
             //注入场景
-            Scene scene = SessionUtil.getScene();
+            Scene scene = SessionUtil.getScene(request);
             order.setScene(scene);
             //现在orderSetting后台默认注入默认配置
             if(order.getOrderSetting() == null){
@@ -124,10 +125,10 @@ public class OrderController extends BaseController {
             order.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
             AjaxResult ajaxResult = AjaxResult.failed("订单生成异常");
             if(orderNavType != null && orderNavType.equals(Constant.ORDER_NAV_TYPE_PATH)) {
-                ajaxResult = orderService.savePathOrder(order);
+                ajaxResult = orderService.savePathOrder(order, request);
             }
             else {
-                ajaxResult = orderService.saveOrder(order);
+                ajaxResult = orderService.saveOrder(order, request);
             }
             //若未成功， 机器人状态也回滚
             if(!ajaxResult.isSuccess()){
@@ -158,9 +159,9 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(value = "getOrderPageInfo", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult getOrderPageInfo(@RequestParam("type") Long type){
+    public AjaxResult getOrderPageInfo(@RequestParam("type") Long type, HttpServletRequest request){
         try {
-            Station station = stationService.findById(userUtil.getStationId());
+            Station station = stationService.findById(userUtil.getStationId(request));
             if(station == null){
                 return AjaxResult.failed("未获取到用户的关联站点");
             }
@@ -186,9 +187,9 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(value = "listStationTasks", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult listStationTasks(HttpSession session,WhereRequest whereRequest){
+    public AjaxResult listStationTasks(HttpSession session,WhereRequest whereRequest, HttpServletRequest request){
         try {
-            Long stationId = userUtil.getStationId();
+            Long stationId = userUtil.getStationId(request);
             List<OrderDetail> orderDetailList = orderDetailService.listStationTasks(stationId, whereRequest);
             List<OrderDetailVO> orderDetailVOs = orderDetailList.stream().map(orderDetail -> generateOrderDetailVO(orderDetail)).collect(Collectors.toList());
             PageInfo<OrderDetailVO> detailPageInfo = new PageInfo<>(orderDetailVOs);

@@ -12,7 +12,6 @@ import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.bean.order.OrderSetting;
-import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.MessageInfo;
@@ -32,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -61,7 +61,7 @@ public class MissionListTaskController {
     @ApiOperation(
             value = "任务列表创建",
             notes = "任务列表创建")
-    public AjaxResult createMissionListTask() {
+    public AjaxResult createMissionListTask(HttpServletRequest request) {
         try {
             Order order = new Order();
             order.setId(1L);
@@ -90,7 +90,7 @@ public class MissionListTaskController {
             order.setDetailList(orderDetails);
 
             AjaxResult ret =
-                    missionFuncsService.createMissionLists(order);
+                    missionFuncsService.createMissionLists(order, request);
             return ret;
         } catch (Exception e) {
             e.printStackTrace();

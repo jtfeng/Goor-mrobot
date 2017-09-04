@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,16 +59,16 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     private RabbitTemplate rabbitTemplate;
 
     @Override
-    public void saveWaitOrder(Order order) {
+    public void saveWaitOrder(Order order, HttpServletRequest request) {
         //保存订单
-        preInject(order);
+        preInject(order, request);
         orderMapper.saveOrder(order);
         //保存订单详情
         List<OrderDetail> orderDetailList = order.getDetailList();
         orderDetailList.forEach(orderDetail -> {
             orderDetail.setOrderId(order.getId());
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
-            orderDetailService.save(orderDetail);
+            orderDetailService.save(orderDetail, request);
             //保存货物信息
             orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
                 goodsInfo.setOrderDetailId(orderDetail.getId());
@@ -77,10 +78,10 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     }
 
     @Override
-    public AjaxResult saveOrder(Order order) {
-        saveWaitOrder(order);
+    public AjaxResult saveOrder(Order order, HttpServletRequest request) {
+        saveWaitOrder(order, request);
         //在这里调用任务生成器
-        return generateMissionList(order.getId());
+        return generateMissionList(order.getId(), request);
     }
 
     /**
@@ -89,9 +90,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * @return
      */
     @Override
-    public AjaxResult savePathOrder(Order order) {
+    public AjaxResult savePathOrder(Order order, HttpServletRequest request) {
         //保存订单
-        preInject(order);
+        preInject(order, request);
 //        order.setStatus(OrderConstant.ORDER_STATUS_UNDONE);
         orderMapper.saveOrder(order);
         //保存订单详情
@@ -99,7 +100,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         orderDetailList.forEach(orderDetail -> {
             orderDetail.setOrderId(order.getId());
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
-            orderDetailService.save(orderDetail);
+            orderDetailService.save(orderDetail, request);
             //保存货物信息
             orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
                 goodsInfo.setOrderDetailId(orderDetail.getId());
@@ -109,7 +110,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         //在这里调用任务生成器
         Order sqlOrder = getOrder(order.getId());
 //        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
-        AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder);
+        AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder, request);
         if(!ajaxResult.isSuccess()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
@@ -138,9 +139,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * @param orderId
      * @return
      */
-    public AjaxResult generateMissionList(Long orderId){
+    public AjaxResult generateMissionList(Long orderId, HttpServletRequest request){
         Order sqlOrder = getOrder(orderId);
-        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
+        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder, request);
         if(!ajaxResult.isSuccess()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
@@ -152,7 +153,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * 查询数据库内排列订单并处理
      */
     @Override
-    public void checkWaitOrders() {
+    public void checkWaitOrders(HttpServletRequest request) {
         Order domain = new Order();
         domain.setStatus(OrderConstant.ORDER_STATUS_WAIT);
         List<Order> waitOrders = orderMapper.listByDomain(domain);
@@ -165,7 +166,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             }else{
                 waitOrder.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
                 orderMapper.updateOrder(waitOrder);
-                generateMissionList(waitOrder.getId());
+                generateMissionList(waitOrder.getId(), request);
             }
         }
     }
@@ -175,7 +176,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * @param mapPoint
      */
     @Override
-    public void backToStartPoint(String robotCode, MapPoint mapPoint) {
+    public void backToStartPoint(String robotCode, MapPoint mapPoint, HttpServletRequest request) {
         //发送指定消息，任务中断的时候可以返回出发点
         //TODO: 需要确定这个任务事件的相关 Topic 名称和类型的相关信息
         CommonInfo commonInfo = new CommonInfo();

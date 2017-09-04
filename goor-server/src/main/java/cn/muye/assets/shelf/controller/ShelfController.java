@@ -12,6 +12,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -28,10 +30,10 @@ public class ShelfController {
 
     @RequestMapping(value = "assets/shelf", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult list(WhereRequest whereRequest) {
+    public AjaxResult list(WhereRequest whereRequest, HttpServletRequest request) {
         PageInfo<Shelf> pageList = null;
         try {
-            Long sceneId = SessionUtil.getScene().getId();
+            Long sceneId = SessionUtil.getScene(request).getId();
             List<Shelf> list = shelfService.listPageByStoreIdAndOrderAndSceneId(whereRequest.getPage(), whereRequest.getPageSize(), whereRequest.getQueryObj(), Shelf.class, "ID DESC", sceneId);
             pageList = new PageInfo<>(list);
         } catch (Exception e) {
@@ -43,7 +45,7 @@ public class ShelfController {
 
     @RequestMapping(value = "assets/shelf", method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult addOrUpdateShelf(@RequestBody Shelf shelf) {
+    public AjaxResult addOrUpdateShelf(@RequestBody Shelf shelf, HttpServletRequest request) {
         try {
             if (StringUtil.isNullOrEmpty(shelf.getCode()) || StringUtil.isNullOrEmpty(shelf.getRfid()) || StringUtil.isNullOrEmpty(shelf.getName()) || StringUtil.isNullOrEmpty(shelf.getType())) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "货架名称或RFID或编号或类型不能为空");
@@ -59,7 +61,7 @@ public class ShelfController {
             if (shelfDbByCode != null && !shelfDbByCode.getId().equals(id)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "货架编号重复");
             }
-            shelf.setSceneId(SessionUtil.getScene().getId());
+            shelf.setSceneId(SessionUtil.getScene(request).getId());
             if (id == null) {
                 shelf.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
                 shelf.setCreateTime(new Date());

@@ -5,6 +5,7 @@ import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public interface SceneService extends BaseService<Scene> {
 
     List<Scene> list() throws Exception;
 
-    Object saveScene(Scene scene) throws Exception;
+    Object saveScene(Scene scene, HttpServletRequest request) throws Exception;
 
     Scene getSceneById(Long id) throws Exception;
 

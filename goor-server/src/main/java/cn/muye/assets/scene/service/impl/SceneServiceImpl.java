@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -63,11 +64,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized Object saveScene(Scene scene) throws Exception {
+    public synchronized Object saveScene(Scene scene, HttpServletRequest request) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
         scene.setState(0);//代表正在上传
-        int insertRowsCount = this.save(scene);//数据库中插入这条场景记录
+        int insertRowsCount = this.save(scene, request);//数据库中插入这条场景记录
         bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
         //自动下发地图
@@ -90,9 +91,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         log.info("传入的场景 ID 编号为 ：" + sceneId);
         Scene scene = getSceneById(Long.parseLong(sceneId));
         if (source.equals(Constant.RECORD_SCENE_SOURCE_PAD)) {
-            SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG_PAD, scene);
+            SessionUtil.SCENE_LOADING_CACHE.put((token != null ? token : null)+":"+Constant.SCENE_SESSION_TAG_PAD, scene);
         } else {
-            SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG_PC, scene);
+            SessionUtil.SCENE_LOADING_CACHE.put((token != null ? token : null)+":"+Constant.SCENE_SESSION_TAG_PC, scene);
         }
         log.info("传入用户会话中的场景信息为：" + scene);
         return scene;

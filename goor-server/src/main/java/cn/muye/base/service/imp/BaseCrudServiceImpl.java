@@ -7,6 +7,7 @@ import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -18,8 +19,8 @@ public abstract class BaseCrudServiceImpl<T extends BaseBean>  extends BasePreIn
     @Autowired
     protected MyMapper<T> myMapper;
 
-    public int save(T entity) {
-        preInject(entity);
+    public int save(T entity, HttpServletRequest request) {
+        preInject(entity, request);
         return myMapper.insert(entity);
     }
 

@@ -17,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.servlet.http.HttpServletRequest;
+
 import static com.google.common.base.Preconditions.*;
 
 import java.util.Arrays;
@@ -145,9 +148,9 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
+    public void createElevator(Elevator elevator, List<Long> combinationIds, HttpServletRequest request) throws Exception {
         //保存电梯信息
-        save(elevator);
+        save(elevator, request);
         //删除旧的关系
         elevatorMapper.deleteRelationsByElevatorId(elevator.getId());
         if (combinationIds.size() != 0) {

@@ -19,6 +19,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * Created by abel on 17-7-15.
  */
@@ -37,7 +39,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
     private MissionListTaskService missionListTaskService;
 
     @Override
-    public AjaxResult handleX86MissionEvent(MessageInfo messageInfo) {
+    public AjaxResult handleX86MissionEvent(MessageInfo messageInfo, HttpServletRequest request) {
         logger.info(JsonUtils.toJson(
                 messageInfo,
                 new TypeToken<MessageInfo>(){}.getType()));
@@ -90,7 +92,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                     logMission.setPowerPercent(chargeInfo.getPowerPercent());
                 }
                 //保存日志
-                logMissionService.save(logMission);
+                logMissionService.save(logMission, request);
                 if (logMission.getId() == null){
                     logger.warn("logMissionService save new mission log failed! Pls check!!!");
                 }

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
@@ -61,7 +62,7 @@ public class ResourceController extends BaseController {
     @RequestMapping(value = "save", method = RequestMethod.POST)
     @ResponseBody
     private AjaxResult saveResource(@RequestParam("file") MultipartFile file,
-                                    @RequestParam("resourceType") Integer resourceType) {
+                                    @RequestParam("resourceType") Integer resourceType, HttpServletRequest request) {
         try {
             //上传文件
             StringBuffer path = new StringBuffer("/" + resourceType.toString());
@@ -98,7 +99,7 @@ public class ResourceController extends BaseController {
                 resource.setResourceType(resourceType);
                 resource.setPath(path.toString());
                 //resource.setContent();
-                resourceService.save(resource);
+                resourceService.save(resource, request);
                 return AjaxResult.success(resource, "资源上传成功");
             }
         } catch (Exception e) {

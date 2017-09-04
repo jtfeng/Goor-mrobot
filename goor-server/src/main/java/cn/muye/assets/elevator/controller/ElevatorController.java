@@ -16,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+
 import static com.google.common.base.Preconditions.*;
 import java.util.List;
 
@@ -141,7 +144,7 @@ public class ElevatorController {
      * @return
      */
     @RequestMapping(value = "/assets/elevatorPointCombination", method = RequestMethod.POST)
-    public AjaxResult createElevatorPointCombination(@RequestBody ElevatorPointCombination combination){
+    public AjaxResult createElevatorPointCombination(@RequestBody ElevatorPointCombination combination, HttpServletRequest request){
         try {
             checkNotNull(combination.getWaitPoint(),"等待点编号不能为空!");
             checkNotNull(combination.getGoPoint(),  "进入点编号不能为空!");
@@ -151,7 +154,7 @@ public class ElevatorController {
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
             ));
-            elevatorPointCombinationService.save(combination);
+            elevatorPointCombinationService.save(combination, request);
             return AjaxResult.success("保存四点组合信息成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
@@ -216,7 +219,7 @@ public class ElevatorController {
      * @return
      */
     @RequestMapping(value = "/assets/elevator", method = RequestMethod.POST)
-    public AjaxResult createElevator(@RequestBody Elevator elevator){
+    public AjaxResult createElevator(@RequestBody Elevator elevator, HttpServletRequest request){
         try {
             List<Long> combinationIds = Lists.newArrayList();
             checkNotNull(elevator.getElevatorshaftId(),"电梯必须绑定电梯井，请重新选择!");
@@ -224,7 +227,7 @@ public class ElevatorController {
                 combinationIds.add(checkNotNull(combination.getId(), "ID编号必须存在，请重新检查!"));
             }
             //保存电梯信息以及电梯与点组合的对应关系
-            elevatorService.createElevator(elevator, combinationIds);
+            elevatorService.createElevator(elevator, combinationIds, request);
             return AjaxResult.success("保存电梯信息成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
@@ -288,9 +291,9 @@ public class ElevatorController {
      * @return
      */
     @RequestMapping(value = "/assets/elevatorShaft", method = RequestMethod.POST)
-    public AjaxResult createElevatorShaft(@RequestBody ElevatorShaft elevatorShaft){
+    public AjaxResult createElevatorShaft(@RequestBody ElevatorShaft elevatorShaft, HttpServletRequest request){
         try {
-            elevatorShaftService.save(elevatorShaft);
+            elevatorShaftService.save(elevatorShaft, request);
             return AjaxResult.success("创建新的电梯井成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);

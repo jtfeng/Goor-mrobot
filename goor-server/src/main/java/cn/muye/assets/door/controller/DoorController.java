@@ -46,7 +46,7 @@ public class DoorController {
     private AjaxResult pageStation(WhereRequest whereRequest, HttpServletRequest request) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene();
+            Scene scene = SessionUtil.getScene(request);
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -73,7 +73,7 @@ public class DoorController {
     public AjaxResult deleteMapPoint(@PathVariable long id, HttpServletRequest request) throws Exception {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene();
+            Scene scene = SessionUtil.getScene(request);
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -104,7 +104,7 @@ public class DoorController {
     public AjaxResult saveOrUpdateStation(@ApiParam(value = "门") @RequestBody Door door, HttpServletRequest request) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene();
+            Scene scene = SessionUtil.getScene(request);
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }

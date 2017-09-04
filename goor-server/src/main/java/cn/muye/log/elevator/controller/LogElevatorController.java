@@ -14,8 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import tk.mybatis.mapper.entity.Example;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -54,12 +54,12 @@ public class LogElevatorController {
             value = "电梯日志新增提交",
             notes = "电梯日志新增提交")
     @ResponseBody
-    public AjaxResult addLogElevator() {
+    public AjaxResult addLogElevator(HttpServletRequest request) {
         try {
             LogElevator logElevator = new LogElevator();
             logElevator.setAddr("test");
             logElevator.setValue("test value");
-            logElevatorService.save(logElevator);
+            logElevatorService.save(logElevator, request);
             if (logElevator.getId() != null){
                 return AjaxResult.success("电梯日志新增成功");
             }else{

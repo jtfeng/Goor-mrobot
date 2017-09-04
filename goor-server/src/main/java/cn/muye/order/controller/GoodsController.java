@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -101,9 +102,9 @@ public class GoodsController extends BaseController {
      */
     @RequestMapping(value = "goodsType",method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveGoodsType(@RequestBody GoodsType goodsType){
+    public AjaxResult saveGoodsType(@RequestBody GoodsType goodsType, HttpServletRequest request){
         try {
-            goodsTypeService.save(goodsType);
+            goodsTypeService.save(goodsType, request);
             return AjaxResult.success(goodsType, "保存货物类型成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -177,9 +178,9 @@ public class GoodsController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveGoods(@RequestBody Goods goods){
+    public AjaxResult saveGoods(@RequestBody Goods goods, HttpServletRequest request){
         try {
-            goodsService.save(goods);
+            goodsService.save(goods, request);
             return AjaxResult.success(goods, "保存货物成功");
         } catch (Exception e) {
             e.printStackTrace();

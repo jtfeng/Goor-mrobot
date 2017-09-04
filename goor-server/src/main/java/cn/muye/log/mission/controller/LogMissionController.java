@@ -1,7 +1,6 @@
 package cn.muye.log.mission.controller;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.log.mission.JsonMissionStateResponse;
 import cn.mrobot.bean.log.mission.LogMission;
 import cn.mrobot.bean.log.mission.LogMission.MissionLogType;
 import cn.mrobot.utils.JsonUtils;
@@ -18,6 +17,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 import static cn.mrobot.bean.log.mission.LogMission.MissionLogType.MISSION;
@@ -56,7 +56,7 @@ public class LogMissionController {
                     required = true,
                     name = "body",
                     value = "入参对象")
-            @RequestBody LogMission body) {
+            @RequestBody LogMission body, HttpServletRequest request) {
         try {
             if (body.getMissionType() == null ||
                     body.getStoreId() == null ||
@@ -101,7 +101,7 @@ public class LogMissionController {
                 body.setCreateTime(new Date());
             }
             //保存记录
-            int id = logMissionService.save(body);
+            int id = logMissionService.save(body, request);
             if (id <= 0){
                 throw new Exception("任务日志保存失败。");
             }

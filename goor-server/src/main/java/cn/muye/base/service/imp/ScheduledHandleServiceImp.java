@@ -105,13 +105,12 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 if (robot != null) {
                     //如果大于1分钟
                     if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
-                        robot.setOnline(false);
+                        CacheInfoManager.setRobotOnlineCache(code, false);
                     } else {
-                        robot.setOnline(true);
+                        CacheInfoManager.setRobotOnlineCache(code, true);
                     }
                     robotService.updateSelective(robot);
                 }
-
             }
         }
         List<Station> stationList = stationService.listAll();

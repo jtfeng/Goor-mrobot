@@ -7,6 +7,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 import com.google.common.collect.Lists;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface ElevatorService extends BaseService<Elevator> {
@@ -27,7 +28,7 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @param elevator
      * @throws Exception
      */
-    void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception;
+    void createElevator(Elevator elevator, List<Long> combinationIds, HttpServletRequest request) throws Exception;
 
     /**
      * 更新电梯信息

@@ -5,6 +5,7 @@ import cn.mrobot.bean.constant.Constant;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -32,8 +33,8 @@ public class SessionUtil {
      * @return
      * @throws Exception
      */
-    public static Scene getScene() throws Exception {
-        return SCENE_LOADING_CACHE.getIfPresent(UserUtil.getUserTokenValue()+":"+Constant.SCENE_SESSION_TAG_PC);
+    public static Scene getScene(HttpServletRequest request) throws Exception {
+        return SCENE_LOADING_CACHE.getIfPresent(request.getHeader("access_token")+":"+Constant.SCENE_SESSION_TAG_PC);
     }
 
 }

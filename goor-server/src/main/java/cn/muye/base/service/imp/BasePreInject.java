@@ -6,6 +6,7 @@ import cn.muye.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
@@ -17,9 +18,9 @@ public class BasePreInject<T extends BaseBean> {
     @Autowired
     private UserUtil userUtil;
 
-    public T preInject(T entity){
+    public T preInject(T entity, HttpServletRequest request){
         entity.setCreateTime(new Date());
-        entity.setCreatedBy(userUtil.getCurrentUserId());
+        entity.setCreatedBy(userUtil.getCurrentUserId(request));
         entity.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         return entity;
     }

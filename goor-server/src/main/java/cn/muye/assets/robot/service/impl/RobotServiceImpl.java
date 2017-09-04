@@ -29,6 +29,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.log.base.LogInfoUtils;
+import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
@@ -42,6 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -80,6 +83,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     private MessageSendHandleService messageSendHandleService;
 
     public static final Lock lock1 = new ReentrantLock();
+
+    @Autowired
+    private UserUtil userUtil;
 
     /**
      * 更新机器人
@@ -166,7 +172,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public Robot getAvailableRobotByStationId(Long stationId, Integer typeId) {
+    public Robot getAvailableRobotByStationId(Long stationId, Integer typeId) throws RuntimeException {
         List<StationRobotXREF> list = stationRobotXREFService.getByStationId(stationId);
         Robot availableRobot = null;
         StringBuffer stringBuffer = new StringBuffer();
@@ -174,15 +180,21 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
                 Robot robotDb = getById(robotId);
-                //todo 紧急制动以后在做
-                if (robotDb != null && robotDb.getBusy() == false && robotDb.getOnline() == true && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
-                    availableRobot = robotDb;
-                    stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
-                    LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
-                    break;
-                } else {
-                    stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (robotDb.getOnline() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
-                    LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                if (robotDb != null) {
+                    //todo 紧急制动以后在做
+                    Boolean flag = CacheInfoManager.getRobotOnlineCache(robotDb.getCode());
+                    if (flag == null) {
+                        flag = false;
+                    }
+                    if (robotDb.getBusy() == false && flag == true && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
+                        availableRobot = robotDb;
+                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
+                        LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                        break;
+                    } else {
+                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (robotDb.getOnline() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                        LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                    }
                 }
             }
         }
@@ -314,6 +326,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robot.setSufficientBatteryThreshold(robotConfigDb != null ? robotConfigDb.getSufficientBatteryThreshold() : null);
             List<RobotPassword> robotPasswordList = robotPasswordService.listRobotPassword(robotId);
             robot.setPasswords(robotPasswordList);
+            Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+            if (flag != null) {
+                robot.setOnline(flag);
+            } else {
+                robot.setOnline(false);
+            }
             List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
             List<MapPoint> mapPointList = Lists.newArrayList();
             xrefList.forEach(xref -> {
@@ -337,15 +355,14 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return myMapper.selectByPrimaryKey(id);
     }
 
-
     /**
      * 新增机器人信息
      *
      * @param robot
      * @throws RuntimeException
      */
-    public void saveRobotAndBindChargerMapPoint(Robot robot) throws RuntimeException {
-        super.save(robot);
+    public void saveRobotAndBindChargerMapPoint(Robot robot, HttpServletRequest request) throws RuntimeException {
+        super.save(robot, request);
         Long robotNewId = robot.getId();
         List list = robot.getChargerMapPointList();
         if (list != null && list.size() == 1 && robotNewId != null) {
@@ -357,7 +374,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotConfig.setRobotId(robot.getId());
         robotConfig.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         robotConfig.setCreateTime(new Date());
-        robotConfig.setCreatedBy(1L);
+        robotConfig.setCreatedBy(userUtil.getCurrentUserId(request));
         robotConfigService.add(robotConfig);
         if (robot.getTypeId() != null) {
             robotPasswordService.saveRobotPassword(robot);
@@ -371,7 +388,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public AjaxResult autoRegister(Robot robotNew) throws RuntimeException {
+    public AjaxResult autoRegister(Robot robotNew, HttpServletRequest request) throws RuntimeException {
         if (lock1.tryLock()) {
             try {
                 try {
@@ -380,7 +397,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
                 if (lock1.tryLock()) {
                     try {
-                        return doingAutoRegister(robotNew);
+                        return doingAutoRegister(robotNew, request);
                     } finally {
                         lock1.unlock();
                     }
@@ -394,10 +411,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return null;
     }
 
-    private AjaxResult doingAutoRegister(Robot robotNew) {
+    private AjaxResult doingAutoRegister(Robot robotNew, HttpServletRequest request) {
         try {
             if (robotNew != null) {
-                Long robotId = robotNew.getId();
                 String robotCode = robotNew.getCode();
                 Integer robotTypeId = robotNew.getTypeId();
                 String robotName = robotNew.getName();
@@ -430,7 +446,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
                 Robot robotDb = getByCode(robotCode, robotStoreId);
                 if (robotDb == null) {
-                    saveRobotAndBindChargerMapPoint(robotNew);
+                    saveRobotAndBindChargerMapPoint(robotNew, request);
                     //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
                     syncRosRobotConfig(robotNew);
                     return AjaxResult.success(robotNew, "注册成功");

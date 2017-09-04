@@ -23,7 +23,7 @@ public class ApplicationStartup implements ApplicationListener<ContextRefreshedE
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         //启动电梯tcp server
         try {
-            elevatorAsyncTask.taskElevatorTcpSer();
+            elevatorAsyncTask.taskElevatorTcpSer(null);
             logger.info("ApplicationStartup ########### start elevator ser successed!");
         } catch (InterruptedException e) {
             logger.info("ApplicationStartup ########### start elevator ser failed!");

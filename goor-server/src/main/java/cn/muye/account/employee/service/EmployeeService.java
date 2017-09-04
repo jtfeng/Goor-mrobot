@@ -5,6 +5,7 @@ import cn.mrobot.bean.account.Employee;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  */
 public interface EmployeeService extends BaseService<Employee> {
 
-    void addEmployee(Employee employee);
+    void addEmployee(Employee employee, HttpServletRequest request);
 
     void updateEmployee(Employee employee);
 
