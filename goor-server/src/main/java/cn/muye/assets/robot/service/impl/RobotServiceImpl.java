@@ -703,7 +703,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 robot.setBusy(busy);
             }
             if (online != null){
-                robot.setOnline(online);
+                CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
             }
             if (busy != null ||
                     online != null){
