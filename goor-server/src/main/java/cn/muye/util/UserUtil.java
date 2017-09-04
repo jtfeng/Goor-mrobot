@@ -49,18 +49,4 @@ public class UserUtil {
         }
         return null;
     }
-
-    /**
-     * 获取当前用户的 token 值
-     * @return
-     */
-    public static String getUserTokenValue(){
-        if (SecurityContextHolder.getContext() == null ||
-                SecurityContextHolder.getContext().getAuthentication() == null ||
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal() == null) {
-            return null;
-        }
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return ((OAuth2AuthenticationDetails)authentication.getDetails()).getTokenValue();
-    }
 }

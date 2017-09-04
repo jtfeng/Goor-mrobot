@@ -20,15 +20,6 @@ public class SessionUtil {
             .expireAfterWrite(123, TimeUnit.MINUTES).build();
 
     /**
-     * 从cache获取当前切换的场景PAD端
-     * @return
-     * @throws Exception
-     */
-    public static Scene getPadScene() throws Exception {
-         return SCENE_LOADING_CACHE.getIfPresent(UserUtil.getUserTokenValue()+":"+Constant.SCENE_SESSION_TAG_PAD);
-    }
-
-    /**
      * 从cache获取当前切换的场景PC端
      * @return
      * @throws Exception
