@@ -116,7 +116,10 @@ public class Constant {
     public final static String STOP = "结束";//结束
 
     //Session 中存储的场景（Scene 场景常量标识）
-    public static final String SCENE_SESSION_TAG = "scene_session_information";
+    public static final String SCENE_SESSION_TAG_PC = "scene_session_information_pc";
+
+    //Session 中存储的场景（Scene 场景常量标识）
+    public static final String SCENE_SESSION_TAG_PAD = "scene_session_information_pad";
 
     public static final String SESSION_STATION_ID = "stationId";
 
@@ -125,4 +128,8 @@ public class Constant {
 
     //默认机器人类型
     public static final Integer ROBOT_PRIMARY_TYPE_ID = 1;
+
+    public static final String RECORD_SCENE_SOURCE_PAD = "pad"; //保存场景ID的来源是pad
+
+    public static final String RECORD_SCENE_SOURCE_PC = "pc"; //保存场景ID的来源是pc
 }

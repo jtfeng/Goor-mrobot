@@ -22,6 +22,7 @@ import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.util.UserUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +50,8 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     private FeatureItemService featureItemService;
     @Autowired
     private UserUtil userUtil;
+
+    private static Logger LOGGER = Logger.getLogger(EmployeeServiceImpl.class);
 
     @Override
     public void addEmployee(Employee employee) throws RuntimeException {
@@ -134,27 +137,33 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
 
     @Override
     public AjaxResult verifyEmplyeeNumber(String code, Long missionItemId) {
-        MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
-        //记录日志.单独开前程，避免影响主线程
-        new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
-        if (missionItemTaskListDb != null && (Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName()))) {
-            Employee employee = new Employee();
-            employee.setCode(code);
-            Employee employeeDb = employeeMapper.selectOne(employee);
-            if (employeeDb != null) {
-                return AjaxResult.success();
-            } else {
-                return AjaxResult.failed("没有权限");
+        try {
+            MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
+            //记录日志.单独开前程，避免影响主线程
+            new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
+            if (missionItemTaskListDb != null && (Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName()))) {
+                Employee employee = new Employee();
+                employee.setCode(code);
+                Employee employeeDb = employeeMapper.selectOne(employee);
+                if (employeeDb != null) {
+                    return AjaxResult.success();
+                } else {
+                    return AjaxResult.failed("没有权限");
+                }
             }
-        }
-        if (missionItemTaskListDb != null && missionItemTaskListDb.getName().equals(Constant.MISSION_ITEM_TASK_CONCERN_STATION_NAMES_FOR_EMP_NUMBER)) {
-            Map map = Maps.newHashMap();
-            map.put("code", code);
-            map.put("missionItemId", missionItemId);
-            List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
-            if (employeeListDb != null && employeeListDb.size() > 0) {
-                return AjaxResult.success();
+            if (missionItemTaskListDb != null && missionItemTaskListDb.getName().equals(Constant.MISSION_ITEM_TASK_CONCERN_STATION_NAMES_FOR_EMP_NUMBER)) {
+                Map map = Maps.newHashMap();
+                map.put("code", code);
+                map.put("missionItemId", missionItemId);
+                List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
+                if (employeeListDb != null && employeeListDb.size() > 0) {
+                    return AjaxResult.success();
+                }
             }
+        } catch (Exception e) {
+            LOGGER.error("{}", e);
+            return AjaxResult.failed("系统错误");
+        } finally {
         }
         return AjaxResult.failed("没有权限");
     }

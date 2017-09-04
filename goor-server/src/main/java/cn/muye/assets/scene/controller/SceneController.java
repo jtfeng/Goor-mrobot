@@ -2,15 +2,14 @@ package cn.muye.assets.scene.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.scene.service.SceneService;
-import cn.muye.log.base.service.LogInfoService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +35,7 @@ public class SceneController {
     @RequestMapping(value = "/assets/scene/session/{sceneId}", method = RequestMethod.POST)
     public AjaxResult storeSceneInfoToSession(@PathVariable("sceneId") String sceneId, HttpServletRequest request) {
         try {
-            Scene scene = this.sceneService.storeSceneInfoToSession(sceneId, null);
+            Scene scene = this.sceneService.storeSceneInfoToSession(Constant.RECORD_SCENE_SOURCE_PC, sceneId, null);
             return AjaxResult.success(scene, "保存场景信息到用户会话中成功!");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage());

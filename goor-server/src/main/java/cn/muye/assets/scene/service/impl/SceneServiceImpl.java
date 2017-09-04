@@ -85,11 +85,15 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     @Override
-    public Scene storeSceneInfoToSession(String sceneId, String token) throws Exception {
+    public Scene storeSceneInfoToSession(String source, String sceneId, String token) throws Exception {
         Preconditions.checkArgument(sceneId != null && !"".equals(sceneId.trim()), "请传入合法的 sceneId 值");
         log.info("传入的场景 ID 编号为 ：" + sceneId);
         Scene scene = getSceneById(Long.parseLong(sceneId));
-        SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG, scene);
+        if (source.equals(Constant.RECORD_SCENE_SOURCE_PAD)) {
+            SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG_PAD, scene);
+        } else {
+            SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG_PC, scene);
+        }
         log.info("传入用户会话中的场景信息为：" + scene);
         return scene;
     }

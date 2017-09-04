@@ -231,7 +231,7 @@ public class UserController {
         if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
         }
-        Map map = doLogin(userParam.getUserName(), userParam.getPassword());
+        Map map = doLogin(userParam.getUserName(), userParam.getPassword(), Constant.RECORD_SCENE_SOURCE_PC);
         return doCheckLogin(map);
     }
 
@@ -253,7 +253,7 @@ public class UserController {
             //todo StoreId暂时用100去代替，以后用session里获取
             User userDb = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (userDb != null) {
-                Map map = doLogin(userDb.getUserName(), userDb.getPassword());
+                Map map = doLogin(userDb.getUserName(), userDb.getPassword(), Constant.RECORD_SCENE_SOURCE_PAD);
                 return doCheckLoginPad(map);
             } else {
                 return AjaxResult.failed("用户不存在");
@@ -357,7 +357,7 @@ public class UserController {
      * @param password
      * @return
      */
-    private Map<String, Object> doLogin(String userName, String password) {
+    private Map<String, Object> doLogin(String userName, String password, String source) {
         //调auth_server的token接口
         User user;
         Map map = new HashMap();
@@ -377,7 +377,7 @@ public class UserController {
                         //todo 暂时写死 临时添加场景id( ?? 注意对应 id 场景不存在的情况)
 //                        session.setAttribute(Constant.SCENE_SESSION_TAG, new Scene(1L));
                         try {
-                            this.sceneService.storeSceneInfoToSession(String.valueOf(stationList.get(0).getSceneId()), accessToken);
+                            this.sceneService.storeSceneInfoToSession(source, String.valueOf(stationList.get(0).getSceneId()), accessToken);
                         } catch (Exception e) {
                             LOGGER.info(" * * * * * * 指定 sceneId 编号的场景信息不存在. * * * * * * ");
                         }

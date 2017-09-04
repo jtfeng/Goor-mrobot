@@ -9,8 +9,10 @@ import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
+import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
@@ -26,6 +28,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.log.base.LogInfoUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
@@ -166,13 +169,20 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     public Robot getAvailableRobotByStationId(Long stationId, Integer typeId) {
         List<StationRobotXREF> list = stationRobotXREFService.getByStationId(stationId);
         Robot availableRobot = null;
+        StringBuffer stringBuffer = new StringBuffer();
         if (list != null && list.size() > 0) {
             for (StationRobotXREF xref : list) {
                 Long robotId = xref.getRobotId();
                 Robot robotDb = getById(robotId);
-                if (robotDb != null && robotDb.getBusy() == false && robotDb.getOnline() == true && robotDb.getTypeId().equals(typeId)) {
+                //todo 紧急制动以后在做
+                if (robotDb != null && robotDb.getBusy() == false && robotDb.getOnline() == true && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
                     availableRobot = robotDb;
+                    stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
+                    LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                     break;
+                } else {
+                    stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (robotDb.getOnline() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                    LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 }
             }
         }
