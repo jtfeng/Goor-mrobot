@@ -5,8 +5,8 @@ package cn.mrobot.bean.mission;
  */
 public enum MissionState {
 
-    STATE_INIT("init", "待执行"),
-    STATE_WAITING("waiting", "等待中"),
+    STATE_INIT("init", "未执行"),
+    STATE_WAITING("waiting", "未执行"),
     STATE_FINISHED("finished", "已经完成"),
     STATE_EXECUTING("executing", "正在执行"),
     STATE_PAUSED("paused", "暂停中"),
