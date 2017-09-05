@@ -174,25 +174,6 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
             for (Station station : stationList) {
                 List<MapPoint> resultMapPoint = new ArrayList<MapPoint>();
                 List<StationMapPointXREF> stationMapPointXREFList = stationMapPointXREFService.listByStationId(station.getId());
-                //如果没有关联点，则直接返回
-                if (stationMapPointXREFList == null || stationMapPointXREFList.size() <= 0) {
-                    continue;
-                }
-
-                //如果有关联点，则更新station的点列表
-                for (StationMapPointXREF stationMapPointXREF : stationMapPointXREFList) {
-                    MapPoint mapPoint = pointService.findById(stationMapPointXREF.getMapPointId());
-                    if (mapPoint == null) {
-                        //如果关联的点不存在，手动删除点的关联关系
-                        stationMapPointXREFService.deleteByPointId(stationMapPointXREF.getMapPointId());
-                        continue;
-                    }
-                    resultMapPoint.add(mapPoint);
-                }
-
-                if (resultMapPoint != null && resultMapPoint.size() > 0) {
-                    station.setMapPoints(resultMapPoint);
-                }
                 //组装绑定的机器人List
                 List<Robot> robotList = Lists.newArrayList();
                 List<StationRobotXREF> stationRobotXrefDbList = stationRobotXREFService.getByStationId(station.getId());
@@ -217,6 +198,26 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
                     }
                 }
                 station.setAccessArriveStationIdList(accessArriveStationList);
+                //如果没有关联点，则直接返回
+                if (stationMapPointXREFList == null || stationMapPointXREFList.size() <= 0) {
+                        station.setMapPoints(new ArrayList<>());
+                    continue;
+                }
+
+                //如果有关联点，则更新station的点列表
+                for (StationMapPointXREF stationMapPointXREF : stationMapPointXREFList) {
+                    MapPoint mapPoint = pointService.findById(stationMapPointXREF.getMapPointId());
+                    if (mapPoint == null) {
+                        //如果关联的点不存在，手动删除点的关联关系
+                        stationMapPointXREFService.deleteByPointId(stationMapPointXREF.getMapPointId());
+                        continue;
+                    }
+                    resultMapPoint.add(mapPoint);
+                }
+
+                if (resultMapPoint != null && resultMapPoint.size() > 0) {
+                    station.setMapPoints(resultMapPoint);
+                }
             }
         }
         return stationList;
