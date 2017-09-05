@@ -605,9 +605,7 @@ public class MissionController {
 			}
 			Long sceneId = scene.getId();
 			if(!userSceneId.equals(sceneId)) {
-				JSONObject jsonObject = new JSONObject();
-				jsonObject.put("sceneId",sceneId);
-				return AjaxResult.success(jsonObject, "当前场景已被其他人切换，现帮你自动切换场景！");
+				return AjaxResult.success(JSON.toJSONString(scene), "当前场景已被其他人切换，现帮你自动切换场景！");
 			}
 
 			missionList.setSceneId(sceneId);
