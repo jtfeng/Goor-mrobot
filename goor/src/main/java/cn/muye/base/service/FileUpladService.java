@@ -74,79 +74,67 @@ public class FileUpladService {
                     return;
                 }
 
-                if (uploadFile.isDirectory() && uploadFile.listFiles().length <=0) {
+                if (uploadFile.isDirectory() && uploadFile.listFiles().length <= 0) {
                     LOGGER.error("文件夹为空, path= " + MAP_PATH);
                     sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图文件夹为空文件夹");
                     return;
                 }
 
                 if (uploadFile.isDirectory()) {
-                    LOGGER.info("开始压缩");
-                    //压缩文件夹
-                    String lastDirName = uploadFile.getName();
-                    DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
-                    String dateStr = format.format(new Date());
-                    String zipFileName = lastDirName + "_" + dateStr + TopicConstants.ZIP_FILE_SUFFIX;
-
-                    String uploadFilePath = uploadFile.getParent() + File.separator + zipFileName;
-                    File zipFile = new File(uploadFilePath);
-                    zipFile.deleteOnExit(); //如果存在同名文件，则删除
-                    LOGGER.info("压缩文件夹，zipFileName = " + zipFileName);
-                    boolean zipResult = ZipUtils.zip(MAP_PATH, uploadFile.getParent(), zipFileName);
-                    if (!zipResult) {
-                        LOGGER.error("文件夹压缩失败，停止上传");
-                        return;
-                    }
-                    uploadFile = new File(uploadFile.getParent(), zipFileName);
+                    uploadFile = zipDirectory(uploadFile);
                 }
+
                 if (uploadFile.length() > 500 * 1024 * 1024) {
                     LOGGER.info("文件" + uploadFile.getName() + "大于500M，无法上传");
+                    sendTopic(MAP_UPLOAD_FAIL, uuid, "文件过大（超过500M）");
                     return;
                 }
-                LOGGER.info("压缩成功，查询文件是否存在，path= " + uploadFile.getAbsolutePath());
+                LOGGER.info("压缩成功，压缩文件地址，path= " + uploadFile.getAbsolutePath());
                 Map<String, String> params = Maps.newHashMap();
                 params.put("fileName", uploadFile.getName());
                 params.put("type", Constant.FILE_UPLOAD_TYPE_MAP);
                 //查询文件是否存在
-                String jsonResult = HttpClientUtil.executePost(null, REMOTE_URL + EXIST_URL, params, null, null, null,null,null, true);
+                String jsonResult = HttpClientUtil.executePost(null, REMOTE_URL + EXIST_URL, params, null, null, null, null, null, true);
                 JSONObject object = JSON.parseObject(jsonResult);
                 Integer code = object.getInteger("code");
+
                 if (null != code && (code == Constant.ERROR_CODE_NOT_AUTHORIZED || code == Constant.ERROR_CODE_NOT_LOGGED || code == AjaxResult.CODE_SYSTEM_ERROR)) {
                     LOGGER.info("上传失败，code= " + code + ", message=" + object.getString("message"));
                     sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传失败");
                     return;
                 }
+
                 FileResult fileResult = JSON.parseObject(jsonResult, FileResult.class);
-                if (fileResult.getStatus() == 0) {
-                    if (!fileResult.isExist()) {
-                        long jumpSize = 0;
-                        if (fileResult.isTemp()) {
-                            jumpSize = fileResult.getSize();
-                        }
-                        //获取上传信息
-                        JSONObject otherInfo = new JSONObject();
-                        otherInfo.put("robotPath", MAP_PATH);
-                        otherInfo.put(Constant.SCENE_MAP_NAME, getSceneMapName());
-                        otherInfo.put("deviceId", deviceId);
-                        LOGGER.info("开始上传，path= " + uploadFile.getAbsolutePath());
-                        String uri = REMOTE_URL + UPLOAD_URL + "?fileName=" + uploadFile.getName() + "&type=" + Constant.FILE_UPLOAD_TYPE_MAP;
-                        String result = HttpClientUtil.executeUploadFile(null, uri, uploadFile.getPath(), jumpSize, null, true, JSON.toJSONString(otherInfo));
-                        AjaxResponse resp = JSON.parseObject(result, AjaxResponse.class);
-                        LOGGER.info("上传状态 status = " + resp.getStatus());
-                        if (resp.getStatus() == AjaxResponse.RESPONSE_STATUS_SUCCESS) {
-                            //上传成功
-                            uploadFile.delete();
-                            LOGGER.info("上传成功，删除文件，发送topic");
-                            sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传成功");
-                        } else {
-                            LOGGER.info("上传失败，发送topic");
-                            sendTopic(MAP_UPLOAD_FAIL, uuid, "地图上传失败");
-                        }
-                    } else {
-                        //假提示上传成功 同时删除本地文件
-                        uploadFile.delete();
-                    }
+                if (fileResult.getStatus() != 0) {
+                    sendTopic(MAP_UPLOAD_FAIL, uuid, "地图上传失败");
+                    return;
+                }
+                if (fileResult.isExist()) {
+                    sendTopic(MAP_UPLOAD_SUCCESS, uuid, "文件已经存在云端");
+                    uploadFile.delete();
+                    return;
+                }
+                long jumpSize = 0;
+                if (fileResult.isTemp()) {
+                    jumpSize = fileResult.getSize();
+                }
+                //获取上传信息
+                JSONObject otherInfo = new JSONObject();
+                otherInfo.put("robotPath", MAP_PATH);
+                otherInfo.put(Constant.SCENE_MAP_NAME, getSceneMapName());
+                otherInfo.put("deviceId", deviceId);
+                LOGGER.info("开始上传，path= " + uploadFile.getAbsolutePath());
+                String uri = REMOTE_URL + UPLOAD_URL + "?fileName=" + uploadFile.getName() + "&type=" + Constant.FILE_UPLOAD_TYPE_MAP;
+                String result = HttpClientUtil.executeUploadFile(null, uri, uploadFile.getPath(), jumpSize, null, true, JSON.toJSONString(otherInfo));
+                AjaxResponse resp = JSON.parseObject(result, AjaxResponse.class);
+                LOGGER.info("上传状态 status = " + resp.getStatus());
+                if (resp.getStatus() == AjaxResponse.RESPONSE_STATUS_SUCCESS) {
+                    //上传成功
+                    uploadFile.delete();
+                    LOGGER.info("上传成功，删除文件，发送topic");
+                    sendTopic(MAP_UPLOAD_SUCCESS, uuid, "地图上传成功");
                 } else {
+                    LOGGER.info("上传失败，发送topic");
                     sendTopic(MAP_UPLOAD_FAIL, uuid, "地图上传失败");
                 }
             } catch (HttpHostConnectException e) {
@@ -167,6 +155,32 @@ public class FileUpladService {
         }
     }
 
+    /**
+     * 压缩文件夹
+     *
+     * @param file
+     * @return
+     */
+    private File zipDirectory(File file) throws Exception {
+        LOGGER.info("开始压缩");
+        //压缩文件夹
+        String lastDirName = file.getName();
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
+        String dateStr = format.format(new Date());
+        String zipFileName = lastDirName + "_" + dateStr + TopicConstants.ZIP_FILE_SUFFIX;
+
+        String uploadFilePath = file.getParent() + File.separator + zipFileName;
+        File zipFile = new File(uploadFilePath);
+        zipFile.deleteOnExit(); //如果存在同名文件，则删除
+        LOGGER.info("压缩文件夹，zipFileName = " + zipFileName);
+        boolean zipResult = ZipUtils.zip(MAP_PATH, file.getParent(), zipFileName);
+        if (!zipResult) {
+            LOGGER.error("文件夹压缩失败，停止上传");
+            return null;
+        }
+        return new File(file.getParent(), zipFileName);
+    }
+
     public void sendTopic(String errorCode, String uuid, String message) {
         try {
             //封装数据，通知Artmis地图上传成功
@@ -176,7 +190,7 @@ public class FileUpladService {
             slamBody.setUuid(uuid);
             slamBody.setMsg(message);
             appSubService.sendTopic(TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING, slamBody);
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("FileUpladService sendTopic Exception", e);
         }
     }

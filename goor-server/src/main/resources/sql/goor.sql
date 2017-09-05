@@ -293,6 +293,23 @@ INSERT INTO `AC_STATION_ROBOT_XREF` VALUES ('29', '20', '314');
 INSERT INTO `AC_STATION_ROBOT_XREF` VALUES ('30', '20', '315');
 
 -- ----------------------------
+-- Table structure for AC_STATION_ROBOT_XREF
+-- ----------------------------
+DROP TABLE IF EXISTS `A_STATION_STATION_XREF`;
+
+CREATE TABLE `A_STATION_STATION_XREF` (
+  `ORIGIN_STATION_ID` bigint(20) DEFAULT NULL COMMENT '发货站点ID',
+  `DESTINATION_STATION_ID` bigint(20) DEFAULT NULL COMMENT '可到达站ID'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of a_station_station_xref
+-- ----------------------------
+INSERT INTO `A_STATION_STATION_XREF` VALUES ('2', '4');
+INSERT INTO `A_STATION_STATION_XREF` VALUES ('2', '5');
+INSERT INTO `A_STATION_STATION_XREF` VALUES ('2', '7');
+
+-- ----------------------------
 -- Table structure for AC_USER
 -- ----------------------------
 -- ----------------------------
@@ -491,6 +508,33 @@ CREATE TABLE `APP_CONFIG` (
 -- Records of APP_CONFIG
 -- ----------------------------
 INSERT INTO `APP_CONFIG` VALUES ('1', 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCghPCWCobG8nTD24juwSVataW7iViRxcTkey/B792VZEhuHjQvA3cAJgx2Lv8GnX8NIoShZtoCg3Cx6ecs+VEPD2fBcg2L4JK7xldGpOJ3ONEAyVsLOttXZtNXvyDZRijiErQALMTorcgi79M5uVX9/jMv2Ggb2XAeZhlLD28fHwIDAQAB', 'http://push.myee7.com/allocServer/', 'http://push.myee7.com/pushServer/api/admin/push.json', 'goor-server', 'ubuntu_1', 'goor-server', 'goor-server', 'goor-server', 'goor-server', 'goor-server', '192.168.3.51');
+
+-- ----------------------------
+-- Table structure for AS_DOOR
+-- ----------------------------
+DROP TABLE IF EXISTS `AS_DOOR`;
+CREATE TABLE `AS_DOOR` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(50) DEFAULT NULL COMMENT '名称',
+  `IP` varchar(15) DEFAULT NULL COMMENT '门控制器IP地址',
+  `LOCK_STATE` int(1) DEFAULT NULL COMMENT '锁定状态',
+  `INFO` varchar(100) DEFAULT NULL COMMENT '备注',
+  `CREATED_BY` bigint(20) DEFAULT NULL COMMENT '创建用户',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '所属门店ID',
+  `ROBOT_CODE` varchar(50) DEFAULT NULL COMMENT '上锁或者解锁机器人的 code 编号',
+  `WAIT_POINT` bigint(20) DEFAULT NULL,
+  `GO_POINT` bigint(20) DEFAULT NULL,
+  `OUT_POINT` bigint(20) DEFAULT NULL,
+  `SCENE_ID` bigint(20) DEFAULT NULL COMMENT '所属云端场景ID',
+  `SCENE_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图场景名',
+  `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
+  `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
+  `DOOR_ORDER_TYPE` varchar(255) DEFAULT NULL COMMENT '门对应的任务类型：比如普通导航，沿线导航，固定路径导航',
+  `PATH_ID` bigint(20) DEFAULT NULL COMMENT '工控路径ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
+
 
 -- ----------------------------
 -- Table structure for AS_GOODS_TYPE
@@ -1451,7 +1495,6 @@ CREATE TABLE `OR_ORDER` (
   `ORDER_SETTING_ID` bigint(12) DEFAULT NULL COMMENT '关联基本设置',
   `ROBOT_ID` bigint(12) DEFAULT NULL COMMENT '启用机器人',
   `START_STATION_ID` bigint(12) DEFAULT NULL COMMENT '下单站',
-  `NEED_SHELF` tinyint(1) DEFAULT NULL,
   `SHELF_ID` bigint(12) DEFAULT NULL,
   `SCENE_ID` bigint(12) DEFAULT NULL COMMENT '场景id',
   `STATUS` int(12) DEFAULT NULL COMMENT '状态',
@@ -1497,6 +1540,7 @@ CREATE TABLE `OR_ORDER_SETTING` (
   `STATION_ID` bigint(12) DEFAULT NULL,
   `START_POINT_ID` bigint(12) DEFAULT NULL,
   `END_POINT_ID` bigint(12) DEFAULT NULL,
+  `NEED_SHELF` tinyint(1) DEFAULT NULL,
   `NEED_SIGN` tinyint(1) DEFAULT NULL,
   `GOODS_TYPE_ID` bigint(20) DEFAULT NULL,
   `PACKAGE_TYPE` int(12) DEFAULT NULL,
@@ -1800,6 +1844,7 @@ create table AS_ROADPATH
   PATH_ID varchar(32) null,
   PATH_TYPE int(1) null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
+ALTER TABLE AS_ROADPATH ADD PATH_LOCK BIGINT(20) NULL;
 
 DROP TABLE IF EXISTS `AS_ROADPATHPOINT`;
 create table AS_ROADPATHPOINT
@@ -1819,3 +1864,14 @@ create table AS_ROADPATHPOINT
 ALTER TABLE AS_ROADPATHPOINT
   ADD CONSTRAINT AS_ROADPATHPOINT_AS_ROADPATH_ID_fk
 FOREIGN KEY (ROAD_PATH_ID) REFERENCES AS_ROADPATH (ID) ON DELETE CASCADE ON UPDATE CASCADE;
+
+DROP TABLE IF EXISTS `AS_ROADPATHLOCK`;
+create table AS_ROADPATHLOCK
+(
+  ID bigint auto_increment comment 'ID 序号列表' primary key,
+  CREATED_BY bigint null comment '信息记录创建人',
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  NAME varchar(50) null comment '名称信息',
+  `LOCK` int(1) null comment '是否上锁的标识'
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;

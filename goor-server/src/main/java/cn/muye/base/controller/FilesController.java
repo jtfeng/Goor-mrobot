@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,7 +143,7 @@ public class FilesController {
         String fileName = request.getParameter("fileName");
         String type = request.getParameter("type");
         String otherInfo = request.getHeader("otherInfo");
-        JSONObject otherInfoObject = JSON.parseObject(otherInfo);
+        JSONObject otherInfoObject = JSON.parseObject(URLDecoder.decode(otherInfo));
         otherInfoObject.put("fileName", fileName);
 
         InputStream in = request.getInputStream();

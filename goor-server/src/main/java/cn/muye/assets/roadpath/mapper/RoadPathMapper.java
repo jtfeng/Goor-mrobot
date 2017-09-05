@@ -14,4 +14,8 @@ public interface RoadPathMapper extends MyMapper<RoadPath> {
 
     List<RoadPathPoint> findSpecifyRoadPathPoint(Long roadPathId, Long pointId);
 
+    void deleteRoadPathPointsByPathId(Long roadPathId);
+
+    List<RoadPathPoint> findRoadPathPointByRoadPath(Long roadPathId);
+
 }
