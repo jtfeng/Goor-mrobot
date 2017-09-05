@@ -26,8 +26,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by admin on 2017/7/3.
@@ -55,6 +59,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private MapZipMapper mapZipMapper;
     @Autowired
     private RobotMapZipXREFService robotMapZipXREFService;
+    //保存添加场景与机器人之间的关系时候，需要加锁，以免事务未提交读取到脏数据
+    private ReentrantLock lock = new ReentrantLock();
+
     @Override
     public List<Scene> list() throws Exception {
         return sceneMapper.selectAll();
@@ -62,63 +69,76 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized Object saveScene(Scene scene) throws Exception {
+    public Object saveScene(Scene scene, HttpServletRequest request) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
         scene.setState(0);//代表正在上传
-        int insertRowsCount = this.save(scene);//数据库中插入这条场景记录
+        this.save(scene, request);//数据库中插入这条场景记录
+
+        this.deleteRobotAndSceneRelations(scene.getId());
         bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
+
+        this.deleteMapAndSceneRelations(scene.getId());
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
-        //自动下发地图
-        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
-        List<Robot> robots = new ArrayList<>();
-        for (Robot robot : scene.getRobots()){
-            robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
-        }
+
         Object taskResult = null;
-        if (mapInfos.size() !=0 && robots.size()!= 0){
-            log.info("场景同步地图");
-            taskResult = mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
+            //自动下发地图
+            List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
+            List<Robot> robots = new ArrayList<>();
+            for (Robot robot : scene.getRobots()) {
+                robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
+            }
+            if (mapInfos.size() != 0 && robots.size() != 0) {
+                log.info("场景同步地图");
+                taskResult = mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+            }
         }
         return taskResult;
     }
 
     @Override
-    public Scene storeSceneInfoToSession(String sceneId, String token) throws Exception {
+    public Scene storeSceneInfoToSession(String source, String sceneId, String token) throws Exception {
         Preconditions.checkArgument(sceneId != null && !"".equals(sceneId.trim()), "请传入合法的 sceneId 值");
         log.info("传入的场景 ID 编号为 ：" + sceneId);
         Scene scene = getSceneById(Long.parseLong(sceneId));
-        SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG, scene);
+        if (source.equals(Constant.RECORD_SCENE_SOURCE_PAD)) {
+            SessionUtil.SCENE_LOADING_CACHE.put((token != null ? token : null)+":"+Constant.SCENE_SESSION_TAG_PAD, scene);
+        } else {
+            SessionUtil.SCENE_LOADING_CACHE.put((token != null ? token : null)+":"+Constant.SCENE_SESSION_TAG_PC, scene);
+        }
         log.info("传入用户会话中的场景信息为：" + scene);
         return scene;
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public synchronized Object updateScene(Scene scene) throws Exception {
+    public Object updateScene(Scene scene) throws Exception {
         log.info("更新场景信息，scene="+ JSON.toJSONString(scene));
         Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
         scene.setStoreId(STORE_ID);//设置默认的门店编号
         scene.setCreateTime(new Date());
         scene.setState(0);//代表正在上传
-//        scene.setMapSceneName(existScene.getMapSceneName());// 重新设置旧的地图场景名称
+
+        this.deleteRobotAndSceneRelations(scene.getId());
         bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
-        // 更新的时候不修改场景与地图之间的对应关系
-//        bindSceneAndMapRelations(scene);//更新场景与地图之间的绑定关系
+
         updateSelective(scene) ;//更新对应的场景信息
-        //自动下发地图
-        log.info("更新场景信息，scene.getMapSceneName()="+scene.getMapSceneName()+", scene.getStoreId()"+scene.getStoreId());
-        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
-        log.info("更新场景信息，mapInfos="+JSON.toJSONString(mapInfos));
-        List<Robot> robots = new ArrayList<>();
-        for (Robot robot : scene.getRobots()){
-            robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
-        }
         Object taskResult = null;
-        log.info("更新场景信息，mapInfos.size()="+mapInfos.size()+", robots.size()="+robots.size());
-        if (mapInfos.size() !=0 && robots.size()!= 0){
-            log.info("场景同步地图");
-            taskResult = mapSyncService.sendMapSyncMessage(robots,mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
+            //自动下发地图
+            log.info("更新场景信息，scene.getMapSceneName()=" + scene.getMapSceneName() + ", scene.getStoreId()" + scene.getStoreId());
+            List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
+            log.info("更新场景信息，mapInfos=" + JSON.toJSONString(mapInfos));
+            List<Robot> robots = new ArrayList<>();
+            for (Robot robot : scene.getRobots()) {
+                robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
+            }
+            log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
+            if (mapInfos.size() != 0 && robots.size() != 0) {
+                log.info("场景同步地图");
+                taskResult = mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+            }
         }
         return taskResult;
     }
@@ -235,7 +255,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             Long sceneId = Preconditions.checkNotNull(scene.getId());
             String sceneName = Preconditions.checkNotNull(scene.getName());
             String mapSceneName = Preconditions.checkNotNull(scene.getMapSceneName());
-            this.deleteMapAndSceneRelations(sceneId);
             //&& this.sceneMapper.checkMapInfo(mapSceneName, scene.getStoreId()) == 0
             if (this.sceneMapper.checkMapLegal(mapSceneName, scene.getStoreId()) > 0) {
                 //保证场景名城合法且没有绑定云端场景
@@ -253,9 +272,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Override
     public void bindSceneAndRobotRelations(Scene scene) throws Exception {
         try {
+            lock.lock();
             Long sceneId = Preconditions.checkNotNull(scene.getId());
             List<Robot> robots = Preconditions.checkNotNull(scene.getRobots());
-            this.deleteRobotAndSceneRelations(sceneId);
             List<Long> ids = new ArrayList<>();
             for (Robot robot : robots) {
                 if (this.sceneMapper.checkRobotLegal(robot.getId()) >0 && this.sceneMapper.checkRobot(robot.getId()) == 0) {
@@ -268,6 +287,29 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
                 this.insertSceneAndRobotRelations(scene.getId(), ids);
             } else {
                 throw new Exception(ROBOT_ERROR_MESSAGE);
+            }
+            if(TransactionSynchronizationManager.isActualTransactionActive()){
+                log.info(" - - - - 当前操作正处在事务中 - - - - ");
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
+                    @Override
+                    public void afterCompletion(int status) {
+                        switch (status){
+                            case STATUS_COMMITTED:
+                                log.info(" - - - - 事务已提交 - - - - ");
+                                break;
+                            case STATUS_ROLLED_BACK:
+                                log.info(" - - - - 事务已回滚 - - - - ");
+                                break;
+                            case STATUS_UNKNOWN:
+                                log.info(" - - - - 事务状态为止 - - - - ");
+                                break;
+                        }
+                        lock.unlock();
+                    }
+                });
+            }else{
+                log.info(" ~ ~ ~ ~ 当前操作没有实际事务，系统异常，回滚事务 ~ ~ ~ ~ ");
+                throw new Exception("当前操作没有实际事务，系统异常，回滚事务");
             }
         }catch (Exception e){
             e.printStackTrace();
