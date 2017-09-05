@@ -18,6 +18,7 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -90,13 +91,14 @@ public class MapZipController {
             pageSize = pageSize == null ? 10 : pageSize;
             PageHelper.startPage(pageNo, pageSize);
             List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            PageInfo<MapZip> page = new PageInfo<>(mapZipList);
+            PageInfo<MapZip> page = new PageInfo<MapZip>(mapZipList);
             return AjaxResult.success(page, "查询成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统错误");
         }
     }
+
 
     @RequestMapping(value = "area/mapzip/{id}", method = RequestMethod.DELETE)
     @ResponseBody
