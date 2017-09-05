@@ -10,7 +10,6 @@
         <result property="batteryThreshold" column="BATTERY_THRESHOLD"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
-        <result property="online" column="ONLINE"/>
         <result property="sceneId" column="SCENE_ID"/>
         <result property="sceneName" column="SCENE_NAME"/>
     </resultMap>
@@ -48,8 +47,7 @@
             robot.NAME,
             robot.CODE,
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
-            robot.BOX_ACTIVATED,
-            robot.ONLINE
+            robot.BOX_ACTIVATED
         FROM AS_ROBOT robot LEFT JOIN SCENES_ROBOTS_RELATIONS r ON robot.ID = r.ROBOT_ID
         WHERE r.SCENE_ID = #{0}
     </select>
@@ -60,8 +58,7 @@
         robot.NAME,
         robot.CODE,
         ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
-        robot.BOX_ACTIVATED,
-        robot.ONLINE
+        robot.BOX_ACTIVATED
         FROM AS_ROBOT robot LEFT JOIN SCENES_ROBOTS_RELATIONS r ON robot.ID = r.ROBOT_ID
         WHERE r.SCENE_ID = #{sceneId} AND r.ROBOT_ID in
         <foreach item="item" index="index" collection="robotIds" open="(" separator="," close=")">

@@ -144,8 +144,12 @@ public class MapInfoServiceImpl implements MapInfoService {
             if(null == robot){
                 return null;
             }
-            currentInfo.setOnline(robot.getOnline());
-            if(!robot.getOnline()){
+            Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+            if (flag == null) {
+                flag = false;
+            }
+            currentInfo.setOnline(flag);
+            if(!flag){
                 LOGGER.info("机器人（" + code + "）不在线");
             }
 

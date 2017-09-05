@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSON;
  */
 public class TopicConstants {
 
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 
 	public static final String LAGENT_PREFIX = "agent_local"; //需要agent本地处理的topic
 

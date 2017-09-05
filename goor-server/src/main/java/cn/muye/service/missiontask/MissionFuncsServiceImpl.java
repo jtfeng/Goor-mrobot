@@ -3294,8 +3294,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         String parentName = "取货任务-";
 
         //添加单点导航任务,导航到取货点
-        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
-        missionListTask.getMissionTasks().add(sigleNavTask);
+//        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
+//        missionListTask.getMissionTasks().add(sigleNavTask);
 
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
         missionListTask.getMissionTasks().add(mp3loadTask);

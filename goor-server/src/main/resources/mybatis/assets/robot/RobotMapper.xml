@@ -12,7 +12,6 @@
         <result property="robotIdForElevator" column="ROBOT_ID_FOR_ELEVATOR"/>
         <result property="description" column="DESCRIPTION"/>
         <result property="boxActivated" column="BOX_ACTIVATED"/>
-        <result property="online" column="ONLINE"/>
         <result property="busy" column="BUSY"/>
         <result property="sceneId" column="SCENE_ID"/>
         <result property="sceneName" column="SCENE_NAME"/>
@@ -45,7 +44,6 @@
             config.SUFFICIENT_BATTERY_THRESHOLD,
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
-            robot.ONLINE,
             robot.ROBOT_ID_FOR_ELEVATOR,
             scene.ID as SCENE_ID,
             scene.NAME as SCENE_NAME
@@ -81,7 +79,6 @@
                 config.SUFFICIENT_BATTERY_THRESHOLD,
                 ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
                 robot.BOX_ACTIVATED,
-                robot.ONLINE,
                 robot.BUSY,
                 robot.STORE_ID as storeId,
                 robot.ROBOT_ID_FOR_ELEVATOR,

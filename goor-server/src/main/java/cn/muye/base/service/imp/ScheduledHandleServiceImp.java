@@ -45,10 +45,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private RabbitTemplate rabbitTemplate;
 
-    @Autowired
     private StationService stationService;
 
-    @Autowired
     private WebSocketSendMessage webSocketSendMessage;
 
     public ScheduledHandleServiceImp() {

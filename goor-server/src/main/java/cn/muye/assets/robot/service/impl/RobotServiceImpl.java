@@ -114,13 +114,14 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robotConfigService.updateSelective(robotConfig);
         }
         //向X86上同步修改后的机器人电量阈值信息
-        if (robot.getOnline() != null && robot.getOnline() == true && lowBatteryThresholdDb != null && lowRobotBatteryThreshold != null && sufficientBatteryThresholdDb != null && sufficientBatteryThreshold != null) {
+        if (CacheInfoManager.getRobotOnlineCache(robot.getCode()) == true && lowBatteryThresholdDb != null && lowRobotBatteryThreshold != null && sufficientBatteryThresholdDb != null && sufficientBatteryThreshold != null) {
             if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
                 robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
             }
             if (sufficientBatteryThresholdDb != null && !sufficientBatteryThresholdDb.equals(sufficientBatteryThreshold)) {
                 robot.setSufficientBatteryThreshold(sufficientBatteryThreshold);
             }
+            robot.setOnline(CacheInfoManager.getRobotOnlineCache(robot.getCode()));
             syncRobotBatteryThresholdToRos(robot);
         }
         return AjaxResult.success(robot, "修改成功");
@@ -192,7 +193,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                         break;
                     } else {
-                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (robotDb.getOnline() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (flag ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                     }
                 }
@@ -225,7 +226,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 Long robotId = xref.getRobotId();
                 Robot robotDb = getById(robotId);
                 //todo 暂时先不考虑低电量和紧急制动状态
-                if (robotDb != null && robotDb.getBusy() == false && robotDb.getOnline() == true) {
+                if (robotDb != null && robotDb.getBusy() == false && CacheInfoManager.getRobotOnlineCache(robotDb.getCode()) == true) {
                     if (robotDb.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
                         trailerCount++;
                     } else if (robotDb.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {

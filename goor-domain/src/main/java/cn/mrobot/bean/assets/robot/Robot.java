@@ -44,7 +44,8 @@ public class Robot extends BaseBean {
 
     private Boolean busy = Boolean.FALSE; ; //状态(0-空闲， 1-占用)
 
-    private Boolean online = Boolean.TRUE; //在线状态
+    @Transient
+    private Boolean online; //在线状态(放缓存中CacheInfoManager.robotOnlineCache)
 
     @Transient
     private String sceneName; //场景名
