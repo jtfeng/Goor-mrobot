@@ -599,7 +599,6 @@ CREATE TABLE `AS_ROBOT` (
   `UPDATE_TIME` datetime DEFAULT NULL COMMENT '更新时间',
   `BOX_ACTIVATED` bit(1) DEFAULT b'1' COMMENT '是否启用',
   `BUSY` bit(1) DEFAULT b'0' COMMENT '状态(0-空闲， 1-占用)',
-  `ONLINE` bit(1) DEFAULT b'1' COMMENT '是否在线',
   `ROBOT_ID_FOR_ELEVATOR` int(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
   `STATUS` varchar(255) DEFAULT NULL COMMENT '状态',
   `EMERGENCY_STOP_STATE` bit(1) DEFAULT b'1' NULL COMMENT '机器人急停状态（true:急停拍下  false:急停未拍下）',
