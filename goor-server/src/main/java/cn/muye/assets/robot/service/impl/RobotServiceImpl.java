@@ -226,7 +226,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 Long robotId = xref.getRobotId();
                 Robot robotDb = getById(robotId);
                 //todo 暂时先不考虑低电量和紧急制动状态
-                if (robotDb != null && robotDb.getBusy() == false && CacheInfoManager.getRobotOnlineCache(robotDb.getCode()) == true) {
+                if (robotDb != null && robotDb.getBusy() == false && CacheInfoManager.getRobotOnlineCache(robotDb.getCode()) != null && CacheInfoManager.getRobotOnlineCache(robotDb.getCode()) == true) {
                     if (robotDb.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
                         trailerCount++;
                     } else if (robotDb.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {
@@ -330,8 +330,10 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
             if (flag != null) {
                 robot.setOnline(flag);
+                LOGGER.info(robot.getCode() + (flag ? "在线": "离线"));
             } else {
                 robot.setOnline(false);
+                LOGGER.info(robot.getCode() + "离线");
             }
             List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
             List<MapPoint> mapPointList = Lists.newArrayList();
