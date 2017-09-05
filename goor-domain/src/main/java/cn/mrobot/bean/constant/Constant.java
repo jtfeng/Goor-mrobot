@@ -94,6 +94,8 @@ public class Constant {
 
     public final static long ORDER_TIME_CHARGE_ID = 7L;//带时间长度的充电任务ID
 
+    public final static long ORDER_LASER_NAVIGATION = 1L;//单点导航任务ID
+
     public final static String ORDER_TIME_CHARGE_POINT = "point"; // 导航目标点
 
     public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";
