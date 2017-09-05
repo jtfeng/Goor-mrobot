@@ -15,9 +15,9 @@ import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
-import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -133,7 +133,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public Scene getSceneById(Long id) throws Exception {
         Scene scene = sceneMapper.selectByPrimaryKey(id);
         Preconditions.checkNotNull(scene, "传入指定编号的场景信息不存在，请检查!");
-        scene.setRobots(this.sceneMapper.findRobotBySceneId(id));
+        List<Robot> list = this.sceneMapper.findRobotBySceneId(id);
+        foreachList(list);
+        scene.setRobots(list);
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(id, scene.getStoreId());
         if (mapInfos != null && mapInfos.size() != 0) {
             scene.setMapSceneName(mapInfos.get(0).getSceneName());
@@ -200,6 +202,20 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
     }
 
+    /**
+     * 遍历赋机器人在线字段
+     * @param list
+     */
+     private static void foreachList(List<Robot> list) {
+         list.forEach(robot -> {
+             Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+             if (flag == null) {
+                 flag = false;
+             }
+             robot.setOnline(flag);
+         });
+     }
+
     @Override
     public Object sendSyncMapMessageToSpecialRobots(Map<String, Object> params) throws Exception {
         Long sceneId = Long.valueOf(String.valueOf(Preconditions.checkNotNull(params.get("sceneId"), "场景 ID 不允许为空!")));
@@ -207,6 +223,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Preconditions.checkArgument(robotIds.size() != 0, "传入的机器人编号数组信息不可以为空");
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
         List<Robot> robots     = this.sceneMapper.findRobotBySceneIdAndRobotIds(params);
+        foreachList(robots);
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
         if (robots.size() == 0 || mapInfos.size() == 0){
             return null;
