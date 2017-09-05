@@ -69,11 +69,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Object saveScene(Scene scene, HttpServletRequest request) throws Exception {
+    public Object saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
         scene.setState(0);//代表正在上传
-        this.save(scene, request);//数据库中插入这条场景记录
+        this.save(scene);//数据库中插入这条场景记录
 
         this.deleteRobotAndSceneRelations(scene.getId());
         bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
@@ -98,15 +98,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     @Override
-    public Scene storeSceneInfoToSession(String source, String sceneId, String token) throws Exception {
+    public Scene storeSceneInfoToSession(String sceneId, String token) throws Exception {
         Preconditions.checkArgument(sceneId != null && !"".equals(sceneId.trim()), "请传入合法的 sceneId 值");
         log.info("传入的场景 ID 编号为 ：" + sceneId);
         Scene scene = getSceneById(Long.parseLong(sceneId));
-        if (source.equals(Constant.RECORD_SCENE_SOURCE_PAD)) {
-            SessionUtil.SCENE_LOADING_CACHE.put((token != null ? token : null)+":"+Constant.SCENE_SESSION_TAG_PAD, scene);
-        } else {
-            SessionUtil.SCENE_LOADING_CACHE.put((token != null ? token : null)+":"+Constant.SCENE_SESSION_TAG_PC, scene);
-        }
+        SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG, scene);
         log.info("传入用户会话中的场景信息为：" + scene);
         return scene;
     }

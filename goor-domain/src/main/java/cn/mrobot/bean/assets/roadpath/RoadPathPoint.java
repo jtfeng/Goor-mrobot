@@ -1,11 +1,8 @@
 package cn.mrobot.bean.assets.roadpath;
 
-import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import java.util.List;
 
 @Table(name = "AS_ROADPATHPOINT")
 public class RoadPathPoint extends BaseBean{
@@ -14,6 +11,8 @@ public class RoadPathPoint extends BaseBean{
     private Long pointId;
     // 下一个点 id 信息
     private Long nextPointId;
+    // 上一个点 id 信息
+    private Long prevPointId;
     // 是否为开始点的标记（1：是、0：否）
     private Integer startFlag;
     // 是否为结束点的标记（1：是、0：否）
@@ -22,14 +21,6 @@ public class RoadPathPoint extends BaseBean{
     private Long roadPathId;
 
     public RoadPathPoint(){}
-
-    public RoadPathPoint(Long pointId, Long nextPointId, Integer startFlag, Integer endFlag, Long roadPathId) {
-        this.pointId = pointId;
-        this.nextPointId = nextPointId;
-        this.startFlag = startFlag;
-        this.endFlag = endFlag;
-        this.roadPathId = roadPathId;
-    }
 
     public Long getPointId() {
         return pointId;
@@ -71,11 +62,20 @@ public class RoadPathPoint extends BaseBean{
         this.roadPathId = roadPathId;
     }
 
+    public Long getPrevPointId() {
+        return prevPointId;
+    }
+
+    public void setPrevPointId(Long prevPointId) {
+        this.prevPointId = prevPointId;
+    }
+
     @Override
     public String toString() {
         return "RoadPathPoint{" +
                 "pointId=" + pointId +
                 ", nextPointId=" + nextPointId +
+                ", prevPointId=" + prevPointId +
                 ", startFlag=" + startFlag +
                 ", endFlag=" + endFlag +
                 ", roadPathId=" + roadPathId +
