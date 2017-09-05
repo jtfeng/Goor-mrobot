@@ -113,15 +113,13 @@ public class MapZipServiceImpl implements MapZipService {
     }
 
     private List<MapZip> parseLocalPath(List<MapZip> mapZipList) {
-        List<MapZip> resultList = new ArrayList<>();
         for (int i = 0; i < mapZipList.size(); i++) {
             MapZip mapZip = mapZipList.get(i);
             if (mapZip != null) {
                 mapZip.setFileHttpPath(parseLocalPath(mapZip.getFilePath()));
-                resultList.add(mapZip);
             }
         }
-        return resultList;
+        return mapZipList;
     }
 
     private String parseLocalPath(String localPath) {
