@@ -60,25 +60,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         log.info(String.format("路径权值数据为：%s", weight));
         List points = (List)checkNotNull(body.get("points"),"点组合不允许为空，请重新选择!");
         checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
-
-//        Set<String> checkContainer = Sets.newHashSet();
-//        for (Object pointId : points) {
-//            MapPoint mapPoint = this.mapPointMapper.selectByPrimaryKey(Long.parseLong(String.valueOf(pointId)));// 依次遍历每一个接收到的点信息并且进行处理
-//            checkContainer.add(new StringBuilder().append(mapPoint.getSceneName())
-//                .append("|").append(mapPoint.getMapName()).append("|").append(mapPoint.getStoreId()).toString());
-//            if (sceneName == null){sceneName = mapPoint.getSceneName();}
-//            if (mapName == null){mapName = mapPoint.getMapName();}
-//        }
-//        checkArgument(checkContainer.size() == 1, "传入的点组合不在同一张地图上，请重新选择");
-
-        // 首先保存路径信息
         RoadPath roadPath = new RoadPath(){{
             setData(data);setPattern(pattern);setPathName(pathName);
             setCreateTime(new Date());setStoreId(100L); setWeight(weight);
             setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置开始点
             setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置结束点
             setSceneName(sceneName);setMapName(mapName);
-            setPathId(UUID.randomUUID().toString().replaceAll("\\-", ""));setPathType(0);//云端创建的路径信息
+            setPathId(UUID.randomUUID().toString().replaceAll("\\-", ""));
+            setPathType(0);//云端创建的路径信息
         }};
         this.roadPathMapper.insert(roadPath);
         packageRoadPathRelations(points, roadPath);
@@ -98,17 +87,6 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         log.info(String.format("路径权值数据为：%s", weight));
         List points = (List)checkNotNull(body.get("points"),"点组合不允许为空，请重新选择!");
         checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
-
-//        Set<String> checkContainer = Sets.newHashSet();
-//        for (Object pointId : points) {
-//            MapPoint mapPoint = this.mapPointMapper.selectByPrimaryKey(Long.parseLong(String.valueOf(pointId)));// 依次遍历每一个接收到的点信息并且进行处理
-//            checkContainer.add(new StringBuilder().append(mapPoint.getSceneName())
-//                    .append("|").append(mapPoint.getMapName()).append("|").append(mapPoint.getStoreId()).toString());
-//            if (sceneName == null){sceneName = mapPoint.getSceneName();}
-//            if (mapName == null){mapName = mapPoint.getMapName();}
-//        }
-//        checkArgument(checkContainer.size() == 1, "传入的点组合不在同一张地图上，请重新选择");
-
         RoadPath roadPath = new RoadPath(){{ // 实例化指定对象
             setId(Long.parseLong(pathId));
             setData(data); // 路径数据
