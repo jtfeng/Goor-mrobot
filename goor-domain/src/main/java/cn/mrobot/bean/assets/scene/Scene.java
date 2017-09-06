@@ -6,6 +6,7 @@ import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class Scene extends BaseBean{
     @Transient
     private String mapSceneName;
     @Transient
-    private List<Robot> robots;
+    private List<Robot> robots = new ArrayList<>();
 
     public String getName() {
         return name;
