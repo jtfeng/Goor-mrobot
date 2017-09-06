@@ -31,10 +31,10 @@ public class RoadPathLockController {
         RoadPathLock roadPathLock = new RoadPathLock();
         roadPathLock.setName("LOCK - 1");
         roadPathLock.setLockAction(RoadPathLock.LockAction.LOCK);
-        roadPathLockService.save(roadPathLock, request);
+        roadPathLockService.save(roadPathLock);
         roadPathLock.setName("LOCK - 2");
         roadPathLock.setLockAction(RoadPathLock.LockAction.UNLOCK);
-        roadPathLockService.save(roadPathLock, request);
+        roadPathLockService.save(roadPathLock);
 
         Long id = roadPathLock.getId();
         RoadPathLock chaxunPathLock = roadPathLockService.findById(id);
