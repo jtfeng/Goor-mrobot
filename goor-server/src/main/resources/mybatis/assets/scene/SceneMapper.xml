@@ -70,6 +70,7 @@
         SELECT i.*
         FROM A_MAP_INFO i LEFT JOIN SCENES_MAPS_RELATIONS smr ON i.SCENE_NAME = smr.MAP_SCENENAME
         WHERE smr.SCENE_ID = #{param1} AND i.STORE_ID = #{param2}
+        ORDER BY i.CREATE_TIME DESC
     </select>
 
     <!-- 根据场景ID查询充电桩点 -->
