@@ -49,10 +49,10 @@ public class SceneController {
      * @return
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.POST)
-    public AjaxResult createScene(@RequestBody Scene scene, HttpServletRequest request) {
+    public AjaxResult createScene(@RequestBody Scene scene) {
         // TODO: 21/07/2017 创建新场景
         try {
-            Object taskResult = sceneService.saveScene(scene, request);
+            Object taskResult = sceneService.saveScene(scene);
             return AjaxResult.success(taskResult, "新增场景信息成功!");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage(), "新增场景信息失败");

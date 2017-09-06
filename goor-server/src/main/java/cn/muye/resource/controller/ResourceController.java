@@ -99,7 +99,7 @@ public class ResourceController extends BaseController {
                 resource.setResourceType(resourceType);
                 resource.setPath(path.toString());
                 //resource.setContent();
-                resourceService.save(resource, request);
+                resourceService.save(resource);
                 return AjaxResult.success(resource, "资源上传成功");
             }
         } catch (Exception e) {

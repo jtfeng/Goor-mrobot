@@ -131,7 +131,7 @@ public class HttpClientUtil {
                 get.setHeader("Cookie", cookie);
             }
             if (accessToken != null && !"".equals(accessToken)) {
-                get.setHeader("Authorization", "bearer " + accessToken);
+                get.setHeader("Authorization", accessToken);
             }
             if (reffer != null && !"".equals(reffer)) {
                 get.setHeader("Reffer", reffer);

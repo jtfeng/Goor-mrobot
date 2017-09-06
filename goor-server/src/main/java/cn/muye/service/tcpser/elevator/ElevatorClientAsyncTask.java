@@ -62,7 +62,7 @@ public class ElevatorClientAsyncTask {
 
                     if (logElevatorService != null){
                         try {
-                            logElevatorService.save(logElevator, request);
+                            logElevatorService.save(logElevator);
                         } catch (Exception e) {
                             e.printStackTrace();
                             logger.info(e.getMessage());

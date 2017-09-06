@@ -16,7 +16,7 @@ public interface SceneService extends BaseService<Scene> {
 
     List<Scene> list() throws Exception;
 
-    Object saveScene(Scene scene, HttpServletRequest request) throws Exception;
+    Object saveScene(Scene scene) throws Exception;
 
     Scene getSceneById(Long id) throws Exception;
 

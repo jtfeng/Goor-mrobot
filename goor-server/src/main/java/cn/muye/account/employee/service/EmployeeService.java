@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface EmployeeService extends BaseService<Employee> {
 
-    void addEmployee(Employee employee, HttpServletRequest request);
+    void addEmployee(Employee employee);
 
     void updateEmployee(Employee employee);
 

@@ -2,7 +2,6 @@ package cn.muye.order.service;
 
 import cn.mrobot.bean.order.OrderSetting;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -11,7 +10,7 @@ import java.util.List;
 public interface OrderSettingService {
     OrderSetting getById(Long id);
 
-    int saveOrderSetting(OrderSetting orderSetting, HttpServletRequest request);
+    int saveOrderSetting(OrderSetting orderSetting);
 
     int updateOrderSetting(OrderSetting orderSetting);
 

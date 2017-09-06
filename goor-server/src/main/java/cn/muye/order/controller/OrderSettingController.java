@@ -47,9 +47,9 @@ public class OrderSettingController extends BaseController{
      */
     @RequestMapping(value = "list", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult listAvailableOrderSetting(HttpServletRequest request){
+    public AjaxResult listAvailableOrderSetting(){
         try {
-            Long stationId = userUtil.getStationId(request);
+            Long stationId = userUtil.getStationId();
             List<OrderSetting> orderSetting = orderSettingService.listAvailableOrderSettingByStationId(stationId);
             return AjaxResult.success(orderSetting);
         } catch (Exception e) {
@@ -65,9 +65,9 @@ public class OrderSettingController extends BaseController{
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting, HttpServletRequest request){
+    public AjaxResult saveOrderSetting(@RequestBody OrderSetting orderSetting){
         try {
-            Long stationId = userUtil.getStationId(request);
+            Long stationId = userUtil.getStationId();
             if(stationId == null){
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "session内无法获取站id");
             }
@@ -76,7 +76,7 @@ public class OrderSettingController extends BaseController{
                 orderSetting.setDefaultSetting(Boolean.TRUE);
             }
             orderSetting.setStationId(stationId);
-            orderSettingService.saveOrderSetting(orderSetting, request);
+            orderSettingService.saveOrderSetting(orderSetting);
             return AjaxResult.success("添加配置成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -112,9 +112,9 @@ public class OrderSettingController extends BaseController{
      */
     @RequestMapping(value = "updateDefault" , method = RequestMethod.PUT)
     @ResponseBody
-    public AjaxResult updateDefaultOrderSetting(@RequestParam("id") Long id, HttpServletRequest request){
+    public AjaxResult updateDefaultOrderSetting(@RequestParam("id") Long id){
         try {
-            Long stationId = userUtil.getStationId(request);
+            Long stationId = userUtil.getStationId();
             List<OrderSetting> settingList = orderSettingService.listAvailableOrderSettingByStationId(stationId);
             settingList.forEach(orderSetting -> {
                if(orderSetting.getId() == id ){

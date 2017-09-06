@@ -69,10 +69,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Object saveScene(Scene scene, HttpServletRequest request) throws Exception {
+    public Object saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
-        this.save(scene, request);//数据库中插入这条场景记录
+        this.save(scene);//数据库中插入这条场景记录
 
         this.deleteRobotAndSceneRelations(scene.getId());
         boolean flag = bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系

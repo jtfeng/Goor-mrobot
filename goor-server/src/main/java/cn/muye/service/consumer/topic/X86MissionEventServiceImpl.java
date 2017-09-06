@@ -4,7 +4,6 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.log.mission.JsonLogMission;
 import cn.mrobot.bean.log.mission.LogMission;
-import cn.mrobot.bean.mission.MissionState;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
@@ -19,7 +18,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * Created by abel on 17-7-15.
@@ -39,7 +37,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
     private MissionListTaskService missionListTaskService;
 
     @Override
-    public AjaxResult handleX86MissionEvent(MessageInfo messageInfo, HttpServletRequest request) {
+    public AjaxResult handleX86MissionEvent(MessageInfo messageInfo) {
         logger.info(JsonUtils.toJson(
                 messageInfo,
                 new TypeToken<MessageInfo>(){}.getType()));
@@ -92,7 +90,7 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                     logMission.setPowerPercent(chargeInfo.getPowerPercent());
                 }
                 //保存日志
-                logMissionService.save(logMission, request);
+                logMissionService.save(logMission);
                 if (logMission.getId() == null){
                     logger.warn("logMissionService save new mission log failed! Pls check!!!");
                 }

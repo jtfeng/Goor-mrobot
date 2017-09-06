@@ -144,7 +144,7 @@ public class ElevatorController {
      * @return
      */
     @RequestMapping(value = "/assets/elevatorPointCombination", method = RequestMethod.POST)
-    public AjaxResult createElevatorPointCombination(@RequestBody ElevatorPointCombination combination, HttpServletRequest request){
+    public AjaxResult createElevatorPointCombination(@RequestBody ElevatorPointCombination combination){
         try {
             checkNotNull(combination.getWaitPoint(),"等待点编号不能为空!");
             checkNotNull(combination.getGoPoint(),  "进入点编号不能为空!");
@@ -154,7 +154,7 @@ public class ElevatorController {
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
             ));
-            elevatorPointCombinationService.save(combination, request);
+            elevatorPointCombinationService.save(combination);
             return AjaxResult.success("保存四点组合信息成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
@@ -219,7 +219,7 @@ public class ElevatorController {
      * @return
      */
     @RequestMapping(value = "/assets/elevator", method = RequestMethod.POST)
-    public AjaxResult createElevator(@RequestBody Elevator elevator, HttpServletRequest request){
+    public AjaxResult createElevator(@RequestBody Elevator elevator){
         try {
             List<Long> combinationIds = Lists.newArrayList();
             checkNotNull(elevator.getElevatorshaftId(),"电梯必须绑定电梯井，请重新选择!");
@@ -227,7 +227,7 @@ public class ElevatorController {
                 combinationIds.add(checkNotNull(combination.getId(), "ID编号必须存在，请重新检查!"));
             }
             //保存电梯信息以及电梯与点组合的对应关系
-            elevatorService.createElevator(elevator, combinationIds, request);
+            elevatorService.createElevator(elevator, combinationIds);
             return AjaxResult.success("保存电梯信息成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
@@ -291,9 +291,9 @@ public class ElevatorController {
      * @return
      */
     @RequestMapping(value = "/assets/elevatorShaft", method = RequestMethod.POST)
-    public AjaxResult createElevatorShaft(@RequestBody ElevatorShaft elevatorShaft, HttpServletRequest request){
+    public AjaxResult createElevatorShaft(@RequestBody ElevatorShaft elevatorShaft){
         try {
-            elevatorShaftService.save(elevatorShaft, request);
+            elevatorShaftService.save(elevatorShaft);
             return AjaxResult.success("创建新的电梯井成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);

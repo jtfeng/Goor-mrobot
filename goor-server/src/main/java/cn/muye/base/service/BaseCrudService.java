@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface BaseCrudService<T extends BaseBean> {
 
-    int save(T entity, HttpServletRequest request);
+    int save(T entity);
 
     int delete(T entity);
 

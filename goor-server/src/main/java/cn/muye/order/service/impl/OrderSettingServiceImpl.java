@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -27,8 +26,8 @@ public class OrderSettingServiceImpl extends BasePreInject<OrderSetting> impleme
     }
 
     @Override
-    public int saveOrderSetting(OrderSetting orderSetting, HttpServletRequest request) {
-        preInject(orderSetting, request);
+    public int saveOrderSetting(OrderSetting orderSetting) {
+        preInject(orderSetting);
         return orderSettingMapper.saveOrderSetting(orderSetting);
     }
 

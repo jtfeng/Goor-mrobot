@@ -11,15 +11,15 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface OrderService {
 
-    void saveWaitOrder(Order order, HttpServletRequest request);
+    void saveWaitOrder(Order order);
 
-    AjaxResult saveOrder(Order order, HttpServletRequest request);
+    AjaxResult saveOrder(Order order);
 
-    AjaxResult savePathOrder(Order order, HttpServletRequest request);
+    AjaxResult savePathOrder(Order order);
 
     Order getOrder(Long id);
 
-    void backToStartPoint(String robotCode, MapPoint mapPoint, HttpServletRequest request);
+    void backToStartPoint(String robotCode, MapPoint mapPoint);
 
     void checkWaitOrders(HttpServletRequest request);
 }

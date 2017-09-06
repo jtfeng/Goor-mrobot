@@ -18,9 +18,9 @@ public class BasePreInject<T extends BaseBean> {
     @Autowired
     private UserUtil userUtil;
 
-    public T preInject(T entity, HttpServletRequest request){
+    public T preInject(T entity){
         entity.setCreateTime(new Date());
-        entity.setCreatedBy(userUtil.getCurrentUserId(request));
+        entity.setCreatedBy(userUtil.getCurrentUserId());
         entity.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         return entity;
     }

@@ -565,8 +565,8 @@ public class ConsumerCommon {
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 String robotStr = AES.decryptFromBase64(messageInfo.getMessageText(), Constant.AES_KEY);
                 Robot robotNew = JSON.parseObject(robotStr, Robot.class);
-                CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), messageInfo.getSendTime().getTime());
-                robotService.autoRegister(robotNew, null);
+                CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), System.currentTimeMillis());
+                robotService.autoRegister(robotNew);
             }
         } catch (RuntimeException e) {
             logger.error("机器人注册失败，回滚，错误信息==>{}", e);

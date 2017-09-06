@@ -28,7 +28,7 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @param elevator
      * @throws Exception
      */
-    void createElevator(Elevator elevator, List<Long> combinationIds, HttpServletRequest request) throws Exception;
+    void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception;
 
     /**
      * 更新电梯信息

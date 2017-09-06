@@ -41,7 +41,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -175,8 +174,8 @@ public class UserController {
     @RequestMapping(value = {"account/user"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询用户接口", httpMethod = "GET", notes = "查询用户接口")
     @ResponseBody
-    public AjaxResult list(WhereRequest whereRequest, HttpServletRequest request) {
-        User userDb = userUtil.getCurrentUser(request);
+    public AjaxResult list(WhereRequest whereRequest) {
+        User userDb = userUtil.getCurrentUser();
         if (userDb == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "当前用户不存在");
         }
@@ -345,9 +344,8 @@ public class UserController {
      */
     @RequestMapping(value = {"account/user/logOut"}, method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult logOut(HttpServletRequest request) {
-        CacheInfoManager.removeUserLoginStatusCache(userUtil.getCurrentUser(request).getUserName());
-        CacheInfoManager.removeLoggedUserCache(request.getHeader("access_token"));
+    public AjaxResult logOut() {
+        CacheInfoManager.removeUserLoginStatusCache(userUtil.getCurrentUser().getUserName());
         return AjaxResult.success("注销成功");
     }
 

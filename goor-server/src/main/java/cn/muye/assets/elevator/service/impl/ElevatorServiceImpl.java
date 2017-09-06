@@ -148,9 +148,9 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public void createElevator(Elevator elevator, List<Long> combinationIds, HttpServletRequest request) throws Exception {
+    public void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //保存电梯信息
-        save(elevator, request);
+        save(elevator);
         //删除旧的关系
         elevatorMapper.deleteRelationsByElevatorId(elevator.getId());
         if (combinationIds.size() != 0) {

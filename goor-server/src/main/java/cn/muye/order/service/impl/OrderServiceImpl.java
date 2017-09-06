@@ -59,16 +59,16 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     private RabbitTemplate rabbitTemplate;
 
     @Override
-    public void saveWaitOrder(Order order, HttpServletRequest request) {
+    public void saveWaitOrder(Order order) {
         //保存订单
-        preInject(order, request);
+        preInject(order);
         orderMapper.saveOrder(order);
         //保存订单详情
         List<OrderDetail> orderDetailList = order.getDetailList();
         orderDetailList.forEach(orderDetail -> {
             orderDetail.setOrderId(order.getId());
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
-            orderDetailService.save(orderDetail, request);
+            orderDetailService.save(orderDetail);
             //保存货物信息
             orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
                 goodsInfo.setOrderDetailId(orderDetail.getId());
@@ -78,10 +78,10 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     }
 
     @Override
-    public AjaxResult saveOrder(Order order, HttpServletRequest request) {
-        saveWaitOrder(order, request);
+    public AjaxResult saveOrder(Order order) {
+        saveWaitOrder(order);
         //在这里调用任务生成器
-        return generateMissionList(order.getId(), request);
+        return generateMissionList(order.getId());
     }
 
     /**
@@ -90,9 +90,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * @return
      */
     @Override
-    public AjaxResult savePathOrder(Order order, HttpServletRequest request) {
+    public AjaxResult savePathOrder(Order order) {
         //保存订单
-        preInject(order, request);
+        preInject(order);
 //        order.setStatus(OrderConstant.ORDER_STATUS_UNDONE);
         orderMapper.saveOrder(order);
         //保存订单详情
@@ -100,7 +100,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         orderDetailList.forEach(orderDetail -> {
             orderDetail.setOrderId(order.getId());
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
-            orderDetailService.save(orderDetail, request);
+            orderDetailService.save(orderDetail);
             //保存货物信息
             orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
                 goodsInfo.setOrderDetailId(orderDetail.getId());
@@ -110,7 +110,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         //在这里调用任务生成器
         Order sqlOrder = getOrder(order.getId());
 //        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
-        AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder, request);
+        AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder);
         if(!ajaxResult.isSuccess()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
@@ -139,9 +139,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * @param orderId
      * @return
      */
-    public AjaxResult generateMissionList(Long orderId, HttpServletRequest request){
+    public AjaxResult generateMissionList(Long orderId){
         Order sqlOrder = getOrder(orderId);
-        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder, request);
+        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
         if(!ajaxResult.isSuccess()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
@@ -166,7 +166,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             }else{
                 waitOrder.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
                 orderMapper.updateOrder(waitOrder);
-                generateMissionList(waitOrder.getId(), request);
+                generateMissionList(waitOrder.getId());
             }
         }
     }
@@ -176,7 +176,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * @param mapPoint
      */
     @Override
-    public void backToStartPoint(String robotCode, MapPoint mapPoint, HttpServletRequest request) {
+    public void backToStartPoint(String robotCode, MapPoint mapPoint) {
         //发送指定消息，任务中断的时候可以返回出发点
         //TODO: 需要确定这个任务事件的相关 Topic 名称和类型的相关信息
         CommonInfo commonInfo = new CommonInfo();
