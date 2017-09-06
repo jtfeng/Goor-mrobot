@@ -7,6 +7,8 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.door.mapper.DoorMapper;
 import cn.muye.assets.door.service.DoorService;
+import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
+import cn.muye.assets.roadpath.mapper.RoadPathMapper;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSON;
@@ -30,6 +32,8 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
     private static final Logger log = LoggerFactory.getLogger(DoorServiceImpl.class);
     @Autowired
     private DoorMapper myMapper;
+    @Autowired
+    private RoadPathLockMapper roadPathLockMapper;
     @Autowired
     private PointService pointService;
 
@@ -58,6 +62,7 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
         if (temp == null || temp.size() <= 0) {
             return null;
         }
+        temp.get(0).setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(temp.get(0).getPathLock()));
         return bindPoint(temp.get(0));
     }
 
@@ -142,6 +147,7 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
             MapPoint oP = pointService.findById(door.getOutPoint());
             door.setoPoint(oP);
         }
+        door.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(door.getPathLock()));
         return door;
     }
 

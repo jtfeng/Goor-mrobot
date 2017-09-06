@@ -1,6 +1,7 @@
 package cn.mrobot.bean.assets.door;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.assets.roadpath.RoadPathLock;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
@@ -26,6 +27,7 @@ public class Door  extends BaseBean {
     private int active;//假删除标志：0 未删除，1 已删除
     private String doorOrderType;//门对应的任务类型：比如普通导航door，沿线导航laneDoor，固定路径导航pathDoor
     private String pathId;//工控路径ID
+    private Long pathLock;//逻辑锁 ID
 
     @Transient
     private MapPoint wPoint;//等门点，加锁任务
@@ -33,6 +35,8 @@ public class Door  extends BaseBean {
     private MapPoint gPoint;//进门点,执行开门任务
     @Transient
     private MapPoint oPoint;//出门点，解锁任务
+    @Transient
+    private RoadPathLock roadPathLock;//对应的逻辑锁对象
 
     @Override
     public String toString() {
@@ -58,6 +62,8 @@ public class Door  extends BaseBean {
                 ", wPoint=" + wPoint +
                 ", gPoint=" + gPoint +
                 ", oPoint=" + oPoint +
+                ", pathLock=" + pathLock +
+                ", roadPathLock=" + roadPathLock +
                 '}';
     }
 
@@ -195,5 +201,21 @@ public class Door  extends BaseBean {
 
     public void setPathId(String pathId) {
         this.pathId = pathId;
+    }
+
+    public Long getPathLock() {
+        return pathLock;
+    }
+
+    public void setPathLock(Long pathLock) {
+        this.pathLock = pathLock;
+    }
+
+    public RoadPathLock getRoadPathLock() {
+        return roadPathLock;
+    }
+
+    public void setRoadPathLock(RoadPathLock roadPathLock) {
+        this.roadPathLock = roadPathLock;
     }
 }
