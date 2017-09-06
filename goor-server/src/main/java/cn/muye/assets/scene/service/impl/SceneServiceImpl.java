@@ -72,18 +72,21 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public Object saveScene(Scene scene, HttpServletRequest request) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
-        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
-            scene.setState(0);//代表正在上传
-        } else {
-            scene.setState(1);//代表上传成功
-        }
         this.save(scene, request);//数据库中插入这条场景记录
 
         this.deleteRobotAndSceneRelations(scene.getId());
-        bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
+        boolean flag = bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
 
         this.deleteMapAndSceneRelations(scene.getId());
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
+
+        if (flag) {
+            // 实际有机器人需要进行地图下发操作
+            scene.setState(0);
+        } else {
+            scene.setState(1);
+        }
+        updateSelective(scene);
 
         Object taskResult = null;
         if (scene.getRobots() != null && scene.getRobots().size() != 0) {
@@ -122,16 +125,17 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
         scene.setStoreId(STORE_ID);//设置默认的门店编号
         scene.setCreateTime(new Date());
-        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
-            scene.setState(0);//代表正在上传
-        } else {
-            scene.setState(1);//代表上传失败
-        }
-
         this.deleteRobotAndSceneRelations(scene.getId());
-        bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
+        boolean flag = bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
 
+        if (flag) {
+            // 实际有机器人需要进行地图下发操作
+            scene.setState(0);
+        } else {
+            scene.setState(1);
+        }
         updateSelective(scene) ;//更新对应的场景信息
+
         Object taskResult = null;
         if (scene.getRobots() != null && scene.getRobots().size() != 0) {
             //自动下发地图
@@ -295,7 +299,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private static final String ROBOT_ERROR_MESSAGE = "传入的机器人信息不存在或者机器人已经被绑定到云端场景，请重新选择!" ;
 
     @Override
-    public void bindSceneAndRobotRelations(Scene scene) throws Exception {
+    public boolean bindSceneAndRobotRelations(Scene scene) throws Exception {
+        boolean flag = false;
         try {
             lock.lock();//操作开始前先上锁
             Long sceneId = scene.getId();
@@ -311,6 +316,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             if (ids.size() != 0) {
                 //如果有效序号ids的集合内容不为空，则插入新的关系信息，否则不执行任何操作
                 //不能抛出异常信息，因为仙子阿允许绑定空元素
+                flag = true;//表示有实际的机器人进行地图下发操作
                 this.insertSceneAndRobotRelations(scene.getId(), ids);
             }
             if(TransactionSynchronizationManager.isActualTransactionActive()){
@@ -342,6 +348,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             log.error(e.getMessage(), e);
             throw e;
         }
+        return flag;
     }
 
     /**
