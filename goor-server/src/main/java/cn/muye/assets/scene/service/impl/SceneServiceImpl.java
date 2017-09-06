@@ -119,7 +119,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
         scene.setStoreId(STORE_ID);//设置默认的门店编号
         scene.setCreateTime(new Date());
-        scene.setState(0);//代表正在上传
+        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
+            scene.setState(0);//代表正在上传
+        } else {
+            scene.setState(1);//代表上传成功
+        }
 
         this.deleteRobotAndSceneRelations(scene.getId());
         bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
