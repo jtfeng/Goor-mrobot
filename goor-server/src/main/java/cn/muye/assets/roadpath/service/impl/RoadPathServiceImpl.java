@@ -7,6 +7,7 @@ import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
+import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathPointMapper;
 import cn.muye.assets.roadpath.service.RoadPathService;
@@ -39,6 +40,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     private MapPointMapper mapPointMapper;
     @Autowired
     private SceneMapper sceneMapper;
+    @Autowired
+    private RoadPathLockMapper roadPathLockMapper;
     private String sceneName = null;
     private String mapName = null;
     @Transactional(rollbackFor = Exception.class)
@@ -138,7 +141,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public List<RoadPath> listRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception {
+    public List<RoadPathDetail> listRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andCondition("START_POINT = ", startPoint)
@@ -153,7 +156,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
-        return roadPaths;
+        return packageRoadPathDetail(roadPaths);
     }
 
     @Override
@@ -174,6 +177,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
             roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
+            roadPathDetail.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(roadPath.getPathLock()));//设置对应的逻辑锁对象
 
             List<MapPoint> relatePoints = Lists.newArrayList();
             log.info("packageRoadPathDetail: start- " + roadPath.getStartPoint()

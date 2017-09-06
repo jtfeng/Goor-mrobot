@@ -9,6 +9,7 @@ public class RoadPathDetail extends RoadPath {
     private MapPoint start;
     private MapPoint end;
     private List<MapPoint> relatePoints;
+    private RoadPathLock roadPathLock;
 
     public MapPoint getStart() {
         return start;
@@ -34,12 +35,21 @@ public class RoadPathDetail extends RoadPath {
         this.relatePoints = relatePoints;
     }
 
+    public RoadPathLock getRoadPathLock() {
+        return roadPathLock;
+    }
+
+    public void setRoadPathLock(RoadPathLock roadPathLock) {
+        this.roadPathLock = roadPathLock;
+    }
+
     @Override
     public String toString() {
         return "RoadPathDetail{" +
                 "start=" + start +
                 ", end=" + end +
                 ", relatePoints=" + relatePoints +
+                ", roadPathLock=" + roadPathLock +
                 '}';
     }
 }
