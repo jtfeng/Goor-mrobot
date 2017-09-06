@@ -70,20 +70,25 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Object saveScene(Scene scene) throws Exception {
-        scene.setStoreId(STORE_ID);//设置默认 store ID
-        scene.setCreateTime(new Date());//设置当前时间为创建时间
-        scene.setState(0);//代表正在上传
-        this.save(scene);//数据库中插入这条场景记录
 
-        this.deleteRobotAndSceneRelations(scene.getId());
+        scene.setStoreId(STORE_ID);     //设置默认 store ID
+        scene.setCreateTime(new Date());//设置当前时间为创建时间
+        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
+            scene.setState(0);              //代表正在上传
+        } else {
+            scene.setState(1);              //没有实际机器人的时候，设置为上传成功状态
+        }
+        this.save(scene);               //数据库中插入这条场景记录（保存场景）
+
+        this.deleteRobotAndSceneRelations(scene.getId());//先删除旧的场景与机器人的对应关系
         bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
 
-        this.deleteMapAndSceneRelations(scene.getId());
-        bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
+        this.deleteMapAndSceneRelations(  scene.getId());//先删除旧的场景与地图信息的对应关系
+        bindSceneAndMapRelations(scene);  //绑定场景与地图信息之间的对应关系
 
         Object taskResult = null;
         if (scene.getRobots() != null && scene.getRobots().size() != 0) {
-            //自动下发地图
+            //当参数传递的机器人信息不为空时候，才自动下发地图
             List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
             List<Robot> robots = new ArrayList<>();
             for (Robot robot : scene.getRobots()) {
@@ -268,10 +273,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Override
     public void bindSceneAndRobotRelations(Scene scene) throws Exception {
         try {
-            lock.lock();
-            Long sceneId = Preconditions.checkNotNull(scene.getId());
-            List<Robot> robots = Preconditions.checkNotNull(scene.getRobots());
-            List<Long> ids = new ArrayList<>();
+            lock.lock();//操作开始前先上锁
+            Long sceneId = scene.getId();
+            List<Robot> robots = scene.getRobots();//可能为空或者为一个空数组
+            List<Long> ids = new ArrayList<>();//真正需要以及将会插入到关系表中的 ID 信息数据
             for (Robot robot : robots) {
                 if (this.sceneMapper.checkRobotLegal(robot.getId()) >0 && this.sceneMapper.checkRobot(robot.getId()) == 0) {
                     //机器人合法并且机器人没有绑定到已有场景的条件
@@ -280,13 +285,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
                 }
             }
             if (ids.size() != 0) {
+                //如果有效序号ids的集合内容不为空，则插入新的关系信息，否则不执行任何操作
+                //不能抛出异常信息，因为仙子阿允许绑定空元素
                 this.insertSceneAndRobotRelations(scene.getId(), ids);
-            } else {
-                throw new Exception(ROBOT_ERROR_MESSAGE);
             }
             if(TransactionSynchronizationManager.isActualTransactionActive()){
                 log.info(" - - - - 当前操作正处在事务中 - - - - ");
-                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter(){
+                TransactionSynchronizationManager.registerSynchronization(
+                        new TransactionSynchronizationAdapter(){
                     @Override
                     public void afterCompletion(int status) {
                         switch (status){
@@ -304,11 +310,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
                     }
                 });
             }else{
+                //事务执行异常，整体事务需要进行回滚操作
                 log.info(" ~ ~ ~ ~ 当前操作没有实际事务，系统异常，回滚事务 ~ ~ ~ ~ ");
                 throw new Exception("当前操作没有实际事务，系统异常，回滚事务");
             }
         }catch (Exception e){
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw e;
         }
     }

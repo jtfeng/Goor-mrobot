@@ -52,10 +52,9 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.POST)
     public AjaxResult createScene(@RequestBody Scene scene) {
-        // TODO: 21/07/2017 创建新场景
         try {
             Object taskResult = sceneService.saveScene(scene);
-            return AjaxResult.success(taskResult, "新增场景信息成功!");
+            return AjaxResult.success(taskResult,    "新增场景信息成功!");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage(), "新增场景信息失败");
         }
@@ -69,9 +68,7 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.PUT)
     public AjaxResult updateScene(@RequestBody Scene scene) {
-        // TODO: 21/07/2017 更新指定的场景信息
         try {
-            log.info("更新指定的场景信息");
             Object taskResult = sceneService.updateScene(scene);
             return AjaxResult.success(taskResult, "修改场景信息成功！");
         } catch (Exception e) {
