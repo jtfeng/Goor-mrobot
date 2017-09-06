@@ -141,7 +141,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public List<RoadPathDetail> listRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception {
+    public List<RoadPath> listRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         criteria.andCondition("START_POINT = ", startPoint)
@@ -156,7 +156,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
-        return packageRoadPathDetail(roadPaths);
+        return roadPaths;
     }
 
     @Override
