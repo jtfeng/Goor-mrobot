@@ -521,6 +521,7 @@ public class MissionController {
 //			if(scene == null) {
 //				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 //			}
+
 			Long sceneId = userSceneId;
 			List<MissionList> missionListList = missionListService.list(storeId,sceneId);
 
