@@ -43,10 +43,10 @@ public class DoorController {
      */
     @RequestMapping(value = {"assets/door"}, method = RequestMethod.GET)
     @ResponseBody
-    private AjaxResult pageStation(WhereRequest whereRequest, HttpServletRequest request) {
+    private AjaxResult pageStation(WhereRequest whereRequest) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -70,10 +70,10 @@ public class DoorController {
     @RequestMapping(value = "assets/door/{id}", method = RequestMethod.DELETE)
     @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-    public AjaxResult deleteMapPoint(@PathVariable long id, HttpServletRequest request) throws Exception {
+    public AjaxResult deleteMapPoint(@PathVariable long id) throws Exception {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -101,10 +101,10 @@ public class DoorController {
     @RequestMapping(value = {"assets/door"}, method = RequestMethod.POST)
     @ApiOperation(value = "新增或修改门", httpMethod = "POST", notes = "新增或修改门")
     @ResponseBody
-    public AjaxResult saveOrUpdateStation(@ApiParam(value = "门") @RequestBody Door door, HttpServletRequest request) {
+    public AjaxResult saveOrUpdateStation(@ApiParam(value = "门") @RequestBody Door door) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if(scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
