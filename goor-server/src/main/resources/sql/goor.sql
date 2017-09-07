@@ -1046,7 +1046,8 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('22', '门加锁任务', 'doorLock', '门�
 INSERT INTO `D_FEATURE_ITEM` VALUES ('23', '门解锁任务', 'doorUnlock', '门解锁任务', '{\"door_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('24', '路径加锁任务', 'pathLock', '路径加锁任务', '{\"path_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('25', '路径解锁任务', 'pathUnlock', '路径解锁任务', '{\"path_id\":1, \"interval_time\":30}');
-
+INSERT INTO `D_FEATURE_ITEM` VALUES ('26', '逻辑路径加锁任务', 'roadpathLock', '逻辑路径加锁任务', ' {\"roadpath_id\":1, \"interval_time\":30}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('27', '逻辑路径解锁任务', 'roadpathUnlock', '逻辑路径解锁任务', ' {\"roadpath_id\":1, \"interval_time\":30}');
 
 
 
