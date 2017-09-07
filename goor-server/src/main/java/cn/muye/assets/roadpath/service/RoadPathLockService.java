@@ -11,7 +11,7 @@ public interface RoadPathLockService extends BaseService<RoadPathLock> {
      * @return
      * @throws Exception
      */
-    boolean lock(Long id) throws Exception;
+    boolean lock(Long id, String robotCode) throws Exception;
 
     /**
      * 释放锁
@@ -19,6 +19,6 @@ public interface RoadPathLockService extends BaseService<RoadPathLock> {
      * @return
      * @throws Exception
      */
-    boolean unlock(Long id) throws Exception;
+    boolean unlock(Long id, String robotCode) throws Exception;
 
 }

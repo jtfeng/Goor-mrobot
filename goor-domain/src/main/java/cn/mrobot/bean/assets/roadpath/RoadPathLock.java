@@ -8,6 +8,7 @@ public class RoadPathLock extends BaseBean{
 
     private String name;
     private Integer lock;
+    private String robotCode;
 
     public String getName() {
         return name;
@@ -29,11 +30,20 @@ public class RoadPathLock extends BaseBean{
         setLock(action.getValue());
     }
 
+    public String getRobotCode() {
+        return robotCode;
+    }
+
+    public void setRobotCode(String robotCode) {
+        this.robotCode = robotCode;
+    }
+
     @Override
     public String toString() {
         return "RoadPathLock{" +
                 "name='" + name + '\'' +
                 ", lock=" + lock +
+                ", robotCode=" + robotCode +
                 '}';
     }
 
