@@ -1874,5 +1874,5 @@ create table AS_ROADPATHLOCK
   STORE_ID bigint null,
   NAME varchar(50) null comment '名称信息',
   `LOCK` int(1) null comment '是否上锁的标识'
-)ENGINE=MyISAM DEFAULT CHARSET=tf8;
+)ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
