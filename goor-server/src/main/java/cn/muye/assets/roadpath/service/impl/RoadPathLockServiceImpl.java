@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> implements RoadPathLockService {
@@ -26,7 +28,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
      * @throws Exception
      */
     @Override
-    public synchronized boolean lock(Long id) throws Exception {
+    public synchronized boolean lock(Long id, String robotCode) throws Exception {
         RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id),
                 String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
         Integer lock = roadPathLock.getLock();
@@ -36,6 +38,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         }else {
             //没有上锁，可以加锁
             roadPathLock.setLockAction(RoadPathLock.LockAction.LOCK);
+            roadPathLock.setCreateTime(new Date());
+            roadPathLock.setRobotCode(robotCode);
             updateSelective(roadPathLock);
             return true;
         }
@@ -48,7 +52,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
      * @throws Exception
      */
     @Override
-    public synchronized boolean unlock(Long id) throws Exception {
+    public synchronized boolean unlock(Long id, String robotCode) throws Exception {
         RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id),
                 String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
         Integer lock = roadPathLock.getLock();
@@ -58,6 +62,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         }else {
             //已经上锁，需要解锁
             roadPathLock.setLockAction(RoadPathLock.LockAction.UNLOCK);
+            roadPathLock.setCreateTime(new Date());
+            roadPathLock.setRobotCode(robotCode);
             updateSelective(roadPathLock);
             return true;
         }
