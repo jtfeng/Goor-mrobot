@@ -233,4 +233,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         // 关系生成完毕之后 ， 保存一系列数据到数据库中
         this.roadPathPointMapper.insertList(roadPathPoints);// 批量保存数据信息
     }
+
+    @Override
+    public RoadPath findByPathId(String pathId) throws Exception {
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("PATH_ID = ", pathId);
+        List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
+        return roadPaths.get(0);
+    }
+
 }

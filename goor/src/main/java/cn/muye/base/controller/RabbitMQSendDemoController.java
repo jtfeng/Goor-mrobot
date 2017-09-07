@@ -7,6 +7,7 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.producer.ProducerCommon;
 import cn.muye.publisher.AppSubService;
+import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -58,5 +61,38 @@ public class RabbitMQSendDemoController {
 
 
 		return AjaxResult.success();
+	}
+
+	@RequestMapping(value = "testAgentSub", method= RequestMethod.GET)
+	@ResponseBody
+	public AjaxResult testAgentSub() {
+		try {
+//			{
+//				sub_name: check_operate_pwd,
+//				data: { "input_pwd" : "xxxxx" },
+//				uuid : "xxxxx",
+//				msg:"",
+//				error_code: ""
+//			}
+			MessageInfo info = new MessageInfo();
+			info.setUuId(UUID.randomUUID().toString().replace("-", ""));
+			info.setSendTime(new Date());
+			info.setSenderId(localRobotSN);
+			info.setMessageType(MessageType.EXECUTOR_COMMAND);
+			Map<String,String> map = new HashMap<String,String>(){{
+				put("data", JSONObject.toJSONString(new HashMap<String,String>(){{
+					put("input_pwd","xxxxx");
+					put("sub_name","check_operate_pwd");
+					put("uuid",UUID.randomUUID().toString().replace("-", ""));
+					put("msg","");
+					put("error_code","");
+				}}));
+			}};
+			info.setMessageText(JSONObject.toJSONString(map));
+			rabbitTemplate.convertAndSend(TopicConstants.DIRECT_AGENT_SUB, info);
+			return AjaxResult.success();
+		}catch (Exception e){
+			return AjaxResult.failed(e.getMessage());
+		}
 	}
 }
