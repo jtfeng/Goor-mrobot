@@ -28,7 +28,7 @@ public class EmployeeController {
 
     @RequestMapping(value = {"account/employee"}, method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult addEmployee(@RequestBody Employee employee, HttpServletRequest request) {
+    public AjaxResult addEmployee(@RequestBody Employee employee) {
         try{
             //校验员工工号是否重复
             String code = employee.getCode();
@@ -43,7 +43,7 @@ public class EmployeeController {
             if (employeeDb != null && employeeDb.getCode() != null && employeeDb.getCode().equals(code)) {
                 return AjaxResult.failed(employee, "员工编号重复");
             }
-            employeeService.addEmployee(employee, request);
+            employeeService.addEmployee(employee);
         } catch (RuntimeException e) {
             LOGGER.error("{}", e);
             return AjaxResult.failed(employee,"新增失败");

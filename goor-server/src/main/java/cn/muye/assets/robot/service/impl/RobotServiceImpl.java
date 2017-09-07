@@ -364,8 +364,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @param robot
      * @throws RuntimeException
      */
-    public void saveRobotAndBindChargerMapPoint(Robot robot, HttpServletRequest request) throws RuntimeException {
-        super.save(robot, request);
+    public void saveRobotAndBindChargerMapPoint(Robot robot) throws RuntimeException {
+        super.save(robot);
         Long robotNewId = robot.getId();
         List list = robot.getChargerMapPointList();
         if (list != null && list.size() == 1 && robotNewId != null) {
@@ -377,7 +377,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         robotConfig.setRobotId(robot.getId());
         robotConfig.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         robotConfig.setCreateTime(new Date());
-        robotConfig.setCreatedBy(userUtil.getCurrentUserId(request));
+        robotConfig.setCreatedBy(userUtil.getCurrentUserId());
         robotConfigService.add(robotConfig);
         if (robot.getTypeId() != null) {
             robotPasswordService.saveRobotPassword(robot);
@@ -391,7 +391,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public AjaxResult autoRegister(Robot robotNew, HttpServletRequest request) throws RuntimeException {
+    public AjaxResult autoRegister(Robot robotNew) throws RuntimeException {
         if (lock1.tryLock()) {
             try {
                 try {
@@ -400,7 +400,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
                 if (lock1.tryLock()) {
                     try {
-                        return doingAutoRegister(robotNew, request);
+                        return doingAutoRegister(robotNew);
                     } finally {
                         lock1.unlock();
                     }
@@ -414,7 +414,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return null;
     }
 
-    private AjaxResult doingAutoRegister(Robot robotNew, HttpServletRequest request) {
+    private AjaxResult doingAutoRegister(Robot robotNew) {
         try {
             if (robotNew != null) {
                 String robotCode = robotNew.getCode();
@@ -449,7 +449,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
                 Robot robotDb = getByCode(robotCode, robotStoreId);
                 if (robotDb == null) {
-                    saveRobotAndBindChargerMapPoint(robotNew, request);
+                    saveRobotAndBindChargerMapPoint(robotNew);
                     //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
                     syncRosRobotConfig(robotNew);
                     return AjaxResult.success(robotNew, "注册成功");

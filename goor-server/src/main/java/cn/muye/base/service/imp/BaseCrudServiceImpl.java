@@ -19,8 +19,8 @@ public abstract class BaseCrudServiceImpl<T extends BaseBean>  extends BasePreIn
     @Autowired
     protected MyMapper<T> myMapper;
 
-    public int save(T entity, HttpServletRequest request) {
-        preInject(entity, request);
+    public int save(T entity) {
+        preInject(entity);
         return myMapper.insert(entity);
     }
 

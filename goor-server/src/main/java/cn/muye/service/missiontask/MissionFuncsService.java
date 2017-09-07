@@ -6,7 +6,6 @@ import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.order.Order;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -19,14 +18,14 @@ public interface MissionFuncsService {
      * @param order
      * @return
      */
-    AjaxResult createMissionLists(Order order, HttpServletRequest request);
+    AjaxResult createMissionLists(Order order);
 
     /**
      * 根据订单数据创建任务列表,导航用固定路径导航
      * @param order
      * @return
      */
-    AjaxResult createMissionListsPathNav(Order order, HttpServletRequest request);
+    AjaxResult createMissionListsPathNav(Order order);
 
     /**
      * 获取任务下发的消息对象json字串
@@ -48,7 +47,7 @@ public interface MissionFuncsService {
      * @param missionLists
      * @return
      */
-    AjaxResult createMissionListTasksByMissionLists(String robotCode, List<MissionList> missionLists, HttpServletRequest request)  throws Exception;
+    AjaxResult createMissionListTasksByMissionLists(String robotCode, List<MissionList> missionLists)  throws Exception;
 
 
 }

@@ -55,8 +55,8 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     private static Logger LOGGER = Logger.getLogger(EmployeeServiceImpl.class);
 
     @Override
-    public void addEmployee(Employee employee, HttpServletRequest request) throws RuntimeException {
-        employee.setCreatedBy(userUtil.getCurrentUserId(request));
+    public void addEmployee(Employee employee) throws RuntimeException {
+        employee.setCreatedBy(userUtil.getCurrentUserId());
         employee.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         employee.setCreateTime(new Date());
         employeeMapper.insert(employee);

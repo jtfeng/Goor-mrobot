@@ -10,5 +10,5 @@ import javax.servlet.http.HttpServletRequest;
  */
 public interface X86MissionEventService {
 
-    AjaxResult handleX86MissionEvent(MessageInfo messageInfo, HttpServletRequest request);
+    AjaxResult handleX86MissionEvent(MessageInfo messageInfo);
 }

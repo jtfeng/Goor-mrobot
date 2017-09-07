@@ -66,8 +66,6 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     private static ConcurrentHashMapCache<String, Integer> userLoginStatusCache = new ConcurrentHashMapCache<>();//用户登录状态
 
-    private static ConcurrentHashMapCache<String, String> loggedUserCache = new ConcurrentHashMapCache<>();//登录的用户名缓存
-
     private static ConcurrentHashMapCache<String, Boolean> robotOnlineCache = new ConcurrentHashMapCache<>();//机器人是否在线缓存
 
     /**
@@ -102,8 +100,6 @@ public class CacheInfoManager implements ApplicationContextAware {
 
         webSocketSessionCache.setMaxLifeTime(0);
         webSocketClientReceiveModuleCache.setMaxLifeTime(0);
-
-        loggedUserCache.setMaxLifeTime(0);
     }
 
     private CacheInfoManager() {
@@ -384,18 +380,6 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setUserLoginStatusCache(String key, Integer status) {
         userLoginStatusCache.put(key, status);
-    }
-
-    public static String getLoggedUserCache(String accessToken) {
-        return loggedUserCache.get(accessToken);
-    }
-
-    public static void setLoggedUserCache(String accessToken, String userName) {
-        loggedUserCache.put(accessToken, userName);
-    }
-
-    public static void removeLoggedUserCache(String key) {
-        loggedUserCache.remove(key);
     }
 
     public static Boolean getRobotOnlineCache(String robotSn) {

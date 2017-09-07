@@ -68,7 +68,7 @@ public class MissionConsumer {
     public void directX86MissionEvent(@Payload MessageInfo messageInfo) {
         try {
             //直接service方法处理上报的数据
-            x86MissionEventService.handleX86MissionEvent(messageInfo, null);
+            x86MissionEventService.handleX86MissionEvent(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directX86MissionEvent exception", e);
         }

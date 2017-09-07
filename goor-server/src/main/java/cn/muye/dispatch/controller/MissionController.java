@@ -791,7 +791,7 @@ public class MissionController {
 			//遍历发送机器人消息
 			for(String robotCode : robotCodesArray) {
 				//TODO 现在限定是一台机器人，将来多台，返回结果还需要Map形式
-				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists, request);
+				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists);
 				resp = ajaxResult;
 			}
 		} catch (Exception e) {
@@ -986,7 +986,7 @@ public class MissionController {
 			//遍历发送机器人消息
 			for(String robotCode : robotCodesArray) {
 				//TODO 现在限定是一台机器人，将来多台，返回结果还需要Map形式
-				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists, request);
+				AjaxResult ajaxResult = missionFuncsService.createMissionListTasksByMissionLists(robotCode,missionLists);
 				resp = ajaxResult;
 			}
 		} catch (Exception e) {

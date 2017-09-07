@@ -102,9 +102,9 @@ public class GoodsController extends BaseController {
      */
     @RequestMapping(value = "goodsType",method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveGoodsType(@RequestBody GoodsType goodsType, HttpServletRequest request){
+    public AjaxResult saveGoodsType(@RequestBody GoodsType goodsType){
         try {
-            goodsTypeService.save(goodsType, request);
+            goodsTypeService.save(goodsType);
             return AjaxResult.success(goodsType, "保存货物类型成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -178,9 +178,9 @@ public class GoodsController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveGoods(@RequestBody Goods goods, HttpServletRequest request){
+    public AjaxResult saveGoods(@RequestBody Goods goods){
         try {
-            goodsService.save(goods, request);
+            goodsService.save(goods);
             return AjaxResult.success(goods, "保存货物成功");
         } catch (Exception e) {
             e.printStackTrace();

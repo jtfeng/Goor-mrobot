@@ -21,9 +21,9 @@ public interface RobotService extends BaseService<Robot>{
 
     Robot getById(Long id);
 
-    void saveRobotAndBindChargerMapPoint(Robot robot, HttpServletRequest request);
+    void saveRobotAndBindChargerMapPoint(Robot robot);
 
-    AjaxResult autoRegister(Robot robotNew, HttpServletRequest request);
+    AjaxResult autoRegister(Robot robotNew);
 
     void deleteRobotById(Long id);
 

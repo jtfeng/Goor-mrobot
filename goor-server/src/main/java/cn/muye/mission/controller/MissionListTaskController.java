@@ -90,7 +90,7 @@ public class MissionListTaskController {
             order.setDetailList(orderDetails);
 
             AjaxResult ret =
-                    missionFuncsService.createMissionLists(order, request);
+                    missionFuncsService.createMissionLists(order);
             return ret;
         } catch (Exception e) {
             e.printStackTrace();

@@ -101,7 +101,7 @@ public class LogMissionController {
                 body.setCreateTime(new Date());
             }
             //保存记录
-            int id = logMissionService.save(body, request);
+            int id = logMissionService.save(body);
             if (id <= 0){
                 throw new Exception("任务日志保存失败。");
             }
