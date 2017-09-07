@@ -7,6 +7,8 @@ import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import cn.muye.log.base.service.LogCollectService;
+import cn.muye.order.service.OrderDetailService;
+import cn.muye.order.service.OrderService;
 import cn.muye.service.consumer.topic.X86MissionCommonRequestService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,14 @@ public class ScheduleTasks {
 
     @Autowired
     private CurrentPoseService currentPoseService;
+
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderDetailService orderDetailService;
+
+    private final static Object lock = new Object();
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -82,6 +92,32 @@ public class ScheduleTasks {
 //            logger.error("Scheduled send reply message error", e);
 //        }
 //    }
+
+    //每分钟执行一次
+    //@Scheduled(cron = "0 */1 * * * ?")
+    public void scanWaitOrders() {
+        synchronized (lock){
+            logger.info("开启订单等待队列扫描");
+            try {
+                orderService.checkWaitOrders();
+                logger.info("订单扫描结束");
+            } catch (Exception e) {
+                logger.error("订单扫描出现异常", e);
+            }
+        }
+    }
+
+    //每分钟执行一次
+    //@Scheduled(cron = "0/30 * * * * ?")
+    public void testWsOrder() {
+        logger.info("开启ws 推送");
+        try {
+            orderDetailService.finishedDetailTask(316L,1);
+            logger.info("ws 推送结束");
+        } catch (Exception e) {
+            logger.error("ws 推送失败", e);
+        }
+    }
 
     //每天晚上23:5触发
     @Scheduled(cron = "0 5 23 * * ?")

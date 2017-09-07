@@ -6,6 +6,8 @@
         <id property="id" column="id" />
         <result property="nickName" column="nickName" />
         <result property="stationId" column="stationId" />
+        <result property="startStation.id" column="startStation.id" />
+        <result property="endStation.id" column="endStation.id" />
         <result property="packageType" column="packageType" />
         <result property="robotType.id" column="robotType.id" />
         <result property="needSign" column="needSign" />
@@ -14,30 +16,6 @@
         <result property="storeId" column="storeId" />
         <result property="createBy" column="createBy" />
         <result property="createTime" column="createTime" />
-        <association property="startPoint" javaType="cn.mrobot.bean.area.point.MapPoint">
-            <id column="startPointId" property="id"/>
-            <result column="startPointName" property="pointName"/>
-            <result column="startPointAlias" property="pointAlias"/>
-            <result column="startSceneName" property="sceneName"/>
-            <result column="startMapName" property="mapName"/>
-            <result column="startX" property="x"/>
-            <result column="startY" property="y"/>
-            <result column="startTh" property="th"/>
-            <result column="startPointLevel" property="pointLevel"/>
-            <result column="startMapPointTypeId" property="mapPointTypeId"/>
-        </association>
-        <association property="endPoint" javaType="cn.mrobot.bean.area.point.MapPoint">
-            <id column="endPointId" property="id"/>
-            <result column="endPointName" property="pointName"/>
-            <result column="endPointAlias" property="pointAlias"/>
-            <result column="endSceneName" property="sceneName"/>
-            <result column="endMapName" property="mapName"/>
-            <result column="endX" property="x"/>
-            <result column="endY" property="y"/>
-            <result column="endTh" property="th"/>
-            <result column="endPointLevel" property="pointLevel"/>
-            <result column="endMapPointTypeId" property="mapPointTypeId"/>
-        </association>
         <association property="goodsType" javaType="cn.mrobot.bean.assets.good.GoodsType">
             <id column="id" property="id"/>
             <result column="typeName" property="name"/>
@@ -48,41 +26,22 @@
         os.id AS "id",
         os.nick_name AS "nickName",
         os.station_id AS "stationId",
+        os.start_station_id AS "startStation.id",
+        os.end_station_id AS "endStation.id",
         os.package_type AS "packageType",
         os.robot_type_id AS "robotType.id",
         os.need_shelf AS "needShelf",
         os.need_sign AS "needSign",
+        os.need_shelf AS "needShelf",
         os.default_setting AS "defaultSetting",
         os.store_id AS "storeId",
         os.created_by AS "createdBy",
         os.create_time AS "createTime",
-        ps.id AS "startPointId",
-        ps.point_name AS "startPointName",
-        ps.point_alias AS "startPointAlias",
-        ps.scene_name AS "startSceneName",
-        ps.map_name AS "startMapName",
-        ps.point_level AS "startPointLevel",
-        ps.th AS "startTh",
-        ps.x AS "startX",
-        ps.y AS "startY",
-        ps.map_point_type_id AS "startMapPointTypeId",
-        pe.id AS "endPointId",
-        pe.point_name AS "endPointName",
-        pe.point_alias AS "endPointAlias",
-        pe.scene_name AS "endSceneName",
-        pe.map_name AS "endMapName",
-        pe.point_level AS "endPointLevel",
-        pe.th AS "endTh",
-        pe.x AS "endX",
-        pe.y AS "endY",
-        pe.map_point_type_id AS "endMapPointTypeId",
         t.id AS "typeId",
         t.name AS "typeName"
     </sql>
 
     <sql id = "orderSettingJoin">
-        LEFT JOIN A_MAP_POINT ps ON os.start_point_id = ps.id
-        LEFT JOIN A_MAP_POINT pe ON os.end_point_id = pe.id
         LEFT JOIN AS_GOODS_TYPE t ON os.goods_type_id = t.id
     </sql>
 
@@ -108,18 +67,20 @@
         where station_id = #{stationId} AND default_setting = TRUE AND delete_status = FALSE ;
     </select>
 
-    <select id="getDefaultSetting" resultType="cn.mrobot.bean.order.OrderSetting">
-        select id
-        from OR_ORDER_SETTING
-        where station_id = #{stationId} AND default_setting = TRUE AND delete_status = FALSE limit 1;
+    <select id="getDefaultSetting" resultMap="orderSettingResult">
+        select
+        <include refid="orderSettingColumn" />
+        from OR_ORDER_SETTING os
+        <include refid="orderSettingJoin" />
+        where os.station_id = #{stationId} AND os.default_setting = TRUE AND os.delete_status = FALSE limit 1;
     </select>
 
     <insert id="saveOrderSetting" parameterType="cn.mrobot.bean.order.OrderSetting" useGeneratedKeys="true" keyProperty="id">
         insert into OR_ORDER_SETTING(
         nick_name,
         station_id,
-        start_point_id,
-        end_point_id,
+        start_station_id,
+        end_station_id,
         goods_type_id,
         package_type,
         robot_type_id,
@@ -133,8 +94,8 @@
         ) values (
         #{nickName},
         #{stationId},
-        #{startPoint.id},
-        #{endPoint.id},
+        #{startStation.id},
+        #{endStation.id},
         #{goodsType.id},
         #{packageType},
         #{robotType.id},
@@ -157,11 +118,11 @@
             <if test="stationId != null" >
                 station_id = #{stationId},
             </if>
-            <if test="startPoint != null and startPoint.id != null and startPoint.id != ''" >
-                start_point_id = #{startPoint.id},
+            <if test="startStation != null and startStation.id != null and startStation.id != ''" >
+                start_station_id = #{startStation.id},
             </if>
-            <if test="endPoint != null and endPoint.id != null and endPoint.id != ''" >
-                end_point_id = #{endPoint.id},
+            <if test="endStation != null and endStation.id != null and endStation.id != ''" >
+                end_station_id = #{endStation.id},
             </if>
             <if test="goodsType != null and goodsType.id != null and goodsType.id != ''" >
                 goods_type_id = #{goodsType.id},

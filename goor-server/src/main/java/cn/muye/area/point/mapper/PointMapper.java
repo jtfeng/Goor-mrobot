@@ -2,7 +2,6 @@ package cn.muye.area.point.mapper;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.muye.util.MyMapper;
-import org.apache.catalina.mapper.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -35,4 +34,7 @@ public interface PointMapper extends MyMapper<MapPoint> {
                                                  @Param("storeId") long storeId);
 
     void updateDeleteFlag(@Param("storeId") long storeId, @Param("mapZipId") long mapZipId, @Param("deleteFlag") int deleteFlag);
+
+    List<MapPoint> listByMapSceneNameAndPointType(@Param("mapSceneName")String mapSceneName, @Param("type")int type, @Param("storeId")Long storeId);
+
 }

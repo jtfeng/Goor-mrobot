@@ -81,25 +81,32 @@
         from OR_ORDER o
         <where>
             <if test="orderSetting != null and orderSetting.id != null and orderSetting.id != ''" >
-                order_setting_id = #{orderSetting.id},
+                o.order_setting_id = #{orderSetting.id}
             </if>
             <if test="robot != null and robot.id != null and robot.id != ''" >
-                robot_id = #{robot.id},
+                AND o.robot_id = #{robot.id}
             </if>
             <if test="startStation != null and startStation.id != null and startStation.id != ''" >
-                start_station_id = #{startStation.id},
+                AND o.start_station_id = #{startStation.id}
             </if>
             <if test="shelf != null and shelf.id != null and shelf.id != ''" >
-                shelf_id = #{shelf.id},
+                AND o.shelf_id = #{shelf.id}
             </if>
             <if test="scene != null and scene.id != null and scene.id != ''" >
-                scene_id = #{scene.id},
+                AND o.scene_id = #{scene.id}
             </if>
             <if test="status != null" >
-                status = #{status}
+                AND o.status = #{status}
             </if>
         </where>
     </select>
+
+    <update id="returnToWaitOrder">
+        update OR_ORDER SET
+        robot_id = null,
+        status = #{status}
+        where id = #{id}
+    </update>
 
 
 </mapper>

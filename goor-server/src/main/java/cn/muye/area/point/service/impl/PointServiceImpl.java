@@ -5,12 +5,14 @@ import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
+import cn.mrobot.bean.area.station.StationMapPointXREF;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.mapper.PointMapper;
 import cn.muye.area.point.service.PointService;
+import cn.muye.area.station.service.StationMapPointXREFService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import com.alibaba.fastjson.JSON;
@@ -45,6 +47,8 @@ public class PointServiceImpl implements PointService {
     private PointMapper pointMapper;
     @Autowired
     private SceneService sceneService;
+    @Autowired
+    private StationMapPointXREFService stationMapPointXREFService;
 
 
     private static final int LEVEL_ONE = 1;
@@ -244,6 +248,25 @@ public class PointServiceImpl implements PointService {
     @Override
     public void updateDeleteFlag(long storeId, long mapZipId, int deleteFlag) {
         pointMapper.updateDeleteFlag(storeId, mapZipId, deleteFlag);
+    }
+
+    @Override
+    public List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, int type, Long storeId) {
+        return pointMapper.listByMapSceneNameAndPointType(mapSceneName, type, storeId);
+    }
+
+    @Override
+    public MapPoint findMapPointByStationIdAndCloudType(Long stationId, int status) {
+        List<StationMapPointXREF> stationMapPointXREFs = stationMapPointXREFService.listByStationId(stationId);
+        MapPoint mapPoint = null;
+        for (StationMapPointXREF stationMapPointXREF : stationMapPointXREFs) {
+            MapPoint findPoint = pointMapper.selectByPrimaryKey(stationMapPointXREF.getMapPointId());
+            if(findPoint.getCloudMapPointTypeId() == status){
+                mapPoint = findPoint;
+                break;
+            }
+        }
+        return mapPoint;
     }
 
     /**

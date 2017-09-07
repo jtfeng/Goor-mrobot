@@ -136,4 +136,9 @@
         UPDATE goor.AS_SCENE SET STATE = #{param2} WHERE ID = #{param1}
     </update>
 
+    <select id="getRelatedMapNameBySceneId" resultType="java.lang.String">
+        SELECT MAP_SCENENAME FROM SCENES_MAPS_RELATIONS WHERE SCENE_ID = #{sceneId}
+    </select>
+
+
 </mapper>

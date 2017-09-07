@@ -17,4 +17,8 @@ public interface OrderMapper {
     int updateOrder(Order order);
 
     List<Order> listByDomain(Order order);
+
+    void returnToWaitOrder(@Param("id") Long orderId, @Param("status")Integer status);
+
+    List<Order> listWaitOrdersByStation(@Param("stationId")Long stationId, @Param("status")Integer orderStatus);
 }

@@ -15,4 +15,6 @@ public interface OrderDetailMapper extends MyMapper<OrderDetail> {
     int countUndoneDetail(@Param("orderId")Long orderId);
 
     OrderDetail getOrderDetailInfo(@Param("id")Long id);
+
+    List<OrderDetail> listStationTasks(@Param("stationId")Long stationId);
 }

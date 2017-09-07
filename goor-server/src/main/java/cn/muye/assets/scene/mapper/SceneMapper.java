@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.muye.util.MyMapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
@@ -40,4 +41,6 @@ public interface SceneMapper extends MyMapper<Scene> {
     List<MapInfo> findMapBySceneName(String SceneName, Long storeId);
 
     void setSceneStateForUpload(Long sceneId, Integer state);
+
+    String getRelatedMapNameBySceneId(@Param("sceneId") Long sceneId);
 }

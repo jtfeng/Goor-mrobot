@@ -29,7 +29,7 @@ public interface MissionFuncsService {
 
     /**
      * 获取任务下发的消息对象json字串
-     * @param listTasks
+     * @aram listTasks
      * @return
      */
     String getGoorMissionMsg(List<MissionListTask> listTasks);

@@ -79,8 +79,8 @@ public class MissionListTaskController {
             b.setSceneName("b");
 
             OrderSetting orderSetting = new OrderSetting();
-            orderSetting.setStartPoint(a);
-            orderSetting.setEndPoint(b);
+            //orderSetting.setStartPoint(a);
+            //orderSetting.setEndPoint(b);
             order.setOrderSetting(orderSetting);
 
             List<OrderDetail> orderDetails = new ArrayList<>();

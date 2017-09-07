@@ -29,8 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -116,6 +118,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         log.info("传入用户会话中的场景信息为：" + scene);
         return scene;
+    }
+
+    @Override
+    public String getRelatedMapNameBySceneId(Long sceneId) {
+        return sceneMapper.getRelatedMapNameBySceneId(sceneId);
     }
 
     @Transactional(rollbackFor = Exception.class)
