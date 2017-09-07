@@ -84,6 +84,8 @@ public class OrderController extends BaseController {
         }
     }
 
+
+
     /**
      * 保存一个订单
      * @param order
@@ -91,14 +93,14 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult saveOrder(@RequestBody Order order,@RequestParam(required = false) String orderNavType, HttpServletRequest request){
+    public AjaxResult saveOrder(@RequestBody Order order,@RequestParam(required = false) String orderNavType){
         Robot arrangeRobot = null;
         try {
             //注入发起站
             Long stationId = userUtil.getStationId();
             order.setStartStation(new Station(stationId));
             //注入场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             order.setScene(scene);
             //现在orderSetting后台默认注入默认配置
             if(order.getOrderSetting() == null){

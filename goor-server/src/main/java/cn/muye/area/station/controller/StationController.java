@@ -57,10 +57,10 @@ public class StationController {
     @RequestMapping(value = {"area/station"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询站列表", httpMethod = "GET", notes = "查询站列表")
     @ResponseBody
-    private AjaxResult pageStation(WhereRequest whereRequest, HttpServletRequest request) {
+    private AjaxResult pageStation(WhereRequest whereRequest) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if (scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -89,14 +89,14 @@ public class StationController {
     @RequestMapping(value = {"area/station/{id}"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询站详情", httpMethod = "GET", notes = "查询站详情")
     @ResponseBody
-    public AjaxResult getStation(@ApiParam(value = "站ID") @PathVariable Long id, HttpServletRequest request) {
+    public AjaxResult getStation(@ApiParam(value = "站ID") @PathVariable Long id) {
         if (id == null) {
             return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
         }
         Station station = null;
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if (scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -118,10 +118,10 @@ public class StationController {
     @RequestMapping(value = "area/station/{id}", method = RequestMethod.DELETE)
     @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
-    public AjaxResult deleteMapPoint(@PathVariable long id, HttpServletRequest request) throws Exception {
+    public AjaxResult deleteMapPoint(@PathVariable long id) throws Exception {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if (scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
@@ -149,10 +149,10 @@ public class StationController {
     @RequestMapping(value = {"area/station"}, method = RequestMethod.POST)
     @ApiOperation(value = "新增或修改站", httpMethod = "POST", notes = "新增或修改站")
     @ResponseBody
-    public AjaxResult saveOrUpdateStation(@ApiParam(value = "站") @RequestBody Station station, HttpServletRequest request) {
+    public AjaxResult saveOrUpdateStation(@ApiParam(value = "站") @RequestBody Station station) {
         try {
             //从session取当前切换的场景
-            Scene scene = SessionUtil.getScene(request);
+            Scene scene = SessionUtil.getScene();
             if (scene == null) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
             }
