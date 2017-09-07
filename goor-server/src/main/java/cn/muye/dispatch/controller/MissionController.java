@@ -512,17 +512,17 @@ public class MissionController {
 	 */
 	@RequestMapping(value = {"dispatch/missionList/listMeiYa"}, method = RequestMethod.GET)
 	@ResponseBody
-	public AjaxResult listMeiYaMissionList(HttpServletRequest request) {
+	public AjaxResult listMeiYaMissionList(@RequestParam Long userSceneId, HttpServletRequest request) {
 		try {
 			//TODO 从session取当前切换门店的ID
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
-			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene();
-			if(scene == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
-			}
-
-			List<MissionList> missionListList = missionListService.list(storeId,scene.getId());
+//			//从session取当前切换的场景
+//			Scene scene = SessionUtil.getScene();
+//			if(scene == null) {
+//				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+//			}
+			Long sceneId = userSceneId;
+			List<MissionList> missionListList = missionListService.list(storeId,sceneId);
 
 			if(missionListList == null) {
 				return AjaxResult.success(Collections.EMPTY_LIST);
@@ -599,15 +599,15 @@ public class MissionController {
 		AjaxResult resp;
 		try {
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene();
+			/*Scene scene = SessionUtil.getScene();
 			if(scene == null || userSceneId == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
 			Long sceneId = scene.getId();
 			if(!userSceneId.equals(sceneId)) {
 				return AjaxResult.success(JSON.toJSONString(scene), "当前场景已被其他人切换，现帮你自动切换场景！");
-			}
-
+			}*/
+			Long sceneId = userSceneId;
 			missionList.setSceneId(sceneId);
 
 			//设置重复次数是1，执行1次
@@ -823,16 +823,22 @@ public class MissionController {
 			@RequestBody MissionList missionList,
 			@RequestParam Long[] robotIds,
 			@RequestParam Long[] missionListIds,
+			@RequestParam Long userSceneId,
 			@RequestParam(required = false) String name,
 			HttpServletRequest request) {
 		AjaxResult resp = AjaxResult.success();
 		try {
 			//从session取当前切换的场景
-			Scene scene = SessionUtil.getScene();
+			/*Scene scene = SessionUtil.getScene();
 			if(scene == null) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
 			}
-			missionList.setSceneId(scene.getId());
+			Long sceneId = scene.getId();
+			if(!userSceneId.equals(sceneId)) {
+				return AjaxResult.success(JSON.toJSONString(scene), "当前场景已被其他人切换，现帮你自动切换场景！");
+			}*/
+			Long sceneId = userSceneId;
+			missionList.setSceneId(sceneId);
 
 			if(robotIds == null || robotIds.length <= 0) {
 				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
@@ -929,15 +935,15 @@ public class MissionController {
 								}
 								else if(featureItemId.equals(Constant.ORDER_LASER_NAVIGATION)) {
 									//巡逻任务校验点是否是当前
-									MapPoint mapPoint = (MapPoint) JSON.parse(missionItem.getData());
+									MapPoint mapPoint = JSON.parseObject(missionItem.getData(),MapPoint.class);
 									if(!mapPoint.getMapName().equals(targetMapName)) {
 										return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"下发的充电任务与机器人当前所在地图不一致，无法执行");
 									}
 								}
 
 							} catch (Exception e) {
-								LOGGER.error("充电任务数据错误"+e.getMessage(),e);
-								return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"充电任务数据错误");
+								LOGGER.error("任务数据错误"+e.getMessage(),e);
+								return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"任务数据错误");
 							}
 						}
 					}
