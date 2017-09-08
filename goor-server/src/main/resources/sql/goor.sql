@@ -1062,7 +1062,8 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('22', '门加锁任务', 'doorLock', '门�
 INSERT INTO `D_FEATURE_ITEM` VALUES ('23', '门解锁任务', 'doorUnlock', '门解锁任务', '{\"door_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('24', '路径加锁任务', 'pathLock', '路径加锁任务', '{\"path_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('25', '路径解锁任务', 'pathUnlock', '路径解锁任务', '{\"path_id\":1, \"interval_time\":30}');
-
+INSERT INTO `D_FEATURE_ITEM` VALUES ('26', '逻辑路径加锁任务', 'roadpathLock', '逻辑路径加锁任务', ' {\"roadpath_id\":1, \"interval_time\":30}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('27', '逻辑路径解锁任务', 'roadpathUnlock', '逻辑路径解锁任务', ' {\"roadpath_id\":1, \"interval_time\":30}');
 
 
 
@@ -1518,6 +1519,7 @@ CREATE TABLE `OR_ORDER_DETAIL` (
   `ORDER_ID` bigint(12) DEFAULT NULL,
   `STATION_ID` bigint(12) DEFAULT NULL,
   `STATUS` int(12) DEFAULT NULL,
+  `PLACE` int(12) DEFAULT NULL,
   `FINISH_DATE` datetime DEFAULT NULL,
   `STORE_ID` bigint(12) DEFAULT NULL,
   `CREATED_BY` bigint(12) DEFAULT NULL,
@@ -1538,8 +1540,8 @@ CREATE TABLE `OR_ORDER_SETTING` (
   `ID` bigint(12) NOT NULL AUTO_INCREMENT,
   `NICK_NAME` varchar(64) DEFAULT NULL,
   `STATION_ID` bigint(12) DEFAULT NULL,
-  `START_POINT_ID` bigint(12) DEFAULT NULL,
-  `END_POINT_ID` bigint(12) DEFAULT NULL,
+  `START_STATION_ID` bigint(12) DEFAULT NULL,
+  `END_STATION_ID` bigint(12) DEFAULT NULL,
   `NEED_SHELF` tinyint(1) DEFAULT NULL,
   `NEED_SIGN` tinyint(1) DEFAULT NULL,
   `GOODS_TYPE_ID` bigint(20) DEFAULT NULL,

@@ -2,6 +2,7 @@ package cn.muye.order.service.impl;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
@@ -29,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Date;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,11 +63,20 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         //保存订单
         preInject(order);
         orderMapper.saveOrder(order);
+        //在此前保存起始站
+        OrderSetting sqlSetting = orderSettingService.getById(order.getOrderSetting().getId());
+        OrderDetail startDetail = new OrderDetail();
+        startDetail.setOrderId(order.getId());
+        startDetail.setStationId(sqlSetting.getStartStation().getId());
+        startDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_START);
+        startDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
+        orderDetailService.save(startDetail);
         //保存订单详情
         List<OrderDetail> orderDetailList = order.getDetailList();
         orderDetailList.forEach(orderDetail -> {
             orderDetail.setOrderId(order.getId());
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
+            orderDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_MIDDLE);
             orderDetailService.save(orderDetail);
             //保存货物信息
             orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
@@ -75,6 +84,13 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
                 goodsInfoMapper.insert(goodsInfo);
             });
         });
+        //之后保存末尾站
+        OrderDetail endDetail = new OrderDetail();
+        endDetail.setOrderId(order.getId());
+        endDetail.setStationId(sqlSetting.getEndStation().getId());
+        endDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
+        endDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_END);
+        orderDetailService.save(endDetail);
     }
 
     @Override
@@ -91,30 +107,8 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      */
     @Override
     public AjaxResult savePathOrder(Order order) {
-        //保存订单
-        preInject(order);
-//        order.setStatus(OrderConstant.ORDER_STATUS_UNDONE);
-        orderMapper.saveOrder(order);
-        //保存订单详情
-        List<OrderDetail> orderDetailList = order.getDetailList();
-        orderDetailList.forEach(orderDetail -> {
-            orderDetail.setOrderId(order.getId());
-            orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
-            orderDetailService.save(orderDetail);
-            //保存货物信息
-            orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
-                goodsInfo.setOrderDetailId(orderDetail.getId());
-                goodsInfoMapper.insert(goodsInfo);
-            });
-        });
-        //在这里调用任务生成器
-        Order sqlOrder = getOrder(order.getId());
-//        AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
-        AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder);
-        if(!ajaxResult.isSuccess()){
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        }
-        return ajaxResult;
+        saveWaitOrder(order);
+        return generateMissionListPathNav(order.getId());
     }
 
     @Override
@@ -134,6 +128,13 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         return getOrder;
     }
 
+    @Override
+    public void changeOrderStatus(Long id, Integer status) {
+        Order changeOrder = new Order(id);
+        changeOrder.setStatus(status);
+        orderMapper.updateOrder(changeOrder);
+    }
+
     /**
      * 调用 任务生成器
      * @param orderId
@@ -142,6 +143,37 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public AjaxResult generateMissionList(Long orderId){
         Order sqlOrder = getOrder(orderId);
         AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
+        /*if(!ajaxResult.isSuccess()){
+            //修改该order属性,重新回到等待状态
+            orderMapper.returnToWaitOrder(orderId, OrderConstant.ORDER_STATUS_WAIT);
+            //订单失败，进入队列模式，前端返回提示变化
+            ajaxResult = AjaxResult.failed("订单已接收，等待机器分配");
+        }else {
+            ajaxResult = AjaxResult.success("订单已接收，开始执行任务");
+        }*/
+        if(!ajaxResult.isSuccess()){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return ajaxResult;
+
+    }
+
+    /**
+     * 调用 任务生成器
+     * @param orderId
+     * @return
+     */
+    public AjaxResult generateMissionListPathNav(Long orderId){
+        Order sqlOrder = getOrder(orderId);
+        AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder);
+        /*if(!ajaxResult.isSuccess()){
+            //修改该order属性,重新回到等待状态
+            orderMapper.returnToWaitOrder(orderId, OrderConstant.ORDER_STATUS_WAIT);
+            //订单失败，进入队列模式，前端返回提示变化
+            ajaxResult = AjaxResult.failed("订单已接收，等待机器分配");
+        }else {
+            ajaxResult = AjaxResult.success("订单已接收，开始执行任务");
+        }*/
         if(!ajaxResult.isSuccess()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
@@ -153,22 +185,41 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * 查询数据库内排列订单并处理
      */
     @Override
-    public void checkWaitOrders(HttpServletRequest request) {
+    public void checkWaitOrders() {
         Order domain = new Order();
         domain.setStatus(OrderConstant.ORDER_STATUS_WAIT);
         List<Order> waitOrders = orderMapper.listByDomain(domain);
         for (Order waitOrder : waitOrders) {
+            logger.info("检测订单号为{} ",waitOrder.getId());
             Order sqlOrder = getOrder(waitOrder.getId());
             Robot availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),sqlOrder.getOrderSetting().getRobotType().getId());
             if(availableRobot == null){
                 //依旧无可用机器
+                logger.info("未获取到可使用机器人");
+                logger.info("本次订单号为{}检测结束", waitOrder.getId());
                 continue;
             }else{
+                logger.info("正在请求机器人,编号为{}",availableRobot.getCode());
+                waitOrder.setRobot(availableRobot);
                 waitOrder.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
                 orderMapper.updateOrder(waitOrder);
-                generateMissionList(waitOrder.getId());
+                AjaxResult ajaxResult = generateMissionList(waitOrder.getId());
+                if(!ajaxResult.isSuccess()){
+                    availableRobot.setBusy(Boolean.FALSE);
+                    robotService.updateSelective(availableRobot);
+                    logger.info("请求机器人失败");
+                }
             }
+            logger.info("本次订单号为{}检测结束", waitOrder.getId());
         }
+    }
+
+    @Override
+    public List<Order> listWaitOrdersByStation(Long stationId, Integer orderStatus) {
+        Order order = new Order();
+        order.setStatus(orderStatus);
+        order.setStartStation(new Station(stationId));
+        return orderMapper.listByDomain(order);
     }
 
     /**

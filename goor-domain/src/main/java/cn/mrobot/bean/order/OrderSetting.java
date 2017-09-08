@@ -1,6 +1,6 @@
 package cn.mrobot.bean.order;
 
-import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.robot.RobotType;
 import cn.mrobot.bean.base.BaseBean;
@@ -14,9 +14,9 @@ public class OrderSetting extends BaseBean{
 
     private Long stationId;  //关联stationId
 
-    private MapPoint startPoint; //装货地点
+    private Station startStation; //装货地点
 
-    private MapPoint endPoint; //货架回收点
+    private Station endStation; //货架回收点
 
     private GoodsType goodsType; //货物类型
 
@@ -87,20 +87,20 @@ public class OrderSetting extends BaseBean{
         this.goodsType = goodsType;
     }
 
-    public MapPoint getEndPoint() {
-        return endPoint;
+    public Station getStartStation() {
+        return startStation;
     }
 
-    public void setEndPoint(MapPoint endPoint) {
-        this.endPoint = endPoint;
+    public void setStartStation(Station startStation) {
+        this.startStation = startStation;
     }
 
-    public MapPoint getStartPoint() {
-        return startPoint;
+    public Station getEndStation() {
+        return endStation;
     }
 
-    public void setStartPoint(MapPoint startPoint) {
-        this.startPoint = startPoint;
+    public void setEndStation(Station endStation) {
+        this.endStation = endStation;
     }
 
     public Long getStationId() {

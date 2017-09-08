@@ -115,4 +115,22 @@
         AND
         MAP_ZIP_ID = #{mapZipId}
     </update>
+
+    <select id="listByMapSceneNameAndPointType" resultMap="mapPoint">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM A_MAP_POINT a
+        <where>
+            <if test = "mapSceneName != null">
+                AND a.SCENE_NAME = #{mapSceneName}
+            </if>
+            <if test = "type != null">
+                AND a.CLOUD_POINT_TYPE_ID = #{type}
+            </if>
+            <if test = "storeId != null">
+                AND a.STORE_ID = #{storeId}
+            </if>
+        </where>
+    </select>
+
 </mapper>

@@ -1,20 +1,28 @@
 package cn.muye.order.service.impl;
 
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
+import cn.mrobot.bean.websocket.WSMessage;
+import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.order.bean.WSOrderNotificationType;
+import cn.muye.order.bean.WSOrderNotificationVO;
 import cn.muye.order.mapper.OrderDetailMapper;
 import cn.muye.order.mapper.OrderMapper;
 import cn.muye.order.service.OrderDetailService;
+import cn.muye.order.service.OrderService;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
@@ -31,7 +39,13 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     @Autowired
     private OrderMapper orderMapper;
     @Autowired
+    private OrderService orderService;
+    @Autowired
     private RobotService robotService;
+    @Autowired
+    private WebSocketSendMessage webSocketSendMessage;
+    @Autowired
+    private StationService stationService;
 
     @Override
     public List<OrderDetail> listOrderDetailByOrderId(Long orderId) {
@@ -42,7 +56,34 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     public void finishedDetailTask(Long id, Integer type) {
         OrderDetail orderDetail  = new OrderDetail(id);
         if(type == OrderConstant.ORDER_DETAIL_STATUS_GET){
+            //已到达，通知推送
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_GET);
+            OrderDetail sqlDetail = super.findById(id);
+            Station station = stationService.findById(sqlDetail.getStationId());
+            Order sqlOrder = orderService.getOrder(sqlDetail.getOrderId());
+            String receiveBody = "已送达站" + station.getName();
+            String sendBody = "已送达站" + station.getName();
+
+            WSMessage wsReceive = new WSMessage.Builder().
+                    title(LogType.INFO_GOAL_REACHED.getValue())
+                    .messageType(WSMessageType.NOTIFICATION)
+                    .body(new WSOrderNotificationVO(WSOrderNotificationType.RECEIVE_STATION, receiveBody))
+                    .deviceId(sqlDetail.getStationId()+"")
+                    .module(LogType.INFO_GOAL_REACHED.getName()).build();
+            WSMessage wsSend = new WSMessage.Builder().
+                    title(LogType.INFO_GOAL_REACHED.getValue())
+                    .messageType(WSMessageType.NOTIFICATION)
+                    .body(new WSOrderNotificationVO(WSOrderNotificationType.SEND_STATION, sendBody))
+                    .deviceId(sqlOrder.getStartStation().getId() + "")
+                    .module(LogType.INFO_GOAL_REACHED.getName()).build();
+            try {
+                webSocketSendMessage.sendWebSocketMessage(wsReceive);
+                webSocketSendMessage.sendWebSocketMessage(wsSend);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException();
+            }
+
         }else if(type == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_SIGN);
         }else {
@@ -68,14 +109,12 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     @Override
     public List<OrderDetail> listStationTasks(Long stationId, WhereRequest whereRequest) {
         PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-        Example example = new Example(OrderDetail.class);
-        example.createCriteria().andCondition("STATION_ID = ", stationId);
-        example.setOrderByClause("STATUS ASC, CREATE_TIME DESC");
-        return myMapper.selectByExample(example);
+        return orderDetailMapper.listStationTasks(stationId);
     }
 
     @Override
     public OrderDetail getOrderDetailInfo(Long id) {
         return orderDetailMapper.getOrderDetailInfo(id);
     }
+
 }

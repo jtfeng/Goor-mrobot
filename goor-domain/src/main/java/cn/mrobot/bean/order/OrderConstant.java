@@ -15,4 +15,9 @@ public class OrderConstant {
     public static final Integer ORDER_DETAIL_STATUS_TRANSFER = 0; //运输
     public static final Integer ORDER_DETAIL_STATUS_GET = 1; //到达
     public static final Integer ORDER_DETAIL_STATUS_SIGN = 2; //已签收
+
+    //订单细节节点位置
+    public static final Integer ORDER_DETAIL_PLACE_START = 0; //起始
+    public static final Integer ORDER_DETAIL_PLACE_MIDDLE = 1; //中间
+    public static final Integer ORDER_DETAIL_PLACE_END = 2; //结束
 }

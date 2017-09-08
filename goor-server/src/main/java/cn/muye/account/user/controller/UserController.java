@@ -14,6 +14,7 @@ import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
+import cn.mrobot.bean.order.OrderSetting;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.bean.state.enums.StateFieldEnums;
 import cn.mrobot.dto.account.RoleDTO;
@@ -29,6 +30,7 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -41,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +68,9 @@ public class UserController {
 
     @Autowired
     private SceneService sceneService;
+
+    @Autowired
+    private OrderSettingService orderSettingService;
 
     @Value("${authServer.host}")
     private String authServerHost;
@@ -288,6 +294,12 @@ public class UserController {
             }
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
+            OrderSetting defaultSetting = null;
+            if(stationList.size()> 0){
+                StationDTO4User firstStation = stationList.get(0);
+                defaultSetting = orderSettingService.getDefaultSetting(firstStation.getId());
+            }
+            map.put("orderSetting",defaultSetting);
             return AjaxResult.success(map, "登录成功");
         } else if (userDTO != null && stationList == null) {
             return AjaxResult.failed("账号异常，请联系客服");

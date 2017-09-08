@@ -1,6 +1,5 @@
 package cn.muye.area.map.service.impl;
 
-import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;

@@ -20,6 +20,8 @@ public class OrderDetail extends BaseBean{
 
     private Integer status; //当前部分任务是否完成 0 未完成  1完成
 
+    private Integer place; // 运送点类型 0起始点 1中间点 2末尾点
+
     private Date finishDate; // 配送到确认时间
 
     public OrderDetail() {
@@ -31,6 +33,14 @@ public class OrderDetail extends BaseBean{
 
     @Transient
     private List<GoodsInfo> goodsInfoList; //货物详情单
+
+    public Integer getPlace() {
+        return place;
+    }
+
+    public void setPlace(Integer place) {
+        this.place = place;
+    }
 
     public Date getFinishDate() {
         return finishDate;

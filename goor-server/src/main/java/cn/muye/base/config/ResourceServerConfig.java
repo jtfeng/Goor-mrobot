@@ -11,7 +11,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
     @Override
     public void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http
+                .authorizeRequests()
                 .antMatchers("/account/user/login").permitAll()
                 .antMatchers("/account/user/login/pad").permitAll()
                 .antMatchers("/goor/ws").permitAll()
@@ -22,5 +23,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers("/**").permitAll();
 //        http.authorizeRequests().anyRequest().permitAll();
     }
+
+
+
 
 }

@@ -25,7 +25,7 @@ public class Order extends BaseBean{
 
     private Scene scene;  //场景
 
-    private Integer status; //订单状态 0 1完成
+    private Integer status; //订单状态 0开启 1完成 2等待分配 3取消
 
     public Order() {
     }

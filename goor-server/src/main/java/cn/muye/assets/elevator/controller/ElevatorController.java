@@ -18,9 +18,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-
-import static com.google.common.base.Preconditions.*;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @RestController
 public class ElevatorController {

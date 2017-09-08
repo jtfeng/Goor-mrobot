@@ -1,6 +1,5 @@
 package cn.mrobot.bean.area.point;
 
-import cn.mrobot.bean.area.station.StationType;
 import com.alibaba.fastjson.JSON;
 
 import java.util.ArrayList;
@@ -42,6 +41,8 @@ public enum MapPointType {
 	DOOR_WAIT(16, "门任务等待点", 2, 0.1,0),//工控 2普通目标点
 	DOOR_START(17, "门任务开始点", 2, 0.1,0),//工控 2普通目标点
 	DOOR_END(18, "门任务结束点", 2, 0.1,0),//工控 2普通目标点
+	FINAL_UNLOAD(19, "货架回收点", 2, 0.1,0),//工控 2普通目标点
+
 	;
 
 	private String value;

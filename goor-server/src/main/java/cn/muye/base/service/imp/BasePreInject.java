@@ -3,10 +3,11 @@ package cn.muye.base.service.imp;
 import cn.mrobot.bean.base.BaseBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.util.UserUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 
 /**
@@ -14,6 +15,8 @@ import java.util.Date;
  */
 @Service
 public class BasePreInject<T extends BaseBean> {
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private UserUtil userUtil;

@@ -15,6 +15,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.bean.mission.task.*;
 import cn.mrobot.bean.order.Order;
+import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionItemDTO;
@@ -40,10 +41,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -92,16 +93,18 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public AjaxResult createMissionLists(Order order) {
-
+    
+    
         logger.info("##############  createMissionLists #################");
 
         //判断order
         if (order == null ||
                 order.getOrderSetting() == null ||
                 order.getRobot() == null ||
-                order.getOrderSetting().getStartPoint() == null ||
-                order.getOrderSetting().getEndPoint() == null){
+                order.getOrderSetting().getStartStation() == null ||
+                order.getOrderSetting().getEndStation() == null){
             logger.info("##############  createMissionLists attrs error #################");
         }
 
@@ -384,15 +387,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         MPointAtts atts;
 
-        //首先插入起点
-        mapPoints.add(order.getOrderSetting().getStartPoint());
-        //设置属性
-        atts = new MPointAtts();
-        atts.type = MPointType_QUHUO;
-        mpAttrs.put(order.getOrderSetting().getStartPoint(), atts);
-        prePoint = order.getOrderSetting().getStartPoint();
-        logger.info("###### quhuo is ok ");
-
         //判断中间站点，如果有中间站点，添加中间站点的地图点，如果中间点跨楼层，则要在两个任务中间插入电梯任务
         if (order.getDetailList() != null){
             for (OrderDetail od :
@@ -400,64 +394,80 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 if (od != null &&
                         od.getStationId() != null) {
                     logger.info("###### begin get order detail station ");
-                    //取得站点对象
-                    //TODO 以后AGV也需要按照切换的场景过滤
-                    Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
-                    if (station != null &&
-                            station.getMapPoints() != null){
-                        logger.info("###### get order detail station is ok， list size is: " + station.getMapPoints().size());
-                        for (MapPoint mp :
-                                station.getMapPoints()) {
-                            if (mp != null) {
-                                logger.info("mpname: " + mp.getMapName() + ", scenename: " + mp.getSceneName() + ", pointname: " + mp.getPointName());
-                            }
+                    //判定是否为起始点
+                    if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_START){
+                        //首先插入起点
+                        Long stationId = order.getOrderSetting().getStartStation().getId();
+                        MapPoint startPoint = pointService.findMapPointByStationIdAndCloudType(stationId, MapPointType.LOAD.getCaption());
+                        mapPoints.add(startPoint);
+                        //设置属性
+                        atts = new MPointAtts();
+                        atts.type = MPointType_QUHUO;
+                        mpAttrs.put(startPoint, atts);
+                        prePoint = startPoint;
+                        logger.info("###### quhuo is ok ");
+                    }else if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_END){
+                        Long endStationId = order.getOrderSetting().getEndStation().getId();
+                        MapPoint endPoint = pointService.findMapPointByStationIdAndCloudType(endStationId, MapPointType.FINAL_UNLOAD.getCaption());
+                        if (endPoint != null) {
+                            logger.info("### end point ####  mpname: " + endPoint.getMapName() +
+                                    ", scenename: " + endPoint.getSceneName() +
+                                    ", pointname: " + endPoint.getPointName());
                         }
-                        //目前只取第一个坐标点加入
-                        for (MapPoint mp :
-                                station.getMapPoints()) {
-                            if(mp != null){
-                                //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
-                                addRoadPathPoint(mp, mapPoints, mpAttrs);
-//                                addElevatorPoint(mp, mapPoints, mpAttrs);
-                                //判断当前点的属性，根据属性加入相应的任务
-                                switch (MapPointType.getType(mp.getCloudMapPointTypeId())){
-                                    case ELEVATOR:
-                                    case ELEVATOR_WAIT:
-                                    default:
-                                        //加入该点，并标记这个点状态是orderDetail点
-                                        mapPoints.add(mp);
-                                        //标记该点的属性
-                                        atts = new MPointAtts();
-                                        atts.type = MPointType_SONGHUO;
-                                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
-                                        mpAttrs.put(mp, atts);
-                                        logger.info("###### order detail station is ok ");
-                                        break;
+
+                        //判断添加电梯点
+                        addRoadPathPoint(endPoint, mapPoints, mpAttrs);
+                        //addElevatorPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
+                        //中间点添加完毕，添加卸货点
+                        mapPoints.add(endPoint);
+                        //设置属性
+                        atts = new MPointAtts();
+                        atts.type = MPointType_XIAHUO;
+                        mpAttrs.put(endPoint, atts);
+                        logger.info("###### xiahuo is ok ");
+                    }else {
+                        //取得站点对象
+                        //TODO 以后AGV也需要按照切换的场景过滤
+                        Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
+                        if (station != null &&
+                                station.getMapPoints() != null){
+                            logger.info("###### get order detail station is ok， list size is: " + station.getMapPoints().size());
+                            for (MapPoint mp :
+                                    station.getMapPoints()) {
+                                if (mp != null) {
+                                    logger.info("mpname: " + mp.getMapName() + ", scenename: " + mp.getSceneName() + ", pointname: " + mp.getPointName());
                                 }
-                                break;
+                            }
+                            //目前只取第一个坐标点加入
+                            for (MapPoint mp :
+                                    station.getMapPoints()) {
+                                if(mp != null){
+                                    //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
+                                    addRoadPathPoint(mp, mapPoints, mpAttrs);
+//                                addElevatorPoint(mp, mapPoints, mpAttrs);
+                                    //判断当前点的属性，根据属性加入相应的任务
+                                    switch (MapPointType.getType(mp.getCloudMapPointTypeId())){
+                                        case ELEVATOR:
+                                        case ELEVATOR_WAIT:
+                                        default:
+                                            //加入该点，并标记这个点状态是orderDetail点
+                                            mapPoints.add(mp);
+                                            //标记该点的属性
+                                            atts = new MPointAtts();
+                                            atts.type = MPointType_SONGHUO;
+                                            atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
+                                            mpAttrs.put(mp, atts);
+                                            logger.info("###### order detail station is ok ");
+                                            break;
+                                    }
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-
-        if (order.getOrderSetting().getEndPoint() != null) {
-            logger.info("### end point ####  mpname: " + order.getOrderSetting().getEndPoint().getMapName() +
-                    ", scenename: " + order.getOrderSetting().getEndPoint().getSceneName() +
-                    ", pointname: " + order.getOrderSetting().getEndPoint().getPointName());
-        }
-
-        //判断添加电梯点
-        addRoadPathPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
-//        addElevatorPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
-        //中间点添加完毕，添加卸货点
-        mapPoints.add(order.getOrderSetting().getEndPoint());
-        //设置属性
-        atts = new MPointAtts();
-        atts.type = MPointType_XIAHUO;
-        mpAttrs.put(order.getOrderSetting().getEndPoint(), atts);
-        logger.info("###### xiahuo is ok ");
 
         //最后添加充电点，目前充电点从机器人的数据库里面查询出来
         //查询列表
@@ -541,8 +551,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     case ELEVATOR_WAIT:
                                         addElevatorPoint(mp, mapPoints, mpAttrs);
                                         break;
-                                        default:
-                                            break;
+                                    default:
+                                        break;
                                 }
                             }
                         }
@@ -2541,6 +2551,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public AjaxResult createMissionListsPathNav(Order order) {
 
         logger.info("##############  createMissionListsPathNav #################");
@@ -2549,8 +2560,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order == null ||
                 order.getOrderSetting() == null ||
                 order.getRobot() == null ||
-                order.getOrderSetting().getStartPoint() == null ||
-                order.getOrderSetting().getEndPoint() == null){
+                order.getOrderSetting().getStartStation() == null ||
+                order.getOrderSetting().getEndStation() == null){
             logger.info("##############  createMissionListsPathNav attrs error #################");
         }
 
@@ -2606,15 +2617,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         MPointAtts atts;
 
-        //首先插入起点
-        mapPoints.add(order.getOrderSetting().getStartPoint());
-        //设置属性
-        atts = new MPointAtts();
-        atts.type = MPointType_QUHUO;
-        mpAttrs.put(order.getOrderSetting().getStartPoint(), atts);
-        prePoint = order.getOrderSetting().getStartPoint();
-        logger.info("###### quhuo is ok ");
-
         //判断中间站点，如果有中间站点，添加中间站点的地图点，如果中间点跨楼层，则要在两个任务中间插入电梯任务
         if (order.getDetailList() != null){
             for (OrderDetail od :
@@ -2622,64 +2624,80 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 if (od != null &&
                         od.getStationId() != null) {
                     logger.info("###### begin get order detail station ");
-                    //取得站点对象
-                    //TODO 以后AGV也需要按照切换的场景过滤
-                    Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
-                    if (station != null &&
-                            station.getMapPoints() != null){
-                        logger.info("###### get order detail station is ok， list size is: " + station.getMapPoints().size());
-                        for (MapPoint mp :
-                                station.getMapPoints()) {
-                            if (mp != null) {
-                                logger.info("mpname: " + mp.getMapName() + ", scenename: " + mp.getSceneName() + ", pointname: " + mp.getPointName());
-                            }
+                    if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_START){
+                        //首先插入起点
+                        Long stationId = order.getOrderSetting().getStartStation().getId();
+                        MapPoint startPoint = pointService.findMapPointByStationIdAndCloudType(stationId, MapPointType.LOAD.getCaption());
+                        mapPoints.add(startPoint);
+                        //设置属性
+                        atts = new MPointAtts();
+                        atts.type = MPointType_QUHUO;
+                        mpAttrs.put(startPoint, atts);
+                        prePoint = startPoint;
+                        logger.info("###### quhuo is ok ");
+                    }else if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_END){
+                        Long endStationId = order.getOrderSetting().getEndStation().getId();
+                        MapPoint endPoint = pointService.findMapPointByStationIdAndCloudType(endStationId, MapPointType.FINAL_UNLOAD.getCaption());
+                        if (endPoint != null) {
+                            logger.info("### end point ####  mpname: " + endPoint.getMapName() +
+                                    ", scenename: " + endPoint.getSceneName() +
+                                    ", pointname: " + endPoint.getPointName());
                         }
-                        //目前只取第一个坐标点加入
-                        for (MapPoint mp :
-                                station.getMapPoints()) {
-                            if(mp != null){
-                                //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
-                                addPathRoadPathPoint(mp, mapPoints, mpAttrs);
-//                                addElevatorPoint(mp, mapPoints, mpAttrs);
-                                //判断当前点的属性，根据属性加入相应的任务
-                                switch (MapPointType.getType(mp.getCloudMapPointTypeId())){
-                                    case ELEVATOR:
-                                    case ELEVATOR_WAIT:
-                                    default:
-                                        //加入该点，并标记这个点状态是orderDetail点
-                                        mapPoints.add(mp);
-                                        //标记该点的属性
-                                        atts = new MPointAtts();
-                                        atts.type = MPointType_SONGHUO;
-                                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
-                                        mpAttrs.put(mp, atts);
-                                        logger.info("###### order detail station is ok ");
-                                        break;
+
+                        //判断添加电梯点
+                        addRoadPathPoint(endPoint, mapPoints, mpAttrs);
+                        //addElevatorPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
+                        //中间点添加完毕，添加卸货点
+                        mapPoints.add(endPoint);
+                        //设置属性
+                        atts = new MPointAtts();
+                        atts.type = MPointType_XIAHUO;
+                        mpAttrs.put(endPoint, atts);
+                        logger.info("###### xiahuo is ok ");
+                    }else {
+
+                        //取得站点对象
+                        //TODO 以后AGV也需要按照切换的场景过滤
+                        Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
+                        if (station != null &&
+                                station.getMapPoints() != null){
+                            logger.info("###### get order detail station is ok， list size is: " + station.getMapPoints().size());
+                            for (MapPoint mp :
+                                    station.getMapPoints()) {
+                                if (mp != null) {
+                                    logger.info("mpname: " + mp.getMapName() + ", scenename: " + mp.getSceneName() + ", pointname: " + mp.getPointName());
                                 }
-                                break;
+                            }
+                            //目前只取第一个坐标点加入
+                            for (MapPoint mp :
+                                    station.getMapPoints()) {
+                                if(mp != null){
+                                    //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
+                                    addPathRoadPathPoint(mp, mapPoints, mpAttrs);
+//                                addElevatorPoint(mp, mapPoints, mpAttrs);
+                                    //判断当前点的属性，根据属性加入相应的任务
+                                    switch (MapPointType.getType(mp.getCloudMapPointTypeId())){
+                                        case ELEVATOR:
+                                        case ELEVATOR_WAIT:
+                                        default:
+                                            //加入该点，并标记这个点状态是orderDetail点
+                                            mapPoints.add(mp);
+                                            //标记该点的属性
+                                            atts = new MPointAtts();
+                                            atts.type = MPointType_SONGHUO;
+                                            atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
+                                            mpAttrs.put(mp, atts);
+                                            logger.info("###### order detail station is ok ");
+                                            break;
+                                    }
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
         }
-
-        if (order.getOrderSetting().getEndPoint() != null) {
-            logger.info("### end point ####  mpname: " + order.getOrderSetting().getEndPoint().getMapName() +
-                    ", scenename: " + order.getOrderSetting().getEndPoint().getSceneName() +
-                    ", pointname: " + order.getOrderSetting().getEndPoint().getPointName());
-        }
-
-        //判断添加电梯点
-        addPathRoadPathPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
-//        addElevatorPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
-        //中间点添加完毕，添加卸货点
-        mapPoints.add(order.getOrderSetting().getEndPoint());
-        //设置属性
-        atts = new MPointAtts();
-        atts.type = MPointType_XIAHUO;
-        mpAttrs.put(order.getOrderSetting().getEndPoint(), atts);
-        logger.info("###### xiahuo is ok ");
 
         //最后添加充电点，目前充电点从机器人的数据库里面查询出来
         //查询列表
