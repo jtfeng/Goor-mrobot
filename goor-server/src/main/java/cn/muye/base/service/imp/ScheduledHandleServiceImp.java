@@ -101,7 +101,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 String code = robot.getCode();
                 Long sendTime = CacheInfoManager.getRobotAutoRegisterTimeCache(code);
                 if (robot != null) {
-                    //如果大于3秒
+                    //如果大于15秒
                     if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
                         CacheInfoManager.setRobotOnlineCache(code, false);
                     } else {

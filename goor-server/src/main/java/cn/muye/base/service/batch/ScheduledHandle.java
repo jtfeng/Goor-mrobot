@@ -74,7 +74,7 @@ public class ScheduledHandle {
                     logger.error("schedule publishRosScheduled exception", e);
                 }
             }
-        }, 60, 1, TimeUnit.SECONDS);
+        }, 60, 5, TimeUnit.SECONDS);
     }
 
 
