@@ -2670,6 +2670,20 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         MPointAtts atts;
 
+        //查询充电点列表
+        List<MapPoint> chongMPs = robotService
+                .getChargerMapPointByRobotCode(order.getRobot().getCode(), SearchConstants.FAKE_MERCHANT_STORE_ID);
+        MapPoint chargePoint = null;
+        if (chongMPs != null){
+            for (MapPoint mp :
+                    chongMPs) {
+                if (mp != null) {
+                    chargePoint = mp;
+                    break;
+                }
+            }
+        }
+
         //判断中间站点，如果有中间站点，添加中间站点的地图点，如果中间点跨楼层，则要在两个任务中间插入电梯任务
         if (order.getDetailList() != null){
             for (OrderDetail od :
@@ -2685,6 +2699,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_QUHUO;
+                        atts.chargePoint = chargePoint;//设置充电点数据
                         mpAttrs.put(startPoint, atts);
                         prePoint = startPoint;
                         logger.info("###### quhuo is ok ");
@@ -2705,6 +2720,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_XIAHUO;
+                        atts.chargePoint = chargePoint;//设置充电点
                         mpAttrs.put(endPoint, atts);
                         logger.info("###### xiahuo is ok ");
                     }else {
@@ -2753,27 +2769,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         }
 
         //最后添加充电点，目前充电点从机器人的数据库里面查询出来
-        //查询列表
-        List<MapPoint> chongMPs = robotService
-                .getChargerMapPointByRobotCode(order.getRobot().getCode(), SearchConstants.FAKE_MERCHANT_STORE_ID);
         //取第一个有效的点设置进去
-        if (chongMPs != null){
-            for (MapPoint mp :
-                    chongMPs) {
-                if (mp != null) {
-                    //如果充电点和上一个点不在同一个楼层，则要添加相应的电梯任务。
-                    addPathRoadPathPoint(mp, mapPoints, mpAttrs);
-//                    addElevatorPoint(mp, mapPoints, mpAttrs);
-                    //添加充电点任务
-                    mapPoints.add(mp);
-                    //设置属性
-                    atts = new MPointAtts();
-                    atts.type = MPointType_CHONGDIAN;
-                    mpAttrs.put(mp, atts);
-                    logger.info("###### chongdian is ok ");
-                    break;
-                }
-            }
+        if (chargePoint != null){
+            //如果充电点和上一个点不在同一个楼层，则要添加相应的电梯任务。
+            addPathRoadPathPoint(chargePoint, mapPoints, mpAttrs);
+            //添加充电点任务
+            mapPoints.add(chargePoint);
+            //设置属性
+            atts = new MPointAtts();
+            atts.type = MPointType_CHONGDIAN;
+            mpAttrs.put(chargePoint, atts);
+            logger.info("###### chongdian is ok ");
         }
     }
 
@@ -3069,6 +3075,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     );
                     break;
                 case MPointType_QUHUO:
+                    //如果充电点属性不为null，则查询充电点到取货点的工控路径
+                    if (mPointAtts.chargePoint != null){
+                        initChargePointStaticPathPoint(mPointAtts.chargePoint,
+                                mp,
+                                missionListTask,
+                                order);
+                    }
                     initPathMissionTaskQuHuo(
                             missionListTask,
                             order,
@@ -3085,6 +3098,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             mp,
                             mPointAtts
                     );
+                    //如果充电点属性不为null，则查询充电点到取货点的工控路径
+                    if (mPointAtts.chargePoint != null){
+                        initChargePointStaticPathPoint(mp,
+                                mPointAtts.chargePoint,
+                                missionListTask,
+                                order);
+                    }
                     break;
                 case MPointType_CHONGDIAN:
                     //暂时取消充电任务
@@ -3145,6 +3165,51 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 default:
                     break;
             }
+        }
+    }
+
+    /**
+     * 判断充电工控路径
+     */
+    private void initChargePointStaticPathPoint(
+            MapPoint prePoint,
+            MapPoint point,
+            MissionListTask missionListTask,
+            Order order) {
+        try {
+            List<RoadPath> roadPaths =
+                    roadPathService.listRoadPathByStartAndEndPoint(
+                            prePoint.getId(),
+                            point.getId(),
+                            prePoint.getSceneName(),
+                            prePoint.getMapName(),
+                            Constant.PATH_TYPE_X86
+                    );
+            if (roadPaths != null){
+                for (RoadPath rp :
+                        roadPaths) {
+                    if (rp != null) {
+                        MapPoint temp = new MapPoint();
+                        copyValue(temp,prePoint);
+                        temp.setSceneName(rp.getSceneName());
+                        //标记该点的属性
+                        MPointAtts atts = new MPointAtts();
+                        atts.type = MPointType_STATIC_PATH;
+                        atts.pathId = rp.getPathId();
+                        atts.roadpathId = rp.getPathLock();//将路径锁对象id放入。
+                        initPathMissionTaskStaticPath(
+                                missionListTask,
+                                order,
+                                temp,
+                                atts
+                        );
+                        logger.info("###### addChargePointStaticPathPoint is ok ");
+                        break;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
         }
     }
 
@@ -3849,6 +3914,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public Long nextMapId;
         public String pathId;
         public Long roadpathId;
+        public MapPoint chargePoint;
     }
 
     /**
