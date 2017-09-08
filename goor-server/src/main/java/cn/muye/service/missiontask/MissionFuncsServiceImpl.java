@@ -1051,8 +1051,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "卸货任务-";
 
+        boolean isSetOrderDetailMP = false;
+        if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
+                !str_zero.equalsIgnoreCase(mPointAtts.orderDetailMP)){
+            isSetOrderDetailMP = true;
+        }
+
         //单点导航任务，回到下货点
         MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
+        if (isSetOrderDetailMP){
+            sigleNavTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(sigleNavTask);
 
         //等待任务，等待货架取下（同时语音提示我回来了，请取下货箱？）
@@ -1062,12 +1071,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionListTask.getMissionTasks().add(waitingTask);
 
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
+        if (isSetOrderDetailMP){
+            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
         MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName);
 //        finalUnloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
-
+        if (isSetOrderDetailMP){
+            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(finalUnloadTask);
 
         //语音任务，感谢使用，我要回去充电了？
@@ -1094,12 +1108,21 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "取货任务-";
 
+        boolean isSetOrderDetailMP = false;
+        if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
+                !str_zero.equalsIgnoreCase(mPointAtts.orderDetailMP)){
+            isSetOrderDetailMP = true;
+        }
+
         //离开充电任务
 //        MissionTask leavechargeTask = getLeaveChargeTask(order, mp, parentName);
 //        missionListTask.getMissionTasks().add(leavechargeTask);
 
         //添加单点导航任务,导航到取货点
         MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
+        if (isSetOrderDetailMP){
+            sigleNavTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(sigleNavTask);
 
         //到达，等待任务（同时语音播报，请放上货箱？）
@@ -1109,16 +1132,24 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionListTask.getMissionTasks().add(waitingTask);
 
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
+        if (isSetOrderDetailMP){
+            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //load任务，取代等待任务
         MissionTask loadTask = getLoadTask(order, mp, parentName);
 //        loadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD));
-
+        if (isSetOrderDetailMP){
+            loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(loadTask);
 
         //装载完毕语音任务
         MissionTask mp3loadFinishTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD_FINISH);
+        if (isSetOrderDetailMP){
+            mp3loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadFinishTask);
 
         //语音任务，我要出发了？
@@ -3606,6 +3637,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "固定路径卸货任务-";
 
+        boolean isSetOrderDetailMP = false;
+        if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
+                !str_zero.equalsIgnoreCase(mPointAtts.orderDetailMP)){
+            isSetOrderDetailMP = true;
+        }
+
         //如果没有货架，就不需要再加入卸货架任务了
         if (order.getShelf() == null){
             return;
@@ -3622,12 +3659,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionListTask.getMissionTasks().add(waitingTask);
 
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
+        if (isSetOrderDetailMP){
+            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
         MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName);
 //        finalUnloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
-
+        if (isSetOrderDetailMP){
+            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(finalUnloadTask);
 
         //语音任务，感谢使用，我要回去充电了？
@@ -3655,27 +3697,44 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "取货任务-";
 
+        boolean isSetOrderDetailMP = false;
+        if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
+                !str_zero.equalsIgnoreCase(mPointAtts.orderDetailMP)){
+            isSetOrderDetailMP = true;
+        }
+
         //添加单点导航任务,导航到取货点
 //        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
 //        missionListTask.getMissionTasks().add(sigleNavTask);
 
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
+        if (isSetOrderDetailMP){
+            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         if (order.getShelf() == null){
             //不需要装货架的取货任务
             MissionTask loadNoShelfTask = getLoadNoShelfTask(order, mp, parentName);
+            if (isSetOrderDetailMP){
+                loadNoShelfTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            }
             missionListTask.getMissionTasks().add(loadNoShelfTask);
         }else{
             //load任务，取代等待任务
             MissionTask loadTask = getLoadTask(order, mp, parentName);
+            if (isSetOrderDetailMP){
+                loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            }
 //        loadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD));
-
             missionListTask.getMissionTasks().add(loadTask);
         }
 
         //装载完毕语音任务
         MissionTask mp3loadFinishTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD_FINISH);
+        if (isSetOrderDetailMP){
+            mp3loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
         missionListTask.getMissionTasks().add(mp3loadFinishTask);
 
         //语音任务，我要出发了？
