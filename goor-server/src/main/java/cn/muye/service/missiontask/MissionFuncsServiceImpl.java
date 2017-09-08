@@ -2624,7 +2624,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 if (od != null &&
                         od.getStationId() != null) {
                     logger.info("###### begin get order detail station ");
-                    if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_START){
+                    if(Objects.equals(od.getPlace(), OrderConstant.ORDER_DETAIL_PLACE_START)){
                         //首先插入起点
                         Long stationId = order.getOrderSetting().getStartStation().getId();
                         MapPoint startPoint = pointService.findMapPointByStationIdAndCloudType(stationId, MapPointType.LOAD.getCaption());
@@ -2635,7 +2635,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         mpAttrs.put(startPoint, atts);
                         prePoint = startPoint;
                         logger.info("###### quhuo is ok ");
-                    }else if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_END){
+                    }else if(Objects.equals(od.getPlace(), OrderConstant.ORDER_DETAIL_PLACE_END)){
                         Long endStationId = order.getOrderSetting().getEndStation().getId();
                         MapPoint endPoint = pointService.findMapPointByStationIdAndCloudType(endStationId, MapPointType.FINAL_UNLOAD.getCaption());
                         if (endPoint != null) {
@@ -2645,7 +2645,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         }
 
                         //判断添加电梯点
-                        addRoadPathPoint(endPoint, mapPoints, mpAttrs);
+                        addPathRoadPathPoint(endPoint, mapPoints, mpAttrs);
                         //addElevatorPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
                         //中间点添加完毕，添加卸货点
                         mapPoints.add(endPoint);
