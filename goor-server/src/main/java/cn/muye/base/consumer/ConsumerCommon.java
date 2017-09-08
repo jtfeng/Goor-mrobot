@@ -502,12 +502,18 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_COMMAND_ROBOT_INFO)
     public void subscribeRobotInfo(@Payload MessageInfo messageInfo) {
         try {
-//            logger.info("subscribeRobotInfo start");
+            logger.info("#############subscribeRobotInfo start##############");
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 String robotStr = AES.decryptFromBase64(messageInfo.getMessageText(), Constant.AES_KEY);
                 Robot robotNew = JSON.parseObject(robotStr, Robot.class);
-                CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), messageInfo.getSendTime().getTime());
-                robotService.autoRegister(robotNew);
+                //判断缓存里有没有
+                Long lastRegTime = CacheInfoManager.getRobotAutoRegisterTimeCache(robotNew.getCode());
+                if (lastRegTime == null) {
+                    robotService.autoRegister(robotNew);
+                } else {
+                    //已经有了，更新缓存
+                    CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), System.currentTimeMillis());
+                }
             }
         } catch (RuntimeException e) {
             logger.error("机器人注册失败，回滚，错误信息==>{}", e);
