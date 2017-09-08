@@ -75,7 +75,7 @@ public class Constant {
 
     public final static String ORDER_NAV_TYPE_PATH = "path";//下单优先执行的导航类型-固定路径导航
 
-    public final static Long CHECK_IF_OFFLINE_TIME = 3000L; //3秒
+    public final static Long CHECK_IF_OFFLINE_TIME = 15000L; //15秒（rabbitMQ的connection-timeout时间为5秒，断网重连的时间为10秒，所以设置15秒）
 
     public final static Long LEAVE_CHARGER_DELAY_TIME = 60000L; //1分钟=60000毫秒
 
@@ -89,6 +89,7 @@ public class Constant {
     //MissionItemTask列表用于取货校验员工工号
     public final static List<String> MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = Arrays.asList(
             "load",
+            "unload",
             "finalUnload"
     );
 
