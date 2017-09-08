@@ -177,7 +177,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
             roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
-            roadPathDetail.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(roadPath.getPathLock()));//设置对应的逻辑锁对象
+            if (roadPath.getPathLock() != null) {
+                roadPathDetail.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(roadPath.getPathLock()));//设置对应的逻辑锁对象
+            }
 
             List<MapPoint> relatePoints = Lists.newArrayList();
             log.info("packageRoadPathDetail: start- " + roadPath.getStartPoint()

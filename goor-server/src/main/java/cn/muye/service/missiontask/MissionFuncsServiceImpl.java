@@ -2219,6 +2219,118 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         return itemTask;
     }
 
+
+
+    /**
+     * 路径解锁
+     * @param mp
+     * @return
+     */
+    private MissionTask getRoadPathUnlockTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataRoadPathUnlock json) {
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "路径解锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getRoadPathUnlockItemTask(order, mp, parentName, json));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取路径解锁ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getRoadPathUnlockItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataRoadPathUnlock json) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "路径解锁Item");
+        itemTask.setName(MissionItemName_roadpath_unlock);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataRoadPathUnlock>(){}.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_roadpath_unlock);
+
+        return itemTask;
+    }
+
+    /**
+     * 路径加锁
+     * @param mp
+     * @return
+     */
+    private MissionTask getRoadPathLockTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataRoadPathLock json) {
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "路径加锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getRoadPathLockItemTask(order, mp, parentName, json));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取路径加锁ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getRoadPathLockItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataRoadPathLock json) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "路径加锁Item");
+        itemTask.setName(MissionItemName_roadpath_lock);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataRoadPathLock>(){}.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_roadpath_lock);
+
+        return itemTask;
+    }
+
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////
     ////  missionItem,mission,missionList转成对应DTO和Task对象的方法
@@ -2652,26 +2764,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     case ELEVATOR_WAIT:
                                         addPathElevatorPoint(mp, point, mapPoints, mpAttrs);
                                         break;
-//                                    case ELEVATOR_END:
-//                                        //添加沿线导航任务
-//                                        mapPoints.add(point);
-//                                        //标记该点的属性
-//                                        MPointAtts atts1 = new MPointAtts();
-//                                        atts1.type = MPointType_ELEVATOR_END;
-//                                        MapPoint temp1 = new MapPoint();
-//                                        mpAttrs.put(copyValue(temp1,point), atts1);
-//                                        logger.info("###### addPathRoadPathPoint elevator_end is ok ");
-//                                        break;
-//                                    case DOOR_END:
-//                                        //添加沿线导航任务
-//                                        mapPoints.add(point);
-//                                        //标记该点的属性
-//                                        MPointAtts atts2 = new MPointAtts();
-//                                        atts2.type = MPointType_DOOR_END;
-//                                        MapPoint temp2 = new MapPoint();
-//                                        mpAttrs.put(copyValue(temp2,point), atts2);
-//                                        logger.info("###### addPathRoadPathPoint door_end is ok ");
-//                                        break;
                                     default:
                                         if (prePoint != null){
                                             //使用上一个点和当前点查询是否工控路径，如果是工控路径，则添加工控导航任务
@@ -2721,13 +2813,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         roadPaths) {
                     if (rp != null) {
                         MapPoint temp = new MapPoint();
-                        copyValue(temp,point);
+                        copyValue(temp,prePoint);
                         temp.setSceneName(rp.getSceneName());
                         mapPoints.add(temp);
                         //标记该点的属性
                         MPointAtts atts = new MPointAtts();
                         atts.type = MPointType_STATIC_PATH;
                         atts.pathId = rp.getPathId();
+                        atts.roadpathId = rp.getPathLock();//将路径锁对象id放入。
                         mpAttrs.put(temp, atts);
                         logger.info("###### addStaticPathPoint is ok ");
                         break;
@@ -2854,6 +2947,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         List<MissionTask> missionTasks = new ArrayList<>();
         missionListTask.setMissionTasks(missionTasks);
 
+        //锁操作相关变量初始化
+        RoadPathLockAtts roadPathLockAtts =
+                new RoadPathLockAtts();
+
         //顺序遍历，添加任务
         if (mapPoints != null &&
                 mpAttrs != null){
@@ -2864,7 +2961,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             order,
                             null,
                             mp,
-                            mpAttrs.get(mp));
+                            mpAttrs.get(mp),
+                            roadPathLockAtts);
                 }
             }
         }
@@ -2876,13 +2974,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @param order
      * @param mp
      * @param mPointAtts
+     * @param roadPathLockAtts
      */
     private void initPathMissionTask(
             MissionListTask missionListTask,
             Order order,
             MapPoint startMp,
             MapPoint mp,
-            MPointAtts mPointAtts) {
+            MPointAtts mPointAtts,
+            RoadPathLockAtts roadPathLockAtts) {
         //必须要有点属性对象，否则无法判断当前点是什么节点，如何加入前后置任务
         if (mPointAtts != null &&
                 !StringUtil.isEmpty(mPointAtts.type)){
@@ -2940,20 +3040,170 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             order,
                             startMp,
                             mp,
-                            mPointAtts
+                            mPointAtts,
+                            roadPathLockAtts
                     );
                     break;
                 case MPointType_STATIC_PATH:
+                    addRoadPathLockOrUnlock(
+                            missionListTask,
+                            order,
+                            mp,
+                            mPointAtts,
+                            roadPathLockAtts);
                     initPathMissionTaskStaticPath(
                             missionListTask,
                             order,
                             mp,
                             mPointAtts);
                     break;
+//                case MPointType_ROAD_PATH_LOCK:
+//                    initPathMissionTaskRoadPathLock(
+//                            missionListTask,
+//                            order,
+//                            mp,
+//                            mPointAtts);
+//                    break;
+//                case MPointType_ROAD_PATH_UNLOCK:
+//                    initPathMissionTaskRoadPathUnlock(
+//                            missionListTask,
+//                            order,
+//                            mp,
+//                            mPointAtts);
+//                    break;
                 default:
                     break;
             }
         }
+    }
+
+    /**
+     * 判断是否新增或者解锁路径段
+     * @param missionListTask
+     * @param order
+     * @param mp
+     * @param mPointAtts
+     * @param roadPathLockAtts
+     */
+    private void addRoadPathLockOrUnlock(
+            MissionListTask missionListTask,
+            Order order,
+            MapPoint mp,
+            MPointAtts mPointAtts,
+            RoadPathLockAtts roadPathLockAtts) {
+        logger.info("### addRoadPathLockOrUnlock ");
+        if (mPointAtts.roadpathId != null){
+            if (roadPathLockAtts.lastRoadPathId != null){
+                if (!Objects.equals(mPointAtts.roadpathId,
+                        roadPathLockAtts.lastRoadPathId)){
+                    //如果两个记录不一样，则先解锁旧的，再加锁新的
+                    //解锁
+                    Long temp = mPointAtts.roadpathId;
+                    mPointAtts.roadpathId =
+                            roadPathLockAtts.lastRoadPathId;
+                    initPathMissionTaskRoadPathUnlock(
+                            missionListTask,
+                            order,
+                            mp,
+                            mPointAtts
+                    );
+                    //加锁
+                    mPointAtts.roadpathId = temp;
+                    roadPathLockAtts.lastRoadPathId = temp;
+                    initPathMissionTaskRoadPathLock(
+                            missionListTask,
+                            order,
+                            mp,
+                            mPointAtts
+                    );
+                }
+            }else{
+                //给路径加锁
+                roadPathLockAtts.lastRoadPathId =
+                        mPointAtts.roadpathId;
+                initPathMissionTaskRoadPathLock(
+                        missionListTask,
+                        order,
+                        mp,
+                        mPointAtts
+                );
+            }
+        }else{
+            //当前已经没有路径锁了，如果前面的路径锁了，则要解锁
+            if (roadPathLockAtts.lastRoadPathId != null){
+                mPointAtts.roadpathId =
+                        roadPathLockAtts.lastRoadPathId;
+                roadPathLockAtts.lastRoadPathId = null;
+                initPathMissionTaskRoadPathUnlock(
+                        missionListTask,
+                        order,
+                        mp,
+                        mPointAtts
+                );
+            }
+        }
+    }
+
+    /**
+     * 逻辑路径解锁
+     * @param missionListTask
+     * @param order
+     * @param mp
+     * @param mPointAtts
+     */
+    private void initPathMissionTaskRoadPathUnlock(
+            MissionListTask missionListTask,
+            Order order,
+            MapPoint mp,
+            MPointAtts mPointAtts) {
+
+        logger.info("### initPathMissionTaskRoadPathUnlock ");
+
+        String parentName = "工控固定路径逻辑路径解锁任务-";
+
+        JsonMissionItemDataRoadPathUnlock json =
+                new JsonMissionItemDataRoadPathUnlock();
+        json.setInterval_time(5);
+        json.setRoadpath_id(mPointAtts.roadpathId);
+        MissionTask roadpathUnlockTask = getRoadPathUnlockTask(
+                order,
+                mp,
+                parentName,
+                json
+        );
+        missionListTask.getMissionTasks().add(roadpathUnlockTask);
+
+    }
+
+    /**
+     * 逻辑路径加锁
+     * @param missionListTask
+     * @param order
+     * @param mp
+     * @param mPointAtts
+     */
+    private void initPathMissionTaskRoadPathLock(
+            MissionListTask missionListTask,
+            Order order,
+            MapPoint mp,
+            MPointAtts mPointAtts) {
+
+        logger.info("### initPathMissionTaskRoadPathLock ");
+
+        String parentName = "工控固定路径逻辑路径加锁任务-";
+
+        JsonMissionItemDataRoadPathLock json =
+                new JsonMissionItemDataRoadPathLock();
+        json.setInterval_time(5);
+        json.setRoadpath_id(mPointAtts.roadpathId);
+        MissionTask roadpathLockTask = getRoadPathLockTask(
+                order,
+                mp,
+                parentName,
+                json
+        );
+        missionListTask.getMissionTasks().add(roadpathLockTask);
+
     }
 
     /**
@@ -2984,13 +3234,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @param order
      * @param mp
      * @param mPointAtts
+     * @param roadPathLockAtts
      */
     private void initPathMissionTaskDoor(
             MissionListTask missionListTask,
             Order order,
             MapPoint startMp,
             MapPoint mp,
-            MPointAtts mPointAtts) {
+            MPointAtts mPointAtts,
+            RoadPathLockAtts roadPathLockAtts) {
 
         logger.info("### initPathMissionTaskDoor ");
 
@@ -3057,6 +3309,37 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 path.setId(Long.parseLong(door.getPathId()));
                                 path.setScene_name(door.getoPoint().getSceneName());
                                 obj.setPath(path);
+
+                                //通过pathid，查询到对应的逻辑路径段id
+//                                try {
+//                                    RoadPath roadPath =
+//                                            roadPathService.findByPathId(
+//                                                    String.valueOf(path.getId()));
+//                                    if (roadPath != null){
+//                                        mPointAtts.roadpathId = roadPath.getPathLock();
+//                                        //添加路径锁或解锁
+//                                        addRoadPathLockOrUnlock(
+//                                                missionListTask,
+//                                                order,
+//                                                mp,
+//                                                mPointAtts,
+//                                                roadPathLockAtts
+//                                        );
+//                                    }
+//                                } catch (Exception e) {
+//                                    e.printStackTrace();
+//                                    logger.info("Path Door find RoadPath Error: " + e.getMessage());
+//                                }
+                                //直接通过门对象关联的逻辑路径对象，判断是否加入逻辑路径锁
+                                mPointAtts.roadpathId = door.getPathLock();
+                                //添加路径锁或解锁
+                                addRoadPathLockOrUnlock(
+                                        missionListTask,
+                                        order,
+                                        mp,
+                                        mPointAtts,
+                                        roadPathLockAtts
+                                );
 
                                 doorTask = getPathDoorTask(order,
                                         door.getoPoint(),
@@ -3399,6 +3682,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MPointType_DOOR_END = "door_end";//门任务结束点
     public static final String MPointType_UNDEFINED = "undefined";//未定义
     public static final String MPointType_STATIC_PATH = "static_path";//固定路径
+    public static final String MPointType_ROAD_PATH_LOCK = "road_path_lock";//加锁路径
+    public static final String MPointType_ROAD_PATH_UNLOCK = "road_path_unlock";//解锁路径
 
     public static final String FeatureValue_test = "test";//测试命令
 
@@ -3413,6 +3698,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String FeatureValue_elevator = "elevator";//电梯
     public static final String FeatureValue_elevator_lock = "elevatorLock";
     public static final String FeatureValue_elevator_unlock = "elevatorUnlock";
+    public static final String FeatureValue_roadpath_lock = "roadpathLock";
+    public static final String FeatureValue_roadpath_unlock = "roadpathUnlock";
     public static final String FeatureValue_door = "door";
     public static final String FeatureValue_laneDoor = "laneDoor";
     public static final String FeatureValue_pathDoor = "pathDoor";
@@ -3432,6 +3719,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionItemName_elevator = "elevator";
     public static final String MissionItemName_elevator_lock = "elevatorLock";
     public static final String MissionItemName_elevator_unlock = "elevatorUnlock";
+    public static final String MissionItemName_roadpath_lock = "roadpathLock";
+    public static final String MissionItemName_roadpath_unlock = "roadpathUnlock";
     public static final String MissionItemName_door = "door";
     public static final String MissionItemName_laneDoor = "laneDoor";
     public static final String MissionItemName_pathDoor = "pathDoor";
@@ -3475,6 +3764,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public Long currentMapId;
         public Long nextMapId;
         public String pathId;
+        public Long roadpathId;
+    }
+
+    /**
+     * 路径锁相关属性变量
+     */
+    public static class RoadPathLockAtts{
+        public Long lastRoadPathId;
     }
 }
 

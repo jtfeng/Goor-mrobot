@@ -236,4 +236,9 @@ public class RabbitMQConfig {
     public Queue directX86ElevatorLock() {
         return new Queue(TopicConstants.DIRECT_X86_ELEVATOR_LOCK,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
+
+    @Bean
+    public Queue directX86RoadPathLock() {
+        return new Queue(TopicConstants.DIRECT_X86_ROADPATH_LOCK,false,false,true, RabbitmqUtil.getRabbitMQArguments());
+    }
 }

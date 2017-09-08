@@ -9,6 +9,7 @@ import cn.muye.service.consumer.topic.X86MissionEventService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.service.consumer.topic.X86MissionStateResponseService;
+import cn.muye.service.consumer.topic.X86RoadPathLockService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
@@ -89,6 +90,24 @@ public class MissionConsumer {
             x86ElevatorLockService.handleX86ElevatorLock(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directX86ElevatorLock exception", e);
+        }
+    }
+
+    @Autowired
+    X86RoadPathLockService x86RoadPathLockService;
+
+    /**
+     * 透传ros发布的topic：x86_roadpath_lock
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_X86_ROADPATH_LOCK)
+    public void directX86RoadPathLock(@Payload MessageInfo messageInfo) {
+        try {
+            //直接service方法处理上报的数据
+            x86RoadPathLockService.handleX86RoadPathLock(messageInfo);
+        } catch (Exception e) {
+            logger.error("consumer directX86RoadPathLock exception", e);
         }
     }
 

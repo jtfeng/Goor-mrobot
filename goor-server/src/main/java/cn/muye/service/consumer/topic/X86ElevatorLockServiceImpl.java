@@ -38,11 +38,13 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
                     (JsonElevatorLock) JsonUtils.fromJson(data,
                             new TypeToken<JsonElevatorLock>(){}.getType());
             Boolean ret;
+            logger.info("111111111111");
             if (jsonElevatorLock != null &&
                     jsonElevatorLock.getAction() != null){
                 switch (jsonElevatorLock.getAction()){
                     case "lock":
                         //判断和返回加锁
+                        logger.info("2222222222");
                         ret = elevatorService.updateElevatorLockStateWithRobotCode(
                                 jsonElevatorLock.getElevator_id(),
                                 Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK,
@@ -50,6 +52,7 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
                         );
                         break;
                     case "unlock":
+                        logger.info("3333333");
                         ret = elevatorService.updateElevatorLockStateWithRobotCode(
                                 jsonElevatorLock.getElevator_id(),
                                 Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK,
