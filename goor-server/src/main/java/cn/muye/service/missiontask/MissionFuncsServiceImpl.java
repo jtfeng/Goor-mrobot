@@ -1773,6 +1773,59 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     }
 
     /**
+     * 无货架装货
+     * @param mp
+     * @return
+     */
+    private MissionTask getLoadNoShelfTask(
+            Order order,
+            MapPoint mp,
+            String parentName) {
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "无货架装货任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getLoadNoShelfItemTask(order, mp, parentName));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取无货架装货ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getLoadNoShelfItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "无货架装货Item");
+        itemTask.setName(MissionItemName_loadNoShelf);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData("");
+
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_loadNoShelf);
+
+        return itemTask;
+    }
+
+    /**
      * 卸货
      * @param mp
      * @param orderDetailMP
@@ -3549,6 +3602,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "固定路径卸货任务-";
 
+        //如果没有货架，就不需要再加入卸货架任务了
+        if (order.getShelf() == null){
+            return;
+        }
+
         //单点导航任务，回到下货点
 //        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
 //        missionListTask.getMissionTasks().add(sigleNavTask);
@@ -3600,11 +3658,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
         missionListTask.getMissionTasks().add(mp3loadTask);
 
-        //load任务，取代等待任务
-        MissionTask loadTask = getLoadTask(order, mp, parentName);
+        if (order.getShelf() == null){
+            //不需要装货架的取货任务
+            MissionTask loadNoShelfTask = getLoadNoShelfTask(order, mp, parentName);
+            missionListTask.getMissionTasks().add(loadNoShelfTask);
+        }else{
+            //load任务，取代等待任务
+            MissionTask loadTask = getLoadTask(order, mp, parentName);
 //        loadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD));
 
-        missionListTask.getMissionTasks().add(loadTask);
+            missionListTask.getMissionTasks().add(loadTask);
+        }
 
         //装载完毕语音任务
         MissionTask mp3loadFinishTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD_FINISH);
@@ -3711,6 +3775,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String FeatureValue_leavecharge = "leavecharge";//离开充电命令
     public static final String FeatureValue_mp3 = "mp3";//语音命令
     public static final String FeatureValue_load = "load";//装货
+    public static final String FeatureValue_loadNoShelf = "loadNoShelf";//无货架装货
     public static final String FeatureValue_unload = "unload";//卸货
     public static final String FeatureValue_finalUnload = "finalUnload";//终点卸货
     public static final String FeatureValue_elevator = "elevator";//电梯
@@ -3732,6 +3797,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionItemName_mp3 = "mp3";
     public static final String MissionItemName_waiting = "waiting";
     public static final String MissionItemName_load = "load";
+    public static final String MissionItemName_loadNoShelf = "loadNoShelf";
     public static final String MissionItemName_unload = "unload";
     public static final String MissionItemName_finalUnload = "finalUnload";
     public static final String MissionItemName_elevator = "elevator";
