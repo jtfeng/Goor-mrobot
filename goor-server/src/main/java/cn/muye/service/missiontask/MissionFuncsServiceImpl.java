@@ -2732,6 +2732,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_QUHUO;
+                        atts.chargePoint = chargePoint;//设置充电点
+                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(startPoint, atts);
                         prePoint = startPoint;
                         logger.info("###### quhuo is ok ");
