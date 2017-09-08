@@ -12,6 +12,9 @@ public class Constant {
     public final static Integer NORMAL = 0; //正常值
     public final static Integer DELETE = 1;  //删除
 
+    //PathType
+    public final static Integer PATH_TYPE_CLOUD = 0; //云端路径
+    public final static Integer PATH_TYPE_X86 = 1;  //工控路径
 
     public static final String UTF_8 = "UTF-8";
 
@@ -42,6 +45,9 @@ public class Constant {
     public final static Integer FILE_FAIL = 1;  //传输失败
     public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
 
+    public final static String EXPORT_DIR_NAME = "export"; //导出文件夹路径
+    public final static String LOG_DIR_NAME= "log"; //日志文件夹路径
+
     public static final String AUTHORIZE_USERNAME = "web";
 
     public static final String AUTHORIZE_PASSWORD = "web_secret";
@@ -67,7 +73,9 @@ public class Constant {
     public final static String MISSION_LIST_TYPE_CHARGE = "charge"; //充电任务-美亚
     public final static String MISSION_LIST_TYPE_NORMAL = "normal"; //普通任务——任务管理器
 
-    public final static Long CHECK_IF_OFFLINE_TIME = 60000L; //5分钟=30000毫秒
+    public final static String ORDER_NAV_TYPE_PATH = "path";//下单优先执行的导航类型-固定路径导航
+
+    public final static Long CHECK_IF_OFFLINE_TIME = 15000L; //15秒（rabbitMQ的connection-timeout时间为5秒，断网重连的时间为10秒，所以设置15秒）
 
     public final static Long LEAVE_CHARGER_DELAY_TIME = 60000L; //1分钟=60000毫秒
 
@@ -78,7 +86,14 @@ public class Constant {
             5L//离开充电桩
     );
 
+    //MissionItemTask列表用于取货校验员工工号
+    public final static List<String> MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = Arrays.asList(
+            "load",
+            "unload",
+            "finalUnload"
+    );
 
+    public final static String MISSION_ITEM_TASK_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = "unload";
 
     public final static String ROBOT_BATTERY_THRESHOLD = "local.robot.batteryThreshold"; //机器人电量阈值配置的Key
 
@@ -104,7 +119,10 @@ public class Constant {
     public final static String STOP = "结束";//结束
 
     //Session 中存储的场景（Scene 场景常量标识）
-    public static final String SCENE_SESSION_TAG = "scene_session_information";
+    public static final String SCENE_SESSION_TAG_PC = "scene_session_information_pc";
+
+    //Session 中存储的场景（Scene 场景常量标识）
+    public static final String SCENE_SESSION_TAG_PAD = "scene_session_information_pad";
 
     public static final String SESSION_STATION_ID = "stationId";
 
@@ -113,4 +131,8 @@ public class Constant {
 
     //默认机器人类型
     public static final Integer ROBOT_PRIMARY_TYPE_ID = 1;
+
+    public static final String RECORD_SCENE_SOURCE_PAD = "pad"; //保存场景ID的来源是pad
+
+    public static final String RECORD_SCENE_SOURCE_PC = "pc"; //保存场景ID的来源是pc
 }
