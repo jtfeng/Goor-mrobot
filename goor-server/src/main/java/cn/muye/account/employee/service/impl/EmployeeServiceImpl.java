@@ -142,17 +142,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
             //记录日志.单独开前程，避免影响主线程
             new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
-            if (missionItemTaskListDb != null && (Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName()))) {
-                Employee employee = new Employee();
-                employee.setCode(code);
-                Employee employeeDb = employeeMapper.selectOne(employee);
-                if (employeeDb != null) {
-                    return AjaxResult.success();
-                } else {
-                    return AjaxResult.failed("没有权限");
-                }
-            }
-            if (missionItemTaskListDb != null && missionItemTaskListDb.getName().equals(Constant.MISSION_ITEM_TASK_CONCERN_STATION_NAMES_FOR_EMP_NUMBER)) {
+            if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
                 Map map = Maps.newHashMap();
                 map.put("code", code);
                 map.put("missionItemId", missionItemId);
