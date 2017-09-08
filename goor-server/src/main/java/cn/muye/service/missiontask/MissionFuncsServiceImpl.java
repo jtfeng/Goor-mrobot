@@ -403,6 +403,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_QUHUO;
+                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(startPoint, atts);
                         prePoint = startPoint;
                         logger.info("###### quhuo is ok ");
@@ -423,6 +424,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_XIAHUO;
+                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(endPoint, atts);
                         logger.info("###### xiahuo is ok ");
                     }else {
@@ -2685,6 +2687,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_QUHUO;
+                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(startPoint, atts);
                         prePoint = startPoint;
                         logger.info("###### quhuo is ok ");
@@ -2705,6 +2708,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_XIAHUO;
+                        atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(endPoint, atts);
                         logger.info("###### xiahuo is ok ");
                     }else {

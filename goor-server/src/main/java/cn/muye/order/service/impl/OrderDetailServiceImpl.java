@@ -6,6 +6,7 @@ import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
+import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.bean.websocket.WSMessage;
 import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.WhereRequest;
@@ -13,12 +14,14 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.log.base.LogInfoUtils;
 import cn.muye.order.bean.WSOrderNotificationType;
 import cn.muye.order.bean.WSOrderNotificationVO;
 import cn.muye.order.mapper.OrderDetailMapper;
 import cn.muye.order.mapper.OrderMapper;
 import cn.muye.order.service.OrderDetailService;
 import cn.muye.order.service.OrderService;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,19 +66,22 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
             Order sqlOrder = orderService.getOrder(sqlDetail.getOrderId());
             String receiveBody = "已送达站" + station.getName();
             String sendBody = "已送达站" + station.getName();
-
+            WSOrderNotificationVO receive = new WSOrderNotificationVO(WSOrderNotificationType.RECEIVE_STATION, receiveBody, sqlOrder.getRobot().getName());
+            WSOrderNotificationVO send = new WSOrderNotificationVO(WSOrderNotificationType.SEND_STATION, sendBody, sqlOrder.getRobot().getName());
             WSMessage wsReceive = new WSMessage.Builder().
                     title(LogType.INFO_GOAL_REACHED.getValue())
                     .messageType(WSMessageType.NOTIFICATION)
-                    .body(new WSOrderNotificationVO(WSOrderNotificationType.RECEIVE_STATION, receiveBody))
+                    .body(receive)
                     .deviceId(sqlDetail.getStationId()+"")
                     .module(LogType.INFO_GOAL_REACHED.getName()).build();
             WSMessage wsSend = new WSMessage.Builder().
                     title(LogType.INFO_GOAL_REACHED.getValue())
                     .messageType(WSMessageType.NOTIFICATION)
-                    .body(new WSOrderNotificationVO(WSOrderNotificationType.SEND_STATION, sendBody))
+                    .body(send)
                     .deviceId(sqlOrder.getStartStation().getId() + "")
                     .module(LogType.INFO_GOAL_REACHED.getName()).build();
+            LogInfoUtils.info("", ModuleEnums.PAD_INFO, LogType.INFO_GOAL_REACHED, JSON.toJSONString(receive));
+            LogInfoUtils.info("", ModuleEnums.PAD_INFO, LogType.INFO_GOAL_REACHED, JSON.toJSONString(send));
             try {
                 webSocketSendMessage.sendWebSocketMessage(wsReceive);
                 webSocketSendMessage.sendWebSocketMessage(wsSend);

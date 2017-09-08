@@ -14,7 +14,8 @@ public enum ModuleEnums {
     CHARGE(200, "电池"),
     BASE(300, "底盘"),
     MISSION(400, "调度任务"),
-    SCENE(500, "场景");
+    SCENE(500, "场景"),
+    PAD_INFO(600,"护士站提醒");
 
     private int moduleId;
 
