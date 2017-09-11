@@ -147,6 +147,7 @@ public class OrderController extends BaseController {
             Integer robotTypeId = setting.getRobotType().getId();
             //根据 站点id 和 机器人类型 自动选择机器人
             arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
+
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功
                 logger.info("本次请求未获取到可用机器人");
