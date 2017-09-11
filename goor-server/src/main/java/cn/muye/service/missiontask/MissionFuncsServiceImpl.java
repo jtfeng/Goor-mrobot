@@ -1566,7 +1566,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "等待Item");
         itemTask.setName(MissionItemName_waiting);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("NULL_JSON_OBJ");
+        itemTask.setData(NULL_JSON_OBJ);
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_waiting);
         return itemTask;
@@ -1797,7 +1797,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             itemTask.setData(JsonUtils.toJson(order.getShelf(),
                     new TypeToken<Shelf>(){}.getType()));
         }else{
-            itemTask.setData("NULL_JSON_OBJ");
+            itemTask.setData(NULL_JSON_OBJ);
         }
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_load);
@@ -1850,7 +1850,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "无货架装货Item");
         itemTask.setName(MissionItemName_loadNoShelf);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("NULL_JSON_OBJ");
+        itemTask.setData(NULL_JSON_OBJ);
 
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_loadNoShelf);
