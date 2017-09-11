@@ -2,15 +2,14 @@ package cn.muye.assets.scene.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.scene.service.SceneService;
-import cn.muye.log.base.service.LogInfoService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
@@ -36,8 +35,7 @@ public class SceneController {
     @RequestMapping(value = "/assets/scene/session/{sceneId}", method = RequestMethod.POST)
     public AjaxResult storeSceneInfoToSession(@PathVariable("sceneId") String sceneId, HttpServletRequest request) {
         try {
-//            Scene scene = this.sceneService.storeSceneInfoToSession(sceneId, null);
-            Scene scene = this.sceneService.storeSceneInfoToSession(sceneId, "sdfdsfdfdsf1231234");
+            Scene scene = this.sceneService.storeSceneInfoToSession(sceneId, null);
             return AjaxResult.success(scene, "保存场景信息到用户会话中成功!");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage());
@@ -52,9 +50,10 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.POST)
     public AjaxResult createScene(@RequestBody Scene scene) {
+        // TODO: 21/07/2017 创建新场景
         try {
             Object taskResult = sceneService.saveScene(scene);
-            return AjaxResult.success(taskResult,    "新增场景信息成功!");
+            return AjaxResult.success(taskResult, "新增场景信息成功!");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage(), "新增场景信息失败");
         }
@@ -68,7 +67,9 @@ public class SceneController {
      */
     @RequestMapping(value = "/assets/scene", method = RequestMethod.PUT)
     public AjaxResult updateScene(@RequestBody Scene scene) {
+        // TODO: 21/07/2017 更新指定的场景信息
         try {
+            log.info("更新指定的场景信息");
             Object taskResult = sceneService.updateScene(scene);
             return AjaxResult.success(taskResult, "修改场景信息成功！");
         } catch (Exception e) {

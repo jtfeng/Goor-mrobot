@@ -15,9 +15,9 @@ import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
-import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -29,8 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -70,18 +72,18 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Transactional(rollbackFor = Exception.class)
     @Override
     public Object saveScene(Scene scene) throws Exception {
-
-        scene.setStoreId(STORE_ID);     //设置默认 store ID
+        scene.setStoreId(STORE_ID);//设置默认 store ID
         scene.setCreateTime(new Date());//设置当前时间为创建时间
-        this.save(scene);               //数据库中插入这条场景记录（保存场景）
+        this.save(scene);//数据库中插入这条场景记录
 
-        this.deleteRobotAndSceneRelations(scene.getId());//先删除旧的场景与机器人的对应关系
+        this.deleteRobotAndSceneRelations(scene.getId());
         boolean flag = bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
 
-        this.deleteMapAndSceneRelations(  scene.getId());//先删除旧的场景与地图信息的对应关系
-        bindSceneAndMapRelations(scene);  //绑定场景与地图信息之间的对应关系
+        this.deleteMapAndSceneRelations(scene.getId());
+        bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
 
-        if (flag){
+        if (flag) {
+            // 实际有机器人需要进行地图下发操作
             scene.setState(0);
         } else {
             scene.setState(1);
@@ -90,7 +92,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
         Object taskResult = null;
         if (scene.getRobots() != null && scene.getRobots().size() != 0) {
-            //当参数传递的机器人信息不为空时候，才自动下发地图
+            //自动下发地图
             List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
             List<Robot> robots = new ArrayList<>();
             for (Robot robot : scene.getRobots()) {
@@ -109,9 +111,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Preconditions.checkArgument(sceneId != null && !"".equals(sceneId.trim()), "请传入合法的 sceneId 值");
         log.info("传入的场景 ID 编号为 ：" + sceneId);
         Scene scene = getSceneById(Long.parseLong(sceneId));
-        SessionUtil.SCENE_LOADING_CACHE.put((token == null ? UserUtil.getUserTokenValue() : token)+":"+Constant.SCENE_SESSION_TAG, scene);
+        SessionUtil.SCENE_LOADING_CACHE.put((token != null ? token : null)+":"+Constant.SCENE_SESSION_TAG, scene);
         log.info("传入用户会话中的场景信息为：" + scene);
         return scene;
+    }
+
+    @Override
+    public String getRelatedMapNameBySceneId(Long sceneId) {
+        return sceneMapper.getRelatedMapNameBySceneId(sceneId);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -121,13 +128,13 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
         scene.setStoreId(STORE_ID);//设置默认的门店编号
         scene.setCreateTime(new Date());
-
         this.deleteRobotAndSceneRelations(scene.getId());
         boolean flag = bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
 
-        if (flag){
+        if (flag) {
+            // 实际有机器人需要进行地图下发操作
             scene.setState(0);
-        }else {
+        } else {
             scene.setState(1);
         }
         updateSelective(scene) ;//更新对应的场景信息
@@ -155,7 +162,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public Scene getSceneById(Long id) throws Exception {
         Scene scene = sceneMapper.selectByPrimaryKey(id);
         Preconditions.checkNotNull(scene, "传入指定编号的场景信息不存在，请检查!");
-        scene.setRobots(this.sceneMapper.findRobotBySceneId(id));
+        List<Robot> list = this.sceneMapper.findRobotBySceneId(id);
+        foreachList(list);
+        scene.setRobots(list);
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(id, scene.getStoreId());
         if (mapInfos != null && mapInfos.size() != 0) {
             scene.setMapSceneName(mapInfos.get(0).getSceneName());
@@ -222,6 +231,20 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
     }
 
+    /**
+     * 遍历赋机器人在线字段
+     * @param list
+     */
+    private static void foreachList(List<Robot> list) {
+        list.forEach(robot -> {
+            Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+            if (flag == null) {
+                flag = false;
+            }
+            robot.setOnline(flag);
+        });
+    }
+
     @Override
     public Object sendSyncMapMessageToSpecialRobots(Map<String, Object> params) throws Exception {
         Long sceneId = Long.valueOf(String.valueOf(Preconditions.checkNotNull(params.get("sceneId"), "场景 ID 不允许为空!")));
@@ -229,6 +252,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Preconditions.checkArgument(robotIds.size() != 0, "传入的机器人编号数组信息不可以为空");
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
         List<Robot> robots     = this.sceneMapper.findRobotBySceneIdAndRobotIds(params);
+        foreachList(robots);
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
         if (robots.size() == 0 || mapInfos.size() == 0){
             return null;
@@ -295,7 +319,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             if (ids.size() != 0) {
                 //如果有效序号ids的集合内容不为空，则插入新的关系信息，否则不执行任何操作
                 //不能抛出异常信息，因为仙子阿允许绑定空元素
-                flag = true;
+                flag = true;//表示有实际的机器人进行地图下发操作
                 this.insertSceneAndRobotRelations(scene.getId(), ids);
             }
             if(TransactionSynchronizationManager.isActualTransactionActive()){

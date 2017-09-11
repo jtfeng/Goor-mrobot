@@ -5,6 +5,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.DateTimeUtils;
+import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
@@ -14,6 +15,7 @@ import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.base.websoket.WebSocketSendMessage;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
@@ -37,6 +39,10 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     private RobotService robotService;
 
     private RabbitTemplate rabbitTemplate;
+
+    private StationService stationService;
+
+    private WebSocketSendMessage webSocketSendMessage;
 
     public ScheduledHandleServiceImp() {
 
