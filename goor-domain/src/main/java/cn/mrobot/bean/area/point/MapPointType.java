@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public enum MapPointType {
 
+
 	/*********
 	 * 工控那边约定目标点类型
 	 * 0 为初始点,
