@@ -208,43 +208,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
     /**
-     * 下单检查可用机器人(发送机器人消息判断是否离线)
-     * @param robot
-     * @return
-     * @throws RuntimeException
-     */
-    private AjaxResult testSendRobotMessage(Robot robot) throws RuntimeException {
-        AjaxResult ajaxResult;
-        try {
-            CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setTopicName(TopicConstants.AGENT_PUB);
-            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-            String uuid = UUID.randomUUID().toString().replace("-", "");
-            SlamBody slamBody = new SlamBody();
-            slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
-            slamBody.setUuid(uuid);
-            slamBody.setData(JsonUtils.toJson(robot,
-                    new TypeToken<Robot>() {
-                    }.getType()));
-            slamBody.setErrorCode("0");
-            slamBody.setMsg("success");
-            slamBody.setMsg("测试机器人是否离线");
-            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-            messageInfo.setReceiverId(robot.getCode());
-            messageInfo.setSenderId("goor-server");
-            messageInfo.setMessageType(MessageType.ROBOT_INFO);
-            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-            ajaxResult = messageSendHandleService.sendCommandMessage(true, true, robot.getCode(), messageInfo);
-        } catch (Exception e) {
-            throw new RuntimeException();
-        } finally {
-        }
-        return ajaxResult;
-    }
-
-    /**
      * 根据站查询可调用的机器人数量
      *
      * @param stationId
@@ -352,7 +315,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             String name = (String) jsonObject.get(SearchConstants.SEARCH_NAME);
             String sceneId = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_ID);
             String sceneName = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
-            Integer type = jsonObject.get(SearchConstants.SEARCH_TYPE)!= null ? Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE)) : null;
+            Integer type = jsonObject.get(SearchConstants.SEARCH_TYPE) != null ? Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE)) : null;
             map.put("name", name);
             map.put("sceneId", sceneId);
             map.put("sceneName", sceneName);
@@ -369,7 +332,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
             if (flag != null) {
                 robot.setOnline(flag);
-                LOGGER.info(robot.getCode() + (flag ? "在线": "离线"));
+                LOGGER.info(robot.getCode() + (flag ? "在线" : "离线"));
             } else {
                 robot.setOnline(false);
                 LOGGER.info(robot.getCode() + "离线");
@@ -487,6 +450,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号不能为空");
                 }
                 Robot robotDb = getByCode(robotCode, robotStoreId);
+                //如果表中没有该机器人记录，则写缓存，再写数据库
+                CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), System.currentTimeMillis());
                 if (robotDb == null) {
                     saveRobotAndBindChargerMapPoint(robotNew);
                     //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
@@ -499,10 +464,48 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 return AjaxResult.failed("注册失败");
             }
         } catch (Exception e) {
+            CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), null);
             LOGGER.error("注册失败, 错误日志 >>>> {}", e);
             return AjaxResult.failed("注册失败");
         } finally {
         }
+    }
+
+    /**
+     * 下单检查可用机器人(发送机器人消息判断是否离线)
+     * @param robot
+     * @return
+     * @throws RuntimeException
+     */
+    private AjaxResult testSendRobotMessage(Robot robot) throws RuntimeException {
+        AjaxResult ajaxResult;
+        try {
+            CommonInfo commonInfo = new CommonInfo();
+            commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+            commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+            String uuid = UUID.randomUUID().toString().replace("-", "");
+            SlamBody slamBody = new SlamBody();
+            slamBody.setPubName(TopicConstants.PUB_SUB_NAME_ROBOT_INFO);
+            slamBody.setUuid(uuid);
+            slamBody.setData(JsonUtils.toJson(robot,
+                    new TypeToken<Robot>() {
+                    }.getType()));
+            slamBody.setErrorCode("0");
+            slamBody.setMsg("success");
+            slamBody.setMsg("测试机器人是否离线");
+            commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+            MessageInfo messageInfo = new MessageInfo();
+            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+            messageInfo.setReceiverId(robot.getCode());
+            messageInfo.setSenderId("goor-server");
+            messageInfo.setMessageType(MessageType.ROBOT_INFO);
+            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+            ajaxResult = messageSendHandleService.sendCommandMessage(true, true, robot.getCode(), messageInfo);
+        } catch (Exception e) {
+            throw new RuntimeException();
+        } finally {
+        }
+        return ajaxResult;
     }
 
     /**
@@ -687,7 +690,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 } else {
                     LOGGER.info(String.format("编号为 %s 的机器人下发新密码 %s 失败!", String.valueOf(robot.getCode()), password));
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -695,6 +698,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     /**
      * 为应用提供一个验证 操作密码 是否合法的操作接口 （ 应用获取云端配置的操作密码 ）
+     *
      * @param robotCode
      * @param password
      * @return
@@ -702,7 +706,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public boolean checkPasswordIsValid(String uuid, String robotCode, String password) {
         checkNotNull(robotCode, "验证机器人编号不允许为空，请重新输入!!");
-        checkNotNull(password,  "验证密码不允许为空，请重新输入!");
+        checkNotNull(password, "验证密码不允许为空，请重新输入!");
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition(" CODE = ", robotCode);
         Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
@@ -710,7 +714,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName(TopicConstants.AGENT_PUB);
         commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>(){{
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>() {{
             put("sub_name", TopicConstants.PUB_SUB_NAME_CHECK_OPERATE_PWD);
             put("uuid", uuid);
             put("msg", result ? "success" : "error");
@@ -734,21 +738,21 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public void setRobotBusyAndOnline(String robotCode, Boolean busy, Boolean online) {
         checkNotNull(robotCode, "机器人编号不允许为空!!");
-        if (StringUtil.isEmpty(robotCode)){
+        if (StringUtil.isEmpty(robotCode)) {
             return;
         }
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition(" CODE = ", robotCode);
         Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
         if (robot != null) {
-            if (busy != null){
+            if (busy != null) {
                 robot.setBusy(busy);
             }
-            if (online != null){
+            if (online != null) {
                 CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
             }
             if (busy != null ||
-                    online != null){
+                    online != null) {
                 super.updateSelective(robot);
             }
         }
