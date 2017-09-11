@@ -174,13 +174,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         for (RoadPath roadPath : roadPaths) {
             RoadPathDetail roadPathDetail = new RoadPathDetail();
             BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
-
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
             roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
             if (roadPath.getPathLock() != null) {
+                // 当逻辑锁对象不为空时，才级联查询对应的管理锁对象
                 roadPathDetail.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(roadPath.getPathLock()));//设置对应的逻辑锁对象
             }
-
             List<MapPoint> relatePoints = Lists.newArrayList();
             log.info("packageRoadPathDetail: start- " + roadPath.getStartPoint()
                     + ",end- " + roadPath.getEndPoint()
@@ -235,14 +234,4 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         // 关系生成完毕之后 ， 保存一系列数据到数据库中
         this.roadPathPointMapper.insertList(roadPathPoints);// 批量保存数据信息
     }
-
-    @Override
-    public RoadPath findByPathId(String pathId) throws Exception {
-        Example example = new Example(RoadPath.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andCondition("PATH_ID = ", pathId);
-        List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
-        return roadPaths.get(0);
-    }
-
 }
