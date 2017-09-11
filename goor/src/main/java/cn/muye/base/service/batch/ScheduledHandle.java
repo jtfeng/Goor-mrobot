@@ -59,7 +59,7 @@ public class ScheduledHandle {
                     logger.error("schedule sendRobotInfoScheduled exception", e);
                 }
             }
-        }, 92, 5, TimeUnit.SECONDS);
+        }, 92, 1, TimeUnit.SECONDS);
     }
 
     /**
