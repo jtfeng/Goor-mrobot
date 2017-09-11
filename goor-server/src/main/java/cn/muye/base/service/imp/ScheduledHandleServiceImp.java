@@ -1,9 +1,13 @@
 package cn.muye.base.service.imp;
 
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.websocket.WSMessage;
+import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ScheduledHandleServiceImp implements ScheduledHandleService, ApplicationContextAware {
@@ -52,7 +57,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     public void mqHealthCheck() throws Exception {
         try {
             logger.info("Scheduled mqHealthCheck start");
-            if(!getRabbitTemplate()){
+            if (!getRabbitTemplate()) {
                 return;
             }
             MessageInfo messageInfo = new MessageInfo();
@@ -86,6 +91,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public void executeRobotHeartBeat() {
         robotService = applicationContext.getBean(RobotService.class);
+        stationService = applicationContext.getBean(StationService.class);
+        webSocketSendMessage = applicationContext.getBean(WebSocketSendMessage.class);
         //拿sendTime跟内存里的同步时间
         Long currentTime = new Date().getTime();
         List<Robot> list = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
@@ -93,28 +100,38 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             for (Robot robot : list) {
                 String code = robot.getCode();
                 Long sendTime = CacheInfoManager.getRobotAutoRegisterTimeCache(code);
-                Robot robotDb = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-                if (robotDb != null) {
-                    //如果大于1分钟
+                if (robot != null) {
+                    //如果大于15秒
                     if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
-                        robotDb.setOnline(false);
+                        CacheInfoManager.setRobotOnlineCache(code, false);
                     } else {
-                        robotDb.setOnline(true);
+                        CacheInfoManager.setRobotOnlineCache(code, true);
                     }
-                    robotService.updateSelective(robotDb);
+                    robotService.updateSelective(robot);
                 }
-
+            }
+        }
+        List<Station> stationList = stationService.listAll();
+        if (stationList != null && stationList.size() > 0) {
+            for (Station station : stationList) {
+                Map map = robotService.getCountAvailableRobotByStationId(station.getId());
+                WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName()).messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
+                try {
+                    webSocketSendMessage.sendWebSocketMessage(ws);
+                } catch (Exception e) {
+                    logger.error("{}", e);
+                }
             }
         }
     }
 
-    private boolean getRabbitTemplate(){
-        if(null == applicationContext){
+    private boolean getRabbitTemplate() {
+        if (null == applicationContext) {
             logger.error("getRabbitTemplate applicationContext is null error");
             return false;
         }
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
-        if(null == rabbitTemplate){
+        if (null == rabbitTemplate) {
             logger.error("getRabbitTemplate rabbitTemplate is null error ");
             return false;
         }
