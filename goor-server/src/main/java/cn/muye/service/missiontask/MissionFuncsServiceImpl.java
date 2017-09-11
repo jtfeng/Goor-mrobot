@@ -1566,7 +1566,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "等待Item");
         itemTask.setName(MissionItemName_waiting);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("");
+        itemTask.setData("NULL_JSON_OBJ");
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_waiting);
         return itemTask;
@@ -1736,7 +1736,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "离开充电Item");
         itemTask.setName(MissionItemName_leavecharge);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("");
+        itemTask.setData(NULL_JSON_OBJ);
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_leavecharge);
 
@@ -1797,7 +1797,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             itemTask.setData(JsonUtils.toJson(order.getShelf(),
                     new TypeToken<Shelf>(){}.getType()));
         }else{
-            itemTask.setData("");
+            itemTask.setData("NULL_JSON_OBJ");
         }
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_load);
@@ -1850,7 +1850,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "无货架装货Item");
         itemTask.setName(MissionItemName_loadNoShelf);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("");
+        itemTask.setData("NULL_JSON_OBJ");
 
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_loadNoShelf);
@@ -1978,7 +1978,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "终点卸货Item");
         itemTask.setName(MissionItemName_finalUnload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData("");
+        itemTask.setData(NULL_JSON_OBJ);
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_finalUnload);
 
@@ -3960,6 +3960,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String DoorType_door = "door";
     public static final String DoorType_laneDoor = "laneDoor";
     public static final String DoorType_pathDoor = "pathDoor";
+
+    public static final String NULL_JSON_OBJ = "{}";
 
     /**
      * 地图点的属性类
