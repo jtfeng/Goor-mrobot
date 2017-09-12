@@ -65,12 +65,16 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, String> persistMissionState = new ConcurrentHashMapCache<>();//已经存库的任务状态
 
     private static ConcurrentHashMapCache<String, Integer> userLoginStatusCache = new ConcurrentHashMapCache<>();//用户登录状态
+
+    private static ConcurrentHashMapCache<String, Boolean> robotOnlineCache = new ConcurrentHashMapCache<>();//机器人是否在线缓存
+
+    private static ConcurrentHashMapCache<String, String> robotMissionAlertStatusCache = new ConcurrentHashMapCache<>();//当前机器人任务状态缓存
+
     /**
      * webSocket根据用户名来缓存Session 的缓存
      */
     private static ConcurrentHashMapCache<String, Set<Session>> webSocketSessionCache = new ConcurrentHashMapCache<String, Set<Session>>(); //key ： 机器人code
-    private static ConcurrentHashMapCache<Session, Map<String, Set<String>>> webSocketClientReceiveModuleCache
-            = new ConcurrentHashMapCache<>(); //key ：客户端session value为指定类型的列表
+    private static ConcurrentHashMapCache<Session, Map<String, Set<String>>> webSocketClientReceiveModuleCache = new ConcurrentHashMapCache<>(); //key ：客户端session value为指定类型的列表
 
     static {
 
@@ -115,7 +119,6 @@ public class CacheInfoManager implements ApplicationContextAware {
     public static void removeMapOriginalCache(String key) {
         mapOriginalCache.remove(key);
     }
-
     public static void setUUIDCache(String uuId, MessageInfo messageInfo) {
         UUIDCache.put(uuId, messageInfo);
     }
@@ -379,5 +382,21 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setUserLoginStatusCache(String key, Integer status) {
         userLoginStatusCache.put(key, status);
+    }
+
+    public static Boolean getRobotOnlineCache(String robotSn) {
+        return robotOnlineCache.get(robotSn);
+    }
+
+    public static void setRobotOnlineCache(String robotSn, Boolean online) {
+        robotOnlineCache.put(robotSn, online);
+    }
+
+    public static String getRobotMissionAlertStatusCache(String code) {
+        return robotMissionAlertStatusCache.get(code);
+    }
+
+    public static void setRobotMissionAlertStatusCache(String code, String missionStatus) {
+        robotMissionAlertStatusCache.put(code, missionStatus);
     }
 }

@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSON;
  */
 public class TopicConstants {
 
-	public static final boolean DEBUG = false;
+	public static final boolean DEBUG = true;
 
 	public static final String LAGENT_PREFIX = "agent_local"; //需要agent本地处理的topic
 
@@ -50,6 +50,7 @@ public class TopicConstants {
 	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
 	public static final String X86_ELEVATOR_LOCK = "/x86_elevator_lock";//电梯锁定topic
 	public static final String X86_MISSION_HEARTBEAT = "/x86_mission_heartbeat";//x86 mission心跳topic
+	public static final String X86_MISSION_ALERT = "x86_mission_alert";
 
 	public static final String ANDROID_JOYSTICK_CMD_VEL = "/android_joystick_cmd_vel";//摇杆topic
 	public static final String ROS_SUB_YAOGAN_TOPIC = "~cmd_vel";
@@ -62,7 +63,9 @@ public class TopicConstants {
 	public static final String STATE_COLLECTOR = "/state_collector"; //状态机返回状态的topic
 	public static final String STATE_REQUEST = "state_request"; //向状态机请求状态的topic
 	public static final String ROBOTS_CURRENT_POSE = "robots_current_pose"; //所有机器人当前位置
+	public static final String VERIFY_EMPLYEE_NUMBER = "verify_emplyee_number"; //员工工号取货校验
 	public static final String POWER = "/power"; //机器人电量
+	public static final String PUB_SUB_NAME_CHECK_OPERATE_PWD = "check_operate_pwd"; // 应用请求操作机器人密码校验的 PUB 和 SUB 名称
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号
 	public static final String ROBOT_CODE = "robot_code";//机器人主板编号
@@ -111,7 +114,7 @@ public class TopicConstants {
 	public static final String ROBOT_KEY_TYPE_ID = "typeId";
 	public static final String ROBOT_KEY_LOW_BATTERY_THRESHOLD = "lowBatteryThreshold";
 	public static final String ROBOT_KEY_SUFFICIENT_BATTERY_THRESHOLD = "sufficientBatteryThreshold";
-//	public static final String ROBOT_KEY_BOX_ACTIVATED = "boxActivated";
+	//	public static final String ROBOT_KEY_BOX_ACTIVATED = "boxActivated";
 	public static final String ROBOT_KEY_BUSY = "busy";
 	public static final String ROBOT_KEY_ONLINE = "online";
 	public static final String ROBOT_KEY_CHARGER_MAP_POINT_LIST = "chargerMapPointList";
@@ -148,8 +151,10 @@ public class TopicConstants {
 	public static final String DIRECT_X86_MISSION_QUEUE_RESPONSE = "direct.x86_mission_queue_response";//当前任务队列数据响应topic
 	public static final String DIRECT_X86_MISSION_STATE_RESPONSE = "direct.x86_mission_state_response";//当前任务状态响应topic
 	public static final String DIRECT_X86_MISSION_EVENT = "direct.x86_mission_event";//任务事件上报topic
+	public static final String DIRECT_X86_MISSION_ALERT= "direct.x86_mission_alert";//任务事件上报topic
 	public static final String DIRECT_X86_MISSION_RECEIVE = "direct.x86_mission_receive";//任务回执上报topic
 	public static final String DIRECT_X86_ELEVATOR_LOCK = "direct.x86_elevator_lock";//电梯锁操作请求topic
+	public static final String DIRECT_X86_ROADPATH_LOCK = "direct.x86_roadpath_lock";//路径锁操作请求topic
 
 	public static final String DIRECT_STATE_COLLECTOR = "direct.state_collector"; //状态机上报 queue
 	public static final String DIRECT_COMMAND_REPORT = "direct.command_report";

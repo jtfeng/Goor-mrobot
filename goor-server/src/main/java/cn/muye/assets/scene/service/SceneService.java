@@ -5,6 +5,7 @@ import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -48,4 +49,6 @@ public interface SceneService extends BaseService<Scene> {
     boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId, Scene.SCENE_STATE state, Long ... sceneId) throws Exception;
 
     Scene storeSceneInfoToSession(String sceneId, String token) throws Exception;
+
+    String getRelatedMapNameBySceneId(Long sceneId);
 }
