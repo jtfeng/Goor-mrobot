@@ -23,6 +23,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
@@ -53,56 +55,87 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         // String -> pattern
         // String -> data
         // List<Long> -> points -> 前端传递格式为 一个数组
-        String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
-        log.info(String.format("路径名称：%s", pathName));
-        String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
-        log.info(String.format("路径拟合方式：%s", pattern));
-        String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
-        log.info(String.format("路径相关数据：%s", data));
-        Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
-        log.info(String.format("路径权值数据为：%s", weight));
-        List points = (List)checkNotNull(body.get("points"),"点组合不允许为空，请重新选择!");
-        checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
-        RoadPath roadPath = new RoadPath(){{
-            setData(data);setPattern(pattern);setPathName(pathName);
-            setCreateTime(new Date());setStoreId(100L); setWeight(weight);
-            setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置开始点
-            setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置结束点
-            setSceneName(sceneName);setMapName(mapName);
-            setPathId(UUID.randomUUID().toString().replaceAll("\\-", ""));
-            setPathType(0);//云端创建的路径信息
-        }};
-        this.roadPathMapper.insert(roadPath);
-        packageRoadPathRelations(points, roadPath);
+
+        // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+        try {
+            String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
+            log.info(String.format("路径名称：%s", pathName));
+
+            String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
+            log.info(String.format("路径拟合方式：%s", pattern));
+
+            String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
+            log.info(String.format("路径相关数据：%s", data));
+
+            Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
+            log.info(String.format("路径权值数据为：%s", weight));
+
+            List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
+            checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
+
+            // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+
+            RoadPath roadPath = new RoadPath() {{
+                setData(data);
+                setPattern(pattern);
+                setPathName(pathName);
+                setCreateTime(new Date());
+                setStoreId(100L);
+                setWeight(weight);
+                setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置开始点
+                setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置结束点
+                setSceneName(sceneName);
+                setMapName(mapName);
+                setPathId(UUID.randomUUID().toString().replaceAll("\\-", ""));
+                setPathType(0);//云端创建的路径信息
+            }};
+            this.roadPathMapper.insert(roadPath);
+            packageRoadPathRelations(points, roadPath);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
     public void updateRoadPath(Map<String, Object> body) throws Exception {
-        String pathId = String.valueOf(checkNotNull(body.get("pathId"), "路径 ID 编号不允许为空，请重新输入!"));
-        log.info(String.format("路径编号信息为：%s",  pathId));
-        String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
-        log.info(String.format("路径名称：%s", pathName));
-        String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
-        log.info(String.format("路径拟合方式：%s", pattern));
-        String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
-        log.info(String.format("路径相关数据：%s", data));
-        Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
-        log.info(String.format("路径权值数据为：%s", weight));
-        List points = (List)checkNotNull(body.get("points"),"点组合不允许为空，请重新选择!");
-        checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
-        RoadPath roadPath = new RoadPath(){{ // 实例化指定对象
-            setId(Long.parseLong(pathId));
-            setData(data); // 路径数据
-            setPattern(pattern); // 拟合方式
-            setPathName(pathName); // 路径名称
-            setWeight(weight); // 路径权重大小
-            setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
-            setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置（结束点）
-            setSceneName(sceneName); // 工控场景名
-            setMapName(mapName);     // 工控地图名 【此处不知道是否需要更新工控路径 ID 信息以及路径类型】
-        }};
-        updateSelective(roadPath);
-        packageRoadPathRelations(points, roadPath);
+        try {
+            Long id = Long.parseLong(String.valueOf(checkNotNull(body.get("id"), "id编号不允许为空，请重新输入!")));
+            log.info(String.format("id编号信息为：%s", id));
+            String pathId = String.valueOf(checkNotNull(body.get("pathId"), "路径 ID 编号不允许为空，请重新输入!"));
+            log.info(String.format("路径编号信息为：%s", pathId));
+            String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
+            log.info(String.format("4路径名称：%s", pathName));
+            String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
+            log.info(String.format("路径拟合方式：%s", pattern));
+            String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
+            log.info(String.format("路径相关数据：%s", data));
+            Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
+            log.info(String.format("路径权值数据为：%s", weight));
+            List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
+            checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
+
+            RoadPath roadPath = new RoadPath();
+            roadPath.setId(id);
+            roadPath.setPathId(pathId);
+            roadPath.setPathType(0);//云端创建的路径信息
+            roadPath.setData(data); // 路径数据
+            roadPath.setPattern(pattern); // 拟合方式
+            roadPath.setPathName(pathName); // 路径名称
+            roadPath.setWeight(weight); // 路径权重大小
+            roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
+            roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置（结束点）
+            roadPath.setSceneName(sceneName); // 工控场景名
+            roadPath.setMapName(mapName);     // 工控地图名 【此处不知道是否需要更新工控路径 ID 信息以及路径类型】
+            roadPath.setCreateTime(new Date());
+            roadPath.setStoreId(100L);
+            int updateCount = this.roadPathMapper.updateByPrimaryKey(roadPath);
+            log.info("当前更新的数据记录条数为 ：" + updateCount);
+            packageRoadPathRelations(points, roadPath);
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
@@ -196,6 +229,17 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             }
         }
         return roadPathDetails;
+    }
+
+    @Override
+    public int deleteById(Long id) {
+        try {
+            int deleteRowCount = super.deleteById(id);
+            this.roadPathMapper.deleteRoadPathPointsByPathId(id);//删除与路径关联的 MapPoint 信息
+            return deleteRowCount;
+        }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void packageRoadPathRelations(List points, RoadPath roadPath){
