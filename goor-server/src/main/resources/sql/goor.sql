@@ -600,7 +600,7 @@ CREATE TABLE `AS_ROBOT` (
   `UPDATE_TIME` datetime DEFAULT NULL COMMENT '更新时间',
   `BOX_ACTIVATED` bit(1) DEFAULT b'1' COMMENT '是否启用',
   `BUSY` bit(1) DEFAULT b'0' COMMENT '状态(0-空闲， 1-占用)',
-  `ROBOT_ID_FOR_ELEVATOR` int(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
+  `ROBOT_ID_FOR_ELEVATOR` varchar(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
   `STATUS` varchar(255) DEFAULT NULL COMMENT '状态',
   `EMERGENCY_STOP_STATE` bit(1) DEFAULT b'1' NULL COMMENT '机器人急停状态（true:急停拍下  false:急停未拍下）',
   `LOW_POWER_STATE` bit(1) DEFAULT b'1' COMMENT '机器人低电量状态（true:机器人电量低于阈值  false:机器人电量高于阈值）',
@@ -1878,3 +1878,17 @@ create table AS_ROADPATHLOCK
   `LOCK` int(1) null comment '是否上锁的标识'
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
+
+DROP TABLE IF EXISTS `LOG_ALERT`;
+CREATE TABLE `LOG_ALERT` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `ROBOT_CODE` varchar(255) DEFAULT NULL COMMENT '机器人编号',
+  `ALERT_CODE` varchar(20) DEFAULT NULL COMMENT '报警码',
+  `ALERT_TIME` datetime DEFAULT NULL COMMENT '报警时间',
+  `MISSION_ITEM_ID` bigint(20) DEFAULT NULL,
+  `DESCRIPTION` varchar(255) DEFAULT NULL COMMENT '错误描述',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '继承自BaseBean:创建时间',
+  `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '继承自BaseBean:创建来源',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
