@@ -114,7 +114,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robotConfigService.updateSelective(robotConfig);
         }
         //向X86上同步修改后的机器人电量阈值信息
-        if (CacheInfoManager.getRobotOnlineCache(robot.getCode()) == true && lowBatteryThresholdDb != null && lowRobotBatteryThreshold != null && sufficientBatteryThresholdDb != null && sufficientBatteryThreshold != null) {
+        if (CacheInfoManager.getRobotOnlineCache(robot.getCode()) != null && CacheInfoManager.getRobotOnlineCache(robot.getCode()) == true && lowBatteryThresholdDb != null && lowRobotBatteryThreshold != null && sufficientBatteryThresholdDb != null && sufficientBatteryThreshold != null) {
             if (lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
                 robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
             }

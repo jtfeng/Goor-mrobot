@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -69,11 +70,10 @@ public class RobotController {
         String robotCode = robot.getCode();
         Integer lowRobotBatteryThreshold = robot.getLowBatteryThreshold();
         Integer sufficientBatteryThreshold = robot.getSufficientBatteryThreshold();
-        Integer robotIdForElevator = robot.getRobotIdForElevator();
-        if (robotIdForElevator != null) {
-            String robotIdForElevatorStr = String.valueOf(robotIdForElevator);
+        String robotIdForElevator = robot.getRobotIdForElevator();
+        if (!StringUtil.isNullOrEmpty(robotIdForElevator)) {
             String regex = "^[10]{8}";
-            boolean flag = robotIdForElevatorStr.matches(regex);
+            boolean flag = robotIdForElevator.matches(regex);
             if (!flag) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "电梯编号必须为8位二进制");
             }

@@ -67,7 +67,7 @@ public class Robot extends BaseBean {
     @Transient
     private List<JsonMissionItemDataLaserNavigation> chargerMapPointList; //充电桩点LIST(转换成任务管理需要的数据格式)
 
-    private Integer robotIdForElevator; //机器人电梯编号（针对电梯使用）
+    private String robotIdForElevator; //机器人电梯编号（针对电梯使用）
 
     public List<RobotPassword> getPasswords() {
         return passwords;
@@ -190,11 +190,11 @@ public class Robot extends BaseBean {
         this.sceneId = sceneId;
     }
 
-    public Integer getRobotIdForElevator() {
+    public String getRobotIdForElevator() {
         return robotIdForElevator;
     }
 
-    public void setRobotIdForElevator(Integer robotIdForElevator) {
+    public void setRobotIdForElevator(String robotIdForElevator) {
         this.robotIdForElevator = robotIdForElevator;
     }
 
