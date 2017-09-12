@@ -26,4 +26,8 @@
         SELECT NEXT_POINT_ID, PREV_POINT_ID, POINT_ID FROM AS_ROADPATHPOINT WHERE ROAD_PATH_ID = #{param1} AND POINT_ID = #{param2}
     </select>
 
+    <delete id="deleteRoadPathPointsByPathId" parameterType="java.lang.Long">
+        DELETE FROM AS_ROADPATHPOINT WHERE ROAD_PATH_ID = #{0}
+    </delete>
+
 </mapper>

@@ -7,6 +7,8 @@ import javax.persistence.Table;
 @Table(name = "AS_ROADPATH")
 public class RoadPath extends BaseBean{
 
+
+
     // 路径名称信息
     private String pathName;
     // 拟合方式
@@ -29,6 +31,8 @@ public class RoadPath extends BaseBean{
     private Integer pathType;
     //所关联的路径锁对象
     private Long pathLock;
+
+
 
     public RoadPath(){}
 
