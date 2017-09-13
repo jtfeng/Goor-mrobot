@@ -21,7 +21,7 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     List<RoadPath> listRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception;
 
-    List<RoadPathDetail> listRoadPaths(WhereRequest whereRequest) throws Exception;
+    List<RoadPath> listRoadPaths(WhereRequest whereRequest) throws Exception;
 
 
 }

@@ -2805,7 +2805,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         //最后添加充电点，目前充电点从机器人的数据库里面查询出来
         //取第一个有效的点设置进去
-        if (chargePoint != null){
+        //TODO 20170913 临时去掉充电
+        /*if (chargePoint != null){
             //如果充电点和上一个点不在同一个楼层，则要添加相应的电梯任务。
             addPathRoadPathPoint(chargePoint, mapPoints, mpAttrs);
             //添加充电点任务
@@ -2815,7 +2816,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             atts.type = MPointType_CHONGDIAN;
             mpAttrs.put(chargePoint, atts);
             logger.info("###### chongdian is ok ");
-        }
+        }*/
     }
 
     /**
@@ -3111,12 +3112,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     break;
                 case MPointType_QUHUO:
                     //如果充电点属性不为null，则查询充电点到取货点的工控路径
-                    if (mPointAtts.chargePoint != null){
+                    //TODO 20170913 临时去掉充电
+                    /*if (mPointAtts.chargePoint != null){
                         initChargePointStaticPathPoint(mPointAtts.chargePoint,
                                 mp,
                                 missionListTask,
                                 order);
-                    }
+                    }*/
                     initPathMissionTaskQuHuo(
                             missionListTask,
                             order,
@@ -3134,12 +3136,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             mPointAtts
                     );
                     //如果充电点属性不为null，则查询充电点到取货点的工控路径
-                    if (mPointAtts.chargePoint != null){
+                    //TODO 20170913 临时去掉充电
+                    /*if (mPointAtts.chargePoint != null){
                         initChargePointStaticPathPoint(mp,
                                 mPointAtts.chargePoint,
                                 missionListTask,
                                 order);
-                    }
+                    }*/
                     break;
                 case MPointType_CHONGDIAN:
                     //暂时取消充电任务
