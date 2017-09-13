@@ -193,13 +193,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public List<RoadPathDetail> listRoadPaths(WhereRequest whereRequest) throws Exception {
+    public List<RoadPath> listRoadPaths(WhereRequest whereRequest) throws Exception {
         List<RoadPath> roadPaths = listPageByStoreIdAndOrder(
                 whereRequest.getPage(),
                 whereRequest.getPageSize(),
                 RoadPath.class,
                 "ID DESC");
-        return packageRoadPathDetail(roadPaths);
+        detailRoadPath(roadPaths);
+        return roadPaths;
     }
 
     private List<RoadPathDetail> packageRoadPathDetail(List<RoadPath> roadPaths){
@@ -229,6 +230,34 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             }
         }
         return roadPathDetails;
+    }
+
+    /**
+     * 不能返回一个新的 List，因为这样会破坏分页插件显示数据的正确性
+     * @param roadPaths
+     */
+    private void detailRoadPath(List<RoadPath> roadPaths){
+        int i = 0;
+        for (RoadPath roadPath : roadPaths) {
+            RoadPathDetail roadPathDetail = new RoadPathDetail();
+            BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
+            roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
+            roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
+            if (roadPath.getPathLock() != null) {
+                // 当逻辑锁对象不为空时，才级联查询对应的管理锁对象
+                roadPathDetail.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(roadPath.getPathLock()));//设置对应的逻辑锁对象
+            }
+            List<MapPoint> relatePoints = Lists.newArrayList();
+            log.info("packageRoadPathDetail: start- " + roadPath.getStartPoint()
+                    + ",end- " + roadPath.getEndPoint()
+                    + ",roadPathId- " + roadPath.getId());
+            for (RoadPathPoint roadPathPoint : this.roadPathMapper.findRoadPathPointByRoadPath(roadPath.getId())){
+                relatePoints.add(this.mapPointMapper.selectByPrimaryKey(roadPathPoint.getPointId()));
+            }
+            roadPathDetail.setRelatePoints(relatePoints);
+            roadPaths.set(i, roadPathDetail);
+            i ++;
+        }
     }
 
     @Override

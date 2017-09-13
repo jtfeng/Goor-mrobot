@@ -82,8 +82,8 @@ public class RoadPathController {
     @GetMapping("/asset/roadPath")
     public AjaxResult roadPathList(WhereRequest whereRequest) {
         try {
-            List<RoadPathDetail> list = roadPathService.listRoadPaths(whereRequest);
-            PageInfo<RoadPathDetail> pageList = new PageInfo<>(list);
+            List<RoadPath> list = roadPathService.listRoadPaths(whereRequest);
+            PageInfo<RoadPath> pageList = new PageInfo<>(list);
             return AjaxResult.success(pageList, "查询成功");
         } catch (Exception e) {
             return AjaxResult.failed(e,         "查询失败");
