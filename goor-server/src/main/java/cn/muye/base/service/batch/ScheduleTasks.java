@@ -166,16 +166,17 @@ public class ScheduleTasks {
     }
 
     //TODO 暂时注释
-//    /**
-//     * 每秒发送机器人当前的位置信息给工控，工控做机器人排队(暂定2s/次)
-//     */
-//    @Scheduled(cron = "*/2 * * * * ?")
-//    public void sendCurrentPose() {
-//        try {
-//            currentPoseService.sendCurrentPose();
-//        } catch (Exception e) {
-//            logger.error("Scheduled send robots current pose error", e);
-//        }
-//    }
+    /**
+     * 每秒发送机器人当前的位置信息给工控，工控做机器人排队(暂定2s/次)
+     */
+    @Scheduled(cron = "*/2 * * * * ?")
+    public void sendCurrentPose() {
+        try {
+            logger.info("Scheduled send robots current pose start");
+            currentPoseService.sendCurrentPose();
+        } catch (Exception e) {
+            logger.error("Scheduled send robots current pose error", e);
+        }
+    }
 
 }
