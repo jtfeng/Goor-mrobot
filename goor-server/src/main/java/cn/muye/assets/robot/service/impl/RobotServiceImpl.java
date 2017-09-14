@@ -187,8 +187,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 Robot robotDb = getById(robotId);
                 if (robotDb != null) {
                     //todo 紧急制动以后在做
-                    AjaxResult ajaxResult = testSendRobotMessage(robotDb);;
-                    if (ajaxResult != null && ajaxResult.isSuccess() && robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
+                    AjaxResult ajaxResult = testSendRobotMessage(robotDb);
+//                    if (ajaxResult != null && ajaxResult.isSuccess() && robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
+                    if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
                         availableRobot = robotDb;
                         stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
@@ -743,17 +744,19 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition(" CODE = ", robotCode);
-        Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
-        if (robot != null) {
-            if (busy != null) {
-                robot.setBusy(busy);
-            }
-            if (online != null) {
-                CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
-            }
-            if (busy != null ||
-                    online != null) {
-                super.updateSelective(robot);
+        List<Robot> robotDbList = this.robotMapper.selectByExample(example);
+        if (robotDbList != null && robotDbList.size() > 0) {
+            Robot robot = robotDbList.get(0); // 根据机器人 code 编号查询对应的机器人对象
+            if (robot != null) {
+                if (busy != null) {
+                    robot.setBusy(busy);
+                }
+                if (online != null) {
+                    CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
+                }
+                if (busy != null || online != null) {
+                    super.updateSelective(robot);
+                }
             }
         }
     }
