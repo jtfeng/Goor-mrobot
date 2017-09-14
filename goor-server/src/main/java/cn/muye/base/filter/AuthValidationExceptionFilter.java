@@ -58,12 +58,17 @@ public class AuthValidationExceptionFilter implements Filter{
                 String result = HttpClientUtil.executeGet(null, accessTokenFromReq, authUserUri , null, null, "UTF-8", true);
                 JSONObject jsonObject = JSON.parseObject(result);
                 String principal = jsonObject.getString("principal");
+                LOGGER.info("result===>" + result);
+                LOGGER.info("Authorization===>" + accessTokenFromReq);
+                LOGGER.info("principal===>" + principal);
                 if (StringUtil.isNullOrEmpty(principal)) {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
                     response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
                 } else {
                     String userName = JSON.parseObject(principal).getString("username");
+                    LOGGER.info("userName===>" + userName);
                     if (CacheInfoManager.getUserLoginStatusCache(userName) != null) {
+                        LOGGER.info("CacheInfoManager.getUserLoginStatusCache(" + userName+")====>" + CacheInfoManager.getUserLoginStatusCache(userName));
                         chain.doFilter(req, res);
                     } else {
                         response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
@@ -72,8 +77,8 @@ public class AuthValidationExceptionFilter implements Filter{
                 }
             } catch (Exception e) {
                 if (res instanceof HttpServletResponse) {
-                    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An expected error occured!");
+                    response.setStatus(((HttpServletResponse) res).getStatus());
+                    response.sendError(((HttpServletResponse) res).getStatus(), "An expected error occured!");
                 }
                 LOGGER.error(e.getMessage(), e);
             }
