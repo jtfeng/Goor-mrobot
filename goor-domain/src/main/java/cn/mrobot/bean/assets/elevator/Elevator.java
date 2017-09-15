@@ -19,6 +19,8 @@ public class Elevator extends BaseBean {
 
     private String ipElevatorId; //工控电梯ID （八位二进制）
 
+    private Boolean defaultElevator = Boolean.FALSE; //是否默认
+
     @Transient
     private List<ElevatorPointCombination> elevatorPointCombinations = new ArrayList<>();
 
@@ -34,6 +36,7 @@ public class Elevator extends BaseBean {
                 ", robotCode='" + robotCode + '\'' +
                 ", elevatorShaft=" + elevatorShaft +
                 ", ipElevatorId=" + ipElevatorId +
+                ", defaultElevator=" + defaultElevator +
                 ", elevatorPointCombinations=" + elevatorPointCombinations +
                 '}';
     }
@@ -108,6 +111,14 @@ public class Elevator extends BaseBean {
 
     public void setIpElevatorId(String ipElevatorId) {
         this.ipElevatorId = ipElevatorId;
+    }
+
+    public Boolean getDefaultElevator() {
+        return defaultElevator;
+    }
+
+    public void setDefaultElevator(Boolean defaultElevator) {
+        this.defaultElevator = defaultElevator;
     }
 
     //电梯动作
