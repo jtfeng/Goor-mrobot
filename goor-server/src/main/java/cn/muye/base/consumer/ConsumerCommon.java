@@ -145,6 +145,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.DIRECT_AGENT_SUB)
     public void directAgentSub(@Payload MessageInfo messageInfo) {
         try {
+            logger.info("messageInfo : " + JSON.toJSONString(messageInfo));
             if (null != messageInfo && !StringUtils.isEmpty(messageInfo.getMessageText())) {
                 JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
                 String data = jsonObject.getString(TopicConstants.DATA);
@@ -162,6 +163,7 @@ public class ConsumerCommon {
                     }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)) {
                     String jsonData = jsonObjectData.getString(TopicConstants.DATA);
+                    logger.info(" verify_emplyee_number  jsonData : " + JSON.toJSONString(jsonData));
                     JSONObject employeeObj = JSON.parseObject(jsonData);
                     String empNo = employeeObj.getString("empNo");
                     Long missionItemId = employeeObj.getLong("missionItemId");
