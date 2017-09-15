@@ -16,6 +16,9 @@ public class Elevator extends BaseBean {
     private String robotCode;
     @Transient
     private ElevatorShaft elevatorShaft;
+
+    private String ipElevatorId; //工控电梯ID （八位二进制）
+
     @Transient
     private List<ElevatorPointCombination> elevatorPointCombinations = new ArrayList<>();
 
@@ -30,6 +33,7 @@ public class Elevator extends BaseBean {
                 ", elevatorshaftId=" + elevatorshaftId +
                 ", robotCode='" + robotCode + '\'' +
                 ", elevatorShaft=" + elevatorShaft +
+                ", ipElevatorId=" + ipElevatorId +
                 ", elevatorPointCombinations=" + elevatorPointCombinations +
                 '}';
     }
@@ -96,6 +100,14 @@ public class Elevator extends BaseBean {
 
     public void setRobotCode(String robotCode) {
         this.robotCode = robotCode;
+    }
+
+    public String getIpElevatorId() {
+        return ipElevatorId;
+    }
+
+    public void setIpElevatorId(String ipElevatorId) {
+        this.ipElevatorId = ipElevatorId;
     }
 
     //电梯动作

@@ -13,6 +13,7 @@
         <result column="store_id" property="storeId" jdbcType="BIGINT"/>
         <result column="created_by" property="createdBy" jdbcType="BIGINT"/>
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="IP_ELEVATOR_ID" property="ipElevatorId" jdbcType="VARCHAR"/>
     </resultMap>
 
     <!--地图映射关系-->
