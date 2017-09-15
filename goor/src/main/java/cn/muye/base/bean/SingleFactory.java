@@ -30,6 +30,7 @@ public class SingleFactory {
     private static volatile Topic x86_mission_queue_response;
     private static volatile Topic x86_mission_state_response;
     private static volatile Topic x86_mission_event;
+    private static volatile Topic x86_mission_alert;
     private static volatile Topic x86_mission_receive;
     private static volatile Topic x86_elevator_lock;
     private static volatile Topic android_joystick_cmd_vel;
@@ -51,6 +52,7 @@ public class SingleFactory {
     static Lock lock_x86_mission_queue_response=new ReentrantLock();
     static Lock lock_x86_mission_state_response=new ReentrantLock();
     static Lock lock_x86_mission_event=new ReentrantLock();
+    static Lock lock_x86_mission_alert=new ReentrantLock();
     static Lock lock_x86_mission_receive=new ReentrantLock();
     static Lock lock_x86_elevator_lock=new ReentrantLock();
     static Lock lock_android_joystick_cmd_vel=new ReentrantLock();
@@ -326,6 +328,27 @@ public class SingleFactory {
             }
         }
         return x86_mission_event;
+    }
+
+    public static Topic x86_mission_alert(Ros ros) throws Exception {
+        if (x86_mission_alert == null) {
+            if(null == ros){
+                log.error("get x86_mission_alert ros is null error, return null");
+                return x86_mission_alert;
+            }
+            lock_x86_mission_alert.lock();
+            try {
+                if (x86_mission_alert == null) {
+                    x86_mission_alert = new Topic(ros, TopicConstants.X86_MISSION_ALERT, TopicConstants.TOPIC_TYPE_STRING);
+                    log.info("get topic x86_mission_alert="+x86_mission_alert);
+                }
+            }catch (Exception e){
+                log.error("get x86_mission_alert error", e);
+            }finally {
+                lock_x86_mission_alert.unlock();
+            }
+        }
+        return x86_mission_alert;
     }
 
     public static Topic x86_mission_receive(Ros ros) throws Exception {
