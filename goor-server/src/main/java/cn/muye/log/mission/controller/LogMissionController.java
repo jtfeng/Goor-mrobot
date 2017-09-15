@@ -5,23 +5,22 @@ import cn.mrobot.bean.log.mission.LogMission;
 import cn.mrobot.bean.log.mission.LogMission.MissionLogType;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
+import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.log.mission.service.LogMissionService;
 import cn.muye.service.consumer.topic.BaseMessageService;
 import cn.muye.service.consumer.topic.X86ElevatorLockService;
 import cn.muye.service.consumer.topic.X86MissionStateResponseService;
+import com.github.pagehelper.PageInfo;
 import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by abel on 17-7-7.
@@ -201,6 +200,27 @@ public class LogMissionController {
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 查看任务日志
+     * @param whereRequest
+     * @return
+     */
+    @GetMapping()
+    @ApiOperation(
+            value = "任务日志列表",
+            notes = "任务日志列表")
+    public AjaxResult list(WhereRequest whereRequest) {
+        if (whereRequest != null) {
+            int page = whereRequest.getPage();
+            int pageSize = whereRequest.getPageSize();
+            List<LogMission> list = logMissionService.listPageByStoreIdAndOrder(page, pageSize, LogMission.class, "CREATE_TIME DESC");
+            PageInfo<LogMission> pageInfo = new PageInfo<LogMission>(list);
+            return AjaxResult.success(pageInfo, "查询成功");
+        } else {
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
         }
     }
 }

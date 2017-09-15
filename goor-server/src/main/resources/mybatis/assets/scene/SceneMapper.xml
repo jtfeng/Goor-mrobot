@@ -18,7 +18,7 @@
         <result column="MAP_NAME" property="mapName" jdbcType="VARCHAR"/>
         <result column="SCENE_NAME" property="sceneName" jdbcType="BIGINT"/>
         <result column="MAP_ALIAS" property="mapAlias" jdbcType="VARCHAR"/>
-        <result column="PNG_IMAGE_LOCA" property="pngImageLocalPath" jdbcType="BIGINT"/>
+        <result column="PNG_IMAGE_LOCAL_PATH" property="pngImageLocalPath" jdbcType="VARCHAR"/>
         <result column="ROS" property="ros" jdbcType="VARCHAR"/>
         <result column="DEVICE_ID" property="deviceId" jdbcType="BIGINT"/>
         <result column="PNG_DESIGNED" property="pngDesigned" jdbcType="VARCHAR"/>

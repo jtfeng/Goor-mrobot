@@ -35,6 +35,9 @@ public class MapInfo extends BaseBean {
 
 	private String pngDesigned; //  设计图的相对路径
 
+	@Transient
+	private String pngDesignedHttpPath;
+
 	private Long mapZipId;
 
 	private int floor;
@@ -131,6 +134,14 @@ public class MapInfo extends BaseBean {
 		this.floor = floor;
 	}
 
+	public String getPngDesignedHttpPath() {
+		return pngDesignedHttpPath;
+	}
+
+	public void setPngDesignedHttpPath(String pngDesignedHttpPath) {
+		this.pngDesignedHttpPath = pngDesignedHttpPath;
+	}
+
 	@Override
 	public String toString() {
 		return "MapInfo{" +
@@ -142,6 +153,7 @@ public class MapInfo extends BaseBean {
 				", ros='" + ros + '\'' +
 				", deviceId='" + deviceId + '\'' +
 				", pngDesigned='" + pngDesigned + '\'' +
+				", pngDesignedHttpPath='" + pngDesignedHttpPath + '\'' +
 				", mapZipId=" + mapZipId +
 				", floor=" + floor +
 				", deleteFlag=" + deleteFlag +

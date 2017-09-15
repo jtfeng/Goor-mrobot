@@ -1047,7 +1047,7 @@ INSERT INTO `D_FEATURE_ITEM` VALUES ('7', '带时间长度充电任务', 'charge
 INSERT INTO `D_FEATURE_ITEM` VALUES ('8', '装货', 'load', '装货架任务', '{\\\"code\\\":\\\"test0\\\",\\\"rfid\\\":\\\"tes0\\\",\\\"type\\\":\\\"test0\\\",\\\"name\\\":\\\"test0\\\",\\\"id\\\":1,\\\"storeId\\\":100,\\\"createdBy\\\":1,\\\"createTime\\\":\\\"Jul 3, 2017 8:30:31 PM\\\"}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('9', '卸货', 'unload', '卸货架任务', '{\\\"goodsInfos\\\":[{\\\"id\\\":38,\\\"num\\\":1,\\\"goods\\\":{\\\"name\\\":\\\"大箱\\\",\\\"unit\\\":\\\"个\\\",\\\"deleteStatus\\\":false,\\\"id\\\":1}},{\\\"id\\\":39,\\\"num\\\":1,\\\"goods\\\":{\\\"name\\\":\\\"中箱\\\",\\\"unit\\\":\\\"个\\\",\\\"deleteStatus\\\":false,\\\"id\\\":2}},{\\\"id\\\":40,\\\"num\\\":1,\\\"goods\\\":{\\\"name\\\":\\\"小箱\\\",\\\"unit\\\":\\\"个\\\",\\\"deleteStatus\\\":false,\\\"id\\\":3}}]}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('10', '终点卸货任务', 'finalUnload', '终点卸货任务', '{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}');
-INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{\"current_floor\":4,\"arrival_floor\":1,\"enter_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"set_pose_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"back_point\":{{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}}');
+INSERT INTO `D_FEATURE_ITEM` VALUES ('11', '电梯', 'elevator', '电梯', '{\"elevators\":[{\"default_elevator\":1,\"ip_elevator_id\":1,\"current_floor\":4,\"arrival_floor\":1,\"enter_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"set_pose_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"back_point\":{{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}},{\"default_elevator\":0,\"ip_elevator_id\":1,\"current_floor\":4,\"arrival_floor\":1,\"enter_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"set_pose_point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"},\"back_point\":{{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}}],\"path0_1\":{\"id\":1,\"scene_name\":\"test\"},\"path1_0\":{\"id\":1,\"scene_name\":\"test\"},\"path2_3\":{\"id\":1,\"scene_name\":\"test\"},\"path3_2\":{\"id\":1,\"scene_name\":\"test\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('12', '自动门', 'door', '自动门', '{\"waitTime\":100000,\"point\":{\"x\":0,\"y\":0,\"th\":0,\"scene_name\":\"场景名\",\"map_name\":\"地图名\",\"map\":\"地图名\"}}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('13', '电梯加锁任务', 'elevatorLock', '电梯加锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
 INSERT INTO `D_FEATURE_ITEM` VALUES ('14', '电梯解锁任务', 'elevatorUnlock', '电梯解锁任务', '{\"elevator_id\":1, \"interval_time\":30}');
@@ -1769,6 +1769,8 @@ create table AS_ELEVATOR
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   ROBOT_CODE varchar(50) null comment '上锁或者解锁机器人的 code 编号',
+  `IP_ELEVATOR_ID` varchar(8) DEFAULT NULL COMMENT '电梯ID',
+  `DEFAULT_ELEVATOR` bit(1) DEFAULT b'0' COMMENT '是否为默认',
   constraint AS_ELEVATOR_AS_ELEVATORSHAFT_ID_fk
   foreign key (ELEVATORSHAFT_ID) references AS_ELEVATORSHAFT (ID)
     on update cascade on delete cascade

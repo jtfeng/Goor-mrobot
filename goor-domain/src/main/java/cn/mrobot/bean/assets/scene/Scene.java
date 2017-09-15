@@ -28,6 +28,10 @@ public class Scene extends BaseBean{
 
     @Transient
     private String mapSceneName;
+
+    @Transient
+    private List<MapInfo> mapInfoList = new ArrayList<>();
+
     @Transient
     private List<Robot> robots = new ArrayList<>();
 
@@ -71,6 +75,14 @@ public class Scene extends BaseBean{
         this.robots = robots;
     }
 
+    public List<MapInfo> getMapInfoList() {
+        return mapInfoList;
+    }
+
+    public void setMapInfoList(List<MapInfo> mapInfoList) {
+        this.mapInfoList = mapInfoList;
+    }
+
     @Override
     public String toString() {
         return "Scene{" +
@@ -79,6 +91,7 @@ public class Scene extends BaseBean{
                 ", state=" + state +
                 ", mapSceneName='" + mapSceneName + '\'' +
                 ", robots=" + robots +
+                ", mapInfoList=" + mapInfoList +
                 '}';
     }
 
