@@ -4,12 +4,9 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.service.consumer.topic.X86ElevatorLockService;
-import cn.muye.service.consumer.topic.X86MissionEventService;
+import cn.muye.service.consumer.topic.*;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
-import cn.muye.service.consumer.topic.X86MissionStateResponseService;
-import cn.muye.service.consumer.topic.X86RoadPathLockService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
@@ -72,6 +69,24 @@ public class MissionConsumer {
             x86MissionEventService.handleX86MissionEvent(messageInfo);
         } catch (Exception e) {
             logger.error("consumer directX86MissionEvent exception", e);
+        }
+    }
+
+    @Autowired
+    X86MissionAlertService x86MissionAlertService;
+
+    /**
+     * 透传ros发布的topic：x86_mission_event
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.DIRECT_X86_MISSION_ALERT)
+    public void directX86MissionAlert(@Payload MessageInfo messageInfo) {
+        try {
+            //直接service方法处理上报的数据
+            x86MissionAlertService.handleX86MissionAlert(messageInfo);
+        } catch (Exception e) {
+            logger.error("consumer directX86MissionAlert exception", e);
         }
     }
 
