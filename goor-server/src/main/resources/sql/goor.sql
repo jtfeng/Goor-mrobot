@@ -1769,6 +1769,7 @@ create table AS_ELEVATOR
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   ROBOT_CODE varchar(50) null comment '上锁或者解锁机器人的 code 编号',
+  `IP_ELEVATOR_ID` varchar(8) DEFAULT NULL COMMENT '电梯ID',
   constraint AS_ELEVATOR_AS_ELEVATORSHAFT_ID_fk
   foreign key (ELEVATORSHAFT_ID) references AS_ELEVATORSHAFT (ID)
     on update cascade on delete cascade
