@@ -24,6 +24,7 @@ import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -63,6 +64,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private RobotMapZipXREFService robotMapZipXREFService;
     //保存添加场景与机器人之间的关系时候，需要加锁，以免事务未提交读取到脏数据
     private ReentrantLock lock = new ReentrantLock();
+
+    @Value("${goor.push.http}")
+    private String DOWNLOAD_HTTP;
 
     @Override
     public List<Scene> list() throws Exception {
@@ -172,6 +176,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(id, scene.getStoreId());
         if (mapInfos != null && mapInfos.size() != 0) {
             scene.setMapSceneName(mapInfos.get(0).getSceneName());
+            mapInfos.forEach(mapInfo -> {
+                mapInfo.setPngImageHttpPath(DOWNLOAD_HTTP + mapInfo.getPngImageLocalPath());
+                mapInfo.setPngDesignedHttpPath(DOWNLOAD_HTTP + mapInfo.getPngDesigned());
+            });
+            scene.setMapInfoList(mapInfos);
         }
         return scene;
     }
