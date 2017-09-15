@@ -19,6 +19,8 @@ public class Employee extends BaseBean{
 
     private String description; //备注
 
+    private Boolean activated = Boolean.TRUE;; //激活
+
     @Transient
     private List<Station> stationList; //站点List
 
@@ -52,6 +54,14 @@ public class Employee extends BaseBean{
 
     public void setStationList(List<Station> stationList) {
         this.stationList = stationList;
+    }
+
+    public Boolean getActivated() {
+        return activated;
+    }
+
+    public void setActivated(Boolean activated) {
+        this.activated = activated;
     }
 }
 

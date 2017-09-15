@@ -68,6 +68,8 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     private static ConcurrentHashMapCache<String, Boolean> robotOnlineCache = new ConcurrentHashMapCache<>();//机器人是否在线缓存
 
+    private static ConcurrentHashMapCache<String, String> robotMissionAlertStatusCache = new ConcurrentHashMapCache<>();//当前机器人任务状态缓存
+
     /**
      * webSocket根据用户名来缓存Session 的缓存
      */
@@ -388,5 +390,13 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setRobotOnlineCache(String robotSn, Boolean online) {
         robotOnlineCache.put(robotSn, online);
+    }
+
+    public static String getRobotMissionAlertStatusCache(String code) {
+        return robotMissionAlertStatusCache.get(code);
+    }
+
+    public static void setRobotMissionAlertStatusCache(String code, String missionStatus) {
+        robotMissionAlertStatusCache.put(code, missionStatus);
     }
 }

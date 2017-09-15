@@ -223,6 +223,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue directX86MissionAlert() {
+        return new Queue(TopicConstants.DIRECT_X86_MISSION_ALERT,false,false,true, RabbitmqUtil.getRabbitMQArguments());
+    }
+
+    @Bean
     public Queue directX86MissionReceive() {
         return new Queue(TopicConstants.DIRECT_X86_MISSION_RECEIVE,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }

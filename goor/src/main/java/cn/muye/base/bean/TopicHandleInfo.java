@@ -61,6 +61,10 @@ public class TopicHandleInfo implements Serializable {
 		Topic eventTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_EVENT);
 		eventTopic.unsubscribe();
 		eventTopic.subscribe(new X86MissionEventListenerImpl());
+		//任务超时报警上报
+		Topic alertTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_ALERT);
+		alertTopic.unsubscribe();
+		alertTopic.subscribe(new X86MissionAlertListenerImpl());
 		//云端下发任务回执
 		Topic receiveTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_RECEIVE);
 		receiveTopic.unsubscribe();
@@ -304,6 +308,13 @@ public class TopicHandleInfo implements Serializable {
 				return SingleFactory.x86_mission_event(ros);
 			} catch (Exception e) {
 				log.error("getTopic X86_MISSION_EVENT Object error", e);
+			}
+		}
+		if(topicName.equals(TopicConstants.X86_MISSION_ALERT)){
+			try {
+				return SingleFactory.x86_mission_alert(ros);
+			} catch (Exception e) {
+				log.error("getTopic X86_MISSION_ALERT Object error", e);
 			}
 		}
 		if(topicName.equals(TopicConstants.X86_MISSION_RECEIVE)){

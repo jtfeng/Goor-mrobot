@@ -226,6 +226,26 @@ public class ProducerCommon implements ApplicationContextAware {
     }
 
     /**
+     *任务超时报警上报topic
+     * @param text
+     */
+    public void sendX86MissionAlertMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_MISSION_ALERT, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendX86MissionEventMessage error",e);
+        }
+    }
+
+    /**
      *任务回执上报topic
      * @param text
      */

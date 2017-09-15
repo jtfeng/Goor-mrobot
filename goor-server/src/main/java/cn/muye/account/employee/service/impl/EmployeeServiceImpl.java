@@ -142,13 +142,23 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
             //记录日志.单独开前程，避免影响主线程
             new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
-            if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
-                Map map = Maps.newHashMap();
-                map.put("code", code);
-                map.put("missionItemId", missionItemId);
-                List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
-                if (employeeListDb != null && employeeListDb.size() > 0) {
-                    return AjaxResult.success();
+            Employee employee = new Employee();
+            employee.setCode(code);
+            employee.setActivated(true);
+            Employee employeeDb = employeeMapper.selectOne(employee);
+            if (employeeDb == null) {
+                return AjaxResult.failed("输入信息错误");
+            } else {
+                if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
+                    Map map = Maps.newHashMap();
+                    map.put("code", code);
+                    map.put("missionItemId", missionItemId);
+                    List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
+                    if (employeeListDb != null && employeeListDb.size() > 0) {
+                        return AjaxResult.success("校验成功");
+                    } else {
+                        return AjaxResult.failed("没有权限");
+                    }
                 }
             }
         } catch (Exception e) {
@@ -156,7 +166,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             return AjaxResult.failed("系统错误");
         } finally {
         }
-        return AjaxResult.failed("没有权限");
+        return null;
     }
 
     private void saveLogInfo(String code, MissionItemTask missionItemTaskListDb) {
