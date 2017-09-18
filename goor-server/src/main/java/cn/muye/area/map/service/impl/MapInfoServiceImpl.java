@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +88,15 @@ public class MapInfoServiceImpl implements MapInfoService {
 
     @Override
     public void deleteByPrimaryKey(Long id) {
+        //查询出该对象的信息
+        MapInfo mapInfo = mapInfoMapper.selectByPrimaryKey(id);
+        if (null != mapInfo){
+         //递归删除该场景下面文件名包含地图名的所有文件
+            String mapName = mapInfo.getMapName();
+            String sceneName = mapInfo.getSceneName();
+            FileUtils.deleteDirInclude(new File(sceneName), mapName);
+        }
+        //删除数据库记录
         mapInfoMapper.deleteByPrimaryKey(id);
     }
 
@@ -225,8 +235,8 @@ public class MapInfoServiceImpl implements MapInfoService {
     /**
      * 获取机器人当前地图信息
      *
-     * @param code
-     * @return
+     * @param code 机器人编号
+     * @return 机器人当前地图信息
      */
     private MapInfo getCurrentMapInfo(String code) {
         //根据场景名和地图名获取地图信息
