@@ -1,6 +1,5 @@
 package cn.muye.area.map.service.impl;
 
-import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Condition;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +88,15 @@ public class MapInfoServiceImpl implements MapInfoService {
 
     @Override
     public void deleteByPrimaryKey(Long id) {
+        //查询出该对象的信息
+        MapInfo mapInfo = mapInfoMapper.selectByPrimaryKey(id);
+        if (null != mapInfo){
+         //递归删除该场景下面文件名包含地图名的所有文件
+            String mapName = mapInfo.getMapName();
+            String sceneName = mapInfo.getSceneName();
+            FileUtils.deleteDirInclude(new File(sceneName), mapName);
+        }
+        //删除数据库记录
         mapInfoMapper.deleteByPrimaryKey(id);
     }
 
@@ -134,20 +143,21 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     @Override
-    public CurrentInfo getCurrentInfo(String code) throws Exception{
+    public CurrentInfo getCurrentInfo(String code) throws Exception {
         try {
             //从缓存中获取当前机器的坐标
             CurrentInfo currentInfo = new CurrentInfo();
 
             //获取开机状态
             Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            if(null == robot){
+            if (null == robot) {
                 return null;
             }
-            currentInfo.setOnline(robot.getOnline());
-            if(!robot.getOnline()){
-                LOGGER.info("机器人（" + code + "）不在线");
+            Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+            if (flag == null) {
+                flag = false;
             }
+            currentInfo.setOnline(flag);
 
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
             if (null != currentPoseInfo) {
@@ -159,7 +169,7 @@ public class MapInfoServiceImpl implements MapInfoService {
 
             //根据机器人code获取地图信息
             MapInfo mapInfo = getCurrentMapInfo(code);
-            if(null == mapInfo)
+            if (null == mapInfo)
                 currentInfo.setPose("");  //没有地图不显示坐标
             currentInfo.setMapInfo(getCurrentMapInfo(code));
 
@@ -175,7 +185,7 @@ public class MapInfoServiceImpl implements MapInfoService {
             //添加当前任务状态
             currentInfo.setMission(stateCollectorService.collectTaskLog(code));
             return currentInfo;
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error("获取当前位置信息出错", e);
             return null;
         }
@@ -224,31 +234,29 @@ public class MapInfoServiceImpl implements MapInfoService {
 
     /**
      * 获取机器人当前地图信息
-     * @param code
-     * @return
+     *
+     * @param code 机器人编号
+     * @return 机器人当前地图信息
      */
     private MapInfo getCurrentMapInfo(String code) {
         //根据场景名和地图名获取地图信息
         MessageInfo currentMap = CacheInfoManager.getMapCurrentCache(code);
-        if (null != currentMap) {
-            JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
-            String data = jsonObject.getString(TopicConstants.DATA);
-            JSONObject object = JSON.parseObject(data);
-            Integer errorCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
-            if (errorCode != null && errorCode == 0) {
-                String mapData = object.getString(TopicConstants.DATA);
-                JSONObject mapObject = JSON.parseObject(mapData);
-                String mapName = mapObject.getString(TopicConstants.MAP_NAME);
-                String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
-                MapInfo mapInfo = CacheInfoManager.getMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
-                if (mapInfo != null) {
-                    return mapInfo;
-                } else {
-                    LOGGER.info("未找到地图信息 name=" + mapName + "，sceneName=" + sceneName);
-                }
+        if (null == currentMap) {
+            return null;
+        }
+        JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
+        String data = jsonObject.getString(TopicConstants.DATA);
+        JSONObject object = JSON.parseObject(data);
+        Integer errorCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
+        if (errorCode != null && errorCode == 0) {
+            String mapData = object.getString(TopicConstants.DATA);
+            JSONObject mapObject = JSON.parseObject(mapData);
+            String mapName = mapObject.getString(TopicConstants.MAP_NAME);
+            String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
+            MapInfo mapInfo = CacheInfoManager.getMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
+            if (mapInfo != null) {
+                return mapInfo;
             }
-        } else {
-            LOGGER.info("未获取到当前机器人（" + code + "）实时地图");
         }
         return null;
     }
