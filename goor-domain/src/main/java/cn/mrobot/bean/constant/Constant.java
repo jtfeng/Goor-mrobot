@@ -12,6 +12,9 @@ public class Constant {
     public final static Integer NORMAL = 0; //正常值
     public final static Integer DELETE = 1;  //删除
 
+    //PathType
+    public final static Integer PATH_TYPE_CLOUD = 0; //云端路径
+    public final static Integer PATH_TYPE_X86 = 1;  //工控路径
 
     public static final String UTF_8 = "UTF-8";
 
