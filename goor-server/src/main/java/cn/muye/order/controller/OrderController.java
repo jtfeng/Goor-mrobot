@@ -112,7 +112,19 @@ public class OrderController extends BaseController {
         }
     }
 
-
+    /**
+     * 测试发送发货卸货取货任务，不要提交
+     * @return
+     */
+    @RequestMapping(value = "sendLoadUnload", method = RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult testLoadUnloadEvent(@RequestBody String json, @RequestParam("robotSn") String robotSn) {
+        AjaxResult ajaxResult = x86MissionDispatchService.sendX86MissionDispatch(
+                robotSn,
+                json
+        );
+        return ajaxResult;
+    }
 
     /**
      * 保存一个订单

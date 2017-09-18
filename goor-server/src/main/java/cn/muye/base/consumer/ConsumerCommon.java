@@ -168,7 +168,7 @@ public class ConsumerCommon {
                     String empNo = employeeObj.getString("empNo");
                     Long missionItemId = employeeObj.getLong("missionItemId");
                     AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(empNo, missionItemId);
-                    replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.isSuccess(), uuid);
+                    replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.getCode(), uuid);
                 } else if (!StringUtils.isEmpty(messageName)  &&
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CHECK_OPERATE_PWD)) {
                     //PUB AND SUB NAME : check_operate_pwd
@@ -186,10 +186,10 @@ public class ConsumerCommon {
      *
      * @param robotCode
      * @param msg
-     * @param flag
+     * @param code
      * @param uuid
      */
-    private void replyVerification(String robotCode, String msg, Boolean flag, String uuid) {
+    private void replyVerification(String robotCode, String msg, Integer code, String uuid) {
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName(TopicConstants.AGENT_PUB);
         commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
@@ -197,7 +197,7 @@ public class ConsumerCommon {
         slamBody.setPubName(TopicConstants.VERIFY_EMPLYEE_NUMBER);
         slamBody.setUuid(uuid);
         slamBody.setMsg(msg);
-        slamBody.setErrorCode(flag? "0" : "1");
+        slamBody.setErrorCode(String.valueOf(code));
         slamBody.setData("");
         commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
         MessageInfo messageInfo = new MessageInfo();

@@ -3,6 +3,7 @@ package cn.muye.base.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.log.alert.LogAlert;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.service.FileUpladService;
@@ -152,5 +153,54 @@ public class ExampleController {
             e.printStackTrace();
             return AjaxResult.failed();
         }
+    }
+
+    /**
+     * 模拟应用发送校验员工工号
+     *
+     * @return
+     */
+    @RequestMapping(value = "test6", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult test6(@RequestParam("missionItemId") Long missionItemId, @RequestParam("empNo") String empNo) {
+        //        //TODO 模拟应用发布查询云端站数据接口
+        Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.AGENT_SUB);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(TopicConstants.SUB_NAME, "verify_emplyee_number");
+        jsonObject.put(TopicConstants.DATA, "{\"missionItemId\": " + missionItemId +", \"empNo\": "+ empNo +"}");
+        jsonObject.put(TopicConstants.UUID, "fldslfjlsajflsdjfljdslkfjlkdsjfl");
+        jsonObject.put("msg", "");
+        jsonObject.put("error_code", "");
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+        Message toSend = new Message(JSON.toJSONString(messageObject));
+//        Message toSend = new Message("{\"data\":{\"pub_name\": \"station_list_get\",\"data\": {\"robot_code\": \"cookyPlus1301chay\"} } }");
+//        Message toSend = new Message("{\"data\": \"hello, world,appSub!"+ new Date()+aa +"\"}");
+        echo.publish(toSend);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 模拟应用发送报警事件
+     *
+     * @return
+     */
+    @RequestMapping(value = "testAlert", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult testAlert(@RequestParam(value = "robotCode",required = false) String robotCode, @RequestParam("uuId") String uuId, @RequestParam("sendTime") Long sendTime, @RequestParam("alertCode") Integer alertCode, @RequestParam("msg") String msg, @RequestParam("missionItemId") Long missionItemId) {
+        //        //TODO 模拟应用发布查询云端站数据接口
+        Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_ALERT);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(TopicConstants.SUB_NAME, "mission_alert");
+        jsonObject.put(TopicConstants.DATA, "   {\"alert_time\":"+ sendTime + ", \"alert_code\":"+ alertCode+ ", \"msg\":\""+ msg + "\", \"mission_item_id\":"+ missionItemId +"}" );
+        jsonObject.put(TopicConstants.UUID, uuId);
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+        logger.info("测试alert的Data:" + jsonObject.get(TopicConstants.DATA));
+        Message toSend = new Message(JSON.toJSONString(messageObject));
+//        Message toSend = new Message("{\"data\":{\"pub_name\": \"station_list_get\",\"data\": {\"robot_code\": \"cookyPlus1301chay\"} } }");
+//        Message toSend = new Message("{\"data\": \"hello, world,appSub!"+ new Date()+aa +"\"}");
+        echo.publish(toSend);
+        return AjaxResult.success();
     }
 }
