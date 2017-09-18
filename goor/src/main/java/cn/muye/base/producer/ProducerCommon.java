@@ -4,7 +4,6 @@ import cn.mrobot.bean.constant.TopicConstants;
 
 import cn.muye.base.bean.MessageInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -241,7 +240,7 @@ public class ProducerCommon implements ApplicationContextAware {
             }
             rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_MISSION_ALERT, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
-            log.error("sendX86MissionEventMessage error",e);
+            log.error("sendX86MissionAlertMessage error",e);
         }
     }
 

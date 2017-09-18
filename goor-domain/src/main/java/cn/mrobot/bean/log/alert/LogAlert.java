@@ -4,6 +4,7 @@ import cn.mrobot.bean.base.BaseBean;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -21,7 +22,13 @@ public class LogAlert extends BaseBean {
 
     private Long missionItemId;
 
+    @Transient
+    private String missionItemDescription;
+
     private String description;
+
+    @Transient
+    private String alertName;
 
     public String getRobotCode() {
         return robotCode;
@@ -61,5 +68,21 @@ public class LogAlert extends BaseBean {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getAlertName() {
+        return alertName;
+    }
+
+    public void setAlertName(String alertName) {
+        this.alertName = alertName;
+    }
+
+    public String getMissionItemDescription() {
+        return missionItemDescription;
+    }
+
+    public void setMissionItemDescription(String missionItemDescription) {
+        this.missionItemDescription = missionItemDescription;
     }
 }

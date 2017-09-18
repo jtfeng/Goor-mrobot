@@ -62,10 +62,10 @@ public enum AlertTypeEnum {
         return description;
     }
 
-    public static String getValue(String description) {
+    public static String getValue(String code) {
         String value = "";
         for (AlertTypeEnum noticeType : AlertTypeEnum.values()) {
-            if (description == noticeType.getDescription()) {
+            if (code.equals(String.valueOf(noticeType.getCode()))) {
                 value = noticeType.getDescription();
             }
         }
@@ -85,7 +85,7 @@ public enum AlertTypeEnum {
         List<Map> resultList = new ArrayList<Map>();
         for (AlertTypeEnum c : AlertTypeEnum.values()) {
             Map result = new HashMap<String, Object>();
-            result.put("code", c);
+            result.put("code", c.getCode());
             result.put("description", c.getDescription());
             resultList.add(result);
         }

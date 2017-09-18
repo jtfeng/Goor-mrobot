@@ -50,7 +50,7 @@ public class TopicConstants {
 	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
 	public static final String X86_ELEVATOR_LOCK = "/x86_elevator_lock";//电梯锁定topic
 	public static final String X86_MISSION_HEARTBEAT = "/x86_mission_heartbeat";//x86 mission心跳topic
-	public static final String X86_MISSION_ALERT = "x86_mission_alert";
+	public static final String X86_MISSION_ALERT = "x86_mission_alert"; //x86 mission任务报警topic
 
 	public static final String ANDROID_JOYSTICK_CMD_VEL = "/android_joystick_cmd_vel";//摇杆topic
 	public static final String ROS_SUB_YAOGAN_TOPIC = "~cmd_vel";
@@ -151,7 +151,7 @@ public class TopicConstants {
 	public static final String DIRECT_X86_MISSION_QUEUE_RESPONSE = "direct.x86_mission_queue_response";//当前任务队列数据响应topic
 	public static final String DIRECT_X86_MISSION_STATE_RESPONSE = "direct.x86_mission_state_response";//当前任务状态响应topic
 	public static final String DIRECT_X86_MISSION_EVENT = "direct.x86_mission_event";//任务事件上报topic
-	public static final String DIRECT_X86_MISSION_ALERT= "direct.x86_mission_alert";//任务事件上报topic
+	public static final String DIRECT_X86_MISSION_ALERT= "direct.x86_mission_alert";//任务报警上报topic
 	public static final String DIRECT_X86_MISSION_RECEIVE = "direct.x86_mission_receive";//任务回执上报topic
 	public static final String DIRECT_X86_ELEVATOR_LOCK = "direct.x86_elevator_lock";//电梯锁操作请求topic
 	public static final String DIRECT_X86_ROADPATH_LOCK = "direct.x86_roadpath_lock";//路径锁操作请求topic

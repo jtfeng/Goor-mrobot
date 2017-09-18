@@ -144,7 +144,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
             Employee employee = new Employee();
             employee.setCode(code);
-            employee.setActivated(true);
+//            employee.setActivated(true);
             Employee employeeDb = employeeMapper.selectOne(employee);
             if (employeeDb == null) {
                 return AjaxResult.failed("输入信息错误");

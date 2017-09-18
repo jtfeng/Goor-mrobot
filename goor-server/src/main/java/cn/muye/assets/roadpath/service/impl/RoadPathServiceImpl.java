@@ -5,6 +5,7 @@ import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
 import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
@@ -70,27 +71,52 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
             log.info(String.format("路径权值数据为：%s", weight));
 
+            String pathType = String.valueOf(checkNotNull(body.get("pathType"),"路径类型不能为空"));
+            Integer pathTypeInt = Integer.parseInt(pathType);
+            checkNotNull(pathTypeInt,"路径类型不能为空");
             List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
-            checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
 
-            // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+            //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
+            if(pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
+                checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
+                Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
+                RoadPath roadPath = new RoadPath() {{
+                    setData(data);
+                    setPattern(pattern);
+                    setPathName(pathName);
+                    setCreateTime(new Date());
+                    setStoreId(100L);
+                    setWeight(weight);
+                    setStartPoint(startPointId);               // 设置开始点
+                    setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置结束点
+                    setPathId("");//云端路径没有PathId
+                    setPathType(pathTypeInt);
+                }};
+                setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+                this.roadPathMapper.insert(roadPath);
+                packageRoadPathRelations(points, roadPath);
+            }
+            else if(pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
+                checkArgument(points.size() == 2, "工控路径点组合只能两个点（开始点和结束点）");
+                Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
+                //如果是工控路径还得校验工控路径不为空
+                String pathId = String.valueOf(checkNotNull(body.get("pathId"),"工控路径ID不能为空"));
+                RoadPath roadPath = new RoadPath() {{
+                    setData(data);
+                    setPattern(pattern);
+                    setPathName(pathName);
+                    setCreateTime(new Date());
+                    setStoreId(100L);
+                    setWeight(weight);
+                    setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置开始点
+                    setEndPoint(Long.parseLong(String.valueOf(points.get(1)))); // 设置结束点
+                    setPathType(pathTypeInt);
+                    setPathId(pathId);
+                }};
+                setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+                this.roadPathMapper.insert(roadPath);
+            }
 
-            RoadPath roadPath = new RoadPath() {{
-                setData(data);
-                setPattern(pattern);
-                setPathName(pathName);
-                setCreateTime(new Date());
-                setStoreId(100L);
-                setWeight(weight);
-                setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置开始点
-                setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置结束点
-                setSceneName(sceneName);
-                setMapName(mapName);
-                setPathId(UUID.randomUUID().toString().replaceAll("\\-", ""));
-                setPathType(0);//云端创建的路径信息
-            }};
-            this.roadPathMapper.insert(roadPath);
-            packageRoadPathRelations(points, roadPath);
         }catch (Exception e){
             e.printStackTrace();
             throw e;
@@ -112,30 +138,69 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             log.info(String.format("路径相关数据：%s", data));
             Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
             log.info(String.format("路径权值数据为：%s", weight));
-            List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
-            checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
+            String pathType = String.valueOf(checkNotNull(body.get("pathType"),"路径类型不能为空"));
+            Integer pathTypeInt = Integer.parseInt(pathType);
+            checkNotNull(pathTypeInt,"路径类型不能为空");
 
             RoadPath roadPath = new RoadPath();
             roadPath.setId(id);
             roadPath.setPathId(pathId);
-            roadPath.setPathType(0);//云端创建的路径信息
+            roadPath.setPathType(pathTypeInt);
             roadPath.setData(data); // 路径数据
             roadPath.setPattern(pattern); // 拟合方式
             roadPath.setPathName(pathName); // 路径名称
             roadPath.setWeight(weight); // 路径权重大小
-            roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
-            roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置（结束点）
             roadPath.setSceneName(sceneName); // 工控场景名
             roadPath.setMapName(mapName);     // 工控地图名 【此处不知道是否需要更新工控路径 ID 信息以及路径类型】
             roadPath.setCreateTime(new Date());
             roadPath.setStoreId(100L);
-            int updateCount = this.roadPathMapper.updateByPrimaryKey(roadPath);
-            log.info("当前更新的数据记录条数为 ：" + updateCount);
-            packageRoadPathRelations(points, roadPath);
+
+            //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
+            if(pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
+                List points = (List) checkNotNull(body.get("points"), "云端路径点组合不允许为空，请重新选择!");
+                checkArgument(points.size() >= 2, "云端路径点组合至少需要两个点（开始点和结束点）");
+                roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
+                roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置（结束点）
+
+                Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
+                setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+
+                int updateCount = this.roadPathMapper.updateByPrimaryKeySelective(roadPath);
+                log.info("当前更新的数据记录条数为 ：" + updateCount);
+                packageRoadPathRelations(points, roadPath);
+                return;
+            }
+            else if(pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
+                List points = (List)body.get("points");
+                if(points != null && points.size() > 0) {
+                    checkArgument(points.size() == 2, "工控路径点组合至少只能有两个点（开始点和结束点）");
+                    roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
+                    roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(1)))); // 设置（结束点）
+
+                    Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
+                    setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+                }
+
+                int updateCount = this.roadPathMapper.updateByPrimaryKeySelective(roadPath);
+                log.info("当前更新的数据记录条数为 ：" + updateCount);
+            }
+
+
         }catch (Exception e){
             e.printStackTrace();
             throw e;
         }
+    }
+
+    /**
+     * 根据出发点设置roadPath的场景名和地图名
+     * @param roadPath
+     * @param startPointId
+     */
+    private void setRoadPathSceneMapNameByPoint(RoadPath roadPath, Long startPointId) {
+        MapPoint mapPoint = mapPointMapper.selectByPrimaryKey(startPointId);
+        roadPath.setSceneName(mapPoint.getSceneName());
+        roadPath.setMapName(mapPoint.getMapName());
     }
 
     @Override

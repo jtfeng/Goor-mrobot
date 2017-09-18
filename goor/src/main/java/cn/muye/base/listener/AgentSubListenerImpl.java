@@ -38,8 +38,7 @@ public class AgentSubListenerImpl implements TopicCallback,ApplicationContextAwa
 	@Override
 	public void handleMessage(Message message) {
 		try {
-			if (TopicConstants.DEBUG)
-				logger.info("From ROS ====== agent_sub topic  " + message.toString());
+			logger.info("From ROS ====== agent_sub topic  " + message.toString());
 			if (TopicHandleInfo.checkSubNameIsNeedConsumer(message.toString())) {
 				if (TopicConstants.DEBUG)
 					logger.info(" ====== message.toString()===" + message.toString());

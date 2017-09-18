@@ -1,7 +1,6 @@
 package cn.muye.log.mission.controller;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.log.alert.LogAlert;
 import cn.mrobot.bean.log.mission.LogMission;
 import cn.mrobot.bean.log.mission.LogMission.MissionLogType;
 import cn.mrobot.utils.JsonUtils;
@@ -19,7 +18,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
