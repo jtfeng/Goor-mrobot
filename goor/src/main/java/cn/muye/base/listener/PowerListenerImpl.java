@@ -3,8 +3,6 @@ package cn.muye.base.listener;
 import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.producer.ProducerCommon;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.callback.TopicCallback;
 import edu.wpi.rail.jrosbridge.messages.Message;
 import org.slf4j.Logger;
@@ -13,8 +11,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import org.glassfish.grizzly.http.util.Base64Utils;
-import sun.misc.BASE64Decoder;
 
 /**
  * Created with IntelliJ IDEA.
