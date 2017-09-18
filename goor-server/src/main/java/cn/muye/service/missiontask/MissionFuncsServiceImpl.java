@@ -3575,15 +3575,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                                        order, startMp, epc.getwPoint(), parentName);
 //                                missionListTask.getMissionTasks().add(sigleNavTask);
                                 //加入check电梯状态任务
-//                                JsonMissionItemDataElevatorLock lock =
-//                                        new JsonMissionItemDataElevatorLock();
-//                                lock.setElevator_id(ev.getId());
-//                                lock.setInterval_time(30);
-//                                MissionTask elevatorLockTask = getElevatorLockTask(
-//                                        order, epc.getwPoint(), parentName,
-//                                        lock
-//                                );
-//                                missionListTask.getMissionTasks().add(elevatorLockTask);
+                                JsonMissionItemDataElevatorLock lock =
+                                        new JsonMissionItemDataElevatorLock();
+                                lock.setElevator_id(ev.getId());
+                                lock.setInterval_time(30);
+                                MissionTask elevatorLockTask = getElevatorLockTask(
+                                        order, epc.getwPoint(), parentName,
+                                        lock
+                                );
+                                missionListTask.getMissionTasks().add(elevatorLockTask);
                                 elevatorid = ev.getId();
 
                                 jsonMissionItemDataElevator
@@ -3639,15 +3639,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(elevatorTask);
 
         //加入check电梯状态解锁任务
-//        JsonMissionItemDataElevatorUnlock unlock =
-//                new JsonMissionItemDataElevatorUnlock();
-//        unlock.setElevator_id(elevatorid);
-//        unlock.setInterval_time(30);
-//        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
-//                order, mp, parentName,
-//                unlock
-//        );
-//        missionListTask.getMissionTasks().add(elevatorUnlockTask);
+        JsonMissionItemDataElevatorUnlock unlock =
+                new JsonMissionItemDataElevatorUnlock();
+        unlock.setElevator_id(elevatorid);
+        unlock.setInterval_time(30);
+        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
+                order, mp, parentName,
+                unlock
+        );
+        missionListTask.getMissionTasks().add(elevatorUnlockTask);
 
     }
 
