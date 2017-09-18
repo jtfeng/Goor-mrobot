@@ -2041,6 +2041,62 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     }
 
     /**
+     * 双电梯
+     * @param mp
+     * @return
+     */
+    private MissionTask getTwoElevatorTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataTwoElevator json) {
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "双电梯任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
+
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
+        missionItemTasks.add(getTwoElevatorItemTask(order, mp, parentName, json));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
+     * 获取双电梯ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getTwoElevatorItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonMissionItemDataTwoElevator json) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "双电梯Item");
+        itemTask.setName(MissionItemName_elevator);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataTwoElevator>(){}.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_elevator);
+
+        return itemTask;
+    }
+
+
+    /**
      * 电梯解锁
      * @param mp
      * @return
@@ -3152,7 +3208,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                    );
                     break;
                 case MPointType_ELEVATOR:
-                    initPathMissionTaskElevator(
+                    initPathMissionTaskTwoElevator(
                             missionListTask,
                             order,
                             startMp,
@@ -3246,6 +3302,40 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
+    }
+
+    /**
+     * 通过先后点，获取对应的工控路径
+     */
+    private JsonMissionItemDataTwoElevator.PathEntity getStaticPathPointPathEntity(
+            String sceneName,
+            String mapName,
+            Long prePointid,
+            Long nextPointid) {
+        JsonMissionItemDataTwoElevator.PathEntity ret = null;
+        try {
+            List<RoadPath> roadPaths =
+                    roadPathService.listRoadPathByStartAndEndPoint(
+                            prePointid,
+                            nextPointid,
+                            sceneName,
+                            mapName,
+                            Constant.PATH_TYPE_X86
+                    );
+            if (roadPaths != null){
+                for (RoadPath rp :
+                        roadPaths) {
+                    if (rp != null) {
+                        ret = new JsonMissionItemDataTwoElevator.PathEntity();
+                        ret.setId(Integer.valueOf(rp.getPathId()));
+                        ret.setScene_name(sceneName);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return ret;
     }
 
     /**
@@ -3648,6 +3738,229 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 unlock
         );
         missionListTask.getMissionTasks().add(elevatorUnlockTask);
+
+    }
+
+    /**
+     * 实例化双电梯任务
+     * @param missionListTask
+     * @param order
+     * @param mp
+     * @param mPointAtts
+     */
+    private void initPathMissionTaskTwoElevator(
+            MissionListTask missionListTask,
+            Order order,
+            MapPoint startMp,
+            MapPoint mp,
+            MPointAtts mPointAtts) {
+
+        logger.info("### initPathMissionTaskTwoElevator ");
+
+        String parentName = "固定路径双电梯任务-";
+
+        Long elevatorid = null;
+        //电梯任务，发送进入电梯到第几层
+        JsonMissionItemDataTwoElevator jsonMissionItemDataTwoElevator =
+                new JsonMissionItemDataTwoElevator();
+        List<JsonMissionItemDataTwoElevator.ElevatorsEntity> elevatorsEntities =
+                new ArrayList<>();
+        if (mPointAtts != null){
+            JsonMissionItemDataTwoElevator.ElevatorsEntity temp =
+                    new JsonMissionItemDataTwoElevator.ElevatorsEntity();
+            temp.setCurrent_floor(mPointAtts.currentFloor);
+            temp.setArrival_floor(mPointAtts.nextFloor);
+            elevatorsEntities.add(temp);
+            temp = new JsonMissionItemDataTwoElevator.ElevatorsEntity();
+            temp.setCurrent_floor(mPointAtts.currentFloor);
+            temp.setArrival_floor(mPointAtts.nextFloor);
+            elevatorsEntities.add(temp);
+            List<Elevator> preElevator = elevatorService.findByMapFloor(
+                    mPointAtts.currentMapId,
+                    mPointAtts.currentFloor);
+            int count = -1;
+            if (preElevator != null){
+                for (Elevator ev :
+                        preElevator) {
+                    if (ev != null &&
+                            ev.getElevatorPointCombinations() != null &&
+                            ev.getElevatorPointCombinations().size() > 0) {
+                        count++;
+                        if (count >= 2){
+                            break;
+                        }
+                        elevatorsEntities.get(count)
+                                .setDefault_elevator(ev.getDefaultElevator()?1:0);
+                        elevatorsEntities.get(count)
+                                .setIp_elevator_id(Integer.valueOf(ev.getIpElevatorId()));
+                        elevatorsEntities.get(count)
+                                .setElevatorId(ev.getId());
+                        for (ElevatorPointCombination epc :
+                                ev.getElevatorPointCombinations()) {
+                            if (epc != null) {
+                                //等待点导航任务
+
+                                //单点路径导航任务，当前路径导航到电梯等待点,测试门任务的时候，不需要单点导航了
+//                                MissionTask sigleNavTask = getPathNavTask(
+//                                        order, startMp, epc.getwPoint(), parentName);
+//                                missionListTask.getMissionTasks().add(sigleNavTask);
+                                if (count == 0){
+                                    //加入check电梯状态任务
+//                                    JsonMissionItemDataElevatorLock lock =
+//                                            new JsonMissionItemDataElevatorLock();
+//                                    lock.setElevator_id(ev.getId());
+//                                    lock.setInterval_time(30);
+//                                    MissionTask elevatorLockTask = getElevatorLockTask(
+//                                            order, epc.getwPoint(), parentName,
+//                                            lock
+//                                    );
+//                                    missionListTask.getMissionTasks().add(elevatorLockTask);
+//                                    elevatorid = ev.getId();
+                                }
+
+                                elevatorsEntities.get(count).setWaitPointId(
+                                        epc.getwPoint() != null ? epc.getwPoint().getId() : 0L);
+                                if (epc.getwPoint() != null){
+                                    elevatorsEntities.get(count)
+                                            .setSceneName(epc.getwPoint().getSceneName());
+                                    elevatorsEntities.get(count)
+                                            .setMapName(epc.getwPoint().getMapName());
+                                }
+                                elevatorsEntities.get(count).setEnter_point(
+                                        changeToPoint(epc.getiPoint())
+                                );
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            List<Elevator> nextElevator = elevatorService.findByMapFloor(
+                    mPointAtts.nextMapId,
+                    mPointAtts.nextFloor);
+            count = -1;
+            if (nextElevator != null){
+                for (Elevator ev :
+                        nextElevator) {
+                    if (ev != null &&
+                            ev.getElevatorPointCombinations() != null &&
+                            ev.getElevatorPointCombinations().size() > 0) {
+                        count++;
+                        if (count >= 2){
+                            break;
+                        }
+                        Long elevatorId = ev.getId();
+                        for (ElevatorPointCombination epc :
+                                ev.getElevatorPointCombinations()) {
+                            if (epc != null) {
+                                for (int tempcount = 0; tempcount < 2; tempcount++){
+                                    if (elevatorsEntities.get(tempcount).getElevatorId() != null){
+                                        if (Objects.equals(elevatorId,
+                                                elevatorsEntities.get(tempcount).getElevatorId())){
+                                            elevatorsEntities.get(tempcount)
+                                                    .setSet_pose_point(
+                                                            changeToPoint(epc.getiPoint())
+                                                    );
+                                            elevatorsEntities.get(tempcount)
+                                                    .setBack_point(
+                                                            changeToPoint(epc.getoPoint())
+                                                    );
+                                            elevatorsEntities.get(tempcount).setWaitPointIdNext(
+                                                    epc.getwPoint() != null ? epc.getwPoint().getId() : 0L);
+                                            if (epc.getwPoint() != null){
+                                                elevatorsEntities.get(tempcount)
+                                                        .setSceneNameNext(epc.getwPoint().getSceneName());
+                                                elevatorsEntities.get(tempcount)
+                                                        .setMapNameNext(epc.getwPoint().getMapName());
+                                            }
+
+                                        }
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }else{
+            logger.error("没有获取到电梯到达的楼层，请注意查看地图是否配置了楼层数据，或者电梯点后续是否没有设置到达点！");
+        }
+
+        JsonMissionItemDataTwoElevator.ElevatorsEntity defaultElevator = null;
+        JsonMissionItemDataTwoElevator.ElevatorsEntity nextElevator = null;
+
+        int defaultindex;
+        int nextindex;
+        for (int i = 0; i < 2; i++){
+            if (elevatorsEntities.get(i).getDefault_elevator() == 1){
+                defaultElevator = elevatorsEntities.get(i);
+                defaultindex = i;
+            }else{
+                nextElevator = elevatorsEntities.get(i);
+                nextindex = i;
+            }
+        }
+
+        //这里查询工控路径数据
+        if (defaultElevator != null &&
+                nextElevator != null){
+            jsonMissionItemDataTwoElevator.setPath0_1(
+                    getStaticPathPointPathEntity(
+                            defaultElevator.getSceneName(),
+                            defaultElevator.getMapName(),
+                            defaultElevator.getWaitPointId(),
+                            nextElevator.getWaitPointId()
+                    )
+            );
+            jsonMissionItemDataTwoElevator.setPath1_0(
+                    getStaticPathPointPathEntity(
+                            defaultElevator.getSceneName(),
+                            defaultElevator.getMapName(),
+                            nextElevator.getWaitPointId(),
+                            defaultElevator.getWaitPointId()
+                    )
+            );
+            jsonMissionItemDataTwoElevator.setPath2_3(
+                    getStaticPathPointPathEntity(
+                            defaultElevator.getSceneNameNext(),
+                            defaultElevator.getMapNameNext(),
+                            defaultElevator.getWaitPointIdNext(),
+                            nextElevator.getWaitPointIdNext()
+                    )
+            );
+            jsonMissionItemDataTwoElevator.setPath3_2(
+                    getStaticPathPointPathEntity(
+                            defaultElevator.getSceneNameNext(),
+                            defaultElevator.getMapNameNext(),
+                            nextElevator.getWaitPointIdNext(),
+                            defaultElevator.getWaitPointIdNext()
+                    )
+            );
+        }
+
+        //将电梯数据放入
+        jsonMissionItemDataTwoElevator.setElevators(elevatorsEntities);
+
+
+        //电梯任务
+        MissionTask elevatorTask = getTwoElevatorTask(
+                order,
+                mp,
+                parentName,
+                jsonMissionItemDataTwoElevator);
+        missionListTask.getMissionTasks().add(elevatorTask);
+
+        //加入check电梯状态解锁任务
+//        JsonMissionItemDataElevatorUnlock unlock =
+//                new JsonMissionItemDataElevatorUnlock();
+//        unlock.setElevator_id(elevatorid);
+//        unlock.setInterval_time(30);
+//        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
+//                order, mp, parentName,
+//                unlock
+//        );
+//        missionListTask.getMissionTasks().add(elevatorUnlockTask);
 
     }
 
