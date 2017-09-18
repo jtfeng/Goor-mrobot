@@ -177,8 +177,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         if (mapInfos != null && mapInfos.size() != 0) {
             scene.setMapSceneName(mapInfos.get(0).getSceneName());
             mapInfos.forEach(mapInfo -> {
-                mapInfo.setPngImageHttpPath(DOWNLOAD_HTTP + mapInfo.getPngImageLocalPath());
-                mapInfo.setPngDesignedHttpPath(DOWNLOAD_HTTP + mapInfo.getPngDesigned());
+                if (mapInfo.getPngImageLocalPath() != null) {
+                    mapInfo.setPngImageHttpPath(DOWNLOAD_HTTP + mapInfo.getPngImageLocalPath());
+                }
+                if (mapInfo.getPngDesigned() != null) {
+                    mapInfo.setPngDesignedHttpPath(DOWNLOAD_HTTP + mapInfo.getPngDesigned());
+                }
             });
             scene.setMapInfoList(mapInfos);
         }
