@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -69,15 +70,14 @@ public class RobotController {
         String robotCode = robot.getCode();
         Integer lowRobotBatteryThreshold = robot.getLowBatteryThreshold();
         Integer sufficientBatteryThreshold = robot.getSufficientBatteryThreshold();
-        Integer robotIdForElevator = robot.getRobotIdForElevator();
-        if (robotIdForElevator != null) {
-            String robotIdForElevatorStr = String.valueOf(robotIdForElevator);
+        String robotIdForElevator = robot.getRobotIdForElevator();
+        /*if (!StringUtil.isNullOrEmpty(robotIdForElevator)) {
             String regex = "^[10]{8}";
-            boolean flag = robotIdForElevatorStr.matches(regex);
+            boolean flag = robotIdForElevator.matches(regex);
             if (!flag) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "电梯编号必须为8位二进制");
             }
-        }
+        }*/
         List list = robot.getOriginChargerMapPointList();
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
@@ -169,12 +169,28 @@ public class RobotController {
         }
     }
 
+    /**
+     * 所有设置机器人的通用密码（当前的处理模式是 设置过程可能不成功，若设置失败，则继续使用旧密码）
+     * @param newPassword
+     * @return
+     */
+    @RequestMapping(value = {"assets/setNewRobotPassword"}, method = RequestMethod.GET)
+    @ApiOperation(value = "设置所有机器人操作的通用密码", httpMethod = "GET", notes = "设置所有机器人操作的通用密码")
+    @ResponseBody
+    public AjaxResult setRobotPassword(String newPassword) {
+        try {
+            this.robotService.setRobotPassword(newPassword);
+            return AjaxResult.success();
+        }catch (Exception e){
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
     //整合到新增和修改接口了
 //    @RequestMapping(value = {"assets/robot/bindChargerMapPoint"}, method = RequestMethod.POST)
 //    @ApiOperation(value = "机器人绑充电桩", httpMethod = "POST", notes = "机器人绑充电桩")
 //    @ResponseBody
 //    public AjaxResult bindChargerMapPoint(@RequestBody Robot robot) {
-//
 //    }
 
 }

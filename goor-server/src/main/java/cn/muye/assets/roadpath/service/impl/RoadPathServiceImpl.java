@@ -341,12 +341,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
         List<RoadPathPoint> roadPathPoints = Lists.newArrayList();
         int i = 0;
-        for (Object pointIdOrign : points) {
+        for (int j = 0;j < points.size(); j++) {
+            Object pointIdOrign = points.get(j);
             Long pointId = Long.parseLong(String.valueOf(pointIdOrign));
             RoadPathPoint roadPathPoint = new RoadPathPoint();
             roadPathPoint.setCreateTime(new Date());roadPathPoint.setStoreId(100L);
             roadPathPoint.setRoadPathId(roadPath.getId());// 设置路径信息 id 编号
             roadPathPoint.setPointId(pointId);// 当前点 id
+            roadPathPoint.setOrderIndex(j);//设置排序索引
             roadPathPoint.setStartFlag(0);roadPathPoint.setEndFlag(0);
             if (i == 0){
                 roadPathPoint.setStartFlag(1);// 标记为开始点
