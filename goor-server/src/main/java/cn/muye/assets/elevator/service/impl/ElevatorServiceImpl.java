@@ -16,9 +16,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -36,6 +40,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     private ElevatorShaftMapper elevatorShaftMapper;
     @Autowired
     private ElevatorPointCombinationService elevatorPointCombinationService;
+    private ReentrantLock lock;
+    private ReentrantLock lock1;
 
     @Override
     public List<Elevator> listElevators(WhereRequest whereRequest) throws Exception {
@@ -98,50 +104,82 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public synchronized boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action){
-        Elevator elevator = super.findById(elevatorId);
-        if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)){
-            //上锁
-            if ("1".equals(elevator.getLockState())){// 1表示上锁
-                return false;
-            }else {
-                this.elevatorMapper.updateElevatorLockState(elevatorId, 1);
-                return true;
+    public boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action){
+        boolean flag = false;
+        try {
+            if (lock.tryLock(5, TimeUnit.SECONDS)) {// 限制超时时间为5秒
+                Elevator elevator = super.findById(elevatorId);
+                if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)) {
+                    //上锁
+                    if ("1".equals(elevator.getLockState())) {// 1表示上锁
+                        flag = false;
+                    } else {
+                        this.elevatorMapper.updateElevatorLockState(elevatorId, 1);
+                        flag = true;
+                    }
+                }
+                if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)) {
+                    //解锁
+                    if ("1".equals(elevator.getLockState())) {// 1表示上锁
+                        this.elevatorMapper.updateElevatorLockState(elevatorId, 0);
+                    }
+                    flag = true;
+                }
+                if (TransactionSynchronizationManager.isActualTransactionActive()) {
+                    TransactionSynchronizationManager.registerSynchronization(
+                            new TransactionSynchronizationAdapter() {
+                                @Override
+                                public void afterCompletion(int status) {
+                                    lock.unlock();//释放锁
+                                }
+                            });
+                }
             }
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
         }
-        if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)){
-            //解锁
-            if ("1".equals(elevator.getLockState())) {// 1表示上锁
-                this.elevatorMapper.updateElevatorLockState(elevatorId, 0);
-            }
-            return true;
-        }
-        return false;
+        return flag;
     }
 
     @Override
-    public synchronized boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
+    public boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
         checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
-        Elevator elevator = super.findById(elevatorId);
-        if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)){
-            if ("1".equals(elevator.getLockState())){// 1表示上锁
-                return false;
-            }else {
-                elevator.setLockState("1");
-                elevator.setRobotCode(robotCode);
-                this.update(elevator);
-                return true;
+        boolean flag = false;
+        try {
+            if (lock1.tryLock(5, TimeUnit.SECONDS)) {
+                Elevator elevator = super.findById(elevatorId);
+                if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)) {
+                    if ("1".equals(elevator.getLockState())) {// 1表示上锁
+                        flag = false;
+                    } else {
+                        elevator.setLockState("1");
+                        elevator.setRobotCode(robotCode);
+                        this.update(elevator);
+                        flag = true;
+                    }
+                }
+                if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)) {
+                    if (("1".equals(elevator.getLockState())) && (robotCode.equals(elevator.getRobotCode()))) {// 0表示解锁
+                        elevator.setLockState("0");
+                        elevator.setRobotCode(null);
+                        updateSelective(elevator);
+                    }
+                    flag = true;
+                }
+                if (TransactionSynchronizationManager.isActualTransactionActive()) {
+                    TransactionSynchronizationManager.registerSynchronization(
+                            new TransactionSynchronizationAdapter() {
+                                @Override
+                                public void afterCompletion(int status) {
+                                    lock1.unlock();//释放锁
+                                }
+                            });
+                }
             }
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
         }
-        if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)){
-            if (("1".equals(elevator.getLockState()))  && (robotCode.equals(elevator.getRobotCode()))  ) {// 0表示解锁
-                elevator.setLockState("0");
-                elevator.setRobotCode(null);
-                updateSelective(elevator);
-            }
-            return true;
-        }
-        return false;
+        return flag;
     }
 
     @Override

@@ -17,4 +17,14 @@ public interface ElevatorShaftService extends BaseService<ElevatorShaft> {
      */
     public List<ElevatorShaft> listElevatorShafts(WhereRequest whereRequest) throws Exception;
 
+    /**
+     * 更新电梯井状态
+     */
+    boolean updateElevatorShaftLockState(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action);
+
+    /**
+     * 更新电梯井状态
+     */
+    boolean updateElevatorShaftLockStateWithRobotCode(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode);
+
 }
