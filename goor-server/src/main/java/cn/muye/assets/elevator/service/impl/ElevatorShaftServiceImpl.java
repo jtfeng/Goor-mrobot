@@ -15,11 +15,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tk.mybatis.mapper.entity.Example;
 
 import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 @Transactional
@@ -30,6 +34,8 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
     private ElevatorMapper elevatorMapper;
     @Autowired
     private ElevatorShaftMapper elevatorShaftMapper;
+    private ReentrantLock lock = new ReentrantLock();
+    private ReentrantLock lock1 = new ReentrantLock();
 
     @Override
     public List<ElevatorShaft> listElevatorShafts(WhereRequest whereRequest) throws Exception {
@@ -68,5 +74,84 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
         ElevatorShaft shaft = super.findById(id);
         packageDateBindelevator(Lists.newArrayList(shaft));
         return shaft;
+    }
+
+    @Override
+    public boolean updateElevatorShaftLockState(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action){
+        boolean flag = false;
+        try {
+            if (lock.tryLock(5, TimeUnit.SECONDS)) {
+                ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);//先获取电梯井对象
+                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK.equals(action)) {
+                    //上锁
+                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
+                        flag = false;
+                    } else {
+                        this.elevatorShaftMapper.updateElevatorShaftLockState(elevatorShaftId, 1);
+                        flag = true;
+                    }
+                }
+                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK.equals(action)) {
+                    //解锁
+                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
+                        this.elevatorShaftMapper.updateElevatorShaftLockState(elevatorShaftId, 0);
+                    }
+                    flag = true;
+                }
+                if (TransactionSynchronizationManager.isActualTransactionActive()) {
+                    TransactionSynchronizationManager.registerSynchronization(
+                            new TransactionSynchronizationAdapter() {
+                                @Override
+                                public void afterCompletion(int status) {
+                                    lock.unlock();//释放锁
+                                }
+                            });
+                }
+            }
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+        }
+        return flag;
+    }
+
+    @Override
+    public boolean updateElevatorShaftLockStateWithRobotCode(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode) {
+        checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
+        boolean flag = false;
+        try {
+            if (lock1.tryLock(5, TimeUnit.SECONDS)) {//如果在5秒内获取到锁
+                ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);
+                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK.equals(action)) {
+                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
+                        flag = false;
+                    } else {
+                        elevatorShaft.setLockState("1");
+                        elevatorShaft.setRobotCode(robotCode);
+                        this.update(elevatorShaft);
+                        flag = true;
+                    }
+                }
+                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK.equals(action)) {
+                    if (("1".equals(elevatorShaft.getLockState())) && (robotCode.equals(elevatorShaft.getRobotCode()))) {// 0表示解锁
+                        elevatorShaft.setLockState("0");
+                        elevatorShaft.setRobotCode(null);
+                        updateSelective(elevatorShaft);
+                    }
+                    flag = true;
+                }
+                if (TransactionSynchronizationManager.isActualTransactionActive()) {
+                    TransactionSynchronizationManager.registerSynchronization(
+                            new TransactionSynchronizationAdapter() {
+                                @Override
+                                public void afterCompletion(int status) {
+                                    lock1.unlock();//释放锁
+                                }
+                            });
+                }
+            }
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+        }
+        return flag;
     }
 }

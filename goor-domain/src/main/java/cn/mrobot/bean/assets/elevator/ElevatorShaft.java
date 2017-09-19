@@ -11,6 +11,8 @@ public class ElevatorShaft extends BaseBean {
 
     private String name;
     private String info;
+    private String lockState = "0";// 0表示 未锁定、1表示 已锁定
+    private String robotCode;
     @Transient
     private List<Elevator> elevators;
 
@@ -20,6 +22,8 @@ public class ElevatorShaft extends BaseBean {
                 "name='" + name + '\'' +
                 ", info='" + info + '\'' +
                 ", elevators=" + elevators +
+                ", lockState=" + lockState +
+                ", robotCode=" + robotCode +
                 '}';
     }
 
@@ -45,5 +49,27 @@ public class ElevatorShaft extends BaseBean {
 
     public void setElevators(List<Elevator> elevators) {
         this.elevators = elevators;
+    }
+
+    public String getLockState() {
+        return lockState;
+    }
+
+    public void setLockState(String lockState) {
+        this.lockState = lockState;
+    }
+
+    public String getRobotCode() {
+        return robotCode;
+    }
+
+    public void setRobotCode(String robotCode) {
+        this.robotCode = robotCode;
+    }
+
+    //电梯井动作
+    public static enum ELEVATORSHAFT_ACTION {
+        ELEVATORSHAFT_LOCK,
+        ELEVATORSHAFT_UNLOCK
     }
 }
