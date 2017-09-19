@@ -142,6 +142,11 @@ public class TopicHandleInfo implements Serializable {
 		x86ElevatorLockTopic.advertise();
 		x86ElevatorLockTopic.subscribe(new X86ElevatorLockListenerImpl());
 
+		Topic x86RoadPathLockTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_ROADPATH_LOCK);
+		x86RoadPathLockTopic.unadvertise();
+		x86RoadPathLockTopic.advertise();
+		x86RoadPathLockTopic.subscribe(new X86RoadPathLockListenerImpl());
+
 		Topic androidJoyStickCmdVelTopic = TopicHandleInfo.getTopic(ros, TopicConstants.ANDROID_JOYSTICK_CMD_VEL);
 		androidJoyStickCmdVelTopic.unadvertise();
 		androidJoyStickCmdVelTopic.advertise();
@@ -329,6 +334,13 @@ public class TopicHandleInfo implements Serializable {
 				return SingleFactory.x86_elevator_lock(ros);
 			} catch (Exception e) {
 				log.error("getTopic X86_ELEVATOR_LOCK Object error", e);
+			}
+		}
+		if(topicName.equals(TopicConstants.X86_ROADPATH_LOCK)){
+			try {
+				return SingleFactory.x86_roadpath_lock(ros);
+			} catch (Exception e) {
+				log.error("getTopic X86_ROADPATH_LOCK Object error", e);
 			}
 		}
 		if(topicName.equals(TopicConstants.ANDROID_JOYSTICK_CMD_VEL)){

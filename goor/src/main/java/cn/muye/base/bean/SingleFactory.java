@@ -33,6 +33,7 @@ public class SingleFactory {
     private static volatile Topic x86_mission_alert;
     private static volatile Topic x86_mission_receive;
     private static volatile Topic x86_elevator_lock;
+    private static volatile Topic x86_roadpath_lock;
     private static volatile Topic android_joystick_cmd_vel;
     private static volatile Topic state_collector;
     private static volatile Topic checkHeartTopic;
@@ -55,6 +56,7 @@ public class SingleFactory {
     static Lock lock_x86_mission_alert=new ReentrantLock();
     static Lock lock_x86_mission_receive=new ReentrantLock();
     static Lock lock_x86_elevator_lock=new ReentrantLock();
+    static Lock lock_x86_roadpath_lock=new ReentrantLock();
     static Lock lock_android_joystick_cmd_vel=new ReentrantLock();
     static Lock lock_state_collector=new ReentrantLock();
     static Lock lock_checkHeartTopic=new ReentrantLock();
@@ -391,6 +393,27 @@ public class SingleFactory {
             }
         }
         return x86_elevator_lock;
+    }
+
+    public static Topic x86_roadpath_lock(Ros ros) throws Exception {
+        if (x86_roadpath_lock == null) {
+            if(null == ros){
+                log.error("get x86_roadpath_lock ros is null error, return null");
+                return x86_roadpath_lock;
+            }
+            lock_x86_roadpath_lock.lock();
+            try {
+                if (x86_roadpath_lock == null) {
+                    x86_roadpath_lock = new Topic(ros, TopicConstants.X86_ROADPATH_LOCK, TopicConstants.TOPIC_TYPE_STRING);
+                    log.info("get topic x86_roadpath_lock="+x86_roadpath_lock);
+                }
+            }catch (Exception e){
+                log.error("get x86_roadpath_lock error", e);
+            }finally {
+                lock_x86_roadpath_lock.unlock();
+            }
+        }
+        return x86_roadpath_lock;
     }
 
     public static Topic android_joystick_cmd_vel(Ros ros) throws Exception {
