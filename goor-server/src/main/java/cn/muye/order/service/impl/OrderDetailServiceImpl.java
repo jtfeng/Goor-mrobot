@@ -57,6 +57,18 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
 
     @Override
     public void finishedDetailTask(Long id, Integer type) {
+        //先查看detail是否已经到达签收情况
+        OrderDetail sqlOrderDetail = orderDetailMapper.selectByPrimaryKey(id);
+        if(sqlOrderDetail != null){
+            if(sqlOrderDetail.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+                return;
+            }else if(sqlOrderDetail.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
+                if(type != OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+                    return;
+                }
+            }
+        }
+        //状态需要修改的情况下
         OrderDetail orderDetail  = new OrderDetail(id);
         if(type == OrderConstant.ORDER_DETAIL_STATUS_GET){
             //已到达，通知推送
@@ -68,14 +80,14 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
             String sendBody = "已送达站" + station.getName();
             WSOrderNotificationVO receive = new WSOrderNotificationVO(WSOrderNotificationType.RECEIVE_STATION, receiveBody, sqlOrder.getRobot().getName());
             WSOrderNotificationVO send = new WSOrderNotificationVO(WSOrderNotificationType.SEND_STATION, sendBody, sqlOrder.getRobot().getName());
-            WSMessage wsReceive = new WSMessage.Builder().
-                    title(LogType.INFO_GOAL_REACHED.getValue())
+            WSMessage wsReceive = new WSMessage.Builder()
+                    .title(LogType.INFO_GOAL_REACHED.getValue())
                     .messageType(WSMessageType.NOTIFICATION)
                     .body(receive)
                     .deviceId(sqlDetail.getStationId()+"")
                     .module(LogType.INFO_GOAL_REACHED.getName()).build();
-            WSMessage wsSend = new WSMessage.Builder().
-                    title(LogType.INFO_GOAL_REACHED.getValue())
+            WSMessage wsSend = new WSMessage.Builder()
+                    .title(LogType.INFO_GOAL_REACHED.getValue())
                     .messageType(WSMessageType.NOTIFICATION)
                     .body(send)
                     .deviceId(sqlOrder.getStartStation().getId() + "")

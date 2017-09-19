@@ -42,8 +42,8 @@ public class ElevatorPointCombinationImpl extends BaseServiceImpl<ElevatorPointC
 
     @Override
     public boolean checkCreateCondition(List<Long> mappointIds) throws Exception {
-        checkArgument(mappointIds.size() == Sets.newHashSet(mappointIds).size(),
-                "四个点不能是相同的点，请重新选择!");
+//        checkArgument(mappointIds.size() == Sets.newHashSet(mappointIds).size(),
+//                "四个点不能是相同的点，请重新选择!");
         Set<String> strings = Sets.newHashSet();
         for (Long id:mappointIds){
             MapPoint point = mapPointMapper.selectByPrimaryKey(id);

@@ -1,7 +1,6 @@
 package cn.muye.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.good.GoodsType;
@@ -19,7 +18,6 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.assets.shelf.service.ShelfService;
-import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.bean.*;
 import cn.muye.order.service.GoodsService;
@@ -203,18 +201,40 @@ public class OrderController extends BaseController {
     }
 
     /**
-     * 获取在等待分配的订单
+     * 获取依据状态的订单列表
+     * status  0为处理订单中  1为完成订单 2为等待分配订单 3为订单取消
      * @param
      * @return
      */
-    @RequestMapping(value = "listWaitOrderByStation", method = RequestMethod.GET)
+    @RequestMapping(value = "listOrderByStationAndStatus", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult listWaitOrdersByStation(){
+    public AjaxResult listOrderByStationAndStatus(@RequestParam("status") Integer status){
         try {
             Long stationId = userUtil.getStationId();
-            List<Order> waitOrders = orderService.listWaitOrdersByStation(stationId, OrderConstant.ORDER_STATUS_WAIT);
+            List<Order> waitOrders = orderService.listOrdersByStationAndStatus(stationId, status);
             List<Order> detailWaitOrders = waitOrders.stream().map(order -> orderService.getOrder(order.getId())).collect(Collectors.toList());
             return AjaxResult.success(detailWaitOrders, "获取等待订单成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("获取等待订单出错");
+        }
+    }
+
+
+    /**
+     * 获取所有的订单
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "listOrderByStation", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listOrdersByStation(WhereRequest whereRequest){
+        try {
+            Long stationId = userUtil.getStationId();
+            List<Order> waitOrders = orderService.listOrdersByStation(stationId, whereRequest.getPage(), whereRequest.getPageSize());
+            List<Order> detailWaitOrders = waitOrders.stream().map(order -> orderService.getOrder(order.getId())).collect(Collectors.toList());
+            PageInfo<Order> pageWaitOrders = new PageInfo<>(detailWaitOrders);
+            return AjaxResult.success(pageWaitOrders, "获取等待订单成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("获取等待订单出错");
@@ -267,12 +287,12 @@ public class OrderController extends BaseController {
             }
             String mapSceneName = sceneService.getRelatedMapNameBySceneId(station.getSceneId());
             List<GoodsType> goodsTypes = goodsTypeService.listAllByStoreId(GoodsType.class);
-            List<MapPoint> startPoints = pointService.listByMapSceneNameAndPointType(mapSceneName, MapPointType.LOAD.getCaption(), SearchConstants.FAKE_MERCHANT_STORE_ID);
-            List<MapPoint> endPoints = pointService.listByMapSceneNameAndPointType(mapSceneName, MapPointType.FINAL_UNLOAD.getCaption(), SearchConstants.FAKE_MERCHANT_STORE_ID);
+            List<Station> startStations = stationService.listStationsBySceneAndMapPointType(station.getSceneId(), MapPointType.LOAD.getCaption());
+            List<Station> endStations = stationService.listStationsBySceneAndMapPointType(station.getSceneId(), MapPointType.FINAL_UNLOAD.getCaption());
             OrderSettingPageInfoVO orderSettingPageInfoVO = new OrderSettingPageInfoVO();
             orderSettingPageInfoVO.setGoodsTypes(goodsTypes);
-            orderSettingPageInfoVO.setStartMapPoints(startPoints);
-            orderSettingPageInfoVO.setEndMapPoints(endPoints);
+            orderSettingPageInfoVO.setStartStations(startStations);
+            orderSettingPageInfoVO.setEndStations(endStations);
             return AjaxResult.success(orderSettingPageInfoVO, "查询订单设置页面信息成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -280,6 +300,7 @@ public class OrderController extends BaseController {
         }
 
     }
+
 
     /**
      * 获取当前用户 查询到的任务列表

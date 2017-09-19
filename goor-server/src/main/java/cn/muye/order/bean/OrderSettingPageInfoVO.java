@@ -1,6 +1,6 @@
 package cn.muye.order.bean;
 
-import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.good.GoodsType;
 
 import java.util.List;
@@ -12,9 +12,9 @@ public class OrderSettingPageInfoVO {
 
     private List<GoodsType> goodsTypes;
 
-    private List<MapPoint> startMapPoints;
+    private List<Station> startStations;
 
-    private List<MapPoint> endMapPoints;
+    private List<Station> endStations;
 
     public List<GoodsType> getGoodsTypes() {
         return goodsTypes;
@@ -24,19 +24,19 @@ public class OrderSettingPageInfoVO {
         this.goodsTypes = goodsTypes;
     }
 
-    public List<MapPoint> getEndMapPoints() {
-        return endMapPoints;
+    public List<Station> getStartStations() {
+        return startStations;
     }
 
-    public void setEndMapPoints(List<MapPoint> endMapPoints) {
-        this.endMapPoints = endMapPoints;
+    public void setStartStations(List<Station> startStations) {
+        this.startStations = startStations;
     }
 
-    public List<MapPoint> getStartMapPoints() {
-        return startMapPoints;
+    public List<Station> getEndStations() {
+        return endStations;
     }
 
-    public void setStartMapPoints(List<MapPoint> startMapPoints) {
-        this.startMapPoints = startMapPoints;
+    public void setEndStations(List<Station> endStations) {
+        this.endStations = endStations;
     }
 }
