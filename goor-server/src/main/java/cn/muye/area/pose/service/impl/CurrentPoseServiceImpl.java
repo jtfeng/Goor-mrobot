@@ -134,30 +134,25 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
             for (int i = 0; i < robotCodeList.size(); i++) {
                 String code = robotCodeList.get(i);
 
-<<<<<<< HEAD
-=======
 //                LOGGER.info("robot {} sendCurrentPose start", code);
 
->>>>>>> a692758... 添加地图信息删除时删除本地文件操作
                 //封装robots_current_pose数据
                 SlamBody slamBody = new SlamBody();
                 slamBody.setPubName(TopicConstants.ROBOTS_CURRENT_POSE);
                 slamBody.setErrorCode("0");
                 slamBody.setMsg("success");
                 slamBody.setData(jsonArray);
+                slamBody.setTargetRobotCode(code);
                 slamBody.setUuid(UUID.randomUUID().toString().replace("-", ""));
 
-<<<<<<< HEAD
-=======
                 String slamBodyString = JSON.toJSONString(slamBody);
 //                LOGGER.info("sendCurrentPose slamBody {}", slamBodyString);
 
->>>>>>> a692758... 添加地图信息删除时删除本地文件操作
                 //封装命令消息
                 CommonInfo commonInfo = new CommonInfo();
                 commonInfo.setTopicName(TopicConstants.AGENT_PUB);
                 commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
-                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
+                commonInfo.setPublishMessage(JSON.toJSONString(new PubData(slamBodyString)));
 
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setMessageText(JSON.toJSONString(commonInfo));

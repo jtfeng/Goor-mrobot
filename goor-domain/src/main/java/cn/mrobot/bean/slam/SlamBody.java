@@ -31,6 +31,9 @@ public class SlamBody <T> {
     @JSONField(name = "uuid")
     private String uuid;
 
+    @JSONField(name = "target_robot_code")
+    private String targetRobotCode;
+
     public String getPubName() {
         return pubName;
     }
@@ -77,5 +80,13 @@ public class SlamBody <T> {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getTargetRobotCode() {
+        return targetRobotCode;
+    }
+
+    public void setTargetRobotCode(String targetRobotCode) {
+        this.targetRobotCode = targetRobotCode;
     }
 }
