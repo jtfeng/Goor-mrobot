@@ -261,31 +261,6 @@ public class FileUtils {
         return dir.delete();
     }
 
-//    /**
-//     * 递归删除目录下除特定文件名或者后缀的所有文件及子目录下所有文件
-//     *
-//     * @param dir 将要删除的文件目录
-//     * fileName 不删除的文件名或后缀
-//     */
-//    public static boolean deleteDirExcept(File dir, String fileName) {
-//        if (dir.isDirectory()) {
-//            String[] children = dir.list();//递归删除目录中的子目录下
-//            for (int i = 0; i < children.length; i++) {
-//                boolean success = deleteDirExcept(new File(dir, children[i]), fileName);
-//                if (!success) {
-//                    return false;
-//                }
-//            }
-//        }
-//        if(dir.getName().indexOf(fileName) >=0){
-//            return false;
-//        }
-//        return dir.delete();
-//    }
-//
-//    public static void main(String[] args) {
-//        deleteDirExcept(new File("E:\\share\\map_server\\maps"),"agv");
-//    }
     /**
      * 将地图名和场景名封装成单一的key
      */
