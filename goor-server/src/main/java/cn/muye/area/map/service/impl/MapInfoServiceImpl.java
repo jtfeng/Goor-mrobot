@@ -90,11 +90,11 @@ public class MapInfoServiceImpl implements MapInfoService {
     public void deleteByPrimaryKey(Long id) {
         //查询出该对象的信息
         MapInfo mapInfo = mapInfoMapper.selectByPrimaryKey(id);
-        if (null != mapInfo){
-         //递归删除该场景下面文件名包含地图名的所有文件
+        if (null != mapInfo) {
+            //递归删除该场景下面文件名包含地图名的所有文件
             String mapName = mapInfo.getMapName();
             String sceneName = mapInfo.getSceneName();
-            FileUtils.deleteDirInclude(new File(sceneName), mapName);
+            deleteDirInclude(new File(sceneName), mapName);
         }
         //删除数据库记录
         mapInfoMapper.deleteByPrimaryKey(id);
@@ -295,4 +295,31 @@ public class MapInfoServiceImpl implements MapInfoService {
         return DOWNLOAD_HTTP + localPath;
     }
 
+    private final static String SUFFIX_PGM = ".pgm";
+    private final static String SUFFIX_YAML = ".yaml";
+    private final static String SUFFIX_PNG = ".png";
+
+    /**
+     * 递归删除场景目录下指定地图名的png.pgm.yaml文件
+     *
+     * @param dir 场景目录
+     *            fileName 地图名称
+     */
+    public static boolean deleteDirInclude(File dir, String fileName) {
+        String pgmFileName = fileName + SUFFIX_PGM;
+        String yamlFileName = fileName + SUFFIX_YAML;
+        String pngFileName = fileName + SUFFIX_PNG;
+
+        if (dir.isDirectory()) {
+            String[] children = dir.list();//递归删除目录中的子目录下
+            for (int i = 0; i < children.length; i++) {
+                deleteDirInclude(new File(dir, children[i]), fileName);
+            }
+        }
+        String name = dir.getName();
+        if (!(name.equals(pgmFileName) || name.equals(yamlFileName) || name.equals(pngFileName))) {
+            return false;
+        }
+        return dir.delete();
+    }
 }

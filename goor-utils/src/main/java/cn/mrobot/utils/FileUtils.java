@@ -262,29 +262,6 @@ public class FileUtils {
     }
 
     /**
-     * 递归删除目录下特定文件名或者后缀的所有文件及子目录下所有文件
-     *
-     * @param dir 将要删除的文件目录
-     * fileName 不删除的文件名或后缀
-     */
-    public static boolean deleteDirInclude(File dir, String fileName) {
-        if (dir.isDirectory()) {
-            String[] children = dir.list();//递归删除目录中的子目录下
-            for (int i = 0; i < children.length; i++) {
-                deleteDirInclude(new File(dir, children[i]), fileName);
-            }
-        }
-        if(dir.getName().indexOf(fileName) < 0){
-            return false;
-        }
-        return dir.delete();
-    }
-
-    public static void main(String[] args) {
-        deleteDirInclude(new File("E:\\share\\map_server\\maps\\agv"),"agv");
-    }
-
-    /**
      * 将地图名和场景名封装成单一的key
      */
     public static String parseMapAndSceneName(String mapName, String sceneName, Long storeId) {
