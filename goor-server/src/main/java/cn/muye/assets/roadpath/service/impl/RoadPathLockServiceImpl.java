@@ -31,7 +31,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     public synchronized boolean lock(Long id, String robotCode) throws Exception {
         RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id),
                 String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
-        Integer lock = roadPathLock.getLock();
+        Integer lock = roadPathLock.getLockStatus();
         if (lock != null && lock == 1){
             //已上锁，不能重复上锁
             return false;
@@ -55,7 +55,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     public synchronized boolean unlock(Long id, String robotCode) throws Exception {
         RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id),
                 String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
-        Integer lock = roadPathLock.getLock();
+        Integer lock = roadPathLock.getLockStatus();
         if (lock == null || lock == 0){
             //当前没有上锁，无锁状态
             return true;

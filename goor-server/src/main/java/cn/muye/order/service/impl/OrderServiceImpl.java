@@ -23,6 +23,7 @@ import cn.muye.order.service.OrderService;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.service.missiontask.MissionFuncsService;
 import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageHelper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -97,6 +98,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public AjaxResult saveOrder(Order order) {
         saveWaitOrder(order);
         //在这里调用任务生成器
+        //return AjaxResult.success();
         return generateMissionList(order.getId());
     }
 
@@ -215,11 +217,17 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     }
 
     @Override
-    public List<Order> listWaitOrdersByStation(Long stationId, Integer orderStatus) {
+    public List<Order> listOrdersByStationAndStatus(Long stationId, Integer orderStatus) {
         Order order = new Order();
         order.setStatus(orderStatus);
         order.setStartStation(new Station(stationId));
         return orderMapper.listByDomain(order);
+    }
+
+    @Override
+    public List<Order> listOrdersByStation(Long stationId, Integer page, Integer pageSize) {
+        PageHelper.startPage(page, pageSize);
+        return orderMapper.listOrdersByStation(stationId);
     }
 
     /**

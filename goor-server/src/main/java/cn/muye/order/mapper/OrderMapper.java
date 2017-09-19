@@ -20,5 +20,5 @@ public interface OrderMapper {
 
     void returnToWaitOrder(@Param("id") Long orderId, @Param("status")Integer status);
 
-    List<Order> listWaitOrdersByStation(@Param("stationId")Long stationId, @Param("status")Integer orderStatus);
+    List<Order> listOrdersByStation(@Param("stationId")Long stationId);
 }

@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -267,6 +268,11 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
         Example example = new Example(Station.class);
         example.createCriteria().andCondition("ID in", stationIdList).andCondition("SCENE_ID =", sceneId);
         return stationMapper.selectByExample(example);
+    }
+
+    @Override
+    public List<Station> listStationsBySceneAndMapPointType(Long sceneId, Integer type) {
+        return stationMapper.listStationsBySceneAndMapPointType(sceneId, type);
     }
 }
 

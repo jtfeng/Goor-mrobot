@@ -109,4 +109,19 @@
     </update>
 
 
+    <select id="listOrdersByStation" resultType="cn.mrobot.bean.order.Order">
+        select
+        <include refid="orderColumn" />
+        from OR_ORDER o
+        ORDER BY (
+        CASE o.STATUS
+        WHEN 2 THEN 1
+        WHEN 0 THEN 2
+        WHEN 1 THEN 3
+        WHEN 3 THEN 4
+        ELSE -1 END
+        ) ASC, o.create_time DESC
+    </select>
+
+
 </mapper>
