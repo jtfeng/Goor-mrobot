@@ -71,13 +71,13 @@ public class RobotController {
         Integer lowRobotBatteryThreshold = robot.getLowBatteryThreshold();
         Integer sufficientBatteryThreshold = robot.getSufficientBatteryThreshold();
         String robotIdForElevator = robot.getRobotIdForElevator();
-        if (!StringUtil.isNullOrEmpty(robotIdForElevator)) {
+        /*if (!StringUtil.isNullOrEmpty(robotIdForElevator)) {
             String regex = "^[10]{8}";
             boolean flag = robotIdForElevator.matches(regex);
             if (!flag) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "电梯编号必须为8位二进制");
             }
-        }
+        }*/
         List list = robot.getOriginChargerMapPointList();
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
