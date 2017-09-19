@@ -24,5 +24,10 @@
         </collection>
     </resultMap>
 
+    <!-- 更新电梯井状态 -->
+    <update id="updateElevatorShaftLockState">
+        UPDATE AS_ELEVATORSHAFT r SET r.LOCK_STATE = #{param2} WHERE r.ID = #{param1}
+    </update>
+
 
 </mapper>
