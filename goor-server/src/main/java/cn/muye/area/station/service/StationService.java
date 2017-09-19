@@ -49,5 +49,7 @@ public interface StationService extends BaseService<Station>{
 	List<Station> findStationsByRobotCode(String robotCode);
 
 	List<Station> listAccessStationByStationId(Long stationId, Long sceneId);
+
+	List<Station> listStationsBySceneAndMapPointType(Long sceneId, Integer type);
 }
 

@@ -27,5 +27,7 @@ public interface StationMapper  extends MyMapper<Station> {
 	List<Station> list(@Param("name") Object name);
 
 	List<Station> findStationsByRobotCode(String robotCode);
+
+	List<Station> listStationsBySceneAndMapPointType(@Param("sceneId")Long sceneId, @Param("type")Integer type);
 }
 

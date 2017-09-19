@@ -541,24 +541,26 @@ ALTER TABLE AS_DOOR ADD PATH_LOCK BIGINT(20) NULL;
 -- Table structure for AS_GOODS_TYPE
 -- ----------------------------
 DROP TABLE IF EXISTS `AS_GOODS_TYPE`;
-CREATE TABLE `AS_GOODS_TYPE` (
+CREATE TABLE `as_goods_type` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `NAME` varchar(255) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
   `DESCRIPTION` varchar(255) DEFAULT NULL,
+  `DELETE_STATUS` tinyint(1) DEFAULT NULL,
   `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '创建人ID',
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '店铺ID',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
 
 -- ----------------------------
 -- Records of AS_GOODS_TYPE
 -- ----------------------------
-INSERT INTO `AS_GOODS_TYPE` VALUES ('1', '药物', '2017-07-07 11:47:02', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('2', '垃圾', '2017-07-07 11:47:05', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('3', '被草', '2017-07-07 11:47:09', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('4', '医疗器械', '2017-07-07 11:47:12', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('5', '餐饮', '2017-07-07 11:47:14', null, '1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('1', '药物', '2017-07-07 11:47:02', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('2', '垃圾', '2017-07-07 11:47:05', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('3', '被草', '2017-07-07 11:47:09', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('4', '医疗器械', '2017-07-07 11:47:12', null, 0 , '1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('5', '餐饮', '2017-07-07 11:47:14', null, '1',0 , '100');
 
 -- ----------------------------
 -- Table structure for AS_RFIDBRACELET
@@ -1879,7 +1881,8 @@ create table AS_ROADPATHLOCK
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   NAME varchar(50) null comment '名称信息',
-  `LOCK` int(1) null comment '是否上锁的标识'
+  LOCK_STATUS int(1) null comment '是否上锁的标识'
+  `ROBOT_CODE` varchar(50) DEFAULT NULL
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
 
