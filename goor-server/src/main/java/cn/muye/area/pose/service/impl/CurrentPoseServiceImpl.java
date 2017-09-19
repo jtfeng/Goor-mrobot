@@ -56,10 +56,10 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
     @Override
     public void sendCurrentPose() {
         Map<String, List<String>> sceneRobotCodeList = CacheInfoManager.getSceneRobotListCache();
-        if(sceneRobotCodeList == null || sceneRobotCodeList.size() <= 0)
+        if (sceneRobotCodeList == null || sceneRobotCodeList.size() <= 0)
             return;
         Iterator iterator = sceneRobotCodeList.entrySet().iterator();
-        while (iterator.hasNext()){
+        while (iterator.hasNext()) {
             JSONArray jsonArray = new JSONArray();
             Map.Entry entry = (Map.Entry) iterator.next();
             String sceneName = (String) entry.getKey();
@@ -67,22 +67,12 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
             for (int i = 0; i < robotCodeList.size(); i++) {
                 String code = robotCodeList.get(i);
                 Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-                MessageInfo messageInfo = CacheInfoManager.getMapCurrentCache(code);
+
+                //获取机器人所在地图名称
+                String mapName = getMapName(code);
                 //未获取到地图信息，循环下一个
-                if (messageInfo == null || StringUtil.isNullOrEmpty(messageInfo.getMessageText())) {
+                if (StringUtil.isNullOrEmpty(mapName))
                     continue;
-                }
-                JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
-                String data = jsonObject.getString(TopicConstants.DATA);
-                JSONObject object = JSON.parseObject(data);
-                Integer currentMapCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
-                //未获取到当前地图的正常数据，循环下一个
-                if (currentMapCode == null || currentMapCode != 0) {
-                    continue;
-                }
-                String mapData = object.getString(TopicConstants.DATA);
-                JSONObject mapObject = JSON.parseObject(mapData);
-                String mapName = mapObject.getString(TopicConstants.MAP_NAME);
 
                 MessageInfo currentPose = CacheInfoManager.getMessageCache(code);
                 //未获取到当前位置信息信息，循环下一个
@@ -102,19 +92,49 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
             Runnable runnable = new MyThread(robotCodeList, jsonArray);
             executorService.execute(runnable);
         }
-
     }
 
+    /**
+     * 获取机器人所在地图信息
+     * @param code  机器人编号
+     * @return 地图名
+     */
+    private String getMapName(String code) {
+        MessageInfo messageInfo = CacheInfoManager.getMapCurrentCache(code);
+        //未获取到地图信息，循环下一个
+        if (messageInfo == null || StringUtil.isNullOrEmpty(messageInfo.getMessageText())) {
+            return null;
+        }
+        JSONObject jsonObject = JSON.parseObject(messageInfo.getMessageText());
+        String data = jsonObject.getString(TopicConstants.DATA);
+        JSONObject object = JSON.parseObject(data);
+        Integer currentMapCode = object.getInteger(SearchConstants.SEARCH_ERROR_CODE);
+        //未获取到当前地图的正常数据，循环下一个
+        if (currentMapCode == null || currentMapCode != 0) {
+            return null;
+        }
+        String mapData = object.getString(TopicConstants.DATA);
+        JSONObject mapObject = JSON.parseObject(mapData);
+        String mapName = mapObject.getString(TopicConstants.MAP_NAME);
+        return mapName;
+    }
+
+
+    /**
+     * 向list中的机器人发送当前位置信息
+     * @param robotCodeList 机器人列表
+     * @param jsonArray 发送的数据
+     */
     public void sendCurrentPose(List<String> robotCodeList, JSONArray jsonArray) {
         try {
-            if (jsonArray.size() <= 0 || robotCodeList == null || robotCodeList.size() <=0) {
+            if (jsonArray.size() <= 0 || robotCodeList == null || robotCodeList.size() <= 0) {
                 return;
             }
             //循环给每个机器人下发
-            for(int i=0; i < robotCodeList.size(); i ++){
+            for (int i = 0; i < robotCodeList.size(); i++) {
                 String code = robotCodeList.get(i);
 
-                LOGGER.info("robot {} sendCurrentPose start",code);
+//                LOGGER.info("robot {} sendCurrentPose start", code);
 
                 //封装robots_current_pose数据
                 SlamBody slamBody = new SlamBody();
@@ -126,7 +146,7 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
                 slamBody.setUuid(UUID.randomUUID().toString().replace("-", ""));
 
                 String slamBodyString = JSON.toJSONString(slamBody);
-                LOGGER.info("sendCurrentPose slamBody {}",slamBodyString);
+//                LOGGER.info("sendCurrentPose slamBody {}", slamBodyString);
 
                 //封装命令消息
                 CommonInfo commonInfo = new CommonInfo();
@@ -142,14 +162,14 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
                 messageInfo.setSenderId("goor-server");
                 messageInfo.setMessageType(MessageType.EXECUTOR_COMMAND);
 
-                messageSendHandleService.sendCommandMessage(false,false, code, messageInfo);
+                messageSendHandleService.sendCommandMessage(false, false, code, messageInfo);
             }
         } catch (Exception e) {
             LOGGER.error("发送实时坐标信息失败", e);
         }
     }
 
-    class MyThread implements Runnable{
+    class MyThread implements Runnable {
         private List<String> robotCodeList;
         private JSONArray jsonArray;
 
