@@ -1,11 +1,13 @@
 package cn.muye.assets.elevator.service.impl;
 
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.elevator.ElevatorShaft;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.elevator.mapper.ElevatorMapper;
+import cn.muye.assets.elevator.mapper.ElevatorPointCombinationMapper;
 import cn.muye.assets.elevator.mapper.ElevatorShaftMapper;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
@@ -20,6 +22,8 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -72,6 +76,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                         public boolean test(ElevatorPointCombination combination) {
                             boolean isPassed = false;
                             try {
+                                // 四点集合必须在同一张地图上
                                 MapInfo mapInfo = findByMapNameAndStoreId(
                                         combination.getgPoint().getMapName(),
                                         combination.getStoreId(),
@@ -94,6 +99,28 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
             }
         }).collect(Collectors.toList());
 
+    }
+
+    @Autowired
+    private ElevatorPointCombinationMapper elevatorPointCombinationMapper;
+    @Override
+    public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor, MapPoint waitPoint) {//传入的点类型肯定为等待点
+        Long elevatorId = elevatorPointCombinationMapper.findElevatorByWaitPoint(waitPoint.getId());
+        if (elevatorId != null) {
+            Elevator elevator = elevatorMapper.selectByPrimaryKey(elevatorId);
+            bindElevatorShaft(Collections.singletonList(elevator));//绑定修饰电梯，赋值实体类的其余属性
+            if (elevator.getElevatorShaft() != null) {
+                Long elevatorShaftId = elevator.getElevatorShaft().getId();//当前绑定点对应的电梯井
+                List<Elevator> elevators = findByMapFloor(mapInfoId, floor);
+                return elevators.stream().filter(new Predicate<Elevator>() {
+                    @Override
+                    public boolean test(Elevator elevator) {
+                        return elevatorShaftId.equals(elevator.getElevatorShaft().getId());
+                    }
+                }).collect(Collectors.toList());
+            }
+        }
+        return null;
     }
 
     @Override
