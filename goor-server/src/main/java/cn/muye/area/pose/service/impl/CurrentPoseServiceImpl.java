@@ -67,7 +67,8 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
             for (int i = 0; i < robotCodeList.size(); i++) {
                 String code = robotCodeList.get(i);
                 Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-
+                if (null == robot)
+                    continue;
                 //获取机器人所在地图名称
                 String mapName = getMapName(code);
                 //未获取到地图信息，循环下一个

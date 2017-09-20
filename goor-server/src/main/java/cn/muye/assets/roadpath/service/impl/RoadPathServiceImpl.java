@@ -46,6 +46,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     private RoadPathLockMapper roadPathLockMapper;
     private String sceneName = null;
     private String mapName = null;
+
     @Transactional(rollbackFor = Exception.class)
     @SuppressWarnings("unchecked")
     @Override
@@ -70,13 +71,13 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
             log.info(String.format("路径权值数据为：%s", weight));
 
-            String pathType = String.valueOf(checkNotNull(body.get("pathType"),"路径类型不能为空"));
+            String pathType = String.valueOf(checkNotNull(body.get("pathType"), "路径类型不能为空"));
             Integer pathTypeInt = Integer.parseInt(pathType);
-            checkNotNull(pathTypeInt,"路径类型不能为空");
+            checkNotNull(pathTypeInt, "路径类型不能为空");
             List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
 
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
-            if(pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
+            if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
                 checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
                 Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
                 RoadPath roadPath = new RoadPath() {{
@@ -91,15 +92,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     setPathId("");//云端路径没有PathId
                     setPathType(pathTypeInt);
                 }};
-                setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+                setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 this.roadPathMapper.insert(roadPath);
                 packageRoadPathRelations(points, roadPath);
-            }
-            else if(pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
+            } else if (pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
                 checkArgument(points.size() == 2, "工控路径点组合只能两个点（开始点和结束点）");
                 Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
                 //如果是工控路径还得校验工控路径不为空
-                String pathId = String.valueOf(checkNotNull(body.get("pathId"),"工控路径ID不能为空"));
+                String pathId = String.valueOf(checkNotNull(body.get("pathId"), "工控路径ID不能为空"));
                 RoadPath roadPath = new RoadPath() {{
                     setData(data);
                     setPattern(pattern);
@@ -112,11 +112,11 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     setPathType(pathTypeInt);
                     setPathId(pathId);
                 }};
-                setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+                setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 this.roadPathMapper.insert(roadPath);
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
@@ -137,9 +137,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             log.info(String.format("路径相关数据：%s", data));
             Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
             log.info(String.format("路径权值数据为：%s", weight));
-            String pathType = String.valueOf(checkNotNull(body.get("pathType"),"路径类型不能为空"));
+            String pathType = String.valueOf(checkNotNull(body.get("pathType"), "路径类型不能为空"));
             Integer pathTypeInt = Integer.parseInt(pathType);
-            checkNotNull(pathTypeInt,"路径类型不能为空");
+            checkNotNull(pathTypeInt, "路径类型不能为空");
 
             RoadPath roadPath = new RoadPath();
             roadPath.setId(id);
@@ -155,29 +155,28 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setStoreId(100L);
 
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
-            if(pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
+            if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
                 List points = (List) checkNotNull(body.get("points"), "云端路径点组合不允许为空，请重新选择!");
                 checkArgument(points.size() >= 2, "云端路径点组合至少需要两个点（开始点和结束点）");
                 roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
                 roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置（结束点）
 
                 Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
-                setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+                setRoadPathSceneMapNameByPoint(roadPath, startPointId);
 
                 int updateCount = this.roadPathMapper.updateByPrimaryKeySelective(roadPath);
                 log.info("当前更新的数据记录条数为 ：" + updateCount);
                 packageRoadPathRelations(points, roadPath);
                 return;
-            }
-            else if(pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
-                List points = (List)body.get("points");
-                if(points != null && points.size() > 0) {
+            } else if (pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
+                List points = (List) body.get("points");
+                if (points != null && points.size() > 0) {
                     checkArgument(points.size() == 2, "工控路径点组合至少只能有两个点（开始点和结束点）");
                     roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
                     roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(1)))); // 设置（结束点）
 
                     Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
-                    setRoadPathSceneMapNameByPoint(roadPath,startPointId);
+                    setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 }
 
                 int updateCount = this.roadPathMapper.updateByPrimaryKeySelective(roadPath);
@@ -185,7 +184,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             }
 
 
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw e;
         }
@@ -193,6 +192,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
     /**
      * 根据出发点设置roadPath的场景名和地图名
+     *
      * @param roadPath
      * @param startPointId
      */
@@ -208,7 +208,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (sceneName == null || mapName == null) {
             example.createCriteria().andCondition("START_POINT = ", startPoint)
                     .andCondition("END_POINT = ", endPoint);
-        }else {
+        } else {
             example.createCriteria().andCondition("START_POINT = ", startPoint)
                     .andCondition("END_POINT = ", endPoint)
                     .andCondition("SCENE_NAME = ", sceneName)
@@ -230,7 +230,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (mapName != null) {
             criteria.andCondition("MAP_NAME = ", mapName);
         }
-        if(pathType != null) {
+        if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
@@ -249,7 +249,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (mapName != null) {
             criteria.andCondition("MAP_NAME = ", mapName);
         }
-        if(pathType != null) {
+        if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
@@ -275,13 +275,18 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         return count > 0 ? true : false;
     }
 
-    private List<RoadPathDetail> packageRoadPathDetail(List<RoadPath> roadPaths){
+    @Override
+    public RoadPath findRoadPath(RoadPath roadPath) throws Exception {
+        return roadPathMapper.selectOne(roadPath);
+    }
+
+    private List<RoadPathDetail> packageRoadPathDetail(List<RoadPath> roadPaths) {
         List<RoadPathDetail> roadPathDetails = Lists.newArrayList();
         for (RoadPath roadPath : roadPaths) {
             RoadPathDetail roadPathDetail = new RoadPathDetail();
             BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
-            roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
+            roadPathDetail.setEnd(this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
             if (roadPath.getPathLock() != null) {
                 // 当逻辑锁对象不为空时，才级联查询对应的管理锁对象
                 roadPathDetail.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(roadPath.getPathLock()));//设置对应的逻辑锁对象
@@ -291,13 +296,13 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     + ",end- " + roadPath.getEndPoint()
                     + ",roadPathId- " + roadPath.getId());
             try {
-                for (RoadPathPoint roadPathPoint : this.roadPathMapper.findRoadPathPointByRoadPath(roadPath.getId())){
+                for (RoadPathPoint roadPathPoint : this.roadPathMapper.findRoadPathPointByRoadPath(roadPath.getId())) {
                     relatePoints.add(this.mapPointMapper.selectByPrimaryKey(roadPathPoint.getPointId()));
                 }
                 roadPathDetail.setRelatePoints(relatePoints);
                 roadPathDetails.add(roadPathDetail);
             } catch (Exception e) {
-                log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
                 continue;
             }
         }
@@ -306,15 +311,16 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
     /**
      * 不能返回一个新的 List，因为这样会破坏分页插件显示数据的正确性
+     *
      * @param roadPaths
      */
-    private void detailRoadPath(List<RoadPath> roadPaths){
+    private void detailRoadPath(List<RoadPath> roadPaths) {
         int i = 0;
         for (RoadPath roadPath : roadPaths) {
             RoadPathDetail roadPathDetail = new RoadPathDetail();
             BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
-            roadPathDetail.setEnd(  this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
+            roadPathDetail.setEnd(this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
             if (roadPath.getPathLock() != null) {
                 // 当逻辑锁对象不为空时，才级联查询对应的管理锁对象
                 roadPathDetail.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(roadPath.getPathLock()));//设置对应的逻辑锁对象
@@ -323,12 +329,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             log.info("packageRoadPathDetail: start- " + roadPath.getStartPoint()
                     + ",end- " + roadPath.getEndPoint()
                     + ",roadPathId- " + roadPath.getId());
-            for (RoadPathPoint roadPathPoint : this.roadPathMapper.findRoadPathPointByRoadPath(roadPath.getId())){
+            for (RoadPathPoint roadPathPoint : this.roadPathMapper.findRoadPathPointByRoadPath(roadPath.getId())) {
                 relatePoints.add(this.mapPointMapper.selectByPrimaryKey(roadPathPoint.getPointId()));
             }
             roadPathDetail.setRelatePoints(relatePoints);
             roadPaths.set(i, roadPathDetail);
-            i ++;
+            i++;
         }
     }
 
@@ -338,29 +344,31 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             int deleteRowCount = super.deleteById(id);
             this.roadPathMapper.deleteRoadPathPointsByPathId(id);//删除与路径关联的 MapPoint 信息
             return deleteRowCount;
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void packageRoadPathRelations(List points, RoadPath roadPath){
+    private void packageRoadPathRelations(List points, RoadPath roadPath) {
         // 首先删除旧的关系 ， 再添加新的数据关系
         this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
         List<RoadPathPoint> roadPathPoints = Lists.newArrayList();
         int i = 0;
-        for (int j = 0;j < points.size(); j++) {
+        for (int j = 0; j < points.size(); j++) {
             Object pointIdOrign = points.get(j);
             Long pointId = Long.parseLong(String.valueOf(pointIdOrign));
             RoadPathPoint roadPathPoint = new RoadPathPoint();
-            roadPathPoint.setCreateTime(new Date());roadPathPoint.setStoreId(100L);
+            roadPathPoint.setCreateTime(new Date());
+            roadPathPoint.setStoreId(100L);
             roadPathPoint.setRoadPathId(roadPath.getId());// 设置路径信息 id 编号
             roadPathPoint.setPointId(pointId);// 当前点 id
             roadPathPoint.setOrderIndex(j);//设置排序索引
-            roadPathPoint.setStartFlag(0);roadPathPoint.setEndFlag(0);
-            if (i == 0){
+            roadPathPoint.setStartFlag(0);
+            roadPathPoint.setEndFlag(0);
+            if (i == 0) {
                 roadPathPoint.setStartFlag(1);// 标记为开始点
             }
-            if (i == (points.size() - 1)){
+            if (i == (points.size() - 1)) {
                 RoadPathPoint prevPoint = roadPathPoints.get(i - 1);
                 roadPathPoint.setPrevPointId(prevPoint.getPointId());
                 roadPathPoint.setEndFlag(1);// 标记为结束点
@@ -376,7 +384,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 roadPathPoints.set(i - 1, prevPoint);
             }
             roadPathPoints.add(roadPathPoint);
-            i ++ ;
+            i++;
         }
         // 关系生成完毕之后 ， 保存一系列数据到数据库中
         this.roadPathPointMapper.insertList(roadPathPoints);// 批量保存数据信息
