@@ -31,4 +31,11 @@
         </foreach>
     </select>
 
+    <select id="findElevatorByWaitPoint" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT R.ELEVATOR_ID FROM
+        ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS R LEFT JOIN
+        AS_ELEVATORPOINTCOMBINATION S ON S.ID  = R.ELEVATORPOINTCOMBINATION_ID
+        WHERE S.WAIT_POINT = #{0} limit 0,1;
+    </select>
+
 </mapper>

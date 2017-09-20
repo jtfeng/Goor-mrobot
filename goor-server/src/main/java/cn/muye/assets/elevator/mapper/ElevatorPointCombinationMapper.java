@@ -11,4 +11,5 @@ public interface ElevatorPointCombinationMapper extends MyMapper<ElevatorPointCo
 
     Long checkCreateCondition(List<Long> mappointIds);
 
+    Long findElevatorByWaitPoint(Long waitPointId);
 }
