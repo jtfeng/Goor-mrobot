@@ -896,7 +896,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (mPointAtts != null){
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
+                    mPointAtts.currentFloor,
+                    mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
@@ -939,7 +940,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             List<Elevator> nextElevator = elevatorService.findByMapFloor(
                     mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
+                    mPointAtts.nextFloor,
+                    mp);
             if (nextElevator != null){
                 for (Elevator ev :
                         nextElevator) {
@@ -3646,7 +3648,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (mPointAtts != null){
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
+                    mPointAtts.currentFloor,
+                    mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
@@ -3689,7 +3692,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             List<Elevator> nextElevator = elevatorService.findByMapFloor(
                     mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
+                    mPointAtts.nextFloor,
+                    mp);
             if (nextElevator != null){
                 for (Elevator ev :
                         nextElevator) {
@@ -3777,7 +3781,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             elevatorsEntities.add(temp);
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
+                    mPointAtts.currentFloor,
+                    mp);
             int count = -1;
             if (preElevator != null){
                 for (Elevator ev :
@@ -3837,7 +3842,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             List<Elevator> nextElevator = elevatorService.findByMapFloor(
                     mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
+                    mPointAtts.nextFloor,
+                    mp);
             count = -1;
             if (nextElevator != null){
                 for (Elevator ev :
