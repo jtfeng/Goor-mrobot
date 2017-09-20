@@ -96,7 +96,8 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
 
     /**
      * 获取机器人所在地图信息
-     * @param code  机器人编号
+     *
+     * @param code 机器人编号
      * @return 地图名
      */
     private String getMapName(String code) {
@@ -122,8 +123,9 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
 
     /**
      * 向list中的机器人发送当前位置信息
+     *
      * @param robotCodeList 机器人列表
-     * @param jsonArray 发送的数据
+     * @param jsonArray     发送的数据
      */
     public void sendCurrentPose(List<String> robotCodeList, JSONArray jsonArray) {
         try {
@@ -134,11 +136,8 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
             for (int i = 0; i < robotCodeList.size(); i++) {
                 String code = robotCodeList.get(i);
 
-<<<<<<< HEAD
-=======
-//                LOGGER.info("robot {} sendCurrentPose start", code);
+                LOGGER.info("robot {} sendCurrentPose start", code);
 
->>>>>>> a692758... 添加地图信息删除时删除本地文件操作
                 //封装robots_current_pose数据
                 SlamBody slamBody = new SlamBody();
                 slamBody.setPubName(TopicConstants.ROBOTS_CURRENT_POSE);
@@ -147,12 +146,9 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
                 slamBody.setData(jsonArray);
                 slamBody.setUuid(UUID.randomUUID().toString().replace("-", ""));
 
-<<<<<<< HEAD
-=======
                 String slamBodyString = JSON.toJSONString(slamBody);
-//                LOGGER.info("sendCurrentPose slamBody {}", slamBodyString);
+                LOGGER.info("sendCurrentPose slamBody {}", slamBodyString);
 
->>>>>>> a692758... 添加地图信息删除时删除本地文件操作
                 //封装命令消息
                 CommonInfo commonInfo = new CommonInfo();
                 commonInfo.setTopicName(TopicConstants.AGENT_PUB);
