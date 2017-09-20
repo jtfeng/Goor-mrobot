@@ -56,6 +56,9 @@ public class MapInfoServiceImpl implements MapInfoService {
     @Value("${goor.push.http}")
     private String DOWNLOAD_HTTP;
 
+    @Value("${goor.push.dirs}")
+    private String DOWNLOAD_HOME;
+
     private static final int LEVEL_ONE = 1;
     private static final int LEVEL_TWO = 2;
     private static final int LEVEL_THREE = 3;
@@ -94,7 +97,8 @@ public class MapInfoServiceImpl implements MapInfoService {
             //递归删除该场景下面文件名包含地图名的所有文件
             String mapName = mapInfo.getMapName();
             String sceneName = mapInfo.getSceneName();
-            deleteDirInclude(new File(sceneName), mapName);
+            String localSceneDir = DOWNLOAD_HOME + File.separator + SearchConstants.FAKE_MERCHANT_STORE_ID + File.separator + mapInfo.getDeviceId() + File.separator + sceneName;
+            deleteDirInclude(new File(localSceneDir), mapName);
         }
         //删除数据库记录
         mapInfoMapper.deleteByPrimaryKey(id);
