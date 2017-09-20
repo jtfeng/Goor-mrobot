@@ -1,6 +1,7 @@
 package cn.muye.assets.elevator.service;
 
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorShaft;
 import cn.mrobot.utils.WhereRequest;
@@ -56,6 +57,15 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @return
      */
     List<Elevator> findByMapFloor(Long mapInfoId, Integer floor);
+
+    /**
+     * 根据地图楼层查询电梯信息（ Abel 使用，外加一个等待点 MapPoint 的参数，将查询结果限制在对应的电梯井）
+     * @param mapInfoId
+     * @param floor
+     * @return
+     */
+    List<Elevator> findByMapFloor(Long mapInfoId, Integer floor, MapPoint waitPoint);
+
     /**
      * 根据地图名称以及门店编号查询对应的地图实体信息
      * @param mapName
