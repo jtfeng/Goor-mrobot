@@ -14,10 +14,10 @@
         <result property="needShelf" column="needShelf" />
         <result property="defaultSetting" column="defaultSetting" />
         <result property="storeId" column="storeId" />
-        <result property="createBy" column="createBy" />
+        <result property="createdBy" column="createdBy" />
         <result property="createTime" column="createTime" />
         <association property="goodsType" javaType="cn.mrobot.bean.assets.good.GoodsType">
-            <id column="id" property="id"/>
+            <id column="typeId" property="id"/>
             <result column="typeName" property="name"/>
         </association>
     </resultMap>
@@ -118,19 +118,19 @@
             <if test="stationId != null" >
                 station_id = #{stationId},
             </if>
-            <if test="startStation != null and startStation.id != null and startStation.id != ''" >
+            <if test="startStation != null" >
                 start_station_id = #{startStation.id},
             </if>
-            <if test="endStation != null and endStation.id != null and endStation.id != ''" >
+            <if test="endStation != null" >
                 end_station_id = #{endStation.id},
             </if>
-            <if test="goodsType != null and goodsType.id != null and goodsType.id != ''" >
+            <if test="goodsType != null" >
                 goods_type_id = #{goodsType.id},
             </if>
             <if test="packageType != null" >
                 package_type = #{packageType},
             </if>
-            <if test="robotType != null and robotType.id != null and robotType.id != ''" >
+            <if test="robotType != null" >
                 robot_type_id = #{robotType.id},
             </if>
             <if test="needSign != null" >

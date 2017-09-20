@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by Selim on 2017/7/6.
  */
-public interface OrderSettingMapper {
+public interface OrderSettingMapper{
 
     OrderSetting getById(@Param("id") Long id);
 
