@@ -264,6 +264,46 @@ public class ProducerCommon implements ApplicationContextAware {
         }
     }
 
+    /**
+     *电梯加锁事件上报topic
+     * @param text
+     */
+    public void sendX86ElevatorLockMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_ELEVATOR_LOCK, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendX86MissionEventMessage error",e);
+        }
+    }
+
+    /**
+     *路径加锁事件上报topic
+     * @param text
+     */
+    public void sendX86RoadPathLockMessage(String text){
+        try {
+            if(!getRabbitTemplate()){
+                log.error("getRabbitTemplate is null");
+                return;
+            }
+            if(!getLocalRobotSN()){
+                log.error("getLocalRobotSN is null");
+                return;
+            }
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_X86_ROADPATH_LOCK, new MessageInfo(localRobotSN, new Date(), text));
+        }catch (Exception e){
+            log.error("sendX86MissionEventMessage error",e);
+        }
+    }
+
     private boolean getRabbitTemplate(){
         if(null == applicationContext){
             log.error("sendGoorMessage applicationContext is null error");

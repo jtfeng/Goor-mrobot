@@ -4,7 +4,6 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
@@ -14,21 +13,21 @@ import cn.muye.assets.roadpath.mapper.RoadPathPointMapper;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.base.service.imp.BaseServiceImpl;
-import static com.google.common.base.Preconditions.*;
-
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronizationAdapter;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @Service
 @Transactional
@@ -268,6 +267,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         return roadPaths;
     }
 
+    @Override
+    public Boolean hasRelatedRoadPath(Long id) {
+        RoadPath roadPath = new RoadPath();
+        roadPath.setPathLock(id);
+        int count = myMapper.selectCount(roadPath);
+        return count > 0 ? true : false;
+    }
+
     private List<RoadPathDetail> packageRoadPathDetail(List<RoadPath> roadPaths){
         List<RoadPathDetail> roadPathDetails = Lists.newArrayList();
         for (RoadPath roadPath : roadPaths) {
@@ -341,12 +348,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
         List<RoadPathPoint> roadPathPoints = Lists.newArrayList();
         int i = 0;
-        for (Object pointIdOrign : points) {
+        for (int j = 0;j < points.size(); j++) {
+            Object pointIdOrign = points.get(j);
             Long pointId = Long.parseLong(String.valueOf(pointIdOrign));
             RoadPathPoint roadPathPoint = new RoadPathPoint();
             roadPathPoint.setCreateTime(new Date());roadPathPoint.setStoreId(100L);
             roadPathPoint.setRoadPathId(roadPath.getId());// 设置路径信息 id 编号
             roadPathPoint.setPointId(pointId);// 当前点 id
+            roadPathPoint.setOrderIndex(j);//设置排序索引
             roadPathPoint.setStartFlag(0);roadPathPoint.setEndFlag(0);
             if (i == 0){
                 roadPathPoint.setStartFlag(1);// 标记为开始点

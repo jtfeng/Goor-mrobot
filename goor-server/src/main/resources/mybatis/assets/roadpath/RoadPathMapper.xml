@@ -15,7 +15,7 @@
     </select>
 
     <select id="findRoadPathPointByRoadPath" parameterType="java.lang.Long" resultMap="RoadPathPointSimpleMap">
-        SELECT * FROM AS_ROADPATHPOINT WHERE ROAD_PATH_ID = #{0} ORDER BY ID ASC
+        SELECT * FROM AS_ROADPATHPOINT WHERE ROAD_PATH_ID = #{0} ORDER BY ORDER_INDEX ASC,ID ASC
     </select>
 
     <select id="findBeginRoadPathPoint" parameterType="java.lang.Long" resultMap="RoadPathPointSimpleMap">

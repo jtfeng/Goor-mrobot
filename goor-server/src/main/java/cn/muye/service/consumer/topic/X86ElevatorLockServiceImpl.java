@@ -2,11 +2,13 @@ package cn.muye.service.consumer.topic;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.elevator.Elevator;
+import cn.mrobot.bean.assets.elevator.ElevatorShaft;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.mission.task.JsonElevatorLock;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.elevator.service.ElevatorService;
+import cn.muye.assets.elevator.service.ElevatorShaftService;
 import cn.muye.base.bean.MessageInfo;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
@@ -25,7 +27,7 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
     BaseMessageService baseMessageService;
 
     @Autowired
-    ElevatorService elevatorService;
+    ElevatorShaftService elevatorShaftService;
 
     @Override
     public AjaxResult handleX86ElevatorLock(MessageInfo messageInfo) {
@@ -45,17 +47,17 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
                     case "lock":
                         //判断和返回加锁
                         logger.info("2222222222");
-                        ret = elevatorService.updateElevatorLockStateWithRobotCode(
+                        ret = elevatorShaftService.updateElevatorShaftLockStateWithRobotCode(
                                 jsonElevatorLock.getElevator_id(),
-                                Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK,
+                                ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK,
                                 baseMessageService.getSenderId(messageInfo)
                         );
                         break;
                     case "unlock":
                         logger.info("3333333");
-                        ret = elevatorService.updateElevatorLockStateWithRobotCode(
+                        ret = elevatorShaftService.updateElevatorShaftLockStateWithRobotCode(
                                 jsonElevatorLock.getElevator_id(),
-                                Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK,
+                                ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK,
                                 baseMessageService.getSenderId(messageInfo)
                         );
                         break;

@@ -228,13 +228,13 @@ public class ElevatorController {
                 combinationIds.add(checkNotNull(combination.getId(), "ID编号必须存在，请重新检查!"));
             }
             String ipElevatorId = elevator.getIpElevatorId();
-            if (!StringUtil.isNullOrEmpty(ipElevatorId)) {
+            /*if (!StringUtil.isNullOrEmpty(ipElevatorId)) {
                 String regex = "^[10]{8}";
                 boolean flag = ipElevatorId.matches(regex);
                 if (!flag) {
                     return AjaxResult.failed(AjaxResult.CODE_FAILED, "工控电梯ID必须为8位二进制");
                 }
-            }
+            }*/
             //保存电梯信息以及电梯与点组合的对应关系
             elevatorService.createElevator(elevator, combinationIds);
             return AjaxResult.success("保存电梯信息成功");

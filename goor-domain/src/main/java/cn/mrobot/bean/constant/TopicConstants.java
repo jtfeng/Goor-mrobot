@@ -49,6 +49,7 @@ public class TopicConstants {
 	public static final String X86_MISSION_EVENT = "/x86_mission_event";//任务事件上报topic
 	public static final String X86_MISSION_RECEIVE = "/x86_mission_receive";//任务回执上报topic
 	public static final String X86_ELEVATOR_LOCK = "/x86_elevator_lock";//电梯锁定topic
+	public static final String X86_ROADPATH_LOCK = "/x86_roadpath_lock";//路径锁定topic
 	public static final String X86_MISSION_HEARTBEAT = "/x86_mission_heartbeat";//x86 mission心跳topic
 	public static final String X86_MISSION_ALERT = "x86_mission_alert"; //x86 mission任务报警topic
 

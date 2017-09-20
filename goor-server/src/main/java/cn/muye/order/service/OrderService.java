@@ -25,5 +25,7 @@ public interface OrderService {
 
     void changeOrderStatus(Long id, Integer status);
 
-    List<Order> listWaitOrdersByStation(Long stationId, Integer orderStatus);
+    List<Order> listOrdersByStationAndStatus(Long stationId, Integer orderStatus);
+
+    List<Order> listOrdersByStation(Long stationId, Integer page, Integer pageSize);
 }

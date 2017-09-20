@@ -2,7 +2,6 @@ package cn.muye.assets.roadpath.service;
 
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
@@ -23,5 +22,5 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     List<RoadPath> listRoadPaths(WhereRequest whereRequest) throws Exception;
 
-
+    Boolean hasRelatedRoadPath(Long id);
 }

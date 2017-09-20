@@ -107,4 +107,14 @@
             </if>
         </where>
     </select>
+
+    <select id="listStationsBySceneAndMapPointType" resultType="cn.mrobot.bean.area.station.Station">
+        SELECT ast.*
+        FROM A_STATION ast
+        LEFT JOIN A_STATION_MAP_POINT_XREF asmx ON ast.ID = asmx.STATION_ID
+        LEFT JOIN A_MAP_POINT am ON am.ID = asmx.MAP_POINT_ID
+        WHERE am.CLOUD_POINT_TYPE_ID = #{type}
+        AND ast.SCENE_ID = #{sceneId}
+        GROUP BY ast.ID
+    </select>
 </mapper>

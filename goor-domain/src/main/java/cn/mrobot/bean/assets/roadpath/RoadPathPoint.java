@@ -19,6 +19,8 @@ public class RoadPathPoint extends BaseBean{
     private Integer endFlag;
     // 对应绑定的路径 id 编号
     private Long roadPathId;
+    //排序索引
+    private Integer orderIndex;
 
     public RoadPathPoint(){}
 
@@ -70,6 +72,14 @@ public class RoadPathPoint extends BaseBean{
         this.prevPointId = prevPointId;
     }
 
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+    }
+
     @Override
     public String toString() {
         return "RoadPathPoint{" +
@@ -79,6 +89,7 @@ public class RoadPathPoint extends BaseBean{
                 ", startFlag=" + startFlag +
                 ", endFlag=" + endFlag +
                 ", roadPathId=" + roadPathId +
+                ", orderIndex=" + orderIndex +
                 '}';
     }
 }
