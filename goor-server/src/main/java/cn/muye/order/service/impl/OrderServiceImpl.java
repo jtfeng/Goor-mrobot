@@ -66,12 +66,14 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         orderMapper.saveOrder(order);
         //在此前保存起始站
         OrderSetting sqlSetting = orderSettingService.getById(order.getOrderSetting().getId());
-        OrderDetail startDetail = new OrderDetail();
-        startDetail.setOrderId(order.getId());
-        startDetail.setStationId(sqlSetting.getStartStation().getId());
-        startDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_START);
-        startDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
-        orderDetailService.save(startDetail);
+        if(sqlSetting.getNeedShelf()){
+            OrderDetail startDetail = new OrderDetail();
+            startDetail.setOrderId(order.getId());
+            startDetail.setStationId(sqlSetting.getStartStation().getId());
+            startDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_START);
+            startDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
+            orderDetailService.save(startDetail);
+        }
         //保存订单详情
         List<OrderDetail> orderDetailList = order.getDetailList();
         orderDetailList.forEach(orderDetail -> {
@@ -86,12 +88,14 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             });
         });
         //之后保存末尾站
-        OrderDetail endDetail = new OrderDetail();
-        endDetail.setOrderId(order.getId());
-        endDetail.setStationId(sqlSetting.getEndStation().getId());
-        endDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
-        endDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_END);
-        orderDetailService.save(endDetail);
+        if(sqlSetting.getNeedShelf()){
+            OrderDetail endDetail = new OrderDetail();
+            endDetail.setOrderId(order.getId());
+            endDetail.setStationId(sqlSetting.getEndStation().getId());
+            endDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
+            endDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_END);
+            orderDetailService.save(endDetail);
+        }
     }
 
     @Override

@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -77,7 +76,7 @@ public class OrderSettingController extends BaseController{
             }
             orderSetting.setStationId(stationId);
             orderSettingService.saveOrderSetting(orderSetting);
-            return AjaxResult.success("添加配置成功");
+            return AjaxResult.success(orderSetting, "添加配置成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("添加配置内部出错");
@@ -96,8 +95,9 @@ public class OrderSettingController extends BaseController{
             if(orderSetting.getId() == null){
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "修改订单必须带有id");
             }
+            if(orderSetting.getDefaultSetting())
             orderSettingService.updateOrderSetting(orderSetting);
-            return AjaxResult.success("修改配置成功");
+            return AjaxResult.success(orderSetting, "修改配置成功");
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed("修改配置内部出错");
