@@ -2,11 +2,11 @@ package cn.muye.assets.elevator.service.impl;
 
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.assets.elevator.Elevator;
-import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
-import cn.mrobot.bean.assets.elevator.ElevatorShaft;
+import cn.mrobot.bean.assets.elevator.*;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.elevator.mapper.ElevatorMapper;
+import cn.muye.assets.elevator.mapper.ElevatorModeMapper;
 import cn.muye.assets.elevator.mapper.ElevatorPointCombinationMapper;
 import cn.muye.assets.elevator.mapper.ElevatorShaftMapper;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
@@ -20,10 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -42,6 +44,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     private ElevatorMapper elevatorMapper;
     @Autowired
     private ElevatorShaftMapper elevatorShaftMapper;
+    @Autowired
+    private ElevatorModeMapper elevatorModeMapper;
     @Autowired
     private ElevatorPointCombinationService elevatorPointCombinationService;
     private ReentrantLock lock;
@@ -285,5 +289,26 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         bindElevatorShaft(Lists.newArrayList(elevator));
         bindElevatorPointCombination(Lists.newArrayList(elevator));
         return elevator;
+    }
+
+    @Override
+    public ElevatorModeEnum determineCurrentElevatorMode(Long elevatorId) throws Exception {
+        Date currentDate = new Date();
+        Example example = new Example(ElevatorMode.class);
+        example.createCriteria()
+                .andCondition("ELEVATOR_ID =", elevatorId)
+                .andCondition("START_TIME <=", currentDate)
+                .andCondition("END_TIME >=", currentDate);
+        List<ElevatorMode> elevatorModes = elevatorModeMapper.selectByExample(example);
+        if (elevatorModes != null && elevatorModes.size() != 0) {
+            ElevatorMode mode = elevatorModes.get(0);
+            if (0 == mode.getState()) {
+                return ElevatorModeEnum.FULL_AUTOMATIC;
+            }
+            if (1 == mode.getState()) {
+                return ElevatorModeEnum.HALF_AUTOMATIC;
+            }
+        }
+        return null;
     }
 }

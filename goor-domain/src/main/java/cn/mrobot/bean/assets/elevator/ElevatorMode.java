@@ -1,130 +1,62 @@
 package cn.mrobot.bean.assets.elevator;
 
 import cn.mrobot.bean.base.BaseBean;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.Table;
-import javax.persistence.Transient;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Date;
 
-@Table(name = "AS_ELEVATOR")
-public class Elevator extends BaseBean {
-    private String name;
-    private String ip;
-    private String lockState = "0";// 0表示 未锁定、1表示 已锁定
-    private String info;
-    private Long elevatorshaftId;
-    private String robotCode;
-    @Transient
-    private ElevatorShaft elevatorShaft;
+@Table(name = "AS_ELEVATORMODE")
+public class ElevatorMode extends BaseBean {
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date startTime;//开始时间
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date endTime;//结束时间
+    private Integer state;//电梯当前的模式 (0 代表全自动, 1 代表半自动)
+    private Long elevatorId;//电梯 id
 
-    private String ipElevatorId; //工控电梯ID （八位二进制）
+    public Date getStartTime() {
+        return startTime;
+    }
 
-    private Boolean defaultElevator = Boolean.FALSE; //是否默认
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
+    }
 
-    @Transient
-    private List<ElevatorPointCombination> elevatorPointCombinations = new ArrayList<>();
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public Long getElevatorId() {
+        return elevatorId;
+    }
+
+    public void setElevatorId(Long elevatorId) {
+        this.elevatorId = elevatorId;
+    }
 
     @Override
     public String toString() {
-        return "Elevator{" +
-                "name='" + name + '\'' +
-                ", ip='" + ip + '\'' +
-                ", lockState='" + lockState + '\'' +
-                ", info='" + info + '\'' +
-                ", robotCode='" + robotCode + '\'' +
-                ", elevatorshaftId=" + elevatorshaftId +
-                ", robotCode='" + robotCode + '\'' +
-                ", elevatorShaft=" + elevatorShaft +
-                ", ipElevatorId=" + ipElevatorId +
-                ", defaultElevator=" + defaultElevator +
-                ", elevatorPointCombinations=" + elevatorPointCombinations +
+        return "ElevatorMode{" +
+                "startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", state=" + state +
+                ", elevatorId=" + elevatorId +
                 '}';
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public String getLockState() {
-        return lockState;
-    }
-
-    public void setLockState(String lockState) {
-        this.lockState = lockState;
-    }
-
-    public String getInfo() {
-        return info;
-    }
-
-    public void setInfo(String info) {
-        this.info = info;
-    }
-
-    public ElevatorShaft getElevatorShaft() {
-        return elevatorShaft;
-    }
-
-    public void setElevatorShaft(ElevatorShaft elevatorShaft) {
-        this.elevatorShaft = elevatorShaft;
-    }
-
-    public List<ElevatorPointCombination> getElevatorPointCombinations() {
-        return elevatorPointCombinations;
-    }
-
-    public void setElevatorPointCombinations(List<ElevatorPointCombination> elevatorPointCombinations) {
-        this.elevatorPointCombinations = elevatorPointCombinations;
-    }
-
-    public Long getElevatorshaftId() {
-        return elevatorshaftId;
-    }
-
-    public void setElevatorshaftId(Long elevatorshaftId) {
-        this.elevatorshaftId = elevatorshaftId;
-    }
-
-    public String getRobotCode() {
-        return robotCode;
-    }
-
-    public void setRobotCode(String robotCode) {
-        this.robotCode = robotCode;
-    }
-
-    public String getIpElevatorId() {
-        return ipElevatorId;
-    }
-
-    public void setIpElevatorId(String ipElevatorId) {
-        this.ipElevatorId = ipElevatorId;
-    }
-
-    public Boolean getDefaultElevator() {
-        return defaultElevator;
-    }
-
-    public void setDefaultElevator(Boolean defaultElevator) {
-        this.defaultElevator = defaultElevator;
-    }
-
-    //电梯动作
-    public static enum ELEVATOR_ACTION {
-        ELEVATOR_LOCK,
-        ELEVATOR_UNLOCK
-    }
-
 }

@@ -541,24 +541,26 @@ ALTER TABLE AS_DOOR ADD PATH_LOCK BIGINT(20) NULL;
 -- Table structure for AS_GOODS_TYPE
 -- ----------------------------
 DROP TABLE IF EXISTS `AS_GOODS_TYPE`;
-CREATE TABLE `AS_GOODS_TYPE` (
+CREATE TABLE `as_goods_type` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `NAME` varchar(255) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
   `DESCRIPTION` varchar(255) DEFAULT NULL,
+  `DELETE_STATUS` tinyint(1) DEFAULT NULL,
   `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '创建人ID',
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '店铺ID',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
 
 -- ----------------------------
 -- Records of AS_GOODS_TYPE
 -- ----------------------------
-INSERT INTO `AS_GOODS_TYPE` VALUES ('1', '药物', '2017-07-07 11:47:02', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('2', '垃圾', '2017-07-07 11:47:05', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('3', '被草', '2017-07-07 11:47:09', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('4', '医疗器械', '2017-07-07 11:47:12', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('5', '餐饮', '2017-07-07 11:47:14', null, '1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('1', '药物', '2017-07-07 11:47:02', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('2', '垃圾', '2017-07-07 11:47:05', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('3', '被草', '2017-07-07 11:47:09', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('4', '医疗器械', '2017-07-07 11:47:12', null, 0 , '1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('5', '餐饮', '2017-07-07 11:47:14', null, '1',0 , '100');
 
 -- ----------------------------
 -- Table structure for AS_RFIDBRACELET
@@ -600,7 +602,7 @@ CREATE TABLE `AS_ROBOT` (
   `UPDATE_TIME` datetime DEFAULT NULL COMMENT '更新时间',
   `BOX_ACTIVATED` bit(1) DEFAULT b'1' COMMENT '是否启用',
   `BUSY` bit(1) DEFAULT b'0' COMMENT '状态(0-空闲， 1-占用)',
-  `ROBOT_ID_FOR_ELEVATOR` int(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
+  `ROBOT_ID_FOR_ELEVATOR` varchar(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
   `STATUS` varchar(255) DEFAULT NULL COMMENT '状态',
   `EMERGENCY_STOP_STATE` bit(1) DEFAULT b'1' NULL COMMENT '机器人急停状态（true:急停拍下  false:急停未拍下）',
   `LOW_POWER_STATE` bit(1) DEFAULT b'1' COMMENT '机器人低电量状态（true:机器人电量低于阈值  false:机器人电量高于阈值）',
@@ -1771,6 +1773,8 @@ create table AS_ELEVATOR
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   ROBOT_CODE varchar(50) null comment '上锁或者解锁机器人的 code 编号',
+  `IP_ELEVATOR_ID` varchar(8) DEFAULT NULL COMMENT '电梯ID',
+  `DEFAULT_ELEVATOR` bit(1) DEFAULT b'0' COMMENT '是否为默认',
   constraint AS_ELEVATOR_AS_ELEVATORSHAFT_ID_fk
   foreign key (ELEVATORSHAFT_ID) references AS_ELEVATORSHAFT (ID)
     on update cascade on delete cascade
@@ -1868,6 +1872,7 @@ create table AS_ROADPATHPOINT
 ALTER TABLE AS_ROADPATHPOINT
   ADD CONSTRAINT AS_ROADPATHPOINT_AS_ROADPATH_ID_fk
 FOREIGN KEY (ROAD_PATH_ID) REFERENCES AS_ROADPATH (ID) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE AS_ROADPATHPOINT ADD ORDER_INDEX INT(11) NULL;
 
 DROP TABLE IF EXISTS `AS_ROADPATHLOCK`;
 create table AS_ROADPATHLOCK
@@ -1877,13 +1882,14 @@ create table AS_ROADPATHLOCK
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   NAME varchar(50) null comment '名称信息',
-  `LOCK` int(1) null comment '是否上锁的标识'
+  LOCK_STATUS int(1) null comment '是否上锁的标识'
+  `ROBOT_CODE` varchar(50) DEFAULT NULL
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
 
 DROP TABLE IF EXISTS `LOG_ALERT`;
 CREATE TABLE `LOG_ALERT` (
-  `ID` bigint(20) NOT NULL,
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `ROBOT_CODE` varchar(255) DEFAULT NULL COMMENT '机器人编号',
   `ALERT_CODE` varchar(20) DEFAULT NULL COMMENT '报警码',
   `ALERT_TIME` datetime DEFAULT NULL COMMENT '报警时间',
@@ -1894,3 +1900,38 @@ CREATE TABLE `LOG_ALERT` (
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '继承自BaseBean:门店ID',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AC_EMPLOYEE`;
+CREATE TABLE `AC_EMPLOYEE` (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `NAME` varchar(255) DEFAULT NULL COMMENT '员工名称',
+  `CODE` varchar(255) DEFAULT NULL COMMENT '员工工号',
+  `STORE_ID` bigint(20) DEFAULT NULL COMMENT '店铺ID',
+  `CREATED_BY` bigint(20) DEFAULT NULL COMMENT 'ID',
+  `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
+  `DESCRIPTION` varchar(255) DEFAULT NULL COMMENT '备注',
+  `ACTIVATED` bit(1) DEFAULT b'1' COMMENT '是否激活 默认1激活；0禁用',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AC_EMPLOYEE_STATION_XREF`;
+CREATE TABLE `AC_EMPLOYEE_STATION_XREF` (
+  `EMPLOYEE_ID` bigint(20) DEFAULT NULL COMMENT '员工ID',
+  `STATION_ID` bigint(20) DEFAULT NULL COMMENT '站点ID'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AS_ELEVATORMODE`;
+create table AS_ELEVATORMODE
+(
+  ID bigint auto_increment
+    primary key,
+  START_TIME datetime null comment '开始时间',
+  END_TIME datetime null comment '结束时间',
+  STATE tinyint(1) null comment '当前电梯的模式',
+  ELEVATOR_ID bigint null comment '对应的电梯 ID 信息',
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  constraint AS_ELEVATORMODE_ID_uindex
+  unique (ID)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
