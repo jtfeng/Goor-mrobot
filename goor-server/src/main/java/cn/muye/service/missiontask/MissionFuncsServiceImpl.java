@@ -7,6 +7,7 @@ import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.door.Door;
 import cn.mrobot.bean.assets.elevator.Elevator;
+import cn.mrobot.bean.assets.elevator.ElevatorModeEnum;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
@@ -3764,6 +3765,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         String parentName = "固定路径双电梯任务-";
 
+        boolean isNotTwo = false;//取到的不是两个电梯数据的情况
         Long elevatorid = null;
         //电梯任务，发送进入电梯到第几层
         JsonMissionItemDataTwoElevator jsonMissionItemDataTwoElevator =
@@ -3786,6 +3788,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     mp);
             int count = -1;
             if (preElevator != null){
+                if (preElevator.size() != 2){
+                    isNotTwo = true;
+                }
                 for (Elevator ev :
                         preElevator) {
                     if (ev != null &&
@@ -3795,10 +3800,39 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         if (count >= 2){
                             break;
                         }
+                        try {
+                            ElevatorModeEnum elevatorModeEnum =
+                                    elevatorService
+                                            .determineCurrentElevatorMode(
+                                                    ev.getId()
+                                            );
+                            if (elevatorModeEnum != null){
+                                switch (elevatorModeEnum){
+                                    case FULL_AUTOMATIC:
+                                        elevatorsEntities.get(count)
+                                                .setAuto_mode(
+                                                    1
+                                                );
+                                        break;
+                                    case HALF_AUTOMATIC:
+                                        elevatorsEntities.get(count)
+                                                .setAuto_mode(
+                                                    0
+                                                );
+                                        break;
+                                        default:
+                                            break;
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                         elevatorsEntities.get(count)
                                 .setDefault_elevator(ev.getDefaultElevator()?1:0);
-                        elevatorsEntities.get(count)
-                                .setIp_elevator_id(Integer.valueOf(ev.getIpElevatorId()));
+                        if (ev.getIpElevatorId() != null){
+                            elevatorsEntities.get(count)
+                                    .setIp_elevator_id(Integer.valueOf(ev.getIpElevatorId()));
+                        }
                         elevatorsEntities.get(count)
                                 .setElevatorId(ev.getId());
                         for (ElevatorPointCombination epc :
@@ -3906,6 +3940,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }else{
                 nextElevator = elevatorsEntities.get(i);
                 nextindex = i;
+                if (isNotTwo){
+                    elevatorsEntities.remove(nextElevator);
+                    nextElevator = null;
+                }
             }
         }
 
