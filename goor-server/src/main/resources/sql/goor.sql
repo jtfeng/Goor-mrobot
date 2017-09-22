@@ -1919,3 +1919,19 @@ CREATE TABLE `AC_EMPLOYEE_STATION_XREF` (
   `EMPLOYEE_ID` bigint(20) DEFAULT NULL COMMENT '员工ID',
   `STATION_ID` bigint(20) DEFAULT NULL COMMENT '站点ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AS_ELEVATORMODE`;
+create table AS_ELEVATORMODE
+(
+  ID bigint auto_increment
+    primary key,
+  START_TIME datetime null comment '开始时间',
+  END_TIME datetime null comment '结束时间',
+  STATE tinyint(1) null comment '当前电梯的模式',
+  ELEVATOR_ID bigint null comment '对应的电梯 ID 信息',
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  constraint AS_ELEVATORMODE_ID_uindex
+  unique (ID)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
