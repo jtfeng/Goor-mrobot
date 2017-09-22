@@ -331,6 +331,10 @@ public class CacheInfoManager implements ApplicationContextAware {
         return navigationCache.get(deviceId);
     }
 
+    public static List<String>getSceneRobotListCache(String sceneName) {
+       return sceneRobotListCache.get(sceneName);
+    }
+
     public static Map<String, List<String>> getSceneRobotListCache() {
         Map<String, List<String>> sceneRobotCodeList = new HashMap<>();
         Iterator iterator = sceneRobotListCache.iterator();

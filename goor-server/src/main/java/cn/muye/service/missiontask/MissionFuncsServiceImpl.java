@@ -395,7 +395,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         od.getStationId() != null) {
                     logger.info("###### begin get order detail station ");
                     //判定是否为起始点
-                    if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_START){
+                    if(Objects.equals(od.getPlace(), OrderConstant.ORDER_DETAIL_PLACE_START)){
                         //首先插入起点
                         Long stationId = order.getOrderSetting().getStartStation().getId();
                         MapPoint startPoint = pointService.findMapPointByStationIdAndCloudType(stationId, MapPointType.LOAD.getCaption());
@@ -407,7 +407,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         mpAttrs.put(startPoint, atts);
                         prePoint = startPoint;
                         logger.info("###### quhuo is ok ");
-                    }else if(od.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_END){
+                    }else if(Objects.equals(od.getPlace(), OrderConstant.ORDER_DETAIL_PLACE_END)){
                         Long endStationId = order.getOrderSetting().getEndStation().getId();
                         MapPoint endPoint = pointService.findMapPointByStationIdAndCloudType(endStationId, MapPointType.FINAL_UNLOAD.getCaption());
                         if (endPoint != null) {
@@ -896,7 +896,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (mPointAtts != null){
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
+                    mPointAtts.currentFloor,
+                    mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
@@ -939,7 +940,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             List<Elevator> nextElevator = elevatorService.findByMapFloor(
                     mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
+                    mPointAtts.nextFloor,
+                    mp);
             if (nextElevator != null){
                 for (Elevator ev :
                         nextElevator) {
@@ -3059,6 +3061,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     }
 
     private MapPoint copyValue(MapPoint newP,MapPoint mapPoint) {
+        newP.setId(mapPoint.getId());
         newP.setCloudMapPointTypeId(mapPoint.getCloudMapPointTypeId());
         newP.setDeleteFlag(mapPoint.getDeleteFlag());
         newP.setICPointType(mapPoint.getICPointType());
@@ -3646,7 +3649,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (mPointAtts != null){
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
+                    mPointAtts.currentFloor,
+                    mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
@@ -3689,7 +3693,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             List<Elevator> nextElevator = elevatorService.findByMapFloor(
                     mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
+                    mPointAtts.nextFloor,
+                    mp);
             if (nextElevator != null){
                 for (Elevator ev :
                         nextElevator) {
@@ -3777,7 +3782,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             elevatorsEntities.add(temp);
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
-                    mPointAtts.currentFloor);
+                    mPointAtts.currentFloor,
+                    mp);
             int count = -1;
             if (preElevator != null){
                 for (Elevator ev :
@@ -3837,7 +3843,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             List<Elevator> nextElevator = elevatorService.findByMapFloor(
                     mPointAtts.nextMapId,
-                    mPointAtts.nextFloor);
+                    mPointAtts.nextFloor,
+                    mp);
             count = -1;
             if (nextElevator != null){
                 for (Elevator ev :
@@ -3984,11 +3991,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         String parentName = "充电任务-";
 
         //单点路径导航任务，当前路径导航到充电点
-        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
-        missionListTask.getMissionTasks().add(sigleNavTask);
+//        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
+//        missionListTask.getMissionTasks().add(sigleNavTask);
 
-        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CHARGE);
-        missionListTask.getMissionTasks().add(mp3loadTask);
+//        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CHARGE);
+//        missionListTask.getMissionTasks().add(mp3loadTask);
 
         //自动充电任务,会自动导航
         MissionTask gotochargeTask = getGotoChargeTask(order, mp, parentName);

@@ -22,6 +22,7 @@ import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.account.employee.service.EmployeeService;
+import cn.muye.area.fixpath.service.FixPathService;
 import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.assets.goods.service.GoodsTypeService;
@@ -97,6 +98,8 @@ public class ConsumerCommon {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private FixPathService fixPathService;
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -350,6 +353,8 @@ public class ConsumerCommon {
                     }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
                     saveChargeStatus(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.FIXPATH_QUERY)) {
+                    fixPathService.saveFixpathQuery(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
                 }
             }
         } catch (Exception e) {
