@@ -3061,6 +3061,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     }
 
     private MapPoint copyValue(MapPoint newP,MapPoint mapPoint) {
+        newP.setId(mapPoint.getId());
         newP.setCloudMapPointTypeId(mapPoint.getCloudMapPointTypeId());
         newP.setDeleteFlag(mapPoint.getDeleteFlag());
         newP.setICPointType(mapPoint.getICPointType());
