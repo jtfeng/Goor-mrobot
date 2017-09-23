@@ -203,4 +203,28 @@ public class ExampleController {
         echo.publish(toSend);
         return AjaxResult.success();
     }
+
+    /**
+     * 发送获取工控固定路径的topic
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "area/fixpath", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult fixpath(@RequestParam("uuid") String uuid) throws Exception {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put(TopicConstants.PUB_NAME, "fixpath_query");
+
+            JSONObject dataObject = new JSONObject();
+            dataObject.put(TopicConstants.SCENE_NAME, "scene2");
+            jsonObject.put(TopicConstants.DATA, dataObject);
+            logger.info("发送获取工控固定路径的topic");
+            appSubService.sendTopic(TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
+            return AjaxResult.success();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed();
+        }
+    }
 }

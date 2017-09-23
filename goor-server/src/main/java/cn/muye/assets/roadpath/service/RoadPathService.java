@@ -23,4 +23,8 @@ public interface RoadPathService extends BaseService<RoadPath> {
     List<RoadPath> listRoadPaths(WhereRequest whereRequest) throws Exception;
 
     Boolean hasRelatedRoadPath(Long id);
+
+    RoadPath findRoadPath(RoadPath roadPath) throws Exception ;
+
+
 }

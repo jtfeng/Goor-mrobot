@@ -3,11 +3,13 @@ package cn.muye.assets.elevator.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.Elevator;
+import cn.mrobot.bean.assets.elevator.ElevatorMode;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.elevator.ElevatorShaft;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
+import cn.muye.assets.elevator.service.ElevatorModeService;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.elevator.service.ElevatorShaftService;
@@ -389,4 +391,26 @@ public class ElevatorController {
             return AjaxResult.failed(e.getMessage());
         }
     }
+
+    @Autowired
+    private ElevatorModeService elevatorModeService;
+    @PostMapping(value = "/assets/createElevatorMode")
+    public AjaxResult createElevatorMode(@RequestBody ElevatorMode elevatorMode){
+        if (elevatorModeService.save(elevatorMode) > 0) {
+            return AjaxResult.success("保存状态成功");
+        }else {
+            return AjaxResult.failed("保存状态失败");
+        }
+    }
+
+    @GetMapping(value = "/assets/elevatorMode/{elevatorId}")
+    public Object fetchElevatorState(@PathVariable("elevatorId") Long elevatorId){
+        try {
+            return AjaxResult.success(elevatorService.determineCurrentElevatorMode(elevatorId));
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
 }

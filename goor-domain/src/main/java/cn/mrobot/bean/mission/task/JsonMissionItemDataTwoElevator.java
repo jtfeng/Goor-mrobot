@@ -76,6 +76,7 @@ public class JsonMissionItemDataTwoElevator implements Serializable {
         private int ip_elevator_id;
         private int arrival_floor;
         private int default_elevator;
+        private int auto_mode;
         private JsonMissionItemDataElevator.Point enter_point;
         private JsonMissionItemDataElevator.Point set_pose_point;
         private JsonMissionItemDataElevator.Point back_point;
@@ -87,6 +88,14 @@ public class JsonMissionItemDataTwoElevator implements Serializable {
         private String mapName;
         private String sceneNameNext;
         private String mapNameNext;
+
+        public int getAuto_mode() {
+            return auto_mode;
+        }
+
+        public void setAuto_mode(int auto_mode) {
+            this.auto_mode = auto_mode;
+        }
 
         public String getSceneNameNext() {
             return sceneNameNext;

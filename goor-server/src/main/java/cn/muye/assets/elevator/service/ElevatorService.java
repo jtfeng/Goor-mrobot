@@ -3,12 +3,10 @@ package cn.muye.assets.elevator.service;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.Elevator;
-import cn.mrobot.bean.assets.elevator.ElevatorShaft;
+import cn.mrobot.bean.assets.elevator.ElevatorModeEnum;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
-import com.google.common.collect.Lists;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface ElevatorService extends BaseService<Elevator> {
@@ -73,4 +71,12 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @return
      */
      MapInfo findByMapNameAndStoreId(String mapName, Long storeId, String sceneName) throws Exception;
+
+    /**
+     * 判断电梯在当前时刻的模式
+     * @return  电梯模式，枚举
+     * @throws Exception    程序出现异常
+     */
+    ElevatorModeEnum determineCurrentElevatorMode(Long elevatorId) throws Exception;
+
 }

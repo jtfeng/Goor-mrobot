@@ -531,7 +531,7 @@ CREATE TABLE `AS_DOOR` (
   `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
   `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
   `DOOR_ORDER_TYPE` varchar(255) DEFAULT NULL COMMENT '门对应的任务类型：比如普通导航，沿线导航，固定路径导航',
-  `PATH_ID` bigint(20) DEFAULT NULL COMMENT '工控路径ID',
+  `PATH_ID` varchar(20) DEFAULT NULL COMMENT '工控路径ID',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 ALTER TABLE AS_DOOR ADD PATH_LOCK BIGINT(20) NULL;
@@ -1919,3 +1919,19 @@ CREATE TABLE `AC_EMPLOYEE_STATION_XREF` (
   `EMPLOYEE_ID` bigint(20) DEFAULT NULL COMMENT '员工ID',
   `STATION_ID` bigint(20) DEFAULT NULL COMMENT '站点ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `AS_ELEVATORMODE`;
+create table AS_ELEVATORMODE
+(
+  ID bigint auto_increment
+    primary key,
+  START_TIME datetime null comment '开始时间',
+  END_TIME datetime null comment '结束时间',
+  STATE tinyint(1) null comment '当前电梯的模式',
+  ELEVATOR_ID bigint null comment '对应的电梯 ID 信息',
+  CREATED_BY bigint null,
+  CREATE_TIME datetime null,
+  STORE_ID bigint null,
+  constraint AS_ELEVATORMODE_ID_uindex
+  unique (ID)
+)  ENGINE=InnoDB DEFAULT CHARSET=utf8;
