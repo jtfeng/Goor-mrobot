@@ -147,6 +147,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
 //            employee.setActivated(true);
             Employee employeeDb = employeeMapper.selectOne(employee);
             if (employeeDb == null) {
+                LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " not found");
                 return AjaxResult.failed("输入信息错误");
             } else {
                 if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
@@ -157,8 +158,12 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
                     if (employeeListDb != null && employeeListDb.size() > 0) {
                         return AjaxResult.success("校验成功");
                     } else {
+                        LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " 没有权限");
                         return AjaxResult.failed("没有权限");
                     }
+                }
+                else {
+                    LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : missionItemTaskListDb " + missionItemId + " not found or wrong missionItemTaskType");
                 }
             }
         } catch (Exception e) {
