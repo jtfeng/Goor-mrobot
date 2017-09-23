@@ -66,7 +66,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         orderMapper.saveOrder(order);
         //在此前保存起始站
         OrderSetting sqlSetting = orderSettingService.getById(order.getOrderSetting().getId());
-        if(sqlSetting.getNeedShelf()){
+        if(sqlSetting.getStartStation()!= null && sqlSetting.getStartStation().getId()!= null){
             OrderDetail startDetail = new OrderDetail();
             startDetail.setOrderId(order.getId());
             startDetail.setStationId(sqlSetting.getStartStation().getId());
@@ -88,7 +88,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             });
         });
         //之后保存末尾站
-        if(sqlSetting.getNeedShelf()){
+        if(sqlSetting.getEndStation()!=null && sqlSetting.getEndStation().getId()!= null){
             OrderDetail endDetail = new OrderDetail();
             endDetail.setOrderId(order.getId());
             endDetail.setStationId(sqlSetting.getEndStation().getId());
