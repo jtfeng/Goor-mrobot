@@ -164,14 +164,14 @@ public class ConsumerCommon {
                     if (!StringUtil.isNullOrEmpty(uuid)) {
                         syncRosRobotConfig(robotDb, uuid);
                     }
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)) {
+                } else if (!StringUtils.isEmpty(messageName) && (messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER) || messageName.equals(TopicConstants.VERIFY_ELEVATOR_ADMIN_NUMBER))) {
                     String jsonData = jsonObjectData.getString(TopicConstants.DATA);
                     logger.info(" verify_emplyee_number  jsonData : " + JSON.toJSONString(jsonData));
                     JSONObject employeeObj = JSON.parseObject(jsonData);
                     String empNo = employeeObj.getString("empNo");
                     Long missionItemId = employeeObj.getLong("missionItemId");
-                    AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(empNo, missionItemId);
-                    replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.getCode(), uuid);
+                    AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(empNo, missionItemId, messageName);
+                    replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.getCode(), uuid, messageName);
                 } else if (!StringUtils.isEmpty(messageName)  &&
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CHECK_OPERATE_PWD)) {
                     //PUB AND SUB NAME : check_operate_pwd
@@ -192,12 +192,12 @@ public class ConsumerCommon {
      * @param code
      * @param uuid
      */
-    private void replyVerification(String robotCode, String msg, Integer code, String uuid) {
+    private void replyVerification(String robotCode, String msg, Integer code, String uuid, String subName) {
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName(TopicConstants.AGENT_PUB);
         commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
         SlamBody slamBody = new SlamBody();
-        slamBody.setPubName(TopicConstants.VERIFY_EMPLYEE_NUMBER);
+        slamBody.setPubName(subName);
         slamBody.setUuid(uuid);
         slamBody.setMsg(msg);
         slamBody.setErrorCode(String.valueOf(code));

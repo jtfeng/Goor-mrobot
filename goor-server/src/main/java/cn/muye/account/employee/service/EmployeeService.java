@@ -5,7 +5,6 @@ import cn.mrobot.bean.account.Employee;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -21,5 +20,5 @@ public interface EmployeeService extends BaseService<Employee> {
 
     List<Employee> list(WhereRequest whereRequest);
 
-    AjaxResult verifyEmplyeeNumber(String code, Long missionItemId);
+    AjaxResult verifyEmplyeeNumber(String code, Long missionItemId, String subName) throws Exception;
 }

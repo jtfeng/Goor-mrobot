@@ -135,4 +135,7 @@ public class Constant {
     public static final String RECORD_SCENE_SOURCE_PAD = "pad"; //保存场景ID的来源是pad
 
     public static final String RECORD_SCENE_SOURCE_PC = "pc"; //保存场景ID的来源是pc
+
+    public static final Integer EMPLOYEE_TYPE_ELEVATOR_ADMIN = 1; //电梯管理员
+    public static final Integer EMPLOYEE_TYPE_NORMAL = 0; //普通员工
 }

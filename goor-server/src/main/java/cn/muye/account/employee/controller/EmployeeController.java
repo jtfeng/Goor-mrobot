@@ -24,6 +24,24 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
+    /**
+     * 测试员工工号校验，返回值
+     * @param code
+     * @param missionItemId
+     * @param subName
+     * @return
+     */
+    @RequestMapping(value = {"account/testEmployee"}, method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult testEmployeeNumber(@RequestParam("code") String code, @RequestParam(value = "missionItemId",required = false) Long missionItemId, @RequestParam("subName") String subName) {
+        try {
+            AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(code, missionItemId, subName);
+            return ajaxResult;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     @RequestMapping(value = {"account/employee"}, method = RequestMethod.POST)

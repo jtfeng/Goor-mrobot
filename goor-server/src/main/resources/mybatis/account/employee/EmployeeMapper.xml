@@ -9,6 +9,7 @@
         <result property="description" column="DESCRIPTION"/>
         <result property="createTime" column="CREATE_TIME"/>
         <result property="storeId" column="STORE_ID"/>
+        <result property="type" column="TYPE"/>
         <collection property="stationList" ofType="cn.mrobot.bean.area.station.Station">
             <id column="NAME" property="name"/>
             <result property="id" column="ID"/>

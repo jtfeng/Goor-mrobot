@@ -160,7 +160,7 @@ public class ExampleController {
      *
      * @return
      */
-    @RequestMapping(value = "test6", method = RequestMethod.GET)
+    @RequestMapping(value = "testVerifyEmpNo", method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult test6(@RequestParam("missionItemId") Long missionItemId, @RequestParam("empNo") String empNo) {
         //        //TODO 模拟应用发布查询云端站数据接口

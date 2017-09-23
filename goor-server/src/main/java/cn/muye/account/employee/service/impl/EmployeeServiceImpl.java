@@ -5,6 +5,7 @@ import cn.mrobot.bean.account.Employee;
 import cn.mrobot.bean.account.EmployeeStationXref;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.FeatureItem;
 import cn.mrobot.bean.mission.task.MissionItemTask;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -137,40 +137,50 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     }
 
     @Override
-    public AjaxResult verifyEmplyeeNumber(String code, Long missionItemId) {
-        try {
+    public AjaxResult verifyEmplyeeNumber(String code, Long missionItemId, String subName) throws Exception{
             MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
             //记录日志.单独开前程，避免影响主线程
             new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
-            Employee employee = new Employee();
-            employee.setCode(code);
+            if (subName.equals(TopicConstants.VERIFY_ELEVATOR_ADMIN_NUMBER)) {
+                Employee employee = new Employee();
+                employee.setType(Constant.EMPLOYEE_TYPE_ELEVATOR_ADMIN);
+                employee.setCode(code);
+                List<Employee> list = employeeMapper.select(employee);
+                List<String> codeList = Lists.newArrayList();
+                list.forEach(oneEmployee -> {
+                    codeList.add(oneEmployee.getCode());
+                });
+                if (list != null && list.size() > 0 && codeList.contains(code)) {
+                    return AjaxResult.success("校验成功");
+                } else {
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"校验失败");
+                }
+            } else if (subName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)) {
+                Employee employee = new Employee();
+                employee.setCode(code);
 //            employee.setActivated(true);
-            Employee employeeDb = employeeMapper.selectOne(employee);
-            if (employeeDb == null) {
-                LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " not found");
-                return AjaxResult.failed("输入信息错误");
-            } else {
-                if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
-                    Map map = Maps.newHashMap();
-                    map.put("code", code);
-                    map.put("missionItemId", missionItemId);
-                    List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
-                    if (employeeListDb != null && employeeListDb.size() > 0) {
-                        return AjaxResult.success("校验成功");
-                    } else {
-                        LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " 没有权限");
-                        return AjaxResult.failed("没有权限");
+                Employee employeeDb = employeeMapper.selectOne(employee);
+                if (employeeDb == null) {
+                    LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " not found");
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED,"输入信息错误");
+                } else {
+                    if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
+                        Map map = Maps.newHashMap();
+                        map.put("code", code);
+                        map.put("missionItemId", missionItemId);
+                        List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
+                        if (employeeListDb != null && employeeListDb.size() > 0) {
+                            return AjaxResult.success("校验成功");
+                        } else {
+                            LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " 没有权限");
+                            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"没有权限");
+                        }
+                    }
+                    else {
+                        LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : missionItemTaskListDb " + missionItemId + " not found or wrong missionItemTaskType");
                     }
                 }
-                else {
-                    LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : missionItemTaskListDb " + missionItemId + " not found or wrong missionItemTaskType");
-                }
             }
-        } catch (Exception e) {
-            LOGGER.error("{}", e);
-            return AjaxResult.failed("系统错误");
-        } finally {
-        }
         return null;
     }
 
