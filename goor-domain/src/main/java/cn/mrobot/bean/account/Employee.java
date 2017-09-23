@@ -19,7 +19,9 @@ public class Employee extends BaseBean{
 
     private String description; //备注
 
-    private Boolean activated = Boolean.TRUE;; //激活
+//    private Boolean activated = Boolean.TRUE;; //激活
+
+    private Integer type; //员工类型(1. 普通， 2. 电梯管理员)
 
     @Transient
     private List<Station> stationList; //站点List
@@ -56,12 +58,20 @@ public class Employee extends BaseBean{
         this.stationList = stationList;
     }
 
-    public Boolean getActivated() {
-        return activated;
+//    public Boolean getActivated() {
+//        return activated;
+//    }
+//
+//    public void setActivated(Boolean activated) {
+//        this.activated = activated;
+//    }
+
+    public Integer getType() {
+        return type;
     }
 
-    public void setActivated(Boolean activated) {
-        this.activated = activated;
+    public void setType(Integer type) {
+        this.type = type;
     }
 }
 
