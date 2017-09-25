@@ -40,6 +40,10 @@ public class X86RoadPathLockServiceImpl implements X86RoadPathLockService {
             logger.info("111111111111");
             if (jsonRoadPathLock != null &&
                     jsonRoadPathLock.getAction() != null){
+                //如果含有result字段，则不处理
+                if(jsonRoadPathLock.getResult() != null){
+                    return AjaxResult.success();
+                }
                 switch (jsonRoadPathLock.getAction()){
                     case "lock":
                         //判断和返回加锁

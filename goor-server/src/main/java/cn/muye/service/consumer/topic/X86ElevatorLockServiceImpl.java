@@ -43,6 +43,10 @@ public class X86ElevatorLockServiceImpl implements X86ElevatorLockService {
             logger.info("111111111111");
             if (jsonElevatorLock != null &&
                     jsonElevatorLock.getAction() != null){
+                //如果含有result字段，则不处理
+                if(jsonElevatorLock.getResult() != null){
+                    return AjaxResult.success();
+                }
                 switch (jsonElevatorLock.getAction()){
                     case "lock":
                         //判断和返回加锁
