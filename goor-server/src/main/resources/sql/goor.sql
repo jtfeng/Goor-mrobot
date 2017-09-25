@@ -531,7 +531,7 @@ CREATE TABLE `AS_DOOR` (
   `MAP_NAME` varchar(255) DEFAULT NULL COMMENT '所属地图名',
   `ACTIVE` int(1) DEFAULT NULL COMMENT '假删除标志：0 未删除，1 已删除',
   `DOOR_ORDER_TYPE` varchar(255) DEFAULT NULL COMMENT '门对应的任务类型：比如普通导航，沿线导航，固定路径导航',
-  `PATH_ID` bigint(20) DEFAULT NULL COMMENT '工控路径ID',
+  `PATH_ID` varchar(20) DEFAULT NULL COMMENT '工控路径ID',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4;
 ALTER TABLE AS_DOOR ADD PATH_LOCK BIGINT(20) NULL;
@@ -541,24 +541,26 @@ ALTER TABLE AS_DOOR ADD PATH_LOCK BIGINT(20) NULL;
 -- Table structure for AS_GOODS_TYPE
 -- ----------------------------
 DROP TABLE IF EXISTS `AS_GOODS_TYPE`;
-CREATE TABLE `AS_GOODS_TYPE` (
+CREATE TABLE `as_goods_type` (
   `ID` bigint(20) NOT NULL AUTO_INCREMENT,
   `NAME` varchar(255) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
   `DESCRIPTION` varchar(255) DEFAULT NULL,
+  `DELETE_STATUS` tinyint(1) DEFAULT NULL,
   `CREATED_BY` bigint(11) DEFAULT NULL COMMENT '创建人ID',
   `STORE_ID` bigint(20) DEFAULT NULL COMMENT '店铺ID',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+
 
 -- ----------------------------
 -- Records of AS_GOODS_TYPE
 -- ----------------------------
-INSERT INTO `AS_GOODS_TYPE` VALUES ('1', '药物', '2017-07-07 11:47:02', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('2', '垃圾', '2017-07-07 11:47:05', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('3', '被草', '2017-07-07 11:47:09', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('4', '医疗器械', '2017-07-07 11:47:12', null, '1', '100');
-INSERT INTO `AS_GOODS_TYPE` VALUES ('5', '餐饮', '2017-07-07 11:47:14', null, '1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('1', '药物', '2017-07-07 11:47:02', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('2', '垃圾', '2017-07-07 11:47:05', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('3', '被草', '2017-07-07 11:47:09', null, 0 ,'1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('4', '医疗器械', '2017-07-07 11:47:12', null, 0 , '1', '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('5', '餐饮', '2017-07-07 11:47:14', null, '1',0 , '100');
 
 -- ----------------------------
 -- Table structure for AS_RFIDBRACELET
@@ -600,8 +602,7 @@ CREATE TABLE `AS_ROBOT` (
   `UPDATE_TIME` datetime DEFAULT NULL COMMENT '更新时间',
   `BOX_ACTIVATED` bit(1) DEFAULT b'1' COMMENT '是否启用',
   `BUSY` bit(1) DEFAULT b'0' COMMENT '状态(0-空闲， 1-占用)',
-  `ONLINE` bit(1) DEFAULT b'1' COMMENT '是否在线',
-  `ROBOT_ID_FOR_ELEVATOR` int(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
+  `ROBOT_ID_FOR_ELEVATOR` varchar(8) DEFAULT NULL COMMENT '机器人电梯编号（针对电梯使用）8位二进制',
   `STATUS` varchar(255) DEFAULT NULL COMMENT '状态',
   `EMERGENCY_STOP_STATE` bit(1) DEFAULT b'1' NULL COMMENT '机器人急停状态（true:急停拍下  false:急停未拍下）',
   `LOW_POWER_STATE` bit(1) DEFAULT b'1' COMMENT '机器人低电量状态（true:机器人电量低于阈值  false:机器人电量高于阈值）',
@@ -1871,16 +1872,19 @@ create table AS_ROADPATHPOINT
 ALTER TABLE AS_ROADPATHPOINT
   ADD CONSTRAINT AS_ROADPATHPOINT_AS_ROADPATH_ID_fk
 FOREIGN KEY (ROAD_PATH_ID) REFERENCES AS_ROADPATH (ID) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE AS_ROADPATHPOINT ADD ORDER_INDEX INT(11) NULL;
 
 DROP TABLE IF EXISTS `AS_ROADPATHLOCK`;
 create table AS_ROADPATHLOCK
 (
-  ID bigint auto_increment comment 'ID 序号列表' primary key,
+  ID bigint auto_increment comment 'ID 序号列表'
+    primary key,
   CREATED_BY bigint null comment '信息记录创建人',
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   NAME varchar(50) null comment '名称信息',
-  `LOCK` int(1) null comment '是否上锁的标识'
+  LOCK_STATE int(1) null comment '是否上锁的标识',
+  ROBOT_CODE varchar(50) null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
 
@@ -1907,6 +1911,7 @@ CREATE TABLE `AC_EMPLOYEE` (
   `CREATED_BY` bigint(20) DEFAULT NULL COMMENT 'ID',
   `CREATE_TIME` datetime DEFAULT NULL COMMENT '创建时间',
   `DESCRIPTION` varchar(255) DEFAULT NULL COMMENT '备注',
+  `TYPE` int(11) DEFAULT NULL COMMENT '0-普通员工，1-电梯管理员',
   `ACTIVATED` bit(1) DEFAULT b'1' COMMENT '是否激活 默认1激活；0禁用',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
