@@ -5,6 +5,7 @@ import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class SceneController {
     @RequestMapping(value = "/assets/scene/session/{sceneId}", method = RequestMethod.POST)
     public AjaxResult storeSceneInfoToSession(@PathVariable("sceneId") String sceneId, HttpServletRequest request) {
         try {
-            Scene scene = this.sceneService.storeSceneInfoToSession(Constant.RECORD_SCENE_SOURCE_PC, sceneId, null);
+            Scene scene = this.sceneService.storeSceneInfoToSession(Constant.RECORD_SCENE_SOURCE_PC, sceneId, UserUtil.getUserTokenValue());
             return AjaxResult.success(scene, "保存场景信息到用户会话中成功!");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage());
