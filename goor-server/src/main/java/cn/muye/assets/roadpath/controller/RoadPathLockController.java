@@ -86,42 +86,42 @@ public class RoadPathLockController {
         }
     }
 
-    /**
-     * 路径锁列表查询
-     * @param whereRequest
-     * @return
-     */
-    @RequestMapping(method = RequestMethod.GET)
-    public AjaxResult updateRoadPathLock(WhereRequest whereRequest){
-        try {
-            List<RoadPathLock> roadPathLockList = roadPathLockService.listQueryPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),new RoadPathLock(),null);
-            PageInfo<RoadPathLock> pathLockPageInfo = new PageInfo<>(roadPathLockList);
-            return AjaxResult.success(pathLockPageInfo, "查询成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return AjaxResult.failed("内部出错");
-        }
-    }
+//    /**
+//     * 路径锁列表查询
+//     * @param whereRequest
+//     * @return
+//     */
+//    @RequestMapping(method = RequestMethod.GET)
+//    public AjaxResult updateRoadPathLock(WhereRequest whereRequest){
+//        try {
+//            List<RoadPathLock> roadPathLockList = roadPathLockService.listQueryPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),new RoadPathLock(),null);
+//            PageInfo<RoadPathLock> pathLockPageInfo = new PageInfo<>(roadPathLockList);
+//            return AjaxResult.success(pathLockPageInfo, "查询成功");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return AjaxResult.failed("内部出错");
+//        }
+//    }
 
-    /**
-     * 删除 路径锁对象
-     * @param id
-     * @return
-     */
-    @RequestMapping(method = RequestMethod.DELETE)
-    public AjaxResult deleteRoadPathLock(@RequestParam("id")Long id){
-        try {
-            Boolean bool = roadPathService.hasRelatedRoadPath(id);
-            if(bool){
-                return AjaxResult.failed("存在相关联的路径，无法删除");
-            }
-            roadPathLockService.deleteById(id);
-            return AjaxResult.success("删除成功");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return AjaxResult.failed("内部出错");
-        }
-    }
+//    /**
+//     * 删除 路径锁对象
+//     * @param id
+//     * @return
+//     */
+//    @RequestMapping(method = RequestMethod.DELETE)
+//    public AjaxResult deleteRoadPathLock(@RequestParam("id")Long id){
+//        try {
+//            Boolean bool = roadPathService.hasRelatedRoadPath(id);
+//            if(bool){
+//                return AjaxResult.failed("存在相关联的路径，无法删除");
+//            }
+//            roadPathLockService.deleteById(id);
+//            return AjaxResult.success("删除成功");
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return AjaxResult.failed("内部出错");
+//        }
+//    }
 
     @GetMapping("/testT")
     public AjaxResult testT() throws Exception{
