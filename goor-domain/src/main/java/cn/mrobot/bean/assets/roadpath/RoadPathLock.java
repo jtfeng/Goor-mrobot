@@ -7,7 +7,7 @@ import javax.persistence.Table;
 public class RoadPathLock extends BaseBean{
 
     private String name;
-    private Integer lockStatus;
+    private Integer lock;
     private String robotCode;
 
     public String getName() {
@@ -18,16 +18,16 @@ public class RoadPathLock extends BaseBean{
         this.name = name;
     }
 
-    public Integer getLockStatus() {
-        return lockStatus;
+    public Integer getLock() {
+        return lock;
     }
 
-    public void setLockStatus(Integer lockStatus) {
-        this.lockStatus = lockStatus;
+    public void setLock(Integer lock) {
+        this.lock = lock;
     }
 
     public void setLockAction(LockAction action) {
-        setLockStatus(action.getValue());
+        setLock(action.getValue());
     }
 
     public String getRobotCode() {
@@ -42,7 +42,7 @@ public class RoadPathLock extends BaseBean{
     public String toString() {
         return "RoadPathLock{" +
                 "name='" + name + '\'' +
-                ", lock=" + lockStatus +
+                ", lock=" + lock +
                 ", robotCode=" + robotCode +
                 '}';
     }
