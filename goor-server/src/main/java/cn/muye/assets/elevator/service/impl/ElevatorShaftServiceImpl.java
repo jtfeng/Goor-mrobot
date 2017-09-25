@@ -114,6 +114,13 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
         return flag;
     }
 
+    /**
+     * 上锁与加锁
+     * @param elevatorShaftId
+     * @param action
+     * @param robotCode
+     * @return
+     */
     @Override
     public boolean updateElevatorShaftLockStateWithRobotCode(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode) {
         checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
@@ -122,8 +129,12 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
             if (lock1.tryLock(5, TimeUnit.SECONDS)) {//如果在5秒内获取到锁
                 ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);
                 if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK.equals(action)) {
-                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
-                        flag = false;
+                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示当前状态为"上锁状态"
+                        if (robotCode.equals(elevatorShaft.getRobotCode())) {
+                            flag = true;
+                        } else {
+                            flag = false;
+                        }
                     } else {
                         elevatorShaft.setLockState("1");
                         elevatorShaft.setRobotCode(robotCode);
@@ -132,12 +143,20 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
                     }
                 }
                 if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK.equals(action)) {
-                    if (("1".equals(elevatorShaft.getLockState())) && (robotCode.equals(elevatorShaft.getRobotCode()))) {// 0表示解锁
-                        elevatorShaft.setLockState("0");
-                        elevatorShaft.setRobotCode(null);
-                        updateSelective(elevatorShaft);
+                    //UNLOCK 表示解锁动作，机器人发出解锁请求
+                    if ("1".equals(elevatorShaft.getLockState())) {// 如果当前为上锁状态
+                        if (robotCode.equals(elevatorShaft.getRobotCode())) {
+                            elevatorShaft.setLockState("0");
+                            elevatorShaft.setRobotCode(null);
+                            updateSelective(elevatorShaft);
+                            flag = true;
+                        }else {
+                            flag = false;
+                        }
+                    } else {
+                        // 当前状态已经是解锁状态
+                        flag = true;
                     }
-                    flag = true;
                 }
                 if (TransactionSynchronizationManager.isActualTransactionActive()) {
                     TransactionSynchronizationManager.registerSynchronization(
