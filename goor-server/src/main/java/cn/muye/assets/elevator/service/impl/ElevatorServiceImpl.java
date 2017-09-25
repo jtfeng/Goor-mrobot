@@ -220,8 +220,10 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                                 @Override
                                 public void afterCompletion(int status) {
                                     lock1.unlock();//释放锁
-                                }
+                            }
                             });
+                } else {
+                    lock1.unlock();
                 }
             }
         }catch (Exception e){

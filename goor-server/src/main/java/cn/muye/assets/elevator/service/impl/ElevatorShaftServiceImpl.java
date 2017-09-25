@@ -166,6 +166,8 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
                                     lock1.unlock();//释放锁
                                 }
                             });
+                }else {
+                    lock1.unlock();
                 }
             }
         }catch (Exception e){
