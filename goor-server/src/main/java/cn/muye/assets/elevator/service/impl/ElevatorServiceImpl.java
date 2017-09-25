@@ -172,6 +172,13 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return flag;
     }
 
+    /**
+     * 电梯上锁与加锁
+     * @param elevatorId
+     * @param action
+     * @param robotCode
+     * @return
+     */
     @Override
     public boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
         checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
@@ -180,8 +187,12 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
             if (lock1.tryLock(5, TimeUnit.SECONDS)) {
                 Elevator elevator = super.findById(elevatorId);
                 if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)) {
-                    if ("1".equals(elevator.getLockState())) {// 1表示上锁
-                        flag = false;
+                    if ("1".equals(elevator.getLockState())) {// 1表示当前的电梯状态为"上锁状态"
+                        if (robotCode.equals(elevator.getRobotCode())) {
+                            flag = true;
+                        } else {
+                            flag = false;
+                        }
                     } else {
                         elevator.setLockState("1");
                         elevator.setRobotCode(robotCode);
@@ -190,12 +201,18 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                     }
                 }
                 if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)) {
-                    if (("1".equals(elevator.getLockState())) && (robotCode.equals(elevator.getRobotCode()))) {// 0表示解锁
-                        elevator.setLockState("0");
-                        elevator.setRobotCode(null);
-                        updateSelective(elevator);
+                    if ("1".equals(elevator.getLockState())) {// 0表示解锁
+                        if (robotCode.equals(elevator.getRobotCode())) {
+                            elevator.setLockState("0");
+                            elevator.setRobotCode(null);
+                            updateSelective(elevator);
+                            flag = true;
+                        }else {
+                            flag = false;
+                        }
+                    }else {
+                        flag = true;
                     }
-                    flag = true;
                 }
                 if (TransactionSynchronizationManager.isActualTransactionActive()) {
                     TransactionSynchronizationManager.registerSynchronization(
