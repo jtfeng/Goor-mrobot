@@ -127,8 +127,6 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         try {
             Long id = Long.parseLong(String.valueOf(checkNotNull(body.get("id"), "id编号不允许为空，请重新输入!")));
             log.info(String.format("id编号信息为：%s", id));
-            String pathId = String.valueOf(checkNotNull(body.get("pathId"), "路径 ID 编号不允许为空，请重新输入!"));
-            log.info(String.format("路径编号信息为：%s", pathId));
             String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
             log.info(String.format("4路径名称：%s", pathName));
             String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
@@ -143,7 +141,6 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
             RoadPath roadPath = new RoadPath();
             roadPath.setId(id);
-            roadPath.setPathId(pathId);
             roadPath.setPathType(pathTypeInt);
             roadPath.setData(data); // 路径数据
             roadPath.setPattern(pattern); // 拟合方式
@@ -169,6 +166,11 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 packageRoadPathRelations(points, roadPath);
                 return;
             } else if (pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
+                //如果是工控路径还得判断路径ID不为空
+                String pathId = String.valueOf(checkNotNull(body.get("pathId"), "路径 ID 编号不允许为空，请重新输入!"));
+                log.info(String.format("路径编号信息为：%s", pathId));
+                roadPath.setPathId(pathId);
+
                 List points = (List) body.get("points");
                 if (points != null && points.size() > 0) {
                     checkArgument(points.size() == 2, "工控路径点组合至少只能有两个点（开始点和结束点）");
