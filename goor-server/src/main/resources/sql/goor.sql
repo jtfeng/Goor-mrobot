@@ -1250,6 +1250,8 @@ CREATE TABLE `LOG_MISSION` (
   `ROS` varchar(200) DEFAULT NULL COMMENT 'ros当前位置信息',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ALTER TABLE LOG_MISSION ADD TIME BIGINT(20) DEFAULT NULL;
+
 
 -- ----------------------------
 -- Records of LOG_MISSION
@@ -1877,13 +1879,14 @@ ALTER TABLE AS_ROADPATHPOINT ADD ORDER_INDEX INT(11) NULL;
 DROP TABLE IF EXISTS `AS_ROADPATHLOCK`;
 create table AS_ROADPATHLOCK
 (
-  ID bigint auto_increment comment 'ID 序号列表' primary key,
+  ID bigint auto_increment comment 'ID 序号列表'
+    primary key,
   CREATED_BY bigint null comment '信息记录创建人',
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   NAME varchar(50) null comment '名称信息',
-  LOCK_STATUS int(1) null comment '是否上锁的标识'
-  `ROBOT_CODE` varchar(50) DEFAULT NULL
+  LOCK_STATE int(1) null comment '是否上锁的标识',
+  ROBOT_CODE varchar(50) null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
 

@@ -41,6 +41,7 @@ public class LogMission extends BaseBean {
     public static final String object_mission = "mission";
     public static final String object_mission_item = "mission_item";
 
+    private Long time;
     /**
      * 机器人编号
      */
@@ -210,5 +211,13 @@ public class LogMission extends BaseBean {
 
     public void setRos(String ros) {
         this.ros = ros;
+    }
+
+    public Long getTime() {
+        return time;
+    }
+
+    public void setTime(Long time) {
+        this.time = time;
     }
 }

@@ -123,5 +123,14 @@ public class RoadPathLockController {
         }
     }
 
+    @GetMapping("/testT")
+    public AjaxResult testT() throws Exception{
+        System.out.println("CCCCCC");
+        roadPathLockService.lock(1L,"xx");
+        return AjaxResult.success();
+    }
+
+
+
 
 }

@@ -36,7 +36,7 @@ public class X86RoadPathLockServiceImpl implements X86RoadPathLockService {
             JsonRoadPathLock jsonRoadPathLock =
                     (JsonRoadPathLock) JsonUtils.fromJson(data,
                             new TypeToken<JsonRoadPathLock>(){}.getType());
-            Boolean ret;
+            boolean ret;
             logger.info("111111111111");
             if (jsonRoadPathLock != null &&
                     jsonRoadPathLock.getAction() != null){
@@ -86,7 +86,7 @@ public class X86RoadPathLockServiceImpl implements X86RoadPathLockService {
 
                 return baseMessageService.sendRobotMessage(
                         baseMessageService.getSenderId(messageInfo),
-                        TopicConstants.DIRECT_X86_ROADPATH_LOCK,
+                        TopicConstants.X86_ROADPATH_LOCK,
                         JsonUtils.toJson(jsonRoadPathLock,
                                 new TypeToken<JsonRoadPathLock>(){}.getType())
                 );
