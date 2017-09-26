@@ -2791,10 +2791,21 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_QUHUO;
-                        atts.chargePoint = chargePoint;//设置充电点
+
+                        //判断充电点和起点的关系，加入相关任务
+                        if (chargePoint != null){
+                            prePoint = chargePoint;
+                        }else{
+                            prePoint = null;
+                        }
+                        //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
+                        addPathRoadPathPoint(startPoint, mapPoints, mpAttrs);
+
                         atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(startPoint, atts);
-                        prePoint = startPoint;
+                        if (prePoint == null){
+                            prePoint = startPoint;
+                        }
                         logger.info("###### quhuo is ok ");
                     }else if(Objects.equals(od.getPlace(), OrderConstant.ORDER_DETAIL_PLACE_END)){
                         Long endStationId = order.getOrderSetting().getEndStation().getId();
@@ -2813,7 +2824,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //设置属性
                         atts = new MPointAtts();
                         atts.type = MPointType_XIAHUO;
-                        atts.chargePoint = chargePoint;//设置充电点
                         atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(endPoint, atts);
                         logger.info("###### xiahuo is ok ");
@@ -3202,6 +3212,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     }
                     break;
                 case MPointType_CHONGDIAN:
+                    //首先检索是否充电点和上一个站点之间是否有云端路径点序列，如果有，加入相关任务
                     //暂时取消充电任务
 //                    initPathMissionTaskChongDian(
 //                            missionListTask,
@@ -4338,6 +4349,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public String pathId;
         public Long roadpathId;
         public MapPoint chargePoint;
+        public MapPoint chargePrePoint;
     }
 
     /**
