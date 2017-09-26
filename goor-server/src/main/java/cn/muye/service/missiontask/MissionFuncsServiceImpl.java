@@ -2787,10 +2787,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //首先插入起点
                         Long stationId = order.getOrderSetting().getStartStation().getId();
                         MapPoint startPoint = pointService.findMapPointByStationIdAndCloudType(stationId, MapPointType.LOAD.getCaption());
-                        mapPoints.add(startPoint);
-                        //设置属性
-                        atts = new MPointAtts();
-                        atts.type = MPointType_QUHUO;
 
                         //判断充电点和起点的关系，加入相关任务
                         if (chargePoint != null){
@@ -2800,6 +2796,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         }
                         //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
                         addPathRoadPathPoint(startPoint, mapPoints, mpAttrs);
+
+                        mapPoints.add(startPoint);
+                        //设置属性
+                        atts = new MPointAtts();
+                        atts.type = MPointType_QUHUO;
 
                         atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
                         mpAttrs.put(startPoint, atts);
