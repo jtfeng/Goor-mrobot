@@ -3819,22 +3819,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                                     ev.getId()
                                             );
                             if (elevatorModeEnum != null){
-                                switch (elevatorModeEnum){
-                                    case FULL_AUTOMATIC:
-                                        elevatorsEntities.get(count)
-                                                .setAuto_mode(
-                                                    1
-                                                );
-                                        break;
-                                    case HALF_AUTOMATIC:
-                                        elevatorsEntities.get(count)
-                                                .setAuto_mode(
-                                                    0
-                                                );
-                                        break;
-                                        default:
-                                            break;
-                                }
+                                    elevatorsEntities.get(count).setAuto_mode(elevatorModeEnum.getModelCode());
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

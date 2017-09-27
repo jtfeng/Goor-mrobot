@@ -15,7 +15,7 @@ public class ElevatorMode extends BaseBean {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date endTime;//结束时间
-    private Integer state;//电梯当前的模式 (0 代表全自动, 1 代表半自动)
+    private Integer state;//电梯当前的模式 (1 代表全自动, 0 代表半自动)
     private Long elevatorId;//电梯 id
 
     public Date getStartTime() {

@@ -321,12 +321,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         List<ElevatorMode> elevatorModes = elevatorModeMapper.selectByExample(example);
         if (elevatorModes != null && elevatorModes.size() != 0) {
             ElevatorMode mode = elevatorModes.get(0);
-            if (0 == mode.getState()) {
-                return ElevatorModeEnum.FULL_AUTOMATIC;
-            }
-            if (1 == mode.getState()) {
-                return ElevatorModeEnum.HALF_AUTOMATIC;
-            }
+            return ElevatorModeEnum.getElevatorModeEnum(mode.getState());
         }
         return null;
     }
