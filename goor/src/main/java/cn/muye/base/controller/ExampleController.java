@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
+
 @Controller
 public class ExampleController {
     private Logger logger = Logger.getLogger(ExampleController.class);
@@ -249,6 +251,29 @@ public class ExampleController {
 //        Message toSend = new Message("{\"data\":{\"pub_name\": \"station_list_get\",\"data\": {\"robot_code\": \"cookyPlus1301chay\"} } }");
 //        Message toSend = new Message("{\"data\": \"hello, world,appSub!"+ new Date()+aa +"\"}");
         logger.info("测试alert的Data:" + messageObject.get(TopicConstants.DATA));
+        echo.publish(toSend);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 模拟mission发送加锁请求
+     *
+     * @return
+     */
+    @RequestMapping(value = "testRoadPath", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult testRoadPath(@RequestParam("command") String command, @RequestParam("uuid") String uuid) {
+        //
+        Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.X86_ROADPATH_LOCK);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("action", command);//lock，unlock
+        jsonObject.put("roadpath_id", 1);
+        jsonObject.put(TopicConstants.UUID, uuid);
+        jsonObject.put("sendTime", new Date().getTime());
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+        Message toSend = new Message(JSON.toJSONString(messageObject));
+        logger.info("testRoadPath:" + messageObject.get(TopicConstants.DATA));
         echo.publish(toSend);
         return AjaxResult.success();
     }
