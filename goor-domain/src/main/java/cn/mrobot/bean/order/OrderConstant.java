@@ -20,4 +20,8 @@ public class OrderConstant {
     public static final Integer ORDER_DETAIL_PLACE_START = 0; //起始
     public static final Integer ORDER_DETAIL_PLACE_MIDDLE = 1; //中间
     public static final Integer ORDER_DETAIL_PLACE_END = 2; //结束
+
+    //是否需要签收
+    public static final String ORDER_NEED_SIGN_NO = "0"; //不需要签收
+    public static final String ORDER_NEED_SIGN_YES = "1"; //需要签收
 }
