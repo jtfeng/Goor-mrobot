@@ -40,12 +40,16 @@ public interface ElevatorService extends BaseService<Elevator> {
      * 更新电梯状态
      * @param elevatorId
      */
+    boolean updateElevatorLockStateInner(Long elevatorId, Elevator.ELEVATOR_ACTION action);
+
     boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action);
 
     /**
      * 更新电梯状态
      * @param elevatorId
      */
+    boolean updateElevatorLockStateWithRobotCodeInner(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode);
+
     boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode);
 
     /**

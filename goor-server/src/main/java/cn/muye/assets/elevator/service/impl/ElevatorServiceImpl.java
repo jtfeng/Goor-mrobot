@@ -36,7 +36,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 @Service
-@Transactional
 public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements ElevatorService {
 
     private static final Logger log = LoggerFactory.getLogger(ElevatorServiceImpl.class);
@@ -48,9 +47,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     private ElevatorModeMapper elevatorModeMapper;
     @Autowired
     private ElevatorPointCombinationService elevatorPointCombinationService;
-    private ReentrantLock lock;
-    private ReentrantLock lock1;
 
+    @Transactional
     @Override
     public List<Elevator> listElevators(WhereRequest whereRequest) throws Exception {
         List<Elevator> elevators = this.listPageByStoreIdAndOrder(whereRequest.getPage(),
@@ -58,6 +56,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return elevators;
     }
 
+    @Transactional
     @Override
     public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor){
         log.info("###################  mapinfoid: " + mapInfoId + ", floor: " + floor);
@@ -107,6 +106,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
 
     @Autowired
     private ElevatorPointCombinationMapper elevatorPointCombinationMapper;
+
+    @Transactional
     @Override
     public List<Elevator> findByMapFloor(Long mapInfoId, Integer floor, MapPoint waitPoint) {//传入的点类型肯定为等待点
         Long elevatorId = elevatorPointCombinationMapper.findElevatorByWaitPoint(waitPoint.getId());
@@ -127,6 +128,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return null;
     }
 
+    @Transactional
     @Override
     public MapInfo findByMapNameAndStoreId(String mapName, Long storeId, String sceneName) throws Exception {
         List<MapInfo> mapInfos = this.elevatorMapper.findByMapNameAndStoreId(mapName, storeId, sceneName);
@@ -135,41 +137,41 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     }
 
     @Override
-    public boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action){
+    public synchronized boolean updateElevatorLockState(Long elevatorId, Elevator.ELEVATOR_ACTION action) {
+        return updateElevatorLockStateInner(elevatorId, action);
+    }
+
+    @Transactional
+    @Override
+    public boolean updateElevatorLockStateInner(Long elevatorId, Elevator.ELEVATOR_ACTION action){
         boolean flag = false;
         try {
-            if (lock.tryLock(5, TimeUnit.SECONDS)) {// 限制超时时间为5秒
-                Elevator elevator = super.findById(elevatorId);
-                if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)) {
-                    //上锁
-                    if ("1".equals(elevator.getLockState())) {// 1表示上锁
-                        flag = false;
-                    } else {
-                        this.elevatorMapper.updateElevatorLockState(elevatorId, 1);
-                        flag = true;
-                    }
-                }
-                if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)) {
-                    //解锁
-                    if ("1".equals(elevator.getLockState())) {// 1表示上锁
-                        this.elevatorMapper.updateElevatorLockState(elevatorId, 0);
-                    }
+            Elevator elevator = super.findById(elevatorId);
+            if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)) {
+                //上锁
+                if ("1".equals(elevator.getLockState())) {// 1表示上锁
+                    flag = false;
+                } else {
+                    this.elevatorMapper.updateElevatorLockState(elevatorId, 1);
                     flag = true;
                 }
-                if (TransactionSynchronizationManager.isActualTransactionActive()) {
-                    TransactionSynchronizationManager.registerSynchronization(
-                            new TransactionSynchronizationAdapter() {
-                                @Override
-                                public void afterCompletion(int status) {
-                                    lock.unlock();//释放锁
-                                }
-                            });
+            }
+            if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)) {
+                //解锁
+                if ("1".equals(elevator.getLockState())) {// 1表示上锁
+                    this.elevatorMapper.updateElevatorLockState(elevatorId, 0);
                 }
+                flag = true;
             }
         }catch (Exception e){
             log.error(e.getMessage(), e);
         }
         return flag;
+    }
+
+    @Override
+    public synchronized boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
+        return updateElevatorLockStateWithRobotCodeInner(elevatorId,action, robotCode);
     }
 
     /**
@@ -179,51 +181,39 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
      * @param robotCode
      * @return
      */
+    @Transactional
     @Override
-    public boolean updateElevatorLockStateWithRobotCode(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
+    public boolean updateElevatorLockStateWithRobotCodeInner(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
         checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
         boolean flag = false;
         try {
-            if (lock1.tryLock(5, TimeUnit.SECONDS)) {
-                Elevator elevator = super.findById(elevatorId);
-                if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)) {
-                    if ("1".equals(elevator.getLockState())) {// 1表示当前的电梯状态为"上锁状态"
-                        if (robotCode.equals(elevator.getRobotCode())) {
-                            flag = true;
-                        } else {
-                            flag = false;
-                        }
+            Elevator elevator = super.findById(elevatorId);
+            if (Elevator.ELEVATOR_ACTION.ELEVATOR_LOCK.equals(action)) {
+                if ("1".equals(elevator.getLockState())) {// 1表示当前的电梯状态为"上锁状态"
+                    if (robotCode.equals(elevator.getRobotCode())) {
+                        flag = true;
                     } else {
-                        elevator.setLockState("1");
-                        elevator.setRobotCode(robotCode);
-                        this.update(elevator);
-                        flag = true;
+                        flag = false;
                     }
-                }
-                if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)) {
-                    if ("1".equals(elevator.getLockState())) {// 0表示解锁
-                        if (robotCode.equals(elevator.getRobotCode())) {
-                            elevator.setLockState("0");
-                            elevator.setRobotCode(null);
-                            updateSelective(elevator);
-                            flag = true;
-                        }else {
-                            flag = false;
-                        }
-                    }else {
-                        flag = true;
-                    }
-                }
-                if (TransactionSynchronizationManager.isActualTransactionActive()) {
-                    TransactionSynchronizationManager.registerSynchronization(
-                            new TransactionSynchronizationAdapter() {
-                                @Override
-                                public void afterCompletion(int status) {
-                                    lock1.unlock();//释放锁
-                            }
-                            });
                 } else {
-                    lock1.unlock();
+                    elevator.setLockState("1");
+                    elevator.setRobotCode(robotCode);
+                    this.update(elevator);
+                    flag = true;
+                }
+            }
+            if (Elevator.ELEVATOR_ACTION.ELEVATOR_UNLOCK.equals(action)) {
+                if ("1".equals(elevator.getLockState())) {// 0表示解锁
+                    if (robotCode.equals(elevator.getRobotCode())) {
+                        elevator.setLockState("0");
+                        elevator.setRobotCode(null);
+                        updateSelective(elevator);
+                        flag = true;
+                    }else {
+                        flag = false;
+                    }
+                }else {
+                    flag = true;
                 }
             }
         }catch (Exception e){
@@ -232,6 +222,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return flag;
     }
 
+    @Transactional
     @Override
     public void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //保存电梯信息
@@ -244,6 +235,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         }
     }
 
+    @Transactional
     @Override
     public void updateElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //更新电梯信息
@@ -256,6 +248,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         }
     }
 
+    @Transactional
     @Override
     public List<Elevator> findByElevatorPointCombinationId(Long elevatorPointCombinationId) {
         List<Elevator> elevators = elevatorMapper.findByElevatorPointCombinationId(elevatorPointCombinationId);
@@ -263,6 +256,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return elevators;
     }
 
+    @Transactional
     @Override
     public List<Elevator> listPageByStoreIdAndOrder(int page, int pageSize, Class<Elevator> clazz, String order) {
         List<Elevator> elevators = super.listPageByStoreIdAndOrder(page, pageSize, clazz, order);
@@ -302,6 +296,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         }
     }
 
+    @Transactional
     @Override
     public Elevator findById(Long id) {
         Elevator elevator = super.findById(id);
@@ -310,6 +305,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return elevator;
     }
 
+    @Transactional
     @Override
     public ElevatorModeEnum determineCurrentElevatorMode(Long elevatorId) throws Exception {
         Date currentDate = new Date();

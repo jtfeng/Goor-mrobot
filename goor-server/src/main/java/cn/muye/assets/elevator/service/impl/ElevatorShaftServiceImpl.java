@@ -19,6 +19,8 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import tk.mybatis.mapper.entity.Example;
 
+import javax.validation.constraints.AssertTrue;
+
 import static com.google.common.base.Preconditions.*;
 
 import java.util.List;
@@ -26,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Service
-@Transactional
 public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> implements ElevatorShaftService {
 
     private static final Logger log = LoggerFactory.getLogger(ElevatorShaftServiceImpl.class);
@@ -34,16 +35,15 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
     private ElevatorMapper elevatorMapper;
     @Autowired
     private ElevatorShaftMapper elevatorShaftMapper;
-    private ReentrantLock lock = new ReentrantLock();
-    private ReentrantLock lock1 = new ReentrantLock();
 
+    @Transactional
     @Override
     public List<ElevatorShaft> listElevatorShafts(WhereRequest whereRequest) throws Exception {
         List<ElevatorShaft> elevatorShafts = this.listPageByStoreIdAndOrder(whereRequest.getPage(),
                 whereRequest.getPageSize(), ElevatorShaft.class,"ID DESC");
         return elevatorShafts;
     }
-
+    @Transactional
     @Override
     public List<ElevatorShaft> listPageByStoreIdAndOrder(int page, int pageSize, Class<ElevatorShaft> clazz, String order) {
         List<ElevatorShaft> elevatorShafts = super.listPageByStoreIdAndOrder(page, pageSize, clazz, order);
@@ -68,7 +68,7 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
             }
         }
     }
-
+    @Transactional
     @Override
     public ElevatorShaft findById(Long id) {
         ElevatorShaft shaft = super.findById(id);
@@ -77,41 +77,41 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
     }
 
     @Override
-    public boolean updateElevatorShaftLockState(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action){
+    public synchronized boolean updateElevatorShaftLockState(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action) {
+        return updateElevatorShaftLockStateInner(elevatorShaftId, action);
+    }
+
+    @Transactional
+    @Override
+    public boolean updateElevatorShaftLockStateInner(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action){
         boolean flag = false;
         try {
-            if (lock.tryLock(5, TimeUnit.SECONDS)) {
-                ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);//先获取电梯井对象
-                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK.equals(action)) {
-                    //上锁
-                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
-                        flag = false;
-                    } else {
-                        this.elevatorShaftMapper.updateElevatorShaftLockState(elevatorShaftId, 1);
-                        flag = true;
-                    }
-                }
-                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK.equals(action)) {
-                    //解锁
-                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
-                        this.elevatorShaftMapper.updateElevatorShaftLockState(elevatorShaftId, 0);
-                    }
+            ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);//先获取电梯井对象
+            if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK.equals(action)) {
+                //上锁
+                if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
+                    flag = false;
+                } else {
+                    this.elevatorShaftMapper.updateElevatorShaftLockState(elevatorShaftId, 1);
                     flag = true;
                 }
-                if (TransactionSynchronizationManager.isActualTransactionActive()) {
-                    TransactionSynchronizationManager.registerSynchronization(
-                            new TransactionSynchronizationAdapter() {
-                                @Override
-                                public void afterCompletion(int status) {
-                                    lock.unlock();//释放锁
-                                }
-                            });
+            }
+            if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK.equals(action)) {
+                //解锁
+                if ("1".equals(elevatorShaft.getLockState())) {// 1表示上锁
+                    this.elevatorShaftMapper.updateElevatorShaftLockState(elevatorShaftId, 0);
                 }
+                flag = true;
             }
         }catch (Exception e){
             log.error(e.getMessage(), e);
         }
         return flag;
+    }
+
+    @Override
+    public synchronized boolean updateElevatorShaftLockStateWithRobotCode(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode) {
+        return updateElevatorShaftLockStateWithRobotCodeInner(elevatorShaftId, action, robotCode);
     }
 
     /**
@@ -121,53 +121,41 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
      * @param robotCode
      * @return
      */
+    @Transactional
     @Override
-    public boolean updateElevatorShaftLockStateWithRobotCode(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode) {
+    public boolean updateElevatorShaftLockStateWithRobotCodeInner(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode) {
         checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
         boolean flag = false;
         try {
-            if (lock1.tryLock(5, TimeUnit.SECONDS)) {//如果在5秒内获取到锁
-                ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);
-                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK.equals(action)) {
-                    if ("1".equals(elevatorShaft.getLockState())) {// 1表示当前状态为"上锁状态"
-                        if (robotCode.equals(elevatorShaft.getRobotCode())) {
-                            flag = true;
-                        } else {
-                            flag = false;
-                        }
-                    } else {
-                        elevatorShaft.setLockState("1");
-                        elevatorShaft.setRobotCode(robotCode);
-                        this.update(elevatorShaft);
+            ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);
+            if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_LOCK.equals(action)) {
+                if ("1".equals(elevatorShaft.getLockState())) {// 1表示当前状态为"上锁状态"
+                    if (robotCode.equals(elevatorShaft.getRobotCode())) {
                         flag = true;
-                    }
-                }
-                if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK.equals(action)) {
-                    //UNLOCK 表示解锁动作，机器人发出解锁请求
-                    if ("1".equals(elevatorShaft.getLockState())) {// 如果当前为上锁状态
-                        if (robotCode.equals(elevatorShaft.getRobotCode())) {
-                            elevatorShaft.setLockState("0");
-                            elevatorShaft.setRobotCode(null);
-                            updateSelective(elevatorShaft);
-                            flag = true;
-                        }else {
-                            flag = false;
-                        }
                     } else {
-                        // 当前状态已经是解锁状态
-                        flag = true;
+                        flag = false;
                     }
+                } else {
+                    elevatorShaft.setLockState("1");
+                    elevatorShaft.setRobotCode(robotCode);
+                    this.update(elevatorShaft);
+                    flag = true;
                 }
-                if (TransactionSynchronizationManager.isActualTransactionActive()) {
-                    TransactionSynchronizationManager.registerSynchronization(
-                            new TransactionSynchronizationAdapter() {
-                                @Override
-                                public void afterCompletion(int status) {
-                                    lock1.unlock();//释放锁
-                                }
-                            });
-                }else {
-                    lock1.unlock();
+            }
+            if (ElevatorShaft.ELEVATORSHAFT_ACTION.ELEVATORSHAFT_UNLOCK.equals(action)) {
+                //UNLOCK 表示解锁动作，机器人发出解锁请求
+                if ("1".equals(elevatorShaft.getLockState())) {// 如果当前为上锁状态
+                    if (robotCode.equals(elevatorShaft.getRobotCode())) {
+                        elevatorShaft.setLockState("0");
+                        elevatorShaft.setRobotCode(null);
+                        updateSelective(elevatorShaft);
+                        flag = true;
+                    }else {
+                        flag = false;
+                    }
+                } else {
+                    // 当前状态已经是解锁状态
+                    flag = true;
                 }
             }
         }catch (Exception e){

@@ -20,11 +20,15 @@ public interface ElevatorShaftService extends BaseService<ElevatorShaft> {
     /**
      * 更新电梯井状态
      */
+    boolean updateElevatorShaftLockStateInner(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action);
+
     boolean updateElevatorShaftLockState(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action);
 
     /**
      * 更新电梯井状态
      */
+    boolean updateElevatorShaftLockStateWithRobotCodeInner(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode);
+
     boolean updateElevatorShaftLockStateWithRobotCode(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode);
 
 }
