@@ -1920,6 +1920,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         order.getDetailList()) {
                     if (de != null &&
                             Objects.equals(id, de.getId())){
+                        //判定是否需要签收
+                        Boolean needSign = order.getOrderSetting().getNeedSign();
+                        json.setSign_in_mode(needSign ? OrderConstant.ORDER_NEED_SIGN_YES : OrderConstant.ORDER_NEED_SIGN_NO);
                         //填充货物信息
                         json.setGoodsInfos(de.getGoodsInfoList());
                         break;
