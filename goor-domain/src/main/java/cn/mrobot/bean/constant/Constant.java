@@ -89,6 +89,7 @@ public class Constant {
     //MissionItemTask列表用于取货校验员工工号
     public final static List<String> MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = Arrays.asList(
             "load",
+            "loadNoShelf",
             "unload",
             "finalUnload"
     );

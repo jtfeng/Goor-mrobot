@@ -117,7 +117,7 @@ public class FixPathServiceImpl implements FixPathService {
     }
 
     /**
-     * 查询或者保存点
+     * 查询或者保存点_路径点重复
      *
      * @param sceneName 场景名
      * @param pathDTO   固定路径对象
@@ -128,15 +128,47 @@ public class FixPathServiceImpl implements FixPathService {
         String mapName = pathDTO.getStartMap();
         String pointName = start ? pathDTO.getStartId() : pathDTO.getEndId();
         List<MapPoint> pointList = pointService.findByName(pointName, sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if (null == pointList && pointList.size() > 0) {
+        if (null != pointList && pointList.size() > 0) {
             return pointList.get(0);
         }
         //封装mapPoint对象，保存数据库
         MapPoint mapPoint = new MapPoint();
+        mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         mapPoint.setSceneName(sceneName);
         mapPoint.setMapName(mapName);
         mapPoint.setCreateTime(new Date());
         mapPoint.setPointName(start ? pathDTO.getStartId() : pathDTO.getEndId());
+        mapPoint.setX(start ? pathDTO.getStartX() : pathDTO.getEndX());
+        mapPoint.setY(start ? pathDTO.getStartY() : pathDTO.getEndY());
+        mapPoint.setTh(start ? pathDTO.getStartTh() : pathDTO.getEndTh());
+        pointService.save(mapPoint);
+        return mapPoint;
+    }
+
+    /**
+     * 查询或者保存点——点名根据路径取
+     *
+     * @param sceneName 场景名
+     * @param pathDTO   固定路径对象
+     * @param start     是否为固定路径开始点   true:开始点 false:结束点
+     * @return 导航目标点
+     */
+    public static MapPoint findOrSaveMapPointByPath(String sceneName, PathDTO pathDTO, boolean start , PointService pointService) {
+        String mapName = pathDTO.getStartMap();
+        String pointName = PATH + pathDTO.getId() + ( start ? "start" : "end" );
+        String pointNamePre = start ? pathDTO.getStartId() : pathDTO.getEndId();
+        List<MapPoint> pointList = pointService.findByName(pointName, sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (null != pointList && pointList.size() > 0) {
+            return pointList.get(0);
+        }
+        //封装mapPoint对象，保存数据库
+        MapPoint mapPoint = new MapPoint();
+        mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        mapPoint.setSceneName(sceneName);
+        mapPoint.setMapName(mapName);
+        mapPoint.setCreateTime(new Date());
+        mapPoint.setPointName(pointNamePre + "_" + pointName);
+        mapPoint.setPointAlias(pointName);
         mapPoint.setX(start ? pathDTO.getStartX() : pathDTO.getEndX());
         mapPoint.setY(start ? pathDTO.getStartY() : pathDTO.getEndY());
         mapPoint.setTh(start ? pathDTO.getStartTh() : pathDTO.getEndTh());

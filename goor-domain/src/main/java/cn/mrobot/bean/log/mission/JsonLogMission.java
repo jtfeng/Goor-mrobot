@@ -17,6 +17,15 @@ public class JsonLogMission implements Serializable {
     private String event;
     private String description;
     private String mission_item_name;
+    private Long time;
+
+    public Long getTime() {
+        return time;
+    }
+
+    public void setTime(Long time) {
+        this.time = time;
+    }
 
     public String getObject() {
         return object;
