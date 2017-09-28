@@ -61,11 +61,15 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                             new TransactionSynchronizationAdapter() {
                                 @Override
                                 public void afterCompletion(int status) {
-                                    lock1.unlock();
+                                    if (lock1.isHeldByCurrentThread()) {
+                                        lock1.unlock();
+                                    }
                                 }
                             });
                 } else {
-                    lock1.unlock();
+                    if (lock1.isHeldByCurrentThread()) {
+                        lock1.unlock();
+                    }
                 }
             }
         }catch (Exception e){
@@ -106,11 +110,15 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                             new TransactionSynchronizationAdapter() {
                                 @Override
                                 public void afterCompletion(int status) {
-                                    lock2.unlock();
+                                    if (lock2.isHeldByCurrentThread()) {
+                                        lock2.unlock();
+                                    }
                                 }
                             });
                 } else {
-                    lock2.unlock();
+                    if (lock2.isHeldByCurrentThread()) {
+                        lock2.unlock();
+                    }
                 }
             }
         }catch (Exception e){
