@@ -2,7 +2,7 @@ package cn.muye.dijkstra;
 
 import java.util.*;
 
-class Graph {
+public class Graph {
 
 //    private final Map<String, List<Vertex>> vertices;
     private final Map<Long, List<Vertex>> vertices;

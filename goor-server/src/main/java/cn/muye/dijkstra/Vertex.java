@@ -1,6 +1,6 @@
 package cn.muye.dijkstra;
 
-class Vertex implements Comparable<Vertex> {
+public class Vertex implements Comparable<Vertex> {
 
     private Long id;
     private Integer distance;

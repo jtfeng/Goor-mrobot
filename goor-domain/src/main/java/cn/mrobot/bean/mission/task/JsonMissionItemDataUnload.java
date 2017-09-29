@@ -14,7 +14,9 @@ public class JsonMissionItemDataUnload implements Serializable {
 
     private String sign_in_mode;  //0 表示不签收 1表示签收
 
-    List<GoodsInfo> goodsInfos;
+    private List<String> employee_num_list; //本地员工校验列表
+
+    private List<GoodsInfo> goodsInfos;
 
     public List<GoodsInfo> getGoodsInfos() {
         return goodsInfos;
@@ -30,5 +32,13 @@ public class JsonMissionItemDataUnload implements Serializable {
 
     public void setSign_in_mode(String sign_in_mode) {
         this.sign_in_mode = sign_in_mode;
+    }
+
+    public List<String> getEmployee_num_list() {
+        return employee_num_list;
+    }
+
+    public void setEmployee_num_list(List<String> employee_num_list) {
+        this.employee_num_list = employee_num_list;
     }
 }

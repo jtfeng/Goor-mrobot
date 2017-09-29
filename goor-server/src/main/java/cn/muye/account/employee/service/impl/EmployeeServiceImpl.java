@@ -184,6 +184,11 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
         return null;
     }
 
+    @Override
+    public List<String> listAvailableEmployees(Long stationId, Integer employeeType) {
+        return employeeMapper.listAvailableEmployees(stationId, employeeType);
+    }
+
     private void saveLogInfo(String code, MissionItemTask missionItemTaskListDb) {
         if (missionItemTaskListDb == null)
             return;

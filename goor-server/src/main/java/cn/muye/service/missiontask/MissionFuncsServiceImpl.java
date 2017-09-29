@@ -23,6 +23,7 @@ import cn.mrobot.dto.mission.MissionItemDTO;
 import cn.mrobot.dto.mission.MissionListDTO;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.account.employee.service.EmployeeService;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
@@ -87,6 +88,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     @Autowired
     RoadPathService roadPathService;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     /**
      * 根据订单数据创建任务列表
@@ -1080,7 +1084,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
-        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName);
+        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
 //        finalUnloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
         if (isSetOrderDetailMP){
             finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
@@ -1141,7 +1145,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //load任务，取代等待任务
-        MissionTask loadTask = getLoadTask(order, mp, parentName);
+        MissionTask loadTask = getLoadTask(order, mp, parentName, mPointAtts.orderDetailMP);
 //        loadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD));
         if (isSetOrderDetailMP){
             loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
@@ -1353,7 +1357,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         data.setMap(mp.getMapName());
         data.setScene_name(mp.getSceneName());
         itemTask.setData(JsonUtils.toJson(data,
-                new TypeToken<JsonMissionItemDataLaserNavigation>(){}.getType()));
+                new TypeToken<JsonMissionItemDataLaserNavigation>() {
+                }.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_nav);
 
@@ -1518,7 +1523,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         data.setId(Long.parseLong(mPointAtts.pathId));
         data.setScene_name(mp.getSceneName());
         itemTask.setData(JsonUtils.toJson(data,
-                new TypeToken<JsonMissionItemDataPathNavigation>(){}.getType()));
+                new TypeToken<JsonMissionItemDataPathNavigation>() {
+                }.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_nav);
         return itemTask;
@@ -1628,7 +1634,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 new JsonMissionItemDataMp3();
         json.setFilename(fileName);
         itemTask.setData(JsonUtils.toJson(json,
-                new TypeToken<JsonMissionItemDataMp3>(){}.getType()));
+                new TypeToken<JsonMissionItemDataMp3>() {
+                }.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_mp3);
 
@@ -1687,7 +1694,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         json.setTh(mp.getTh());
         json.setMap(mp.getMapName());
         itemTask.setData(JsonUtils.toJson(json,
-                new TypeToken<JsonMissionItemDataGotocharge>(){}.getType()));
+                new TypeToken<JsonMissionItemDataGotocharge>() {
+                }.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_gotocharge);
 
@@ -1754,7 +1762,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionTask getLoadTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionTask missionTask = new MissionTask();
         if (order.getScene() != null) {
             missionTask.setSceneId(order.getScene().getId());
@@ -1768,7 +1777,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
-        missionItemTasks.add(getLoadItemTask(order, mp, parentName));
+        missionItemTasks.add(getLoadItemTask(order, mp, parentName, orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
 
@@ -1783,7 +1792,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionItemTask getLoadItemTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionItemTask itemTask = new MissionItemTask();
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
@@ -1796,11 +1806,32 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        json.setShelf(order.getShelf());
 //        itemTask.setData(JsonUtils.toJson(json,
 //                new TypeToken<JsonMissionItemDataLoad>(){}.getType()));
+        //查取 工号可用列表
+        OrderDetail currentOrderDetail = null;
+        List<String> employee_num_list = null;
+        if (!StringUtil.isNullOrEmpty(orderDetailMP) && !str_zero.equalsIgnoreCase(orderDetailMP)){
+            Long id = Long.valueOf(orderDetailMP);
+            if (id != null && order.getDetailList() != null){
+                for (OrderDetail de : order.getDetailList()) {
+                    if (de != null && Objects.equals(id, de.getId())){
+                        currentOrderDetail = de;
+                        break;
+                    }
+                }
+            }
+        }
+        if(currentOrderDetail!= null){
+             employee_num_list = employeeService.listAvailableEmployees(currentOrderDetail.getStationId(),Constant.EMPLOYEE_TYPE_NORMAL);
+        }
         if (order.getShelf() != null){
-            itemTask.setData(JsonUtils.toJson(order.getShelf(),
+            Shelf shelf = order.getShelf();
+            shelf.setEmployee_num_list(employee_num_list);
+            itemTask.setData(JsonUtils.toJson(shelf,
                     new TypeToken<Shelf>(){}.getType()));
         }else{
-            itemTask.setData(NULL_JSON_OBJ);
+            JsonMissionItemDataEmployee jsonMissionItemDataEmployee = new JsonMissionItemDataEmployee();
+            jsonMissionItemDataEmployee.setEmployee_num_list(employee_num_list);
+            itemTask.setData(JsonUtils.toJson(jsonMissionItemDataEmployee, new TypeToken<JsonMissionItemDataEmployee>(){}.getType()));
         }
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_load);
@@ -1816,7 +1847,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionTask getLoadNoShelfTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionTask missionTask = new MissionTask();
         if (order.getScene() != null) {
             missionTask.setSceneId(order.getScene().getId());
@@ -1830,7 +1862,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
-        missionItemTasks.add(getLoadNoShelfItemTask(order, mp, parentName));
+        missionItemTasks.add(getLoadNoShelfItemTask(order, mp, parentName, orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
 
@@ -1845,7 +1877,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionItemTask getLoadNoShelfItemTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionItemTask itemTask = new MissionItemTask();
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
@@ -1853,7 +1886,25 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "无货架装货Item");
         itemTask.setName(MissionItemName_loadNoShelf);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData(NULL_JSON_OBJ);
+        OrderDetail currentOrderDetail = null;
+        List<String> employee_num_list = null;
+        if (!StringUtil.isNullOrEmpty(orderDetailMP) && !str_zero.equalsIgnoreCase(orderDetailMP)){
+            Long id = Long.valueOf(orderDetailMP);
+            if (id != null && order.getDetailList() != null){
+                for (OrderDetail de : order.getDetailList()) {
+                    if (de != null && Objects.equals(id, de.getId())){
+                        currentOrderDetail = de;
+                        break;
+                    }
+                }
+            }
+        }
+        if(currentOrderDetail!= null){
+            employee_num_list = employeeService.listAvailableEmployees(currentOrderDetail.getStationId(),Constant.EMPLOYEE_TYPE_NORMAL);
+        }
+        JsonMissionItemDataEmployee jsonMissionItemDataEmployee = new JsonMissionItemDataEmployee();
+        jsonMissionItemDataEmployee.setEmployee_num_list(employee_num_list);
+        itemTask.setData(JsonUtils.toJson(jsonMissionItemDataEmployee, new TypeToken<JsonMissionItemDataEmployee>(){}.getType()));
 
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_loadNoShelf);
@@ -1923,6 +1974,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //判定是否需要签收
                         Boolean needSign = order.getOrderSetting().getNeedSign();
                         json.setSign_in_mode(needSign ? OrderConstant.ORDER_NEED_SIGN_YES : OrderConstant.ORDER_NEED_SIGN_NO);
+                        //可校验的员工列表
+                        List<String> employeeCodeList = employeeService.listAvailableEmployees(de.getStationId(), Constant.EMPLOYEE_TYPE_NORMAL);
+                        json.setEmployee_num_list(employeeCodeList);
                         //填充货物信息
                         json.setGoodsInfos(de.getGoodsInfoList());
                         break;
@@ -1947,7 +2001,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionTask getFinalUnloadTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionTask missionTask = new MissionTask();
         if (order.getScene() != null) {
             missionTask.setSceneId(order.getScene().getId());
@@ -1961,7 +2016,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         List<MissionItemTask> missionItemTasks =
                 new ArrayList<>();
-        missionItemTasks.add(getFinalUnloadItemTask(order, mp, parentName));
+        missionItemTasks.add(getFinalUnloadItemTask(order, mp, parentName,orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
 
@@ -1976,7 +2031,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionItemTask getFinalUnloadItemTask(
             Order order,
             MapPoint mp,
-            String parentName) {
+            String parentName,
+            String orderDetailMP) {
         MissionItemTask itemTask = new MissionItemTask();
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
@@ -1984,7 +2040,25 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "终点卸货Item");
         itemTask.setName(MissionItemName_finalUnload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
-        itemTask.setData(NULL_JSON_OBJ);
+        OrderDetail currentOrderDetail = null;
+        List<String> employee_num_list = null;
+        if (!StringUtil.isNullOrEmpty(orderDetailMP) && !str_zero.equalsIgnoreCase(orderDetailMP)){
+            Long id = Long.valueOf(orderDetailMP);
+            if (id != null && order.getDetailList() != null){
+                for (OrderDetail de : order.getDetailList()) {
+                    if (de != null && Objects.equals(id, de.getId())){
+                        currentOrderDetail = de;
+                        break;
+                    }
+                }
+            }
+        }
+        if(currentOrderDetail!= null){
+            employee_num_list = employeeService.listAvailableEmployees(currentOrderDetail.getStationId(),Constant.EMPLOYEE_TYPE_NORMAL);
+        }
+        JsonMissionItemDataEmployee jsonMissionItemDataEmployee = new JsonMissionItemDataEmployee();
+        jsonMissionItemDataEmployee.setEmployee_num_list(employee_num_list);
+        itemTask.setData(JsonUtils.toJson(jsonMissionItemDataEmployee, new TypeToken<JsonMissionItemDataEmployee>(){}.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_finalUnload);
 
@@ -2038,6 +2112,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "电梯Item");
         itemTask.setName(MissionItemName_elevator);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        List<String> employee_num_list = employeeService.listAvailableEmployees(null,Constant.EMPLOYEE_TYPE_ELEVATOR_ADMIN);
+        json.setEmployee_num_list(employee_num_list);
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataElevator>(){}.getType()));
         itemTask.setState(MissionStateInit);
@@ -2093,6 +2169,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setDescription(parentName + "双电梯Item");
         itemTask.setName(MissionItemName_elevator);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        List<String> employee_num_list = employeeService.listAvailableEmployees(null,Constant.EMPLOYEE_TYPE_ELEVATOR_ADMIN);
+        json.setEmployee_num_list(employee_num_list);
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataTwoElevator>(){}.getType()));
         itemTask.setState(MissionStateInit);
@@ -4088,7 +4166,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
-        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName);
+        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
 //        finalUnloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
         if (isSetOrderDetailMP){
             finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
@@ -4138,14 +4216,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         if (order.getShelf() == null){
             //不需要装货架的取货任务
-            MissionTask loadNoShelfTask = getLoadNoShelfTask(order, mp, parentName);
+            MissionTask loadNoShelfTask = getLoadNoShelfTask(order, mp, parentName, mPointAtts.orderDetailMP);
             if (isSetOrderDetailMP){
                 loadNoShelfTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }
             missionListTask.getMissionTasks().add(loadNoShelfTask);
         }else{
             //load任务，取代等待任务
-            MissionTask loadTask = getLoadTask(order, mp, parentName);
+            MissionTask loadTask = getLoadTask(order, mp, parentName, mPointAtts.orderDetailMP);
             if (isSetOrderDetailMP){
                 loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }

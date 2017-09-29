@@ -21,4 +21,6 @@ public interface EmployeeService extends BaseService<Employee> {
     List<Employee> list(WhereRequest whereRequest);
 
     AjaxResult verifyEmplyeeNumber(String code, Long missionItemId, String subName) throws Exception;
+
+    List<String> listAvailableEmployees(Long stationId, Integer employeeType);
 }

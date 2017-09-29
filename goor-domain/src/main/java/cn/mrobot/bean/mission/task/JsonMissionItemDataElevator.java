@@ -1,6 +1,7 @@
 package cn.mrobot.bean.mission.task;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by abel on 17-7-19.
@@ -13,6 +14,8 @@ public class JsonMissionItemDataElevator implements Serializable {
     Point enter_point;
     Point set_pose_point;
     Point back_point;
+
+    private List<String> employee_num_list;
 
     public Integer getCurrent_floor() {
         return current_floor;
@@ -52,6 +55,14 @@ public class JsonMissionItemDataElevator implements Serializable {
 
     public void setBack_point(Point back_point) {
         this.back_point = back_point;
+    }
+
+    public List<String> getEmployee_num_list() {
+        return employee_num_list;
+    }
+
+    public void setEmployee_num_list(List<String> employee_num_list) {
+        this.employee_num_list = employee_num_list;
     }
 
     public static class Point implements Serializable{

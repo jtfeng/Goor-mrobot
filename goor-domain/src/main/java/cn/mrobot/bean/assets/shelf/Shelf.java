@@ -27,6 +27,9 @@ public class Shelf extends BaseBean {
     @Transient
     private List<GoodsType> goodTypes;//可装配的货物类型
 
+    @Transient
+    private List<String> employee_num_list; //为mission 而用
+
     public Long getId() {
         return id;
     }
@@ -89,5 +92,13 @@ public class Shelf extends BaseBean {
 
     public void setSceneId(Long sceneId) {
         this.sceneId = sceneId;
+    }
+
+    public List<String> getEmployee_num_list() {
+        return employee_num_list;
+    }
+
+    public void setEmployee_num_list(List<String> employee_num_list) {
+        this.employee_num_list = employee_num_list;
     }
 }

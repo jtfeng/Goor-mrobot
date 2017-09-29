@@ -34,4 +34,18 @@
         </if>
     </select>
 
+    <select id="listAvailableEmployees" resultType="java.lang.String" >
+        SELECT employee.code
+        FROM AC_EMPLOYEE employee
+        LEFT JOIN AC_EMPLOYEE_STATION_XREF empStation ON employee.ID = empStation.EMPLOYEE_ID
+        <where>
+            <if test="employeeType != null">
+                AND employee.type = #{employeeType}
+            </if>
+            <if test="stationId != null">
+                AND empStation.station_id = #{stationId}
+            </if>
+        </where>
+    </select>
+
 </mapper>

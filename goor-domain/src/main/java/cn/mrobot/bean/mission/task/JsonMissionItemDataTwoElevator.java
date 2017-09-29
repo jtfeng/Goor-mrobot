@@ -22,6 +22,8 @@ public class JsonMissionItemDataTwoElevator implements Serializable {
     private PathEntity path0_1;
     private PathEntity path1_0;
 
+    private List<String> employee_num_list;
+
     public void setPath2_3(PathEntity path2_3) {
         this.path2_3 = path2_3;
     }
@@ -60,6 +62,14 @@ public class JsonMissionItemDataTwoElevator implements Serializable {
 
     public PathEntity getPath1_0() {
         return path1_0;
+    }
+
+    public List<String> getEmployee_num_list() {
+        return employee_num_list;
+    }
+
+    public void setEmployee_num_list(List<String> employee_num_list) {
+        this.employee_num_list = employee_num_list;
     }
 
     public static class ElevatorsEntity implements Serializable {
