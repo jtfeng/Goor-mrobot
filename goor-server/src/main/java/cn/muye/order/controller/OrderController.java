@@ -141,11 +141,12 @@ public class OrderController extends BaseController {
             Scene scene = SessionUtil.getScene();
             order.setScene(scene);
             //现在orderSetting后台默认注入默认配置
-            if(order.getOrderSetting() == null){
+//            if(order.getOrderSetting() == null){
                 OrderSetting orderSetting = orderSettingService.getDefaultSetting(stationId);
                 order.setOrderSetting(orderSetting);
-            }
-            OrderSetting setting = orderSettingService.getById(order.getOrderSetting().getId());
+//            }
+//            OrderSetting setting = orderSettingService.getById(order.getOrderSetting().getId());
+            OrderSetting setting = orderSetting;
             //货架判定
             if(setting.getNeedShelf()){
                 if(order.getShelf()== null || order.getShelf().getId() == null){
@@ -157,6 +158,9 @@ public class OrderController extends BaseController {
             Integer robotTypeId = setting.getRobotType().getId();
             //根据 站点id 和 机器人类型 自动选择机器人
             arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
+
+            //TODO test
+//            arrangeRobot = robotService.findById(321L);
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功
                 logger.info("本次请求未获取到可用机器人");
