@@ -35,7 +35,7 @@
     </select>
 
     <select id="listAvailableEmployees" resultType="java.lang.String" >
-        SELECT employee.code
+        SELECT DISTINCT(employee.code)
         FROM AC_EMPLOYEE employee
         LEFT JOIN AC_EMPLOYEE_STATION_XREF empStation ON employee.ID = empStation.EMPLOYEE_ID
         <where>
