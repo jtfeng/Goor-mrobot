@@ -17,13 +17,15 @@ public class RoadPathMaps {
      */
     public void init(List<RoadPath> roadPathList) {
         Long startPoint = -1L;
+        List<Long> startPointList = new ArrayList<Long>();
         List<Vertex> vertexList = null;
         for (RoadPath path: roadPathList) {
             //id 变更，更新上一个id的路径到图中，并重新申请相关资源
             if (startPoint != path.getStartPoint()) {
                 //更新上一个id的路径到图中
-                if (startPoint != -1) {
+                if (startPoint != -1L) {
                     g.addVertex(startPoint,vertexList);
+                    startPointList.add(startPoint);
                 }
                 // 重新申请资源
                 startPoint = path.getStartPoint();
@@ -39,12 +41,21 @@ public class RoadPathMaps {
 
         //最后一个路径ID的相关数据更新到图中
         if (startPoint != -1L) {
-            g.addVertex(startPoint,vertexList);
+            g.addVertex(startPoint, vertexList);
+            startPointList.add(startPoint);
+        }
+
+        //对于某个没有作为任意一条路径的起始点的点，也需要进行初始化
+        for (RoadPath path: roadPathList) {
+            Long endPoint = path.getEndPoint();
+            if (startPointList.contains(endPoint)) {
+                continue;
+            }
+            g.addVertex(endPoint, new ArrayList<Vertex>());
         }
     }
 
     public List<Long> getShortestPath(Long startPointId, Long finishPointIdId) {
-
         return g.getShortestPath(startPointId, finishPointIdId);
     }
 

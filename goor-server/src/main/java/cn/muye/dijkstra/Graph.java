@@ -2,9 +2,8 @@ package cn.muye.dijkstra;
 
 import java.util.*;
 
-public class Graph {
+class Graph {
 
-//    private final Map<String, List<Vertex>> vertices;
     private final Map<Long, List<Vertex>> vertices;
 
     public Graph() {
@@ -22,7 +21,8 @@ public class Graph {
         PriorityQueue<Vertex> nodes = new PriorityQueue<Vertex>();
 
         for(Long vertex : vertices.keySet()) {
-            if (vertex == start) {
+            if (vertex.longValue() == start.longValue()) {
+                start = vertex;
                 distances.put(vertex, 0);
                 nodes.add(new Vertex(vertex, 0));
             } else {
@@ -34,7 +34,7 @@ public class Graph {
 
         while (!nodes.isEmpty()) {
             Vertex smallest = nodes.poll();
-            if (smallest.getId() == finish) {
+            if (smallest.getId().longValue() == finish.longValue()) {
                 final List<Long> path = new ArrayList<Long>();
                 while (previous.get(smallest.getId()) != null) {
                     path.add(smallest.getId());
@@ -57,7 +57,7 @@ public class Graph {
 
                     forloop:
                     for(Vertex n : nodes) {
-                        if (n.getId() == neighbor.getId()) {
+                        if (n.getId().longValue() == neighbor.getId().longValue()) {
                             nodes.remove(n);
                             n.setDistance(alt);
                             nodes.add(n);
@@ -68,7 +68,7 @@ public class Graph {
             }
         }
 
-        return new ArrayList<Long>(distances.keySet());
+        return new ArrayList<Long>();
     }
 
 }
