@@ -282,6 +282,21 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         return roadPathMapper.selectOne(roadPath);
     }
 
+    @Override
+    public List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType) {
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (sceneName != null) {
+            criteria.andCondition("SCENE_NAME = ", sceneName);
+        }
+        if (pathType != null) {
+            criteria.andCondition("PATH_TYPE = ", pathType);
+        }
+        example.setOrderByClause("START_POINT ASC,ID ASC");
+        List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
+        return roadPaths;
+    }
+
     private List<RoadPathDetail> packageRoadPathDetail(List<RoadPath> roadPaths) {
         List<RoadPathDetail> roadPathDetails = Lists.newArrayList();
         for (RoadPath roadPath : roadPaths) {
@@ -309,6 +324,15 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             }
         }
         return roadPathDetails;
+    }
+
+    public void createRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
+        this.roadPathMapper.insert(roadPath);
+        packageRoadPathRelations(roadPathPointIds, roadPath);
+    }
+
+    public void updateRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
+        packageRoadPathRelations(roadPathPointIds, roadPath);
     }
 
     /**

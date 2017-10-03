@@ -75,6 +75,8 @@ public class Constant {
 
     public final static String ORDER_NAV_TYPE_PATH = "path";//下单优先执行的导航类型-固定路径导航
 
+    public final static String PATH = "path";//下单优先执行的导航类型-固定路径导航
+
     public final static Long CHECK_IF_OFFLINE_TIME = 15000L; //15秒（rabbitMQ的connection-timeout时间为5秒，断网重连的时间为10秒，所以设置15秒）
 
     public final static Long LEAVE_CHARGER_DELAY_TIME = 60000L; //1分钟=60000毫秒

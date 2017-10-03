@@ -8,7 +8,7 @@ import java.util.List;
 
 
 public class RoadPathMaps {
-    private static final int DEFAULT_DISTANCE = 1;
+    private static final Long DEFAULT_DISTANCE = 1L;
     private Graph g = new Graph();
     public RoadPathMaps(){}
 
@@ -21,9 +21,9 @@ public class RoadPathMaps {
         List<Vertex> vertexList = null;
         for (RoadPath path: roadPathList) {
             //id 变更，更新上一个id的路径到图中，并重新申请相关资源
-            if (startPoint != path.getStartPoint()) {
+            if (!startPoint.equals(path.getStartPoint())) {
                 //更新上一个id的路径到图中
-                if (startPoint != -1L) {
+                if (!startPoint.equals(-1L)) {
                     g.addVertex(startPoint,vertexList);
                     startPointList.add(startPoint);
                 }
@@ -33,14 +33,15 @@ public class RoadPathMaps {
             }
 
             //TODO // distance 使用默认值
-            vertexList.add(new Vertex(path.getEndPoint(), DEFAULT_DISTANCE));
+//            vertexList.add(new Vertex(path.getEndPoint(), DEFAULT_DISTANCE));
+            vertexList.add(new Vertex(path.getEndPoint(), path.getWeight()));
             // 后续每条路径有值后再进行替换
 //            Long distance = (path.getWeight() == null)? DEFAULT_DISTANCE : path.getWeight();
 //            vertexList.add(new Vertex(path.getEndPoint(), distance.intValue()));
         }
 
         //最后一个路径ID的相关数据更新到图中
-        if (startPoint != -1L) {
+        if (!startPoint.equals(-1L)) {
             g.addVertex(startPoint, vertexList);
             startPointList.add(startPoint);
         }

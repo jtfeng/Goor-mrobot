@@ -3,9 +3,9 @@ package cn.muye.dijkstra;
 public class Vertex implements Comparable<Vertex> {
 
     private Long id;
-    private Integer distance;
+    private Long distance;
 
-    public Vertex(Long id, Integer distance) {
+    public Vertex(Long id, Long distance) {
         super();
         this.id = id;
         this.distance = distance;
@@ -15,7 +15,7 @@ public class Vertex implements Comparable<Vertex> {
         return id;
     }
 
-    public Integer getDistance() {
+    public Long getDistance() {
         return distance;
     }
 
@@ -23,7 +23,7 @@ public class Vertex implements Comparable<Vertex> {
         this.id = id;
     }
 
-    public void setDistance(Integer distance) {
+    public void setDistance(Long distance) {
         this.distance = distance;
     }
 

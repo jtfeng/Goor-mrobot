@@ -14,6 +14,10 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     void updateRoadPath(Map<String, Object> body) throws Exception;
 
+    void createRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception;
+
+    void updateRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception;
+
     List<RoadPathDetail> findRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName) throws Exception;
 
     List<RoadPathDetail> listRoadPathDetailByStartAndEndPointType(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception;
@@ -26,5 +30,5 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     RoadPath findRoadPath(RoadPath roadPath) throws Exception ;
 
-
+    List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType);
 }
