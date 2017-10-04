@@ -32,7 +32,7 @@ public class RoadPath extends BaseBean{
     //所关联的路径锁对象
     private Long pathLock;
     //工控路径类型（此处暂定为 0 表示终点保持原样工控路径 1 代表终点无朝向要求工控路径）
-//    private Integer x86PathType;
+    private Integer x86PathType;
 
 
     public RoadPath(){}
@@ -125,13 +125,13 @@ public class RoadPath extends BaseBean{
         this.pathLock = pathLock;
     }
 
-    /*public Integer getX86PathType() {
+    public Integer getX86PathType() {
         return x86PathType;
     }
 
     public void setX86PathType(Integer x86PathType) {
         this.x86PathType = x86PathType;
-    }*/
+    }
 
     @Override
     public String toString() {
@@ -147,7 +147,7 @@ public class RoadPath extends BaseBean{
                 ", pathId='" + pathId + '\'' +
                 ", pathType=" + pathType +
                 ", pathLock=" + pathLock +
-//                ", x86PathType=" + x86PathType +
+                ", x86PathType=" + x86PathType +
                 '}';
     }
 }

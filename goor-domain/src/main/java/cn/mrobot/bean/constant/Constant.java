@@ -16,6 +16,13 @@ public class Constant {
     public final static Integer PATH_TYPE_CLOUD = 0; //云端路径
     public final static Integer PATH_TYPE_X86 = 1;  //工控路径
 
+    //X86PathType
+    public final static Integer X86_PATH_TYPE_STRICT_DIRECTION = 0; //0 表示终点保持原样工控路径
+    public final static Integer X86_PATH_TYPE_NO_DIRECTION = 1;  //1 代表终点无朝向要求工控路径
+
+    //默认工控路径权值
+    public final static Long DEFAULT_ROAD_PATH_X86_WEIGHT = 1L;
+
     public static final String UTF_8 = "UTF-8";
 
     public static final String CONTENT = "content";

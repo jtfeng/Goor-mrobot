@@ -298,7 +298,8 @@ public class RoadPathController {
                                 roadPath.setPathName(PATH + pathDTO.getId());
                                 roadPath.setCreateTime(new Date());
                                 roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                                roadPath.setWeight(1L);
+                                roadPath.setWeight(Constant.DEFAULT_ROAD_PATH_X86_WEIGHT);
+                                roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
                                 //根据数据库查询结果判断是更新还是新增
                                 if (null != roadPathDB) {
                                     roadPath.setId(roadPathDB.getId());

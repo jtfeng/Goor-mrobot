@@ -1437,6 +1437,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             new JsonMissionItemDataPathNavigation();
                     data.setId(Long.parseLong(roadPath.getPathId()));
                     data.setScene_name(endMp.getSceneName());
+                    data.setType(roadPath.getX86PathType());
                     itemTask.setData(JsonUtils.toJson(data,
                             new TypeToken<JsonMissionItemDataPathNavigation>(){}.getType()));
                     itemTask.setState(MissionStateInit);
@@ -1520,8 +1521,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是固定路径导航的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataPathNavigation data =
                 new JsonMissionItemDataPathNavigation();
-        data.setId(Long.parseLong(mPointAtts.pathId));
+        Long roadPathId = Long.parseLong(mPointAtts.pathId);
+        data.setId(roadPathId);
+        RoadPath roadPath = roadPathService.findById(roadPathId);
+        if(roadPath == null) {
+            logger.error("###find roadPath error###,{} roadPath not found!!" , roadPathId);
+        }
         data.setScene_name(mp.getSceneName());
+        data.setType(roadPath.getX86PathType());
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataPathNavigation>() {
                 }.getType()));
@@ -2816,6 +2823,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 order.getRobot().getCode(),
                 getGoorMissionMsg(listTasks)
         );
+
+        //TODO test
+//        AjaxResult ajaxResult = AjaxResult.success();
         if(ajaxResult == null || !ajaxResult.isSuccess()){
             logger.info("##############  createPathMissionLists failed ，发送客户端goor失败#################");
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -3305,7 +3315,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                    );
                     break;
                 case MPointType_ELEVATOR:
-                    initPathMissionTaskTwoElevator(
+//                    initPathMissionTaskTwoElevator(
+                    initPathMissionTaskElevator(
                             missionListTask,
                             order,
                             startMp,
