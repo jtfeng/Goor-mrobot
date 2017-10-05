@@ -1521,13 +1521,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是固定路径导航的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataPathNavigation data =
                 new JsonMissionItemDataPathNavigation();
-        Long roadPathId = Long.parseLong(mPointAtts.pathId);
-        data.setId(roadPathId);
-        RoadPath roadPath = roadPathService.findById(roadPathId);
+        //工控路径ID
+        Long x86RoadPathId = Long.parseLong(mPointAtts.pathId);
+        data.setId(x86RoadPathId);
+        String sceneName = mp.getSceneName();
+        RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName);
         if(roadPath == null) {
-            logger.error("###find roadPath error###,{} roadPath not found!!" , roadPathId);
+            logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
         }
-        data.setScene_name(mp.getSceneName());
+        data.setScene_name(sceneName);
         data.setType(roadPath.getX86PathType());
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataPathNavigation>() {

@@ -31,4 +31,6 @@ public interface RoadPathService extends BaseService<RoadPath> {
     RoadPath findRoadPath(RoadPath roadPath) throws Exception ;
 
     List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType);
+
+    RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName);
 }
