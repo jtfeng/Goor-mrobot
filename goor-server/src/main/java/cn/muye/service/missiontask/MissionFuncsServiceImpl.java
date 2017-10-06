@@ -453,20 +453,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     addRoadPathPoint(mp, mapPoints, mpAttrs);
 //                                addElevatorPoint(mp, mapPoints, mpAttrs);
                                     //判断当前点的属性，根据属性加入相应的任务
-                                    switch (MapPointType.getType(mp.getCloudMapPointTypeId())){
-                                        case ELEVATOR:
-                                        case ELEVATOR_WAIT:
-                                        default:
-                                            //加入该点，并标记这个点状态是orderDetail点
-                                            mapPoints.add(mp);
-                                            //标记该点的属性
-                                            atts = new MPointAtts();
-                                            atts.type = MPointType_SONGHUO;
-                                            atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
-                                            mpAttrs.put(mp, atts);
-                                            logger.info("###### order detail station is ok ");
-                                            break;
-                                    }
+                                    //加入该点，并标记这个点状态是orderDetail点
+                                    mapPoints.add(mp);
+                                    //标记该点的属性
+                                    atts = new MPointAtts();
+                                    atts.type = MPointType_SONGHUO;
+                                    atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
+                                    mpAttrs.put(mp, atts);
+                                    logger.info("###### order detail station is ok ");
                                     break;
                                 }
                             }
@@ -1529,8 +1523,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if(roadPath == null) {
             logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
         }
+        if(roadPath != null) {
+            data.setType(roadPath.getX86PathType());
+        }
         data.setScene_name(sceneName);
-        data.setType(roadPath.getX86PathType());
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataPathNavigation>() {
                 }.getType()));
@@ -2825,9 +2821,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 order.getRobot().getCode(),
                 getGoorMissionMsg(listTasks)
         );
-
-        //TODO test
-//        AjaxResult ajaxResult = AjaxResult.success();
         if(ajaxResult == null || !ajaxResult.isSuccess()){
             logger.info("##############  createPathMissionLists failed ，发送客户端goor失败#################");
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -2943,20 +2936,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     addPathRoadPathPoint(mp, mapPoints, mpAttrs);
 //                                addElevatorPoint(mp, mapPoints, mpAttrs);
                                     //判断当前点的属性，根据属性加入相应的任务
-                                    switch (MapPointType.getType(mp.getCloudMapPointTypeId())){
-                                        case ELEVATOR:
-                                        case ELEVATOR_WAIT:
-                                        default:
-                                            //加入该点，并标记这个点状态是orderDetail点
-                                            mapPoints.add(mp);
-                                            //标记该点的属性
-                                            atts = new MPointAtts();
-                                            atts.type = MPointType_SONGHUO;
-                                            atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
-                                            mpAttrs.put(mp, atts);
-                                            logger.info("###### order detail station is ok ");
-                                            break;
-                                    }
+                                    //加入该点，并标记这个点状态是orderDetail点
+                                    mapPoints.add(mp);
+                                    //标记该点的属性
+                                    atts = new MPointAtts();
+                                    atts.type = MPointType_SONGHUO;
+                                    atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
+                                    mpAttrs.put(mp, atts);
+                                    logger.info("###### order detail station is ok ");
                                     break;
                                 }
                             }
@@ -3317,8 +3304,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                    );
                     break;
                 case MPointType_ELEVATOR:
-//                    initPathMissionTaskTwoElevator(
                     initPathMissionTaskElevator(
+//                    initPathMissionTaskTwoElevator(
                             missionListTask,
                             order,
                             startMp,
@@ -3677,7 +3664,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             case DoorType_pathDoor:
                                 JsonMissionItemDataDoor.Path path =
                                         new JsonMissionItemDataDoor.Path();
-                                path.setId(Long.parseLong(door.getPathId()));
+                                //工控路径ID
+                                Long x86RoadPathId = Long.parseLong(door.getPathId());
+                                path.setId(x86RoadPathId);
+                                String sceneName = door.getoPoint().getSceneName();
+                                RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName);
+                                if(roadPath == null) {
+                                    logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
+                                }
+                                if(roadPath != null) {
+                                    path.setType(roadPath.getX86PathType());
+                                }
                                 path.setScene_name(door.getoPoint().getSceneName());
                                 obj.setPath(path);
 
@@ -3776,15 +3773,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                                        order, startMp, epc.getwPoint(), parentName);
 //                                missionListTask.getMissionTasks().add(sigleNavTask);
                                 //加入check电梯状态任务
-                                JsonMissionItemDataElevatorLock lock =
-                                        new JsonMissionItemDataElevatorLock();
-                                lock.setElevator_id(ev.getElevatorshaftId());
-                                lock.setInterval_time(30);
-                                MissionTask elevatorLockTask = getElevatorLockTask(
-                                        order, epc.getwPoint(), parentName,
-                                        lock
-                                );
-                                missionListTask.getMissionTasks().add(elevatorLockTask);
+//                                JsonMissionItemDataElevatorLock lock =
+//                                        new JsonMissionItemDataElevatorLock();
+//                                lock.setElevator_id(ev.getElevatorshaftId());
+//                                lock.setInterval_time(30);
+//                                MissionTask elevatorLockTask = getElevatorLockTask(
+//                                        order, epc.getwPoint(), parentName,
+//                                        lock
+//                                );
+//                                missionListTask.getMissionTasks().add(elevatorLockTask);
                                 elevatorid = ev.getElevatorshaftId();
 
                                 jsonMissionItemDataElevator
@@ -3841,15 +3838,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(elevatorTask);
 
         //加入check电梯状态解锁任务
-        JsonMissionItemDataElevatorUnlock unlock =
-                new JsonMissionItemDataElevatorUnlock();
-        unlock.setElevator_id(elevatorid);
-        unlock.setInterval_time(30);
-        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
-                order, mp, parentName,
-                unlock
-        );
-        missionListTask.getMissionTasks().add(elevatorUnlockTask);
+//        JsonMissionItemDataElevatorUnlock unlock =
+//                new JsonMissionItemDataElevatorUnlock();
+//        unlock.setElevator_id(elevatorid);
+//        unlock.setInterval_time(30);
+//        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
+//                order, mp, parentName,
+//                unlock
+//        );
+//        missionListTask.getMissionTasks().add(elevatorUnlockTask);
 
     }
 
@@ -3937,16 +3934,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                                missionListTask.getMissionTasks().add(sigleNavTask);
                                 if (count == 0){
                                     //加入check电梯状态任务
-                                    JsonMissionItemDataElevatorLock lock =
-                                            new JsonMissionItemDataElevatorLock();
-                                    lock.setElevator_id(ev.getElevatorshaftId());
-                                    lock.setInterval_time(30);
-                                    MissionTask elevatorLockTask = getElevatorLockTask(
-                                            order, epc.getwPoint(), parentName,
-                                            lock
-                                    );
-                                    missionListTask.getMissionTasks().add(elevatorLockTask);
-                                    elevatorid = ev.getElevatorshaftId();
+//                                    JsonMissionItemDataElevatorLock lock =
+//                                            new JsonMissionItemDataElevatorLock();
+//                                    lock.setElevator_id(ev.getElevatorshaftId());
+//                                    lock.setInterval_time(30);
+//                                    MissionTask elevatorLockTask = getElevatorLockTask(
+//                                            order, epc.getwPoint(), parentName,
+//                                            lock
+//                                    );
+//                                    missionListTask.getMissionTasks().add(elevatorLockTask);
+//                                    elevatorid = ev.getElevatorshaftId();
                                 }
 
                                 elevatorsEntities.get(count).setWaitPointId(
@@ -4025,6 +4022,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         int defaultindex;
         int nextindex;
         for (int i = 0; i < 2; i++){
+            if (i >= elevatorsEntities.size()){
+                break;
+            }
             if (elevatorsEntities.get(i).getDefault_elevator() == 1){
                 defaultElevator = elevatorsEntities.get(i);
                 defaultindex = i;
@@ -4088,15 +4088,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(elevatorTask);
 
         //加入check电梯状态解锁任务
-        JsonMissionItemDataElevatorUnlock unlock =
-                new JsonMissionItemDataElevatorUnlock();
-        unlock.setElevator_id(elevatorid);
-        unlock.setInterval_time(30);
-        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
-                order, mp, parentName,
-                unlock
-        );
-        missionListTask.getMissionTasks().add(elevatorUnlockTask);
+//        JsonMissionItemDataElevatorUnlock unlock =
+//                new JsonMissionItemDataElevatorUnlock();
+//        unlock.setElevator_id(elevatorid);
+//        unlock.setInterval_time(30);
+//        MissionTask elevatorUnlockTask = getElevatorUnlockTask(
+//                order, mp, parentName,
+//                unlock
+//        );
+//        missionListTask.getMissionTasks().add(elevatorUnlockTask);
 
     }
 
@@ -4179,12 +4179,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
-        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
-//        finalUnloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
-        if (isSetOrderDetailMP){
-            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-        }
-        missionListTask.getMissionTasks().add(finalUnloadTask);
+//        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
+//        if (isSetOrderDetailMP){
+//            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+//        }
+//        missionListTask.getMissionTasks().add(finalUnloadTask);
 
         //语音任务，感谢使用，我要回去充电了？
 //        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
@@ -4236,12 +4235,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             missionListTask.getMissionTasks().add(loadNoShelfTask);
         }else{
             //load任务，取代等待任务
-            MissionTask loadTask = getLoadTask(order, mp, parentName, mPointAtts.orderDetailMP);
-            if (isSetOrderDetailMP){
-                loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-            }
-//        loadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD));
-            missionListTask.getMissionTasks().add(loadTask);
+//            MissionTask loadTask = getLoadTask(order, mp, parentName, mPointAtts.orderDetailMP);
+//            if (isSetOrderDetailMP){
+//                loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+//            }
+//            missionListTask.getMissionTasks().add(loadTask);
         }
 
         //装载完毕语音任务
