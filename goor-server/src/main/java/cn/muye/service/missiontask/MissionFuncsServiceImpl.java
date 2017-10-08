@@ -1431,7 +1431,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             new JsonMissionItemDataPathNavigation();
                     data.setId(Long.parseLong(roadPath.getPathId()));
                     data.setScene_name(endMp.getSceneName());
-                    data.setType(roadPath.getX86PathType());
+                    data.setTolerance_type(roadPath.getX86PathType());
                     itemTask.setData(JsonUtils.toJson(data,
                             new TypeToken<JsonMissionItemDataPathNavigation>(){}.getType()));
                     itemTask.setState(MissionStateInit);
@@ -1524,7 +1524,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
         }
         if(roadPath != null) {
-            data.setType(roadPath.getX86PathType());
+            data.setTolerance_type(roadPath.getX86PathType());
         }
         data.setScene_name(sceneName);
         itemTask.setData(JsonUtils.toJson(data,
@@ -2791,8 +2791,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order == null ||
                 order.getOrderSetting() == null ||
                 order.getRobot() == null ||
-                order.getOrderSetting().getStartStation() == null ||
-                order.getOrderSetting().getEndStation() == null){
+                order.getOrderSetting().getStartStation() == null){
             logger.info("##############  createMissionListsPathNav attrs error #################");
         }
 
@@ -3304,8 +3303,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                    );
                     break;
                 case MPointType_ELEVATOR:
-                    initPathMissionTaskElevator(
-//                    initPathMissionTaskTwoElevator(
+//                    initPathMissionTaskElevator(
+                    initPathMissionTaskTwoElevator(
                             missionListTask,
                             order,
                             startMp,
@@ -3673,7 +3672,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
                                 }
                                 if(roadPath != null) {
-                                    path.setType(roadPath.getX86PathType());
+                                    path.setTolerance_type(roadPath.getX86PathType());
                                 }
                                 path.setScene_name(door.getoPoint().getSceneName());
                                 obj.setPath(path);
