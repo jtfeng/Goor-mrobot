@@ -3,9 +3,7 @@ package cn.muye.area.fixpath.service.impl;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
-import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.slam.SlamRequestBody;
 import cn.mrobot.dto.area.PathDTO;
 import cn.mrobot.utils.StringUtil;
@@ -13,7 +11,6 @@ import cn.muye.area.fixpath.service.FixPathService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
-import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
@@ -28,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Created by Jelynn on 2017/9/18.
@@ -96,7 +93,7 @@ public class FixPathServiceImpl implements FixPathService {
     @Override
     public AjaxResult sendFixpathQuery(Long sceneId) throws Exception {
         String mapSceneName = sceneService.getRelatedMapNameBySceneId(sceneId);
-        List<String> robotCodeList = CacheInfoManager.getSceneRobotListCache(mapSceneName);
+        CopyOnWriteArraySet<String> robotCodeList = CacheInfoManager.getSceneRobotListCache(mapSceneName);
         if (null == robotCodeList) {
             logger.info("场景 {} 无在线机器人", mapSceneName);
             return AjaxResult.failed("场景" + mapSceneName + "无在线机器人");

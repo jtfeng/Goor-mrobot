@@ -26,6 +26,7 @@ import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -36,6 +37,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -55,20 +57,29 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
 
     @Override
     public void sendCurrentPose() {
-        Map<String, List<String>> sceneRobotCodeList = CacheInfoManager.getSceneRobotListCache();
-        if (sceneRobotCodeList == null || sceneRobotCodeList.size() <= 0)
+        Map<String, CopyOnWriteArraySet<String>> sceneRobotCodeMap = CacheInfoManager.getSceneRobotListCache();
+        if (sceneRobotCodeMap == null || sceneRobotCodeMap.size() <= 0)
             return;
-        Iterator iterator = sceneRobotCodeList.entrySet().iterator();
+        Iterator iterator = sceneRobotCodeMap.entrySet().iterator();
         while (iterator.hasNext()) {
             JSONArray jsonArray = new JSONArray();
             Map.Entry entry = (Map.Entry) iterator.next();
             String sceneName = (String) entry.getKey();
-            List<String> robotCodeList = (List<String>) entry.getValue();
-            for (int i = 0; i < robotCodeList.size(); i++) {
-                String code = robotCodeList.get(i);
+            CopyOnWriteArraySet<String> robotCodeSet = (CopyOnWriteArraySet<String>) entry.getValue();
+
+            List<String> sendRobotCodeList = Lists.newArrayList();
+            for (String code : robotCodeSet) {
                 Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-                if (null == robot)
+                if (null == robot){
                     continue;
+                }
+
+                //判断机器人是否在线，离线不下发位置信息
+                Boolean flag = CacheInfoManager.getRobotOnlineCache(code);
+                if (flag == null || !flag){
+                    continue;
+                }
+
                 //获取机器人所在地图名称
                 String mapName = getMapName(code);
                 //未获取到地图信息，循环下一个
@@ -86,11 +97,13 @@ public class CurrentPoseServiceImpl implements CurrentPoseService {
                 currentPoseObject.put(TopicConstants.MAP_NAME, mapName);
                 currentPoseObject.put(TopicConstants.CODE, code);
                 currentPoseObject.put("id", robot.getRobotIdForElevator());
+
+                sendRobotCodeList.add(code);
                 jsonArray.add(currentPoseObject);
             }
             //将消息通过mq发送给agent,由agent透传给ros topic
             ExecutorService executorService = Executors.newCachedThreadPool();
-            Runnable runnable = new MyThread(robotCodeList, jsonArray);
+            Runnable runnable = new MyThread(sendRobotCodeList, jsonArray);
             executorService.execute(runnable);
         }
     }
