@@ -51,4 +51,6 @@ public interface PointService {
     List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, int type, Long storeId);
 
     MapPoint findMapPointByStationIdAndCloudType(Long stationId, int caption);
+
+    List<MapPoint> listBySceneMapXYTH(String sceneName,String mapName,double x,double y,double th);
 }

@@ -16,6 +16,13 @@ public class Constant {
     public final static Integer PATH_TYPE_CLOUD = 0; //云端路径
     public final static Integer PATH_TYPE_X86 = 1;  //工控路径
 
+    //X86PathType
+    public final static Integer X86_PATH_TYPE_STRICT_DIRECTION = 0; //0 表示终点保持原样工控路径
+    public final static Integer X86_PATH_TYPE_NO_DIRECTION = 1;  //1 代表终点无朝向要求工控路径
+
+    //默认工控路径权值
+    public final static Long DEFAULT_ROAD_PATH_X86_WEIGHT = 1L;
+
     public static final String UTF_8 = "UTF-8";
 
     public static final String CONTENT = "content";
@@ -74,6 +81,8 @@ public class Constant {
     public final static String MISSION_LIST_TYPE_NORMAL = "normal"; //普通任务——任务管理器
 
     public final static String ORDER_NAV_TYPE_PATH = "path";//下单优先执行的导航类型-固定路径导航
+
+    public final static String PATH = "path";//下单优先执行的导航类型-固定路径导航
 
     public final static Long CHECK_IF_OFFLINE_TIME = 15000L; //15秒（rabbitMQ的connection-timeout时间为5秒，断网重连的时间为10秒，所以设置15秒）
 

@@ -2,7 +2,7 @@ package cn.muye.dijkstra;
 
 import java.util.*;
 
-class Graph {
+public class Graph {
 
     private final Map<Long, List<Vertex>> vertices;
 
@@ -16,25 +16,25 @@ class Graph {
     }
 
     public List<Long> getShortestPath(Long start, Long finish) {
-        final Map<Long, Integer> distances = new HashMap<Long, Integer>();
+        final Map<Long, Long> distances = new HashMap<>();
         final Map<Long, Vertex> previous = new HashMap<Long, Vertex>();
         PriorityQueue<Vertex> nodes = new PriorityQueue<Vertex>();
 
         for(Long vertex : vertices.keySet()) {
-            if (vertex.longValue() == start.longValue()) {
+            if (vertex .equals(start)) {
                 start = vertex;
-                distances.put(vertex, 0);
-                nodes.add(new Vertex(vertex, 0));
+                distances.put(vertex, 0L);
+                nodes.add(new Vertex(vertex, 0L));
             } else {
-                distances.put(vertex, Integer.MAX_VALUE);
-                nodes.add(new Vertex(vertex, Integer.MAX_VALUE));
+                distances.put(vertex, Long.MAX_VALUE);
+                nodes.add(new Vertex(vertex, Long.MAX_VALUE));
             }
             previous.put(vertex, null);
         }
 
         while (!nodes.isEmpty()) {
             Vertex smallest = nodes.poll();
-            if (smallest.getId().longValue() == finish.longValue()) {
+            if (smallest.getId().equals(finish)) {
                 final List<Long> path = new ArrayList<Long>();
                 while (previous.get(smallest.getId()) != null) {
                     path.add(smallest.getId());
@@ -45,19 +45,19 @@ class Graph {
                 return path;
             }
 
-            if (distances.get(smallest.getId()) == Integer.MAX_VALUE) {
+            if (distances.get(smallest.getId()).equals(Long.MAX_VALUE)) {
                 break;
             }
 
             for (Vertex neighbor : vertices.get(smallest.getId())) {
-                Integer alt = distances.get(smallest.getId()) + neighbor.getDistance();
+                Long alt = distances.get(smallest.getId()) + neighbor.getDistance();
                 if (alt < distances.get(neighbor.getId())) {
                     distances.put(neighbor.getId(), alt);
                     previous.put(neighbor.getId(), smallest);
 
                     forloop:
                     for(Vertex n : nodes) {
-                        if (n.getId().longValue() == neighbor.getId().longValue()) {
+                        if (n.getId().equals(neighbor.getId())) {
                             nodes.remove(n);
                             n.setDistance(alt);
                             nodes.add(n);
@@ -68,7 +68,7 @@ class Graph {
             }
         }
 
-        return new ArrayList<Long>();
+        return Collections.EMPTY_LIST;
     }
 
 }

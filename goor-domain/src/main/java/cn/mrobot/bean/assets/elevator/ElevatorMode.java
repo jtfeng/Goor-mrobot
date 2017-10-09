@@ -5,33 +5,30 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 @Table(name = "AS_ELEVATORMODE")
 public class ElevatorMode extends BaseBean {
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date startTime;//开始时间
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date endTime;//结束时间
+    private String start;//开始时间
+    private String end;//结束时间
     private Integer state;//电梯当前的模式 (1 代表全自动, 0 代表半自动)
     private Long elevatorId;//电梯 id
 
-    public Date getStartTime() {
-        return startTime;
+    public String getStart() {
+        return start;
     }
 
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
+    public void setStart(String start) {
+        this.start = start;
     }
 
-    public Date getEndTime() {
-        return endTime;
+    public String getEnd() {
+        return end;
     }
 
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+    public void setEnd(String end) {
+        this.end = end;
     }
 
     public Integer getState() {
@@ -53,8 +50,8 @@ public class ElevatorMode extends BaseBean {
     @Override
     public String toString() {
         return "ElevatorMode{" +
-                "startTime=" + startTime +
-                ", endTime=" + endTime +
+                "start='" + start + '\'' +
+                ", end='" + end + '\'' +
                 ", state=" + state +
                 ", elevatorId=" + elevatorId +
                 '}';

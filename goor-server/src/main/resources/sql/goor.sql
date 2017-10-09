@@ -1855,6 +1855,7 @@ create table AS_ROADPATH
   PATH_TYPE int(1) null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATH ADD PATH_LOCK BIGINT(20) NULL;
+ALTER TABLE AS_ROADPATH ADD X86_PATH_TYPE INT(11) default '0' NULL comment '工控路径类型：0 表示终点保持原样工控路径， 1 代表终点无朝向要求工控路径。';
 
 DROP TABLE IF EXISTS `AS_ROADPATHPOINT`;
 create table AS_ROADPATHPOINT
@@ -1929,8 +1930,8 @@ create table AS_ELEVATORMODE
 (
   ID bigint auto_increment
     primary key,
-  START_TIME datetime null comment '开始时间',
-  END_TIME datetime null comment '结束时间',
+  START varchar(8) null comment '开始时间',
+  END varchar(8) null comment '结束时间',
   STATE tinyint(1) null comment '当前电梯的模式',
   ELEVATOR_ID bigint null comment '对应的电梯 ID 信息',
   CREATED_BY bigint null,
@@ -1939,3 +1940,6 @@ create table AS_ELEVATORMODE
   constraint AS_ELEVATORMODE_ID_uindex
   unique (ID)
 )  ENGINE=InnoDB DEFAULT CHARSET=utf8;
+INSERT INTO goor.AS_ELEVATORMODE (START, END, STATE, ELEVATOR_ID, CREATED_BY, CREATE_TIME, STORE_ID) VALUES ('10:10:10', '13:13:13', 1, 1, null, null, null);
+INSERT INTO goor.AS_ELEVATORMODE (START, END, STATE, ELEVATOR_ID, CREATED_BY, CREATE_TIME, STORE_ID) VALUES ('20:10:10', '23:13:13', 1, 1, null, null, null);
+INSERT INTO goor.AS_ELEVATORMODE (START, END, STATE, ELEVATOR_ID, CREATED_BY, CREATE_TIME, STORE_ID) VALUES ('02:10:10', '03:13:13', 1, 1, null, null, null);

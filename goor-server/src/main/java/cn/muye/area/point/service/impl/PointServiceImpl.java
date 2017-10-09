@@ -173,6 +173,18 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
+    public List<MapPoint> listBySceneMapXYTH(String sceneName,String mapName,double x,double y,double th) {
+        Condition condition = new Condition(MapPoint.class);
+        condition.createCriteria().andCondition("SCENE_NAME =" , sceneName)
+                .andCondition("MAP_NAME =" , mapName)
+                .andCondition("X =" , x)
+                .andCondition("Y =" , y)
+                .andCondition("TH =" , th);
+        condition.setOrderByClause("POINT_NAME asc");
+        return pointMapper.selectByExample(condition);
+    }
+
+    @Override
     public void handle(SlamResponseBody slamResponseBody) {
 
         if (TopicConstants.POINT_LOAD.equals(slamResponseBody.getSubName())) {

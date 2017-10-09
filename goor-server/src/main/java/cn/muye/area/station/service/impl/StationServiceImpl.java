@@ -170,6 +170,11 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
             stationList = myMapper.selectByExample(example);
         }
 
+        collectPoints(stationList);
+        return stationList;
+    }
+
+    private List<Station> collectPoints(List<Station> stationList) {
         //如果用公共Mapper查询，则需手动用For循环把关联的点放到站里面
         if (stationList != null && stationList.size() > 0) {
             for (Station station : stationList) {
@@ -201,7 +206,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
                 station.setAccessArriveStationIdList(accessArriveStationList);
                 //如果没有关联点，则直接返回
                 if (stationMapPointXREFList == null || stationMapPointXREFList.size() <= 0) {
-                        station.setMapPoints(new ArrayList<>());
+                    station.setMapPoints(new ArrayList<>());
                     continue;
                 }
 
@@ -272,7 +277,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 
     @Override
     public List<Station> listStationsBySceneAndMapPointType(Long sceneId, Integer type) {
-        return stationMapper.listStationsBySceneAndMapPointType(sceneId, type);
+        return collectPoints(stationMapper.listStationsBySceneAndMapPointType(sceneId, type));
     }
 }
 

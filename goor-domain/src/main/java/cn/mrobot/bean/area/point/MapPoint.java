@@ -183,7 +183,7 @@ public class MapPoint extends BaseBean {
         this.label = pointAlias;
     }
 
-    @Override
+    /*@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
@@ -200,7 +200,7 @@ public class MapPoint extends BaseBean {
                 && mapPoint.getSceneName().equals(sceneName)
                 && mapPoint.getMapName().equals(mapName);
 
-	}
+	}*/
 
 	@Override
 	public int hashCode() {
