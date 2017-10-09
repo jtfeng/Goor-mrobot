@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
 public class CacheInfoManager implements ApplicationContextAware {
@@ -52,7 +53,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, Long> robotAutoRegisterTimeCache = new ConcurrentHashMapCache<String, Long>();
 
     /*场景和机器人列表，key为场景，value为机器人编号列表*/
-    private static ConcurrentHashMapCache<String, List<String>> sceneRobotListCache = new ConcurrentHashMapCache<String, List<String>>();
+    private static ConcurrentHashMapCache<String, CopyOnWriteArraySet<String>> sceneRobotListCache = new ConcurrentHashMapCache<String, CopyOnWriteArraySet<String>>();
 
     //    //状态机缓存
     private static ConcurrentHashMapCache<String, StateCollectorAutoCharge> autoChargeCache = new ConcurrentHashMapCache<>();//自动回充状态
@@ -331,19 +332,19 @@ public class CacheInfoManager implements ApplicationContextAware {
         return navigationCache.get(deviceId);
     }
 
-    public static List<String>getSceneRobotListCache(String sceneName) {
+    public static CopyOnWriteArraySet<String> getSceneRobotListCache(String sceneName) {
        return sceneRobotListCache.get(sceneName);
     }
 
-    public static Map<String, List<String>> getSceneRobotListCache() {
-        Map<String, List<String>> sceneRobotCodeList = new HashMap<>();
+    public static Map<String, CopyOnWriteArraySet<String>> getSceneRobotListCache() {
+        Map<String, CopyOnWriteArraySet<String>> sceneRobotCodeList = new HashMap<>();
         Iterator iterator = sceneRobotListCache.iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             String key = entry.getKey();
             ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
-            List<String> robotCodeList = (List<String>) valueEntry.getValue();
-            sceneRobotCodeList.put(key, robotCodeList);
+            CopyOnWriteArraySet<String> robotCodeset = (CopyOnWriteArraySet<String>) valueEntry.getValue();
+            sceneRobotCodeList.put(key, robotCodeset);
         }
         return sceneRobotCodeList;
     }
@@ -353,18 +354,19 @@ public class CacheInfoManager implements ApplicationContextAware {
         while (iterator.hasNext()) {
             Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
-            List<String> robotCodeList = (List<String>) valueEntry.getValue();
+            CopyOnWriteArraySet<String> robotCodeSet = (CopyOnWriteArraySet<String>) valueEntry.getValue();
             //判断机器是否在缓存中
-            if (robotCodeList.contains(robotCode)) {
-                robotCodeList.remove(robotCode);
+            if (robotCodeSet.contains(robotCode)) {
+                robotCodeSet.remove(robotCode);
+                sceneRobotListCache.put(entry.getKey(), robotCodeSet);
             }
         }
-        List<String> robotCodeList = sceneRobotListCache.get(sceneName);
-        if (robotCodeList == null) {
-            robotCodeList = Lists.newArrayList();
+        CopyOnWriteArraySet<String> sceneRobotCodeSet = sceneRobotListCache.get(sceneName);
+        if (sceneRobotCodeSet == null) {
+            sceneRobotCodeSet = new CopyOnWriteArraySet<String>();
         }
-        robotCodeList.add(robotCode);
-        sceneRobotListCache.put(sceneName, robotCodeList);
+        sceneRobotCodeSet.add(robotCode);
+        sceneRobotListCache.put(sceneName, sceneRobotCodeSet);
     }
 
     //已经存库的任务状态
