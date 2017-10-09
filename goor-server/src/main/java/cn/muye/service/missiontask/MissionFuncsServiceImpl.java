@@ -4178,11 +4178,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
-//        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
-//        if (isSetOrderDetailMP){
-//            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-//        }
-//        missionListTask.getMissionTasks().add(finalUnloadTask);
+        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
+        if (isSetOrderDetailMP){
+            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
+        missionListTask.getMissionTasks().add(finalUnloadTask);
 
         //语音任务，感谢使用，我要回去充电了？
 //        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
@@ -4234,11 +4234,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             missionListTask.getMissionTasks().add(loadNoShelfTask);
         }else{
             //load任务，取代等待任务
-//            MissionTask loadTask = getLoadTask(order, mp, parentName, mPointAtts.orderDetailMP);
-//            if (isSetOrderDetailMP){
-//                loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-//            }
-//            missionListTask.getMissionTasks().add(loadTask);
+            MissionTask loadTask = getLoadTask(order, mp, parentName, mPointAtts.orderDetailMP);
+            if (isSetOrderDetailMP){
+                loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            }
+            missionListTask.getMissionTasks().add(loadTask);
         }
 
         //装载完毕语音任务
