@@ -2,18 +2,17 @@ package cn.muye.assets.elevator.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.assets.elevator.Elevator;
-import cn.mrobot.bean.assets.elevator.ElevatorMode;
-import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
-import cn.mrobot.bean.assets.elevator.ElevatorShaft;
+import cn.mrobot.bean.assets.elevator.*;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.elevator.mapper.ElevatorModeMapper;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.elevator.service.ElevatorModeService;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.elevator.service.ElevatorShaftService;
 import com.github.pagehelper.PageInfo;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,6 +38,8 @@ public class ElevatorController {
     private ElevatorShaftService elevatorShaftService;
     @Autowired
     private ElevatorPointCombinationService elevatorPointCombinationService;
+    @Autowired
+    private ElevatorModeMapper elevatorModeMapper;
     private static final Logger log = LoggerFactory.getLogger(ElevatorController.class);
 
     /**
@@ -410,6 +414,46 @@ public class ElevatorController {
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 添加一份新的时间段电梯模式
+     * @return
+     */
+    @RequestMapping(value = "/status/elevatorMode", method = RequestMethod.POST)
+    public AjaxResult elevatorMode(@RequestBody ElevatorMode elevatorMode){
+        try {
+            Preconditions.checkNotNull(elevatorMode.getStart(), "开始时间不允许为空！");
+            Preconditions.checkNotNull(elevatorMode.getEnd(),   "结束时间不允许为空！");
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            format.parse("2017-01-01 " + elevatorMode.getStart());
+            format.parse("2017-01-01 " + elevatorMode.getEnd());
+            Preconditions.checkState(elevatorMode.getStart().compareTo(elevatorMode.getEnd()) < 0,
+                    "开始时间必须小于结束时间，请检查！");
+            Long ck = this.elevatorModeMapper.checkLegalRangeDate(elevatorMode.getStart(), elevatorMode.getEnd(),
+                    elevatorMode.getElevatorId());
+            Preconditions.checkState(ck == 0, "开始时间或结束时间已经在别的时间范围内，请重新选择！");
+            this.elevatorModeMapper.insert(elevatorMode);
+            return AjaxResult.success("保存电梯模式成功");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "保存电梯模式失败");
+        }
+    }
+
+    /**
+     * 根据电梯 ID 查询电梯模式
+     * @return
+     */
+    @RequestMapping(value = "/status/elevatorMode/{id}", method = RequestMethod.GET)
+    public AjaxResult elevatorModeSearch(@PathVariable("id") Long id){
+        try {
+            ElevatorModeEnum modeEnum = this.elevatorService.determineCurrentElevatorMode(id);
+            return AjaxResult.success(modeEnum);
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "查询电梯模式失败");
         }
     }
 

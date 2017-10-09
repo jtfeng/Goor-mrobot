@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.assets.elevator.mapper.ElevatorModeMapper">
+
+    <select id="checkLegalRangeDate" resultType="java.lang.Long">
+        SELECT count(*) FROM AS_ELEVATORMODE m
+        WHERE (
+                (#{param1} &lt;= m.START AND #{param2} &gt;= m.END)
+                    OR
+                ((m.START &lt;= #{param1} AND m.END &gt;= #{param1}) OR (m.START &lt;= #{param2} AND m.END &gt;= #{param2}))
+              )
+        AND m.ELEVATOR_ID = #{param3}
+    </select>
+
+</mapper>

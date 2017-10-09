@@ -13,6 +13,7 @@ import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import tk.mybatis.mapper.entity.Example;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
@@ -308,12 +308,12 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Transactional
     @Override
     public ElevatorModeEnum determineCurrentElevatorMode(Long elevatorId) throws Exception {
-        Date currentDate = new Date();
+        String currentDateStr = new SimpleDateFormat("HH:mm:ss").format(new Date());
         Example example = new Example(ElevatorMode.class);
         example.createCriteria()
                 .andCondition("ELEVATOR_ID =", elevatorId)
-                .andCondition("START_TIME <=", currentDate)
-                .andCondition("END_TIME >=", currentDate);
+                .andCondition("START <=", currentDateStr)
+                .andCondition("END >=", currentDateStr);
         List<ElevatorMode> elevatorModes = elevatorModeMapper.selectByExample(example);
         log.info(" ################################################################## ");
         log.info(String.format("查询电梯的id是：" + elevatorId));
