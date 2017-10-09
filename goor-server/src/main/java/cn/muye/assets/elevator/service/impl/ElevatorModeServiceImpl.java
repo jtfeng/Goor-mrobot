@@ -13,4 +13,5 @@ import org.springframework.transaction.annotation.Transactional;
 public class ElevatorModeServiceImpl extends BaseServiceImpl<ElevatorMode> implements ElevatorModeService {
 
     private static final Logger log = LoggerFactory.getLogger(ElevatorModeServiceImpl.class);
+
 }
