@@ -27,6 +27,8 @@ public class DateTimeUtils {
 
     public static final String DEFAULT_TIME_FORMAT_PATTERN_SHORT = "HH:mm:ss";
 
+    public static final String DEFAULT_TIME_FORMAT_PATTERN_SHORT_NO_SECOND = "HH:mm";
+
     public static final String DATE_FORMAT_PATTERN_FULL = "yyyyMMddHHmmss";
 
     public static final String DEFAULT_DATE_FORMAT_PATTERN_FULL = "yyyy-MM-dd HH:mm:ss";

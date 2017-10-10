@@ -87,7 +87,7 @@
         from OR_ORDER_DETAIL od
         LEFT JOIN OR_ORDER o ON od.ORDER_ID = o.ID
         where od.STATION_ID = #{stationId} and o.STATUS not in (2,3)
-        ORDER BY od.STATUS ASC, od.FINISH_DATE DESC
+        ORDER BY od.STATUS ASC, od.FINISH_DATE DESC, o.CREATE_TIME DESC
     </select>
 
 

@@ -24,4 +24,14 @@ public class OrderConstant {
     //是否需要签收
     public static final String ORDER_NEED_SIGN_NO = "0"; //不需要签收
     public static final String ORDER_NEED_SIGN_YES = "1"; //需要签收
+
+    //消息推送类型
+    public static final Integer MESSAGE_BELL_RECEIVE = 0; //收货站提醒
+    public static final Integer MESSAGE_BELL_SEND = 1; //发货站提醒
+
+    //消息推送状态
+    public static final Integer MESSAGE_BELL_UNREAD = 0; //消息未读
+    public static final Integer MESSAGE_BELL_READ = 1; //消息已读
+
+    public static final Integer MESSAGE_DEFAULT_MAX_NUM = 99; //读取消息上限条数
 }
