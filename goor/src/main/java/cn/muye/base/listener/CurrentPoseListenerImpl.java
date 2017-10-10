@@ -13,9 +13,8 @@ public class CurrentPoseListenerImpl implements TopicCallback{
 	@Override
 	public void handleMessage(Message message) {
 		try {
-            if (TopicConstants.DEBUG)
-			logger.info("From ROS ====== CurrentPose topic  " + message.toString());
             if((System.currentTimeMillis() - CacheInfoManager.getCurrentPoseSendTime()) > 1000){//每一秒发送一次位置消息
+				logger.info("From ROS ====== CurrentPose topic  " + message.toString());
 				CacheInfoManager.setCurrentPoseSendTime();
 				ProducerCommon msg = SingleFactory.getProducerCommon();
 				msg.sendCurrentPoseMessage(message.toString());
