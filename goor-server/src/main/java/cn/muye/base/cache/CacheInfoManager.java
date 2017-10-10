@@ -332,8 +332,8 @@ public class CacheInfoManager implements ApplicationContextAware {
         return navigationCache.get(deviceId);
     }
 
-    public static CopyOnWriteArraySet<String> getSceneRobotListCache(String sceneName) {
-       return sceneRobotListCache.get(sceneName);
+    public static CopyOnWriteArraySet<String> getSceneRobotListCache(String sceneMapName) {
+       return sceneRobotListCache.get(sceneMapName);
     }
 
     public static Map<String, CopyOnWriteArraySet<String>> getSceneRobotListCache() {
