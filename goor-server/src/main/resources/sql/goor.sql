@@ -1855,7 +1855,7 @@ create table AS_ROADPATH
   PATH_TYPE int(1) null
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATH ADD PATH_LOCK BIGINT(20) NULL;
-ALTER TABLE AS_ROADPATH ADD X86_PATH_TYPE INT(11) default '0' NULL comment '工控路径类型：0 表示终点保持原样工控路径， 1 代表终点无朝向要求工控路径。';
+ALTER TABLE AS_ROADPATH ADD X86_PATH_TYPE INT(11) default '0' NULL comment '工控路径类型：0 表示终点保持原样工控路径， 10 代表终点无朝向要求工控路径。';
 
 DROP TABLE IF EXISTS `AS_ROADPATHPOINT`;
 create table AS_ROADPATHPOINT

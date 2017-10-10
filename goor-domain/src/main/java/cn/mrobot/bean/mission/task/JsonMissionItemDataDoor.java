@@ -40,7 +40,7 @@ public class JsonMissionItemDataDoor implements Serializable {
         private static final long serialVersionUID = 6913188562839295836L;
         private String scene_name;
         private Long id;
-        private Integer type;//工控路径类型（此处暂定为 0 表示终点保持原样工控路径 1 代表终点无朝向要求工控路径）
+        private Integer type;//工控路径类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向要求工控路径）
 
 
         public String getScene_name() {
