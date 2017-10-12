@@ -101,7 +101,10 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     @Override
     public List<OrderDetail> listStationTasks(Long stationId, WhereRequest whereRequest) {
         PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-        return orderDetailMapper.listStationTasks(stationId);
+        Date currentDate = new Date();
+        long oneDayBefore = currentDate.getTime() - 24*60*60*1000;
+        Date beforeDate = new Date(oneDayBefore);
+        return orderDetailMapper.listStationTasks(stationId, currentDate, beforeDate);
     }
 
     @Override
