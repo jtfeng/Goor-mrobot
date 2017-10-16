@@ -16,6 +16,10 @@ public class OrderDetailVO {
 
     private List<OrderTransferVO> transferVOList;
 
+    private String orderYear;  //下单时间（年月日）
+
+    private String orderHour;  //下单时间（时分）
+
     private Integer status; //运输状态
 
     private List<GoodsInfoVO>  goodsInfoList; //装配货物的列表
@@ -66,5 +70,21 @@ public class OrderDetailVO {
 
     public void setTransferVOList(List<OrderTransferVO> transferVOList) {
         this.transferVOList = transferVOList;
+    }
+
+    public String getOrderYear() {
+        return orderYear;
+    }
+
+    public void setOrderYear(String orderYear) {
+        this.orderYear = orderYear;
+    }
+
+    public String getOrderHour() {
+        return orderHour;
+    }
+
+    public void setOrderHour(String orderHour) {
+        this.orderHour = orderHour;
     }
 }

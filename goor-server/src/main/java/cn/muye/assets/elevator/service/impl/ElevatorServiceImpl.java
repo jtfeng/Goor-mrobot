@@ -327,4 +327,15 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         log.info(" ################################################################## ");
         return null;
     }
+
+    @Transactional
+    @Override
+    public List<Elevator> listBySceneName(String sceneName) {
+        Example example = new Example(Elevator.class);
+        example.createCriteria().andCondition("SCENE_NAME =", sceneName);
+        List<Elevator> elevators = myMapper.selectByExample(example);
+        bindElevatorShaft(elevators);
+        bindElevatorPointCombination(elevators);
+        return elevators;
+    }
 }

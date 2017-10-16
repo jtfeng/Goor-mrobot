@@ -745,7 +745,7 @@ public class MissionController {
 
 	//TODO  测试
 	/**
-	 * 发送调度任务，由多个任务列表拼接组成
+	 * 发送调度任务，由多个任务列表拼接组成，需要登录权限
 	 * @param robotIds
 	 * @param missionListIds
 	 * @param request
@@ -807,6 +807,24 @@ public class MissionController {
 			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"出错");
 		}
 		return resp;
+	}
+
+	//TODO  测试
+	/**
+	 * 发送调度任务，由多个任务列表拼接组成,不需要权限
+	 * @param robotIds
+	 * @param missionListIds
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = {"services/missionList/sendDispatchTest"}, method = RequestMethod.GET)
+	@ResponseBody
+//    @PreAuthorize("hasAuthority('mrc_navigation_u')")
+	public AjaxResult sendNavigationTest(
+			@RequestParam Long[] robotIds,
+			@RequestParam Long[] missionListIds,
+			HttpServletRequest request) {
+		return sendNavigation(robotIds,missionListIds,request);
 	}
 
 	/**

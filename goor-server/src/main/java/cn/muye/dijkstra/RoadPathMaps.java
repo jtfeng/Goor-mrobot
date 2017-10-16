@@ -56,11 +56,11 @@ public class RoadPathMaps {
         }
     }
 
-    public List<Long> getShortestPath(Long startPointId, Long finishPointIdId) {
+    public RoadPathResult getShortestPath(Long startPointId, Long finishPointIdId) {
         return g.getShortestPath(startPointId, finishPointIdId);
     }
 
-    public List<Long> getShortestPath(MapPoint startPoint, MapPoint finishPoint) {
+    public RoadPathResult getShortestPath(MapPoint startPoint, MapPoint finishPoint) {
         return g.getShortestPath(startPoint.getId(), finishPoint.getId());
     }
 }

@@ -15,7 +15,9 @@ public class Graph {
         this.vertices.put(id, vertex);
     }
 
-    public List<Long> getShortestPath(Long start, Long finish) {
+    public RoadPathResult getShortestPath(Long start, Long finish) {
+        RoadPathResult roadPathResult = new RoadPathResult();
+        Long totalWeight = 0L;
         final Map<Long, Long> distances = new HashMap<>();
         final Map<Long, Vertex> previous = new HashMap<Long, Vertex>();
         PriorityQueue<Vertex> nodes = new PriorityQueue<Vertex>();
@@ -42,7 +44,9 @@ public class Graph {
                 }
                 path.add(start);
                 Collections.reverse(path);
-                return path;
+                roadPathResult.setPointIds(path);
+                roadPathResult.setTotalWeight(totalWeight);
+                return roadPathResult;
             }
 
             if (distances.get(smallest.getId()).equals(Long.MAX_VALUE)) {
@@ -61,6 +65,7 @@ public class Graph {
                             nodes.remove(n);
                             n.setDistance(alt);
                             nodes.add(n);
+                            totalWeight = alt;
                             break forloop;
                         }
                     }
@@ -68,7 +73,6 @@ public class Graph {
             }
         }
 
-        return Collections.EMPTY_LIST;
+        return roadPathResult;
     }
-
 }

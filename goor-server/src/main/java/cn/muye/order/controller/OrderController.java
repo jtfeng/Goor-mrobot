@@ -379,6 +379,9 @@ public class OrderController extends BaseController {
                 }
             }
             orderDetailVO.setTransferInfo(transferInfo.toString());
+            //注入时间
+            orderDetailVO.setOrderYear(DateTimeUtils.getDateString(findOrder.getCreateTime(),DateTimeUtils.DEFAULT_DATE_FORMAT_PATTERN_SHORT));
+            orderDetailVO.setOrderHour(DateTimeUtils.getDateString(findOrder.getCreateTime(),DateTimeUtils.DEFAULT_TIME_FORMAT_PATTERN_SHORT_NO_SECOND));
         }
         OrderDetail orderDetailInfo = orderDetailService.getOrderDetailInfo(orderDetail.getId());
         if(orderDetailInfo!= null && orderDetailInfo.getGoodsInfoList()!=null){

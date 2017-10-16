@@ -15,6 +15,7 @@
         <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
         <result column="IP_ELEVATOR_ID" property="ipElevatorId" jdbcType="VARCHAR"/>
         <result column="DEFAULT_ELEVATOR" property="defaultElevator"/>
+        <result column="SCENE_NAME" property="sceneName"/>
     </resultMap>
 
     <!--地图映射关系-->

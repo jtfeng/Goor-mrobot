@@ -14,6 +14,7 @@ public class Elevator extends BaseBean {
     private String info;
     private Long elevatorshaftId;
     private String robotCode;
+    private String sceneName;//地图场景名称
     @Transient
     private ElevatorShaft elevatorShaft;
 
@@ -31,11 +32,11 @@ public class Elevator extends BaseBean {
                 ", ip='" + ip + '\'' +
                 ", lockState='" + lockState + '\'' +
                 ", info='" + info + '\'' +
-                ", robotCode='" + robotCode + '\'' +
                 ", elevatorshaftId=" + elevatorshaftId +
                 ", robotCode='" + robotCode + '\'' +
+                ", sceneName='" + sceneName + '\'' +
                 ", elevatorShaft=" + elevatorShaft +
-                ", ipElevatorId=" + ipElevatorId +
+                ", ipElevatorId='" + ipElevatorId + '\'' +
                 ", defaultElevator=" + defaultElevator +
                 ", elevatorPointCombinations=" + elevatorPointCombinations +
                 '}';
@@ -119,6 +120,14 @@ public class Elevator extends BaseBean {
 
     public void setDefaultElevator(Boolean defaultElevator) {
         this.defaultElevator = defaultElevator;
+    }
+
+    public String getSceneName() {
+        return sceneName;
+    }
+
+    public void setSceneName(String sceneName) {
+        this.sceneName = sceneName;
     }
 
     //电梯动作

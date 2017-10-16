@@ -51,7 +51,7 @@ public abstract class BaseServiceImpl<T extends BaseBean>  extends BaseCrudServi
         return myMapper.selectByExample(example);
     }
 
-    public List<T> listQueryPageByStoreIdAndOrder(int page, int pageSize, T entity, String order) {
+    public List<T> listQueryPageByStoreIdAndOrder(Integer page, Integer pageSize, T entity, String order) {
         PageHelper.startPage(page, pageSize);
         Example example = new Example(entity.getClass());
         Example.Criteria criteria = example.createCriteria();

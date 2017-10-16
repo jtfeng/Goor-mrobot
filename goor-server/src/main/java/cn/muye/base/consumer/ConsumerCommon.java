@@ -114,12 +114,6 @@ public class ConsumerCommon {
                 JSONObject jsonObjectData = JSON.parseObject(data);
                 String messageName = jsonObjectData.getString(TopicConstants.PUB_NAME);
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-                if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
-                    logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
-                }
-//                else if(){
-//
-//                }
                 if (!StringUtil.isEmpty(messageName)) {
                     switch (messageName) {
                         case TopicConstants.PICK_UP_PSWD_VERIFY:
@@ -157,9 +151,7 @@ public class ConsumerCommon {
                 String uuid = jsonObjectData.getString(TopicConstants.UUID);
                 String robotCode = messageInfo.getSenderId();
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-                if (!StringUtils.isEmpty(messageName) && messageName.equals("map_current_get")) {
-                    logger.info(" ====== message.toString()===" + messageInfo.getMessageText());
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
+                if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
                     Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
                     if (!StringUtil.isNullOrEmpty(uuid)) {
                         syncRosRobotConfig(robotDb, uuid);
@@ -349,7 +341,9 @@ public class ConsumerCommon {
                         String mapData = jsonObjectData.getString(TopicConstants.DATA);
                         JSONObject mapObject = JSON.parseObject(mapData);
                         String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
-                        CacheInfoManager.setSceneRobotListCache(sceneName, messageInfo.getSenderId());
+                        String mapName = mapObject.getString(TopicConstants.MAP_NAME);
+                        String sceneKey = sceneName + "_" + mapName;
+                        CacheInfoManager.setSceneRobotListCache(sceneKey, messageInfo.getSenderId());
                     }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
                     saveChargeStatus(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);

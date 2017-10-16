@@ -83,4 +83,10 @@ public interface ElevatorService extends BaseService<Elevator> {
      */
     ElevatorModeEnum determineCurrentElevatorMode(Long elevatorId) throws Exception;
 
+    /**
+     * 根据场景名查询电梯列表
+     * @param sceneName
+     * @return
+     */
+    List<Elevator> listBySceneName(String sceneName);
 }
