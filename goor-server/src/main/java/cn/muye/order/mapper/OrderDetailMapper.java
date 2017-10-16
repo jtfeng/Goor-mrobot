@@ -4,6 +4,7 @@ import cn.mrobot.bean.order.OrderDetail;
 import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,5 +17,5 @@ public interface OrderDetailMapper extends MyMapper<OrderDetail> {
 
     OrderDetail getOrderDetailInfo(@Param("id")Long id);
 
-    List<OrderDetail> listStationTasks(@Param("stationId")Long stationId);
+    List<OrderDetail> listStationTasks(@Param("stationId")Long stationId,@Param("currentDate")Date currentDate,@Param("beforeDate")Date beforeDate);
 }

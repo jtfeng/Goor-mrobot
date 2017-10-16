@@ -133,22 +133,25 @@ public class HttpDownloader extends Thread {
         }
     }
 
-
+    /**
+     * 解压地图压缩包，对原地图不进行删除，只进行新增和覆盖（2017-10-12）
+     */
     private void unzipMapFile() {
         try {
-            String localPath = commonInfo.getLocalPath();
+            String localPath = commonInfo.getLocalPath(); //地图包机器人上路径
             String zipFilePath = localPath + File.separator + commonInfo.getLocalFileName();
-            //移动文件到上层目录，删除地图文件夹下所有文件
+            //移动文件到上层目录
             String moveFilePath = new File(localPath).getParent() + File.separator + commonInfo.getLocalFileName();
             logger.info("移动文件到上层目录。path= " + moveFilePath);
             File newZipFile = new File(moveFilePath);
             FileUtils.copyFile(new File(zipFilePath), newZipFile);
             logger.info("移动文件成功 ");
-            FileUtils.deleteDir(new File(localPath));
+//            FileUtils.deleteDir(new File(localPath)); //文件不做删除
 
             boolean unzipFlag = ZipUtils.unzip(moveFilePath, localPath, false);
             if (unzipFlag) {
                 logger.info("解压完成。删除压缩包 ");
+                System.gc();
                 newZipFile.delete();
                 //更改文件夹权限 将maps文件夹下所有文件的owner更改为robot
 //                String os = System.getProperty("os.name");
