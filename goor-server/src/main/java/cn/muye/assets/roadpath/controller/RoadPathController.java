@@ -2,7 +2,10 @@ package cn.muye.assets.roadpath.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.assets.elevator.Elevator;
+import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.scene.Scene;
@@ -14,12 +17,16 @@ import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.fixpath.service.impl.FixPathServiceImpl;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
+import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.dijkstra.RoadPathMaps;
+import cn.muye.dijkstra.RoadPathResult;
+import cn.muye.service.missiontask.MissionFuncsServiceImpl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -332,147 +339,6 @@ public class RoadPathController {
         }
     }
 
-    @Autowired
-    private StationService stationService;
-    @Autowired
-    private SceneService sceneService;
-    /**
-     * 计算某场景下所有站点间的云端路径并存储
-     * 此算法只适用于用上面方法生成的路径点不重复的情况
-     * @param pathType
-     * @param sceneId
-     * @return
-     */
-    @RequestMapping(value = "/services/roadPath/generate", method = RequestMethod.POST)
-    @ResponseBody
-    public AjaxResult generateRoadPath(Integer pathType,Long sceneId){
-        List<Long> result = null;
-        try {
-            Scene scene = sceneService.getSceneById(sceneId);
-            String sceneName = scene.getMapSceneName();
-            RoadPathMaps roadPathMaps = new RoadPathMaps();
-            List<RoadPath> roadPathList = roadPathService.listRoadPathsBySceneNamePathType(sceneName,pathType);
-            String temp = JSON.toJSONString(roadPathList);
-            System.out.println(temp);
 
-            if(roadPathList == null && roadPathList.size() == 0) {
-                return AjaxResult.failed("未找到该云端场景下的工控路径");
-            }
-
-            roadPathMaps.init(roadPathList);
-
-            //TODO test
-//            result = roadPathMaps.getShortestPath(3161L,3166L);
-//            return AjaxResult.success(result);
-
-            List<Station> stationList = stationService.listStationsBySceneAndMapPointType(sceneId,null);
-
-            if(stationList == null) {
-                return AjaxResult.failed("未找到该云端场景下的站点");
-            }
-            for(Station startStation : stationList) {
-                List<MapPoint> mapPoints = startStation.getMapPoints();
-                //站没关联点的不用管
-                if(mapPoints == null || mapPoints.size() == 0) {
-                    continue;
-                }
-                MapPoint startStationPoint = mapPoints.get(0);
-
-                //查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
-                MapPoint startPoint = findPathPointByXYTH(sceneName,startStationPoint.getMapName(),
-                        startStationPoint.getX(),startStationPoint.getY(),startStationPoint.getTh());
-                //没找到与站点相同的可用路径点，则跳过
-                if(startPoint == null) {
-                    continue;
-                }
-
-                //遍历从初始站到结束站的所有路径
-                for(Station endStation : stationList) {
-                    //站没关联点的不用管
-                    List<MapPoint> mapPoints1 = endStation.getMapPoints();
-                    if(mapPoints1 == null || mapPoints1.size() == 0) {
-                        continue;
-                    }
-
-                    MapPoint endStationPoint = mapPoints1.get(0);
-
-                    //查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
-                    MapPoint endPoint = findPathPointByXYTH(sceneName,endStationPoint.getMapName(),
-                            endStationPoint.getX(),endStationPoint.getY(),endStationPoint.getTh());
-                    //没找到与站点相同的可用路径点，则跳过
-                    if(endPoint == null) {
-                        continue;
-                    }
-
-                    //相同的站点（场景、地图、坐标、朝向）不用设计路径
-                    if(endPoint.getMapName().equals(startPoint.getMapName())
-                            && endPoint.getSceneName().equals(startPoint.getSceneName())
-                            && endPoint.getX() == startPoint.getX()
-                            && endPoint.getY() == startPoint.getY()
-                            && endPoint.getTh() == startPoint.getTh()) {
-                        continue;
-                    }
-
-                    result = roadPathMaps.getShortestPath(startPoint,endPoint);
-                    //未找到路径,或者只找到一个点(工控路径至少两个点)则继续
-                    if(result == null || result.size() <= 1) {
-                        continue;
-                    }
-
-                    //没有则新建
-                    List<RoadPath> roadPathList1 = roadPathService.listRoadPathByStartAndEndPoint(startStationPoint.getId(),endStationPoint.getId(),sceneName,null,Constant.PATH_TYPE_CLOUD);
-                    if(roadPathList1 == null || roadPathList1.size() == 0 ) {
-                        RoadPath roadPath = new RoadPath();
-                        roadPath.setWeight(1L);
-                        roadPath.setMapName(startPoint.getMapName());
-                        roadPath.setSceneName(sceneName);
-                        roadPath.setData("");
-                        roadPath.setEndPoint(endStationPoint.getId());
-                        roadPath.setStartPoint(startStationPoint.getId());
-                        roadPath.setPattern("");
-                        roadPath.setPathName(startStation.getName() + " to " + endStation.getName() + "auto");
-                        roadPath.setCreateTime(new Date());
-                        roadPath.setPathType(Constant.PATH_TYPE_CLOUD);
-                        roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                        roadPathService.createRoadPathByRoadPathPointList(roadPath,result);
-                    }
-                    //有则更新第一个的路径详细序列
-                    else {
-                        RoadPath roadPath = roadPathList1.get(0);
-                        roadPathService.updateRoadPathByRoadPathPointList(roadPath,result);
-                    }
-
-                }
-            }
-
-        } catch (Exception e) {
-            return AjaxResult.failed(e.getMessage());
-        }
-
-        return AjaxResult.success();
-    }
-
-    /**
-     * 查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
-     * @param sceneName
-     * @param mapName
-     * @param x
-     * @param y
-     * @param th
-     * @return
-     */
-    private MapPoint findPathPointByXYTH(String sceneName,String mapName,
-                                         double x,double y,double th) {
-        List<MapPoint> startPointList = pointService.listBySceneMapXYTH(sceneName,mapName,x,y,th);
-        if(startPointList == null || startPointList.size() == 0) {
-            return null;
-        }
-        for(MapPoint tempPoint : startPointList) {
-            if(tempPoint.getPointAlias().indexOf(Constant.PATH) > -1) {
-                return tempPoint;
-            }
-        }
-        return null;
-    }
 
 }
