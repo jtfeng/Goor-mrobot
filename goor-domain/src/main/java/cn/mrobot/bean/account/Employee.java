@@ -21,7 +21,7 @@ public class Employee extends BaseBean{
 
 //    private Boolean activated = Boolean.TRUE;; //激活
 
-    private Integer type; //员工类型(1. 普通， 2. 电梯管理员)
+    private Integer type; //员工类型(0. 普通， 1. 电梯管理员)
 
     @Transient
     private List<Station> stationList; //站点List
