@@ -241,4 +241,23 @@ public class MapPoint extends BaseBean {
         this.mapZipId = mapZipId;
     }
 
+    public static MapPoint copyValue(MapPoint newP,MapPoint mapPoint) {
+        newP.setId(mapPoint.getId());
+        newP.setCloudMapPointTypeId(mapPoint.getCloudMapPointTypeId());
+        newP.setDeleteFlag(mapPoint.getDeleteFlag());
+        newP.setICPointType(mapPoint.getICPointType());
+        newP.setLabel(mapPoint.getLabel());
+        newP.setMapName(mapPoint.getMapName());
+        newP.setMapPointTypeId(mapPoint.getMapPointTypeId());
+        newP.setMapZipId(mapPoint.getMapZipId());
+        newP.setPointAlias(mapPoint.getPointAlias());
+        newP.setPointLevel(mapPoint.getPointLevel());
+        newP.setPointName(mapPoint.getPointName());
+        newP.setSceneName(mapPoint.getSceneName());
+        newP.setStoreId(mapPoint.getStoreId());
+        newP.setTh(mapPoint.getTh());
+        newP.setX(mapPoint.getX());
+        newP.setY(mapPoint.getY());
+        return newP;
+    }
 }

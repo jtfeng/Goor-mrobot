@@ -173,13 +173,21 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<MapPoint> listBySceneMapXYTH(String sceneName,String mapName,double x,double y,double th) {
+    public List<MapPoint> listBySceneMapXYTH(String sceneName, String mapName, double x, double y, double th, MapPointType cloudMapPointType) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("SCENE_NAME =" , sceneName)
-                .andCondition("MAP_NAME =" , mapName)
-                .andCondition("X =" , x)
-                .andCondition("Y =" , y)
-                .andCondition("TH =" , th);
+        Example.Criteria criteria = condition.createCriteria();
+        if(!StringUtil.isNullOrEmpty(sceneName)) {
+            criteria.andCondition("SCENE_NAME =" , sceneName);
+        }
+        if(!StringUtil.isNullOrEmpty(mapName)) {
+            criteria.andCondition("MAP_NAME =", mapName);
+        }
+        if(null != cloudMapPointType) {
+            criteria.andCondition("CLOUD_POINT_TYPE_ID =", cloudMapPointType);
+        }
+        criteria.andCondition("X =", x);
+        criteria.andCondition("Y =", y);
+        criteria.andCondition("TH =", th);
         condition.setOrderByClause("POINT_NAME asc");
         return pointMapper.selectByExample(condition);
     }
@@ -263,7 +271,7 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, int type, Long storeId) {
+    public List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, Integer type, Long storeId) {
         return pointMapper.listByMapSceneNameAndPointType(mapSceneName, type, storeId);
     }
 

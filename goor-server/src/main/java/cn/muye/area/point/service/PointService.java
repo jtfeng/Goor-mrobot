@@ -1,6 +1,7 @@
 package cn.muye.area.point.service;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.WhereRequest;
@@ -48,9 +49,9 @@ public interface PointService {
 
     void updateDeleteFlag(long storeId, long mapZipId, int deleteFlag);
 
-    List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, int type, Long storeId);
+    List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, Integer type, Long storeId);
 
     MapPoint findMapPointByStationIdAndCloudType(Long stationId, int caption);
 
-    List<MapPoint> listBySceneMapXYTH(String sceneName,String mapName,double x,double y,double th);
+    List<MapPoint> listBySceneMapXYTH(String sceneName, String mapName, double x, double y, double th, MapPointType mapPointType);
 }

@@ -35,6 +35,6 @@ public interface PointMapper extends MyMapper<MapPoint> {
 
     void updateDeleteFlag(@Param("storeId") long storeId, @Param("mapZipId") long mapZipId, @Param("deleteFlag") int deleteFlag);
 
-    List<MapPoint> listByMapSceneNameAndPointType(@Param("mapSceneName")String mapSceneName, @Param("type")int type, @Param("storeId")Long storeId);
+    List<MapPoint> listByMapSceneNameAndPointType(@Param("mapSceneName")String mapSceneName, @Param("type")Integer type, @Param("storeId")Long storeId);
 
 }

@@ -5,12 +5,14 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.*;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.point.service.PointService;
 import cn.muye.assets.elevator.mapper.ElevatorModeMapper;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.elevator.service.ElevatorModeService;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.elevator.service.ElevatorShaftService;
+import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -86,14 +88,17 @@ public class ElevatorController {
         }
     }
 
+    @Autowired
+    private PointService pointService;
     /**
      * 查询全部的地图点信息
      * @return
      */
     @RequestMapping(value = "listAllMapPoints", method = RequestMethod.GET)
-    public AjaxResult listAllMapPoints(){
+    public AjaxResult listAllMapPoints(@RequestParam(value = "sceneName", required = false) String sceneName){
         try {
-            List<MapPoint> mapPoints = this.mapPointMapper.selectAll();
+//            List<MapPoint> mapPoints = this.mapPointMapper.selectAll();
+            List<MapPoint> mapPoints = pointService.listByMapSceneNameAndPointType(sceneName,null, SearchConstants.FAKE_MERCHANT_STORE_ID);
             return AjaxResult.success(mapPoints, "查询全部地图点信息成功");
         }catch (Exception e){
             return AjaxResult.failed(e,          "查询全部地图点信息失败");
