@@ -2,6 +2,7 @@ package cn.muye.area.station.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.Robot;
@@ -23,8 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -181,9 +184,43 @@ public class StationController {
             }
 
             //校验点都是数据库里的点
-            if (!isPointExist(station)) {
+            if (!isTypePointExist(station)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "点参数错误");
             }
+
+            //根据站点传入的typePoints的Key去判断，如果已经是对应类型的点，则修改，如果不是对应类型的点则复制点插入数据库
+            List<MapPoint> tempStationPoints = new ArrayList<MapPoint>();
+            Map<String,List<MapPoint>> typePoints = station.getTypePoints();
+            typePoints.forEach((String key, List<MapPoint> pointList) -> {
+                    String mapPointType = key;
+                    String pointTypeNameContain = null;
+                    if(key.equals(MapPointType.CHARGER.getCaption() + "")) {
+                        pointTypeNameContain = Constant.CHARGE;
+                    }
+                    else if(key.equals(MapPointType.LOAD.getCaption()  + "")) {
+                        pointTypeNameContain = Constant.LOAD;
+                    }
+                    else if(key.equals(MapPointType.UNLOAD.getCaption()  + "")) {
+                        pointTypeNameContain = Constant.UNLOAD;
+                    }
+                    else if(key.equals(MapPointType.FINAL_UNLOAD.getCaption()  + "")) {
+                        pointTypeNameContain = Constant.FINAL_UNLOAD;
+                    }
+
+                    if(pointList != null
+                            && pointList.size() > 0
+                            && pointTypeNameContain != null){
+                        try {
+                            for (MapPoint mapPoint : pointList) {
+                                tempStationPoints.add(checkStationPoint(mapPoint.getId(),mapPointType,pointTypeNameContain,station.getName()));
+                            }
+                        } catch (Exception e) {
+                            LOGGER.error(e.getMessage(),e);
+                        }
+                    }
+                }
+            );
+            station.setMapPoints(tempStationPoints);
 
             if (station != null && id != null) { //修改
 
@@ -229,7 +266,7 @@ public class StationController {
     public AjaxResult bindRobots(@ApiParam(value = "站") @RequestBody Station station) {
         Long id = station.getId();
         List<Robot> stationList = station.getRobotList();
-        if (station != null && id != null && stationList != null && stationList.size() > 0) {
+//        if (station != null && id != null && stationList != null && stationList.size() > 0) {
             Station stationDb = stationService.findById(station.getId());
             if (stationDb != null) {
                 stationService.bindRobots(station);
@@ -238,9 +275,9 @@ public class StationController {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "不存在的站");
             }
 
-        } else {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
-        }
+//        } else {
+//            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+//        }
     }
 
     /**
@@ -264,6 +301,60 @@ public class StationController {
             }
         }
         return true;
+    }
+
+    /**
+     * 校验station绑定的typePoints点是否都存在
+     *
+     * @param station
+     * @return
+     */
+    private boolean isTypePointExist(Station station) {
+        final boolean[] result = {true};
+        Map<String,List<MapPoint>> typePoints = station.getTypePoints();
+        //如果没有点，则不校验
+        if (typePoints == null || typePoints.size() <= 0) {
+            return true;
+        }
+
+        typePoints.forEach((key,pointList)-> {
+                //如果有一个点不存在，则返回假
+                for (MapPoint mapPoint : pointList) {
+                    MapPoint mapPointDB = pointService.findById(mapPoint.getId());
+                    if (mapPointDB == null) {
+                        result[0] = false;
+                        break;
+                    }
+                }
+            }
+        );
+
+        return result[0];
+    }
+
+    /**
+     * 查找站点是否已经是复制的站点，如果不是则复制并新增一个
+     * @param mapPointType
+     * @param pointId
+     * @param pointTypeName
+     * @param stationName
+     * @return
+     */
+    private MapPoint checkStationPoint(Long pointId, String mapPointType, String pointTypeName,String stationName) throws Exception {
+        //查找等待点是否已经是复制的电梯等待点，如果不是则复制并新增一个
+        MapPoint oldPoint = pointService.findById(pointId);
+        //我们定义站的点明必须包含station,所以未找到的时候，就新建一个
+        if(oldPoint.getPointAlias().indexOf(pointTypeName) <= -1
+                && !mapPointType.equals(oldPoint.getCloudMapPointTypeId() + "")) {
+            MapPoint newPoint = new MapPoint();
+            MapPoint.copyValue(newPoint, oldPoint);
+            newPoint.setPointAlias(newPoint.getPointName()+ "_" +pointTypeName + "_" + stationName);
+            newPoint.setId(null);
+            newPoint.setCloudMapPointTypeId(Integer.parseInt(mapPointType));
+            pointService.save(newPoint);
+            return newPoint;
+        }
+        return oldPoint;
     }
 
     /**
@@ -321,7 +412,7 @@ public class StationController {
     @ResponseBody
     public AjaxResult bindAccessArrivedStation(@ApiParam(value = "站") @RequestBody Station station) {
         List<Station> accessArriveStationIdList = station.getAccessArriveStationIdList();
-        if (station.getId() != null && accessArriveStationIdList != null && accessArriveStationIdList.size() > 0) {
+        if (station.getId() != null && accessArriveStationIdList != null/* && accessArriveStationIdList.size() > 0*/) {
             List<Long> stationIdList = accessArriveStationIdList.stream().map(station1 -> station1.getId()).collect(Collectors.toList());
             if (stationIdList.contains(station.getId())) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"可到达的站不能绑定自己");
