@@ -13,7 +13,7 @@ public class X86MissionAlertListenerImpl implements TopicCallback{
 	public void handleMessage(Message message) {
 		try {
             if (TopicConstants.DEBUG)
-			logger.info("From ROS ====== X86MissionAlert topic  " + message.toString());
+				logger.info("From ROS ====== X86MissionAlert topic  " + message.toString());
 			ProducerCommon msg = SingleFactory.getProducerCommon();
 			msg.sendX86MissionAlertMessage(message.toString());
 		}catch (Exception e){

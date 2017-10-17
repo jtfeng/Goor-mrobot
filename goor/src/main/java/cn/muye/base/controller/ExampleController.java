@@ -277,4 +277,27 @@ public class ExampleController {
         echo.publish(toSend);
         return AjaxResult.success();
     }
+
+    /**
+     * 模拟发送missionAlert请求
+     *
+     * @return
+     */
+    @RequestMapping(value = "testMissionAlert", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult testMissionAlert() {
+        //
+        Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_ALERT);
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("alert_time", new Date().getTime());//lock，unlock
+        jsonObject.put("alert_code", 10101);
+        jsonObject.put("msg", "laser navi start timeout.");
+        jsonObject.put("mission_item_id", 74);
+        JSONObject messageObject = new JSONObject();
+        messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
+        Message toSend = new Message(JSON.toJSONString(messageObject));
+        logger.info("testMissionAlert:" + messageObject.get(TopicConstants.DATA));
+        echo.publish(toSend);
+        return AjaxResult.success();
+    }
 }
