@@ -2,7 +2,9 @@ package cn.muye.assets.elevator.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.elevator.*;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -166,12 +169,37 @@ public class ElevatorController {
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
             ));
+
+            checkWaitPoint(combination);
+
             elevatorPointCombinationService.save(combination);
             return AjaxResult.success("保存四点组合信息成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return AjaxResult.failed( "保存四点组合信息失败");
         }
+    }
+
+    /**
+     * 查找等待点是否已经是复制的电梯等待点，如果不是则复制并新增一个
+     * @param combination
+     * @return
+     */
+    private ElevatorPointCombination checkWaitPoint(ElevatorPointCombination combination) {
+        //查找等待点是否已经是复制的电梯等待点，如果不是则复制并新增一个
+        MapPoint oldPoint = pointService.findById(combination.getWaitPoint());
+        //我们定义站的点明必须包含station,所以未找到的时候，就新建一个
+        if(oldPoint.getPointAlias().indexOf(Constant.ELEVATOR_WAIT) <= -1
+                && oldPoint.getCloudMapPointTypeId() != MapPointType.ELEVATOR_WAIT.getCaption()) {
+            MapPoint newPoint = new MapPoint();
+            MapPoint.copyValue(newPoint, oldPoint);
+            newPoint.setPointAlias(newPoint.getPointName()+ "_" +Constant.ELEVATOR_WAIT + "_" + combination.getName());
+            newPoint.setId(null);
+            newPoint.setCloudMapPointTypeId(MapPointType.ELEVATOR_WAIT.getCaption());
+            pointService.save(newPoint);
+            combination.setWaitPoint(newPoint.getId());
+        }
+        return combination;
     }
 
     /**
@@ -189,6 +217,9 @@ public class ElevatorController {
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
             ));
+
+            checkWaitPoint(combination);
+
             elevatorPointCombinationService.updateSelective(combination);
             return AjaxResult.success("更新四点组合信息成功");
         }catch (Exception e){

@@ -258,6 +258,8 @@ public class MapPoint extends BaseBean {
         newP.setTh(mapPoint.getTh());
         newP.setX(mapPoint.getX());
         newP.setY(mapPoint.getY());
+        newP.setCreateTime(mapPoint.getCreateTime());
+        newP.setCreatedBy(mapPoint.getCreatedBy());
         return newP;
     }
 }

@@ -2,6 +2,7 @@ package cn.muye.assets.door.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.door.Door;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
@@ -130,6 +131,8 @@ public class DoorController {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "点参数错误");
             }
 
+            checkWaitPoint(door);
+
             if (door != null && id != null) { //修改
 
                 Door doorDb = doorService.findById(id, storeId,sceneId);
@@ -166,6 +169,29 @@ public class DoorController {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("出错");
         }
+    }
+
+
+    /**
+     * 查找等待点是否已经是复制的门等待点，如果不是则复制并新增一个
+     * @param door
+     * @return
+     */
+    private Door checkWaitPoint(Door door) {
+        //查找等待点是否已经是复制的电梯等待点，如果不是则复制并新增一个
+        MapPoint oldPoint = pointService.findById(door.getWaitPoint());
+        //我们定义站的点明必须包含station,所以未找到的时候，就新建一个
+        if(oldPoint.getPointAlias().indexOf(Constant.DOOR_WAIT) <= -1
+                && oldPoint.getCloudMapPointTypeId() != MapPointType.DOOR_WAIT.getCaption()) {
+            MapPoint newPoint = new MapPoint();
+            MapPoint.copyValue(newPoint, oldPoint);
+            newPoint.setPointAlias(newPoint.getPointName()+ "_" +Constant.DOOR_WAIT + "_" + door.getName());
+            newPoint.setId(null);
+            newPoint.setCloudMapPointTypeId(MapPointType.DOOR_WAIT.getCaption());
+            pointService.save(newPoint);
+            door.setWaitPoint(newPoint.getId());
+        }
+        return door;
     }
 
     /**
