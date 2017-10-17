@@ -130,17 +130,27 @@ public enum MapPointType {
 	public static List list() {
 		List<Map> resultList = new ArrayList<Map>();
 		for (MapPointType c : MapPointType.values()) {
-			Map result = new HashMap<String,Object>();
-			result.put("name",c);
-			result.put("value",c.getValue());
-			result.put("caption",c.getCaption());
-			result.put("industrialControlCaption", c.getIndustrialControlCaption());
-			result.put("scale", c.getScale());
-			result.put("direction",c.getDirection());
-			resultList.add(result) ;
+			resultList.add(mapPointTypeToEntity(c)) ;
 		}
 		return resultList;
 	}
 
+	public static Map mapPointTypeToEntity(MapPointType c) {
+		Map result = new HashMap<String,Object>();
+		result.put("name",c);
+		result.put("value",c.getValue());
+		result.put("caption",c.getCaption());
+		result.put("industrialControlCaption", c.getIndustrialControlCaption());
+		result.put("scale", c.getScale());
+		result.put("direction",c.getDirection());
+		return result;
+	}
 
+	public static List list(List<MapPointType> mapPointTypes) {
+		List<Map> resultList = new ArrayList<Map>();
+		for (MapPointType c : mapPointTypes) {
+			resultList.add(mapPointTypeToEntity(c)) ;
+		}
+		return resultList;
+	}
 }

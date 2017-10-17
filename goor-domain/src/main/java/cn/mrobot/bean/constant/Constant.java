@@ -1,5 +1,8 @@
 package cn.mrobot.bean.constant;
 
+import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -86,6 +89,10 @@ public class Constant {
     public final static String STATION = "station";//站点别名必须包含的字段
     public final static String ELEVATOR_WAIT = "elevator_wait";//电梯等待点别名必须包含的字段
     public final static String DOOR_WAIT = "door_wait";//门等待点别名必须包含的字段
+    public final static String LOAD = "load";//装货点别名必须包含的字段
+    public final static String CHARGE = "charge";//充电点别名必须包含的字段
+    public final static String UNLOAD = "unload";//中间卸货点别名必须包含的字段
+    public final static String FINAL_UNLOAD = "final_unload";//最终卸货点别名必须包含的字段
 
     public final static Long CHECK_IF_OFFLINE_TIME = 15000L; //15秒（rabbitMQ的connection-timeout时间为5秒，断网重连的时间为10秒，所以设置15秒）
 
@@ -96,6 +103,14 @@ public class Constant {
             1L,//单点导航
             4L,//自动充电
             5L//离开充电桩
+    );
+
+    //站相关的点类型列表
+    public final static List<MapPointType> STATION_MAP_POINT_TYPE_LIST = Arrays.asList(
+            MapPointType.CHARGER,
+            MapPointType.LOAD,
+            MapPointType.UNLOAD,
+            MapPointType.FINAL_UNLOAD
     );
 
     //MissionItemTask列表用于取货校验员工工号

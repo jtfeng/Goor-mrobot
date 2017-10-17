@@ -490,6 +490,7 @@ public class UserController {
         map.put("module", ModuleEnums.list());
         map.put("rfidBraceletType", RfidBraceletTypeEnum.list());
         map.put("stateField", StateFieldEnums.list());
+        map.put("stationPointType",MapPointType.list(Constant.STATION_MAP_POINT_TYPE_LIST));
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO != null) {
