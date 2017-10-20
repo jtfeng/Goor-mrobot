@@ -39,8 +39,9 @@ public class StateCollectorsListenerImpl implements TopicCallback {
                 Long intervalTime = System.currentTimeMillis() - lastUploadTime;
                 if (intervalTime >= 5 * 1000) {
                     //往云端推送
-                    if (TopicConstants.DEBUG)
+                    if (TopicConstants.DEBUG) {
                         logger.info("From ROS ====== state_collectors topic  " + message.toString());
+                    }
                     ProducerCommon msg = SingleFactory.getProducerCommon();
                     msg.sendStateCollectorMessage(message.toString());
                     CacheInfoManager.setStateModuleCache(module);
