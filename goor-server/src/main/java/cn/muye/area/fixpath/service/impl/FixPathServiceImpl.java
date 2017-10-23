@@ -11,6 +11,7 @@ import cn.muye.area.fixpath.service.FixPathService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
@@ -82,6 +83,7 @@ public class FixPathServiceImpl implements FixPathService {
 
             //根据数据库查询结果判断是更新还是新增
             if (null != roadPathDB) {
+                roadPath.setCreateTime(new Date());
                 roadPath.setId(roadPathDB.getId());
                 roadPathService.update(roadPath);  //更新
             } else {
@@ -91,26 +93,22 @@ public class FixPathServiceImpl implements FixPathService {
     }
 
     @Override
-    public AjaxResult sendFixpathQuery(Long sceneId) throws Exception {
+    public AjaxResult sendFixpathQuery(Long sceneId, String robotCode) throws Exception {
         String mapSceneName = sceneService.getRelatedMapNameBySceneId(sceneId);
-        CopyOnWriteArraySet<String> robotCodeList = CacheInfoManager.getSceneRobotListCache(mapSceneName);
-        if (null == robotCodeList) {
-            logger.info("场景 {} 无在线机器人", mapSceneName);
-            return AjaxResult.failed("场景" + mapSceneName + "无在线机器人");
-        }
-        for (String robotCode : robotCodeList) {
-            Boolean online = CacheInfoManager.getRobotOnlineCache(robotCode);
-            if (null == online || !online)
-                continue;
+        Boolean online = CacheInfoManager.getRobotOnlineCache(robotCode);
+//        if (null == online || !online)
+//            return AjaxResult.failed("机器人"+robotCode+"不在线");;
 
-            SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.FIXPATH_QUERY);
-            JSONObject dataObject = new JSONObject();
-            dataObject.put(TopicConstants.SCENE_NAME, mapSceneName);
-            slamRequestBody.setData(dataObject);
-
-            return baseMessageService.sendRobotMessage(robotCode, TopicConstants.APP_PUB, JSON.toJSONString(slamRequestBody));
+        if (StringUtil.isNullOrEmpty(mapSceneName)){
+            return  AjaxResult.failed("未获取到当前场景关联的地图场景名");
         }
-        return AjaxResult.failed("请求失败");
+
+        SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.FIXPATH_QUERY);
+        JSONObject dataObject = new JSONObject();
+        dataObject.put(TopicConstants.SCENE_NAME, mapSceneName);
+        slamRequestBody.setData(dataObject);
+
+        return baseMessageService.sendRobotMessage(robotCode, TopicConstants.APP_PUB, JSON.toJSONString(slamRequestBody));
     }
 
     /**
