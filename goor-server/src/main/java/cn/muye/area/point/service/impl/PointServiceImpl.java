@@ -183,7 +183,7 @@ public class PointServiceImpl implements PointService {
             criteria.andCondition("MAP_NAME =", mapName);
         }
         if(null != cloudMapPointType) {
-            criteria.andCondition("CLOUD_POINT_TYPE_ID =", cloudMapPointType);
+            criteria.andCondition("CLOUD_POINT_TYPE_ID =", cloudMapPointType.getCaption());
         }
         criteria.andCondition("X =", x);
         criteria.andCondition("Y =", y);
