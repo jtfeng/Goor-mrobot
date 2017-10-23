@@ -20,8 +20,8 @@ public interface FixPathService {
 
     /**
      * 发送获取工控固定路径信息的请求
-     *
      * @param sceneId      场景id
+     * @param robotCode      机器人编号
      */
-    AjaxResult sendFixpathQuery(Long sceneId) throws Exception;
+    AjaxResult sendFixpathQuery(Long sceneId, String robotCode) throws Exception;
 }
