@@ -25,6 +25,7 @@ public class Constant {
 
     //默认工控路径权值
     public final static Long DEFAULT_ROAD_PATH_X86_WEIGHT = 1L;
+    public final static Long DEFAULT_ELEVATOR_X86_WEIGHT = 999L;
 
     public static final String UTF_8 = "UTF-8";
 
