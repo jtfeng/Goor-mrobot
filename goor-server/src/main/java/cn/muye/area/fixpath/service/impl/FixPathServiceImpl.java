@@ -1,6 +1,7 @@
 package cn.muye.area.fixpath.service.impl;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.constant.TopicConstants;
@@ -8,6 +9,7 @@ import cn.mrobot.bean.slam.SlamRequestBody;
 import cn.mrobot.dto.area.PathDTO;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.fixpath.service.FixPathService;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
@@ -199,5 +201,29 @@ public class FixPathServiceImpl implements FixPathService {
         mapPoint.setTh(start ? pathDTO.getStartTh() : pathDTO.getEndTh());
         pointService.save(mapPoint);
         return mapPoint;
+    }
+
+    /**
+     * 查询或者保存MapInfo——名称根据路径的起点和终点取
+     *
+     * @param sceneName 场景名
+     * @param pathDTO   固定路径对象
+     * @param start     是否为固定路径开始点   true:开始点 false:结束点
+     * @return 导航目标点
+     */
+    public static MapInfo findOrSaveMapInfoByPath(String sceneName, PathDTO pathDTO, boolean start , MapInfoService infoService) {
+        String mapName = start?pathDTO.getStartMap() : pathDTO.getEndMap();
+        List<MapInfo> infoList = infoService.findByName(sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (null != infoList && infoList.size() > 0) {
+            return infoList.get(0);
+        }
+        //封装MapInfo对象，保存数据库
+        MapInfo mapInfo = new MapInfo();
+        mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        mapInfo.setSceneName(sceneName);
+        mapInfo.setMapName(mapName);
+        mapInfo.setCreateTime(new Date());
+        infoService.save(mapInfo);
+        return mapInfo;
     }
 }
