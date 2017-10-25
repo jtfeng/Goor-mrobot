@@ -23,6 +23,10 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     void saveOrUpdateRoadPathByPathDTOList(List<PathDTO> pathDTOList, String sceneName , boolean isPointDuplicate) throws Exception;
 
+    void saveOrUpdateRoadPathByPathDTOListDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception;
+
+    void saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception;
+
     List<RoadPathDetail> findRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName) throws Exception;
 
     List<RoadPathDetail> listRoadPathDetailByStartAndEndPointType(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception;

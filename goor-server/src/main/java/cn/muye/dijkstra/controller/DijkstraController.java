@@ -88,7 +88,7 @@ public class DijkstraController {
                         String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);
                         String paths = jsonObject.getString(TopicConstants.PATHS);
                         List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
-                        roadPathService.saveOrUpdateRoadPathByPathDTOList(pathDTOList,sceneName,true);
+                        roadPathService.saveOrUpdateRoadPathByPathDTOListDuplicatePoint(pathDTOList,sceneName);
 
                         //清空路径图的缓存
                         CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
@@ -138,7 +138,7 @@ public class DijkstraController {
                         String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);
                         String paths = jsonObject.getString(TopicConstants.PATHS);
                         List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
-                        roadPathService.saveOrUpdateRoadPathByPathDTOList(pathDTOList,sceneName,false);
+                        roadPathService.saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(pathDTOList,sceneName);
 
                         //清空路径图的缓存
                         CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);

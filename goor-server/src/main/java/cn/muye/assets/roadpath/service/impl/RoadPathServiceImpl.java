@@ -438,6 +438,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         }
     }
 
+    public void saveOrUpdateRoadPathByPathDTOListDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
+        saveOrUpdateRoadPathByPathDTOList(pathDTOList, sceneName, true);
+    }
+
+    public void saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
+        saveOrUpdateRoadPathByPathDTOList(pathDTOList, sceneName, false);
+    }
+
     /**
      * 不能返回一个新的 List，因为这样会破坏分页插件显示数据的正确性
      *
