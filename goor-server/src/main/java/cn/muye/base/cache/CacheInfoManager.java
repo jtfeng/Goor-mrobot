@@ -1,12 +1,15 @@
 package cn.muye.base.cache;
 
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.state.*;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.service.MapInfoService;
+import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.bean.MessageInfo;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -77,6 +80,11 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, Set<Session>> webSocketSessionCache = new ConcurrentHashMapCache<String, Set<Session>>(); //key ： 机器人code
     private static ConcurrentHashMapCache<Session, Map<String, Set<String>>> webSocketClientReceiveModuleCache = new ConcurrentHashMapCache<>(); //key ：客户端session value为指定类型的列表
 
+    /**
+     * 云端场景的路径图的缓存，用于动态规划路径
+     */
+    private static ConcurrentHashMapCache<String, RoadPathMaps> roadPathMapsCache = new ConcurrentHashMapCache<String, RoadPathMaps>(); //key: 地图场景名 sceneName
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -103,6 +111,8 @@ public class CacheInfoManager implements ApplicationContextAware {
 
         webSocketSessionCache.setMaxLifeTime(0);
         webSocketClientReceiveModuleCache.setMaxLifeTime(0);
+
+        roadPathMapsCache.setMaxLifeTime(3600 * 1000);//设置超时时间60*60秒=1小时
     }
 
     private CacheInfoManager() {
@@ -404,5 +414,29 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setRobotMissionAlertStatusCache(String code, String missionStatus) {
         robotMissionAlertStatusCache.put(code, missionStatus);
+    }
+
+    public static RoadPathMaps getRoadPathMapsCache(Long storeId, String sceneName, RoadPathService roadPathService) {
+        RoadPathMaps roadPathMaps = roadPathMapsCache.get(storeId + sceneName);
+        //如果缓存中没有，则先写入一遍，再返回
+        if(roadPathMaps == null) {
+            roadPathMaps = setRoadPathMapsCache(storeId, sceneName, roadPathService);
+        }
+        return roadPathMaps;
+    }
+
+    public static RoadPathMaps setRoadPathMapsCache(Long storeId, String sceneName, RoadPathService roadPathService) {
+        List<RoadPath> roadPathList = roadPathService.listRoadPathsBySceneNamePathType(sceneName,null);
+        RoadPathMaps roadPathMaps = null;
+        if(roadPathList != null && roadPathList.size() > 0) {
+            roadPathMaps = new RoadPathMaps();
+            roadPathMaps.init(roadPathList);
+        }
+        roadPathMapsCache.put(storeId + sceneName, roadPathMaps);
+        return roadPathMaps;
+    }
+
+    public static void removeRoadPathMapsCache(Long storeId, String sceneName) {
+        roadPathMapsCache.remove(storeId + sceneName);
     }
 }

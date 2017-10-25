@@ -22,6 +22,7 @@ import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -89,6 +90,9 @@ public class DijkstraController {
                         List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
                         roadPathService.saveOrUpdateRoadPathByPathDTOList(pathDTOList,sceneName,true);
 
+                        //清空路径图的缓存
+                        CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
@@ -135,6 +139,10 @@ public class DijkstraController {
                         String paths = jsonObject.getString(TopicConstants.PATHS);
                         List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
                         roadPathService.saveOrUpdateRoadPathByPathDTOList(pathDTOList,sceneName,false);
+
+                        //清空路径图的缓存
+                        CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
@@ -222,6 +230,9 @@ public class DijkstraController {
                 }
             }
 
+            //清空路径图的缓存
+            CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+
             return AjaxResult.success("执行完毕，若同一部电梯关联的四点对象少于两个，则不会生成");
         } catch (Exception e) {
             log.error("出错:{}",e.getMessage());
@@ -253,16 +264,13 @@ public class DijkstraController {
             if(StringUtil.isNullOrEmpty(sceneName)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
             }
-            RoadPathMaps roadPathMaps = new RoadPathMaps();
-            List<RoadPath> roadPathList = roadPathService.listRoadPathsBySceneNamePathType(sceneName,null);
-            String temp = JSON.toJSONString(roadPathList);
-            System.out.println(temp);
 
-            if(roadPathList == null && roadPathList.size() == 0) {
+            //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
+            RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
+
+            if(roadPathMaps == null) {
                 return AjaxResult.failed("未找到该云端场景下的工控路径");
             }
-
-            roadPathMaps.init(roadPathList);
 
             //TODO test
 //            result = roadPathMaps.getShortestPath(3389L,3410L);
@@ -322,9 +330,9 @@ public class DijkstraController {
                             }
 
                             //TODO test=================================================================
-//                            if(1==1) {
-//                                return AjaxResult.failed(result);
-//                            }
+                            if(1==1) {
+                                return AjaxResult.failed(result);
+                            }
 
                             //没有则新建
                             RoadPath roadPath = new RoadPath();
