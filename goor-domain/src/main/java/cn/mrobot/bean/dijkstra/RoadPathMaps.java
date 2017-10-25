@@ -1,4 +1,4 @@
-package cn.muye.dijkstra;
+package cn.mrobot.bean.dijkstra;
 
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.roadpath.RoadPath;

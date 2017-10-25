@@ -241,6 +241,12 @@ public class MapPoint extends BaseBean {
         this.mapZipId = mapZipId;
     }
 
+    /**
+     * 复制MapPoint点属性
+     * @param newP
+     * @param mapPoint
+     * @return
+     */
     public static MapPoint copyValue(MapPoint newP,MapPoint mapPoint) {
         newP.setId(mapPoint.getId());
         newP.setCloudMapPointTypeId(mapPoint.getCloudMapPointTypeId());

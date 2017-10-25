@@ -6,6 +6,7 @@ import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.area.station.StationMapPointXREF;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.StringUtil;
@@ -359,5 +360,29 @@ public class PointServiceImpl implements PointService {
 
     private List<MapPoint> getMapPoint(String sceneName, String mapName, int pointTypeId) {
         return pointMapper.selectPointByPointTypeMapName(sceneName, mapName, pointTypeId, SearchConstants.FAKE_MERCHANT_STORE_ID);
+    }
+
+    /**
+     * 查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
+     * @param sceneName
+     * @param mapName
+     * @param x
+     * @param y
+     * @param th
+     * @return
+     */
+    public static MapPoint findPathPointByXYTH(String sceneName,String mapName,
+                                               double x,double y,double th ,MapPointType mapPointType,PointService pointService) {
+        List<MapPoint> startPointList = pointService.listBySceneMapXYTH(
+                sceneName,mapName,x,y,th,mapPointType);
+        if(startPointList == null || startPointList.size() == 0) {
+            return null;
+        }
+        for(MapPoint tempPoint : startPointList) {
+            if(tempPoint.getPointAlias().indexOf(Constant.PATH) > -1) {
+                return tempPoint;
+            }
+        }
+        return null;
     }
 }

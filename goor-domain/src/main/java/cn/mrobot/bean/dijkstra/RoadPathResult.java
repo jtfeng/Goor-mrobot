@@ -1,11 +1,13 @@
-package cn.muye.dijkstra;
+package cn.mrobot.bean.dijkstra;
+
+import cn.mrobot.bean.base.BaseBean;
 
 import java.util.List;
 
 /**
  * Created by chay on 2017/10/13.
  */
-public class RoadPathResult {
+public class RoadPathResult extends BaseBean {
     List<Long> pointIds;//最优路径点ID序列
     Long totalWeight;//最优路径总权值
 

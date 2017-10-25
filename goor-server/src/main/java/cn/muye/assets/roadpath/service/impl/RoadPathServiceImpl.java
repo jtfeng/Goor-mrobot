@@ -5,13 +5,18 @@ import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.dto.area.PathDTO;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.fixpath.service.impl.FixPathServiceImpl;
+import cn.muye.area.map.service.MapInfoService;
+import cn.muye.area.point.service.PointService;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathPointMapper;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.mapper.SceneMapper;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -235,6 +240,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
+        example.setOrderByClause("ID DESC");
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
         return packageRoadPathDetail(roadPaths);
     }
@@ -254,6 +260,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
+        example.setOrderByClause("ID DESC");
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
         return roadPaths;
     }
@@ -347,7 +354,88 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     public void updateRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("ID=" + roadPath.getId());
+        this.roadPathMapper.updateByExampleSelective(roadPath,example);
         packageRoadPathRelations(roadPathPointIds, roadPath);
+    }
+
+    public void createOrUpdateRoadPathByStartAndEndPoint(Long startPointId, Long endPointId, String sceneName, String mapName, Integer pathType,RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
+        List<RoadPath> roadPathList1 = listRoadPathByStartAndEndPoint(startPointId,
+                endPointId,sceneName,mapName,pathType);
+        if(roadPathList1 == null || roadPathList1.size() == 0 ) {
+            createRoadPathByRoadPathPointList(roadPath,roadPathPointIds);
+        }
+        //有则更新第一个的路径详细序列和权值
+        else {
+            RoadPath roadPathDB = roadPathList1.get(0);
+            roadPath.setId(roadPathDB.getId());
+            updateRoadPathByRoadPathPointList(roadPath,roadPathPointIds);
+        }
+    }
+
+    @Autowired
+    MapInfoService mapInfoService;
+    @Autowired
+    PointService pointService;
+    /**
+     * 根据PathDTOList插入点和工控路径
+     * @param pathDTOList
+     * @param sceneName
+     * @param isPointDuplicate 是否建立重复的路径交点
+     * @throws Exception
+     */
+    public void saveOrUpdateRoadPathByPathDTOList(List<PathDTO> pathDTOList, String sceneName , boolean isPointDuplicate) throws Exception{
+        for (PathDTO pathDTO : pathDTOList) {
+            //过滤掉地图名为null的错误数据
+            if(null == pathDTO.getStartMap()
+                    || "null".equals(pathDTO.getStartMap())
+                    || null == pathDTO.getEndMap()
+                    || "null".equals(pathDTO.getEndMap())) {
+                continue;
+            }
+
+            //把开始点所属的MapInfo插入数据库(如果存在则不新建，如果不存在则新建)
+            FixPathServiceImpl.findOrSaveMapInfoByPath(sceneName, pathDTO, true, mapInfoService);
+            //把开始点所属的MapInfo插入数据库(如果存在则不新建，如果不存在则新建)
+            FixPathServiceImpl.findOrSaveMapInfoByPath(sceneName, pathDTO, false, mapInfoService);
+
+            MapPoint startPoint = null;
+            MapPoint endPoint = null;
+            if(isPointDuplicate) {
+                startPoint = FixPathServiceImpl.findOrSaveMapPointByPath(sceneName, pathDTO, true,pointService);
+                endPoint = FixPathServiceImpl.findOrSaveMapPointByPath(sceneName, pathDTO, false,pointService);
+            }
+            else {
+                startPoint = FixPathServiceImpl.findOrSaveMapPointNoDuplicate(sceneName, pathDTO, true,pointService);
+                endPoint = FixPathServiceImpl.findOrSaveMapPointNoDuplicate(sceneName, pathDTO, false,pointService);
+            }
+
+            //封装RoadPath对象，保存数据库
+            RoadPath roadPath = new RoadPath();
+            roadPath.setSceneName(sceneName);
+            roadPath.setMapName(pathDTO.getStartMap());
+            roadPath.setPathId(pathDTO.getId() + "");
+            //添加roadpath查询，根据场景，地图，pathid进行查询，如果存在，则更新，不存在则添加
+            RoadPath roadPathDB = findRoadPath(roadPath);
+            //继续封装参数
+            roadPath.setStartPoint(startPoint.getId());
+            roadPath.setEndPoint(endPoint.getId());
+            roadPath.setPathType(Constant.PATH_TYPE_X86);
+            roadPath.setPathName(Constant.PATH + pathDTO.getId());
+            roadPath.setCreateTime(new Date());
+            roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            roadPath.setWeight(Constant.DEFAULT_ROAD_PATH_X86_WEIGHT);
+            roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
+            //根据数据库查询结果判断是更新还是新增
+            if (null != roadPathDB) {
+                roadPath.setId(roadPathDB.getId());
+                update(roadPath);  //更新
+            } else {
+                save(roadPath);  //新增
+            }
+        }
     }
 
     /**
