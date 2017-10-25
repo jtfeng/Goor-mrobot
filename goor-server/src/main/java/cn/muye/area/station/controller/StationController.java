@@ -191,36 +191,38 @@ public class StationController {
             //根据站点传入的typePoints的Key去判断，如果已经是对应类型的点，则修改，如果不是对应类型的点则复制点插入数据库
             List<MapPoint> tempStationPoints = new ArrayList<MapPoint>();
             Map<String,List<MapPoint>> typePoints = station.getTypePoints();
-            typePoints.forEach((String key, List<MapPoint> pointList) -> {
-                    String mapPointType = key;
-                    String pointTypeNameContain = null;
-                    if(key.equals(MapPointType.CHARGER.getCaption() + "")) {
-                        pointTypeNameContain = Constant.CHARGE;
-                    }
-                    else if(key.equals(MapPointType.LOAD.getCaption()  + "")) {
-                        pointTypeNameContain = Constant.LOAD;
-                    }
-                    else if(key.equals(MapPointType.UNLOAD.getCaption()  + "")) {
-                        pointTypeNameContain = Constant.UNLOAD;
-                    }
-                    else if(key.equals(MapPointType.FINAL_UNLOAD.getCaption()  + "")) {
-                        pointTypeNameContain = Constant.FINAL_UNLOAD;
-                    }
-
-                    if(pointList != null
-                            && pointList.size() > 0
-                            && pointTypeNameContain != null){
-                        try {
-                            for (MapPoint mapPoint : pointList) {
-                                tempStationPoints.add(checkStationPoint(mapPoint.getId(),mapPointType,pointTypeNameContain,station.getName()));
+            if(typePoints != null && typePoints.size() > 0) {
+                typePoints.forEach((String key, List<MapPoint> pointList) -> {
+                            String mapPointType = key;
+                            String pointTypeNameContain = null;
+                            if(key.equals(MapPointType.CHARGER.getCaption() + "")) {
+                                pointTypeNameContain = Constant.CHARGE;
                             }
-                        } catch (Exception e) {
-                            LOGGER.error(e.getMessage(),e);
+                            else if(key.equals(MapPointType.LOAD.getCaption()  + "")) {
+                                pointTypeNameContain = Constant.LOAD;
+                            }
+                            else if(key.equals(MapPointType.UNLOAD.getCaption()  + "")) {
+                                pointTypeNameContain = Constant.UNLOAD;
+                            }
+                            else if(key.equals(MapPointType.FINAL_UNLOAD.getCaption()  + "")) {
+                                pointTypeNameContain = Constant.FINAL_UNLOAD;
+                            }
+
+                            if(pointList != null
+                                    && pointList.size() > 0
+                                    && pointTypeNameContain != null){
+                                try {
+                                    for (MapPoint mapPoint : pointList) {
+                                        tempStationPoints.add(checkStationPoint(mapPoint.getId(),mapPointType,pointTypeNameContain,station.getName()));
+                                    }
+                                } catch (Exception e) {
+                                    LOGGER.error(e.getMessage(),e);
+                                }
+                            }
                         }
-                    }
-                }
-            );
-            station.setMapPoints(tempStationPoints);
+                );
+                station.setMapPoints(tempStationPoints);
+            }
 
             if (station != null && id != null) { //修改
 
