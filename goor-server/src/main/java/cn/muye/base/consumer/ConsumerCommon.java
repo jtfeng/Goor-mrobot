@@ -465,6 +465,19 @@ public class ConsumerCommon {
     }
 
     /**
+     * 接收 x86 agent 在线信息监测
+     *
+     * @param messageInfo
+     */
+    @RabbitListener(queues = TopicConstants.ROBOT_ONLINE_QUERY)
+    public AjaxResult robotOnlineQuery(@Payload MessageInfo messageInfo) {
+        if (messageInfo != null) {
+            return AjaxResult.success();
+        }
+        return AjaxResult.success();
+    }
+
+    /**
      * 消费掉topic.server消息
      *
      * @param messageInfo
@@ -546,7 +559,7 @@ public class ConsumerCommon {
                 long avg = sum / 20; //只需要考虑单向时间误差
 
                 //给指定X86发送时间同步消息
-                sendMessageInfo.setMessageText(String.valueOf(new Date().getTime() + avg));
+                sendMessageInfo.setMessageText(String.valueOf(System.currentTimeMillis() + avg));
                 AjaxResult result = (AjaxResult) rabbitTemplate.convertSendAndReceive("topic.command.receive." + messageInfo.getSenderId(), sendMessageInfo);
                 logger.info("the time synchronized result :" + result);
             } catch (Exception e) {
@@ -604,15 +617,19 @@ public class ConsumerCommon {
         //保存低电量警告
         int powerPercent = chargeInfo.getPowerPercent();
         Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if (null == robot)
+        if (null == robot){
             return;
+        }
 
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
-        if (null == robotConfig)
+        if (null == robotConfig){
             return;
+        }
+
         Integer lowBatteryThreshold = robotConfig.getLowBatteryThreshold();
-        if (lowBatteryThreshold == null)
+        if (lowBatteryThreshold == null){
             return;
+        }
 
         if (powerPercent <= lowBatteryThreshold) {
             //更新机器人低电量状态
