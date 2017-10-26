@@ -31,20 +31,12 @@ public class PowerListenerImpl implements TopicCallback, ApplicationContextAware
     @Override
     public void handleMessage(Message message) {
         try {
-            if((System.currentTimeMillis() - CacheInfoManager.getPowerSendTime()) > 30 * 1000){//每30秒发送一次电量消息
+            if ((System.currentTimeMillis() - CacheInfoManager.getPowerSendTime()) > 30 * 1000) {//每30秒发送一次电量消息
                 logger.info("From ROS ====== power topic  " + message.toString());
                 CacheInfoManager.setPowerSendTime();
                 ProducerCommon msg = SingleFactory.getProducerCommon();
                 msg.sendPowerMessage(message.toString());
             }
-
-//            JSONObject jsonObject = JSON.parseObject(message.toString());
-//            String raw_data = jsonObject.getString("data");
-//            byte[] bytes = Base64Utils.decode(raw_data);
-//            int[] ret = new int[bytes.length];
-//            for (int i = 0; i < bytes.length; i++) {
-//                ret[i] = bytes[i] & 0xFF;
-//            }
         } catch (Exception e) {
             logger.error("AgentSubListenerImpl Exception", e);
         }
