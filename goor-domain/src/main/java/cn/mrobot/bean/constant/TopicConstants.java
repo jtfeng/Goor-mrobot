@@ -131,8 +131,7 @@ public class TopicConstants {
 
 	//pub name
 	public static final String MAP_CURRENT_GET = "map_current_get";
-
-
+	public static final String ROBOT_ONLINE_QUERY = "robot_online_query";
 
 	//ros摇杆控制 Topic
 	public static final String ROS_ROCKER_CONTROL_START_PUB_NAME = "robot_start";

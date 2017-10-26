@@ -11,6 +11,8 @@ import java.util.List;
  */
 public class Constant {
 
+    public static final String REQUEST = "request";
+
     //数据库数据删除状态
     public final static Integer NORMAL = 0; //正常值
     public final static Integer DELETE = 1;  //删除
@@ -167,4 +169,6 @@ public class Constant {
 
     public static final Integer EMPLOYEE_TYPE_ELEVATOR_ADMIN = 1; //电梯管理员
     public static final Integer EMPLOYEE_TYPE_NORMAL = 0; //普通员工
+
+    public static final String ONLINE = "online"; //在线
 }
