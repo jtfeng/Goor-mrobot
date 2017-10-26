@@ -61,49 +61,26 @@ public class FixPathServiceImpl implements FixPathService {
     @Override
     public void saveFixpathQuery(String senderId, Date sendTime, String messageData) throws Exception {
 
-        if (StringUtil.isNullOrEmpty(messageData))
+        if (StringUtil.isNullOrEmpty(messageData)){
             return;
+        }
 
         JSONObject jsonObject = JSON.parseObject(messageData);
         String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);
         String paths = jsonObject.getString(TopicConstants.PATHS);
         List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
-        for (PathDTO pathDTO : pathDTOList) {
-            MapPoint startPoint = findOrSaveMapPoint(sceneName, pathDTO, true);
-            MapPoint endPoint = findOrSaveMapPoint(sceneName, pathDTO, false);
-            //封装RoadPath对象，保存数据库
-            RoadPath roadPath = new RoadPath();
-            roadPath.setSceneName(sceneName);
-            roadPath.setMapName(pathDTO.getStartMap());
-            roadPath.setPathId(pathDTO.getId() + "");
-            //添加roadpath查询，根据场景，地图，pathid进行查询，如果存在，则更新，不存在则添加
-            RoadPath roadPathDB = roadPathService.findRoadPath(roadPath);
-            //继续封装参数
-            roadPath.setStartPoint(startPoint.getId());
-            roadPath.setEndPoint(endPoint.getId());
-            roadPath.setPathType(PATH_TYPE_IC);
-            roadPath.setPathName(Constant.PATH + pathDTO.getId());
-            roadPath.setCreateTime(new Date());
-            roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
 
-            //根据数据库查询结果判断是更新还是新增
-            if (null != roadPathDB) {
-                roadPath.setCreateTime(new Date());
-                roadPath.setId(roadPathDB.getId());
-                roadPathService.update(roadPath);  //更新
-            } else {
-                roadPathService.save(roadPath);  //新增
-            }
-        }
+        //调用统一存储工控固定路径方法
+        roadPathService.saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(pathDTOList, sceneName);
     }
 
     @Override
     public AjaxResult sendFixpathQuery(Long sceneId, String robotCode) throws Exception {
         String mapSceneName = sceneService.getRelatedMapNameBySceneId(sceneId);
         Boolean online = CacheInfoManager.getRobotOnlineCache(robotCode);
-//        if (null == online || !online)
-//            return AjaxResult.failed("机器人"+robotCode+"不在线");;
-
+        if (null == online || !online){
+            return AjaxResult.failed("机器人"+robotCode+"不在线");
+        }
         if (StringUtil.isNullOrEmpty(mapSceneName)){
             return  AjaxResult.failed("未获取到当前场景关联的地图场景名");
         }
@@ -114,35 +91,6 @@ public class FixPathServiceImpl implements FixPathService {
         slamRequestBody.setData(dataObject);
 
         return baseMessageService.sendRobotMessage(robotCode, TopicConstants.APP_PUB, JSON.toJSONString(slamRequestBody));
-    }
-
-    /**
-     * 查询或者保存点_路径点不重复
-     *
-     * @param sceneName 场景名
-     * @param pathDTO   固定路径对象
-     * @param start     是否为固定路径开始点   true:开始点 false:结束点
-     * @return 导航目标点
-     */
-    private MapPoint findOrSaveMapPoint(String sceneName, PathDTO pathDTO, boolean start) {
-        String mapName = pathDTO.getStartMap();
-        String pointName = start ? pathDTO.getStartId() : pathDTO.getEndId();
-        List<MapPoint> pointList = pointService.findByName(pointName, sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if (null != pointList && pointList.size() > 0) {
-            return pointList.get(0);
-        }
-        //封装mapPoint对象，保存数据库
-        MapPoint mapPoint = new MapPoint();
-        mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        mapPoint.setSceneName(sceneName);
-        mapPoint.setMapName(mapName);
-        mapPoint.setCreateTime(new Date());
-        mapPoint.setPointName(start ? pathDTO.getStartId() : pathDTO.getEndId());
-        mapPoint.setX(start ? pathDTO.getStartX() : pathDTO.getEndX());
-        mapPoint.setY(start ? pathDTO.getStartY() : pathDTO.getEndY());
-        mapPoint.setTh(start ? pathDTO.getStartTh() : pathDTO.getEndTh());
-        pointService.save(mapPoint);
-        return mapPoint;
     }
 
     /**
