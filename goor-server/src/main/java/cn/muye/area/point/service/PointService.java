@@ -33,6 +33,8 @@ public interface PointService {
 
     List<MapPoint> findByName(String pointName, String sceneName, String mapName, long storeId);
 
+    List<MapPoint> findByNameCloudType(String pointName, String sceneName, String mapName, long storeId, MapPointType mapPointType);
+
     @Deprecated
     List<MapPoint> findBySceneName(String sceneName);
 

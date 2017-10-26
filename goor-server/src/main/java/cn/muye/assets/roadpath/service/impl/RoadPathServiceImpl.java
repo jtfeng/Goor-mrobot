@@ -404,12 +404,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             MapPoint startPoint = null;
             MapPoint endPoint = null;
             if(isPointDuplicate) {
-                startPoint = FixPathServiceImpl.findOrSaveMapPointByPath(sceneName, pathDTO, true,pointService);
-                endPoint = FixPathServiceImpl.findOrSaveMapPointByPath(sceneName, pathDTO, false,pointService);
+                startPoint = FixPathServiceImpl.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, true,pointService);
+                endPoint = FixPathServiceImpl.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, false,pointService);
             }
             else {
-                startPoint = FixPathServiceImpl.findOrSaveMapPointNoDuplicate(sceneName, pathDTO, true,pointService);
-                endPoint = FixPathServiceImpl.findOrSaveMapPointNoDuplicate(sceneName, pathDTO, false,pointService);
+                startPoint = FixPathServiceImpl.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, true,pointService);
+                endPoint = FixPathServiceImpl.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, false,pointService);
             }
 
             //封装RoadPath对象，保存数据库

@@ -65,15 +65,7 @@ public class DijkstraController {
             File dest = FileUtils.getFile(DOWNLOAD_HOME + File.separator + "roadPath" + File.separator + DateTimeUtils.getShortDateTime());
 
             if (!file.isEmpty()) {
-                dest.mkdirs();
-                String fileName = file.getOriginalFilename();
-                final File dest1 = FileUtils.getFile(dest.getPath() + File.separator + fileName);
-
-                if (!dest1.exists()) {
-                    dest1.createNewFile();
-                }
-                file.transferTo(dest1);
-
+                final File dest1 = transferToFile(file,dest);
 
                 //异步插入数据库
                 //用线程池代替原来的new Thread方法
@@ -115,15 +107,7 @@ public class DijkstraController {
             File dest = FileUtils.getFile(DOWNLOAD_HOME + File.separator + "roadPath" + File.separator + DateTimeUtils.getShortDateTime());
 
             if (!file.isEmpty()) {
-                dest.mkdirs();
-                String fileName = file.getOriginalFilename();
-                final File dest1 = FileUtils.getFile(dest.getPath() + File.separator + fileName);
-
-                if (!dest1.exists()) {
-                    dest1.createNewFile();
-                }
-                file.transferTo(dest1);
-
+                final File dest1 = transferToFile(file,dest);
 
                 //异步插入数据库
                 //用线程池代替原来的new Thread方法
@@ -152,6 +136,25 @@ public class DijkstraController {
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }
+    }
+
+    /**
+     * 把上传的文件保存到本地并返回保存的文件
+     * @param file
+     * @param dest
+     * @return
+     * @throws Exception
+     */
+    private File transferToFile(MultipartFile file , File dest) throws Exception{
+        dest.mkdirs();
+        String fileName = file.getOriginalFilename();
+        dest = FileUtils.getFile(dest.getPath() + File.separator + fileName);
+
+        if (!dest.exists()) {
+            dest.createNewFile();
+        }
+        file.transferTo(dest);
+        return dest;
     }
 
     @Autowired
@@ -214,7 +217,7 @@ public class DijkstraController {
                         roadPath.setEndPoint(endCombinePointId);
                         roadPath.setStartPoint(startPathPointId);
                         roadPath.setPattern("");
-                        roadPath.setPathName(startCombinePoint.getPointAlias() + " to " + endCombinePoint.getPointAlias() + "auto");
+                        roadPath.setPathName(startCombinePoint.getPointAlias() + "_to_" + endCombinePoint.getPointAlias() + "_auto");
                         roadPath.setCreateTime(new Date());
                         roadPath.setPathType(Constant.PATH_TYPE_CLOUD);
                         roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
@@ -330,9 +333,9 @@ public class DijkstraController {
                             }
 
                             //TODO test=================================================================
-                            if(1==1) {
-                                return AjaxResult.failed(result);
-                            }
+//                            if(1==1) {
+//                                return AjaxResult.failed(result);
+//                            }
 
                             //没有则新建
                             RoadPath roadPath = new RoadPath();

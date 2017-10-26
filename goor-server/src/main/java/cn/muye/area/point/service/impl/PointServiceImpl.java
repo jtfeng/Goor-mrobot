@@ -112,6 +112,21 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
+    public List<MapPoint> findByNameCloudType(String pointName, String sceneName, String mapName, long storeId, MapPointType mapPointType) {
+        Condition condition = new Condition(MapPoint.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andCondition("POINT_NAME ='" + pointName + "'")
+                .andCondition("SCENE_NAME = '" + sceneName + "'")
+                .andCondition("MAP_NAME = '" + mapName + "'")
+                .andCondition("STORE_ID =" + storeId);
+        if(mapPointType != null) {
+            criteria.andCondition("CLOUD_POINT_TYPE_ID = '" + mapPointType.getCaption() + "'");
+        }
+        condition.setOrderByClause("POINT_NAME desc");
+        return pointMapper.selectByExample(condition);
+    }
+
+    @Override
     public List<MapPoint> list(WhereRequest whereRequest, long storeId) {
         Condition condition = new Condition(MapPoint.class);
         Example.Criteria criteria = condition.createCriteria();
