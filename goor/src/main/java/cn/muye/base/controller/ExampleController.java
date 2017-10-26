@@ -269,7 +269,7 @@ public class ExampleController {
         jsonObject.put("action", command);//lock，unlock
         jsonObject.put("roadpath_id", 1);
         jsonObject.put(TopicConstants.UUID, uuid);
-        jsonObject.put("sendTime", new Date().getTime());
+        jsonObject.put("sendTime", System.currentTimeMillis());
         JSONObject messageObject = new JSONObject();
         messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
         Message toSend = new Message(JSON.toJSONString(messageObject));
@@ -289,7 +289,7 @@ public class ExampleController {
         //
         Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_ALERT);
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("alert_time", new Date().getTime());//lock，unlock
+        jsonObject.put("alert_time", System.currentTimeMillis());//lock，unlock
         jsonObject.put("alert_code", 10101);
         jsonObject.put("msg", "laser navi start timeout.");
         jsonObject.put("mission_item_id", 74);
@@ -298,6 +298,25 @@ public class ExampleController {
         Message toSend = new Message(JSON.toJSONString(messageObject));
         logger.info("testMissionAlert:" + messageObject.get(TopicConstants.DATA));
         echo.publish(toSend);
+        return AjaxResult.success();
+    }
+
+    /**
+     * 模拟发送查询机器人状态
+     *
+     * @return
+     */
+    @RequestMapping(value = "testRobotOnline", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult testRobotOnline(@RequestParam("uuid") String uuid,@RequestParam("request") int request) throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ROBOT_ONLINE_QUERY);
+        jsonObject.put(TopicConstants.UUID, uuid);
+        jsonObject.put("error_code", 0);
+        JSONObject dataObject = new JSONObject();
+        dataObject.put("request", request);
+        jsonObject.put(TopicConstants.DATA, JSON.toJSONString(dataObject));
+        appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
         return AjaxResult.success();
     }
 }

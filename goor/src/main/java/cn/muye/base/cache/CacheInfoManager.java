@@ -57,6 +57,11 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, Boolean> uuidHandledCache = new ConcurrentHashMapCache<String, Boolean>();
 
     /**
+     * 机器人在线查询的uuid缓存
+     */
+    private static ConcurrentHashMapCache<String, Boolean> robotOnlineUUIDCache = new ConcurrentHashMapCache<String, Boolean>();
+
+    /**
      * 状态机 module 的缓存
      */
     private static ConcurrentHashMapCache<String, Long> stateModuleCache = new ConcurrentHashMapCache<String, Long>();
@@ -74,6 +79,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         currentPoseSendTime.put(1, System.currentTimeMillis());
         powerSendTime.put(1, System.currentTimeMillis());
         uuidHandledCache.setMaxLifeTime(0);
+        robotOnlineUUIDCache.setMaxLifeTime(0);
 
         stateModuleCache.setMaxLifeTime(60 * 1000); //存活时间 2s
     }
@@ -172,5 +178,17 @@ public class CacheInfoManager implements ApplicationContextAware {
             return;
         }
         uuidHandledCache.put(uuid, true); //set默认为true
+    }
+
+    public static boolean getRobotOnlineUUIDCache(String uuid) {
+        Boolean flag = robotOnlineUUIDCache.get(uuid);
+        return null == flag ? false : flag;
+    }
+
+    public static void setRobotOnlineUUIDCache(String uuid) {
+        if(robotOnlineUUIDCache.ContainsKey(uuid)){
+            return;
+        }
+        robotOnlineUUIDCache.put(uuid, true); //set默认为true
     }
 }

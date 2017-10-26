@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by enva on 2017/05/12.
@@ -156,7 +157,17 @@ public class ScheduleTasks {
 
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
-
-
+    /**
+     * 每30s发送一次心跳消息。检测机器人是否在线
+     */
+    @Scheduled(cron = "*/30 * *  * * * ")
+    public void robotOnlineState() {
+        try {
+            ScheduledHandleService service = new ScheduledHandleServiceImp();
+            service.robotOnlineState(UUID.randomUUID().toString());
+        } catch (Exception e) {
+            logger.error("Scheduled send message error", e);
+        }
+    }
 
 }
