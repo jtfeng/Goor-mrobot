@@ -9,6 +9,10 @@ public class RoadPathLock extends BaseBean{
     private String name;
     private Integer lockState;
     private String robotCode;
+    private Long passCount;
+    private Long currentPasscount;
+    private String robotCodes;
+    private Long direction;
 
     public String getName() {
         return name;
@@ -38,12 +42,48 @@ public class RoadPathLock extends BaseBean{
         this.robotCode = robotCode;
     }
 
+    public Long getPassCount() {
+        return passCount;
+    }
+
+    public void setPassCount(Long passCount) {
+        this.passCount = passCount;
+    }
+
+    public Long getCurrentPasscount() {
+        return currentPasscount;
+    }
+
+    public void setCurrentPasscount(Long currentPasscount) {
+        this.currentPasscount = currentPasscount;
+    }
+
+    public String getRobotCodes() {
+        return robotCodes;
+    }
+
+    public void setRobotCodes(String robotCodes) {
+        this.robotCodes = robotCodes;
+    }
+
+    public Long getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Long direction) {
+        this.direction = direction;
+    }
+
     @Override
     public String toString() {
         return "RoadPathLock{" +
                 "name='" + name + '\'' +
                 ", lockState=" + lockState +
-                ", robotCode=" + robotCode +
+                ", robotCode='" + robotCode + '\'' +
+                ", passCount=" + passCount +
+                ", currentPasscount=" + currentPasscount +
+                ", robotCodes='" + robotCodes + '\'' +
+                ", direction='" + direction + '\'' +
                 '}';
     }
 
