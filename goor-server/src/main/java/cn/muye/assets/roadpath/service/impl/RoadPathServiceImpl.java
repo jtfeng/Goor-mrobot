@@ -452,7 +452,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
      * @return
      */
     private Long getDistance(MapPoint start, MapPoint end) {
-        Long result = Constant.DEFAULT_ROAD_PATH_X86_WEIGHT;
+        Long result = 0L;
         Double db = Math.sqrt(
                 Math.pow((start.getX() - end.getX()),2L)
                 + Math.pow((start.getY() - end.getY()),2L)
@@ -465,7 +465,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
      * 测试计算坐标长度函数
      * @param args
      */
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         MapPoint start = new MapPoint();
         MapPoint end = new MapPoint();
         start.setX(0L);
@@ -474,7 +474,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         end.setY(4L);
         RoadPathServiceImpl roadPathService = new RoadPathServiceImpl();
         System.out.println(roadPathService.getDistance(start, end));
-    }
+    }*/
 
 
 
