@@ -3310,8 +3310,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     );
                     break;
                 case MPointType_ELEVATOR:
-                    initPathMissionTaskElevator(
-//                    initPathMissionTaskTwoElevator(
+ //                    initPathMissionTaskElevator(
+                    initPathMissionTaskTwoElevator(
                             missionListTask,
                             order,
                             startMp,
@@ -4185,15 +4185,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
-//        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
-//        if (isSetOrderDetailMP){
-//            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-//        }
-//        missionListTask.getMissionTasks().add(finalUnloadTask);
+        MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
+        if (isSetOrderDetailMP){
+            finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        }
+        missionListTask.getMissionTasks().add(finalUnloadTask);
 
         //语音任务，感谢使用，我要回去充电了？
-//        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
-//        missionListTask.getMissionTasks().add(voiceTask);
+        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
+        missionListTask.getMissionTasks().add(voiceTask);
 
     }
 
