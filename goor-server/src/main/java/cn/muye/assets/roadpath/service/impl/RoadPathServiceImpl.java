@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -430,7 +431,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setPathName(Constant.PATH + pathDTO.getId());
             roadPath.setCreateTime(new Date());
             roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            roadPath.setWeight(Constant.DEFAULT_ROAD_PATH_X86_WEIGHT);
+//            roadPath.setWeight(Constant.DEFAULT_ROAD_PATH_X86_WEIGHT);
+            //取两点间长度作为路径权值
+            roadPath.setWeight(getDistance(startPoint, endPoint));
             roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
             //根据数据库查询结果判断是更新还是新增
             if (null != roadPathDB) {
@@ -441,6 +444,39 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             }
         }
     }
+
+    /**
+     * 计算两点间坐标的长度，最终单位cm
+     * @param start
+     * @param end
+     * @return
+     */
+    private Long getDistance(MapPoint start, MapPoint end) {
+        Long result = Constant.DEFAULT_ROAD_PATH_X86_WEIGHT;
+        Double db = Math.sqrt(
+                Math.pow((start.getX() - end.getX()),2L)
+                + Math.pow((start.getY() - end.getY()),2L)
+        ) * 100;//换算成cm
+        result = new BigDecimal(db).setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
+        return result;
+    }
+
+    /**
+     * 测试计算坐标长度函数
+     * @param args
+     */
+    public static void main(String[] args) {
+        MapPoint start = new MapPoint();
+        MapPoint end = new MapPoint();
+        start.setX(0L);
+        start.setY(0L);
+        end.setX(3L);
+        end.setY(4L);
+        RoadPathServiceImpl roadPathService = new RoadPathServiceImpl();
+        System.out.println(roadPathService.getDistance(start, end));
+    }
+
+
 
     @Override
     public void saveOrUpdateRoadPathByPathDTOListDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
