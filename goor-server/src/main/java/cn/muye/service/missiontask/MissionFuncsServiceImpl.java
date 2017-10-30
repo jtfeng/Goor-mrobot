@@ -3073,9 +3073,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                             //使用上一个点和当前点查询是否工控路径，如果是工控路径，则添加工控导航任务
                                             addStaticPathPoint(prePoint, point, mp, mapPoints, mpAttrs);
                                         }
-                                        prePoint = point;
                                         break;
                                 }
+                                prePoint = point;
                             }
                         }
                         break;
