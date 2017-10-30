@@ -197,12 +197,18 @@ public class DijkstraController {
                 //遍历同一部电梯的四点对象，生成两两之间的假工控路径
                 for(ElevatorPointCombination startCombination : elevatorPointCombinations) {
                     MapPoint startCombinePoint = startCombination.getwPoint();
+                    if(startCombinePoint == null || startCombinePoint.getId() == null) {
+                        return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点为空，生成错误！");
+                    }
                     for(ElevatorPointCombination endCombination : elevatorPointCombinations) {
                         //跳过相同的四点集合
                         if(endCombination.getId().equals(startCombination.getId())) {
                             continue;
                         }
                         MapPoint endCombinePoint = endCombination.getoPoint();
+                        if(endCombinePoint == null || endCombinePoint.getId() == null) {
+                            return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'出去点为空，生成错误！");
+                        }
                         //电梯云端路径起点是出发楼层工控路径终点
                         MapPoint startPathPoint = PointServiceImpl.findPathPointByXYTH(sceneName,
                                 startCombinePoint.getMapName(),startCombinePoint.getX(),startCombinePoint.getY(),startCombinePoint.getTh(),null, pointService);
@@ -333,7 +339,7 @@ public class DijkstraController {
                                 continue;
                             }
 
-                            dijkstraService.getShortestCloudRoadPathForMission(startPoint, endPoint,roadPathMaps,result);
+                            result = dijkstraService.getShortestCloudRoadPathForMission(startPoint, endPoint,roadPathMaps,result);
 
                             //未找到路径,或者只找到一个点(工控路径至少两个点)则继续
                             if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {

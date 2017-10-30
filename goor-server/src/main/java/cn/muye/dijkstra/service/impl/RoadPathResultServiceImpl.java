@@ -35,6 +35,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
      * 遍历result的点序列，两点间有云端路径的话，把云端路径点添加到两点间
      * @param result
      */
+    @Override
     public RoadPathResult addCloudRoadPathPoint(RoadPathResult result) throws Exception{
         List<Long> idList = result.getPointIds();
         List<Long> returnIdList = new ArrayList<Long>();
@@ -96,6 +97,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
      * @param result
      * @param mapPointType
      */
+    @Override
     public RoadPathResult replaceDoorWaitPoint(RoadPathResult result, MapPointType mapPointType) throws Exception {
         List<Long> idList = result.getPointIds();
         //最后一个点不用替换成门任务，因为没有下一个任务点，说明不需要过门
@@ -125,6 +127,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
      * @return
      * @throws Exception
      */
+    @Override
     public RoadPathResult getShortestCloudRoadPathForMission(Long startPointId, Long endPointId, RoadPathMaps roadPathMaps, RoadPathResult result) throws Exception {
         result = roadPathMaps.getShortestPath(startPointId,endPointId);
         if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
@@ -136,6 +139,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         return result;
     }
 
+    @Override
     public RoadPathResult getShortestCloudRoadPathForMission(MapPoint startPoint, MapPoint endPoint, RoadPathMaps roadPathMaps, RoadPathResult result) throws Exception {
         return getShortestCloudRoadPathForMission(startPoint.getId(),endPoint.getId(),roadPathMaps,result);
     }
