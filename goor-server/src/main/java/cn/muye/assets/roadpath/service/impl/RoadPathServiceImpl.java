@@ -457,7 +457,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 Math.pow((start.getX() - end.getX()),2L)
                 + Math.pow((start.getY() - end.getY()),2L)
         ) * 100;//换算成cm
-        result = new BigDecimal(db).setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
+        result = new BigDecimal(db + "").setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
         return result;
     }
 
