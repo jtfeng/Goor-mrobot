@@ -1882,14 +1882,17 @@ ALTER TABLE AS_ROADPATHPOINT ADD ORDER_INDEX INT(11) NULL;
 DROP TABLE IF EXISTS `AS_ROADPATHLOCK`;
 create table AS_ROADPATHLOCK
 (
-  ID bigint auto_increment comment 'ID 序号列表'
-    primary key,
+  ID bigint auto_increment comment 'ID 序号列表' primary key,
   CREATED_BY bigint null comment '信息记录创建人',
   CREATE_TIME datetime null,
   STORE_ID bigint null,
   NAME varchar(50) null comment '名称信息',
   LOCK_STATE int(1) null comment '是否上锁的标识',
-  ROBOT_CODE varchar(50) null
+  ROBOT_CODE varchar(50) null comment '进入的最后一个机器人，拥有锁的执行权',
+  PASS_COUNT bigint null comment '路径(s)允许通过的最大机器人数量，当所有机器人全部通过时，才能执行真正的解锁操作',
+  CURRENT_PASSCOUNT bigint null comment '当前路径中所排队的机器数量',
+  ROBOT_CODES varchar(500) null comment '当前路径中所容纳的所有机器人编号信息，为了方便，增加冗余字段',
+  DIRECTION bigint null comment '路径方向信息'
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
 
