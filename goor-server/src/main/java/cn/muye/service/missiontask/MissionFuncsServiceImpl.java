@@ -2942,7 +2942,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         logger.info("###### xiahuo is ok ");
                     }else {
 
-                        //取得站点对象
+                        /*//取得站点对象
                         //TODO 以后AGV也需要按照切换的场景过滤
                         Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
                         if (station != null &&
@@ -2973,6 +2973,22 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     break;
                                 }
                             }
+                        }*/
+
+                        MapPoint songhuoPoint = pointService.findMapPointByStationIdAndCloudType(od.getStationId(), MapPointType.UNLOAD.getCaption());
+                        if(songhuoPoint != null){
+                            //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
+                            addPathRoadPathPoint(songhuoPoint, mapPoints, mpAttrs);
+//                                addElevatorPoint(mp, mapPoints, mpAttrs);
+                            //判断当前点的属性，根据属性加入相应的任务
+                            //加入该点，并标记这个点状态是orderDetail点
+                            mapPoints.add(songhuoPoint);
+                            //标记该点的属性
+                            atts = new MPointAtts();
+                            atts.type = MPointType_SONGHUO;
+                            atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
+                            mpAttrs.put(songhuoPoint, atts);
+                            logger.info("###### order detail station is ok ");
                         }
                     }
                 }
@@ -3310,7 +3326,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     );
                     break;
                 case MPointType_ELEVATOR:
- //                    initPathMissionTaskElevator(
+//                    initPathMissionTaskElevator(
                     initPathMissionTaskTwoElevator(
                             missionListTask,
                             order,

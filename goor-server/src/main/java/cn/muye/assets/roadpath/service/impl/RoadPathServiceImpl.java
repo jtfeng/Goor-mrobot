@@ -348,11 +348,13 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         return roadPathDetails;
     }
 
+    @Override
     public void createRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
         this.roadPathMapper.insert(roadPath);
         packageRoadPathRelations(roadPathPointIds, roadPath);
     }
 
+    @Override
     public void updateRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
@@ -361,6 +363,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         packageRoadPathRelations(roadPathPointIds, roadPath);
     }
 
+    @Override
     public void createOrUpdateRoadPathByStartAndEndPoint(Long startPointId, Long endPointId, String sceneName, String mapName, Integer pathType,RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
         List<RoadPath> roadPathList1 = listRoadPathByStartAndEndPoint(startPointId,
                 endPointId,sceneName,mapName,pathType);
@@ -386,6 +389,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
      * @param isPointDuplicate 是否建立重复的路径交点
      * @throws Exception
      */
+    @Override
     public void saveOrUpdateRoadPathByPathDTOList(List<PathDTO> pathDTOList, String sceneName , boolean isPointDuplicate) throws Exception{
         for (PathDTO pathDTO : pathDTOList) {
             //过滤掉地图名为null的错误数据
@@ -438,10 +442,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         }
     }
 
+    @Override
     public void saveOrUpdateRoadPathByPathDTOListDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
         saveOrUpdateRoadPathByPathDTOList(pathDTOList, sceneName, true);
     }
 
+    @Override
     public void saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
         saveOrUpdateRoadPathByPathDTOList(pathDTOList, sceneName, false);
     }
