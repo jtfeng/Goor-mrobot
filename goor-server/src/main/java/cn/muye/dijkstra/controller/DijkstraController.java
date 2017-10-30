@@ -73,8 +73,9 @@ public class DijkstraController {
                     try {
                         String messageData = FileUtils.readTXT(dest1.getPath());
 
-                        if (StringUtil.isNullOrEmpty(messageData))
+                        if (StringUtil.isNullOrEmpty(messageData)) {
                             return;
+                        }
 
                         JSONObject jsonObject = JSON.parseObject(messageData);
                         String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);
@@ -115,8 +116,9 @@ public class DijkstraController {
                     try {
                         String messageData = FileUtils.readTXT(dest1.getPath());
 
-                        if (StringUtil.isNullOrEmpty(messageData))
+                        if (StringUtil.isNullOrEmpty(messageData)) {
                             return;
+                        }
 
                         JSONObject jsonObject = JSON.parseObject(messageData);
                         String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);
@@ -266,6 +268,12 @@ public class DijkstraController {
             String sceneName = scene.getMapSceneName();
             if(StringUtil.isNullOrEmpty(sceneName)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+            }
+
+            //创建电梯间路径
+            AjaxResult elevatorAjaxResult = generateElevatorPath(sceneId);
+            if(!elevatorAjaxResult.isSuccess()) {
+                return elevatorAjaxResult;
             }
 
             //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
