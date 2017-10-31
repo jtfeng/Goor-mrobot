@@ -48,7 +48,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     private static Logger logger = Logger.getLogger(ScheduledHandleServiceImp.class);
     private static ApplicationContext applicationContext;
     private static final int SUCCESS_CODE = 0;
-    private static final int SEND_COUNT = 5;
+    private static final int SEND_COUNT = 10;
     private ReceiveMessageService receiveMessageService;
 
     private OffLineMessageService offLineMessageService;

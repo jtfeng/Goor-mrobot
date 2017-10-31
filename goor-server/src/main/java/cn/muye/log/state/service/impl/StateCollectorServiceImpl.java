@@ -39,6 +39,8 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private static final String HAPPEN = "触发";
     private static final String UNHAPPEN = "未触发";
 
+    private static final String UNHAPPEN_CODE_ONE = "00";
+    private static final String UNHAPPEN_CODE_TWO = "0";
     private static final int HAPPEN_INT = 1;
 
     @Autowired
@@ -114,8 +116,11 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         int moduleId = Integer.parseInt(stateCollectorResponse.getModule());
         StateCollectorBaseDriver stateCollectorBaseDriver = new StateCollectorBaseDriver();
         String state = stateCollectorResponse.getState();
-        if ("00".equals(state) || "0".equals(state))//过滤都未触发的状态
+        //过滤都未触发的状态
+        if (UNHAPPEN_CODE_ONE.equals(state) || UNHAPPEN_CODE_TWO.equals(state)) {
             return;
+        }
+
         stateCollectorBaseDriver.setState(state);
         String stateStr = StringUtil.parseToBit(state); //00011011
         char[] chars = stateStr.toCharArray();
@@ -165,11 +170,12 @@ public class StateCollectorServiceImpl implements StateCollectorService {
             //更新机器人急停状态
             Robot robot = new Robot();
             Robot robotDB = robotService.getByCode(deviceId, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            if(robot == null)
-                return;
-            robot.setId(robotDB.getId());
-            robot.setEmergencyStopState(true);
-            robotService.updateSelective(robot);
+            if(robot != null){
+                robot.setId(robotDB.getId());
+                robot.setEmergencyStopState(true);
+                robotService.updateSelective(robot);
+                //TODO 刷新云端急停状态。
+            }
         }
 
         stateCollectorBaseSystem.setUnderVoltageEmergencyStop(parseInt(chars[length - 6]));//欠压停机
@@ -188,8 +194,11 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private void analysisBaseMicroswitchAndAntiDroppingstate(StateCollectorResponse stateCollectorResponse) throws Exception {
         StateCollectorBaseMicroSwitchAndAntiDropping baseMicroSwitchAndAntiDropping = new StateCollectorBaseMicroSwitchAndAntiDropping();
         String state = stateCollectorResponse.getState();
-        if ("00".equals(state) || "0".equals(state))//过滤都未触发的状态
+        //过滤都未触发的状态
+        if (UNHAPPEN_CODE_ONE.equals(state) || UNHAPPEN_CODE_TWO.equals(state)){
             return;
+        }
+
         baseMicroSwitchAndAntiDropping.setState(state);
         String stateStr = StringUtil.parseToBit(state);
         char[] chars = stateStr.toCharArray();
@@ -338,8 +347,9 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
             field.setAccessible(true);
-            if (field.getName().equals("state"))
+            if (field.getName().equals("state")){
                 continue;
+            }
             int value = (int) field.get(stateCollector);
             if (value == 1 && (!field.getName().equals(StateFieldEnums.POWER_ON.getName()))) { //排除开机。开机为1
                 stateDetailList.add(parseStateDetail(chPrefix, field, value, HAPPEN));
