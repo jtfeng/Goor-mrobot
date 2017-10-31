@@ -185,7 +185,7 @@ public class ScheduleTasks {
     /**
      * 添加定时任务，每周星期日导出日志表数据到文件中，包括LOG_CHARGE_INFO，LOG_INFO，LOG_MISSION
      */
-    @Scheduled(cron = "0 30 23 ? * 7 *")
+    @Scheduled(cron = "0 30 23 ? * 7")
     public void exportLogToFile() {
         try {
             logger.info("Scheduled exportLogToFile LOG_CHARGE_INFO，LOG_INFO，LOG_MISSION");
