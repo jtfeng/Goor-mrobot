@@ -475,7 +475,7 @@ public class ElevatorController {
             return AjaxResult.success("保存电梯模式成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
-            return AjaxResult.failed( "保存电梯模式失败");
+            return AjaxResult.failed(e.getMessage());
         }
     }
 
