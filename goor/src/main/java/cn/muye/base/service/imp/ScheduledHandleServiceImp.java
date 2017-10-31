@@ -110,8 +110,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             //发布app_pub的获取当前地图消息
             Topic mapCurrentPubTopic = TopicHandleInfo.getTopic(ros, TopicConstants.APP_PUB);
             mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
-            logger.info("心跳时间："+CacheInfoManager.getTopicHeartCheckCache());
-            logger.info("心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()));
+            logger.info("心跳时间：" + CacheInfoManager.getTopicHeartCheckCache());
+            logger.info("心跳时间差：" + (System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()));
 //            logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 ros.disconnect();
@@ -139,8 +139,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             Topic x86MissionHeartBeatTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_HEARTBEAT);
             x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));
 
-            logger.info("x86Mission心跳时间："+CacheInfoManager.getX86MissionTopicHeartCheckCache());
-            logger.info("x86Mission心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()));
+            logger.info("x86Mission心跳时间：" + CacheInfoManager.getX86MissionTopicHeartCheckCache());
+            logger.info("x86Mission心跳时间差：" + (System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()));
             if ((System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));
             }
@@ -152,11 +152,11 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public void mqHealthCheck(String queueName) throws Exception {
         try {
-            logger.info("Scheduled mqHealthCheck start queueName="+queueName);
-            if(!getRabbitTemplate()){
+            logger.info("Scheduled mqHealthCheck start queueName=" + queueName);
+            if (!getRabbitTemplate()) {
                 return;
             }
-            if(!getLocalRobotSN()){
+            if (!getLocalRobotSN()) {
                 return;
             }
             MessageInfo messageInfo = new MessageInfo();
@@ -224,7 +224,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 }
                 if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                     Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
-                    if(null == echo){
+                    if (null == echo) {
                         echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                     }
                     Message toSend = new Message(commonInfo.getPublishMessage());
@@ -258,7 +258,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             }
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
-                if(null == echo){
+                if (null == echo) {
                     echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                 }
                 Message toSend = new Message(commonInfo.getPublishMessage());
@@ -301,13 +301,13 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         }
     }
 
-    private boolean getRabbitTemplate(){
-        if(null == applicationContext){
+    private boolean getRabbitTemplate() {
+        if (null == applicationContext) {
             logger.error("getRabbitTemplate applicationContext is null error");
             return false;
         }
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
-        if(null == rabbitTemplate){
+        if (null == rabbitTemplate) {
             logger.error("getRabbitTemplate rabbitTemplate is null error ");
             return false;
         }
@@ -374,12 +374,12 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     public void robotOnlineStateQuery(String uuid) throws Exception {
         AjaxResult ajaxResult = robotOnlineState();
         SlamBody slamBody = getSendData(uuid, ajaxResult);
-        for (int i = 0; i < SEND_COUNT; i ++){
-            if (CacheInfoManager.getRobotOnlineUUIDCache(uuid)){
+        for (int i = 1; i <= SEND_COUNT; i++) {
+            if (CacheInfoManager.getRobotOnlineUUIDCache(uuid)) {
                 logger.info(localRobotSN + "反馈信息，发送成功");
                 break;
             }
-            logger.info("未收到反馈信息，继续发送");
+            logger.info("未收到反馈信息，继续发送第 " + i + " 次");
             sendRobotOnlineTopic(slamBody);
             TimeUnit.SECONDS.sleep(10);
         }
