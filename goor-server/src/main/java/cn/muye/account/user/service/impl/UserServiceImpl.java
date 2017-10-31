@@ -58,8 +58,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     @Override
     public List<User> getUser(String userName, String password) {
         Example example = new Example(User.class);
-        example.createCriteria().andCondition("USER_NAME =", userName);
-        example.createCriteria().andCondition("PASSWORD =", password);
+        example.createCriteria().andCondition("USER_NAME =", userName)
+                .andCondition("PASSWORD =", password);
         List<User> userList = userMapper.selectByExample(example);
         if (userList != null && userList.size() > 0) {
             for (User u : userList) {

@@ -1,6 +1,7 @@
 package cn.muye.log.charge.service.impl;
 
 import cn.mrobot.bean.charge.ChargeInfo;
+import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.log.charge.mapper.ChargeInfoMapper;
 import cn.muye.log.charge.service.ChargeInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,19 +22,17 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class ChargeInfoServiceImpl  implements ChargeInfoService {
+public class ChargeInfoServiceImpl extends BaseServiceImpl<ChargeInfo> implements ChargeInfoService {
 
 	@Autowired
 	private ChargeInfoMapper chargingInfoMapper;
 
-	public void save(ChargeInfo chargeInfo){
-		chargingInfoMapper.insert(chargeInfo);
-	}
-
+	@Override
 	public ChargeInfo get(Long id){
 		return chargingInfoMapper.selectByPrimaryKey(id);
 	}
 
+	@Override
 	public List<ChargeInfo> getByDeviceId(String deviceId){
 		Example example = new Example(ChargeInfo.class);
 		example.createCriteria().andCondition("DEVICE_ID=",deviceId);
@@ -41,7 +40,8 @@ public class ChargeInfoServiceImpl  implements ChargeInfoService {
 		return chargingInfoMapper.selectByExample(example);
 	}
 
-	public List<ChargeInfo> lists(){
+	@Override
+	public List<ChargeInfo> listAll(){
 		return chargingInfoMapper.selectAll();
 	}
 }

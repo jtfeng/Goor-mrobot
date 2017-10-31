@@ -2,6 +2,7 @@ package cn.muye.base.service.batch;
 
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.area.pose.service.CurrentPoseService;
+import cn.muye.base.export.service.ExportService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
@@ -45,6 +46,9 @@ public class ScheduleTasks {
 
     @Autowired
     private OrderDetailService orderDetailService;
+
+    @Autowired
+    private ExportService exportService;
 
     private final static Object lock = new Object();
 
@@ -178,4 +182,16 @@ public class ScheduleTasks {
         }
     }
 
+    /**
+     * 添加定时任务，每周星期日导出日志表数据到文件中，包括LOG_CHARGE_INFO，LOG_INFO，LOG_MISSION
+     */
+    @Scheduled(cron = "0 30 23 ? * 7")
+    public void exportLogToFile() {
+        try {
+            logger.info("Scheduled exportLogToFile LOG_CHARGE_INFO，LOG_INFO，LOG_MISSION");
+            exportService.exportLogToFile();
+        } catch (Exception e) {
+            logger.error("Scheduled exportLogToFile LOG_CHARGE_INFO，LOG_INFO，LOG_MISSION", e);
+        }
+    }
 }

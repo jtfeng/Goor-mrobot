@@ -35,6 +35,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
      * 遍历result的点序列，两点间有云端路径的话，把云端路径点添加到两点间
      * @param result
      */
+    @Override
     public RoadPathResult addCloudRoadPathPoint(RoadPathResult result) throws Exception{
         List<Long> idList = result.getPointIds();
         List<Long> returnIdList = new ArrayList<Long>();
@@ -96,28 +97,37 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
      * @param result
      * @param mapPointType
      */
+    @Override
     public RoadPathResult replaceDoorWaitPoint(RoadPathResult result, MapPointType mapPointType) throws Exception {
         List<Long> idList = result.getPointIds();
+        List<Long> returnIdList = new ArrayList<Long>();
+        int size = idList.size();
         //最后一个点不用替换成门任务，因为没有下一个任务点，说明不需要过门
-        for(int i=0;i<idList.size() - 1;i++) {
+        for(int i=0;i< size - 1;i++) {
             Long id = idList.get(i);
             MapPoint pathPoint = pointService.findById(id);
             if(pathPoint == null) {
                 continue;
             }
+            returnIdList.add(id);
             //查询所有与路径点坐标相同的点，且类型为：门等待点
             List<MapPoint> endPointList = pointService.listBySceneMapXYTH(pathPoint.getSceneName(),pathPoint.getMapName(),
                     pathPoint.getX(),pathPoint.getY(),pathPoint.getTh(),mapPointType);
+            //如果没有门类型点，则直接返回原来的点
             if(endPointList == null || endPointList.size() == 0) {
                 continue;
             }
-            idList.set(i , endPointList.get(0).getId());
+            //如果找到门任务点，则添加门任务点到原路径后面
+            returnIdList.add(endPointList.get(0).getId());
         }
+        //把最后一个点要放进去，要不然会少一个点
+        returnIdList.add(idList.get(size - 1));
+        result.setPointIds(returnIdList);
         return result;
     }
 
     /**
-     * 获取最短的路径，并替换门店，并将最短路径中的云端路径的点加入到路径结果中
+     * 获取最短的路径，并替换门点，并将最短路径中的云端路径的点加入到路径结果中
      * @param startPointId
      * @param endPointId
      * @param roadPathMaps
@@ -125,6 +135,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
      * @return
      * @throws Exception
      */
+    @Override
     public RoadPathResult getShortestCloudRoadPathForMission(Long startPointId, Long endPointId, RoadPathMaps roadPathMaps, RoadPathResult result) throws Exception {
         result = roadPathMaps.getShortestPath(startPointId,endPointId);
         if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
@@ -136,6 +147,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         return result;
     }
 
+    @Override
     public RoadPathResult getShortestCloudRoadPathForMission(MapPoint startPoint, MapPoint endPoint, RoadPathMaps roadPathMaps, RoadPathResult result) throws Exception {
         return getShortestCloudRoadPathForMission(startPoint.getId(),endPoint.getId(),roadPathMaps,result);
     }

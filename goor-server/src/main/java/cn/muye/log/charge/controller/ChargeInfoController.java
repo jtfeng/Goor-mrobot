@@ -2,15 +2,11 @@ package cn.muye.log.charge.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.base.CommonInfo;
-import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.service.RobotService;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.log.charge.service.ChargeInfoService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +82,7 @@ public class ChargeInfoController implements ApplicationContextAware {
     public AjaxResult lists() {
         //TODO
         ChargeInfoService chargeInfoService = applicationContext.getBean(ChargeInfoService.class);
-        List<ChargeInfo> list = chargeInfoService.lists();
+        List<ChargeInfo> list = chargeInfoService.listAll();
         return AjaxResult.success();
     }
 

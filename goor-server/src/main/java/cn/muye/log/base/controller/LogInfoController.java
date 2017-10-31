@@ -54,7 +54,6 @@ public class LogInfoController {
     private String DOWNLOAD_HTTP;
 
     private static final String LOG_FILE_PREFIX = "日志导出_";
-    private static final String LOG_FILE_SUFFIX = ".csv";
     //CSV文件分隔符
     private static final String NEW_LINE_SEPARATOR = "\n";
 
@@ -90,13 +89,14 @@ public class LogInfoController {
             //CSV文件相对路径
             String fileOppositePath = SearchConstants.FAKE_MERCHANT_STORE_ID + File.separator + Constant.EXPORT_DIR_NAME + File.separator + Constant.LOG_DIR_NAME;
             File fileDir = new File(DOWNLOAD_HOME + File.separator + fileOppositePath);
-            if (!fileDir.exists())
+            if (!fileDir.exists()){
                 fileDir.mkdirs();
-            String logFileName = LOG_FILE_PREFIX + DateTimeUtils.getNormalNameDateTime() + LOG_FILE_SUFFIX;
+            }
+            String logFileName = LOG_FILE_PREFIX + DateTimeUtils.getNormalNameDateTime() + Constant.LOG_FILE_SUFFIX;
             File lgFile = new File(fileDir, logFileName);
 
             // 创建CSV写对象
-            String[] FILE_HEADER = new String[]{"门店ID", "设备编号", "日志等级", "日志类型", "模块", "场景名", "地图名", "具体信息", "创建时间", "警告错误处理人", "警告错误处理时间"};
+            String[] FILE_HEADER ={"门店ID", "设备编号", "日志等级", "日志类型", "模块", "场景名", "地图名", "具体信息", "创建时间", "警告错误处理人", "警告错误处理时间"};
             CSVFormat format = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR).withFirstRecordAsHeader();
 
             // 这是写入CSV的代码
@@ -135,8 +135,10 @@ public class LogInfoController {
                     printer.flush();
                     printer.close();
                 }
-                if (null != out)
+                if (null != out){
                     out.close();
+                }
+
             } catch (Exception e) {
                 LOGGER.error("日志导出错误", e);
             }

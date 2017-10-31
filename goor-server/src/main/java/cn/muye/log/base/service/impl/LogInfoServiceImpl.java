@@ -40,7 +40,7 @@ public class LogInfoServiceImpl implements LogInfoService {
     public List<LogInfo> lists(WhereRequest whereRequest, Long storeId) {
         Example example = new Example(LogInfo.class);
         Example.Criteria criteria = example.createCriteria();
-        if (whereRequest.getQueryObj() != null) {
+        if (whereRequest != null && whereRequest.getQueryObj() != null) {
             JSONObject object = JSON.parseObject(whereRequest.getQueryObj());
             String deviceId = object.getString(SearchConstants.SEARCH_DEVICE_ID);
             String logType = object.getString(SearchConstants.SEARCH_LOG_TYPE);
@@ -77,4 +77,12 @@ public class LogInfoServiceImpl implements LogInfoService {
     public int update(LogInfo logInfo) {
         return logInfoMapper.updateByPrimaryKeySelective(logInfo);
     }
+
+    @Override
+    public void delete(List<LogInfo> logInfoList) {
+        for (LogInfo logInfo : logInfoList){
+            logInfoMapper.delete(logInfo);
+        }
+    }
+
 }
