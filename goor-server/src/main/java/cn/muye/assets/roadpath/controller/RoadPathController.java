@@ -107,5 +107,22 @@ public class RoadPathController {
         }
     }
 
+    /**
+     * 未指定的路径绑定指定的逻辑锁对象
+     * @return
+     */
+    @GetMapping("/asset/roadPath/bind/{pathId}/{lockId}")
+    public AjaxResult findRoadPathByStartAndEndPoint(
+            @PathVariable("pathId") Long pathId,
+            @PathVariable("lockId") Long lockId){
+        try {
+            RoadPath roadPath = this.roadPathService.findById(pathId);
+            roadPath.setPathLock(lockId);
+            roadPathService.updateSelective(roadPath);
+            return AjaxResult.success("路径绑定逻辑锁对象成功");
+        }catch (Exception e){
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
 
 }

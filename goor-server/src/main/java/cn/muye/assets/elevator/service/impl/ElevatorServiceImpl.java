@@ -319,7 +319,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
             ElevatorMode mode = elevatorModes.get(0);
             return ElevatorModeEnum.getElevatorModeEnum(mode.getState());
         }
-        return null;
+        //如果没有查询结果，则设置默认返回结果为 "全自动" 模式
+        return ElevatorModeEnum.FULL_AUTOMATIC;
     }
 
     @Transactional
@@ -332,4 +333,6 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         bindElevatorPointCombination(elevators);
         return elevators;
     }
+
+
 }

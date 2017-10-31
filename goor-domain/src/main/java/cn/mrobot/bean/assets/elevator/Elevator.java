@@ -8,20 +8,21 @@ import java.util.List;
 
 @Table(name = "AS_ELEVATOR")
 public class Elevator extends BaseBean {
+
     private String name;
     private String ip;
     private String lockState = "0";// 0表示 未锁定、1表示 已锁定
     private String info;
     private Long elevatorshaftId;
     private String robotCode;
+    @Transient
     private String sceneName;//地图场景名称
     @Transient
     private ElevatorShaft elevatorShaft;
-
+    @Transient
     private String ipElevatorId; //工控电梯ID （八位二进制）
-
+    @Transient
     private Boolean defaultElevator = Boolean.FALSE; //是否默认
-
     @Transient
     private List<ElevatorPointCombination> elevatorPointCombinations = new ArrayList<>();
 

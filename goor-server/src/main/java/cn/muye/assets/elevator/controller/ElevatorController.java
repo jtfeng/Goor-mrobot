@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.elevator.*;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
@@ -479,6 +480,21 @@ public class ElevatorController {
     }
 
     /**
+     * 删除指定的电梯模式
+     * @return
+     */
+    @DeleteMapping("/status/elevatorMode/{id}")
+    public AjaxResult deleteElevatorMode(@PathVariable("id") Long id){
+        try {
+            this.elevatorModeService.deleteById(id);
+            return AjaxResult.success("删除电梯模式成功");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "删除电梯模式失败");
+        }
+    }
+
+    /**
      * 根据电梯 ID 查询电梯模式
      * @return
      */
@@ -490,6 +506,20 @@ public class ElevatorController {
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return AjaxResult.failed( "查询电梯模式失败");
+        }
+    }
+
+    /**
+     * 根据电梯编号查询所配置的所有电梯模式信息
+     * @return
+     */
+    @GetMapping("/elevatorMode/{elevatorId}")
+    public AjaxResult elevatorModeList(@PathVariable("elevatorId") Long elevatorId) {
+        try {
+            List<ElevatorMode> list = elevatorModeService.listElevatorModesByElevatorId(elevatorId);
+            return AjaxResult.success(list, "查询成功");
+        } catch (Exception e) {
+            return AjaxResult.failed(e, "查询失败");
         }
     }
 

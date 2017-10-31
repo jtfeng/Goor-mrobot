@@ -2,6 +2,8 @@ package cn.muye.assets.roadpath.service.impl;
 
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathLock;
+import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathMapper;
 import cn.muye.assets.roadpath.service.RoadPathLockService;
@@ -245,5 +247,12 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     @Override
     public synchronized boolean unlockNewVersion(Long id, String robotCode) throws Exception {
         return unlockInnerNewVersion(id, robotCode);
+    }
+
+    @Override
+    public List<RoadPathLock> listRoadPathLocks(WhereRequest whereRequest) throws Exception {
+        List<RoadPathLock> roadPathLockList = listPageByStoreIdAndOrder(whereRequest.getPage(),
+                whereRequest.getPageSize(), RoadPathLock.class,"ID DESC");
+        return roadPathLockList;
     }
 }
