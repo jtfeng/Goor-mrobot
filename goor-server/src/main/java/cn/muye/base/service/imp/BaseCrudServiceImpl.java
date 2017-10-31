@@ -27,6 +27,12 @@ public abstract class BaseCrudServiceImpl<T extends BaseBean>  extends BasePreIn
         return myMapper.delete(entity);
     }
 
+    public void delete(List<T> entityList){
+        for(T entity : entityList){
+            delete(entity);
+        }
+    }
+
     public int deleteById(Long id){
         return myMapper.deleteByPrimaryKey(id);
     }

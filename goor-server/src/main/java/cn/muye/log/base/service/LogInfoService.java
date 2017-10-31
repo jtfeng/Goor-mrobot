@@ -23,4 +23,6 @@ public interface LogInfoService {
     List<LogInfo> lists(WhereRequest whereRequest, Long storeId);
 
     int update(LogInfo logInfo);
+
+    void delete(List<LogInfo> logInfoList);
 }

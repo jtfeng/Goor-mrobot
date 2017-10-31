@@ -1,6 +1,7 @@
 package cn.muye.log.charge.service;
 
 import cn.mrobot.bean.charge.ChargeInfo;
+import cn.muye.base.service.BaseService;
 
 import java.util.List;
 
@@ -13,13 +14,11 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
-public interface ChargeInfoService {
-
-	void save(ChargeInfo chargeInfo);
+public interface ChargeInfoService extends BaseService<ChargeInfo> {
 
 	ChargeInfo get(Long id);
 
 	List<ChargeInfo> getByDeviceId(String deviceId);
 
-	List<ChargeInfo> lists();
+	List<ChargeInfo> listAll();
 }
