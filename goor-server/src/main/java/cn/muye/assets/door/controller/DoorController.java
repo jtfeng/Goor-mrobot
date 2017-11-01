@@ -145,6 +145,9 @@ public class DoorController {
                 doorDb.setOutPoint(door.getOutPoint());
                 doorDb.setWaitPoint(door.getWaitPoint());
                 doorDb.setIp(door.getIp());
+                doorDb.setDoorOrderType(door.getDoorOrderType());
+                doorDb.setPathLock(door.getPathLock());
+                doorDb.setPathId(door.getPathId());
 
                 doorService.update(doorDb);
                 return AjaxResult.success(doorDb, "修改成功");
