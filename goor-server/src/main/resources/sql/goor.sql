@@ -1215,7 +1215,7 @@ CREATE TABLE `LOG_INFO` (
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
--- Table structure for SCENE_ROBOT_MAPZIP_XREF
+-- Table structure for ROBOT_MAPZIP_XREF
 -- ----------------------------
 DROP TABLE IF EXISTS `ROBOT_MAPZIP_XREF`;
 CREATE TABLE `ROBOT_MAPZIP_XREF` (

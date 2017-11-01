@@ -18,7 +18,6 @@ public interface RoadPathLockService extends BaseService<RoadPathLock> {
     @Deprecated
     boolean lockInner(Long id, String robotCode) throws Exception;
 
-    @Deprecated
     boolean lock(Long id, String robotCode) throws Exception;
 
     boolean lockInner(Long id, String robotCode, Long direction) throws Exception;
@@ -42,7 +41,6 @@ public interface RoadPathLockService extends BaseService<RoadPathLock> {
     @Deprecated
     boolean unlockInner(Long id, String robotCode) throws Exception;
 
-    @Deprecated
     boolean unlock(Long id, String robotCode) throws Exception;
 
     boolean unlockInnerNewVersion(Long id, String robotCode) throws Exception;

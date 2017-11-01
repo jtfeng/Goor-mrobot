@@ -83,5 +83,5 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType);
 
-    RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName);
+    RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName);
 }

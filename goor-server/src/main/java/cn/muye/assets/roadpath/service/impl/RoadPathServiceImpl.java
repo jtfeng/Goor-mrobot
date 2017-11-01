@@ -291,11 +291,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName) {
+    public RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName) {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         if (sceneName != null) {
             criteria.andCondition("SCENE_NAME = ", sceneName);
+        }
+        if (mapName != null) {
+            criteria.andCondition("MAP_NAME = ", mapName);
         }
         if (x86RoadPathId != null) {
             criteria.andCondition("PATH_ID = ", x86RoadPathId);
