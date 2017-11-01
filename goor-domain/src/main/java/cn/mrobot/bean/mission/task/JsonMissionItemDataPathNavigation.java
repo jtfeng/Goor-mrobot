@@ -11,6 +11,10 @@ public class JsonMissionItemDataPathNavigation implements Serializable {
 
     private Long id;//路径ID
     private String scene_name;//场景名称
+    /**
+     *  地图名称
+     */
+    private String map_name;
     private Integer type;//工控路径类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向要求工控路径）
 
     public Long getId() {
@@ -27,6 +31,14 @@ public class JsonMissionItemDataPathNavigation implements Serializable {
 
     public void setScene_name(String scene_name) {
         this.scene_name = scene_name;
+    }
+
+    public String getMap_name() {
+        return map_name;
+    }
+
+    public void setMap_name(String map_name) {
+        this.map_name = map_name;
     }
 
     public Integer getType() {

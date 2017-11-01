@@ -1457,6 +1457,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             new JsonMissionItemDataPathNavigation();
                     data.setId(Long.parseLong(roadPath.getPathId()));
                     data.setScene_name(endMp.getSceneName());
+                    data.setMap_name(endMp.getMapName());
                     data.setType(roadPath.getX86PathType());
                     itemTask.setData(JsonUtils.toJson(data,
                             new TypeToken<JsonMissionItemDataPathNavigation>(){}.getType()));
@@ -1545,7 +1546,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         Long x86RoadPathId = Long.parseLong(mPointAtts.pathId);
         data.setId(x86RoadPathId);
         String sceneName = mp.getSceneName();
-        RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName);
+        String mapName = mp.getMapName();
+        RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName);
         if(roadPath == null) {
             logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
         }
@@ -1553,6 +1555,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             data.setType(roadPath.getX86PathType());
         }
         data.setScene_name(sceneName);
+        data.setMap_name(mapName);
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataPathNavigation>() {
                 }.getType()));
@@ -3690,7 +3693,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 Long x86RoadPathId = Long.parseLong(door.getPathId());
                                 path.setId(x86RoadPathId);
                                 String sceneName = door.getoPoint().getSceneName();
-                                RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName);
+                                String mapName = door.getoPoint().getMapName();
+                                RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName);
                                 if(roadPath == null) {
                                     logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
                                 }
