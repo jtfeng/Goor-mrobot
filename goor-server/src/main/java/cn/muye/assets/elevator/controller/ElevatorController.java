@@ -463,6 +463,7 @@ public class ElevatorController {
         try {
             Preconditions.checkNotNull(elevatorMode.getStart(), "开始时间不允许为空！");
             Preconditions.checkNotNull(elevatorMode.getEnd(),   "结束时间不允许为空！");
+            Preconditions.checkArgument(elevatorMode.getState() != null && elevatorMode.getState() != -1, "请选择电梯模式！");
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             format.parse("2017-01-01 " + elevatorMode.getStart());
             format.parse("2017-01-01 " + elevatorMode.getEnd());
