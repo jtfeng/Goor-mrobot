@@ -6,6 +6,7 @@ import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.dto.area.PathDTO;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.fixpath.service.impl.FixPathServiceImpl;
 import cn.muye.area.map.service.MapInfoService;
@@ -395,6 +396,11 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
      */
     @Override
     public void saveOrUpdateRoadPathByPathDTOList(List<PathDTO> pathDTOList, String sceneName , boolean isPointDuplicate) throws Exception{
+        //如果没有值，就不更新操作
+        if(pathDTOList == null || pathDTOList.size() == 0 || StringUtil.isNullOrEmpty(sceneName)) {
+            return;
+        }
+
         //先删除该场景下的所有路径，云端路径和工控路径都删除
         deleteBySceneName(sceneName);
 
