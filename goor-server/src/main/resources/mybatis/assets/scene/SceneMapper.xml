@@ -133,7 +133,7 @@
     </update>
 
     <update id="setSceneStateForUpload">
-        UPDATE goor.AS_SCENE SET STATE = #{param2} WHERE ID = #{param1}
+        UPDATE AS_SCENE SET STATE = #{param2} WHERE ID = #{param1}
     </update>
 
     <select id="getRelatedMapNameBySceneId" resultType="java.lang.String">
