@@ -1,6 +1,7 @@
 package cn.muye.log.base.service.impl;
 
 import cn.mrobot.bean.log.LogInfo;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
@@ -43,17 +44,13 @@ public class LogInfoServiceImpl implements LogInfoService {
         if (whereRequest != null && whereRequest.getQueryObj() != null) {
             JSONObject object = JSON.parseObject(whereRequest.getQueryObj());
             String deviceId = object.getString(SearchConstants.SEARCH_DEVICE_ID);
-            String logType = object.getString(SearchConstants.SEARCH_LOG_TYPE);
             String logLevel = object.getString(SearchConstants.SEARCH_LOG_LEVEL);
             Integer module = object.getInteger(SearchConstants.SEARCH_MODULE);
-            String mapName = object.getString(SearchConstants.SEARCH_MAP_NAME);
-            String sceneName = object.getString(SearchConstants.SEARCH_SCENE_NAME);
+            String beginDate = object.getString(SearchConstants.SEARCH_BEGIN_DATE);
+            String endDate = object.getString(SearchConstants.SEARCH_END_DATE);
 
             if (!StringUtil.isNullOrEmpty(deviceId)) {
                 criteria.andCondition("DEVICE_ID = '" + deviceId + "'");
-            }
-            if (!StringUtil.isNullOrEmpty(logType)) {
-                criteria.andCondition("LOG_TYPE = '" + logType + "'");
             }
             if (!StringUtil.isNullOrEmpty(logLevel)) {
                 criteria.andCondition("LOG_LEVEL ='" + logLevel + "'");
@@ -61,11 +58,11 @@ public class LogInfoServiceImpl implements LogInfoService {
             if (null != module) {
                 criteria.andCondition("MODULE = " + module);
             }
-            if (!StringUtil.isNullOrEmpty(mapName)) {
-                criteria.andCondition("MAP_NAME = '" + mapName+"'");
+            if (!StringUtil.isNullOrEmpty(beginDate)) {
+                criteria.andCondition("CREATE_TIME >= '" + beginDate + "'");
             }
-            if (!StringUtil.isNullOrEmpty(sceneName)) {
-                criteria.andCondition("SCENE_NAME = '" + sceneName+"'");
+            if (!StringUtil.isNullOrEmpty(endDate)) {
+                criteria.andCondition("CREATE_TIME <= '" + endDate + "'");
             }
         }
         criteria.andCondition("STORE_ID=" + storeId);
@@ -80,7 +77,7 @@ public class LogInfoServiceImpl implements LogInfoService {
 
     @Override
     public void delete(List<LogInfo> logInfoList) {
-        for (LogInfo logInfo : logInfoList){
+        for (LogInfo logInfo : logInfoList) {
             logInfoMapper.delete(logInfo);
         }
     }
