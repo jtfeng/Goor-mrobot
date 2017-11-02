@@ -395,6 +395,10 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
      */
     @Override
     public void saveOrUpdateRoadPathByPathDTOList(List<PathDTO> pathDTOList, String sceneName , boolean isPointDuplicate) throws Exception{
+        //先删除该场景下的所有路径，云端路径和工控路径都删除
+        deleteBySceneName(sceneName);
+
+        //再导入该场景的工控路径
         for (PathDTO pathDTO : pathDTOList) {
             //过滤掉地图名为null的错误数据
             if(null == pathDTO.getStartMap()
@@ -439,12 +443,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setWeight(getDistance(startPoint, endPoint));
             roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
             //根据数据库查询结果判断是更新还是新增
-            if (null != roadPathDB) {
-                roadPath.setId(roadPathDB.getId());
-                update(roadPath);  //更新
-            } else {
-                save(roadPath);  //新增
-            }
+            //if (null != roadPathDB) {
+            //    roadPath.setId(roadPathDB.getId());
+                //更新
+            //    update(roadPath);
+            //} else {
+                //新增
+                save(roadPath);
+            //}
         }
     }
 
@@ -570,5 +576,30 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         }
         // 关系生成完毕之后 ， 保存一系列数据到数据库中
         this.roadPathPointMapper.insertList(roadPathPoints);// 批量保存数据信息
+    }
+
+    /**
+     * 删除某场景下的所有路径对象
+     * @param sceneName
+     */
+    @Override
+    public void deleteBySceneName(String sceneName) {
+        try {
+            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null);
+            if(roadPaths != null && roadPaths.size() > 0) {
+                //先删除roadPathPoint表
+                for(RoadPath roadPath : roadPaths) {
+                    this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
+                }
+
+                //再删除该场景下所有roadPath
+                Example example = new Example(RoadPath.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andCondition("SCENE_NAME = ", sceneName);
+                this.roadPathMapper.deleteByExample(example);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
