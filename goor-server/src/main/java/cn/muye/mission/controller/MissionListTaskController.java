@@ -130,7 +130,7 @@ public class MissionListTaskController {
             commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, Object>() {{
                 put("command", command);
                 put("uuid", uuid);
-                put("sendTime", new Date().getTime());
+                put("sendTime", System.currentTimeMillis());
             }}))));
             MessageInfo info = new MessageInfo();
             info.setUuId(uuid);
