@@ -402,7 +402,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         }
 
         //先删除该场景下的所有路径，云端路径和工控路径都删除
-        deleteBySceneName(sceneName);
+        //deleteBySceneName(sceneName);
 
         //再导入该场景的工控路径
         for (PathDTO pathDTO : pathDTOList) {
