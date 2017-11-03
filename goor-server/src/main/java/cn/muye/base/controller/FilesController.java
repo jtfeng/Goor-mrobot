@@ -281,7 +281,7 @@ public class FilesController {
             try {
                 mapAnalysisService.analysis(info);
             } catch (Exception e) {
-                mapAnalysisService.callBack();
+//                mapAnalysisService.callBack();
                 throw new MapAnalysisException("地图解析失败，数据回滚");
             }
 
