@@ -117,8 +117,12 @@ public class RoadPathController {
             @PathVariable("lockId") Long lockId){
         try {
             RoadPath roadPath = this.roadPathService.findById(pathId);
-            roadPath.setPathLock(lockId);
-            roadPathService.updateSelective(roadPath);
+            if (lockId != 0L) {
+                roadPath.setPathLock(lockId);
+            }else {
+                roadPath.setPathLock(null);
+            }
+            roadPathService.update(roadPath);
             return AjaxResult.success("路径绑定逻辑锁对象成功");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
