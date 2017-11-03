@@ -67,11 +67,16 @@ public class FixPathServiceImpl implements FixPathService {
 
         JSONObject jsonObject = JSON.parseObject(messageData);
         String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);
-        String paths = jsonObject.getString(TopicConstants.PATHS);
-        List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
-
-        //调用统一存储工控固定路径方法
-        roadPathService.saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(pathDTOList, sceneName);
+        //判断场景是否是云端下发的场景名，如果不是，对上传的fixpath数据不做入库处理
+        Boolean idCloudRequest = CacheInfoManager.getFixpathSceneNameCache(sceneName);
+        if (idCloudRequest != null && idCloudRequest){
+            String paths = jsonObject.getString(TopicConstants.PATHS);
+            List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
+            //删除缓存
+            CacheInfoManager.removeFixpathSceneNameCache(sceneName);
+            //调用统一存储工控固定路径方法
+            roadPathService.saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(pathDTOList, sceneName);
+        }
     }
 
     @Override
@@ -89,8 +94,12 @@ public class FixPathServiceImpl implements FixPathService {
         JSONObject dataObject = new JSONObject();
         dataObject.put(TopicConstants.SCENE_NAME, mapSceneName);
         slamRequestBody.setData(dataObject);
-
-        return baseMessageService.sendRobotMessage(robotCode, TopicConstants.APP_PUB, JSON.toJSONString(slamRequestBody));
+        AjaxResult ajaxResult = baseMessageService.sendRobotMessage(robotCode, TopicConstants.APP_PUB, JSON.toJSONString(slamRequestBody));
+        if (ajaxResult.isSuccess()){
+            //缓存请求发送成功的场景名
+            CacheInfoManager.setFixpathSceneNameCache(mapSceneName);
+        }
+        return ajaxResult;
     }
 
     /**
