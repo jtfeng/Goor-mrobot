@@ -307,7 +307,7 @@ public class MapAnalysisService {
                 //检查命令是否执行失败。
                 if (p.waitFor() != 0) {
                     if (p.exitValue() == 1)//p.exitValue()==0表示正常结束，1：非正常结束
-                        LOGGER.error("命令执行失败!");
+                        LOGGER.error("命令执行失败! cmd = " + cmd);
                 }
                 inBr.close();
                 in.close();
