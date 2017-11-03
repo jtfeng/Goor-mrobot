@@ -309,6 +309,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return robotMapper.listRobot(map);
     }
 
+    @Override
     public List<Robot> listRobot(WhereRequest whereRequest) {
         Map map = Maps.newHashMap();
         if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
@@ -342,8 +343,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             List<MapPoint> mapPointList = Lists.newArrayList();
             xrefList.forEach(xref -> {
                 MapPoint mapPoint = pointService.findById(xref.getChargerMapPointId());
-                if (mapPoint != null)
+                if (mapPoint != null) {
                     mapPointList.add(mapPoint);
+                }
             });
             robot.setOriginChargerMapPointList(mapPointList);
         });
