@@ -92,12 +92,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      *
      * @param robot
      */
+    @Override
     public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientBatteryThreshold, String robotCodeDb) throws RuntimeException {
         List<MapPoint> list = robot.getOriginChargerMapPointList();
-        if (list != null && list.size() == 1) {
-            list = bindChargerMapPoint(robot.getId(), robot.getOriginChargerMapPointList());
-            robot.setOriginChargerMapPointList(list);
-        }
+//        if (list != null && list.size() > 0) {
+        list = bindChargerMapPoint(robot.getId(), robot.getOriginChargerMapPointList());
+        robot.setOriginChargerMapPointList(list);
+//        }
         if (lowBatteryThresholdDb == null || lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
             robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
         }
