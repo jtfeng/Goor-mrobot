@@ -593,9 +593,11 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         try {
             List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null);
             if(roadPaths != null && roadPaths.size() > 0) {
-                //先删除roadPathPoint表
+                //如果是云端路径，则先删除roadPathPoint表
                 for(RoadPath roadPath : roadPaths) {
-                    this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
+                    if(roadPath.getPathType().equals(Constant.PATH_TYPE_CLOUD)) {
+                        this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
+                    }
                 }
 
                 //再删除该场景下所有roadPath
