@@ -87,12 +87,12 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean lockInner(Long id, String robotCode, Long direction) throws Exception {
-        log.info("路径编号为：" + id + "、机器人编号为：" + robotCode + "、加锁方向为(按照定义即为路径编号)：" + direction);
+        log.info("路径锁编号：" + id + "、机器人编号为：" + robotCode + "、加锁方向为(按照定义即为路径编号)：" + direction);
         boolean flag = false;
         try {
-            RoadPath roadPath = Preconditions.checkNotNull(roadPathMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的路径对象!", String.valueOf(id)));
-            Long pathLockId = Preconditions.checkNotNull(roadPath.getPathLock(), String.format("编号为 %s 路径还未绑定逻辑对象锁!", String.valueOf(id)));
-            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(pathLockId), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(pathLockId)));
+//            RoadPath roadPath = Preconditions.checkNotNull(roadPathMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的路径对象!", String.valueOf(id)));
+//            Long pathLockId = Preconditions.checkNotNull(roadPath.getPathLock(), String.format("编号为 %s 路径还未绑定逻辑对象锁!", String.valueOf(id)));
+            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
             Preconditions.checkNotNull(direction, "方向信息不允许为空!");
             // +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++
             Long passCount = roadPathLock.getPassCount();//允许通过的最大机器人数量
@@ -206,12 +206,12 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean unlockInnerNewVersion(Long id, String robotCode) throws Exception {
-        log.info("路径编号为：" + id + "、机器人编号为：" + robotCode);
+        log.info("路径锁编号：" + id + "、机器人编号为：" + robotCode);
         boolean flag = false;
         try {
-            RoadPath roadPath = Preconditions.checkNotNull(roadPathMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的路径对象!", String.valueOf(id)));
-            Long pathLockId = Preconditions.checkNotNull(roadPath.getPathLock(), String.format("编号为 %s 路径还未绑定逻辑对象锁!", String.valueOf(id)));
-            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(pathLockId), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(pathLockId)));
+//            RoadPath roadPath = Preconditions.checkNotNull(roadPathMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的路径对象!", String.valueOf(id)));
+//            Long pathLockId = Preconditions.checkNotNull(roadPath.getPathLock(), String.format("编号为 %s 路径还未绑定逻辑对象锁!", String.valueOf(id)));
+            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey( id), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
             // +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++
             Long passCount = roadPathLock.getPassCount();//允许通过的最大机器人数量
             Long currentPasscount = roadPathLock.getCurrentPasscount();//当前路径中排队的机器人数量
