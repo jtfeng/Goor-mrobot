@@ -92,12 +92,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      *
      * @param robot
      */
+    @Override
     public AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientBatteryThreshold, String robotCodeDb) throws RuntimeException {
         List<MapPoint> list = robot.getOriginChargerMapPointList();
-        if (list != null && list.size() == 1) {
-            list = bindChargerMapPoint(robot.getId(), robot.getOriginChargerMapPointList());
-            robot.setOriginChargerMapPointList(list);
-        }
+//        if (list != null && list.size() > 0) {
+        list = bindChargerMapPoint(robot.getId(), robot.getOriginChargerMapPointList());
+        robot.setOriginChargerMapPointList(list);
+//        }
         if (lowBatteryThresholdDb == null || lowBatteryThresholdDb != null && !lowBatteryThresholdDb.equals(lowRobotBatteryThreshold)) {
             robot.setLowBatteryThreshold(lowRobotBatteryThreshold);
         }
@@ -309,6 +310,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return robotMapper.listRobot(map);
     }
 
+    @Override
     public List<Robot> listRobot(WhereRequest whereRequest) {
         Map map = Maps.newHashMap();
         if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
@@ -342,8 +344,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             List<MapPoint> mapPointList = Lists.newArrayList();
             xrefList.forEach(xref -> {
                 MapPoint mapPoint = pointService.findById(xref.getChargerMapPointId());
-                if (mapPoint != null)
+                if (mapPoint != null) {
                     mapPointList.add(mapPoint);
+                }
             });
             robot.setOriginChargerMapPointList(mapPointList);
         });

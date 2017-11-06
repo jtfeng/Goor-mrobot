@@ -3,8 +3,11 @@ package cn.muye.assets.roadpath.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
+import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.service.RoadPathService;
+import cn.muye.assets.scene.service.SceneService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,8 @@ public class RoadPathController {
 
     @Autowired
     private RoadPathService roadPathService;
+    @Autowired
+    private SceneService sceneService;
 
     /**
      * 创建
@@ -68,6 +73,26 @@ public class RoadPathController {
         try {
             this.roadPathService.deleteById(Long.parseLong(id));
             return AjaxResult.success();
+        }catch (Exception e){
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 删除指定场景的所有路径，包括云端路径和工控路径
+     * @param sceneId
+     * @return
+     */
+    @ RequestMapping(value = "/asset/roadPath/deleteBySceneId/{sceneId}", method = RequestMethod.DELETE)
+    public AjaxResult deleteRoadPathBySceneId(@PathVariable("sceneId") Long sceneId){
+        try {
+            Scene scene = sceneService.getSceneById(sceneId);
+            String sceneName = scene.getMapSceneName();
+            if(StringUtil.isNullOrEmpty(sceneName)) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+            }
+            this.roadPathService.deleteBySceneName(sceneName);
+            return AjaxResult.success("操作成功");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }

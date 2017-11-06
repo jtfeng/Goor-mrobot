@@ -85,6 +85,12 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<String, RoadPathMaps> roadPathMapsCache = new ConcurrentHashMapCache<String, RoadPathMaps>(); //key: 地图场景名 sceneName
 
+    /**
+     * 固定路径获取的uuid缓存
+     * //key: UUID
+     */
+    private static ConcurrentHashMapCache<String,Boolean> fixpathSceneNameCache = new ConcurrentHashMapCache<String, Boolean>();
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -105,7 +111,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         baseMicroSwitchAndAntiCache.setMaxLifeTime(0);
         baseSystemCache.setMaxLifeTime(0);
         navigationCache.setMaxLifeTime(0);
-
+        fixpathSceneNameCache.setMaxLifeTime(10 * 60 * 1000);
         //用户登录状态
         userLoginStatusCache.setMaxLifeTime(0);
 
@@ -438,5 +444,17 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void removeRoadPathMapsCache(Long storeId, String sceneName) {
         roadPathMapsCache.remove(storeId + sceneName);
+    }
+
+    public static Boolean getFixpathSceneNameCache(String sceneName) {
+        return fixpathSceneNameCache.get(sceneName);
+    }
+
+    public static void removeFixpathSceneNameCache(String sceneName) {
+        fixpathSceneNameCache.remove(sceneName);
+    }
+
+    public static void setFixpathSceneNameCache(String sceneName) {
+        CacheInfoManager.fixpathSceneNameCache.put(sceneName, true);
     }
 }

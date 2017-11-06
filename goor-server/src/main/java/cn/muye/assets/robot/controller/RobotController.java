@@ -79,6 +79,11 @@ public class RobotController {
             }
         }*/
         List list = robot.getOriginChargerMapPointList();
+        //TODO 将来要能绑定多个充电桩，现在只能绑定一个20171104
+        if(list != null && list.size() > 1) {
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,"只能绑定一个充电桩");
+        }
+
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
         if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {

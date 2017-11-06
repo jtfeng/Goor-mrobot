@@ -163,8 +163,9 @@ public class MapAnalysisService {
         }
 
         File[] mapFiles = mapFilePath.listFiles();
-        if (null == mapFiles)
+        if (null == mapFiles){
             return;
+        }
         for (File file : mapFiles) {
             String mapName = file.getName().substring(0, file.getName().lastIndexOf("."));
 
@@ -197,7 +198,7 @@ public class MapAnalysisService {
         mapInfoService.save(mapInfo);
 
         //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
-        sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPDATE_STATE);
+        sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "");
     }
 }
 
@@ -211,8 +212,9 @@ public class MapAnalysisService {
             return;
         }
         File[] pointFiles = pointFilePath.listFiles();
-        if (null == pointFiles)
+        if (null == pointFiles){
             return;
+        }
         for (File file : pointFiles) {
             String mapName = file.getName().substring(0, file.getName().lastIndexOf("."));
             Map map = readFileYAML(file);
@@ -301,13 +303,16 @@ public class MapAnalysisService {
                 BufferedInputStream in = new BufferedInputStream(p.getInputStream());
                 BufferedReader inBr = new BufferedReader(new InputStreamReader(in));
                 String lineStr;
-                while ((lineStr = inBr.readLine()) != null)
+                while ((lineStr = inBr.readLine()) != null){
                     //获得命令执行后在控制台的输出信息
                     LOGGER.info(lineStr);// 打印输出信息
+                }
                 //检查命令是否执行失败。
                 if (p.waitFor() != 0) {
-                    if (p.exitValue() == 1)//p.exitValue()==0表示正常结束，1：非正常结束
-                        LOGGER.error("命令执行失败!");
+                    //p.exitValue()==0表示正常结束，1：非正常结束
+                    if (p.exitValue() == 1){
+                        LOGGER.error("命令执行失败! cmd = " + cmd);
+                    }
                 }
                 inBr.close();
                 in.close();

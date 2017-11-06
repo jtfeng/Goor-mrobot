@@ -4,7 +4,6 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
@@ -15,8 +14,7 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
-import cn.muye.base.bean.SearchConstants;
-import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.base.LogInfoUtils;
 import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
@@ -29,6 +27,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -39,6 +38,8 @@ public class MapSyncService implements ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapSyncService.class);
     private static ApplicationContext applicationContext;
+    private static final int UPLOAD_SUCCESS = 1;
+    private static final int UPLOAD_FAIL = 2;
 
     private RabbitTemplate rabbitTemplate;
 
@@ -82,75 +83,38 @@ public class MapSyncService implements ApplicationContextAware {
         try {
             LOGGER.info("开始同步地图,robotList.size()=" + robotList.size() + ",sceneId=" + sceneId + ",mapZip.getFileName()=" + mapZip.getFileName());
             Long mapZipId = mapZip.getId();
-            if (robotList.size() == 1) {
-                Robot robot = robotList.get(0);
-                //如果需要同步地图的机器人是上传地图的机器人，则直接更新场景的状态
-                if (robot.getCode().equals(mapZip.getDeviceId())) {
-                    sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
-                    saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
-                    LOGGER.info("机器人列表为1，且机器人code = " + robot.getCode() + ", 为上传地图的机器人，不进行同步");
-                    return null;
-                }
-            }
-            if (null == applicationContext) {
-                LOGGER.error("applicationContext 为空");
+            if (!checkApplicationContextAndRabbitTemplate()) {
+                LOGGER.error("ApplicationContext And RabbitTemplate 参数为null");
                 return null;
             }
-            rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
-            if (null == rabbitTemplate) {
-                LOGGER.error("rabbitTemplate 为空");
-                return null;
-            }
-            //封装文件下载数据
-            CommonInfo commonInfo = new CommonInfo();
-            commonInfo.setLocalFileName(mapZip.getFileName());
-            commonInfo.setLocalPath(mapZip.getRobotPath());
-            commonInfo.setRemoteFileUrl(DOWNLOAD_HTTP + mapZip.getFilePath());
-            commonInfo.setMD5(FileValidCreateUtil.fileMD5(DOWNLOAD_HOME + mapZip.getFilePath()));
-
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setMessageText(JSON.toJSONString(commonInfo));
-            messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
-            messageInfo.setSendTime(new Date());
-            messageInfo.setSenderId("goor-server");
-            messageInfo.setMessageType(MessageType.EXECUTOR_MAP);
+            MessageInfo messageInfo = getMessageInfo(mapZip);
             Map<String, AjaxResult> resultMap = new HashMap<>();
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append("压缩包名称：").append(mapZip.getFileName()).append(",");
-            LOGGER.info("压缩包名称：" + mapZip.getFileName());
+            int successCount = 0;
             for (int i = 0; i < robotList.size(); i++) {
-
                 Robot robot = robotList.get(i);
-                if (robot == null)
-                    continue;
                 String code = robot.getCode();
                 //如果需要同步的机器为地图上传机器，则跳过
-                if (code.equals(mapZip.getDeviceId())) {
+                if (checkRobotIsMapUploadDevice(robot, mapZip)) {
+                    successCount ++;
                     stringBuffer.append(code).append(":").append("地图上传机器人").append(",");
                     LOGGER.info("需同步的机器人code为上传地图的机器人code，不进行同步，code=" + code);
-                    saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
                     continue;
                 }
-
-                String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(code, true, MessageType.EXECUTOR_MAP.name());
-                AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
-
+                AjaxResult ajaxClientResult = sendRabbitMQMessage(code, messageInfo);
                 //保存关联关系
-                if (null != ajaxClientResult && ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS) {
-                    resultMap.put(code, ajaxClientResult);
-                    saveOrUpdateMapZipXREF(mapZipId, true, robot.getId());
-                    stringBuffer.append(code).append(":").append("同步成功").append(",");
-                    LOGGER.info("机器人" + code + "同步成功");
-                } else {
-                    resultMap.put(code, AjaxResult.failed("未获取到返回结果"));
-                    saveOrUpdateMapZipXREF(mapZipId, false, robot.getId());
-                    stringBuffer.append(code).append(":").append("未获取到返回结果").append(",");
-                    LOGGER.info("机器人" + code + "同步失败或未获取到返回结果");
+                boolean isSuccess = handleSendResult(robot, mapZipId, stringBuffer, ajaxClientResult, resultMap);
+                if (isSuccess){
+                    successCount ++;
                 }
             }
-
             //更新指定场景的state
-            sceneService.checkSceneIsNeedToBeUpdated(mapZip.getSceneName(), SearchConstants.FAKE_MERCHANT_STORE_ID + "", Scene.SCENE_STATE.UPLOAD_SUCCESS, sceneId);
+            if (successCount > 0) {
+                sceneService.updateSceneState(mapZip.getSceneName(),UPLOAD_SUCCESS, sceneId);
+            } else {
+                sceneService.updateSceneState(mapZip.getSceneName(),UPLOAD_FAIL, sceneId);
+            }
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return resultMap;
         } catch (Exception e) {
@@ -159,9 +123,92 @@ public class MapSyncService implements ApplicationContextAware {
         return null;
     }
 
+    private boolean checkRobotIsMapUploadDevice(Robot robot, MapZip mapZip) throws Exception {
+        //如果需要同步地图的机器人是上传地图的机器人，则直接更新场景的状态
+        if (robot.getCode().equals(mapZip.getDeviceId())) {
+            saveOrUpdateMapZipXREF(mapZip.getId(), true, robot.getId());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean checkApplicationContextAndRabbitTemplate() {
+        if (null == applicationContext) {
+            LOGGER.error("applicationContext 为空");
+            return false;
+        }
+        rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+        if (null == rabbitTemplate) {
+            LOGGER.error("rabbitTemplate 为空");
+            return false;
+        }
+        return true;
+    }
+
+    private MessageInfo getMessageInfo(MapZip mapZip) throws IOException {
+        //封装文件下载数据
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setLocalFileName(mapZip.getFileName());
+        commonInfo.setLocalPath(mapZip.getRobotPath());
+        commonInfo.setRemoteFileUrl(DOWNLOAD_HTTP + mapZip.getFilePath());
+        commonInfo.setMD5(FileValidCreateUtil.fileMD5(DOWNLOAD_HOME + mapZip.getFilePath()));
+
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setSendTime(new Date());
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.EXECUTOR_MAP);
+        return messageInfo;
+    }
+
+    private AjaxResult sendRabbitMQMessage(String robotCode, MessageInfo messageInfo) {
+        Boolean isOnline = CacheInfoManager.getRobotOnlineCache(robotCode);
+        if (isOnline == null || !isOnline) {
+            LOGGER.info("机器人 +" + robotCode + "不在线，未同步地图");
+            return AjaxResult.failed();
+        }
+        String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(robotCode, true, MessageType.EXECUTOR_MAP.name());
+        AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
+        return ajaxClientResult;
+    }
+
     private void saveOrUpdateMapZipXREF(Long newMapZipId, boolean result, Long robotId) {
         RobotMapZipXREF robotMapZipXREF = new RobotMapZipXREF.Builder().newMapZipId(newMapZipId).success(result).robotId(robotId).build();
         robotMapZipXREFService.saveOrUpdate(robotMapZipXREF);
+    }
+
+    /**
+     * 返回同步操作是否成功
+     *
+     * @param robot
+     * @param mapZipId
+     * @param stringBuffer
+     * @param ajaxClientResult
+     * @param resultMap
+     * @return
+     */
+    private boolean handleSendResult(Robot robot,
+                                 Long mapZipId,
+                                 StringBuffer stringBuffer,
+                                 AjaxResult ajaxClientResult,
+                                 Map<String, AjaxResult> resultMap) {
+        String robotCode = robot.getCode();
+        Long robotId = robot.getId();
+        if (null != ajaxClientResult && ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS) {
+            resultMap.put(robotCode, ajaxClientResult);
+            saveOrUpdateMapZipXREF(mapZipId, true, robotId);
+            stringBuffer.append(robotCode).append(":").append("同步成功").append(",");
+            LOGGER.info("机器人" + robotCode + "同步成功");
+            return true;
+        } else {
+            resultMap.put(robotCode, AjaxResult.failed("未获取到返回结果"));
+            saveOrUpdateMapZipXREF(mapZipId, false, robotId);
+            stringBuffer.append(robotCode).append(":").append("未获取到返回结果").append(",");
+            LOGGER.info("机器人" + robotCode + "同步失败或未获取到返回结果");
+            return false;
+        }
     }
 
     @Override

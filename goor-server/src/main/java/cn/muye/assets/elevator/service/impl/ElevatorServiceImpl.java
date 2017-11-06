@@ -315,10 +315,16 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                 .andCondition("START <=", currentDateStr)
                 .andCondition("END >=", currentDateStr);
         List<ElevatorMode> elevatorModes = elevatorModeMapper.selectByExample(example);
+        log.info(" ################################################################## ");
+        log.info(String.format("查询电梯的id是：" + elevatorId));
         if (elevatorModes != null && elevatorModes.size() != 0) {
             ElevatorMode mode = elevatorModes.get(0);
+            log.info(String.format("电梯的模式为：%d", mode.getState()));
             return ElevatorModeEnum.getElevatorModeEnum(mode.getState());
+        }else{
+            log.info(String.format("没有获取到电梯的模式"));
         }
+        log.info(" ################################################################## ");
         //如果没有查询结果，则设置默认返回结果为 "全自动" 模式
         return ElevatorModeEnum.FULL_AUTOMATIC;
     }

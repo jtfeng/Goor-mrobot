@@ -54,6 +54,14 @@ public class DijkstraController {
     private String DOWNLOAD_HOME;
     @Autowired
     private PointService pointService;
+    @Autowired
+    ElevatorService elevatorService;
+    @Autowired
+    private StationService stationService;
+    @Autowired
+    private SceneService sceneService;
+    @Autowired
+    private RoadPathResultService dijkstraService;
     /**
      * 读取工控路径文件并入库，相同坐标点重复加
      * @return
@@ -159,8 +167,7 @@ public class DijkstraController {
         return dest;
     }
 
-    @Autowired
-    ElevatorService elevatorService;
+
 
     /**
      * 生成某一场景下的所有电梯等待点到出电梯点的虚拟云端路径
@@ -174,11 +181,11 @@ public class DijkstraController {
             Scene scene = sceneService.getSceneById(sceneId);
             String sceneName = scene.getMapSceneName();
             if(StringUtil.isNullOrEmpty(sceneName)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneName + "云端场景未绑定有效的工控场景");
             }
             List<Elevator> elevatorList = elevatorService.listBySceneName(sceneName);
             if(elevatorList == null || elevatorList.size() == 0) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未设置电梯");
+                return AjaxResult.success(sceneName + "云端场景未设置电梯");
             }
 
             /*
@@ -252,12 +259,7 @@ public class DijkstraController {
     }
 
 
-    @Autowired
-    private StationService stationService;
-    @Autowired
-    private SceneService sceneService;
-    @Autowired
-    private RoadPathResultService dijkstraService;
+
     /**
      * 计算某场景下所有站点间的云端路径并存储
      * 此算法只适用于用上面方法生成的路径点不重复的情况
@@ -380,7 +382,7 @@ public class DijkstraController {
                 }
 
             }
-            return AjaxResult.success();
+            return AjaxResult.success("操作成功");
 
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage());
