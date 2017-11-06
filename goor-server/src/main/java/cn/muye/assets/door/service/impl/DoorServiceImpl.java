@@ -65,7 +65,9 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
         if (temp.get(0).getPathLock() != null) {
             temp.get(0).setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(temp.get(0).getPathLock()));
         }
-        return bindPoint(temp.get(0));
+        Door door = bindPoint(temp.get(0));
+        bindRoadPathLock(door);
+        return door;
     }
 
     @Override
@@ -127,8 +129,22 @@ public class DoorServiceImpl extends BaseServiceImpl<Door> implements DoorServic
     private List<Door> listSetPoints(List<Door> doorList) {
         for(Door door:doorList) {
             bindPoint(door);
+            bindRoadPathLock(door);
         }
         return doorList;
+    }
+
+    /**
+     * 从数据库查出对应锁
+     * @param door
+     * @return
+     */
+    private Door bindRoadPathLock(Door door) {
+        if (door.getPathLock() != null) {
+            // 当逻辑锁对象不为空时，才级联查询对应的管理锁对象
+            door.setRoadPathLock(this.roadPathLockMapper.selectByPrimaryKey(door.getPathLock()));//设置对应的逻辑锁对象
+        }
+        return door;
     }
 
     /**
