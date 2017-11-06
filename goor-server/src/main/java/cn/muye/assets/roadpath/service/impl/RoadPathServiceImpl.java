@@ -5,13 +5,19 @@ import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.dto.area.PathDTO;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.fixpath.service.impl.FixPathServiceImpl;
+import cn.muye.area.map.service.MapInfoService;
+import cn.muye.area.point.service.PointService;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathPointMapper;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.mapper.SceneMapper;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -22,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -235,6 +242,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
+        example.setOrderByClause("ID DESC");
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
         return packageRoadPathDetail(roadPaths);
     }
@@ -254,6 +262,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
+        example.setOrderByClause("ID DESC");
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
         return roadPaths;
     }
@@ -283,11 +292,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName) {
+    public RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName) {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         if (sceneName != null) {
             criteria.andCondition("SCENE_NAME = ", sceneName);
+        }
+        if (mapName != null) {
+            criteria.andCondition("MAP_NAME = ", mapName);
         }
         if (x86RoadPathId != null) {
             criteria.andCondition("PATH_ID = ", x86RoadPathId);
@@ -341,13 +353,154 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         return roadPathDetails;
     }
 
+    @Override
     public void createRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
         this.roadPathMapper.insert(roadPath);
         packageRoadPathRelations(roadPathPointIds, roadPath);
     }
 
+    @Override
     public void updateRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("ID=" + roadPath.getId());
+        this.roadPathMapper.updateByExampleSelective(roadPath,example);
         packageRoadPathRelations(roadPathPointIds, roadPath);
+    }
+
+    @Override
+    public void createOrUpdateRoadPathByStartAndEndPoint(Long startPointId, Long endPointId, String sceneName, String mapName, Integer pathType,RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
+        List<RoadPath> roadPathList1 = listRoadPathByStartAndEndPoint(startPointId,
+                endPointId,sceneName,mapName,pathType);
+        if(roadPathList1 == null || roadPathList1.size() == 0 ) {
+            createRoadPathByRoadPathPointList(roadPath,roadPathPointIds);
+        }
+        //有则更新第一个的路径详细序列和权值
+        else {
+            RoadPath roadPathDB = roadPathList1.get(0);
+            roadPath.setId(roadPathDB.getId());
+            updateRoadPathByRoadPathPointList(roadPath,roadPathPointIds);
+        }
+    }
+
+    @Autowired
+    MapInfoService mapInfoService;
+    @Autowired
+    PointService pointService;
+    /**
+     * 根据PathDTOList插入点和工控路径
+     * @param pathDTOList
+     * @param sceneName
+     * @param isPointDuplicate 是否建立重复的路径交点
+     * @throws Exception
+     */
+    @Override
+    public void saveOrUpdateRoadPathByPathDTOList(List<PathDTO> pathDTOList, String sceneName , boolean isPointDuplicate) throws Exception{
+        //如果没有值，就不更新操作
+        if(pathDTOList == null || pathDTOList.size() == 0 || StringUtil.isNullOrEmpty(sceneName)) {
+            return;
+        }
+
+        //先删除该场景下的所有路径，云端路径和工控路径都删除
+        //deleteBySceneName(sceneName);
+
+        //再导入该场景的工控路径
+        for (PathDTO pathDTO : pathDTOList) {
+            //过滤掉地图名为null的错误数据
+            if(null == pathDTO.getStartMap()
+                    || "null".equals(pathDTO.getStartMap())
+                    || null == pathDTO.getEndMap()
+                    || "null".equals(pathDTO.getEndMap())) {
+                continue;
+            }
+
+            //把开始点所属的MapInfo插入数据库(如果存在则不新建，如果不存在则新建)
+            FixPathServiceImpl.findOrSaveMapInfoByPath(sceneName, pathDTO, true, mapInfoService);
+            //把开始点所属的MapInfo插入数据库(如果存在则不新建，如果不存在则新建)
+            FixPathServiceImpl.findOrSaveMapInfoByPath(sceneName, pathDTO, false, mapInfoService);
+
+            MapPoint startPoint = null;
+            MapPoint endPoint = null;
+            if(isPointDuplicate) {
+                startPoint = FixPathServiceImpl.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, true,pointService);
+                endPoint = FixPathServiceImpl.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, false,pointService);
+            }
+            else {
+                startPoint = FixPathServiceImpl.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, true,pointService);
+                endPoint = FixPathServiceImpl.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, false,pointService);
+            }
+
+            //封装RoadPath对象，保存数据库
+            RoadPath roadPath = new RoadPath();
+            roadPath.setSceneName(sceneName);
+            roadPath.setMapName(pathDTO.getStartMap());
+            roadPath.setPathId(pathDTO.getId() + "");
+            //添加roadpath查询，根据场景，地图，pathid进行查询，如果存在，则更新，不存在则添加
+            RoadPath roadPathDB = findRoadPath(roadPath);
+            //继续封装参数
+            roadPath.setStartPoint(startPoint.getId());
+            roadPath.setEndPoint(endPoint.getId());
+            roadPath.setPathType(Constant.PATH_TYPE_X86);
+            roadPath.setPathName(Constant.PATH + pathDTO.getId());
+            roadPath.setCreateTime(new Date());
+            roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+//            roadPath.setWeight(Constant.DEFAULT_ROAD_PATH_X86_WEIGHT);
+            //取两点间长度作为路径权值
+            roadPath.setWeight(getDistance(startPoint, endPoint));
+            roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
+            //根据数据库查询结果判断是更新还是新增
+            //if (null != roadPathDB) {
+            //    roadPath.setId(roadPathDB.getId());
+                //更新
+            //    update(roadPath);
+            //} else {
+                //新增
+                save(roadPath);
+            //}
+        }
+    }
+
+    /**
+     * 计算两点间坐标的长度，最终单位cm
+     * @param start
+     * @param end
+     * @return
+     */
+    private Long getDistance(MapPoint start, MapPoint end) {
+        Long result = 0L;
+        Double db = Math.sqrt(
+                Math.pow((start.getX() - end.getX()),2L)
+                + Math.pow((start.getY() - end.getY()),2L)
+        ) * 100;//换算成cm
+        result = new BigDecimal(db + "").setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
+        return result;
+    }
+
+    /**
+     * 测试计算坐标长度函数
+     * @param args
+     */
+    /*public static void main(String[] args) {
+        MapPoint start = new MapPoint();
+        MapPoint end = new MapPoint();
+        start.setX(0L);
+        start.setY(0L);
+        end.setX(3L);
+        end.setY(4L);
+        RoadPathServiceImpl roadPathService = new RoadPathServiceImpl();
+        System.out.println(roadPathService.getDistance(start, end));
+    }*/
+
+
+
+    @Override
+    public void saveOrUpdateRoadPathByPathDTOListDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
+        saveOrUpdateRoadPathByPathDTOList(pathDTOList, sceneName, true);
+    }
+
+    @Override
+    public void saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
+        saveOrUpdateRoadPathByPathDTOList(pathDTOList, sceneName, false);
     }
 
     /**
@@ -429,5 +582,32 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         }
         // 关系生成完毕之后 ， 保存一系列数据到数据库中
         this.roadPathPointMapper.insertList(roadPathPoints);// 批量保存数据信息
+    }
+
+    /**
+     * 删除某场景下的所有路径对象
+     * @param sceneName
+     */
+    @Override
+    public void deleteBySceneName(String sceneName) {
+        try {
+            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null);
+            if(roadPaths != null && roadPaths.size() > 0) {
+                //如果是云端路径，则先删除roadPathPoint表
+                for(RoadPath roadPath : roadPaths) {
+                    if(roadPath.getPathType().equals(Constant.PATH_TYPE_CLOUD)) {
+                        this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
+                    }
+                }
+
+                //再删除该场景下所有roadPath
+                Example example = new Example(RoadPath.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andCondition("SCENE_NAME = ", sceneName);
+                this.roadPathMapper.deleteByExample(example);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -18,6 +18,11 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue robotOnlineStateQuery() {
+        return new Queue(TopicConstants.ROBOT_ONLINE_QUERY,false,false,true, RabbitmqUtil.getRabbitMQArguments());
+    }
+
+    @Bean
     public FanoutExchange fanoutCommandExchange() {
         return new FanoutExchange(TopicConstants.FANOUT_COMMAND_EXCHANGE,false,true, RabbitmqUtil.getRabbitMQArguments());
     }

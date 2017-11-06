@@ -7,6 +7,7 @@ import cn.mrobot.bean.base.BaseBean;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by chay on 2017/6/7.
@@ -73,6 +74,14 @@ public class Station extends BaseBean{
     @Transient
     private List<MapPoint> mapPoints;
 
+    /**
+     * 前端传到后台的点序列列表
+     * key是点类型
+     * list是点Id列表
+     */
+    @Transient
+    Map<String,List<MapPoint>> typePoints;
+
     @Transient
     private List<Robot> robotList;
 
@@ -133,5 +142,13 @@ public class Station extends BaseBean{
 
     public void setAccessArriveStationIdList(List<Station> accessArriveStationIdList) {
         this.accessArriveStationIdList = accessArriveStationIdList;
+    }
+
+    public Map<String, List<MapPoint>> getTypePoints() {
+        return typePoints;
+    }
+
+    public void setTypePoints(Map<String, List<MapPoint>> typePoints) {
+        this.typePoints = typePoints;
     }
 }

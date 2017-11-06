@@ -615,6 +615,32 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     private MPointAtts getMapPointFloor(MapPoint mp) {
+        /*MPointAtts ret = new MPointAtts();
+        List<MapInfo> mapInfos = mapInfoService.getMapInfo(
+                mp.getMapName(),
+                mp.getSceneName(),
+                SearchConstants.FAKE_MERCHANT_STORE_ID
+        );
+        if (mapInfos != null){
+            for (MapInfo m :
+                    mapInfos) {
+                if (m != null) {
+                    ret.currentFloor = m.getFloor();
+                    ret.currentMapId = m.getId();
+                    break;
+                }
+            }
+        }
+        return ret;*/
+        return getMapPointFloorStatic(mp,mapInfoService);
+    }
+
+    /**
+     * 获取地图点所在的楼层
+     * @param mp
+     * @return
+     */
+    public static MPointAtts getMapPointFloorStatic(MapPoint mp,MapInfoService mapInfoService) {
         MPointAtts ret = new MPointAtts();
         List<MapInfo> mapInfos = mapInfoService.getMapInfo(
                 mp.getMapName(),
@@ -1432,6 +1458,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     data.setId(Long.parseLong(roadPath.getPathId()));
                     data.setScene_name(endMp.getSceneName());
                     data.setTolerance_type(roadPath.getX86PathType());
+                    data.setMap_name(endMp.getMapName());
                     itemTask.setData(JsonUtils.toJson(data,
                             new TypeToken<JsonMissionItemDataPathNavigation>(){}.getType()));
                     itemTask.setState(MissionStateInit);
@@ -1519,7 +1546,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         Long x86RoadPathId = Long.parseLong(mPointAtts.pathId);
         data.setId(x86RoadPathId);
         String sceneName = mp.getSceneName();
-        RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName);
+        String mapName = mp.getMapName();
+        RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName);
         if(roadPath == null) {
             logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
         }
@@ -1527,6 +1555,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             data.setTolerance_type(roadPath.getX86PathType());
         }
         data.setScene_name(sceneName);
+        data.setMap_name(mapName);
         itemTask.setData(JsonUtils.toJson(data,
                 new TypeToken<JsonMissionItemDataPathNavigation>() {
                 }.getType()));
@@ -2791,7 +2820,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order == null ||
                 order.getOrderSetting() == null ||
                 order.getRobot() == null ||
-                order.getOrderSetting().getStartStation() == null){
+                order.getOrderSetting().getStartStation() == null ||
+                order.getOrderSetting().getEndStation() == null){
             logger.info("##############  createMissionListsPathNav attrs error #################");
         }
 
@@ -2915,7 +2945,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         logger.info("###### xiahuo is ok ");
                     }else {
 
-                        //取得站点对象
+                        /*//取得站点对象
                         //TODO 以后AGV也需要按照切换的场景过滤
                         Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
                         if (station != null &&
@@ -2946,6 +2976,22 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     break;
                                 }
                             }
+                        }*/
+
+                        MapPoint songhuoPoint = pointService.findMapPointByStationIdAndCloudType(od.getStationId(), MapPointType.UNLOAD.getCaption());
+                        if(songhuoPoint != null){
+                            //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
+                            addPathRoadPathPoint(songhuoPoint, mapPoints, mpAttrs);
+//                                addElevatorPoint(mp, mapPoints, mpAttrs);
+                            //判断当前点的属性，根据属性加入相应的任务
+                            //加入该点，并标记这个点状态是orderDetail点
+                            mapPoints.add(songhuoPoint);
+                            //标记该点的属性
+                            atts = new MPointAtts();
+                            atts.type = MPointType_SONGHUO;
+                            atts.orderDetailMP = String.valueOf(od.getId());//标记是orderdetail的点
+                            mpAttrs.put(songhuoPoint, atts);
+                            logger.info("###### order detail station is ok ");
                         }
                     }
                 }
@@ -3030,9 +3076,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                             //使用上一个点和当前点查询是否工控路径，如果是工控路径，则添加工控导航任务
                                             addStaticPathPoint(prePoint, point, mp, mapPoints, mpAttrs);
                                         }
-                                        prePoint = point;
                                         break;
                                 }
+                                prePoint = point;
                             }
                         }
                         break;
@@ -3074,7 +3120,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         roadPaths) {
                     if (rp != null) {
                         MapPoint temp = new MapPoint();
-                        copyValue(temp,prePoint);
+                        MapPoint.copyValue(temp,prePoint);
                         temp.setSceneName(rp.getSceneName());
                         mapPoints.add(temp);
                         //标记该点的属性
@@ -3120,7 +3166,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (!prefloor.currentFloor.equals(mpfloor.currentFloor)){
             //楼层不一样，需要新增电梯任务
             MapPoint temp = new MapPoint();
-            copyValue(temp,currentMp);
+            MapPoint.copyValue(temp,currentMp);
 //            temp.setCloudMapPointTypeId(currentMp.getCloudMapPointTypeId());
 //            temp.setDeleteFlag(currentMp.getDeleteFlag());
 //            temp.setICPointType(currentMp.getICPointType());
@@ -3149,26 +3195,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             logger.info("###### addPathElevatorPoint is ok ");
         }
 //        prePoint = mp;
-    }
-
-    private MapPoint copyValue(MapPoint newP,MapPoint mapPoint) {
-        newP.setId(mapPoint.getId());
-        newP.setCloudMapPointTypeId(mapPoint.getCloudMapPointTypeId());
-        newP.setDeleteFlag(mapPoint.getDeleteFlag());
-        newP.setICPointType(mapPoint.getICPointType());
-        newP.setLabel(mapPoint.getLabel());
-        newP.setMapName(mapPoint.getMapName());
-        newP.setMapPointTypeId(mapPoint.getMapPointTypeId());
-        newP.setMapZipId(mapPoint.getMapZipId());
-        newP.setPointAlias(mapPoint.getPointAlias());
-        newP.setPointLevel(mapPoint.getPointLevel());
-        newP.setPointName(mapPoint.getPointName());
-        newP.setSceneName(mapPoint.getSceneName());
-        newP.setStoreId(mapPoint.getStoreId());
-        newP.setTh(mapPoint.getTh());
-        newP.setX(mapPoint.getX());
-        newP.setY(mapPoint.getY());
-        return newP;
     }
 
     /**
@@ -3294,13 +3320,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 case MPointType_CHONGDIAN:
                     //首先检索是否充电点和上一个站点之间是否有云端路径点序列，如果有，加入相关任务
                     //暂时取消充电任务
-//                    initPathMissionTaskChongDian(
-//                            missionListTask,
-//                            order,
-//                            startMp,
-//                            mp,
-//                            mPointAtts
-//                    );
+                    initPathMissionTaskChongDian(
+                            missionListTask,
+                            order,
+                            startMp,
+                            mp,
+                            mPointAtts
+                    );
                     break;
                 case MPointType_ELEVATOR:
 //                    initPathMissionTaskElevator(
@@ -3377,7 +3403,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         roadPaths) {
                     if (rp != null) {
                         MapPoint temp = new MapPoint();
-                        copyValue(temp,prePoint);
+                        MapPoint.copyValue(temp,prePoint);
                         temp.setSceneName(rp.getSceneName());
                         //标记该点的属性
                         MPointAtts atts = new MPointAtts();
@@ -3667,7 +3693,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 Long x86RoadPathId = Long.parseLong(door.getPathId());
                                 path.setId(x86RoadPathId);
                                 String sceneName = door.getoPoint().getSceneName();
-                                RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName);
+                                String mapName = door.getoPoint().getMapName();
+                                RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName);
                                 if(roadPath == null) {
                                     logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
                                 }
@@ -4185,8 +4212,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionListTask.getMissionTasks().add(finalUnloadTask);
 
         //语音任务，感谢使用，我要回去充电了？
-//        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
-//        missionListTask.getMissionTasks().add(voiceTask);
+        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
+        missionListTask.getMissionTasks().add(voiceTask);
 
     }
 

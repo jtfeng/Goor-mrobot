@@ -2,15 +2,20 @@ package cn.muye.assets.elevator.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.elevator.*;
+import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.point.service.PointService;
 import cn.muye.assets.elevator.mapper.ElevatorModeMapper;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.elevator.service.ElevatorModeService;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.elevator.service.ElevatorShaftService;
+import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -86,14 +92,17 @@ public class ElevatorController {
         }
     }
 
+    @Autowired
+    private PointService pointService;
     /**
      * 查询全部的地图点信息
      * @return
      */
     @RequestMapping(value = "listAllMapPoints", method = RequestMethod.GET)
-    public AjaxResult listAllMapPoints(){
+    public AjaxResult listAllMapPoints(@RequestParam(value = "sceneName", required = false) String sceneName){
         try {
-            List<MapPoint> mapPoints = this.mapPointMapper.selectAll();
+//            List<MapPoint> mapPoints = this.mapPointMapper.selectAll();
+            List<MapPoint> mapPoints = pointService.listByMapSceneNameAndPointType(sceneName,null, SearchConstants.FAKE_MERCHANT_STORE_ID);
             return AjaxResult.success(mapPoints, "查询全部地图点信息成功");
         }catch (Exception e){
             return AjaxResult.failed(e,          "查询全部地图点信息失败");
@@ -161,12 +170,37 @@ public class ElevatorController {
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
             ));
+
+            checkWaitPoint(combination);
+
             elevatorPointCombinationService.save(combination);
             return AjaxResult.success("保存四点组合信息成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return AjaxResult.failed( "保存四点组合信息失败");
         }
+    }
+
+    /**
+     * 查找等待点是否已经是复制的电梯等待点，如果不是则复制并新增一个
+     * @param combination
+     * @return
+     */
+    private ElevatorPointCombination checkWaitPoint(ElevatorPointCombination combination) {
+        //查找等待点是否已经是复制的电梯等待点，如果不是则复制并新增一个
+        MapPoint oldPoint = pointService.findById(combination.getWaitPoint());
+        //我们定义站的点明必须包含station,所以未找到的时候，就新建一个
+        if(oldPoint.getPointAlias().indexOf(Constant.ELEVATOR_WAIT) <= -1
+                && oldPoint.getCloudMapPointTypeId() != MapPointType.ELEVATOR_WAIT.getCaption()) {
+            MapPoint newPoint = new MapPoint();
+            MapPoint.copyValue(newPoint, oldPoint);
+            newPoint.setPointAlias(newPoint.getPointName()+ "_" +Constant.ELEVATOR_WAIT + "_" + combination.getName());
+            newPoint.setId(null);
+            newPoint.setCloudMapPointTypeId(MapPointType.ELEVATOR_WAIT.getCaption());
+            pointService.save(newPoint);
+            combination.setWaitPoint(newPoint.getId());
+        }
+        return combination;
     }
 
     /**
@@ -184,6 +218,9 @@ public class ElevatorController {
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
             ));
+
+            checkWaitPoint(combination);
+
             elevatorPointCombinationService.updateSelective(combination);
             return AjaxResult.success("更新四点组合信息成功");
         }catch (Exception e){
@@ -426,6 +463,7 @@ public class ElevatorController {
         try {
             Preconditions.checkNotNull(elevatorMode.getStart(), "开始时间不允许为空！");
             Preconditions.checkNotNull(elevatorMode.getEnd(),   "结束时间不允许为空！");
+            Preconditions.checkArgument(elevatorMode.getState() != null && elevatorMode.getState() != -1, "请选择电梯模式！");
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             format.parse("2017-01-01 " + elevatorMode.getStart());
             format.parse("2017-01-01 " + elevatorMode.getEnd());
@@ -438,7 +476,22 @@ public class ElevatorController {
             return AjaxResult.success("保存电梯模式成功");
         }catch (Exception e){
             log.error(e.getMessage(), e);
-            return AjaxResult.failed( "保存电梯模式失败");
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 删除指定的电梯模式
+     * @return
+     */
+    @DeleteMapping("/status/elevatorMode/{id}")
+    public AjaxResult deleteElevatorMode(@PathVariable("id") Long id){
+        try {
+            this.elevatorModeService.deleteById(id);
+            return AjaxResult.success("删除电梯模式成功");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed( "删除电梯模式失败");
         }
     }
 
@@ -454,6 +507,20 @@ public class ElevatorController {
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return AjaxResult.failed( "查询电梯模式失败");
+        }
+    }
+
+    /**
+     * 根据电梯编号查询所配置的所有电梯模式信息
+     * @return
+     */
+    @GetMapping("/elevatorMode/{elevatorId}")
+    public AjaxResult elevatorModeList(@PathVariable("elevatorId") Long elevatorId) {
+        try {
+            List<ElevatorMode> list = elevatorModeService.listElevatorModesByElevatorId(elevatorId);
+            return AjaxResult.success(list, "查询成功");
+        } catch (Exception e) {
+            return AjaxResult.failed(e, "查询失败");
         }
     }
 

@@ -25,7 +25,7 @@ public class WebSocketSendMessage {
      * @param wsMessage
      * @throws Exception
      */
-    public void sendWebSocketMessage(WSMessage wsMessage) throws Exception {
+    public void sendWebSocketMessage(WSMessage wsMessage){
         String deviceId = wsMessage.getDeviceId();
         //根据机器人code或者站编号 获取session
         Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(deviceId);
@@ -46,7 +46,7 @@ public class WebSocketSendMessage {
      * @param wsMessage
      * @throws Exception
      */
-    protected void sendWebSocketMessage(WSMessage wsMessage, Session session) throws Exception {
+    protected void sendWebSocketMessage(WSMessage wsMessage, Session session){
         if (null != session) {
             sendMessage(session, JSON.toJSONString(wsMessage));
         } else {

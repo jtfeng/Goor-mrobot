@@ -196,6 +196,23 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     /**
+     * 根据场景名、地图名、店铺ID查找MapInfo列表
+     * @param sceneName
+     * @param mapName
+     * @param storeId
+     * @return
+     */
+    public List<MapInfo> findByName(String sceneName, String mapName, Long storeId) {
+        Condition condition = new Condition(MapInfo.class);
+        condition.createCriteria()
+                .andCondition("SCENE_NAME = '" + sceneName + "'")
+                .andCondition("MAP_NAME = '" + mapName + "'")
+                .andCondition("STORE_ID =" + storeId);
+        condition.setOrderByClause("ID desc");
+        return mapInfoMapper.selectByExample(condition);
+    }
+
+    /**
      * 根据场景名获取地图名
      */
     private List<CascadePoint> getSceneName(int level, String sceneName) {

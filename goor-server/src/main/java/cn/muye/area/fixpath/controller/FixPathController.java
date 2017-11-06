@@ -18,10 +18,12 @@ public class FixPathController {
     @Autowired
     private FixPathService fixPathService;
 
-    @RequestMapping(value = "area/fixpath/{sceneId}", method = RequestMethod.GET)
-    public AjaxResult sendFixPathQuery(@PathVariable("sceneId") Long sceneId) {
+    @RequestMapping(value = "area/fixpath", method = RequestMethod.GET)
+    public AjaxResult sendFixPathQuery(@RequestParam("sceneId") Long sceneId,
+                                       @RequestParam("robotCode") String robotCode) {
         try {
-           return fixPathService.sendFixpathQuery(sceneId);
+            AjaxResult ajaxResult =  fixPathService.sendFixpathQuery(sceneId, robotCode);
+            return ajaxResult;
         } catch (Exception e) {
             logger.error(" 获取工控固定路径出错", e);
             return AjaxResult.failed("请求失败");

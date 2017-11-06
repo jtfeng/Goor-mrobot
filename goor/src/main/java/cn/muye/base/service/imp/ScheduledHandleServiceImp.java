@@ -3,32 +3,31 @@ package cn.muye.base.service.imp;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
-import cn.mrobot.bean.base.PubBean;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.base.PubX86HeartBeat;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.aes.AES;
 import cn.muye.base.bean.MessageInfo;
-import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.download.download.DownloadHandle;
-import cn.muye.base.listener.CheckHeartSubListenerImpl;
 import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.publisher.AppSubService;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
-import edu.wpi.rail.jrosbridge.callback.TopicCallback;
 import edu.wpi.rail.jrosbridge.messages.Message;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -41,12 +40,15 @@ import org.thymeleaf.util.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ScheduledHandleServiceImp implements ScheduledHandleService, ApplicationContextAware {
+
     private static Logger logger = Logger.getLogger(ScheduledHandleServiceImp.class);
     private static ApplicationContext applicationContext;
-
+    private static final int SUCCESS_CODE = 0;
+    private static final int SEND_COUNT = 10;
     private ReceiveMessageService receiveMessageService;
 
     private OffLineMessageService offLineMessageService;
@@ -57,8 +59,17 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private String localRobotSN;
 
+    private AppSubService appSubService;
+
     public ScheduledHandleServiceImp() {
 
+    }
+
+    private void init() {
+        ros = applicationContext.getBean(Ros.class);
+        rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
+        localRobotSN = (String) applicationContext.getBean("localRobotSN");
+        appSubService = applicationContext.getBean(AppSubService.class);
     }
 
     @Override
@@ -73,7 +84,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 info.setSenderId(localRobotSN);
                 info.setMessageType(MessageType.REPLY);
                 AjaxResult ajaxResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.DIRECT_COMMAND_REPORT_RECEIVE, info);
-                if(ajaxResult.isSuccess()){
+                if (ajaxResult.isSuccess()) {
                     message.setSuccess(true);
                     message.setSendCount(message.getSendCount() + 1);
                     receiveMessageService.update(message);
@@ -86,7 +97,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public void rosHealthCheck() throws Exception {
-        logger.info("-->> Scheduled rosHealthCheck start");
+//        logger.info("-->> Scheduled rosHealthCheck start");
         try {
             ros = applicationContext.getBean(Ros.class);
             if (null == ros) {
@@ -99,8 +110,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             //发布app_pub的获取当前地图消息
             Topic mapCurrentPubTopic = TopicHandleInfo.getTopic(ros, TopicConstants.APP_PUB);
             mapCurrentPubTopic.publish(new Message(TopicConstants.GET_CURRENT_MAP_PUB_MESSAGE));
-            logger.info("心跳时间："+CacheInfoManager.getTopicHeartCheckCache());
-            logger.info("心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()));
+            logger.info("心跳时间：" + CacheInfoManager.getTopicHeartCheckCache());
+            logger.info("心跳时间差：" + (System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()));
 //            logger.info("rosHealthCheck heartTime=" + CacheInfoManager.getTopicHeartCheckCache());
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 ros.disconnect();
@@ -128,8 +139,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             Topic x86MissionHeartBeatTopic = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_HEARTBEAT);
             x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));
 
-            logger.info("x86Mission心跳时间："+CacheInfoManager.getX86MissionTopicHeartCheckCache());
-            logger.info("x86Mission心跳时间差："+(System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()));
+            logger.info("x86Mission心跳时间：" + CacheInfoManager.getX86MissionTopicHeartCheckCache());
+            logger.info("x86Mission心跳时间差：" + (System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()));
             if ((System.currentTimeMillis() - CacheInfoManager.getX86MissionTopicHeartCheckCache()) > TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 x86MissionHeartBeatTopic.publish(new Message(JSON.toJSONString(new PubData(JSON.toJSONString(new PubX86HeartBeat(UUID.randomUUID().toString().replace("-", ""), "ping"))))));
             }
@@ -141,11 +152,11 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public void mqHealthCheck(String queueName) throws Exception {
         try {
-            logger.info("Scheduled mqHealthCheck start queueName="+queueName);
-            if(!getRabbitTemplate()){
+            logger.info("Scheduled mqHealthCheck start queueName=" + queueName);
+            if (!getRabbitTemplate()) {
                 return;
             }
-            if(!getLocalRobotSN()){
+            if (!getLocalRobotSN()) {
                 return;
             }
             MessageInfo messageInfo = new MessageInfo();
@@ -213,7 +224,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 }
                 if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                     Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
-                    if(null == echo){
+                    if (null == echo) {
                         echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                     }
                     Message toSend = new Message(commonInfo.getPublishMessage());
@@ -247,7 +258,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             }
             if ((System.currentTimeMillis() - CacheInfoManager.getTopicHeartCheckCache()) < TopicConstants.CHECK_HEART_TOPIC_MAX) {
                 Topic echo = TopicHandleInfo.getTopic(ros, commonInfo.getTopicName());
-                if(null == echo){
+                if (null == echo) {
                     echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                 }
                 Message toSend = new Message(commonInfo.getPublishMessage());
@@ -290,13 +301,13 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         }
     }
 
-    private boolean getRabbitTemplate(){
-        if(null == applicationContext){
+    private boolean getRabbitTemplate() {
+        if (null == applicationContext) {
             logger.error("getRabbitTemplate applicationContext is null error");
             return false;
         }
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
-        if(null == rabbitTemplate){
+        if (null == rabbitTemplate) {
             logger.error("getRabbitTemplate rabbitTemplate is null error ");
             return false;
         }
@@ -339,9 +350,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     @Override
     public void sendRobotInfo() throws Exception {
-        ros = applicationContext.getBean(Ros.class);
-        rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
-        localRobotSN = (String) applicationContext.getBean("localRobotSN");
+        init();
         MessageInfo info = new MessageInfo();
         RobotInfoConfig robotInfoConfig = CacheInfoManager.getRobotInfoConfigCache();
         Robot robot;
@@ -361,8 +370,88 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
     }
 
+    @Override
+    public void robotOnlineStateQuery(String uuid) throws Exception {
+        AjaxResult ajaxResult = robotOnlineState();
+        SlamBody slamBody = getSendData(uuid, ajaxResult);
+        for (int i = 1; i <= SEND_COUNT; i++) {
+            if (CacheInfoManager.getRobotOnlineUUIDCache(uuid)) {
+                logger.info(localRobotSN + "反馈信息，发送成功");
+                break;
+            }
+            logger.info("未收到反馈信息，继续发送第 " + i + " 次");
+            sendRobotOnlineTopic(slamBody);
+            TimeUnit.SECONDS.sleep(10);
+        }
+    }
+
+    @Override
+    public void robotOnlineState(String uuid) throws Exception {
+        AjaxResult ajaxResult = robotOnlineState();
+        SlamBody slamBody = getSendData(uuid, ajaxResult);
+        sendRobotOnlineTopic(slamBody);
+    }
+
+    private AjaxResult robotOnlineState() throws Exception {
+        init();
+        MessageInfo info = new MessageInfo();
+        info.setMessageText(TopicConstants.ROBOT_ONLINE_QUERY);
+        info.setSendTime(new Date());
+        info.setSenderId(localRobotSN);
+        info.setMessageType(MessageType.EXECUTOR_CLIENT);
+        AjaxResult ajaxResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.ROBOT_ONLINE_QUERY, info);
+        return ajaxResult;
+    }
+
+    /**
+     * 检查机器人在线状态
+     *
+     * @param ajaxResult
+     */
+    private SlamBody getSendData(String uuid, AjaxResult ajaxResult) {
+        boolean isOnline = ajaxResult != null && ajaxResult.isSuccess();
+        SlamBody slamBody;
+        if (isOnline) {
+            slamBody = getRobotOnlineSlamBody(uuid);
+        } else {
+            slamBody = getRobotOfflineSlamBody(uuid);
+        }
+        return slamBody;
+    }
+
+    private SlamBody getRobotOnlineSlamBody(String uuid) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Constant.ONLINE, true);
+        return getSlamBody(uuid, jsonObject);
+    }
+
+    private SlamBody getRobotOfflineSlamBody(String uuid) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Constant.ONLINE, false);
+        return getSlamBody(uuid, jsonObject);
+    }
+
+    private SlamBody getSlamBody(String uuid, Object data) {
+        SlamBody slamBody = new SlamBody();
+        slamBody.setUuid(uuid);
+        slamBody.setMsg("online");
+        slamBody.setData(data);
+        slamBody.setErrorCode(SUCCESS_CODE + "");
+        slamBody.setPubName(TopicConstants.ROBOT_ONLINE_QUERY);
+        return slamBody;
+    }
+
+    private void sendRobotOnlineTopic(SlamBody slamBody) {
+        try {
+            appSubService.sendTopic(TopicConstants.AGENT_PUB, TopicConstants.TOPIC_TYPE_STRING, slamBody);
+        } catch (Exception e) {
+            logger.error("发送在线信息出错", e);
+        }
+    }
+
     /**
      * robotInfoConfig转成robot
+     *
      * @param robotInfoConfig
      * @return
      */

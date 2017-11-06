@@ -31,6 +31,7 @@ public enum LogType{
 	INFO_CURRENT_POSE("INFO_CURRENT_POSE", "当前位置"),  //当前位置
 
 	WARNING("WARNING", "WARNING信息"),  //所有WARNING信息  与LogLevel有重复，添加此条主要是为了websocket信息的种类取值统一
+	WARNING_TIMEOUT("WARNING_TIMEOUT", "超时警告"),  //机器人超时警告
 	WARNING_BASE("WARNING_BASE", "底盘警告"),  //机器人静止被推动警告
 	WARNING_LOWER_POWER("WARNING_LOWER_POWER", "机器人低电量警告"),  //机器人低电量警告
 	WARNING_FORCE_RUN("WARNING_FORCE_RUN", "机器人静止被推动警告"),  //机器人静止被推动警告

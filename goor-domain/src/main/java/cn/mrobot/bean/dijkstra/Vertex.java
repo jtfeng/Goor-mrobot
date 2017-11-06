@@ -1,4 +1,4 @@
-package cn.muye.dijkstra;
+package cn.mrobot.bean.dijkstra;
 
 public class Vertex implements Comparable<Vertex> {
 

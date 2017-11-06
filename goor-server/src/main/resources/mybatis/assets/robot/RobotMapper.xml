@@ -45,6 +45,7 @@
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
             robot.ROBOT_ID_FOR_ELEVATOR,
+            robot.BUSY,
             scene.ID as SCENE_ID,
             scene.NAME as SCENE_NAME
         FROM

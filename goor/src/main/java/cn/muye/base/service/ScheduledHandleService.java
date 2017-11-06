@@ -28,4 +28,18 @@ public interface ScheduledHandleService {
     void timeSynchronized(String localRobotSN) throws Exception;
 
     void sendRobotInfo() throws Exception;
+
+    /**
+     * 定时任务接口，每30秒检查一次
+     * @param uuid
+     * @throws Exception
+     */
+    void robotOnlineState(String uuid) throws Exception;
+
+    /**
+     * app主动查询接口，将查询结果按照2秒每次发送10，收到反馈后停止发送
+     * @param uuid
+     * @throws Exception
+     */
+    void robotOnlineStateQuery(String uuid) throws Exception;
 }

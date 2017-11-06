@@ -325,7 +325,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
             log.info(String.format("没有获取到电梯的模式"));
         }
         log.info(" ################################################################## ");
-        return null;
+        //如果没有查询结果，则设置默认返回结果为 "全自动" 模式
+        return ElevatorModeEnum.FULL_AUTOMATIC;
     }
 
     @Transactional
@@ -338,4 +339,6 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         bindElevatorPointCombination(elevators);
         return elevators;
     }
+
+
 }

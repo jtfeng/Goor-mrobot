@@ -1,5 +1,8 @@
 package cn.mrobot.bean.constant;
 
+import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +10,8 @@ import java.util.List;
  * Created by Administrator on 2016/12/7.
  */
 public class Constant {
+
+    public static final String REQUEST = "request";
 
     //数据库数据删除状态
     public final static Integer NORMAL = 0; //正常值
@@ -22,6 +27,7 @@ public class Constant {
 
     //默认工控路径权值
     public final static Long DEFAULT_ROAD_PATH_X86_WEIGHT = 1L;
+    public final static Long DEFAULT_ELEVATOR_X86_WEIGHT = 999L;
 
     public static final String UTF_8 = "UTF-8";
 
@@ -54,6 +60,7 @@ public class Constant {
 
     public final static String EXPORT_DIR_NAME = "export"; //导出文件夹路径
     public final static String LOG_DIR_NAME= "log"; //日志文件夹路径
+    public static final String LOG_FILE_SUFFIX = ".csv";
 
     public static final String AUTHORIZE_USERNAME = "web";
 
@@ -83,6 +90,13 @@ public class Constant {
     public final static String ORDER_NAV_TYPE_PATH = "path";//下单优先执行的导航类型-固定路径导航
 
     public final static String PATH = "path";//下单优先执行的导航类型-固定路径导航
+    public final static String STATION = "station";//站点别名必须包含的字段
+    public final static String ELEVATOR_WAIT = "elevator_wait";//电梯等待点别名必须包含的字段
+    public final static String DOOR_WAIT = "door_wait";//门等待点别名必须包含的字段
+    public final static String LOAD = "load";//装货点别名必须包含的字段
+    public final static String CHARGE = "charge";//充电点别名必须包含的字段
+    public final static String UNLOAD = "unload";//中间卸货点别名必须包含的字段
+    public final static String FINAL_UNLOAD = "final_unload";//最终卸货点别名必须包含的字段
 
     public final static Long CHECK_IF_OFFLINE_TIME = 15000L; //15秒（rabbitMQ的connection-timeout时间为5秒，断网重连的时间为10秒，所以设置15秒）
 
@@ -93,6 +107,14 @@ public class Constant {
             1L,//单点导航
             4L,//自动充电
             5L//离开充电桩
+    );
+
+    //站相关的点类型列表
+    public final static List<MapPointType> STATION_MAP_POINT_TYPE_LIST = Arrays.asList(
+            MapPointType.CHARGER,
+            MapPointType.LOAD,
+            MapPointType.UNLOAD,
+            MapPointType.FINAL_UNLOAD
     );
 
     //MissionItemTask列表用于取货校验员工工号
@@ -148,4 +170,6 @@ public class Constant {
 
     public static final Integer EMPLOYEE_TYPE_ELEVATOR_ADMIN = 1; //电梯管理员
     public static final Integer EMPLOYEE_TYPE_NORMAL = 0; //普通员工
+
+    public static final String ONLINE = "online"; //在线
 }

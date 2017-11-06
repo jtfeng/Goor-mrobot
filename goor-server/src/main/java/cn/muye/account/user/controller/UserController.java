@@ -1,14 +1,12 @@
 package cn.muye.account.user.controller;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.account.Role;
-import cn.mrobot.bean.account.RoleTypeEnum;
-import cn.mrobot.bean.account.User;
-import cn.mrobot.bean.account.UserRoleXref;
+import cn.mrobot.bean.account.*;
 import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
+import cn.mrobot.bean.assets.door.DoorType;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
@@ -490,6 +488,9 @@ public class UserController {
         map.put("module", ModuleEnums.list());
         map.put("rfidBraceletType", RfidBraceletTypeEnum.list());
         map.put("stateField", StateFieldEnums.list());
+        map.put("stationPointType",MapPointType.list(Constant.STATION_MAP_POINT_TYPE_LIST));
+        map.put("doorType", DoorType.list());
+        map.put("employeeType", EmployeeTypeEnum.list());
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO != null) {

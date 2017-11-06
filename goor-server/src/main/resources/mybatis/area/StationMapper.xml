@@ -30,7 +30,7 @@
             LEFT JOIN AS_ROBOT r ON sr.ROBOT_ID = r.ID
             LEFT JOIN A_STATION_MAP_POINT_XREF smp ON s.ID = smp.STATION_ID
             LEFT JOIN A_MAP_POINT p ON smp.MAP_POINT_ID = p.ID
-        WHERE r.CODE = #{0}
+        WHERE r.CODE = #{0} AND s.ACTIVE = 0
     </select>
 
     <sql id="Base_Column_List">
@@ -61,7 +61,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM A_STATION
-        WHERE ID = #{id}
+        WHERE ID = #{id} AND ACTIVE = 0
     </select>
 
     <select id="update" resultMap="station">
@@ -101,11 +101,10 @@
         FROM A_STATION ast
         LEFT JOIN A_STATION_MAP_POINT_XREF asmx ON ast.ID = asmx.STATION_ID
         LEFT JOIN A_MAP_POINT am ON am.ID = asmx.MAP_POINT_ID
-        <where>
-            <if test="name != null ">
-                AND NAME LIKE  CONCAT('%',#{name},'%')
-            </if>
-        </where>
+        WHERE ast.ACTIVE = 0
+        <if test="name != null ">
+            AND NAME LIKE  CONCAT('%',#{name},'%')
+        </if>
     </select>
 
     <select id="listStationsBySceneAndMapPointType" resultType="cn.mrobot.bean.area.station.Station">
@@ -113,14 +112,13 @@
         FROM A_STATION ast
         LEFT JOIN A_STATION_MAP_POINT_XREF asmx ON ast.ID = asmx.STATION_ID
         LEFT JOIN A_MAP_POINT am ON am.ID = asmx.MAP_POINT_ID
-        <where>
-            <if test="type != null">
-                am.CLOUD_POINT_TYPE_ID = #{type}
-            </if>
-            <if test="sceneId != null">
-                AND ast.SCENE_ID = #{sceneId}
-            </if>
-        </where>
+        WHERE ast.ACTIVE = 0
+        <if test="type != null">
+            AND am.CLOUD_POINT_TYPE_ID = #{type}
+        </if>
+        <if test="sceneId != null">
+            AND ast.SCENE_ID = #{sceneId}
+        </if>
         GROUP BY ast.ID
     </select>
 </mapper>

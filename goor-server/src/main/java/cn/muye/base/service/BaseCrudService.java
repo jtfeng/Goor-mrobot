@@ -13,6 +13,8 @@ public interface BaseCrudService<T extends BaseBean> {
 
     int delete(T entity);
 
+    void delete(List<T> entityList);
+
     int deleteById(Long id);
 
     int update(T entity);

@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -73,7 +74,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return sceneMapper.selectAll();
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED )
     @Override
     public Object saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
@@ -391,7 +392,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             //表明状态为上传成功状态(需要针对某个具体场景)
 //            this.sceneMapper.setSceneState(mapSceneName, Long.parseLong(storeId), 1);
             Preconditions.checkArgument(sceneId != null && sceneId.length == 1, "更改场景状态为上传成功时,场景ID编号缺失,请检查代码!");
-            this.sceneMapper.setSceneStateForUpload(sceneId[0],1);
+            Scene scene = sceneMapper.selectByPrimaryKey(sceneId[0]);
+            scene.setState(1);
+            sceneMapper.updateByPrimaryKeySelective(scene);
         }
         return true;
     }

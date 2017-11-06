@@ -6,6 +6,7 @@ import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.area.station.StationMapPointXREF;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.StringUtil;
@@ -111,6 +112,21 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
+    public List<MapPoint> findByNameCloudType(String pointName, String sceneName, String mapName, long storeId, MapPointType mapPointType) {
+        Condition condition = new Condition(MapPoint.class);
+        Example.Criteria criteria = condition.createCriteria();
+        criteria.andCondition("POINT_NAME ='" + pointName + "'")
+                .andCondition("SCENE_NAME = '" + sceneName + "'")
+                .andCondition("MAP_NAME = '" + mapName + "'")
+                .andCondition("STORE_ID =" + storeId);
+        if(mapPointType != null) {
+            criteria.andCondition("CLOUD_POINT_TYPE_ID = '" + mapPointType.getCaption() + "'");
+        }
+        condition.setOrderByClause("POINT_NAME desc");
+        return pointMapper.selectByExample(condition);
+    }
+
+    @Override
     public List<MapPoint> list(WhereRequest whereRequest, long storeId) {
         Condition condition = new Condition(MapPoint.class);
         Example.Criteria criteria = condition.createCriteria();
@@ -173,13 +189,21 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<MapPoint> listBySceneMapXYTH(String sceneName,String mapName,double x,double y,double th) {
+    public List<MapPoint> listBySceneMapXYTH(String sceneName, String mapName, double x, double y, double th, MapPointType cloudMapPointType) {
         Condition condition = new Condition(MapPoint.class);
-        condition.createCriteria().andCondition("SCENE_NAME =" , sceneName)
-                .andCondition("MAP_NAME =" , mapName)
-                .andCondition("X =" , x)
-                .andCondition("Y =" , y)
-                .andCondition("TH =" , th);
+        Example.Criteria criteria = condition.createCriteria();
+        if(!StringUtil.isNullOrEmpty(sceneName)) {
+            criteria.andCondition("SCENE_NAME =" , sceneName);
+        }
+        if(!StringUtil.isNullOrEmpty(mapName)) {
+            criteria.andCondition("MAP_NAME =", mapName);
+        }
+        if(null != cloudMapPointType) {
+            criteria.andCondition("CLOUD_POINT_TYPE_ID =", cloudMapPointType.getCaption());
+        }
+        criteria.andCondition("X =", x);
+        criteria.andCondition("Y =", y);
+        criteria.andCondition("TH =", th);
         condition.setOrderByClause("POINT_NAME asc");
         return pointMapper.selectByExample(condition);
     }
@@ -263,7 +287,7 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, int type, Long storeId) {
+    public List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, Integer type, Long storeId) {
         return pointMapper.listByMapSceneNameAndPointType(mapSceneName, type, storeId);
     }
 
@@ -351,5 +375,29 @@ public class PointServiceImpl implements PointService {
 
     private List<MapPoint> getMapPoint(String sceneName, String mapName, int pointTypeId) {
         return pointMapper.selectPointByPointTypeMapName(sceneName, mapName, pointTypeId, SearchConstants.FAKE_MERCHANT_STORE_ID);
+    }
+
+    /**
+     * 查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
+     * @param sceneName
+     * @param mapName
+     * @param x
+     * @param y
+     * @param th
+     * @return
+     */
+    public static MapPoint findPathPointByXYTH(String sceneName,String mapName,
+                                               double x,double y,double th ,MapPointType mapPointType,PointService pointService) {
+        List<MapPoint> startPointList = pointService.listBySceneMapXYTH(
+                sceneName,mapName,x,y,th,mapPointType);
+        if(startPointList == null || startPointList.size() == 0) {
+            return null;
+        }
+        for(MapPoint tempPoint : startPointList) {
+            if(tempPoint.getPointAlias().indexOf(Constant.PATH) > -1) {
+                return tempPoint;
+            }
+        }
+        return null;
     }
 }
