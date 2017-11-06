@@ -10,6 +10,7 @@ import cn.mrobot.bean.assets.door.DoorType;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
 import cn.mrobot.bean.order.OrderSetting;
@@ -485,12 +486,13 @@ public class UserController {
         map.put("robotType", RobotTypeEnum.list());
         map.put("missionType", MissionTypeEnum.list());
         map.put("missionListType", MissionListTypeEnum.list());
-        map.put("module", ModuleEnums.list());
+        map.put("moduleEnums", ModuleEnums.list());
         map.put("rfidBraceletType", RfidBraceletTypeEnum.list());
         map.put("stateField", StateFieldEnums.list());
         map.put("stationPointType",MapPointType.list(Constant.STATION_MAP_POINT_TYPE_LIST));
         map.put("doorType", DoorType.list());
         map.put("employeeType", EmployeeTypeEnum.list());
+        map.put("logLevel", LogLevel.list());
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO != null) {

@@ -1458,8 +1458,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             new JsonMissionItemDataPathNavigation();
                     data.setId(Long.parseLong(roadPath.getPathId()));
                     data.setScene_name(endMp.getSceneName());
+                    data.setTolerance_type(roadPath.getX86PathType());
                     data.setMap_name(endMp.getMapName());
-                    data.setType(roadPath.getX86PathType());
                     itemTask.setData(JsonUtils.toJson(data,
                             new TypeToken<JsonMissionItemDataPathNavigation>(){}.getType()));
                     itemTask.setState(MissionStateInit);
@@ -1553,7 +1553,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
         }
         if(roadPath != null) {
-            data.setType(roadPath.getX86PathType());
+            data.setTolerance_type(roadPath.getX86PathType());
         }
         data.setScene_name(sceneName);
         data.setMap_name(mapName);
@@ -3700,7 +3700,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
                                 }
                                 if(roadPath != null) {
-                                    path.setType(roadPath.getX86PathType());
+                                    path.setTolerance_type(roadPath.getX86PathType());
                                 }
                                 path.setScene_name(door.getoPoint().getSceneName());
                                 obj.setPath(path);
