@@ -4,7 +4,6 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
-import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamRequestBody;
@@ -15,7 +14,6 @@ import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
-import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
@@ -23,7 +21,6 @@ import cn.muye.service.consumer.topic.BaseMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sun.tools.javac.code.Attribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +28,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * Created by Jelynn on 2017/9/18.
@@ -187,7 +183,7 @@ public class FixPathServiceImpl implements FixPathService {
     }
 
     /**
-     * 查询或者保存MapInfo——名称根据路径的起点和终点取
+     * 根据场景名、固定路径对象查询或者保存MapInfo——名称根据路径的起点和终点取
      *
      * @param sceneName 场景名
      * @param pathDTO   固定路径对象
@@ -196,7 +192,18 @@ public class FixPathServiceImpl implements FixPathService {
      */
     public static MapInfo findOrSaveMapInfoByPath(String sceneName, PathDTO pathDTO, boolean start , MapInfoService infoService) {
         String mapName = start?pathDTO.getStartMap() : pathDTO.getEndMap();
-        List<MapInfo> infoList = infoService.findByName(sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        return findOrSaveMapInfoBySceneMapName(sceneName,mapName,infoService);
+    }
+
+    /**
+     * 根据场景名、地图名查询或者保存MapInfo——名称根据路径的起点和终点取
+     *
+     * @param sceneName 场景名
+     * @param mapName   地图名
+     * @return 地图信息
+     */
+    public static MapInfo findOrSaveMapInfoBySceneMapName(String sceneName, String mapName, MapInfoService infoService) {
+        List<MapInfo> infoList = infoService.listByName(sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (null != infoList && infoList.size() > 0) {
             return infoList.get(0);
         }

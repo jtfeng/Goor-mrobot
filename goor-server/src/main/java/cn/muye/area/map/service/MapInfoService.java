@@ -40,5 +40,5 @@ public interface MapInfoService {
 
     CurrentInfo getCurrentInfo(String code) throws Exception;
 
-    List<MapInfo> findByName(String sceneName, String mapName, Long storeId);
+    List<MapInfo> listByName(String sceneName, String mapName, Long storeId);
 }
