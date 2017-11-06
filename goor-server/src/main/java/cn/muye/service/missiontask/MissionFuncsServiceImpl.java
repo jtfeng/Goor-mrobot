@@ -162,6 +162,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return 返回结果表示对应机器人的下发消息成功失败状态
      *
      */
+    @Override
     public AjaxResult createMissionListTasksByMissionLists(String robotCode,
                                                            List<MissionList> missionLists) throws Exception{
         if(missionLists == null || missionLists.size() <= 0
@@ -3475,7 +3476,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MPointAtts mPointAtts,
             RoadPathLockAtts roadPathLockAtts) {
         logger.info("### addRoadPathLockOrUnlock ");
-        if (mPointAtts.roadpathId != null){
+        if (mPointAtts.roadpathId != null && mPointAtts.roadpathId > 0){
             if (roadPathLockAtts.lastRoadPathId != null){
                 if (!Objects.equals(mPointAtts.roadpathId,
                         roadPathLockAtts.lastRoadPathId)){
