@@ -105,39 +105,44 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     "、路径中所有排队的机器人编号信息：" + robotCodes +
                     "、路径锁绑定的方向：" +  pathDirection);
 
-            // 首先需要判断是不是 第一个机器人 进入执行加锁操作
-            if (pathDirection == null) {
-                log.info("该机器人首次对路径锁进行加锁");
-                //(第一个)机器人进入
-                roadPathLock.setLockAction(RoadPathLock.LockAction.LOCK);
-                roadPathLock.setCreateTime(new Date());
-                roadPathLock.setRobotCode(robotCode);
-                roadPathLock.setDirection(direction);
-                roadPathLock.setCurrentPasscount(1L);
-                roadPathLock.setRobotCodes(robotCode);
-                updateSelective(roadPathLock);
+            if (robotCodes.contains(robotCode)) {
+                log.info("编号为：" + robotCode + " 的机器人重复请求执行加锁操作，上一次已经成功获取锁，所以直接返回加锁成功。");
                 flag = true;
-            } else {
-                log.info("路径锁已经被某个机器人进行加锁操作，后续机器人进行判断确定是否可以执行加锁操作");
-                //后续机器人依次进入，需要根据方向判断是否能够进行加锁
-                if (!direction.equals(pathDirection)) {
-                    log.info("加锁方向与最初的加锁方向不一致，加锁失败");
-                    //传入的方向与绑定的锁方向不一致，加锁失败
-                    flag = false;
+            }else {
+                // 首先需要判断是不是 第一个机器人 进入执行加锁操作
+                if (pathDirection == null) {
+                    log.info("该机器人首次对路径锁进行加锁");
+                    //(第一个)机器人进入
+                    roadPathLock.setLockAction(RoadPathLock.LockAction.LOCK);
+                    roadPathLock.setCreateTime(new Date());
+                    roadPathLock.setRobotCode(robotCode);
+                    roadPathLock.setDirection(direction);
+                    roadPathLock.setCurrentPasscount(1L);
+                    roadPathLock.setRobotCodes(robotCode);
+                    updateSelective(roadPathLock);
+                    flag = true;
                 } else {
-                    //方向一致此时需要判断当前排队数量是否已经达到阈值，若达到阈值，则加锁失败
-                    if (currentPasscount.equals(passCount)) {
-                        log.info("加锁方向与最初方向一致，但路径队列中的机器人数量已经达到最大阈值，加锁失败");
-                        flag = false;//加锁失败
-                    }else {
-                        log.info("满足各项检查条件，加锁成功！");
-                        //没有达到阈值，执行加锁操作
-                        roadPathLock.setCurrentPasscount(currentPasscount + 1L);
-                        roadPathLock.setCreateTime(new Date());
-                        roadPathLock.setRobotCode(robotCode);//将传入的机器人设置为拥有锁对象的持有者
-                        roadPathLock.setRobotCodes(robotCodes + "," + robotCode);//将此机器人信息加入到路径的冗余信息中
-                        updateSelective(roadPathLock);
-                        flag = true;
+                    log.info("路径锁已经被某个机器人进行加锁操作，后续机器人进行判断确定是否可以执行加锁操作");
+                    //后续机器人依次进入，需要根据方向判断是否能够进行加锁
+                    if (!direction.equals(pathDirection)) {
+                        log.info("加锁方向与最初的加锁方向不一致，加锁失败");
+                        //传入的方向与绑定的锁方向不一致，加锁失败
+                        flag = false;
+                    } else {
+                        //方向一致此时需要判断当前排队数量是否已经达到阈值，若达到阈值，则加锁失败
+                        if (currentPasscount.equals(passCount)) {
+                            log.info("加锁方向与最初方向一致，但路径队列中的机器人数量已经达到最大阈值，加锁失败");
+                            flag = false;//加锁失败
+                        } else {
+                            log.info("满足各项检查条件，加锁成功！");
+                            //没有达到阈值，执行加锁操作
+                            roadPathLock.setCurrentPasscount(currentPasscount + 1L);
+                            roadPathLock.setCreateTime(new Date());
+                            roadPathLock.setRobotCode(robotCode);//将传入的机器人设置为拥有锁对象的持有者
+                            roadPathLock.setRobotCodes(robotCodes + "," + robotCode);//将此机器人信息加入到路径的冗余信息中
+                            updateSelective(roadPathLock);
+                            flag = true;
+                        }
                     }
                 }
             }
@@ -228,9 +233,9 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
             }
             //解锁需要先判断，对应的路径所绑定的机器人信息中是否包含有发出解锁指令的机器人
             if (containerRobots.indexOf(robotCode) == -1) {
-                log.info("发出解锁指令的机器人不在当前路径队列中，无权解锁，解锁失败！");
+                log.info("发出解锁指令的机器人不在当前路径队列中，直接返回解锁成功的状态！");
                 //发出指令的机器人当前不在路径排队对象中，解锁失败
-                flag = false;
+                flag = true;
             }else {
                 //执行解锁 （真实解锁 与 修改排队数量 - 两类操作）
                 if (currentPasscount != 1) {
