@@ -105,7 +105,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     "、路径中所有排队的机器人编号信息：" + robotCodes +
                     "、路径锁绑定的方向：" +  pathDirection);
 
-            if (robotCodes.contains(robotCode)) {
+            if (robotCodes != null && robotCodes.contains(robotCode)) {
                 log.info("编号为：" + robotCode + " 的机器人重复请求执行加锁操作，上一次已经成功获取锁，所以直接返回加锁成功。");
                 flag = true;
             }else {
