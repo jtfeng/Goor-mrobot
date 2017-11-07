@@ -449,14 +449,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setWeight(getDistance(startPoint, endPoint));
             roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
             //根据数据库查询结果判断是更新还是新增
-            //if (null != roadPathDB) {
-            //    roadPath.setId(roadPathDB.getId());
+            if (null != roadPathDB) {
+                roadPath.setId(roadPathDB.getId());
                 //更新
-            //    update(roadPath);
-            //} else {
+                update(roadPath);
+            } else {
                 //新增
                 save(roadPath);
-            //}
+            }
         }
     }
 

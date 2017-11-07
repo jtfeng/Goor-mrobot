@@ -175,32 +175,45 @@ public class MapAnalysisService {
             }
             //同场景和地图如果有数据，则删除
             List<MapInfo> mapInfoList = mapInfoService.getMapInfo(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            MapInfo mapInfoDB = null;
             if (mapInfoList != null && mapInfoList.size() > 0) {
-                for (MapInfo mapInfo : mapInfoList) {
-                    mapInfoService.deleteByPrimaryKey(mapInfo.getId());
-                }
+//                for (MapInfo mapInfo : mapInfoList) {
+//                    mapInfoService.deleteByPrimaryKey(mapInfo.getId());
+//                }
+                mapInfoDB = mapInfoList.get(0);
+            }
+
+            //遍历地图
+            MapInfo mapInfo = new MapInfo();
+            mapInfo.setMapName(mapName);
+            mapInfo.setSceneName(sceneName);
+            mapInfo.setMapZipId(mapZipId);
+            mapInfo.setDeviceId(deviceId);
+            mapInfo.setRos(JSON.toJSONString(map));
+
+            File pgmFile = new File(mapFilePath.getAbsolutePath(), map.get("image").toString());
+            String convertPGMFilePath = convertFile(pgmFile);
+            mapInfo.setPngImageLocalPath(convertPGMFilePath.replace(DOWNLOAD_HOME, ""));//保存相对路径
+            mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
+
+            //没有则新增
+            if(mapInfoDB == null) {
+                mapInfo.setCreateTime(createTime);
+                mapInfoService.save(mapInfo);
+            }
+            //有则更新
+            else {
+                mapInfo.setFloor(mapInfoDB.getFloor());
+                mapInfo.setMapAlias(mapInfoDB.getMapAlias());
+                mapInfo.setPngDesigned(mapInfoDB.getPngDesigned());
+                mapInfoService.update(mapInfo);
+            }
+
+            //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
+            sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "");
         }
-
-        //遍历地图
-        MapInfo mapInfo = new MapInfo();
-        mapInfo.setMapName(mapName);
-        mapInfo.setSceneName(sceneName);
-        mapInfo.setMapZipId(mapZipId);
-        mapInfo.setDeviceId(deviceId);
-        mapInfo.setCreateTime(createTime);
-        mapInfo.setRos(JSON.toJSONString(map));
-
-        File pgmFile = new File(mapFilePath.getAbsolutePath(), map.get("image").toString());
-        String convertPGMFilePath = convertFile(pgmFile);
-        mapInfo.setPngImageLocalPath(convertPGMFilePath.replace(DOWNLOAD_HOME, ""));//保存相对路径
-        mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        CacheInfoManager.removeMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
-        mapInfoService.save(mapInfo);
-
-        //查询是否有绑定的云端场景，如果有，则更改状态，提示场景需要更新关联的地图
-        sceneService.checkSceneIsNeedToBeUpdated(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID + "");
     }
-}
 
     /**
      * 解析导航目标点文件

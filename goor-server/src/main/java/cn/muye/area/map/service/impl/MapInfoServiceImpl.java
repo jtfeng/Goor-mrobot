@@ -81,6 +81,7 @@ public class MapInfoServiceImpl implements MapInfoService {
         example.createCriteria().andCondition("MAP_NAME = '" + name + "'")
                 .andCondition("SCENE_NAME = '" + sceneName + "'")
                 .andCondition("STORE_ID = " + storeId + "");
+        example.setOrderByClause("ID desc");
         return parseLocalPath(mapInfoMapper.selectByExample(example));
     }
 
@@ -202,7 +203,8 @@ public class MapInfoServiceImpl implements MapInfoService {
      * @param storeId
      * @return
      */
-    public List<MapInfo> findByName(String sceneName, String mapName, Long storeId) {
+    @Override
+    public List<MapInfo> listByName(String sceneName, String mapName, Long storeId) {
         Condition condition = new Condition(MapInfo.class);
         condition.createCriteria()
                 .andCondition("SCENE_NAME = '" + sceneName + "'")
