@@ -160,7 +160,7 @@ public class ScheduleTasks {
 
     @Scheduled(cron = "*/10 * * * * ?")
     public void missionStateCommonRequest() {
-        logger.info("missionStateCommonRequest Scheduled send");
+        logger.debug("missionStateCommonRequest Scheduled send");
         try {
 //            logger.info("result is: " + x86MissionCommonRequestService.sendX86MissionStateCommonRequest());
             x86MissionCommonRequestService.sendX86MissionStateCommonRequest();
@@ -175,7 +175,7 @@ public class ScheduleTasks {
     @Scheduled(cron = "*/2 * * * * ?")
     public void sendCurrentPose() {
         try {
-            logger.info("Scheduled send robots current pose start");
+            logger.debug("Scheduled send robots current pose start");
             currentPoseService.sendCurrentPose();
         } catch (Exception e) {
             logger.error("Scheduled send robots current pose error", e);

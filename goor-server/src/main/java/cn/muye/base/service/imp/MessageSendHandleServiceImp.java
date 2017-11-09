@@ -100,7 +100,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
             this.saveSendRecord(messageInfo);
         }
         if(StringUtils.isEmpty(routingKey)){
-            log.info("开始批量发送消息");
+            log.debug("开始批量发送消息");
             rabbitTemplate.convertAndSend(exchange, "", messageInfo);
             return AjaxResult.success("已发送，等待机器人回复");
         }
