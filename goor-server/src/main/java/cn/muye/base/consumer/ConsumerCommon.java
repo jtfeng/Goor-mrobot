@@ -485,7 +485,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.TOPIC_SERVER_COMMAND)
     public void topicServerCommand(@Payload MessageInfo messageInfo) {
         try {
-            logger.info("receive heartBeat message topicServerCommand receive message");
+            logger.debug("receive heartBeat message topicServerCommand receive message");
         } catch (Exception e) {
             logger.error("consumer topicServerCommand exception", e);
         }
@@ -499,7 +499,7 @@ public class ConsumerCommon {
     @RabbitListener(queues = TopicConstants.FANOUT_SERVER_COMMAND)
     public void fanoutServerCommand(@Payload MessageInfo messageInfo) {
         try {
-            logger.info("fanoutServerCommand receive message");
+            logger.debug("fanoutServerCommand receive message");
         } catch (Exception e) {
             logger.error("consumer fanoutServerCommand exception", e);
         }

@@ -29,7 +29,7 @@ public class ScheduledHandle {
                 try {
                     ScheduledHandleService service = new ScheduledHandleServiceImp();
                     service.mqHealthCheck();
-                    logger.info("schedule mqHealthCheckScheduled");
+                    logger.debug("schedule mqHealthCheckScheduled");
                 } catch (Exception e) {
                     logger.error("schedule mqHealthCheckScheduled exception", e);
                 }
