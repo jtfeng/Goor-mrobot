@@ -56,7 +56,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public void mqHealthCheck() throws Exception {
         try {
-            logger.info("Scheduled mqHealthCheck start");
+            logger.debug("Scheduled mqHealthCheck start");
             if (!getRabbitTemplate()) {
                 return;
             }
@@ -64,7 +64,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             messageInfo.setSendTime(new Date());
             messageInfo.setSenderId("server");
             messageInfo.setMessageType(MessageType.RABBITMQ_HEARTBEAT);
-            logger.info("开始发送goor-server心跳消息");
+            logger.debug("开始发送goor-server心跳消息");
             rabbitTemplate.convertAndSend(TopicConstants.TOPIC_SERVER_COMMAND, messageInfo);
         } catch (final Exception e) {
             logger.error("Scheduled mqHealthCheck exception", e);
