@@ -3,6 +3,7 @@ package cn.mrobot.bean.mission.task;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 /**
  * Created by abel on 17-7-8.
@@ -34,6 +35,12 @@ public class MissionItemTask extends BaseBean {
     private String description; //描述
     private String data;//任务详细/功能数据
     private String featureValue;//data对应子功能的唯一命令字串
+
+    /**
+     * 是否可忽略执行状态回执
+     */
+    @Transient
+    private boolean ignorable;
 
     public Long getSceneId() {
         return sceneId;
@@ -97,5 +104,13 @@ public class MissionItemTask extends BaseBean {
 
     public void setFeatureValue(String featureValue) {
         this.featureValue = featureValue;
+    }
+
+    public boolean isIgnorable() {
+        return ignorable;
+    }
+
+    public void setIgnorable(boolean ignorable) {
+        this.ignorable = ignorable;
     }
 }

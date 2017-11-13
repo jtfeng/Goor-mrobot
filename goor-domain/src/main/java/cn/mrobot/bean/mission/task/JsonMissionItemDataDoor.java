@@ -41,7 +41,10 @@ public class JsonMissionItemDataDoor implements Serializable {
         private String scene_name;
         private Long id;
         private Integer tolerance_type;//工控路径类型（此处暂定为 0 表示终点保持原样工控路径 1 代表终点无朝向要求工控路径）
-
+        /**
+         *  地图名称
+         */
+        private String map_name;
 
         public String getScene_name() {
             return scene_name;
@@ -65,6 +68,14 @@ public class JsonMissionItemDataDoor implements Serializable {
 
         public void setTolerance_type(Integer tolerance_type) {
             this.tolerance_type = tolerance_type;
+        }
+
+        public String getMap_name() {
+            return map_name;
+        }
+
+        public void setMap_name(String map_name) {
+            this.map_name = map_name;
         }
     }
 }
