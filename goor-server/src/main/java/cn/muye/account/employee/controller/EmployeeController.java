@@ -57,8 +57,10 @@ public class EmployeeController {
             if (StringUtil.isNullOrEmpty(name)) {
                 return AjaxResult.failed(employee, "员工名称不能为空");
             }
-            Employee employeeDb = employeeService.getByCode(code);
-            if (employeeDb != null && employeeDb.getCode() != null && employeeDb.getCode().equals(code)) {
+            Employee employeeDb = employeeService.getByCodeType(code, employee.getType());
+            //同类型下的员工编号不允许重复
+            if (employeeDb != null && employeeDb.getCode() != null
+                    && employeeDb.getCode().equals(code) && employeeDb.getType().equals(employee.getType())) {
                 return AjaxResult.failed(employee, "员工编号重复");
             }
             employeeService.addEmployee(employee);
@@ -93,7 +95,7 @@ public class EmployeeController {
             }
             Employee employeeDb = employeeService.getByCode(code);
             if (employeeDb != null && employeeDb.getCode()!= null && employeeDb.getCode().equals(code) && !employeeDb.getId().equals(id)) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "员工工号重复");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "同类型员工工号重复");
             }
             employeeService.updateEmployee(employee);
         } catch (Exception e) {

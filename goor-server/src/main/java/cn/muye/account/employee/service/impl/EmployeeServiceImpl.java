@@ -131,6 +131,19 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     }
 
     @Override
+    public Employee getByCodeType(String code,Integer type) {
+        Employee employee = new Employee();
+        employee.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        employee.setCode(code);
+        employee.setType(type);
+        List<Employee> employeeDb = employeeMapper.select(employee);
+        if(employeeDb == null || employeeDb.size() == 0) {
+            return null;
+        }
+        return employeeDb.get(0);
+    }
+
+    @Override
     public List<Employee> list(WhereRequest whereRequest) {
         List<Employee> employeeDbList = listPageByStoreIdAndOrder(whereRequest.getPage(), whereRequest.getPageSize(), Employee.class, "ID DESC");
         if (employeeDbList != null && employeeDbList.size() > 0) {
