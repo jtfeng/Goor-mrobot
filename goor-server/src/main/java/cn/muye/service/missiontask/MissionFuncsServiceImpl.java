@@ -1673,6 +1673,38 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataMp3 json =
                 new JsonMissionItemDataMp3();
         json.setFilename(fileName);
+        json.setResscene( StringUtil.isEmpty(order.getResscene()) ? "default":order.getResscene());
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataMp3>() {
+                }.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_mp3);
+
+        return itemTask;
+    }
+
+    /**
+     * 获取列表语音ITEM任务
+     * @param mp
+     * @param fileNames
+     * @return
+     */
+    private MissionItemTask getListMp3VoiceItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            List<String> fileNames) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "列表语音Item");
+        itemTask.setName(MissionItemName_mp3);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        JsonMissionItemDataMp3 json =
+                new JsonMissionItemDataMp3();
+        json.setFilenames(fileNames);
+        json.setResscene(StringUtil.isEmpty(order.getResscene()) ? "default":order.getResscene());
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataMp3>() {
                 }.getType()));
@@ -4381,7 +4413,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         if (missionItemConcurrentable){
             //并行执行语音任务
-            MissionItemTask temp = getMp3VoiceItemTask(order, mp, parentName, MP3_TAKE_CABINET);
+            ArrayList<String> filenames = new ArrayList<>();
+            filenames.add(MP3_TAKE_CABINET);
+            filenames.add(MP3_TAKE_MEDICINE_SIGN);
+            MissionItemTask temp = getListMp3VoiceItemTask(order, mp, parentName, filenames);
             if (temp != null){
                 temp.setIgnorable(true);
                 unloadTask.getMissionItemTasks().add(temp);
