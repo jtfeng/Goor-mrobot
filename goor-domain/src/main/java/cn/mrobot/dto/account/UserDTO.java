@@ -1,7 +1,6 @@
 package cn.mrobot.dto.account;
 
 
-import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.dto.area.station.StationDTO4User;
 
 import java.util.List;
@@ -22,6 +21,8 @@ public class UserDTO {
     private List<StationDTO4User> stationList; //站LIST
 
     private String roleName; //角色名称
+
+    private Integer directLoginKey; //快捷登陆口令（4位码）
 
     public Long getId() {
         return id;
@@ -71,4 +72,11 @@ public class UserDTO {
         this.roleName = roleName;
     }
 
+    public Integer getDirectLoginKey() {
+        return directLoginKey;
+    }
+
+    public void setDirectLoginKey(Integer directLoginKey) {
+        this.directLoginKey = directLoginKey;
+    }
 }
