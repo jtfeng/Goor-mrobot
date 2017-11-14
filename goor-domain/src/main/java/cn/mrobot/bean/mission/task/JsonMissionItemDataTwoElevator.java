@@ -85,6 +85,7 @@ public class JsonMissionItemDataTwoElevator implements Serializable {
          */
         private int ip_elevator_id;
         private int arrival_floor;
+        private int logic_floor;//逻辑楼层，表示人理解的楼层，有负数
         private int default_elevator;
         private int auto_mode;
         private JsonMissionItemDataElevator.Point enter_point;
@@ -98,6 +99,14 @@ public class JsonMissionItemDataTwoElevator implements Serializable {
         private String mapName;
         private String sceneNameNext;
         private String mapNameNext;
+
+        public int getLogic_floor() {
+            return logic_floor;
+        }
+
+        public void setLogic_floor(int logic_floor) {
+            this.logic_floor = logic_floor;
+        }
 
         public int getAuto_mode() {
             return auto_mode;

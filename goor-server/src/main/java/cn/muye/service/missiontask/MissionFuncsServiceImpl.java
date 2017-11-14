@@ -608,6 +608,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             atts.currentMapId = prefloor.currentMapId;
             atts.nextFloor = mpfloor.currentFloor;
             atts.nextMapId = mpfloor.currentMapId;
+            atts.logicFloor = mpfloor.logicFloor;
             mpAttrs.put(temp, atts);
             logger.info("###### addElevatorPoint is ok ");
         }
@@ -620,24 +621,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     private MPointAtts getMapPointFloor(MapPoint mp) {
-        /*MPointAtts ret = new MPointAtts();
-        List<MapInfo> mapInfos = mapInfoService.getMapInfo(
-                mp.getMapName(),
-                mp.getSceneName(),
-                SearchConstants.FAKE_MERCHANT_STORE_ID
-        );
-        if (mapInfos != null){
-            for (MapInfo m :
-                    mapInfos) {
-                if (m != null) {
-                    ret.currentFloor = m.getFloor();
-                    ret.currentMapId = m.getId();
-                    break;
-                }
-            }
-        }
-        return ret;*/
         return getMapPointFloorStatic(mp,mapInfoService);
+    }
+
+    /**
+     * 获取地图点所在的逻辑楼层
+     * @param mp
+     * @return
+     */
+    private MPointAtts getMapPointLogicFloor(MapPoint mp) {
+        return getMapPointLogicFloorStatic(mp,mapInfoService);
     }
 
     /**
@@ -658,6 +651,31 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 if (m != null) {
                     ret.currentFloor = m.getFloor();
                     ret.currentMapId = m.getId();
+                    ret.logicFloor = m.getLogicFloor();
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * 获取地图点所在的逻辑楼层
+     * @param mp
+     * @return
+     */
+    public static MPointAtts getMapPointLogicFloorStatic(MapPoint mp,MapInfoService mapInfoService) {
+        MPointAtts ret = new MPointAtts();
+        List<MapInfo> mapInfos = mapInfoService.getMapInfo(
+                mp.getMapName(),
+                mp.getSceneName(),
+                SearchConstants.FAKE_MERCHANT_STORE_ID
+        );
+        if (mapInfos != null){
+            for (MapInfo m :
+                    mapInfos) {
+                if (m != null) {
+                    ret.logicFloor = m.getLogicFloor();
                     break;
                 }
             }
@@ -930,6 +948,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     mPointAtts.currentFloor,
                     mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
+            jsonMissionItemDataElevator.setLogic_floor(mPointAtts.logicFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
                 for (Elevator ev :
@@ -3229,6 +3248,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             atts.currentMapId = prefloor.currentMapId;
             atts.nextFloor = mpfloor.currentFloor;
             atts.nextMapId = mpfloor.currentMapId;
+            atts.logicFloor = mpfloor.logicFloor;
             mpAttrs.put(temp, atts);
             logger.info("###### addPathElevatorPoint is ok ");
         }
@@ -3821,6 +3841,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     mPointAtts.currentFloor,
                     mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
+            jsonMissionItemDataElevator.setLogic_floor(mPointAtts.logicFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
                 for (Elevator ev :
@@ -3945,10 +3966,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     new JsonMissionItemDataTwoElevator.ElevatorsEntity();
             temp.setCurrent_floor(mPointAtts.currentFloor);
             temp.setArrival_floor(mPointAtts.nextFloor);
+            temp.setLogic_floor(mPointAtts.logicFloor);
             elevatorsEntities.add(temp);
             temp = new JsonMissionItemDataTwoElevator.ElevatorsEntity();
             temp.setCurrent_floor(mPointAtts.currentFloor);
             temp.setArrival_floor(mPointAtts.nextFloor);
+            temp.setLogic_floor(mPointAtts.logicFloor);
             elevatorsEntities.add(temp);
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
@@ -4533,6 +4556,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public String orderDetailMP;
         public Integer nextFloor;
         public Integer currentFloor;
+        public Integer logicFloor;
         public Long currentMapId;
         public Long nextMapId;
         public String pathId;
