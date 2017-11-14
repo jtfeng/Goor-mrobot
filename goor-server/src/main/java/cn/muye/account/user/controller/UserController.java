@@ -441,6 +441,7 @@ public class UserController {
         userDTO.setRoleId(user.getRoleId());
         userDTO.setRoleName(user.getRoleName());
         userDTO.setActivated(user.getActivated());
+        userDTO.setDirectLoginKey(user.getDirectLoginKey());
         List<StationDTO4User> stationDTO4UserList = new ArrayList<>();
         if (sourceType == SOURCE_TYPE_LIST) {
             if (user.getRoleId() != null && (user.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption())) || user.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption())))) {
