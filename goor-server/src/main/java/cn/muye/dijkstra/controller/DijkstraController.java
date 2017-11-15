@@ -390,5 +390,16 @@ public class DijkstraController {
     }
 
 
-
+    /**
+     * 测试查找站相同的路径点
+     * @return
+     */
+    @RequestMapping(value = "/services/roadPath/testGetStationPoint")
+    @ResponseBody
+    public AjaxResult testGetStationPoint(Long id) {
+        MapPoint endStationPoint = pointService.findById(id);
+        MapPoint endPoint = PointServiceImpl.findPathPointByXYTH(endStationPoint.getSceneName(),endStationPoint.getMapName(),
+                endStationPoint.getX(),endStationPoint.getY(),endStationPoint.getTh(),null, pointService);
+        return AjaxResult.success(endPoint);
+    }
 }
