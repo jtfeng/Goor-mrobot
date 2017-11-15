@@ -6,6 +6,7 @@ import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.base.BaseBean;
 
+import javax.persistence.Transient;
 import java.util.List;
 
 /**
@@ -26,6 +27,9 @@ public class Order extends BaseBean{
     private Scene scene;  //场景
 
     private Integer status; //订单状态 0开启 1完成 2等待分配 3取消
+
+    @Transient
+    private String resscene; //资源场景
 
     public Order() {
     }
@@ -88,5 +92,13 @@ public class Order extends BaseBean{
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getResscene() {
+        return resscene;
+    }
+
+    public void setResscene(String resscene) {
+        this.resscene = resscene;
     }
 }

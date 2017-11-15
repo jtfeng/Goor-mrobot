@@ -18,6 +18,8 @@ public interface EmployeeService extends BaseService<Employee> {
 
     Employee getByCode(String code);
 
+    Employee getByCodeType(String code,Integer type);
+
     List<Employee> list(WhereRequest whereRequest);
 
     AjaxResult verifyEmplyeeNumber(String code, Long missionItemId, String subName) throws Exception;

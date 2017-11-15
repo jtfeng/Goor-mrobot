@@ -42,6 +42,7 @@ import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,6 +92,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Value("${mission.item.concurrentable:false}")
+    private Boolean missionItemConcurrentable;
 
     /**
      * 根据订单数据创建任务列表
@@ -604,6 +608,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             atts.currentMapId = prefloor.currentMapId;
             atts.nextFloor = mpfloor.currentFloor;
             atts.nextMapId = mpfloor.currentMapId;
+            atts.logicFloor = mpfloor.logicFloor;
             mpAttrs.put(temp, atts);
             logger.info("###### addElevatorPoint is ok ");
         }
@@ -616,24 +621,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @return
      */
     private MPointAtts getMapPointFloor(MapPoint mp) {
-        /*MPointAtts ret = new MPointAtts();
-        List<MapInfo> mapInfos = mapInfoService.getMapInfo(
-                mp.getMapName(),
-                mp.getSceneName(),
-                SearchConstants.FAKE_MERCHANT_STORE_ID
-        );
-        if (mapInfos != null){
-            for (MapInfo m :
-                    mapInfos) {
-                if (m != null) {
-                    ret.currentFloor = m.getFloor();
-                    ret.currentMapId = m.getId();
-                    break;
-                }
-            }
-        }
-        return ret;*/
         return getMapPointFloorStatic(mp,mapInfoService);
+    }
+
+    /**
+     * 获取地图点所在的逻辑楼层
+     * @param mp
+     * @return
+     */
+    private MPointAtts getMapPointLogicFloor(MapPoint mp) {
+        return getMapPointLogicFloorStatic(mp,mapInfoService);
     }
 
     /**
@@ -654,6 +651,31 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 if (m != null) {
                     ret.currentFloor = m.getFloor();
                     ret.currentMapId = m.getId();
+                    ret.logicFloor = m.getLogicFloor();
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * 获取地图点所在的逻辑楼层
+     * @param mp
+     * @return
+     */
+    public static MPointAtts getMapPointLogicFloorStatic(MapPoint mp,MapInfoService mapInfoService) {
+        MPointAtts ret = new MPointAtts();
+        List<MapInfo> mapInfos = mapInfoService.getMapInfo(
+                mp.getMapName(),
+                mp.getSceneName(),
+                SearchConstants.FAKE_MERCHANT_STORE_ID
+        );
+        if (mapInfos != null){
+            for (MapInfo m :
+                    mapInfos) {
+                if (m != null) {
+                    ret.logicFloor = m.getLogicFloor();
                     break;
                 }
             }
@@ -874,6 +896,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         new JsonMissionItemDataDoor.Path();
                                 path.setId(Long.parseLong(door.getPathId()));
                                 path.setScene_name(door.getoPoint().getSceneName());
+                                path.setMap_name(door.getoPoint().getMapName());
                                 obj.setPath(path);
 
                                 doorTask = getPathDoorTask(order,
@@ -925,6 +948,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     mPointAtts.currentFloor,
                     mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
+            jsonMissionItemDataElevator.setLogic_floor(mPointAtts.logicFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
                 for (Elevator ev :
@@ -1668,6 +1692,41 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataMp3 json =
                 new JsonMissionItemDataMp3();
         json.setFilename(fileName);
+        ArrayList<String> filenames = new ArrayList<>();
+        filenames.add(fileName);
+        json.setFilenames(filenames);
+        json.setResscene( StringUtil.isEmpty(order.getResscene()) ? "default":order.getResscene());
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonMissionItemDataMp3>() {
+                }.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_mp3);
+
+        return itemTask;
+    }
+
+    /**
+     * 获取列表语音ITEM任务
+     * @param mp
+     * @param fileNames
+     * @return
+     */
+    private MissionItemTask getListMp3VoiceItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            List<String> fileNames) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "列表语音Item");
+        itemTask.setName(MissionItemName_mp3);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        JsonMissionItemDataMp3 json =
+                new JsonMissionItemDataMp3();
+        json.setFilenames(fileNames);
+        json.setResscene(StringUtil.isEmpty(order.getResscene()) ? "default":order.getResscene());
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataMp3>() {
                 }.getType()));
@@ -3192,6 +3251,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             atts.currentMapId = prefloor.currentMapId;
             atts.nextFloor = mpfloor.currentFloor;
             atts.nextMapId = mpfloor.currentMapId;
+            atts.logicFloor = mpfloor.logicFloor;
             mpAttrs.put(temp, atts);
             logger.info("###### addPathElevatorPoint is ok ");
         }
@@ -3695,6 +3755,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 path.setId(x86RoadPathId);
                                 String sceneName = door.getoPoint().getSceneName();
                                 String mapName = door.getoPoint().getMapName();
+                                path.setMap_name(mapName);
                                 RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName);
                                 if(roadPath == null) {
                                     logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
@@ -3783,6 +3844,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     mPointAtts.currentFloor,
                     mp);
             jsonMissionItemDataElevator.setArrival_floor(mPointAtts.nextFloor);
+            jsonMissionItemDataElevator.setLogic_floor(mPointAtts.logicFloor);
             jsonMissionItemDataElevator.setCurrent_floor(mPointAtts.currentFloor);
             if (preElevator != null){
                 for (Elevator ev :
@@ -3907,10 +3969,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     new JsonMissionItemDataTwoElevator.ElevatorsEntity();
             temp.setCurrent_floor(mPointAtts.currentFloor);
             temp.setArrival_floor(mPointAtts.nextFloor);
+            temp.setLogic_floor(mPointAtts.logicFloor);
             elevatorsEntities.add(temp);
             temp = new JsonMissionItemDataTwoElevator.ElevatorsEntity();
             temp.setCurrent_floor(mPointAtts.currentFloor);
             temp.setArrival_floor(mPointAtts.nextFloor);
+            temp.setLogic_floor(mPointAtts.logicFloor);
             elevatorsEntities.add(temp);
             List<Elevator> preElevator = elevatorService.findByMapFloor(
                     mPointAtts.currentMapId,
@@ -4199,17 +4263,29 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //
 //        missionListTask.getMissionTasks().add(waitingTask);
 
-        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
-        if (isSetOrderDetailMP){
-            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        if (!missionItemConcurrentable){
+            MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
+            if (isSetOrderDetailMP){
+                mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            }
+            missionListTask.getMissionTasks().add(mp3loadTask);
         }
-        missionListTask.getMissionTasks().add(mp3loadTask);
 
         //终点卸货任务,目前先代替等待任务
         MissionTask finalUnloadTask = getFinalUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
         if (isSetOrderDetailMP){
             finalUnloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
         }
+
+        if (missionItemConcurrentable){
+            //并行执行语音任务
+            MissionItemTask temp = getMp3VoiceItemTask(order, mp, parentName, MP3_TAKE_CABINET);
+            if (temp != null){
+                temp.setIgnorable(true);
+                finalUnloadTask.getMissionItemTasks().add(temp);
+            }
+        }
+
         missionListTask.getMissionTasks().add(finalUnloadTask);
 
         //语音任务，感谢使用，我要回去充电了？
@@ -4247,11 +4323,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
 //        missionListTask.getMissionTasks().add(sigleNavTask);
 
-        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
-        if (isSetOrderDetailMP){
-            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+        if (!missionItemConcurrentable){
+            MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
+            if (isSetOrderDetailMP){
+                mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            }
+            missionListTask.getMissionTasks().add(mp3loadTask);
         }
-        missionListTask.getMissionTasks().add(mp3loadTask);
 
         if (order.getShelf() == null){
             //不需要装货架的取货任务
@@ -4260,6 +4338,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 loadNoShelfTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }
             missionListTask.getMissionTasks().add(loadNoShelfTask);
+
+            if (missionItemConcurrentable){
+                //并行执行语音任务
+                MissionItemTask temp = getMp3VoiceItemTask(order, mp, parentName, MP3_CABINET);
+                if (temp != null){
+                    temp.setIgnorable(true);
+                    loadNoShelfTask.getMissionItemTasks().add(temp);
+                }
+            }
         }else{
             //load任务，取代等待任务
             MissionTask loadTask = getLoadTask(order, mp, parentName, mPointAtts.orderDetailMP);
@@ -4267,6 +4354,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }
             missionListTask.getMissionTasks().add(loadTask);
+
+            if (missionItemConcurrentable){
+                //并行执行语音任务
+                MissionItemTask temp = getMp3VoiceItemTask(order, mp, parentName, MP3_CABINET);
+                if (temp != null){
+                    temp.setIgnorable(true);
+                    loadTask.getMissionItemTasks().add(temp);
+                }
+            }
         }
 
         //装载完毕语音任务
@@ -4321,24 +4417,38 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //
 //        missionListTask.getMissionTasks().add(waitingTask);
 
-        MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
-        if (isSetOrderDetailMP){
-            mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-        }
-        missionListTask.getMissionTasks().add(mp3loadTask);
+        if (!missionItemConcurrentable){
+            MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
+            if (isSetOrderDetailMP){
+                mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            }
+            missionListTask.getMissionTasks().add(mp3loadTask);
 
-        MissionTask mp3SignTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_MEDICINE_SIGN);
-        if (isSetOrderDetailMP){
-            mp3SignTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            MissionTask mp3SignTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_MEDICINE_SIGN);
+            if (isSetOrderDetailMP){
+                mp3SignTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            }
+            missionListTask.getMissionTasks().add(mp3SignTask);
         }
-        missionListTask.getMissionTasks().add(mp3SignTask);
 
         //卸货任务，取代等待任务
         MissionTask unloadTask = getUnloadTask(order, mp, parentName, mPointAtts.orderDetailMP);
         if (isSetOrderDetailMP){
             unloadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
         }
-//        unloadTask.getMissionItemTasks().add(getMp3VoiceItemTask(order, mp, parentName, MP3_ARRIVE));
+
+        if (missionItemConcurrentable){
+            //并行执行语音任务
+            ArrayList<String> filenames = new ArrayList<>();
+            filenames.add(MP3_TAKE_CABINET);
+            filenames.add(MP3_TAKE_MEDICINE_SIGN);
+            MissionItemTask temp = getListMp3VoiceItemTask(order, mp, parentName, filenames);
+            if (temp != null){
+                temp.setIgnorable(true);
+                unloadTask.getMissionItemTasks().add(temp);
+            }
+        }
+
 
         missionListTask.getMissionTasks().add(unloadTask);
 
@@ -4449,6 +4559,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public String orderDetailMP;
         public Integer nextFloor;
         public Integer currentFloor;
+        public Integer logicFloor;
         public Long currentMapId;
         public Long nextMapId;
         public String pathId;
