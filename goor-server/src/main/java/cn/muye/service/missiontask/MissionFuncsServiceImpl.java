@@ -1692,6 +1692,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataMp3 json =
                 new JsonMissionItemDataMp3();
         json.setFilename(fileName);
+        ArrayList<String> filenames = new ArrayList<>();
+        filenames.add(fileName);
+        json.setFilenames(filenames);
         json.setResscene( StringUtil.isEmpty(order.getResscene()) ? "default":order.getResscene());
         itemTask.setData(JsonUtils.toJson(json,
                 new TypeToken<JsonMissionItemDataMp3>() {
