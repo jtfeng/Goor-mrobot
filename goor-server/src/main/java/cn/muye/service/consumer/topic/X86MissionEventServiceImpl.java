@@ -75,8 +75,9 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                         logMission.setMissionRepeatTimes(jsonLogMission.getMission_repeat_times());
                         logMission.setMissionItemName(jsonLogMission.getMission_item_name());
                         break;
-                        default:
-                            break;
+                    default:
+                        logMission.setMissionType(LogMission.MissionLogType.NOT_USE.ordinal());
+                        break;
                 }
                 // 17-7-17 继续从缓存里面取电量等缓存值，放入日志
                 MessageInfo currentPosInfo = CacheInfoManager.getMessageCache(baseMessageService.getSenderId(messageInfo));
