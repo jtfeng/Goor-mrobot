@@ -106,7 +106,7 @@ public class MissionItemTask extends BaseBean {
         this.featureValue = featureValue;
     }
 
-    public boolean isIgnorable() {
+    public boolean getIgnorable() {
         return ignorable;
     }
 

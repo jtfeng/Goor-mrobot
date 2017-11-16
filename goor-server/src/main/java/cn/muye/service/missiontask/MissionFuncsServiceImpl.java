@@ -320,6 +320,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         missionItemDTO.setId(mit.getId());
         missionItemDTO.setName(mit.getName());
         missionItemDTO.setData(mit.getData());
+        missionItemDTO.setIgnorable(mit.getIgnorable());
         return missionItemDTO;
     }
 

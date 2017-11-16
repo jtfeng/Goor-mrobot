@@ -22,6 +22,11 @@ public class MissionItemDTO {
 
 	private String data;//任务详细/功能数据
 
+	/**
+     * 是否可忽略执行状态回执
+     */
+	private boolean ignorable;
+
 	public MissionItemDTO() {
 	}
 
@@ -47,5 +52,13 @@ public class MissionItemDTO {
 
 	public void setData(String data) {
 		this.data = data;
+	}
+
+	public boolean getIgnorable() {
+		return ignorable;
+	}
+
+	public void setIgnorable(boolean ignorable) {
+		this.ignorable = ignorable;
 	}
 }
