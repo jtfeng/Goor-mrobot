@@ -5,6 +5,7 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.base.BaseBean;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.Transient;
 import java.util.List;
@@ -95,7 +96,13 @@ public class Order extends BaseBean{
     }
 
     public String getResscene() {
-        return resscene;
+//        return resscene;
+        if (startStation != null &&
+                !StringUtils.isEmpty(startStation.getResscene())){
+            return startStation.getResscene();
+        }else{
+            return "default";
+        }
     }
 
     public void setResscene(String resscene) {
