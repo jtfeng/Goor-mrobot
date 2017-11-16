@@ -42,7 +42,17 @@ public class MapInfo extends BaseBean {
 
 	private int floor;
 
+	private int logicFloor;//逻辑楼层
+
 	private int deleteFlag;   //0 : 删除   1：未删除
+
+	public int getLogicFloor() {
+		return logicFloor;
+	}
+
+	public void setLogicFloor(int logicFloor) {
+		this.logicFloor = logicFloor;
+	}
 
 	public String getMapName() {
 		return mapName;
@@ -156,6 +166,7 @@ public class MapInfo extends BaseBean {
 				", pngDesignedHttpPath='" + pngDesignedHttpPath + '\'' +
 				", mapZipId=" + mapZipId +
 				", floor=" + floor +
+				", logicFloor=" + logicFloor +
 				", deleteFlag=" + deleteFlag +
 				'}';
 	}

@@ -21,6 +21,8 @@ public class MessageBell extends BaseBean{
 
     private Long stationId;  //关联站id
 
+    private Long missionItemId;  //关联的itemId，为了区分订单警报
+
     private Integer status; //状态 0为未读  1为已读
 
     @Transient
@@ -95,5 +97,13 @@ public class MessageBell extends BaseBean{
 
     public void setCreatedTimeHour(Date createdTimeHour) {
         this.createdTimeHour = createdTimeHour;
+    }
+
+    public Long getMissionItemId() {
+        return missionItemId;
+    }
+
+    public void setMissionItemId(Long missionItemId) {
+        this.missionItemId = missionItemId;
     }
 }

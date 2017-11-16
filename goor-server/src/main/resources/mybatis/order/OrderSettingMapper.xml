@@ -19,6 +19,7 @@
         <association property="goodsType" javaType="cn.mrobot.bean.assets.good.GoodsType">
             <id column="typeId" property="id"/>
             <result column="typeName" property="name"/>
+            <result column="typeRobotTypeId" property="robotTypeId"/>
         </association>
     </resultMap>
 
@@ -30,7 +31,6 @@
         os.end_station_id AS "endStation.id",
         os.package_type AS "packageType",
         os.robot_type_id AS "robotType.id",
-        os.need_shelf AS "needShelf",
         os.need_sign AS "needSign",
         os.need_shelf AS "needShelf",
         os.default_setting AS "defaultSetting",
@@ -38,7 +38,8 @@
         os.created_by AS "createdBy",
         os.create_time AS "createTime",
         t.id AS "typeId",
-        t.name AS "typeName"
+        t.name AS "typeName",
+        t.robot_type_id AS "typeRobotTypeId"
     </sql>
 
     <sql id = "orderSettingJoin">

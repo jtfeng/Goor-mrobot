@@ -17,6 +17,8 @@ public class GoodsType extends BaseBean{
 
     private String description;
 
+    private Integer robotTypeId;
+
     private Boolean deleteStatus = Boolean.FALSE;
 
     @Transient
@@ -52,5 +54,13 @@ public class GoodsType extends BaseBean{
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getRobotTypeId() {
+        return robotTypeId;
+    }
+
+    public void setRobotTypeId(Integer robotTypeId) {
+        this.robotTypeId = robotTypeId;
     }
 }

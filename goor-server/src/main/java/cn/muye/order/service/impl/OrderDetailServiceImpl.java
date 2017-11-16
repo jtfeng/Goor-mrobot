@@ -45,7 +45,14 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
 
     @Override
     public List<OrderDetail> listOrderDetailByOrderId(Long orderId) {
-        return orderDetailMapper.listOrderDetailByOrderId(orderId);
+        List<OrderDetail> orderDetailList = orderDetailMapper.listOrderDetailByOrderId(orderId);
+        orderDetailList.forEach(orderDetail -> {
+            Station findStation = stationService.findById(orderDetail.getStationId());
+            if(findStation!= null){
+                orderDetail.setStationName(findStation.getName());
+            }
+        });
+        return orderDetailList;
     }
 
     @Override

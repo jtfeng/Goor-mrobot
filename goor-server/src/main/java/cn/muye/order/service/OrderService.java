@@ -23,6 +23,12 @@ public interface OrderService {
 
     void checkWaitOrders();
 
+    void robotRequestWaitOrder(String robotCode);
+
+    void stopAllMissions(Long order);
+
+    void checkOrderMissionOverTime();
+
     void changeOrderStatus(Long id, Integer status);
 
     List<Order> listOrdersByStationAndStatus(Long stationId, Integer orderStatus);

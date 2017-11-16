@@ -538,12 +538,11 @@ public class ConsumerCommon {
         Date date = new Date();
         long upTime = messageInfo.getSendTime().getTime();
         long downTime = date.getTime();
-        if ((downTime - upTime) < 10) {
+        if ((downTime - upTime) < 10*1000 || (upTime - downTime) < 10*1000 ) {
             return;
         } else {
             //发送带响应同步消息，获得10次时间平均延迟
             int sum = 0;
-
             try {
                 //todo:rabbitmq响应超时问题，
                 MessageInfo sendMessageInfo = new MessageInfo();

@@ -1,6 +1,7 @@
 package cn.muye.mission.service;
 
 import cn.mrobot.bean.mission.task.MissionListTask;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -113,5 +115,32 @@ public class MissionListTaskServiceImpl
             });
         }
         return list;
+    }
+
+    @Override
+    public List<MissionListTask> findTodayList() {
+        Date startToday = DateTimeUtils.startToday();
+        Date endToday = DateTimeUtils.endToday();
+        Example example = new Example(MissionListTask.class);
+        example.createCriteria().andGreaterThanOrEqualTo("createTime",startToday)
+                .andLessThanOrEqualTo("createTime",endToday);
+        List<MissionListTask> missionListTaskList = myMapper.selectByExample(example);
+        return missionListTaskList;
+    }
+
+    @Override
+    public List<MissionListTask> findByOrderIds(List<Long> processingOrderIdsToday) {
+        Example example = new Example(MissionListTask.class);
+        example.createCriteria().andIn("orderId", processingOrderIdsToday);
+        List<MissionListTask> missionListTaskList = myMapper.selectByExample(example);
+        return missionListTaskList;
+    }
+
+    @Override
+    public MissionListTask findByOrderId(Long orderId) {
+        MissionListTask missionListTask = new MissionListTask();
+        missionListTask.setOrderId(orderId);
+        MissionListTask findMissionListTask = myMapper.selectOne(missionListTask);
+        return findMissionListTask;
     }
 }

@@ -3,36 +3,45 @@ package cn.muye.order.service.impl;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationRobotXREF;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
-import cn.mrobot.bean.order.Order;
-import cn.mrobot.bean.order.OrderConstant;
-import cn.mrobot.bean.order.OrderDetail;
-import cn.mrobot.bean.order.OrderSetting;
+import cn.mrobot.bean.mission.task.MissionItemTask;
+import cn.mrobot.bean.mission.task.MissionListTask;
+import cn.mrobot.bean.mission.task.MissionTask;
+import cn.mrobot.bean.order.*;
+import cn.mrobot.utils.DateTimeUtils;
+import cn.muye.area.station.mapper.StationRobotXREFMapper;
+import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BasePreInject;
+import cn.muye.mission.service.MissionItemTaskService;
+import cn.muye.mission.service.MissionListTaskService;
+import cn.muye.mission.service.MissionTaskService;
+import cn.muye.mission.service.MissionWarningService;
 import cn.muye.order.mapper.GoodsInfoMapper;
 import cn.muye.order.mapper.OrderMapper;
-import cn.muye.order.service.OrderDetailService;
-import cn.muye.order.service.OrderService;
-import cn.muye.order.service.OrderSettingService;
+import cn.muye.order.service.*;
 import cn.muye.service.missiontask.MissionFuncsService;
+import cn.muye.service.missiontask.MissionFuncsServiceImpl;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Created by Selim on 2017/7/8.
@@ -58,6 +67,22 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     private MissionFuncsService missionFuncsService;
     @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private StationRobotXREFMapper stationRobotXREFMapper;
+    @Autowired
+    private MissionItemTaskService missionItemTaskService;
+    @Autowired
+    private MissionListTaskService missionListTaskService;
+    @Autowired
+    private MissionTaskService missionTaskService;
+    @Autowired
+    private MissionWarningService missionWarningService;
+    @Autowired
+    private MessageBellService messageBellService;
+    @Autowired
+    private StationService stationService;
+    @Autowired
+    private ApplyOrderService applyOrderService;
 
     @Override
     public void saveWaitOrder(Order order) {
@@ -82,10 +107,12 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             orderDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_MIDDLE);
             orderDetailService.save(orderDetail);
             //保存货物信息
-            orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
-                goodsInfo.setOrderDetailId(orderDetail.getId());
-                goodsInfoMapper.insert(goodsInfo);
-            });
+            if(orderDetail.getGoodsInfoList()!=null){
+                orderDetail.getGoodsInfoList().forEach(goodsInfo -> {
+                    goodsInfo.setOrderDetailId(orderDetail.getId());
+                    goodsInfoMapper.insert(goodsInfo);
+                });
+            }
         });
         //之后保存末尾站
         if(sqlSetting.getEndStation()!=null && sqlSetting.getEndStation().getId()!= null){
@@ -95,6 +122,15 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             endDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_TRANSFER);
             endDetail.setPlace(OrderConstant.ORDER_DETAIL_PLACE_END);
             orderDetailService.save(endDetail);
+        }
+        //判定是否 存在applyOrderID，若存在 修改状态
+        if(order.getApplyOrderId()!= null){
+            ApplyOrder applyOrder = new ApplyOrder();
+            applyOrder.setId(order.getApplyOrderId());
+            applyOrder.setOrderId(order.getId());
+            applyOrder.setStatus(OrderConstant.APPLY_ORDER_STATUS_ACCEPT);
+            applyOrder.setDealDate(new Date());
+            applyOrderService.updateSelective(applyOrder);
         }
     }
 
@@ -130,6 +166,10 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             if(findSetting != null && findSetting.getNeedShelf()){
                 getOrder.setShelf(shelfService.getById(getOrder.getShelf().getId()));
             }
+            Station startStation = stationService.findById(getOrder.getStartStation().getId());
+            if(startStation !=null){
+                getOrder.setResscene(startStation.getResscene());
+            }
         }
         return getOrder;
     }
@@ -149,17 +189,17 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public AjaxResult generateMissionList(Long orderId){
         Order sqlOrder = getOrder(orderId);
         AjaxResult ajaxResult = missionFuncsService.createMissionLists(sqlOrder);
-        /*if(!ajaxResult.isSuccess()){
+        if(!ajaxResult.isSuccess()){
             //修改该order属性,重新回到等待状态
             orderMapper.returnToWaitOrder(orderId, OrderConstant.ORDER_STATUS_WAIT);
             //订单失败，进入队列模式，前端返回提示变化
             ajaxResult = AjaxResult.failed("订单已接收，等待机器分配");
         }else {
             ajaxResult = AjaxResult.success("订单已接收，开始执行任务");
-        }*/
-        if(!ajaxResult.isSuccess()){
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
+        /*if(!ajaxResult.isSuccess()){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }*/
         return ajaxResult;
 
     }
@@ -172,17 +212,17 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public AjaxResult generateMissionListPathNav(Long orderId){
         Order sqlOrder = getOrder(orderId);
         AjaxResult ajaxResult = missionFuncsService.createMissionListsPathNav(sqlOrder);
-        /*if(!ajaxResult.isSuccess()){
+        if(!ajaxResult.isSuccess()){
             //修改该order属性,重新回到等待状态
             orderMapper.returnToWaitOrder(orderId, OrderConstant.ORDER_STATUS_WAIT);
             //订单失败，进入队列模式，前端返回提示变化
             ajaxResult = AjaxResult.failed("订单已接收，等待机器分配");
         }else {
             ajaxResult = AjaxResult.success("订单已接收，开始执行任务");
-        }*/
-        if(!ajaxResult.isSuccess()){
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
+        /*if(!ajaxResult.isSuccess()){
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }*/
         return ajaxResult;
 
     }
@@ -198,7 +238,13 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         for (Order waitOrder : waitOrders) {
             logger.info("检测订单号为{} ",waitOrder.getId());
             Order sqlOrder = getOrder(waitOrder.getId());
-            Robot availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),sqlOrder.getOrderSetting().getRobotType().getId());
+            GoodsType goodsType = sqlOrder.getOrderSetting().getGoodsType();
+            Robot availableRobot = null;
+            if(goodsType == null){
+                availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),null);
+            }else {
+                availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),goodsType.getRobotTypeId());
+            }
             if(availableRobot == null){
                 //依旧无可用机器
                 logger.info("未获取到可使用机器人");
@@ -209,7 +255,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
                 waitOrder.setRobot(availableRobot);
                 waitOrder.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
                 orderMapper.updateOrder(waitOrder);
-                AjaxResult ajaxResult = generateMissionList(waitOrder.getId());
+                AjaxResult ajaxResult = generateMissionListPathNav(waitOrder.getId());
                 if(!ajaxResult.isSuccess()){
                     availableRobot.setBusy(Boolean.FALSE);
                     robotService.updateSelective(availableRobot);
@@ -218,6 +264,162 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             }
             logger.info("本次订单号为{}检测结束", waitOrder.getId());
         }
+    }
+
+    /**
+     * 机器人 提供SN号 主动请求队列任务 执行
+     * @param robotSn
+     */
+    @Override
+    public void robotRequestWaitOrder(String robotSn) {
+        logger.info("本次主动请求的机器人为{}", robotSn);
+        Robot robot = robotService.getByCode(robotSn, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if(robot!=null){
+            logger.info("获取到该机器人");
+            StationRobotXREF queryStationRobotXREF = new StationRobotXREF();
+            queryStationRobotXREF.setRobotId(robot.getId());
+            List<StationRobotXREF> stationRobotXREFs = stationRobotXREFMapper.select(queryStationRobotXREF);
+            List<Long> stationList = stationRobotXREFs.stream().map(stationRobotXREF -> stationRobotXREF.getStationId()).collect(Collectors.toList());
+            Order waitOrder = orderMapper.findFirstWaitOrder(stationList);
+            if(waitOrder!= null){
+                logger.info("获取到队列订单号为{}", waitOrder.getId());
+                waitOrder.setRobot(robot);
+                waitOrder.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
+                orderMapper.updateOrder(waitOrder);
+                //调用任务生成器
+                AjaxResult ajaxResult = generateMissionListPathNav(waitOrder.getId());
+                if(!ajaxResult.isSuccess()){
+                    logger.info("请求机器人失败");
+                }else {
+                    //请求成功，修改机器人为忙碌状态
+                    robot.setBusy(Boolean.TRUE);
+                    robotService.updateSelective(robot);
+                    logger.info("请求机器人成功");
+                }
+            }else {
+                logger.info("队列中没有该机器人可调度的任务");
+            }
+        }else {
+            logger.info("系统后台未检测到该SN号的机器人");
+        }
+
+    }
+
+    /**
+     * 根据订单id 中止任务（同时释放锁等等）
+     * @param orderId
+     */
+    @Override
+    public void stopAllMissions(Long orderId) {
+        //修改订单状态设置为废弃
+        changeOrderStatus(orderId, OrderConstant.ORDER_STATUS_EXPIRE);
+        //释放电梯及路径锁
+        MissionListTask missionListTask = missionListTaskService.findByOrderId(orderId);
+        if(missionListTask!= null){
+            List<MissionItemTask> missionItemList = missionItemTaskService.findByListIdAndItemNameEqualToUnlock(missionListTask.getId());
+            missionItemList.forEach(missionItemTask -> {
+                if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_elevator_unlock)){
+                    missionItemTask.getData();
+
+                }else if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_roadpath_unlock)){
+
+                }else {
+
+                }
+            });
+        }
+
+
+    }
+
+    /**
+     * 检测运行订单执行任务的超时警报 添加至Message_Bell内
+     */
+    @Override
+    public void checkOrderMissionOverTime() {
+        Date currentTime = new Date();
+        long oneDayBefore = currentTime.getTime() - 24*60*60*1000;
+        Date beforeTime = new Date(oneDayBefore);
+        List<Long> processingOrderIdsToday = orderMapper.listProcessingOrderIdsToday(beforeTime, currentTime);
+        if(processingOrderIdsToday == null || processingOrderIdsToday.size() == 0){
+            return;
+        }
+        List<MissionListTask> missionListTasks = missionListTaskService.findByOrderIds(processingOrderIdsToday);
+        for (MissionListTask missionListTask : missionListTasks) {
+            List<MissionItemTask> missionItemTaskList = missionItemTaskService.findByListIdAndItemName(missionListTask.getId());
+            Date lastFinishData = null;
+            Long lastStationId = null;
+            Order order = orderMapper.getById(missionListTask.getOrderId());
+            Long sendStationId = order.getStartStation().getId();
+            Robot currentRobot = new Robot();
+            if(order!=null){
+                currentRobot = robotService.findById(order.getRobot().getId());
+            }
+            for (MissionItemTask missionItemTask : missionItemTaskList) {
+                if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_load)
+                        ||missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)){
+                    //获取取货的结束时间
+                    Date finishDate = missionItemTask.getFinishDate();
+                    //若无，则直接跳出,无警报信息
+                    if(finishDate == null){
+                        break;
+                    }else {
+                        lastFinishData = finishDate;
+                        lastStationId = getStationIdByMissionId(missionItemTask.getMissionId());
+                    }
+                }else if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload)
+                        ||missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_finalUnload)){
+                    Date finishDate = missionItemTask.getFinishDate();
+                    Long stationId = getStationIdByMissionId(missionItemTask.getMissionId());
+                    if(lastFinishData!=null){
+                        //无结束时间，开始报警时间测定
+                        if(finishDate == null){
+                            Long warningTime = missionWarningService.getWarningTime(lastStationId, stationId);
+                            if(warningTime == null){
+                                logger.info("{}到{}站id的无超时时间设置", lastStationId, stationId);
+                            }else {
+                                //超时系数1.5 暂写死
+                                Date overTimeDate = new Date(lastFinishData.getTime() + warningTime*1500L);
+                                if(currentTime.compareTo(overTimeDate) > 0){
+                                    //已超时，需要警报
+                                    int overTimeMins = DateTimeUtils.getTimeGap(currentTime, overTimeDate);
+                                    MessageBell messageBell = messageBellService.findByMissionItemId(missionItemTask.getId());
+                                    String lastStationName = "";
+                                    String nowStationName = "";
+                                    Station lastStation = stationService.findById(lastStationId);
+                                    if(lastStation!=null){
+                                        lastStationName = lastStation.getName();
+                                    }
+                                    Station nowStation = stationService.findById(stationId);
+                                    if(nowStation!=null){
+                                        nowStationName = nowStation.getName();
+                                    }
+                                    String message = "运送从" +lastStationName+"站至"+ nowStationName+"站已超时"+ overTimeMins + "分钟";
+                                    logger.info("超时内容为："+ message);
+                                    if(messageBell== null){
+                                        //新增
+                                        MessageBell newMessageBell = new MessageBell(message, currentRobot.getCode(), OrderConstant.MESSAGE_BELL_OVERTIME_WARNING, sendStationId, OrderConstant.MESSAGE_BELL_UNREAD);
+                                        newMessageBell.setMissionItemId(missionItemTask.getId());
+                                        messageBellService.save(newMessageBell);
+                                    }else {
+                                        //修改超时时间
+                                        messageBell.setMessage(message);
+                                        messageBellService.updateSelective(messageBell);
+                                    }
+                                }
+                            }
+                            break;
+                        }else{
+                            //有结束时间，不再超时判定，继续遍历
+                            lastFinishData = finishDate;
+                            lastStationId = stationId;
+                        }
+                    }
+                }
+            }
+        }
+
+
     }
 
     @Override
@@ -232,6 +434,17 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public List<Order> listOrdersByStation(Long stationId, Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
         return orderMapper.listOrdersByStation(stationId);
+    }
+
+    //通过missionId 获取对应站id
+    public Long getStationIdByMissionId(Long missionId){
+        MissionTask missionTask = missionTaskService.findById(missionId);
+        if(missionTask == null){
+            return null;
+        }else {
+            OrderDetail orderDetail = orderDetailService.findById(Long.parseLong(missionTask.getOrderDetailMission()));
+            return orderDetail == null ? null: orderDetail.getStationId();
+        }
     }
 
     /**

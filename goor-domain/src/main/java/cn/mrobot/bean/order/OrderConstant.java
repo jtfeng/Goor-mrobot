@@ -28,10 +28,17 @@ public class OrderConstant {
     //消息推送类型
     public static final Integer MESSAGE_BELL_RECEIVE = 0; //收货站提醒
     public static final Integer MESSAGE_BELL_SEND = 1; //发货站提醒
+    public static final Integer MESSAGE_BELL_OVERTIME_WARNING = 2; //超时警报
 
     //消息推送状态
     public static final Integer MESSAGE_BELL_UNREAD = 0; //消息未读
     public static final Integer MESSAGE_BELL_READ = 1; //消息已读
 
+    //applyOrder状态
+    public static final Integer APPLY_ORDER_STATUS_WAITING = 0;
+    public static final Integer APPLY_ORDER_STATUS_ACCEPT = 1;
+    public static final Integer APPLY_ORDER_STATUS_REJECT = 2;
+
     public static final Integer MESSAGE_DEFAULT_MAX_NUM = 99; //读取消息上限条数
+
 }

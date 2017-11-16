@@ -11,11 +11,20 @@ public class JsonMissionItemDataElevator implements Serializable {
 
     private Integer current_floor;
     private Integer arrival_floor;
+    private int logic_floor;//逻辑楼层，表示人理解的楼层，有负数
     Point enter_point;
     Point set_pose_point;
     Point back_point;
 
     private List<String> employee_num_list;
+
+    public int getLogic_floor() {
+        return logic_floor;
+    }
+
+    public void setLogic_floor(int logic_floor) {
+        this.logic_floor = logic_floor;
+    }
 
     public Integer getCurrent_floor() {
         return current_floor;

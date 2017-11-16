@@ -45,6 +45,11 @@ public class Station extends BaseBean{
      */
     private String description;
 
+    /**
+     * 资源场景
+     */
+    private String resscene;
+
     public Long getSceneId() {
         return sceneId;
     }
@@ -150,5 +155,13 @@ public class Station extends BaseBean{
 
     public void setTypePoints(Map<String, List<MapPoint>> typePoints) {
         this.typePoints = typePoints;
+    }
+
+    public String getResscene() {
+        return resscene;
+    }
+
+    public void setResscene(String resscene) {
+        this.resscene = resscene;
     }
 }

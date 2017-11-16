@@ -3,6 +3,7 @@ package cn.muye.order.mapper;
 import cn.mrobot.bean.order.Order;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,4 +22,8 @@ public interface OrderMapper {
     void returnToWaitOrder(@Param("id") Long orderId, @Param("status")Integer status);
 
     List<Order> listOrdersByStation(@Param("stationId")Long stationId);
+
+    Order findFirstWaitOrder(List<Long> stationList);
+
+    List<Long> listProcessingOrderIdsToday(@Param("beforeTime")Date beforeTime, @Param("currentTime")Date currentTime);
 }

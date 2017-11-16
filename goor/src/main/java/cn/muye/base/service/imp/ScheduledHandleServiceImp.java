@@ -374,15 +374,17 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     public void robotOnlineStateQuery(String uuid) throws Exception {
         AjaxResult ajaxResult = robotOnlineState();
         SlamBody slamBody = getSendData(uuid, ajaxResult);
-        for (int i = 1; i <= SEND_COUNT; i++) {
+        //与定时任务每30秒上报一次消息过多，改为只返回一次，
+        //for (int i = 1; i <= SEND_COUNT; i++) {
             if (CacheInfoManager.getRobotOnlineUUIDCache(uuid)) {
                 logger.info(localRobotSN + "反馈信息，发送成功");
-                break;
+                //break;
+            } else {
+                sendRobotOnlineTopic(slamBody);
             }
-            logger.info("未收到反馈信息，继续发送第 " + i + " 次");
-            sendRobotOnlineTopic(slamBody);
-            TimeUnit.SECONDS.sleep(10);
-        }
+            //logger.info("未收到反馈信息，继续发送第 " + i + " 次");
+            //TimeUnit.SECONDS.sleep(10);
+        //}
     }
 
     @Override

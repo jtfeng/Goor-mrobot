@@ -126,4 +126,5 @@ public class OrderSetting extends BaseBean{
     public void setPackageType(Integer packageType) {
         this.packageType = packageType;
     }
+
 }

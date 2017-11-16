@@ -3,11 +3,10 @@ package cn.muye.base.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.log.alert.LogAlert;
-import cn.mrobot.bean.slam.SlamBody;
 import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.service.FileUpladService;
 import cn.muye.publisher.AppSubService;
+import cn.muye.service.FixFilePathService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -17,9 +16,10 @@ import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Date;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 public class ExampleController {
@@ -36,6 +36,15 @@ public class ExampleController {
 
     @Autowired
     private AppSubService appSubService;
+
+    @Autowired
+    private FixFilePathService fixFilePathService;
+
+    @RequestMapping(value = "testFile", method = RequestMethod.POST)
+    @ResponseBody
+    public AjaxResult testFile(){
+        return fixFilePathService.handleFixFilePath("haha");
+    }
 
     @RequestMapping(value = "test1", method = RequestMethod.POST)
     @ResponseBody
