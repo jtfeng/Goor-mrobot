@@ -3,6 +3,7 @@ package cn.mrobot.bean.mission.task;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import java.util.Date;
 import javax.persistence.Transient;
 
 /**
@@ -29,6 +30,17 @@ public class MissionItemTask extends BaseBean {
      * 任务执行状态
      */
     private String state;
+
+    /**
+     * item 开始时间
+     */
+    private Date startDate;
+
+    /**
+     * item 完成时间
+     */
+    private Date finishDate;
+
 
     //下面属性来自MissionItem
     private String name;
@@ -104,6 +116,22 @@ public class MissionItemTask extends BaseBean {
 
     public void setFeatureValue(String featureValue) {
         this.featureValue = featureValue;
+    }
+
+    public Date getFinishDate() {
+        return finishDate;
+    }
+
+    public void setFinishDate(Date finishDate) {
+        this.finishDate = finishDate;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public boolean getIgnorable() {

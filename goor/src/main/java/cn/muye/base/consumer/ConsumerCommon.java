@@ -15,6 +15,7 @@ import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
+import cn.muye.service.FixFilePathService;
 import cn.muye.service.PickUpPswdVerifyService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -220,6 +221,9 @@ public class ConsumerCommon {
     @Autowired
     PickUpPswdVerifyService pickUpPswdVerifyService;
 
+    @Autowired
+    private FixFilePathService fixFilePathService;
+
     /**
      * 接收云端发送至x86消息，不往ros发送消息，只处理agent业务（有回执）
      * @param messageInfo
@@ -243,6 +247,8 @@ public class ConsumerCommon {
                             case TopicConstants.PICK_UP_PSWD_VERIFY:
                             /* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
                                 return pickUpPswdVerifyService.handlePickUpPswdVerify(messageInfo);
+                            /*case TopicConstants.FIXPATH_FILE_QUERY:
+                                return fixFilePathService.handleFixFilePath(data);*/
                             default:
                                 break;
                         }

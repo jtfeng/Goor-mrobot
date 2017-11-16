@@ -66,7 +66,18 @@ public class FixPathServiceImpl implements FixPathService {
         //判断场景是否是云端下发的场景名，如果不是，对上传的fixpath数据不做入库处理
         Boolean idCloudRequest = CacheInfoManager.getFixpathSceneNameCache(sceneName);
         if (idCloudRequest != null && idCloudRequest){
+            //携带sceneName 请求agent端文件
             String paths = jsonObject.getString(TopicConstants.PATHS);
+            /*SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.FIXPATH_FILE_QUERY);
+            JSONObject dataObject = new JSONObject();
+            dataObject.put(TopicConstants.SCENE_NAME, sceneName);
+            slamRequestBody.setData(dataObject);
+            MessageInfo messageInfo = new MessageInfo(Constant.GOOR_SERVER, senderId, JSON.toJSONString(slamRequestBody));
+            messageInfo.setMessageType(MessageType.EXECUTOR_CLIENT);
+            AjaxResult ajaxResult = messageSendHandleService.sendToX86Message(false, true, senderId, messageInfo);
+            String filePaths = ajaxResult.getData().toString();
+            JSONObject pathObject = JSON.parseObject(filePaths);
+            String paths = pathObject.getString("paths");*/
             List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
             //删除缓存
             CacheInfoManager.removeFixpathSceneNameCache(sceneName);

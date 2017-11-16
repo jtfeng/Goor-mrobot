@@ -10,4 +10,6 @@ import java.util.Date;
  */
 public interface MessageBellService extends BaseService<MessageBell>{
     void updateByStationIdAndClearDate(Long stationId, Date clearDate);
+
+    MessageBell findByMissionItemId(Long id);
 }

@@ -25,4 +25,10 @@ public interface MissionListTaskService extends BaseService<MissionListTask> {
             String order);
 
     List<MissionListTask> tasksList(WhereRequest whereRequest);
+
+    List<MissionListTask> findTodayList();
+
+    List<MissionListTask> findByOrderIds(List<Long> processingOrderIdsToday);
+
+    MissionListTask findByOrderId(Long orderId);
 }

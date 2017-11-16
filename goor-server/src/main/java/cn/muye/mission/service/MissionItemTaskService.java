@@ -10,4 +10,10 @@ import java.util.List;
  */
 public interface MissionItemTaskService extends BaseService<MissionItemTask> {
     List<MissionItemTask> findByListIdAndMissionId(Long listId, Long missionId);
+
+    List<MissionItemTask> findByListId(Long listId);
+
+    List<MissionItemTask> findByListIdAndItemName(Long listId);
+
+    List<MissionItemTask> findByListIdAndItemNameEqualToUnlock(Long id);
 }

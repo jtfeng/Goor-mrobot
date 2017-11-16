@@ -24,6 +24,9 @@ public class OrderDetail extends BaseBean{
 
     private Date finishDate; // 配送到确认时间
 
+    @Transient
+    private String stationName;  //站名
+
     public OrderDetail() {
     }
 
@@ -80,5 +83,13 @@ public class OrderDetail extends BaseBean{
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getStationName() {
+        return stationName;
+    }
+
+    public void setStationName(String stationName) {
+        this.stationName = stationName;
     }
 }

@@ -69,6 +69,7 @@ public class TopicConstants {
 	public static final String POWER = "/power"; //机器人电量
 	public static final String PUB_SUB_NAME_CHECK_OPERATE_PWD = "check_operate_pwd"; // 应用请求操作机器人密码校验的 PUB 和 SUB 名称
 	public static final String FIXPATH_QUERY = "fixpath_query"; //  查询保存的路径
+	public static final String FIXPATH_FILE_QUERY = "fixpath_file_query"; //  查询保存的文件路径
 	public static final String PATHS = "paths"; //  查询保存的路径
 
 	public static final String STATION_LIST_GET = "station_list_get";//站信息查询，根据机器人主板编号

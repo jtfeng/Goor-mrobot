@@ -1,7 +1,6 @@
 package cn.muye.base.service.batch;
 
 import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.bean.slam.SlamRequestBody;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
@@ -10,7 +9,6 @@ import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import cn.muye.publisher.AppSubService;
-import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * Created by enva on 2017/05/12.

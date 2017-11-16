@@ -8,6 +8,7 @@ import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import cn.muye.log.base.service.LogCollectService;
+import cn.muye.mission.service.MissionWarningService;
 import cn.muye.order.service.OrderDetailService;
 import cn.muye.order.service.OrderService;
 import cn.muye.service.consumer.topic.X86MissionCommonRequestService;
@@ -50,7 +51,12 @@ public class ScheduleTasks {
     @Autowired
     private ExportService exportService;
 
+    @Autowired
+    private MissionWarningService missionWarningService;
+
     private final static Object lock = new Object();
+
+    private final static Object lock2 = new Object();
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -97,8 +103,8 @@ public class ScheduleTasks {
 //        }
 //    }
 
-    //每分钟执行一次
-    //@Scheduled(cron = "0 */1 * * * ?")
+    //每分钟执行一次, 订单队列扫描
+    @Scheduled(cron = "0 */1 * * * ?")
     public void scanWaitOrders() {
         synchronized (lock){
             logger.info("开启订单等待队列扫描");
@@ -111,17 +117,46 @@ public class ScheduleTasks {
         }
     }
 
+    //每分钟执行一次， 订单任务mission超时扫描
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void checkOrderMissionOverTime() {
+        synchronized (lock2){
+            logger.info("开启订单任务超时扫描");
+            try {
+                orderService.checkOrderMissionOverTime();
+                logger.info("订单任务超时扫描结束");
+            } catch (Exception e) {
+                logger.error("订单任务超时扫描出现异常", e);
+            }
+        }
+    }
+
+    //每天23点59分执行
+    @Scheduled(cron = "0 59 23 * * ?")
+    public void calculateMissionWarning() {
+        logger.info("开启统计站点执行时间");
+        try {
+            missionWarningService.dailyUpdateWarningData();
+            logger.info("统计站点执行时间结束");
+        } catch (Exception e) {
+            logger.error("统计站点执行时间出现异常", e);
+        }
+
+    }
+
     //每分钟执行一次
-    //@Scheduled(cron = "0/30 * * * * ?")
+    //@Scheduled(cron = "0/10 * * * * ?")
     public void testWsOrder() {
         logger.info("开启ws 推送");
         try {
-            orderDetailService.finishedDetailTask(316L,1);
+            orderDetailService.finishedDetailTask(75L,1);
             logger.info("ws 推送结束");
         } catch (Exception e) {
             logger.error("ws 推送失败", e);
         }
     }
+
+
 
     //每天晚上23:5触发
     @Scheduled(cron = "0 5 23 * * ?")

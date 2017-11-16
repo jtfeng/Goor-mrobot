@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletRequest;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -234,6 +234,7 @@ public class StationController {
                 stationDb.setStationTypeId(station.getStationTypeId());
                 stationDb.setDescription(station.getDescription());
                 stationDb.setMapPoints(station.getMapPoints());
+                stationDb.setResscene(station.getResscene());
 
                 stationService.update(stationDb);
                 return AjaxResult.success(toEntity(stationDb), "修改成功");

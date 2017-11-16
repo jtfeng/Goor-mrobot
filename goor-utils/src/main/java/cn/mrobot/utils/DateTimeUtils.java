@@ -329,6 +329,19 @@ public class DateTimeUtils {
     }
 
     /**
+     * 计算2个时间差,date1-date2
+     *
+     * @param date1
+     * @param date2
+     * @return 时间差，单位妙
+     */
+    public static long getTimeGapSecond(Date date1, Date date2) {
+
+        long result = (date1.getTime() - date2.getTime()) / 1000;
+        return result;
+    }
+
+    /**
      * 创建时间
      *
      * @param date1 yyyy-MM-dd

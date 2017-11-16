@@ -1,6 +1,5 @@
 package cn.mrobot.bean.constant;
 
-import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 
 import java.util.Arrays;
@@ -172,4 +171,6 @@ public class Constant {
     public static final Integer EMPLOYEE_TYPE_NORMAL = 0; //普通员工
 
     public static final String ONLINE = "online"; //在线
+
+    public static final Integer USE_CALCULATE_ACTION_TIME = 10;
 }

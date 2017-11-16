@@ -189,9 +189,19 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (robotDb != null) {
                     //todo 紧急制动以后在做
                     AjaxResult ajaxResult = testSendRobotMessage(robotDb);
-                    if (ajaxResult != null && ajaxResult.isSuccess() && robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
+                    if (ajaxResult != null && ajaxResult.isSuccess() && robotDb.getBusy() == false && !robotDb.isLowPowerState()) {
 //                    if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
-                        availableRobot = robotDb;
+                        if(typeId != null){
+                            if(robotDb.getTypeId().equals(typeId)){
+                                availableRobot = robotDb;
+                            }else {
+                                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：机器人类型不匹配");
+                                LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                                continue;
+                            }
+                        }else{
+                            availableRobot = robotDb;
+                        }
                         stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                         break;

@@ -32,6 +32,10 @@ public class Order extends BaseBean{
     @Transient
     private String resscene; //资源场景
 
+    @Transient
+    private Long applyOrderId;  //申请订单id
+
+
     public Order() {
     }
 
@@ -107,5 +111,13 @@ public class Order extends BaseBean{
 
     public void setResscene(String resscene) {
         this.resscene = resscene;
+    }
+
+    public Long getApplyOrderId() {
+        return applyOrderId;
+    }
+
+    public void setApplyOrderId(Long applyOrderId) {
+        this.applyOrderId = applyOrderId;
     }
 }

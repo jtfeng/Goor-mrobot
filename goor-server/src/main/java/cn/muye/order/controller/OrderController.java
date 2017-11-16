@@ -3,6 +3,7 @@ package cn.muye.order.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
@@ -13,6 +14,7 @@ import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
+import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
@@ -20,14 +22,12 @@ import cn.muye.assets.scene.service.SceneService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.bean.*;
-import cn.muye.order.service.GoodsService;
-import cn.muye.order.service.OrderDetailService;
-import cn.muye.order.service.OrderService;
-import cn.muye.order.service.OrderSettingService;
+import cn.muye.order.service.*;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +69,10 @@ public class OrderController extends BaseController {
     private PointService pointService;
     @Autowired
     private SceneService sceneService;
+    @Autowired
+    private ElevatorService elevatorService;
+    @Autowired
+    private ApplyOrderService applyOrderService;
 
     @Autowired
     X86MissionDispatchService x86MissionDispatchService;
@@ -82,7 +86,11 @@ public class OrderController extends BaseController {
     @ResponseBody
     public AjaxResult test(@RequestParam("id")Long id){
         try {
-            orderDetailService.finishedDetailTask(id,1);
+            Elevator elevator = elevatorService.findById(1L);
+            elevator.setSceneName("hahahaha");
+            List<Long> test = Lists.newArrayList();
+            test.add(1L);
+            elevatorService.updateElevator(elevator, test);
             return AjaxResult.success();
         } catch (Exception e) {
             e.printStackTrace();
@@ -155,23 +163,27 @@ public class OrderController extends BaseController {
                     //todo 货架是否被占用？
                 }
             }
-            Integer robotTypeId = setting.getRobotType().getId();
+            //根据物品类型注入对应的选取机器人类型
+            Integer robotTypeId = null;
+            if(setting.getGoodsType()!= null && setting.getGoodsType().getId()!= null){
+                GoodsType goodsType = goodsTypeService.findById(setting.getGoodsType().getId());
+                robotTypeId = goodsType.getRobotTypeId();
+            }
             //根据 站点id 和 机器人类型 自动选择机器人
             arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
-//            arrangeRobot = robotService.findById(317L);
+            //arrangeRobot = robotService.findById(319L);
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功
                 logger.info("本次请求未获取到可用机器人");
-               /* order.setStatus(OrderConstant.ORDER_STATUS_WAIT);
+                order.setStatus(OrderConstant.ORDER_STATUS_WAIT);
                 orderService.saveWaitOrder(order);
-                return AjaxResult.success("订单已接收，等待机器分配");*/
-                return AjaxResult.failed("暂无可用机器人");
+                return AjaxResult.success("订单已接收，等待机器分配");
             }
             //存在机器人，订单直接下单
             logger.info("获取到机器人，机器人编号为{}", arrangeRobot.getCode());
             order.setRobot(arrangeRobot);
             order.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
-            AjaxResult ajaxResult = AjaxResult.failed("订单生成异常");
+            AjaxResult ajaxResult;
             if(orderNavType != null && orderNavType.equals(Constant.ORDER_NAV_TYPE_PATH)) {
                 ajaxResult = orderService.savePathOrder(order);
             }
@@ -236,10 +248,31 @@ public class OrderController extends BaseController {
             List<Order> waitOrders = orderService.listOrdersByStation(stationId, whereRequest.getPage(), whereRequest.getPageSize());
             List<Order> detailWaitOrders = waitOrders.stream().map(order -> orderService.getOrder(order.getId())).collect(Collectors.toList());
             PageInfo<Order> pageWaitOrders = new PageInfo<>(detailWaitOrders);
-            return AjaxResult.success(pageWaitOrders, "获取等待订单成功");
+            return AjaxResult.success(pageWaitOrders, "获取所有订单成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return AjaxResult.failed("获取等待订单出错");
+            return AjaxResult.failed("获取所有订单出错");
+        }
+    }
+
+    /**
+     * 取消 等待订单执行
+     * @param
+     * @return
+     */
+    @RequestMapping(value = "cancelWaitOrder", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult cancelWaitOrder(@RequestParam("id")Long id){
+        try {
+            Order sqlOrder = orderService.getOrder(id);
+            if(sqlOrder.getStatus()!= OrderConstant.ORDER_STATUS_WAIT){
+                return AjaxResult.failed("暂无法取消，订单并非处于等待阶段");
+            }
+            orderService.changeOrderStatus(id, OrderConstant.ORDER_STATUS_EXPIRE);
+            return AjaxResult.success( "取消该订单成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("取消该订单出错");
         }
     }
 
@@ -252,13 +285,16 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(value = "getOrderPageInfo", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult getOrderPageInfo(@RequestParam("type") Long type){
+    public AjaxResult getOrderPageInfo(@RequestParam(value = "type", required = false) Long type){
         try {
             Station station = stationService.findById(userUtil.getStationId());
             if(station == null){
                 return AjaxResult.failed("未获取到用户的关联站点");
             }
-            List<Goods> goodsList = goodsService.listGoodsByType(type);
+            List<Goods> goodsList = Lists.newArrayList();
+            if(type != null){
+                goodsList = goodsService.listGoodsByType(type);
+            }
             List<Station> stationList = stationService.listAccessStationByStationId(station.getId(),station.getSceneId());
             List<Shelf> shelfList = shelfService.listBySceneAndStoreId(station.getSceneId());
             OrderPageInfoVO orderPageInfoVO = new OrderPageInfoVO();

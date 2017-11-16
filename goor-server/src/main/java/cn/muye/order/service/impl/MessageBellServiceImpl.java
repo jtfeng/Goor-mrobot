@@ -31,4 +31,16 @@ public class MessageBellServiceImpl extends BaseServiceImpl<MessageBell> impleme
             }
         }
     }
+
+    @Override
+    public MessageBell findByMissionItemId(Long missionItemId) {
+        MessageBell messageBell = new MessageBell();
+        messageBell.setMissionItemId(missionItemId);
+        List<MessageBell> messageBellList = myMapper.select(messageBell);
+        if(messageBellList.size()> 0){
+            return messageBellList.get(0);
+        }else{
+            return null;
+        }
+    }
 }

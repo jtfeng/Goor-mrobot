@@ -123,5 +123,25 @@
         ) ASC, o.create_time DESC
     </select>
 
+    <select id="findFirstWaitOrder" resultType="cn.mrobot.bean.order.Order">
+        select
+        <include refid="orderColumn" />
+        from OR_ORDER o
+        WHERE o.status = 2
+        AND o.start_station_id IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ORDER BY o.create_time ASC limit 1
+    </select>
+
+    <select id="listProcessingOrderIdsToday" resultType="Long">
+        select o.id
+        from OR_ORDER o
+        WHERE o.status = 0
+        AND o.create_time &gt;= #{beforeTime}
+        AND o.create_time &lt;= #{currentTime}
+    </select>
+
 
 </mapper>

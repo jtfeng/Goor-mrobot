@@ -36,6 +36,7 @@ import cn.muye.dispatch.service.FeatureItemService;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
+import cn.muye.mission.service.MissionWarningService;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.reflect.TypeToken;
@@ -95,6 +96,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     @Value("${mission.item.concurrentable:false}")
     private Boolean missionItemConcurrentable;
+
+    @Autowired
+    private MissionWarningService missionWarningService;
 
     /**
      * 根据订单数据创建任务列表
@@ -2061,6 +2065,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (!StringUtil.isNullOrEmpty(orderDetailMP) &&
                 !str_zero.equalsIgnoreCase(orderDetailMP)){
             Long id = Long.valueOf(orderDetailMP);
+
             if (id != null && order.getDetailList() != null){
                 for (OrderDetail de :
                         order.getDetailList()) {

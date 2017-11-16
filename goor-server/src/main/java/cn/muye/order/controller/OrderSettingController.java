@@ -2,6 +2,7 @@ package cn.muye.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.order.OrderSetting;
+import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
@@ -22,6 +23,8 @@ public class OrderSettingController extends BaseController{
     private OrderSettingService orderSettingService;
     @Autowired
     private UserUtil userUtil;
+    @Autowired
+    private GoodsTypeService goodsTypeService;
 
     /**
      * 通过id获取 订单配置
@@ -95,7 +98,6 @@ public class OrderSettingController extends BaseController{
             if(orderSetting.getId() == null){
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "修改订单必须带有id");
             }
-            if(orderSetting.getDefaultSetting())
             orderSettingService.updateOrderSetting(orderSetting);
             return AjaxResult.success(orderSetting, "修改配置成功");
         } catch (Exception e) {

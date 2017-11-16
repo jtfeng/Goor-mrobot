@@ -4,19 +4,24 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.log.mission.JsonLogMission;
 import cn.mrobot.bean.log.mission.LogMission;
+import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.mission.service.LogMissionService;
+import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
+import cn.muye.service.missiontask.MissionFuncsServiceImpl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 
 
 /**
@@ -35,6 +40,9 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
 
     @Autowired
     private MissionListTaskService missionListTaskService;
+
+    @Autowired
+    private MissionItemTaskService missionItemTaskService;
 
     @Override
     public AjaxResult handleX86MissionEvent(MessageInfo messageInfo) {
@@ -74,6 +82,24 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                         logMission.setMissionItemId(jsonLogMission.getMission_item_id());
                         logMission.setMissionRepeatTimes(jsonLogMission.getMission_repeat_times());
                         logMission.setMissionItemName(jsonLogMission.getMission_item_name());
+                        //update MissionItemTask
+                        String itemName = jsonLogMission.getMission_item_name();
+                        if(itemName.equals(MissionFuncsServiceImpl.MissionItemName_load)
+                                || itemName.equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
+                                || itemName.equals(MissionFuncsServiceImpl.MissionItemName_unload)
+                                || itemName.equals(MissionFuncsServiceImpl.MissionItemName_finalUnload)){
+                            if(jsonLogMission.getEvent().equals(LogMission.event_start_success)){
+                                MissionItemTask missionItemTask = new MissionItemTask();
+                                missionItemTask.setMissionId(jsonLogMission.getMission_item_id());
+                                missionItemTask.setStartDate(new Date(jsonLogMission.getTime()*1000L));
+                                missionItemTaskService.updateSelective(missionItemTask);
+                            }else if(jsonLogMission.getEvent().equals(LogMission.event_finish)){
+                                MissionItemTask missionItemTask = new MissionItemTask();
+                                missionItemTask.setMissionId(jsonLogMission.getMission_item_id());
+                                missionItemTask.setFinishDate(new Date(jsonLogMission.getTime()*1000L));
+                                missionItemTaskService.updateSelective(missionItemTask);
+                            }
+                        }
                         break;
                     default:
                         logMission.setMissionType(LogMission.MissionLogType.NOT_USE.ordinal());
