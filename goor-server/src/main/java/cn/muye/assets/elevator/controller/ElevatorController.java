@@ -15,7 +15,10 @@ import cn.muye.assets.elevator.service.ElevatorModeService;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.elevator.service.ElevatorShaftService;
+import cn.muye.assets.scene.controller.SceneController;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.util.SessionUtil;
+import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -172,7 +175,11 @@ public class ElevatorController {
             ));
 
             checkWaitPoint(combination);
-
+            Scene scene = SessionUtil.SCENE_LOADING_CACHE.getIfPresent(UserUtil.getUserTokenValue() +
+                    ":" + Constant.SCENE_SESSION_TAG_PC);
+            if (scene != null) {
+                combination.setSceneId(scene.getId());
+            }
             elevatorPointCombinationService.save(combination);
             return AjaxResult.success("保存四点组合信息成功");
         }catch (Exception e){
