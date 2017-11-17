@@ -452,7 +452,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             if (null != roadPathDB) {
                 roadPath.setId(roadPathDB.getId());
                 //更新
-                update(roadPath);
+                updateSelectiveByStoreId(roadPath);
             } else {
                 //新增
                 save(roadPath);
