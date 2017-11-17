@@ -4,6 +4,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.elevator.ElevatorShaft;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.service.impl.StationMapPointXREFServiceImpl;
 import cn.muye.assets.elevator.mapper.ElevatorMapper;
@@ -12,7 +13,9 @@ import cn.muye.assets.elevator.mapper.ElevatorShaftMapper;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sun.rmi.runtime.Log;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
 import java.util.Set;
@@ -55,8 +59,17 @@ public class ElevatorPointCombinationImpl extends BaseServiceImpl<ElevatorPointC
 
     @Override
     public List<ElevatorPointCombination> listElevatorPointCombinations(WhereRequest whereRequest) throws Exception {
-        List<ElevatorPointCombination> combinations = this.listPageByStoreIdAndOrder(whereRequest.getPage(),
-                whereRequest.getPageSize(), ElevatorPointCombination.class,"ID DESC");
+//        List<ElevatorPointCombination> combinations = this.listPageByStoreIdAndOrder(whereRequest.getPage(),
+//                whereRequest.getPageSize(), ElevatorPointCombination.class,"ID DESC");
+        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+        Example example = new Example(ElevatorPointCombination.class);
+        example.createCriteria()
+                .andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID)
+                .andCondition("SCENE_ID=", whereRequest.getQueryObj());
+        example.setOrderByClause("ID DESC");
+        List<ElevatorPointCombination> combinations = myMapper.selectByExample(example);
+        packageDataBindMappoint(combinations);
+        packageDataBindElevator(combinations);
         return combinations;
     }
 
@@ -69,7 +82,17 @@ public class ElevatorPointCombinationImpl extends BaseServiceImpl<ElevatorPointC
 
     @Override
     public List<ElevatorPointCombination> listPageByStoreIdAndOrder(int page, int pageSize, Class<ElevatorPointCombination> clazz, String order) {
-        List<ElevatorPointCombination> combinations = super.listPageByStoreIdAndOrder(page, pageSize, clazz, order);
+
+
+        PageHelper.startPage(page, pageSize);
+        Example example = new Example(clazz);
+        example.createCriteria().andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if(!StringUtil.isNullOrEmpty(order)){
+            example.setOrderByClause(order);
+        }
+        List<ElevatorPointCombination> combinations = myMapper.selectByExample(example);
+
+
         packageDataBindMappoint(combinations);
         packageDataBindElevator(combinations);
         return combinations;

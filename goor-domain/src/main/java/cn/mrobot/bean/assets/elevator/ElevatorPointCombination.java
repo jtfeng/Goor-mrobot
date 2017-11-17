@@ -10,6 +10,8 @@ import java.util.List;
 public class ElevatorPointCombination extends BaseBean {
     private String name;
     private String info;
+    //场景 ID
+    protected Long sceneId;
 
     private Long waitPoint;
     private Long goPoint;
@@ -40,6 +42,7 @@ public class ElevatorPointCombination extends BaseBean {
                 ", gPoint=" + gPoint +
                 ", oPoint=" + oPoint +
                 ", iPoint=" + iPoint +
+                ", sceneId=" + sceneId +
                 ", elevators=" + elevators +
                 '}';
     }
@@ -130,5 +133,13 @@ public class ElevatorPointCombination extends BaseBean {
 
     public void setElevators(List<Elevator> elevators) {
         this.elevators = elevators;
+    }
+
+    public Long getSceneId() {
+        return sceneId;
+    }
+
+    public void setSceneId(Long sceneId) {
+        this.sceneId = sceneId;
     }
 }

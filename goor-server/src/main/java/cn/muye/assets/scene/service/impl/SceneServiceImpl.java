@@ -358,6 +358,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
                                     case STATUS_UNKNOWN:
                                         log.info(" - - - - 事务状态为止 - - - - ");
                                         break;
+                                    default:
+                                        break;
                                 }
                                 lock.unlock();
                             }

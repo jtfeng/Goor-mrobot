@@ -148,7 +148,11 @@ public class RoadPathController {
                 roadPath.setPathLock(null);
             }
             roadPathService.update(roadPath);
-            return AjaxResult.success("路径绑定逻辑锁对象成功");
+            if (lockId != 0L) {
+                return AjaxResult.success("路径绑定逻辑锁对象成功");
+            }else {
+                return AjaxResult.success("解除路径锁对象成功");
+            }
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }

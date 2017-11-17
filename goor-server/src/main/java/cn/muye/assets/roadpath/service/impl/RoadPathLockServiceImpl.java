@@ -106,6 +106,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     "、路径锁绑定的方向：" +  pathDirection);
 
             if (robotCodes != null && robotCodes.contains(robotCode)) {
+                // 此时的锁成为可重入锁
                 log.info("编号为：" + robotCode + " 的机器人重复请求执行加锁操作，上一次已经成功获取锁，所以直接返回加锁成功。");
                 flag = true;
             }else {
@@ -259,7 +260,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     roadPathLock.setCurrentPasscount(null);
                     roadPathLock.setRobotCodes(null);
                     roadPathLock.setDirection(null);
-                    updateSelective(roadPathLock);
+                    update(roadPathLock);
                     flag = true;
                 }
             }
