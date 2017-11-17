@@ -178,12 +178,16 @@ public class DijkstraController {
     @ResponseBody
     public AjaxResult generateElevatorPath(Long sceneId) {
         try {
+            String placeholder = " | ----- | ";
             Scene scene = sceneService.getSceneById(sceneId);
+            log.info(placeholder + "scene、" + scene.toString());
             String sceneName = scene.getMapSceneName();
+            log.info(placeholder + "sceneName、" + sceneName);
             if(StringUtil.isNullOrEmpty(sceneName)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneName + "云端场景未绑定有效的工控场景");
             }
             List<Elevator> elevatorList = elevatorService.listBySceneName(sceneName);
+            log.info(placeholder + "elevatorList、" + elevatorList);
             if(elevatorList == null || elevatorList.size() == 0) {
                 return AjaxResult.success(sceneName + "云端场景未设置电梯");
             }
@@ -193,6 +197,7 @@ public class DijkstraController {
             * **/
             //遍历循环电梯列表，建立同一个电梯的电梯四点对象两两间等待点到出电梯的path点的假工控路径(不同电梯之间是没有路径的)
             for(Elevator elevator:elevatorList) {
+                log.info(placeholder + "elevator、" + elevator.toString());
                 //该电梯至少得有两个四点对象才能建立电梯楼层间云端路径
                 if (elevator == null ||
                         elevator.getElevatorPointCombinations() == null ||
@@ -200,26 +205,30 @@ public class DijkstraController {
                     continue;
                 }
                 List<ElevatorPointCombination> elevatorPointCombinations = elevator.getElevatorPointCombinations();
-
+                log.info(placeholder + "elevatorPointCombinations、" + elevatorPointCombinations.toString());
                 //遍历同一部电梯的四点对象，生成两两之间的假工控路径
                 for(ElevatorPointCombination startCombination : elevatorPointCombinations) {
+                    log.info(placeholder + "startCombination、" + startCombination.toString());
                     MapPoint startCombinePoint = startCombination.getwPoint();
+                    log.info(placeholder + "startCombinePoint、" + startCombinePoint.toString());
                     if(startCombinePoint == null || startCombinePoint.getId() == null) {
                         return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点为空，生成错误！");
                     }
                     for(ElevatorPointCombination endCombination : elevatorPointCombinations) {
+                        log.info(placeholder + "endCombination、" + endCombination.toString());
                         //跳过相同的四点集合
                         if(endCombination.getId().equals(startCombination.getId())) {
                             continue;
                         }
                         MapPoint endCombinePoint = endCombination.getoPoint();
+                        log.info(placeholder + "endCombinePoint、" + endCombinePoint.toString());
                         if(endCombinePoint == null || endCombinePoint.getId() == null) {
                             return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'出去点为空，生成错误！");
                         }
                         //电梯云端路径起点是出发楼层工控路径终点
                         MapPoint startPathPoint = PointServiceImpl.findPathPointByXYTH(sceneName,
                                 startCombinePoint.getMapName(),startCombinePoint.getX(),startCombinePoint.getY(),startCombinePoint.getTh(),null, pointService);
-
+                        log.info(placeholder + "startPathPoint、" + startPathPoint.toString());
                         Long startPathPointId = startPathPoint.getId();
                         Long startCombinePointId = startCombinePoint.getId();
                         Long endCombinePointId = endCombinePoint.getId();
@@ -236,10 +245,12 @@ public class DijkstraController {
                         roadPath.setCreateTime(new Date());
                         roadPath.setPathType(Constant.PATH_TYPE_CLOUD);
                         roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                        log.info(placeholder + "roadPath、" + roadPath.toString());
                         List<Long> pointIds = new ArrayList<>();
                         pointIds.add(startPathPointId);
                         pointIds.add(startCombinePointId);
                         pointIds.add(endCombinePointId);
+                        log.info(placeholder + "pointIds、" + pointIds.toString());
 
                         roadPathService.createOrUpdateRoadPathByStartAndEndPoint(startPathPointId,
                                 endCombinePointId,sceneName,null,Constant.PATH_TYPE_CLOUD,
@@ -253,6 +264,7 @@ public class DijkstraController {
 
             return AjaxResult.success("执行完毕，若同一部电梯关联的四点对象少于两个，则不会生成");
         } catch (Exception e) {
+            log.error("出错:{}", e);
             log.error("出错:{}",e.getMessage());
             return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
         }
