@@ -1802,6 +1802,7 @@ create table AS_ELEVATORPOINTCOMBINATION
   CREATED_BY bigint null,
   CREATE_TIME datetime null,
   STORE_ID bigint null,
+  SCENE_ID bigint null,
   constraint AS_ELEVATORPOINTCOMBINATION_A_MAP_POINT_ID_fk
   foreign key (WAIT_POINT) references A_MAP_POINT (ID)
     on update cascade on delete cascade,
