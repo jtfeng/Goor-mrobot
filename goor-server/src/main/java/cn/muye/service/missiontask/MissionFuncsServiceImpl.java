@@ -3613,7 +3613,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         JsonMissionItemDataRoadPathUnlock json =
                 new JsonMissionItemDataRoadPathUnlock();
-        json.setInterval_time(30);
+//        json.setInterval_time(30);
+        json.setInterval_time(5);
         json.setRoadpath_id(mPointAtts.roadpathId);
         MissionTask roadpathUnlockTask = getRoadPathUnlockTask(
                 order,
@@ -3644,7 +3645,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         JsonMissionItemDataRoadPathLock json =
                 new JsonMissionItemDataRoadPathLock();
-        json.setInterval_time(30);
+//        json.setInterval_time(30);
+        json.setInterval_time(5);
         json.setRoadpath_id(mPointAtts.roadpathId);
         MissionTask roadpathLockTask = getRoadPathLockTask(
                 order,
