@@ -119,6 +119,11 @@ public class MapSyncService implements ApplicationContextAware {
             return resultMap;
         } catch (Exception e) {
             LOGGER.error("发送地图更新信息失败", e);
+            try {
+                sceneService.updateSceneState(mapZip.getSceneName(),UPLOAD_FAIL, sceneId);
+            } catch (Exception e1) {
+                LOGGER.error("发送地图更新信息失败", e);
+            }
         }
         return null;
     }
