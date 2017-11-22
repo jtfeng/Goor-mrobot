@@ -29,12 +29,13 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * @author Jelynn
  * Created by Jelynn on 2017/7/8.
  */
 @Service
-public class FileUpladService {
+public class FileUploadService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileUpladService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUploadService.class);
     public final static String PREFIX = "http://"; //前缀
     private static final String MAP_UPLOAD_SUCCESS = "1";
     private static final String MAP_UPLOAD_FAIL = "-1";

@@ -4,7 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.TopicHandleInfo;
-import cn.muye.base.service.FileUpladService;
+import cn.muye.base.service.FileUploadService;
 import cn.muye.publisher.AppSubService;
 import cn.muye.service.FixFilePathService;
 import com.alibaba.fastjson.JSON;
@@ -32,7 +32,7 @@ public class ExampleController {
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private FileUpladService fileUpladService;
+    private FileUploadService fileUploadService;
 
     @Autowired
     private AppSubService appSubService;

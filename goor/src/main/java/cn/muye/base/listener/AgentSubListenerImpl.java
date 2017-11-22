@@ -6,7 +6,7 @@ import cn.muye.base.bean.SingleFactory;
 import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.producer.ProducerCommon;
-import cn.muye.base.service.FileUpladService;
+import cn.muye.base.service.FileUploadService;
 import cn.muye.base.service.ScheduledHandleService;
 import cn.muye.base.service.imp.ScheduledHandleServiceImp;
 import com.alibaba.fastjson.JSON;
@@ -59,7 +59,7 @@ public class AgentSubListenerImpl implements TopicCallback, ApplicationContextAw
                     logger.info(" UUID 请求已处理, uuid=" + uuid);
                 }
                 if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName) && (!handled)) {
-                    FileUpladService fileUpladService = applicationContext.getBean(FileUpladService.class);
+                    FileUploadService fileUpladService = applicationContext.getBean(FileUploadService.class);
                     fileUpladService.sendTopic("0", uuid, "请求接收成功");
                     fileUpladService.uploadMapFile(uuid);
                     CacheInfoManager.setUUIDHandledCache(uuid);
