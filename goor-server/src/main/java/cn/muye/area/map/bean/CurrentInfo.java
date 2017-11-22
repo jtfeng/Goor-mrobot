@@ -20,6 +20,10 @@ public class CurrentInfo {
 
     private List<StateDetail> list;  //状态
 
+    private String fault; //故障
+
+    private int taskStateCode; //任务状态
+
     private List<StateDetail> mission; //任务主状态
 
     public boolean isOnline() {
@@ -68,5 +72,21 @@ public class CurrentInfo {
 
     public void setMission(List<StateDetail> mission) {
         this.mission = mission;
+    }
+
+    public String getFault() {
+        return fault;
+    }
+
+    public void setFault(String fault) {
+        this.fault = fault;
+    }
+
+    public int getTaskStateCode() {
+        return taskStateCode;
+    }
+
+    public void setTaskStateCode(int taskStateCode) {
+        this.taskStateCode = taskStateCode;
     }
 }

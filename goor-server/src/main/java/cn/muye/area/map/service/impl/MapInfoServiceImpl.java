@@ -16,6 +16,7 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.service.StateCollectorService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -52,6 +53,9 @@ public class MapInfoServiceImpl implements MapInfoService {
 
     @Autowired
     private RobotService robotService;
+
+    @Autowired
+    private ChargeInfoService chargeInfoService;
 
     @Value("${goor.push.http}")
     private String DOWNLOAD_HTTP;
@@ -166,7 +170,6 @@ public class MapInfoServiceImpl implements MapInfoService {
 
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
             if (null != currentPoseInfo) {
-                parsePoseData(currentPoseInfo);
                 currentInfo.setPose(parsePoseData(currentPoseInfo));
             } else {
                 LOGGER.info("未获取到当前机器人（" + code + "）实时坐标");
@@ -174,8 +177,9 @@ public class MapInfoServiceImpl implements MapInfoService {
 
             //根据机器人code获取地图信息
             MapInfo mapInfo = getCurrentMapInfo(code);
-            if (null == mapInfo)
+            if (null == mapInfo) {
                 currentInfo.setPose("");  //没有地图不显示坐标
+            }
             currentInfo.setMapInfo(getCurrentMapInfo(code));
 
             //获取当前电量信息
@@ -189,6 +193,12 @@ public class MapInfoServiceImpl implements MapInfoService {
 
             //添加当前任务状态
             currentInfo.setMission(stateCollectorService.collectTaskLog(code));
+
+            //设置任务状态码
+            currentInfo.setTaskStateCode(getTaskState(code).getCode());
+
+            //设置故障
+            currentInfo.setFault(getFault(code));
             return currentInfo;
         } catch (Exception e) {
             LOGGER.error("获取当前位置信息出错", e);
@@ -197,7 +207,39 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     /**
+     * 获取故障状态
+     *
+     * @param code
+     * @return
+     */
+    private String getFault(String code) {
+        //TODO 2017-11-22 后续完善故障状态
+
+        return null;
+    }
+
+    /**
+     * 获取任务状态 运输中/充电/待命
+     *
+     * @param code
+     * @return
+     */
+    private TaskState getTaskState(String code) {
+        Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (robot.getBusy()) {
+            return TaskState.TRANSPORTING;
+        }
+        List<ChargeInfo> chargeInfoList = chargeInfoService.getByDeviceId(code);
+        ChargeInfo chargeInfo = (chargeInfoList != null && chargeInfoList.size() > 0) ? chargeInfoList.get(0) : null;
+        if (chargeInfo.getChargingStatus() == 1) {
+            return TaskState.CHARGING;
+        }
+        return TaskState.STANDBY;
+    }
+
+    /**
      * 根据场景名、地图名、店铺ID查找MapInfo列表
+     *
      * @param sceneName
      * @param mapName
      * @param storeId
@@ -311,8 +353,9 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     private String parseLocalPath(String localPath) {
-        if (StringUtil.isNullOrEmpty(localPath))
+        if (StringUtil.isNullOrEmpty(localPath)){
             return "";
+        }
         //将文件路径封装成http路径
         localPath = localPath.replaceAll("\\\\", "/");
         return DOWNLOAD_HTTP + localPath;
@@ -344,5 +387,45 @@ public class MapInfoServiceImpl implements MapInfoService {
             return false;
         }
         return dir.delete();
+    }
+
+    private enum TaskState {
+        TRANSPORTING(1),
+        CHARGING(2),
+        STANDBY(3);
+
+        private int code;
+
+        private TaskState(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+    }
+
+    private enum FaultState {
+        NORMAL(1),
+        WARNING(2),
+        FAULT(3);
+
+        private int code;
+
+        private FaultState(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
     }
 }
