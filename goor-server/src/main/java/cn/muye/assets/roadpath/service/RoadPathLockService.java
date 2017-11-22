@@ -55,4 +55,6 @@ public interface RoadPathLockService extends BaseService<RoadPathLock> {
      */
     List<RoadPathLock> listRoadPathLocks(WhereRequest whereRequest) throws Exception;
 
+    boolean cloudReleaseRoadPathLock(String robotCode) throws Exception;
+
 }

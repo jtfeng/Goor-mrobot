@@ -19,6 +19,8 @@ import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -269,13 +271,44 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
     @Override
     public List<RoadPath> listRoadPaths(WhereRequest whereRequest) throws Exception {
-        List<RoadPath> roadPaths = listPageByStoreIdAndOrder(
-                whereRequest.getPage(),
-                whereRequest.getPageSize(),
-                RoadPath.class,
-                "ID DESC");
+
+        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
+        // 判断分页查询的时候是否有传入查询关键字
+        if (whereRequest.getQueryObj() != null && !"".equals(whereRequest.getQueryObj().trim())) {
+            JSONObject queryObject = JSONObject.parseObject(whereRequest.getQueryObj());
+            // 可能为空
+            String pathNameKeyword = queryObject.getString("pathNameKeyword");
+            if (pathNameKeyword != null && !"".equals(pathNameKeyword.trim())) {
+                criteria.andCondition(" PATH_NAME LIKE ", "%"+pathNameKeyword.trim()+"%");
+            }
+            // 可能为空
+            String sceneNameKeyword = queryObject.getString("sceneNameKeyword");
+            if (sceneNameKeyword != null && !"".equals(sceneNameKeyword.trim())) {
+                criteria.andCondition(" SCENE_NAME LIKE ", "%"+sceneNameKeyword.trim()+"%");
+            }
+            // 可能为空
+            String mapNameKeyword = queryObject.getString("mapNameKeyword");
+            if (mapNameKeyword != null && !"".equals(mapNameKeyword.trim())) {
+                criteria.andCondition(" MAP_NAME LIKE ", "%"+mapNameKeyword.trim()+"%");
+            }
+            // 可能为空(此处暂定为 0 表示云端配置 1 代表工控上传）)
+            String pathType = queryObject.getString("pathType");
+            if (pathType != null && !"".equals(pathType.trim())) {
+                if ("0".equals(pathType.trim()) || "1".equals(pathType.trim())) {
+                    criteria.andCondition(" PATH_TYPE = ", Integer.parseInt(pathType.trim()));
+                }else {
+                    return Lists.newArrayList();
+                }
+            }
+        }
+        example.setOrderByClause("ID DESC");
+        List<RoadPath> roadPaths = myMapper.selectByExample(example);
         detailRoadPath(roadPaths);
         return roadPaths;
+
     }
 
     @Override

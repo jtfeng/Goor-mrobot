@@ -3,10 +3,12 @@ package cn.muye.assets.roadpath.service.impl;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathLock;
 import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathMapper;
 import cn.muye.assets.roadpath.service.RoadPathLockService;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -280,5 +283,25 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         List<RoadPathLock> roadPathLockList = listPageByStoreIdAndOrder(whereRequest.getPage(),
                 whereRequest.getPageSize(), RoadPathLock.class,"ID DESC");
         return roadPathLockList;
+    }
+
+    /**
+     * 云端主动释放指定机器人的路径锁
+     * @param robotCode
+     * @return
+     * @throws Exception
+     */
+    @Override
+    public boolean cloudReleaseRoadPathLock(String robotCode) throws Exception {
+        Example example = new Example(RoadPathLock.class);
+        example.createCriteria().andCondition(" ROBOT_CODES like ", "%" + robotCode + "%");
+        // 一般只有一个元素(每台机器应该单一时刻只能请求一个路径锁)
+        List<RoadPathLock> locks = this.roadPathLockMapper.selectByExample(example);
+        // 表示最后的解锁结果
+        boolean result = true;
+        for (RoadPathLock roadPathLock: locks) {
+            result = result && unlockInnerNewVersion(roadPathLock.getId(), robotCode);
+        }
+        return result;
     }
 }
