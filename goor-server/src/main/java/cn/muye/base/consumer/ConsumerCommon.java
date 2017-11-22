@@ -345,8 +345,6 @@ public class ConsumerCommon {
                         String sceneKey = sceneName + "_" + mapName;
                         CacheInfoManager.setSceneRobotListCache(sceneKey, messageInfo.getSenderId());
                     }
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.CHARGING_STATUS_INQUIRY)) {
-                    saveChargeStatus(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.FIXPATH_QUERY)) {
                     fixPathService.saveFixpathQuery(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
                 }
@@ -594,15 +592,6 @@ public class ConsumerCommon {
         } catch (Exception e) {
             logger.error("consumer robotInfo exception", e);
         }
-    }
-
-    private void saveChargeStatus(String code, Date sendTime, String messageData) {
-        //保存电量信息
-        ChargeInfo chargeInfo = JSON.parseObject(messageData, ChargeInfo.class);
-        chargeInfo.setDeviceId(code);
-        chargeInfo.setCreateTime(sendTime);
-        chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        saveAndCheckChargeInfo(code, chargeInfo);
     }
 
     private void saveAndCheckChargeInfo(String code, ChargeInfo chargeInfo) {

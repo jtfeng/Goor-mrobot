@@ -58,7 +58,6 @@ public class TopicConstants {
 	public static final String ROS_YAOGAN_TOPIC_TYPE = "geometry_msgs/Twist";
 
 	//ros topic pub/sub  name
-	public static final String CHARGING_STATUS_INQUIRY = "charging_status_inquiry";
 	public static final String PUB_SUB_NAME_ROBOT_INFO = "robot_info"; //下发机器人信息和应用请求机器人信息(电量阈值)的pubName
 	public static final String MOTION_PLANNER_MOTION_STATUS = "motion_planner_motion_status";
 	public static final String STATE_COLLECTOR = "/state_collector"; //状态机返回状态的topic
