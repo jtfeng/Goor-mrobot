@@ -100,13 +100,7 @@ public class Order extends BaseBean{
     }
 
     public String getResscene() {
-//        return resscene;
-        if (startStation != null &&
-                !StringUtils.isEmpty(startStation.getResscene())){
-            return startStation.getResscene();
-        }else{
-            return "default";
-        }
+        return resscene;
     }
 
     public void setResscene(String resscene) {
