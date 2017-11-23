@@ -280,22 +280,22 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (whereRequest.getQueryObj() != null && !"".equals(whereRequest.getQueryObj().trim())) {
             JSONObject queryObject = JSONObject.parseObject(whereRequest.getQueryObj());
             // 可能为空
-            String pathNameKeyword = queryObject.getString("pathNameKeyword");
+            String pathNameKeyword = queryObject.getString("PATH_NAME".toLowerCase());
             if (pathNameKeyword != null && !"".equals(pathNameKeyword.trim())) {
                 criteria.andCondition(" PATH_NAME LIKE ", "%"+pathNameKeyword.trim()+"%");
             }
             // 可能为空
-            String sceneNameKeyword = queryObject.getString("sceneNameKeyword");
+            String sceneNameKeyword = queryObject.getString("SCENE_NAME".toLowerCase());
             if (sceneNameKeyword != null && !"".equals(sceneNameKeyword.trim())) {
                 criteria.andCondition(" SCENE_NAME LIKE ", "%"+sceneNameKeyword.trim()+"%");
             }
             // 可能为空
-            String mapNameKeyword = queryObject.getString("mapNameKeyword");
+            String mapNameKeyword = queryObject.getString("MAP_NAME".toLowerCase());
             if (mapNameKeyword != null && !"".equals(mapNameKeyword.trim())) {
                 criteria.andCondition(" MAP_NAME LIKE ", "%"+mapNameKeyword.trim()+"%");
             }
             // 可能为空(此处暂定为 0 表示云端配置 1 代表工控上传）)
-            String pathType = queryObject.getString("pathType");
+            String pathType = queryObject.getString("PATH_TYPE".toLowerCase());
             if (pathType != null && !"".equals(pathType.trim())) {
                 if ("0".equals(pathType.trim()) || "1".equals(pathType.trim())) {
                     criteria.andCondition(" PATH_TYPE = ", Integer.parseInt(pathType.trim()));
@@ -511,7 +511,6 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
     /**
      * 测试计算坐标长度函数
-     * @param args
      */
     /*public static void main(String[] args) {
         MapPoint start = new MapPoint();
