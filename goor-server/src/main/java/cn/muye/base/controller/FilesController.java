@@ -192,31 +192,11 @@ public class FilesController {
             String relativePath = real.getPath().replace(DOWNLOAD_HOME, "");
             LOGGER.info("上传成功，文件保存路径，path = " + real.getPath());
             // 传输成功后，添加至数据库
-            FileUpload uploadFile = fileUploadService.getByName(fileName);
-            if (uploadFile != null) {
-                uploadFile.setUpdateTime(new Date());
-                uploadFile.setLength(temp.length());
-                uploadFile.setStatus(Constant.FILE_OK);
-                //uploadFile.setMd5(FileValidCreateUtil.fileMD5(real.getAbsolutePath()));
-                fileUploadService.update(uploadFile);
-            } else {
-                FileUpload newFile = new FileUpload();
-                newFile.setCreateTime(new Date());
-                newFile.setUpdateTime(newFile.getCreateTime());
-                newFile.setLength(temp.length());
-                newFile.setName(fileName);
-                newFile.setStatus(Constant.FILE_OK);
-                newFile.setPath(relativePath);
-                // newFile.setMd5(FileValidCreateUtil.fileMD5(real.getAbsolutePath()));
-                fileUploadService.save(newFile);
-                uploadFile = newFile;
-            }
-
+            long uploadFileId = saveUploadFile(relativePath, fileName, temp.length());
             otherInfoObject.put("filePath", relativePath);
-            otherInfoObject.put("fileUploadId", uploadFile.getId());
+            otherInfoObject.put("fileUploadId", uploadFileId);
 
             return AjaxResponse.success();
-
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResponse.failed(-1, "文件上传失败");
@@ -228,7 +208,13 @@ public class FilesController {
                 }
                 if (isSuccess) {
                     temp.renameTo(real);
-                    analysis(type, otherInfoObject);
+                    new Thread(() ->{
+                        try {
+                            analysis(type, otherInfoObject);
+                        } catch (Exception e) {
+                            LOGGER.error("解压地图包出错", e);
+                        }
+                    }).start();
                 }
             } catch (IOException e) {
                 return AjaxResponse.failed(-1, "文件上传失败");
@@ -236,6 +222,27 @@ public class FilesController {
                 return AjaxResponse.failed(-1, e.getMessage());
             }
         }
+    }
+
+    private long saveUploadFile(String relativePath ,String fileName, long length){
+        FileUpload uploadFile = fileUploadService.getByName(fileName);
+        if (uploadFile != null) {
+            uploadFile.setUpdateTime(new Date());
+            uploadFile.setLength(length);
+            uploadFile.setStatus(Constant.FILE_OK);
+            fileUploadService.update(uploadFile);
+        } else {
+            FileUpload newFile = new FileUpload();
+            newFile.setCreateTime(new Date());
+            newFile.setUpdateTime(newFile.getCreateTime());
+            newFile.setLength(length);
+            newFile.setName(fileName);
+            newFile.setStatus(Constant.FILE_OK);
+            newFile.setPath(relativePath);
+            fileUploadService.save(newFile);
+            uploadFile = newFile;
+        }
+        return uploadFile.getId();
     }
 
     /**
