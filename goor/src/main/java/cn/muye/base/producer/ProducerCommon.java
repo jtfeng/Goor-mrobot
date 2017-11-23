@@ -58,7 +58,7 @@ public class ProducerCommon implements ApplicationContextAware {
                 log.error("getLocalRobotSN is null");
                 return;
             }
-            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_POWER, new MessageInfo(localRobotSN, new Date(), text));
+            rabbitTemplate.convertAndSend(TopicConstants.DIRECT_APP_SUB_POWER, new MessageInfo(localRobotSN, new Date(), text));
         }catch (Exception e){
             log.error("sendCurrentPoseMessage error",e);
         }

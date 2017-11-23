@@ -403,7 +403,7 @@ public class ConsumerCommon {
      *
      * @param messageInfo goor上传的信息
      */
-    @RabbitListener(queues = TopicConstants.DIRECT_POWER)
+    @RabbitListener(queues = TopicConstants.DIRECT_APP_SUB_POWER)
     public void directPower(@Payload MessageInfo messageInfo) {
         try {
             String messageText = messageInfo.getMessageText();
@@ -422,9 +422,10 @@ public class ConsumerCommon {
             chargeInfo.setDeviceId(messageInfo.getSenderId());
             chargeInfo.setCreateTime(messageInfo.getSendTime());
             chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+            chargeInfo.setAutoCharging(ret[2]); //byte 2：系统状态ex： BIT0 = 0  自动回充口没有充电；BIT0 = 1 自动回冲口正在充电
             saveAndCheckChargeInfo(messageInfo.getSenderId(), chargeInfo);
         } catch (Exception e) {
-            logger.error("consumer directPower exception", e);
+            logger.error("consumer directAppSubPower exception", e);
         }
     }
 

@@ -105,8 +105,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Queue directPower() {
-        return new Queue(TopicConstants.DIRECT_POWER,false,false,true, RabbitmqUtil.getRabbitMQArguments());
+    public Queue directAppSubPower() {
+        return new Queue(TopicConstants.DIRECT_APP_SUB_POWER,false,false,true, RabbitmqUtil.getRabbitMQArguments());
     }
 
     @Bean

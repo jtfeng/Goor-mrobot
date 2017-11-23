@@ -65,7 +65,7 @@ public class TopicConstants {
 	public static final String ROBOTS_CURRENT_POSE = "robots_current_pose"; //所有机器人当前位置
 	public static final String VERIFY_EMPLYEE_NUMBER = "verify_emplyee_number"; //员工工号取货校验
 	public static final String VERIFY_ELEVATOR_ADMIN_NUMBER = "verify_elevator_admin_number"; //电梯管理员工号进出电梯校验
-	public static final String POWER = "/power"; //机器人电量
+	public static final String APP_SUB_POWER = "/app_sub_power"; //机器人电量
 	public static final String PUB_SUB_NAME_CHECK_OPERATE_PWD = "check_operate_pwd"; // 应用请求操作机器人密码校验的 PUB 和 SUB 名称
 	public static final String FIXPATH_QUERY = "fixpath_query"; //  查询保存的路径
 	public static final String FIXPATH_FILE_QUERY = "fixpath_file_query"; //  查询保存的文件路径
@@ -146,7 +146,7 @@ public class TopicConstants {
 	//定义Queue
 	//客户端上报队列
 	public static final String DIRECT_CURRENT_POSE = "direct.current_pose";
-	public static final String DIRECT_POWER = "direct.power";
+	public static final String DIRECT_APP_SUB_POWER = "direct.app_sub_power";
 	public static final String DIRECT_APP_PUB = "direct.app_pub";
 	public static final String DIRECT_APP_SUB = "direct.app_sub";
 	public static final String DIRECT_AGENT_PUB = "direct.agent_pub";

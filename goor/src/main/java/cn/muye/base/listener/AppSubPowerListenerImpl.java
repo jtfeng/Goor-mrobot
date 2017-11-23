@@ -20,13 +20,12 @@ import org.springframework.stereotype.Component;
  * Time: 14:23
  * Describe:
  * Version:1.0
+ * @author Jelynn
  */
 @Component
-public class PowerListenerImpl implements TopicCallback, ApplicationContextAware {
+public class AppSubPowerListenerImpl implements TopicCallback{
 
-    private static ApplicationContext applicationContext;
-
-    private static final Logger logger = LoggerFactory.getLogger(PowerListenerImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(AppSubPowerListenerImpl.class);
 
     @Override
     public void handleMessage(Message message) {
@@ -40,10 +39,5 @@ public class PowerListenerImpl implements TopicCallback, ApplicationContextAware
         } catch (Exception e) {
             logger.error("AgentSubListenerImpl Exception", e);
         }
-    }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        PowerListenerImpl.applicationContext = applicationContext;
     }
 }

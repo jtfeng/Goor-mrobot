@@ -468,7 +468,7 @@ public class SingleFactory {
             lock_power.lock();
             try {
                 if (power == null) {
-                    power = new Topic(ros, TopicConstants.POWER, UInt8MultiArray.TYPE);
+                    power = new Topic(ros, TopicConstants.APP_SUB_POWER, UInt8MultiArray.TYPE);
                     log.info("get topic power="+power);
                 }
             }catch (Exception e){
