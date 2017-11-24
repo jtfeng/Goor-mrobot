@@ -18,14 +18,12 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -49,6 +47,9 @@ public class MapZipController {
 
     @Autowired
     private MapSyncService mapSyncService;
+
+    @Autowired
+    private MapAnalysisService mapAnalysisService;
 
     @Autowired
     private SceneMapZipXREFService sceneMapZipXREFService;
@@ -145,7 +146,7 @@ public class MapZipController {
             for (int i = 0; i < deviceIds.size(); i++) {
                 robotList.add(robotService.getById(deviceIds.get(i)));
             }
-            Map<String, AjaxResult> result;
+            Object result;
             if (robotList.size() <= 0 || robotList.isEmpty()) {
                 result = mapSyncService.syncMap(mapZip, SearchConstants.FAKE_MERCHANT_STORE_ID);
             } else {
@@ -157,9 +158,6 @@ public class MapZipController {
             return AjaxResult.failed("系统错误");
         }
     }
-
-    @Autowired
-    private MapAnalysisService mapAnalysisService;
 
     /**
      * 解压地图压缩包（仅做还原数据）

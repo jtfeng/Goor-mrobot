@@ -10,6 +10,11 @@ import java.util.List;
  */
 public class Constant {
 
+    //是地图同步状态
+    public static final int UPLOAD_SUCCESS = 1;
+    public static final int UPLOAD_FAIL = 2;
+
+
     public static final String REQUEST = "request";
 
     //数据库数据删除状态
