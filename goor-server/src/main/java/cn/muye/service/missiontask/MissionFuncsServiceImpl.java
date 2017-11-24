@@ -94,7 +94,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Autowired
     private EmployeeService employeeService;
 
-    @Value("${mission.item.concurrentable}")
+    @Value("${mission.item.concurrentable:false}")
     private Boolean missionItemConcurrentable;
 
     @Autowired
@@ -1295,9 +1295,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "测试任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "测试任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getTestItemTask(order, mp, parentName));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1352,9 +1362,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "单点导航任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "单点导航任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getSigleNavItemTask(order, mp, parentName));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1406,9 +1426,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint startMp,
             MapPoint endMp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "优先固定路径导航任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "优先固定路径导航任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getPathNavItemTask(order, startMp, endMp, parentName));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1502,9 +1532,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             MPointAtts mPointAtts) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "进入固定路径导航任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "进入固定路径导航任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getStaticPathItemTask(order, mp, parentName, mPointAtts));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1563,9 +1603,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "等待任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "等待任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getWaitingItemTask(order, mp, parentName));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1606,9 +1656,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String fileName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "语音任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "语音任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getMp3VoiceItemTask(order, mp, parentName, fileName));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1690,9 +1750,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "进入充电任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "进入充电任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getGotoChargeItemTask(order, mp, parentName));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1740,9 +1810,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "离开充电任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "离开充电任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getLeaveChargeItemTask(order, mp, parentName));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1783,9 +1863,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "装货任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "装货任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getLoadItemTask(order, mp, parentName, orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1858,9 +1948,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "无货架装货任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "无货架装货任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getLoadNoShelfItemTask(order, mp, parentName, orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1922,9 +2022,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "卸货任务" );
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "卸货任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getUnloadItemTask(order, mp, parentName, orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -1993,9 +2103,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName,  "终点卸货任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "终点卸货任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getFinalUnloadItemTask(order, mp, parentName,orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2055,9 +2175,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataElevator json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "电梯任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getElevatorItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2102,9 +2232,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataTwoElevator json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "双电梯任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "双电梯任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getTwoElevatorItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2150,9 +2290,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataElevatorUnlock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯解锁任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "电梯解锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getElevatorUnlockItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2195,9 +2345,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataElevatorLock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯加锁任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "电梯加锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getElevatorLockItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2240,9 +2400,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataDoor json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "门任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "门任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getDoorItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2285,9 +2455,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataDoor json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "laneDoor任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "laneDoor任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getLaneDoorItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2330,9 +2510,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataDoor json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "pathDoor任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "pathDoor任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getPathDoorItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2377,9 +2567,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataRoadPathUnlock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "路径解锁任务");
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "路径解锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getRoadPathUnlockItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2422,9 +2622,19 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataRoadPathLock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName,"路径加锁任务"  );
+        MissionTask missionTask = new MissionTask();
+        if (order.getScene() != null) {
+            missionTask.setSceneId(order.getScene().getId());
+        }
+        missionTask.setDescription(parentName + "路径加锁任务");
+        missionTask.setName(missionTask.getDescription());
+        missionTask.setRepeatTimes(1);
+        missionTask.setIntervalTime(0L);
+        missionTask.setState(MissionStateInit);
+        missionTask.setPresetMissionCode("");
 
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        List<MissionItemTask> missionItemTasks =
+                new ArrayList<>();
         missionItemTasks.add(getRoadPathLockItemTask(order, mp, parentName, json));
 
         missionTask.setMissionItemTasks(missionItemTasks);
@@ -2455,28 +2665,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         itemTask.setFeatureValue(FeatureValue_roadpath_lock);
 
         return itemTask;
-    }
-
-    /**
-     * 获取MissionTask的通用信息，不包括missionItemTasks
-     * @param description  描述信息
-     * @return
-     */
-    private MissionTask getCommonMissionTask(
-            Order order,
-            String parentName,
-            String description) {
-        MissionTask missionTask = new MissionTask();
-        if (order.getScene() != null) {
-            missionTask.setSceneId(order.getScene().getId());
-        }
-        missionTask.setDescription(parentName + description);
-        missionTask.setName(missionTask.getDescription());
-        missionTask.setRepeatTimes(1);
-        missionTask.setIntervalTime(0L);
-        missionTask.setState(MissionStateInit);
-        missionTask.setPresetMissionCode("");
-        return missionTask;
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2724,8 +2912,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         List<MissionListTask> listTasks =
                 new ArrayList<>();
         listTasks.add(missionListTask);
-        logger.info("robot code is: " + order.getRobot().getCode() +
-                " , ####### tesk is: " + getGoorMissionMsg(listTasks));
         AjaxResult ajaxResult = x86MissionDispatchService.sendX86MissionDispatch(
                 order.getRobot().getCode(),
                 getGoorMissionMsg(listTasks)
@@ -3201,13 +3387,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 case MPointType_CHONGDIAN:
                     //首先检索是否充电点和上一个站点之间是否有云端路径点序列，如果有，加入相关任务
                     //暂时取消充电任务
-                    initPathMissionTaskChongDian(
+                    /*initPathMissionTaskChongDian(
                             missionListTask,
                             order,
                             startMp,
                             mp,
                             mPointAtts
-                    );
+                    );*/
                     break;
                 case MPointType_ELEVATOR:
 //                    initPathMissionTaskElevator(
@@ -4188,29 +4374,18 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         }
 
         //装载完毕语音任务
-//        MissionTask mp3loadFinishTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD_FINISH);
-//        if (isSetOrderDetailMP){
-//            mp3loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-//        }
-//        missionListTask.getMissionTasks().add(mp3loadFinishTask);
-
-        //并行执行装载完毕语音任务
-        MissionTask loadFinishTask = getCommonMissionTask(order , parentName, "语音任务");
+        MissionTask mp3loadFinishTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD_FINISH);
         if (isSetOrderDetailMP){
-            loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
+            mp3loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
         }
-        MissionItemTask mp3loadFinishTask = getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD_FINISH);
-        mp3loadFinishTask.setIgnorable(missionItemConcurrentable);
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
-        missionItemTasks.add(mp3loadFinishTask);
-        loadFinishTask.setMissionItemTasks(missionItemTasks);
-        missionListTask.getMissionTasks().add(loadFinishTask);
+        missionListTask.getMissionTasks().add(mp3loadFinishTask);
 
         //语音任务，我要出发了？
 //        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
 //        missionListTask.getMissionTasks().add(voiceTask);
 
     }
+
 
     /**
      * 实例化送货任务

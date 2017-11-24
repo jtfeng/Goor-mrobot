@@ -168,8 +168,10 @@ public class FixPathServiceImpl implements FixPathService {
         //只查找未配置的云端类型点，其他用于特殊任务的复制点，不在查找之列
         List<MapPoint> pointList = pointService.findByNameCloudType(pointName, sceneName, mapName,
                 SearchConstants.FAKE_MERCHANT_STORE_ID, MapPointType.UNDEFINED);
+
         if (null != pointList && pointList.size() > 0) {
             MapPoint mapPointDB = pointList.get(0);
+            logger.info("!!!!!!!FixPathServiceImpl --> findOrSaveMapPointByPath:"+ pointName + ",sceneName:" + sceneName + "/" + mapName +" found = " + pointList.size());
             //对于旧的未定义类型点，别名如果没含路径点path关键字，则修改别名
             if(!mapPointDB.getPointAlias().contains(Constant.PATH)) {
                 mapPointDB.setPointName(pointNameResult);
@@ -178,6 +180,7 @@ public class FixPathServiceImpl implements FixPathService {
             }
             return mapPointDB;
         }
+        logger.info("!!!!!!!!FixPathServiceImpl --> findOrSaveMapPointByPath:"+ pointName + ",sceneName:" + sceneName + "/" + mapName + " not found ");
         //封装mapPoint对象，保存数据库
         MapPoint mapPoint = new MapPoint();
         mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);

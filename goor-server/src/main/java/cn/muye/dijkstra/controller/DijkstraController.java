@@ -221,13 +221,19 @@ public class DijkstraController {
                             continue;
                         }
                         MapPoint endCombinePoint = endCombination.getoPoint();
-                        log.info(placeholder + "endCombinePoint、" + endCombinePoint.toString());
                         if(endCombinePoint == null || endCombinePoint.getId() == null) {
                             return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'出去点为空，生成错误！");
                         }
+                        log.info(placeholder + "endCombinePoint、" + endCombinePoint.toString());
+
                         //电梯云端路径起点是出发楼层工控路径终点
                         MapPoint startPathPoint = PointServiceImpl.findPathPointByXYTH(sceneName,
                                 startCombinePoint.getMapName(),startCombinePoint.getX(),startCombinePoint.getY(),startCombinePoint.getTh(),null, pointService);
+                        if(startPathPoint == null) {
+                            log.info(placeholder + "startPathPoint is null");
+                            return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点相关联的path路径点为空，生成错误！");
+                        }
+
                         log.info(placeholder + "startPathPoint、" + startPathPoint.toString());
                         Long startPathPointId = startPathPoint.getId();
                         Long startCombinePointId = startCombinePoint.getId();
