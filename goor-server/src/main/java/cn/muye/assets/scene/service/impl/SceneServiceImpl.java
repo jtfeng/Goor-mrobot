@@ -145,13 +145,13 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     private Object updateMap(Scene scene) throws Exception {
-        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
+        List<Robot> sceneRobotList = scene.getRobots();
+        if (sceneRobotList != null && !sceneRobotList.isEmpty()) {
             //自动下发地图
             log.info("更新场景信息，scene.getMapSceneName()=" + scene.getMapSceneName() + ", scene.getStoreId()" + scene.getStoreId());
             List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
-            log.info("更新场景信息，mapInfos=" + JSON.toJSONString(mapInfos));
             List<Robot> robots = new ArrayList<>();
-            for (Robot robot : scene.getRobots()) {
+            for (Robot robot : sceneRobotList) {
                 robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
             }
             log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
