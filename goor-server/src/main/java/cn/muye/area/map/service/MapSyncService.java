@@ -28,6 +28,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -56,12 +57,12 @@ public class MapSyncService implements ApplicationContextAware {
     @Value("${goor.push.http}")
     private String DOWNLOAD_HTTP;
 
-    public Map<String, AjaxResult> syncMap(MapZip mapZip, long storeId) {
+    public Object syncMap(MapZip mapZip, long storeId) {
         List<Robot> robotList = robotService.listRobot(storeId);
         return syncMap(mapZip, robotList);
     }
 
-    public Map<String, AjaxResult> syncMap(MapZip mapZip, List<Robot> robotList) {
+    public Object syncMap(MapZip mapZip, List<Robot> robotList) {
         //TODO 向机器人发送消息，更新地图
         return sendMapSyncMessage(robotList, mapZip);
     }
@@ -73,17 +74,27 @@ public class MapSyncService implements ApplicationContextAware {
      * @param mapZip
      * @return
      */
-    public Map<String, AjaxResult> sendMapSyncMessage(List<Robot> robotList, MapZip mapZip) {
+    public Object sendMapSyncMessage(List<Robot> robotList, MapZip mapZip) {
         return sendMapSyncMessage(robotList, mapZip, 0L);
     }
 
-    public Map<String, AjaxResult> sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId) {
+    public Object sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId) {
         try {
             LOGGER.info("开始同步地图,robotList.size()=" + robotList.size() + ",sceneId=" + sceneId + ",mapZip.getFileName()=" + mapZip.getFileName());
             Long mapZipId = mapZip.getId();
             if (!checkApplicationContextAndRabbitTemplate()) {
                 LOGGER.error("ApplicationContext And RabbitTemplate 参数为null");
                 return null;
+            }
+            File mapZipfile= new File(DOWNLOAD_HOME + mapZip.getFilePath());
+            if (!mapZipfile.exists()){
+                LOGGER.error("发送地图更新信息失败，未找到压缩包，"+ mapZipfile.getAbsolutePath());
+                try {
+                    sceneService.updateSceneState(Constant.UPLOAD_FAIL, sceneId);
+                    return AjaxResult.failed("发送地图更新信息失败，未找到压缩包，"+ mapZipfile.getAbsolutePath());
+                } catch (Exception e1) {
+                    LOGGER.error("发送地图更新信息失败", e1);
+                }
             }
             MessageInfo messageInfo = getMessageInfo(mapZip);
             Map<String, AjaxResult> resultMap = new HashMap<>();
@@ -115,7 +126,7 @@ public class MapSyncService implements ApplicationContextAware {
             }
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return resultMap;
-        } catch (Exception e) {
+        }catch (Exception e) {
             LOGGER.error("发送地图更新信息失败", e);
             try {
                 sceneService.updateSceneState(Constant.UPLOAD_FAIL, sceneId);

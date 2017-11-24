@@ -145,7 +145,7 @@ public class MapZipController {
             for (int i = 0; i < deviceIds.size(); i++) {
                 robotList.add(robotService.getById(deviceIds.get(i)));
             }
-            Map<String, AjaxResult> result;
+            Object result;
             if (robotList.size() <= 0 || robotList.isEmpty()) {
                 result = mapSyncService.syncMap(mapZip, SearchConstants.FAKE_MERCHANT_STORE_ID);
             } else {

@@ -145,7 +145,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     private Object updateMap(Scene scene) throws Exception {
-        Map<String, AjaxResult> taskResult = null;
         if (scene.getRobots() != null && scene.getRobots().size() != 0) {
             //自动下发地图
             log.info("更新场景信息，scene.getMapSceneName()=" + scene.getMapSceneName() + ", scene.getStoreId()" + scene.getStoreId());
@@ -158,7 +157,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
             if (mapInfos.size() != 0 && robots.size() != 0) {
                 log.info("场景同步地图");
-                taskResult = mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+                return mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
             }else {
                 updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
                 return AjaxResult.failed("未找到该场景关联的地图场景或场景无绑定机器人");
@@ -167,7 +166,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
             return AjaxResult.failed("场景无绑定机器人");
         }
-        return taskResult;
     }
 
     @Override
