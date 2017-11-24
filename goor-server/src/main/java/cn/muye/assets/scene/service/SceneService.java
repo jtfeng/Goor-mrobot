@@ -48,7 +48,7 @@ public interface SceneService extends BaseService<Scene> {
 
     boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception;
 
-    void updateSceneState(String mapSceneName,int state, Long sceneId) throws Exception;
+    void updateSceneState(int state, Long sceneId) throws Exception;
 
     Scene storeSceneInfoToSession(String source, String sceneId, String token) throws Exception;
    

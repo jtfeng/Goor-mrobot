@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.LogType;
@@ -38,9 +39,6 @@ public class MapSyncService implements ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapSyncService.class);
     private static ApplicationContext applicationContext;
-    private static final int UPLOAD_SUCCESS = 1;
-    private static final int UPLOAD_FAIL = 2;
-
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
@@ -111,16 +109,16 @@ public class MapSyncService implements ApplicationContextAware {
             }
             //更新指定场景的state
             if (successCount > 0) {
-                sceneService.updateSceneState(mapZip.getSceneName(),UPLOAD_SUCCESS, sceneId);
+                sceneService.updateSceneState(Constant.UPLOAD_SUCCESS, sceneId);
             } else {
-                sceneService.updateSceneState(mapZip.getSceneName(),UPLOAD_FAIL, sceneId);
+                sceneService.updateSceneState(Constant.UPLOAD_FAIL, sceneId);
             }
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return resultMap;
         } catch (Exception e) {
             LOGGER.error("发送地图更新信息失败", e);
             try {
-                sceneService.updateSceneState(mapZip.getSceneName(),UPLOAD_FAIL, sceneId);
+                sceneService.updateSceneState(Constant.UPLOAD_FAIL, sceneId);
             } catch (Exception e1) {
                 LOGGER.error("发送地图更新信息失败", e);
             }

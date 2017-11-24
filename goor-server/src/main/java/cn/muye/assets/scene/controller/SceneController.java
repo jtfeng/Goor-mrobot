@@ -72,6 +72,9 @@ public class SceneController {
         try {
             log.info("更新指定的场景信息");
             Object taskResult = sceneService.updateScene(scene);
+            if (taskResult instanceof AjaxResult){
+                return (AjaxResult)taskResult;
+            }
             return AjaxResult.success(taskResult, "修改场景信息成功！");
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage(), "修改场景信息失败！");

@@ -1,5 +1,6 @@
 package cn.muye.assets.scene.service.impl;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
@@ -95,19 +96,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         updateSelective(scene);
 
-        Object taskResult = null;
-        if (scene.getRobots() != null && scene.getRobots().size() != 0) {
-            //自动下发地图
-            List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
-            List<Robot> robots = new ArrayList<>();
-            for (Robot robot : scene.getRobots()) {
-                robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
-            }
-            if (mapInfos.size() != 0 && robots.size() != 0) {
-                log.info("场景同步地图");
-                taskResult = mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
-            }
-        }
+        Object taskResult = updateMap(scene);
         return taskResult;
     }
 
@@ -131,15 +120,17 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return sceneMapper.getRelatedMapNameBySceneId(sceneId);
     }
 
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
     @Override
     public Object updateScene(Scene scene) throws Exception {
         log.info("更新场景信息，scene=" + JSON.toJSONString(scene));
-        Scene existScene = this.sceneMapper.selectByPrimaryKey(scene.getId());
-        scene.setStoreId(STORE_ID);//设置默认的门店编号
+        Long sceneId = scene.getId();
+        //设置默认 store ID
+        scene.setStoreId(STORE_ID);
         scene.setCreateTime(new Date());
-        this.deleteRobotAndSceneRelations(scene.getId());
+        this.deleteRobotAndSceneRelations(sceneId);
         boolean flag = bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
+
 
         if (flag) {
             // 实际有机器人需要进行地图下发操作
@@ -149,7 +140,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         updateSelective(scene);//更新对应的场景信息
 
-        Object taskResult = null;
+        Object taskResult = updateMap(scene);
+        return taskResult;
+    }
+
+    private Object updateMap(Scene scene) throws Exception {
+        Map<String, AjaxResult> taskResult = null;
         if (scene.getRobots() != null && scene.getRobots().size() != 0) {
             //自动下发地图
             log.info("更新场景信息，scene.getMapSceneName()=" + scene.getMapSceneName() + ", scene.getStoreId()" + scene.getStoreId());
@@ -163,7 +159,13 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             if (mapInfos.size() != 0 && robots.size() != 0) {
                 log.info("场景同步地图");
                 taskResult = mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+            }else {
+                updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
+                return AjaxResult.failed("未找到该场景关联的地图场景或场景无绑定机器人");
             }
+        }else {
+            updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
+            return AjaxResult.failed("场景无绑定机器人");
         }
         return taskResult;
     }
@@ -393,7 +395,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     @Override
-    public void updateSceneState(String mapSceneName, int state, Long sceneId) throws Exception {
+    public void updateSceneState(int state, Long sceneId) throws Exception {
         Preconditions.checkArgument(sceneId != null, "更改场景状态为上传成功时,场景ID编号缺失,请检查代码!");
         Scene scene = sceneMapper.selectByPrimaryKey(sceneId);
         scene.setState(state);
