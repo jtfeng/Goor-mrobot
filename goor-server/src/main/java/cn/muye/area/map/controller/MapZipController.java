@@ -33,6 +33,7 @@ import java.util.List;
  * Time: 9:46
  * Describe:
  * Version:1.0
+ * @author Jelynn
  */
 @Controller
 public class MapZipController {
@@ -88,8 +89,8 @@ public class MapZipController {
             Integer pageNo = whereRequest.getPage();
             Integer pageSize = whereRequest.getPageSize();
 
-            pageNo = pageNo == null ? 1 : pageNo;
-            pageSize = pageSize == null ? 10 : pageSize;
+            pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
+            pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
             PageHelper.startPage(pageNo, pageSize);
             List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
             PageInfo<MapZip> page = new PageInfo<MapZip>(mapZipList);
@@ -181,6 +182,32 @@ public class MapZipController {
                 mapAnalysisService.analysisFile(saveFile, sceneNames, mapZip);
             }
             return AjaxResult.success("地图压缩包解压成功");
+        } catch (Exception e) {
+            LOGGER.error("地图同步出错", e);
+            return AjaxResult.failed("系统错误");
+        }
+    }
+
+    /**
+     * 根据场景地图名更新机器人地图
+     *
+     */
+    @RequestMapping(value = "area/mapZip/mapSync", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult mapSync(@RequestParam("mapSceneName") String mapSceneName,
+                              @RequestParam("deviceIds") String bindStr,
+                              @RequestParam("sceneId") Long sceneId) {
+        try {
+            List<Long>  deviceIds = new ArrayList<Long>();
+            if (!StringUtil.isNullOrEmpty(bindStr)) {
+                deviceIds = JSONArray.parseArray(bindStr, Long.class);
+            }
+            List<Robot> robotList = new ArrayList<>();
+            for (int i = 0; i < deviceIds.size(); i++) {
+                robotList.add(robotService.getById(deviceIds.get(i)));
+            }
+            mapSyncService.sendMapSyncMessageNew(robotList, mapSceneName,sceneId);
+            return AjaxResult.success("地图同步成功");
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
             return AjaxResult.failed("系统错误");
