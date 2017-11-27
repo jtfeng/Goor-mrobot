@@ -34,6 +34,7 @@ public class RobotMapZipXREFServiceImpl implements RobotMapZipXREFService {
         }
     }
 
+    @Override
     public void updateByRobotId(RobotMapZipXREF robotMapZipXREF) {
         Example example = new Example(RobotMapZipXREF.class);
         Example.Criteria criteria = example.createCriteria();
@@ -41,6 +42,7 @@ public class RobotMapZipXREFServiceImpl implements RobotMapZipXREFService {
         robotMapZipXREFMapper.updateByExampleSelective(robotMapZipXREF, example);
     }
 
+    @Override
     public List<RobotMapZipXREF> findByRobotId(Long robotId) {
         Example example = new Example(RobotMapZipXREF.class);
         Example.Criteria criteria = example.createCriteria();

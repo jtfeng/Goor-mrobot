@@ -231,7 +231,7 @@ public class MapInfoServiceImpl implements MapInfoService {
         }
         List<ChargeInfo> chargeInfoList = chargeInfoService.getByDeviceId(code);
         ChargeInfo chargeInfo = (chargeInfoList != null && chargeInfoList.size() > 0) ? chargeInfoList.get(0) : null;
-        if (chargeInfo.getChargingStatus() == 1) {
+        if (chargeInfo != null && chargeInfo.getChargingStatus() == 1) {
             return TaskState.CHARGING;
         }
         return TaskState.STANDBY;
