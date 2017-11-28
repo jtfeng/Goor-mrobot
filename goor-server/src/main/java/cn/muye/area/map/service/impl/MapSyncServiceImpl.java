@@ -10,13 +10,17 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.enums.ModuleEnums;
+import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.FileValidCreateUtil;
+import cn.mrobot.utils.ZipUtils;
 import cn.muye.area.map.service.MapSyncService;
+import cn.muye.area.map.service.MapZipService;
 import cn.muye.area.map.service.RobotMapZipXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.base.LogInfoUtils;
 import com.alibaba.fastjson.JSON;
@@ -51,6 +55,9 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
     private SceneService sceneService;
 
     @Autowired
+    private MapZipService mapZipService;
+
+    @Autowired
     private RobotMapZipXREFService robotMapZipXREFService;
 
     @Value("${goor.push.dirs}")
@@ -58,6 +65,8 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
 
     @Value("${goor.push.http}")
     private String DOWNLOAD_HTTP;
+
+    private boolean checkUploadRobot = false;
 
     @Override
     public Object syncMap(MapZip mapZip, long storeId) {
@@ -80,7 +89,6 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
     public Object sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId) {
         try {
             LOGGER.info("开始同步地图,robotList.size()=" + robotList.size() + ",sceneId=" + sceneId + ",mapZip.getFileName()=" + mapZip.getFileName());
-            Long mapZipId = mapZip.getId();
             if (!checkApplicationContextAndRabbitTemplate()) {
                 LOGGER.error("ApplicationContext And RabbitTemplate 参数为null");
                 return null;
@@ -88,61 +96,108 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
             File mapZipfile= new File(DOWNLOAD_HOME + mapZip.getFilePath());
             if (!mapZipfile.exists()){
                 LOGGER.error("发送地图更新信息失败，未找到压缩包，"+ mapZipfile.getAbsolutePath());
-                try {
-                    sceneService.updateSceneState(Constant.UPLOAD_FAIL, sceneId);
-                    return AjaxResult.failed("发送地图更新信息失败，未找到压缩包，"+ mapZipfile.getAbsolutePath());
-                } catch (Exception e1) {
-                    LOGGER.error("发送地图更新信息失败", e1);
-                }
+                updateSceneState(Constant.UPLOAD_FAIL, sceneId);
+                return AjaxResult.failed("发送地图更新信息失败，未找到压缩包，"+ mapZipfile.getAbsolutePath());
             }
-            MessageInfo messageInfo = getMessageInfo(mapZip);
-            Map<String, AjaxResult> resultMap = new HashMap<>();
-            StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append("压缩包名称：").append(mapZip.getFileName()).append(",");
-            int successCount = 0;
-            for (int i = 0; i < robotList.size(); i++) {
-                Robot robot = robotList.get(i);
-                String code = robot.getCode();
-                //如果需要同步的机器为地图上传机器，则跳过
-                if (checkRobotIsMapUploadDevice(robot, mapZip)) {
-                    successCount ++;
-                    stringBuffer.append(code).append(":").append("地图上传机器人").append(",");
-                    LOGGER.info("需同步的机器人code为上传地图的机器人code，不进行同步，code=" + code);
-                    continue;
-                }
-                AjaxResult ajaxClientResult = sendRabbitMQMessage(code, messageInfo);
-                //保存关联关系
-                boolean isSuccess = handleSendResult(robot, mapZipId, stringBuffer, ajaxClientResult, resultMap);
-                if (isSuccess){
-                    successCount ++;
-                }
-            }
-            //更新指定场景的state
-            if (successCount > 0) {
-                sceneService.updateSceneState(Constant.UPLOAD_SUCCESS, sceneId);
-            } else {
-                sceneService.updateSceneState(Constant.UPLOAD_FAIL, sceneId);
-            }
-            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
-            return resultMap;
+            checkUploadRobot = true;
+            return mapSync(mapZip, robotList, sceneId);
         }catch (Exception e) {
             LOGGER.error("发送地图更新信息失败", e);
-            try {
-                sceneService.updateSceneState(Constant.UPLOAD_FAIL, sceneId);
-            } catch (Exception e1) {
-                LOGGER.error("发送地图更新信息失败", e);
+            updateSceneState(Constant.UPLOAD_FAIL, sceneId);
+            return AjaxResult.failed("发送地图更新信息失败");
+        }
+    }
+
+    @Override
+    public Object sendMapSyncMessageNew(List<Robot> robotList, String mapSceneName, Long sceneId) {
+        String mapSceneNameDir = DOWNLOAD_HOME + File.separator +  Constant.MAP_FILE_PATH + File.separator + mapSceneName;
+        File mapSceneNameDirFile = new File(mapSceneNameDir);
+        if ( !mapSceneNameDirFile.exists() ||
+                !mapSceneNameDirFile.isDirectory() ||
+                mapSceneNameDirFile.listFiles().length <= 0){
+            LOGGER.error("发送地图更新信息失败，该地图场景文件夹不存在 " + mapSceneName);
+            updateSceneState(Constant.UPLOAD_FAIL, sceneId);
+            return AjaxResult.failed("发送地图更新信息失败，该地图场景文件夹不存在 "+ mapSceneName);
+        }
+        try {
+            File zipFile = zipMapFile(mapSceneNameDir, mapSceneName);
+            if (null == zipFile){
+                return AjaxResult.failed("压缩地图出错");
             }
+            MapZip mapZip = saveMapZip(zipFile, mapSceneName);
+            checkUploadRobot = false;
+            return mapSync(mapZip, robotList, sceneId);
+        }catch (Exception e){
+            LOGGER.error("地图同步失败 " + mapSceneName);
+            updateSceneState(Constant.UPLOAD_FAIL, sceneId);
+            return AjaxResult.failed("地图同步失败");
+        }
+    }
+
+    private MapZip saveMapZip(File zipFile, String mapSceneName){
+        MapZip mapZip = new MapZip();
+        mapZip.setSceneName(mapSceneName);
+        mapZip.setCreateTime(new Date());
+        mapZip.setDeviceId(Constant.GOOR_SERVER);
+        mapZip.setFileName(zipFile.getName());
+        String absolutePath = zipFile.getAbsolutePath();
+        String filePath = absolutePath.substring(absolutePath.indexOf(DOWNLOAD_HOME) + 1);
+        mapZip.setFilePath(filePath);
+        mapZip.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        mapZipService.save(mapZip);
+        return mapZip;
+    }
+
+    private Map<String, AjaxResult> mapSync(MapZip mapZip,  List<Robot> robotList, Long sceneId) throws Exception {
+        MessageInfo messageInfo = getMessageInfo(mapZip);
+        Map<String, AjaxResult> resultMap = new HashMap<>();
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("压缩包名称：").append(mapZip.getFileName()).append(",");
+        int successCount = 0;
+        for (int i = 0; i < robotList.size(); i++) {
+            Robot robot = robotList.get(i);
+            String code = robot.getCode();
+            //如果需要同步的机器为地图上传机器，则跳过
+            if (checkUploadRobot && checkRobotIsMapUploadDevice(robot, mapZip)) {
+                successCount ++;
+                stringBuffer.append(code).append(":").append("地图上传机器人").append(",");
+                LOGGER.info("需同步的机器人code为上传地图的机器人code，不进行同步，code=" + code);
+                continue;
+            }
+            LOGGER.info("同步机器人地图，code=" + code);
+            AjaxResult ajaxClientResult = sendRabbitMQMessage(code, messageInfo);
+            //保存关联关系
+            boolean isSuccess = handleSendResult(robot, mapZip.getId(), stringBuffer, ajaxClientResult, resultMap);
+            if (isSuccess){
+                successCount ++;
+            }
+        }
+        //更新指定场景的state
+        int state = successCount > 0 ? Constant.UPLOAD_SUCCESS : Constant.UPLOAD_FAIL;
+        updateSceneState(state, sceneId);
+        LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+        return resultMap;
+    }
+
+    private File zipMapFile(String filePath, String mapSceneName) throws Exception{
+        String zipFileSavePath = DOWNLOAD_HOME + File.separator + Constant.MAP_SYNCED_FILE_PATH;
+        String ZipFileName = mapSceneName + "_" + DateTimeUtils.getNormalNameDateTime() + Constant.ZIP_FILE_SUFFIX;
+        boolean zipResult =  ZipUtils.zip(filePath, zipFileSavePath, ZipFileName );
+        if (zipResult){
+            return new File(zipFileSavePath + File.separator + ZipFileName);
         }
         return null;
     }
 
-    @Override
-    public Object sendMapSyncMessageIgnoreUploadRobot(List<Robot> robotList, MapZip mapZip, Long sceneId) {
-        return null;
+    private void updateSceneState(int state, Long sceneId){
+        try {
+            sceneService.updateSceneState(state, sceneId);
+        } catch (Exception e) {
+            LOGGER.error("发送地图更新信息失败", e);
+        }
     }
 
     private boolean checkRobotIsMapUploadDevice(Robot robot, MapZip mapZip) throws Exception {
-        //如果需要同步地图的机器人是上传地图的机器人，则直接更新场景的状态
         if (robot.getCode().equals(mapZip.getDeviceId())) {
             saveOrUpdateMapZipXREF(mapZip.getId(), true, robot.getId());
             return true;
@@ -169,7 +224,9 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setLocalFileName(mapZip.getFileName());
         commonInfo.setLocalPath(mapZip.getRobotPath());
-        commonInfo.setRemoteFileUrl(DOWNLOAD_HTTP + mapZip.getFilePath());
+        String httpURL = DOWNLOAD_HTTP + mapZip.getFilePath();
+        LOGGER.info("压缩包http地址 = " + httpURL);
+        commonInfo.setRemoteFileUrl(httpURL);
         commonInfo.setMD5(FileValidCreateUtil.fileMD5(DOWNLOAD_HOME + mapZip.getFilePath()));
 
         MessageInfo messageInfo = new MessageInfo();

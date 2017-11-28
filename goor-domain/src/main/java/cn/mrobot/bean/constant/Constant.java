@@ -60,11 +60,12 @@ public class Constant {
     //文件上传状态
     public final static Integer FILE_OK = 0; //传输成功
     public final static Integer FILE_FAIL = 1;  //传输失败
-    public final static String FILE_UPLOAD_TYPE_MAP = "map"; //文件上传类型 ： map: 地图
+    public final static String FILE_UPLOAD_TYPE_MAP = "maps"; //文件上传类型 ： map: 地图
 
     public final static String EXPORT_DIR_NAME = "export"; //导出文件夹路径
     public final static String LOG_DIR_NAME= "log"; //日志文件夹路径
     public static final String LOG_FILE_SUFFIX = ".csv";
+    public static final String ZIP_FILE_SUFFIX = ".zip";
 
     public static final String AUTHORIZE_USERNAME = "web";
 
@@ -78,6 +79,7 @@ public class Constant {
 
     //地图文件场景下的点和地图路径名
     public final static String MAP_FILE_PATH = "map"; // 地图
+    public final static String MAP_SYNCED_FILE_PATH = "map_synced_file_path"; // 地图
     public final static String POINT_FILE_PATH = "point"; // 导航目标点
     public final static String ROS_MAP_FILE_SUFFIX = ".pgm"; // 导航目标点
 

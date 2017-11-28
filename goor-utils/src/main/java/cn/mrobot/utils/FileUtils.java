@@ -12,8 +12,10 @@ import java.util.Date;
 public class FileUtils {
 
 	private final static Logger logger = LoggerFactory.getLogger(FileUtils.class);
+
+	@Deprecated
     public static long copyFile(File srcFile, File desFile) throws Exception {
-        long time = new Date().getTime();
+        long time = System.currentTimeMillis();
         int length = 2097152;
         FileInputStream in = new FileInputStream(srcFile);
         FileOutputStream out = new FileOutputStream(desFile);
@@ -24,9 +26,10 @@ public class FileUtils {
                 in.close();
                 out.flush();
                 out.close();
-                return new Date().getTime() - time;
-            } else
+                return System.currentTimeMillis() - time;
+            } else{
                 out.write(buffer, 0, ins);
+            }
         }
     }
 
@@ -227,10 +230,12 @@ public class FileUtils {
         } finally {
 
             try {
-                if (bufferedReader != null)
+                if (bufferedReader != null){
                     bufferedReader.close();
-                if (fileReader != null)
+                }
+                if (fileReader != null){
                     fileReader.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

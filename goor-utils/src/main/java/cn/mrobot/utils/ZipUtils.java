@@ -72,8 +72,8 @@ public class ZipUtils {
     /**
      * 对文件或文件目录进行压缩
      *
-     * @param savePath    要压缩的源文件路径。如果压缩一个文件，则为该文件的全路径；如果压缩一个目录，则为该目录的顶层目录路径
-     * @param zipPath     压缩文件保存的路径。注意：zipPath不能是srcPath路径下的子文件夹
+     * @param zipPath    要压缩的源文件路径。
+     * @param savePath    压缩文件保存的路径。注意：zipPath不能是srcPath路径下的子文件夹
      * @param zipFileName 压缩文件名
      * @throws Exception
      */
