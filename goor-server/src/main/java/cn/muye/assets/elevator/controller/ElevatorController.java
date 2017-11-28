@@ -201,7 +201,7 @@ public class ElevatorController {
                 && oldPoint.getCloudMapPointTypeId() != MapPointType.ELEVATOR_WAIT.getCaption()) {
             MapPoint newPoint = new MapPoint();
             MapPoint.copyValue(newPoint, oldPoint);
-            newPoint.setPointAlias(newPoint.getPointName()+ "_" +Constant.ELEVATOR_WAIT + "_" + combination.getName());
+            newPoint.setPointAlias(newPoint.getPointName()+ "_" +Constant.ELEVATOR_WAIT + "_" + combination.getName() + "_" + oldPoint.getMapName() + "_" + oldPoint.getSceneName());
             newPoint.setId(null);
             newPoint.setCloudMapPointTypeId(MapPointType.ELEVATOR_WAIT.getCaption());
             pointService.save(newPoint);

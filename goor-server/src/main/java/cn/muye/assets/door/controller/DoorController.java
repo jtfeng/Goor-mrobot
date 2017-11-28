@@ -188,7 +188,7 @@ public class DoorController {
                 && oldPoint.getCloudMapPointTypeId() != MapPointType.DOOR_WAIT.getCaption()) {
             MapPoint newPoint = new MapPoint();
             MapPoint.copyValue(newPoint, oldPoint);
-            newPoint.setPointAlias(newPoint.getPointName()+ "_" +Constant.DOOR_WAIT + "_" + door.getName());
+            newPoint.setPointAlias(newPoint.getPointName()+ "_" +Constant.DOOR_WAIT + "_" + door.getName()  + "_" + oldPoint.getMapName() + "_" + oldPoint.getSceneName());
             newPoint.setId(null);
             newPoint.setCloudMapPointTypeId(MapPointType.DOOR_WAIT.getCaption());
             pointService.save(newPoint);

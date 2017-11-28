@@ -351,7 +351,7 @@ public class StationController {
                 && !mapPointType.equals(oldPoint.getCloudMapPointTypeId() + "")) {
             MapPoint newPoint = new MapPoint();
             MapPoint.copyValue(newPoint, oldPoint);
-            newPoint.setPointAlias(newPoint.getPointName()+ "_" +pointTypeName + "_" + stationName);
+            newPoint.setPointAlias(newPoint.getPointName()+ "_" +pointTypeName + "_" + stationName + "_" + oldPoint.getMapName() + "_" + oldPoint.getSceneName());
             newPoint.setId(null);
             newPoint.setCloudMapPointTypeId(Integer.parseInt(mapPointType));
             pointService.save(newPoint);
