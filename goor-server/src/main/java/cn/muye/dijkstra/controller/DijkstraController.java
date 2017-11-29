@@ -247,7 +247,9 @@ public class DijkstraController {
                         roadPath.setEndPoint(endCombinePointId);
                         roadPath.setStartPoint(startPathPointId);
                         roadPath.setPattern("");
-                        roadPath.setPathName(startCombinePoint.getPointAlias() + "_to_" + endCombinePoint.getPointAlias() + "_auto");
+                        roadPath.setPathName(startCombinePoint.getPointAlias() + "_" + startCombinePoint.getMapName() + "_" + startCombinePoint.getSceneName()
+                                + "_to_"
+                                + endCombinePoint.getPointAlias() + "_" + endCombinePoint.getMapName() + "_" + endCombinePoint.getSceneName() + "_auto");
                         roadPath.setCreateTime(new Date());
                         roadPath.setPathType(Constant.PATH_TYPE_CLOUD);
                         roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
@@ -419,5 +421,29 @@ public class DijkstraController {
         MapPoint endPoint = PointServiceImpl.findPathPointByXYTH(endStationPoint.getSceneName(),endStationPoint.getMapName(),
                 endStationPoint.getX(),endStationPoint.getY(),endStationPoint.getTh(),null, pointService);
         return AjaxResult.success(endPoint);
+    }
+
+    /**
+     * 测试查找站相同的路径点
+     * @return
+     */
+    @RequestMapping(value = "/services/roadPath/testFindPath")
+    @ResponseBody
+    public AjaxResult testFindPath(Long startPointId,Long endPointId) {
+        try {
+            MapPoint startPoint = pointService.findById(startPointId);
+            //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
+            RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, startPoint.getSceneName(), roadPathService);
+
+            if(roadPathMaps == null) {
+                return AjaxResult.failed("未找到该云端场景下的工控路径");
+            }
+            RoadPathResult result = null;
+            result = dijkstraService.getShortestCloudRoadPathForMission(startPointId, endPointId,roadPathMaps,result);
+            return AjaxResult.success(result);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
+        }
     }
 }
