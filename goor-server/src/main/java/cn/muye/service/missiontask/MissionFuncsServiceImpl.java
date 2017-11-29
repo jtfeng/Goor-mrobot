@@ -2881,15 +2881,22 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //最后添加充电点，目前充电点从机器人的数据库里面查询出来
         //取第一个有效的点设置进去
         if (chargePoint != null){
-            //如果充电点和上一个点不在同一个楼层，则要添加相应的电梯任务。
+            //如果充电点和上一个点不在同一个楼层，则要添加相应的电梯任务。添加去充电点任务。
             addPathRoadPathPoint(chargePoint, mapPoints, mpAttrs);
-            //添加充电点任务
-            mapPoints.add(chargePoint);
-            //设置属性
-            atts = new MPointAtts();
-            atts.type = MPointType_CHONGDIAN;
-            mpAttrs.put(chargePoint, atts);
-            logger.info("###### chongdian is ok ");
+            logger.info("###### path to chongdian is ok ");
+
+            //根据设置是否需要充电任务决定是否插入自动回充任务
+            if(order.getOrderSetting().getNeedAutoCharge()) {
+                //添加充电点任务
+                mapPoints.add(chargePoint);
+                //设置属性
+                atts = new MPointAtts();
+                atts.type = MPointType_CHONGDIAN;
+                mpAttrs.put(chargePoint, atts);
+                logger.info("###### chongdian auto is ok ");
+            }
+
+
         }
     }
 
