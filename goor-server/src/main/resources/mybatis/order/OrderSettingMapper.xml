@@ -12,6 +12,7 @@
         <result property="robotType.id" column="robotType.id" />
         <result property="needSign" column="needSign" />
         <result property="needShelf" column="needShelf" />
+        <result property="needAutoCharge" column="needAutoCharge" />
         <result property="defaultSetting" column="defaultSetting" />
         <result property="storeId" column="storeId" />
         <result property="createdBy" column="createdBy" />
@@ -33,6 +34,7 @@
         os.robot_type_id AS "robotType.id",
         os.need_sign AS "needSign",
         os.need_shelf AS "needShelf",
+        os.need_auto_charge AS "needAutoCharge",
         os.default_setting AS "defaultSetting",
         os.store_id AS "storeId",
         os.created_by AS "createdBy",
@@ -87,6 +89,7 @@
         robot_type_id,
         need_sign,
         need_shelf,
+        need_auto_charge,
         default_setting,
         delete_status,
         store_id,
@@ -102,6 +105,7 @@
         #{robotType.id},
         #{needSign},
         #{needShelf},
+        #{needAutoCharge},
         #{defaultSetting},
         #{deleteStatus},
         #{storeId},
@@ -139,6 +143,9 @@
             </if>
             <if test="needShelf != null" >
                 need_shelf = #{needShelf},
+            </if>
+            <if test="needAutoCharge != null" >
+                need_auto_charge = #{needAutoCharge},
             </if>
             <if test="defaultSetting != null" >
                 default_setting = #{defaultSetting},

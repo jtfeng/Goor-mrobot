@@ -30,6 +30,8 @@ public class OrderSetting extends BaseBean{
 
     private Boolean defaultSetting = Boolean.FALSE; //是否为默认设置
 
+    private Boolean needAutoCharge = Boolean.FALSE; //到达机器人充电点后，是否需要充电任务 默认初始不需要
+
     private Boolean deleteStatus = Boolean.FALSE; //是否已删除 默认初始不删除
 
     public OrderSetting() {
@@ -127,4 +129,11 @@ public class OrderSetting extends BaseBean{
         this.packageType = packageType;
     }
 
+    public Boolean getNeedAutoCharge() {
+        return needAutoCharge;
+    }
+
+    public void setNeedAutoCharge(Boolean needAutoCharge) {
+        this.needAutoCharge = needAutoCharge;
+    }
 }
