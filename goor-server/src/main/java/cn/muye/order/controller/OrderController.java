@@ -170,8 +170,8 @@ public class OrderController extends BaseController {
                 robotTypeId = goodsType.getRobotTypeId();
             }
             //根据 站点id 和 机器人类型 自动选择机器人
-//            arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
-            arrangeRobot = robotService.findById(319L);
+            arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
+//            arrangeRobot = robotService.findById(319L);
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功
                 logger.info("本次请求未获取到可用机器人");
