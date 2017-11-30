@@ -34,4 +34,8 @@ public interface OrderService {
     List<Order> listOrdersByStationAndStatus(Long stationId, Integer orderStatus);
 
     List<Order> listOrdersByStation(Long stationId, Integer page, Integer pageSize);
+
+    List<Order> listPageOrderLogsByRobotId(Long robotId, Integer page, Integer pageSize);
+
+    List<Order> listPageOrderLogsByStationId(Long stationId, Integer page, Integer pageSize);
 }

@@ -96,6 +96,7 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
         if(undoneCount == 0){
             Order order = orderMapper.getById(getOrderDetail.getOrderId());
             order.setStatus(OrderConstant.ORDER_STATUS_DONE);
+            order.setFinishDate(new Date());
             orderMapper.updateOrder(order);
             //修改完订单状态后 再次修改机器人的状态
             Robot robot = new Robot();

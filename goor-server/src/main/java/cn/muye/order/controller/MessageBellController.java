@@ -1,11 +1,15 @@
 package cn.muye.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.order.ApplyOrder;
 import cn.mrobot.bean.order.MessageBell;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.station.service.StationService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.bean.MessageBellVO;
+import cn.muye.order.service.ApplyOrderService;
 import cn.muye.order.service.MessageBellService;
 import cn.muye.util.UserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +32,14 @@ public class MessageBellController extends BaseController{
     @Autowired
     private MessageBellService messageBellService;
     @Autowired
+    private ApplyOrderService applyOrderService;
+    @Autowired
+    private StationService stationService;
+    @Autowired
     private UserUtil userUtil;
 
     /**
-     * 获取 未读消息内容
+     * 获取 未读消息内容 & 订单申请列表
      * @return
      */
     @RequestMapping(method = RequestMethod.GET)
@@ -56,6 +64,16 @@ public class MessageBellController extends BaseController{
             messageBellVO.setMessageBellList(messageBellList);
             messageBellVO.setHasReceive(hasReceive);
             messageBellVO.setHasSend(hasSend);
+            //注入申请订单信息 同时请求
+            ApplyOrder queryApplyOrder = new ApplyOrder();
+            queryApplyOrder.setSendStationId(stationId);
+            queryApplyOrder.setStatus(OrderConstant.APPLY_ORDER_STATUS_WAITING);
+            List<ApplyOrder> applyOrderList = applyOrderService.listQueryPageByStoreIdAndOrder(0,0,queryApplyOrder,"CREATE_TIME DESC");
+            applyOrderList.forEach(applyOrder -> {
+                Station station = stationService.findById(applyOrder.getApplyStationId());
+                applyOrder.setApplyStationName(station == null? "": station.getName());
+            });
+            messageBellVO.setWaitApplyOrders(applyOrderList);
             return AjaxResult.success(messageBellVO, "读取信息列表成功");
         } catch (Exception e) {
             e.printStackTrace();

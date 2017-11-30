@@ -5,9 +5,9 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.base.BaseBean;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.Transient;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,6 +28,8 @@ public class Order extends BaseBean{
     private Scene scene;  //场景
 
     private Integer status; //订单状态 0开启 1完成 2等待分配 3取消
+
+    private Date finishDate;  //订单结束时间
 
     @Transient
     private String resscene; //资源场景
@@ -113,5 +115,13 @@ public class Order extends BaseBean{
 
     public void setApplyOrderId(Long applyOrderId) {
         this.applyOrderId = applyOrderId;
+    }
+
+    public Date getFinishDate() {
+        return finishDate;
+    }
+
+    public void setFinishDate(Date finishDate) {
+        this.finishDate = finishDate;
     }
 }

@@ -1,10 +1,14 @@
 package cn.muye.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationStationXREF;
 import cn.mrobot.bean.order.ApplyOrder;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
+import cn.muye.area.station.service.StationService;
+import cn.muye.area.station.service.StationStationXREFService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.ApplyOrderService;
 import cn.muye.util.UserUtil;
@@ -13,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by Selim on 2017/11/9.
@@ -26,6 +31,10 @@ public class ApplyOrderController extends BaseController{
     private UserUtil userUtil;
     @Autowired
     private ApplyOrderService applyOrderService;
+    @Autowired
+    private StationStationXREFService stationStationXREFService;
+    @Autowired
+    private StationService stationService;
 
     /**
      * 新增一个申请送货请求
@@ -46,6 +55,28 @@ public class ApplyOrderController extends BaseController{
         }
     }
 
+    /**
+     * 获取可申请站列表
+     * @return
+     */
+    @RequestMapping(value = "applyStations", method = RequestMethod.GET)
+    public AjaxResult listApplyStations(){
+        try {
+            Long stationId = userUtil.getStationId();
+            if(stationId == null){
+                return AjaxResult.failed("未获取到用户站");
+            }else {
+                List<StationStationXREF> stationStationXREFs = stationStationXREFService.listByDestinationStationId(stationId);
+                List<Station> stationList = stationStationXREFs.stream().map(stationStationXREF -> stationService.findById(stationStationXREF.getOriginStationId())).collect(Collectors.toList());
+                return AjaxResult.success(stationList, "获取可申请用户站列表成功");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("系统内部错误");
+        }
+
+    }
+
 
     /**
      * 查看待接收的列表
@@ -59,6 +90,10 @@ public class ApplyOrderController extends BaseController{
             queryApplyOrder.setSendStationId(stationId);
             queryApplyOrder.setStatus(OrderConstant.APPLY_ORDER_STATUS_WAITING);
             List<ApplyOrder> applyOrderList = applyOrderService.listQueryPageByStoreIdAndOrder(0,0,queryApplyOrder,"CREATE_TIME DESC");
+            applyOrderList.forEach(applyOrder -> {
+                Station station = stationService.findById(applyOrder.getApplyStationId());
+                applyOrder.setApplyStationName(station == null? "": station.getName());
+            });
             return AjaxResult.success(applyOrderList, "查看待接收的列表成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,7 +114,8 @@ public class ApplyOrderController extends BaseController{
                 order = new Order();
                 List<OrderDetail> orderDetailList = Lists.newArrayList();
                 OrderDetail orderDetail = new OrderDetail();
-                orderDetail.setStationId(applyOrder.getSendStationId());
+                Long sendStationId = applyOrder.getSendStationId();
+                orderDetail.setStationId(sendStationId);
                 orderDetailList.add(orderDetail);
                 order.setDetailList(orderDetailList);
                 order.setApplyOrderId(applyId);

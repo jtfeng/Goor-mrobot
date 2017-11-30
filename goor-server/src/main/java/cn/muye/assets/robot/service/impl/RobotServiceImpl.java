@@ -190,7 +190,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     //todo 紧急制动以后在做
                     AjaxResult ajaxResult = testSendRobotMessage(robotDb);
                     if (ajaxResult != null && ajaxResult.isSuccess() && robotDb.getBusy() == false && !robotDb.isLowPowerState()) {
-//                    if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
+                    //if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
                         if(typeId != null){
                             if(robotDb.getTypeId().equals(typeId)){
                                 availableRobot = robotDb;
@@ -326,7 +326,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         if (!StringUtil.isNullOrEmpty(whereRequest.getQueryObj())) {
             JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
             String name = (String) jsonObject.get(SearchConstants.SEARCH_NAME);
-            String sceneId = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_ID);
+            String sceneId = String.valueOf(jsonObject.get(SearchConstants.SEARCH_SCENE_ID));
             String sceneName = (String) jsonObject.get(SearchConstants.SEARCH_SCENE_NAME);
             Integer type = jsonObject.get(SearchConstants.SEARCH_TYPE) != null ? Integer.valueOf((String) jsonObject.get(SearchConstants.SEARCH_TYPE)) : null;
             map.put("name", name);

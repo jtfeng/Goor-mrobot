@@ -1,6 +1,5 @@
 package cn.muye.area.station.service.impl;
 
-import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.area.station.StationStationXREF;
 import cn.muye.area.station.mapper.StationStationXREFMapper;
 import cn.muye.area.station.service.StationStationXREFService;
@@ -38,6 +37,13 @@ public class StationStationXREFServiceImpl implements StationStationXREFService 
     public List<StationStationXREF> list(Long id) {
         Example example = new Example(StationStationXREF.class);
         example.createCriteria().andCondition("ORIGIN_STATION_ID=", id);
+        return stationStationXREFMapper.selectByExample(example);
+    }
+
+    @Override
+    public List<StationStationXREF> listByDestinationStationId(Long destId) {
+        Example example = new Example(StationStationXREF.class);
+        example.createCriteria().andCondition("DESTINATION_STATION_ID=", destId);
         return stationStationXREFMapper.selectByExample(example);
     }
 }

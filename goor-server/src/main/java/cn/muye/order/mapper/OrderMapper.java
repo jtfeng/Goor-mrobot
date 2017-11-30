@@ -26,4 +26,8 @@ public interface OrderMapper {
     Order findFirstWaitOrder(List<Long> stationList);
 
     List<Long> listProcessingOrderIdsToday(@Param("beforeTime")Date beforeTime, @Param("currentTime")Date currentTime);
+
+    List<Order> listDoneOrdersByRobotIdDateDesc(@Param("robotId")Long robotId);
+
+    List<Order> listDoneOrdersByRobotIdListDateDesc(List<Long> robotIdList);
 }

@@ -11,4 +11,6 @@ public interface StationStationXREFService {
     void save(Long originStationId, List<Long> accessArriveStationIdList);
 
     List<StationStationXREF> list(Long id);
+
+    List<StationStationXREF> listByDestinationStationId(Long destId);
 }

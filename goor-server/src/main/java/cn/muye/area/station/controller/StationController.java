@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
@@ -11,10 +12,13 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
+import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.area.station.service.StationStationXREFService;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.util.SessionUtil;
+import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -50,6 +54,12 @@ public class StationController {
     private PointService pointService;
     @Autowired
     private StationStationXREFService stationStationXREFService;
+    @Autowired
+    private StationRobotXREFService stationRobotXREFService;
+    @Autowired
+    private UserUtil userUtil;
+    @Autowired
+    private RobotService robotService;
 
     /**
      * 分页查询资源
@@ -281,6 +291,29 @@ public class StationController {
 //        } else {
 //            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
 //        }
+    }
+
+    /**
+     * 站获取 绑定的机器人
+     * @param
+     * @return
+     */
+    @RequestMapping(value = {"area/station/listRobotsByStation"}, method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult listRobotsByStation() {
+        try {
+            Long stationId = userUtil.getStationId();
+            if(stationId!= null){
+                List<StationRobotXREF> stationRobotXREFList = stationRobotXREFService.getByStationId(stationId);
+                List<Robot> robotList = stationRobotXREFList.stream().map(stationRobotXREF -> robotService.getById(stationRobotXREF.getRobotId())).collect(Collectors.toList());
+                return AjaxResult.success(robotList, "获取站绑定机器人成功");
+            }else{
+                return AjaxResult.failed("获取机器人失败，未得到站id");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("系统内部查询异常");
+        }
     }
 
     /**

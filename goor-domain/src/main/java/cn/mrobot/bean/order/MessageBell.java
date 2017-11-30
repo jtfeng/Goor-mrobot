@@ -106,4 +106,5 @@ public class MessageBell extends BaseBean{
     public void setMissionItemId(Long missionItemId) {
         this.missionItemId = missionItemId;
     }
+
 }

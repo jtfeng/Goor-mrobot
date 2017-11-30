@@ -3,6 +3,7 @@ package cn.mrobot.bean.order;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import java.util.Date;
 
 /**
@@ -22,6 +23,17 @@ public class ApplyOrder extends BaseBean {
     private Integer status;          //状态  0 申请中 1 已接收 2 被拒绝
 
     private Date dealDate;           //处理时间（接受或拒绝）
+
+    @Transient
+    private String applyStationName;  //申请站名
+
+    public String getApplyStationName() {
+        return applyStationName;
+    }
+
+    public void setApplyStationName(String applyStationName) {
+        this.applyStationName = applyStationName;
+    }
 
     public Long getApplyStationId() {
         return applyStationId;

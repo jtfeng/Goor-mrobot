@@ -11,6 +11,7 @@
         o.scene_id AS "scene.id",
         o.status AS "status",
         o.store_id AS "storeId",
+        o.finish_date AS "finishDate",
         o.created_by AS "createdBy",
         o.create_time AS "createTime"
     </sql>
@@ -33,6 +34,7 @@
         shelf_id,
         scene_id,
         status,
+        finish_date,
         store_id,
         created_by,
         create_time
@@ -43,6 +45,7 @@
         #{shelf.id},
         #{scene.id},
         #{status},
+        #{finishDate},
         #{storeId},
         #{createdBy},
         #{createTime}
@@ -68,7 +71,10 @@
                 scene_id = #{scene.id},
             </if>
             <if test="status != null" >
-                status = #{status}
+                status = #{status},
+            </if>
+            <if test="finishDate != null" >
+                o.finish_date = #{finishDate}
             </if>
         </set>
         WHERE id = #{id}
@@ -97,6 +103,9 @@
             </if>
             <if test="status != null" >
                 AND o.status = #{status}
+            </if>
+            <if test="finishDate != null" >
+                AND o.finish_date = #{finishDate}
             </if>
         </where>
     </select>
@@ -141,6 +150,25 @@
         WHERE o.status = 0
         AND o.create_time &gt;= #{beforeTime}
         AND o.create_time &lt;= #{currentTime}
+    </select>
+
+    <select id="listDoneOrdersByRobotIdDateDesc" resultType="cn.mrobot.bean.order.Order">
+        select o.*
+        from OR_ORDER o
+        WHERE o.robot_id = #{robotId}
+        AND (o.status = 1 OR o.status = 3)
+        ORDER BY o.create_time DESC
+    </select>
+
+    <select id="listDoneOrdersByRobotIdListDateDesc" resultType="cn.mrobot.bean.order.Order">
+        select o.*
+        from OR_ORDER o
+        WHERE o.robot_id IN
+        <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        AND (o.status = 1 OR o.status = 3)
+        ORDER BY o.create_time DESC
     </select>
 
 

@@ -1,9 +1,9 @@
 package cn.muye.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
-import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
@@ -86,13 +86,10 @@ public class OrderController extends BaseController {
     @ResponseBody
     public AjaxResult test(@RequestParam("id")Long id){
         try {
-            Elevator elevator = elevatorService.findById(1L);
-            elevator.setSceneName("hahahaha");
-            List<Long> test = Lists.newArrayList();
-            test.add(1L);
-            elevatorService.updateElevator(elevator, test);
+            orderService.checkWaitOrders();
             return AjaxResult.success();
         } catch (Exception e) {
+            e.printStackTrace();
             e.printStackTrace();
             return AjaxResult.failed();
         }
@@ -171,7 +168,7 @@ public class OrderController extends BaseController {
             }
             //根据 站点id 和 机器人类型 自动选择机器人
             arrangeRobot = robotService.getAvailableRobotByStationId(stationId,robotTypeId);
-//            arrangeRobot = robotService.findById(319L);
+            //arrangeRobot = robotService.findById(319L);
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功
                 logger.info("本次请求未获取到可用机器人");
@@ -336,7 +333,6 @@ public class OrderController extends BaseController {
             e.printStackTrace();
             return AjaxResult.failed("获取订单设置页面的信息失败");
         }
-
     }
 
 
@@ -361,12 +357,50 @@ public class OrderController extends BaseController {
 
     }
 
-    //转化为试图任务列表
+
+    //转化为视图任务列表，图片版
+    private OrderDetailNewVO generateOrderDetailNewVO(OrderDetail orderDetail){
+        OrderDetailNewVO orderDetailNewVO = new OrderDetailNewVO();
+        Order findOrder = orderService.getOrder(orderDetail.getOrderId());
+        if(findOrder != null){
+            Station startStation = stationService.findById(findOrder.getStartStation().getId());
+            orderDetailNewVO.setStartStationName(startStation == null ? "" : startStation.getName());
+            orderDetailNewVO.setRobotCode(findOrder.getRobot().getCode());
+            MapPathInfoVO mapPathInfoVO = new MapPathInfoVO();
+            //根据order封装
+            List<OrderDetail> detailList = findOrder.getDetailList().stream()
+                    .filter(detail -> detail.getId() <= orderDetail.getId())
+                    .collect(Collectors.toList());
+            for (int i = 0; i < detailList.size(); i++) {
+                 if(i == 0){
+                     //起始取货点
+                     OrderDetail beginOrderDetail = detailList.get(i);
+                     MapPoint startPoint = pointService.findMapPointByStationIdAndCloudType(beginOrderDetail.getStationId(), MapPointType.LOAD.getCaption());
+
+                 }else if(i == detailList.size() -1){
+
+                 }else {
+
+                 }
+
+            }
+
+
+
+
+
+
+        }
+        return orderDetailNewVO;
+    }
+
+    //转化为视图任务列表, 文字版
     private OrderDetailVO generateOrderDetailVO(OrderDetail orderDetail){
         OrderDetailVO orderDetailVO = new OrderDetailVO();
         Order findOrder = orderService.getOrder(orderDetail.getOrderId());
         if(findOrder!= null){
-            orderDetailVO.setStartStationName(stationService.findById(findOrder.getStartStation().getId()).getName());
+            Station startStation = stationService.findById(findOrder.getStartStation().getId());
+            orderDetailVO.setStartStationName(startStation == null? "": startStation.getName());
             orderDetailVO.setRobotCode(findOrder.getRobot().getCode());
             //根据order封装
             List<OrderDetail> detailList = findOrder.getDetailList();
@@ -452,6 +486,76 @@ public class OrderController extends BaseController {
             orderTransferVO.setFinishDate(DateTimeUtils.getDefaultDateString(detail.getFinishDate()));
         }
         return orderTransferVO;
+    }
+
+
+
+    // ---------- PAD 检测日志 --------------
+
+    /**
+     * PAD 日志模块 任务记录
+     * @param robotId
+     * @return
+     */
+    @RequestMapping(value = "orderLogs",method = RequestMethod.GET)
+    @ResponseBody
+    private AjaxResult orderLogs(@RequestParam(value = "robotId", required = false)Long robotId,
+                                 WhereRequest whereRequest){
+        try {
+            List<Order> orderList = Lists.newArrayList();
+            if(robotId == null){
+                //查询所有该站下所有机器人
+                Long stationId = userUtil.getStationId();
+                orderList = orderService.listPageOrderLogsByStationId(stationId, whereRequest.getPage(), whereRequest.getPageSize());
+            }else {
+                orderList = orderService.listPageOrderLogsByRobotId(robotId, whereRequest.getPage(), whereRequest.getPageSize());
+            }
+            List<OrderLogVO> orderLogVOList = orderList.stream().map(order -> generateOrderLogVO(order)).collect(Collectors.toList());
+            PageInfo<OrderLogVO> pageInfo = new PageInfo<>(orderLogVOList);
+            return AjaxResult.success(pageInfo, "获取日志任务列表成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("系统内部出错");
+        }
+    }
+
+    //注入OrderLogVO
+    private OrderLogVO generateOrderLogVO(Order order){
+        OrderLogVO orderLogVO = new OrderLogVO();
+        orderLogVO.setBeginTime(order.getCreateTime());
+        orderLogVO.setEndTime(order.getFinishDate());
+        orderLogVO.setRobotName(order.getRobot().getName());
+        Integer status = order.getStatus();
+        StringBuffer sb = new StringBuffer();
+        if(status == OrderConstant.ORDER_STATUS_EXPIRE){
+            sb.append("本次送货请求已被中断");
+        }else {
+            sb.append("去往");
+            List<OrderDetail> orderDetailList = order.getDetailList();
+            List<OrderLogDetailVO> orderLogDetailVOList = orderDetailList.stream().map(orderDetail -> {
+                OrderLogDetailVO orderLogDetailVO = new OrderLogDetailVO();
+                orderLogDetailVO.setCheckTime(orderDetail.getFinishDate());
+                List<GoodsInfoVO> goodsInfoVOList = orderDetail.getGoodsInfoList().stream()
+                        .map(goodsInfo -> generateGoodsInfoVO(goodsInfo, order))
+                        .collect(Collectors.toList());
+                orderLogDetailVO.setGoodsInfoList(goodsInfoVOList);
+                orderLogDetailVO.setLocation(orderDetail.getStationName());
+                if (orderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_START) {
+                    orderLogDetailVO.setEventDetail("起始装货");
+                } else if (orderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_MIDDLE) {
+                    orderLogDetailVO.setEventDetail("签收货物");
+                    sb.append(orderDetail.getStationName() + ",");
+                } else if (orderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_END) {
+                    orderLogDetailVO.setEventDetail("终点卸货");
+                }
+                return orderLogDetailVO;
+            }).collect(Collectors.toList());
+            sb.deleteCharAt(sb.length()-1);
+            sb.append("的货物已送达");
+            orderLogVO.setOrderLogDetailVOList(orderLogDetailVOList);
+        }
+        orderLogVO.setEvent(sb.toString());
+        return orderLogVO;
     }
 
 }

@@ -69,6 +69,13 @@ public class Robot extends BaseBean {
 
     private String robotIdForElevator; //机器人电梯编号（针对电梯使用）
 
+    public Robot() {
+    }
+
+    public Robot(Long id) {
+        super(id);
+    }
+
     public List<RobotPassword> getPasswords() {
         return passwords;
     }

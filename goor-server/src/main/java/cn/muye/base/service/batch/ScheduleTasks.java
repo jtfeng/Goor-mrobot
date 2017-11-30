@@ -107,10 +107,10 @@ public class ScheduleTasks {
     @Scheduled(cron = "0 */1 * * * ?")
     public void scanWaitOrders() {
         synchronized (lock){
-            logger.info("开启订单等待队列扫描");
+            logger.info("-----------开启订单等待队列扫描--------------------");
             try {
                 orderService.checkWaitOrders();
-                logger.info("订单扫描结束");
+                logger.info("---------订单队列扫描结束---------------");
             } catch (Exception e) {
                 logger.error("订单扫描出现异常", e);
             }
@@ -118,7 +118,7 @@ public class ScheduleTasks {
     }
 
     //每分钟执行一次， 订单任务mission超时扫描
-    @Scheduled(cron = "0 */1 * * * ?")
+    @Scheduled(cron = "0 */2 * * * ?")
     public void checkOrderMissionOverTime() {
         synchronized (lock2){
             logger.info("开启订单任务超时扫描");

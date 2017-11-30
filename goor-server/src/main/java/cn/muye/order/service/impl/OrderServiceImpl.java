@@ -163,7 +163,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             getOrder.setDetailList(orderDetailService.listOrderDetailByOrderId(getOrder.getId()));
             OrderSetting findSetting = orderSettingService.getById(getOrder.getOrderSetting().getId());
             getOrder.setOrderSetting(findSetting);
-            if(findSetting != null && findSetting.getNeedShelf()){
+            if(getOrder.getShelf()!= null && getOrder.getShelf().getId()!= null){
                 getOrder.setShelf(shelfService.getById(getOrder.getShelf().getId()));
             }
             Station startStation = stationService.findById(getOrder.getStartStation().getId());
@@ -228,7 +228,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     }
 
     /**
-     * 查询数据库内排列订单并处理
+     * 查询数据库内排列订单并处理,暂只处理一个
      */
     @Override
     public void checkWaitOrders() {
@@ -249,20 +249,22 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
                 //依旧无可用机器
                 logger.info("未获取到可使用机器人");
                 logger.info("本次订单号为{}检测结束", waitOrder.getId());
-                continue;
             }else{
                 logger.info("正在请求机器人,编号为{}",availableRobot.getCode());
                 waitOrder.setRobot(availableRobot);
                 waitOrder.setStatus(OrderConstant.ORDER_STATUS_BEGIN);
                 orderMapper.updateOrder(waitOrder);
                 AjaxResult ajaxResult = generateMissionListPathNav(waitOrder.getId());
+                //AjaxResult ajaxResult = AjaxResult.success();
                 if(!ajaxResult.isSuccess()){
                     availableRobot.setBusy(Boolean.FALSE);
                     robotService.updateSelective(availableRobot);
                     logger.info("请求机器人失败");
                 }
+                logger.info("本次订单号为{}检测结束", waitOrder.getId());
+                break;
             }
-            logger.info("本次订单号为{}检测结束", waitOrder.getId());
+
         }
     }
 
@@ -434,6 +436,24 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public List<Order> listOrdersByStation(Long stationId, Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
         return orderMapper.listOrdersByStation(stationId);
+    }
+
+    @Override
+    public List<Order> listPageOrderLogsByRobotId(Long robotId, Integer page, Integer pageSize) {
+        PageHelper.startPage(page, pageSize);
+        List<Order> sqlOrders = orderMapper.listDoneOrdersByRobotIdDateDesc(robotId);
+        return sqlOrders.stream().map(order -> getOrder(order.getId())).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Order> listPageOrderLogsByStationId(Long stationId, Integer page, Integer pageSize) {
+        StationRobotXREF query = new StationRobotXREF();
+        query.setStationId(stationId);
+        List<StationRobotXREF> stationRobotXREFList = stationRobotXREFMapper.select(query);
+        List<Long> robotIdList = stationRobotXREFList.stream().map(stationRobotXREF -> stationRobotXREF.getRobotId()).collect(Collectors.toList());
+        PageHelper.startPage(page, pageSize);
+        List<Order> sqlOrders = orderMapper.listDoneOrdersByRobotIdListDateDesc(robotIdList);
+        return sqlOrders.stream().map(order -> getOrder(order.getId())).collect(Collectors.toList());
     }
 
     //通过missionId 获取对应站id

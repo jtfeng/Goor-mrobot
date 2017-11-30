@@ -1,6 +1,7 @@
 package cn.muye.log.base.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.bean.log.LogLevel;
@@ -8,11 +9,15 @@ import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.log.base.bean.RobotLogWarningDetail;
+import cn.muye.log.base.bean.RobotLogWarningVO;
 import cn.muye.log.base.service.LogInfoService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
@@ -22,13 +27,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,6 +61,9 @@ public class LogInfoController {
 
     @Value("${goor.push.http}")
     private String DOWNLOAD_HTTP;
+
+    @Autowired
+    private RobotService robotService;
 
     private static final String LOG_FILE_PREFIX = "日志导出_";
     //CSV文件分隔符
@@ -143,5 +155,49 @@ public class LogInfoController {
                 LOGGER.error("日志导出错误", e);
             }
         }
+    }
+
+    /**
+     * PAD 端 显示机器人警报信息
+     * @param robotId
+     * @return
+     */
+    @RequestMapping(value = "logInfo/robotWarningLogs", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult robotWarningLogs(@RequestParam(value = "robotId",required = false)Long robotId){
+        try {
+            Robot queryRobot = robotService.getById(robotId);
+            List<RobotLogWarningVO> robotLogWarningVOs = Lists.newArrayList();
+            if(queryRobot!= null){
+                for (int i = 0; i < 7; i++) {
+                    //最近7天遍历
+                    Date startToday = DateTimeUtils.startSomeDay(-i);
+                    Date endToday = DateTimeUtils.endSomeDay(-i);
+                    List<LogInfo> logInfoList = logInfoService.listWarningLogsByRobotAndTime(queryRobot.getCode(), startToday, endToday);
+                    RobotLogWarningVO logWarningVO = generateRobotLogWarning(logInfoList, startToday);
+                    robotLogWarningVOs.add(logWarningVO);
+                }
+            }
+            Map<String, Object> returnMap = Maps.newLinkedHashMap();
+            returnMap.put(queryRobot.getCode(), robotLogWarningVOs);
+            return AjaxResult.success(returnMap, "获取机器人警报信息成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.failed("系统内部出错");
+        }
+    }
+
+    private RobotLogWarningVO generateRobotLogWarning(List<LogInfo> logInfoList, Date logDate){
+        RobotLogWarningVO robotLogWarningVO = new RobotLogWarningVO();
+        List<RobotLogWarningDetail> robotLogWarningDetailList = logInfoList.stream().map(logInfo -> {
+            RobotLogWarningDetail robotLogWarningDetail = new RobotLogWarningDetail();
+            robotLogWarningDetail.setDateTime(logInfo.getCreateTime());
+            robotLogWarningDetail.setType(LogType.getLogType(logInfo.getLogType()).getValue());
+            return robotLogWarningDetail;
+        }).collect(Collectors.toList());
+        robotLogWarningVO.setWarningTime(logInfoList.size());
+        robotLogWarningVO.setDate(logDate);
+        robotLogWarningVO.setWarningDetails(robotLogWarningDetailList);
+        return robotLogWarningVO;
     }
 }

@@ -6,7 +6,6 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -58,4 +57,6 @@ public interface RobotService extends BaseService<Robot>{
     boolean checkPasswordIsValid(String uuid, String robotCode, String password);
 
     void setRobotBusyAndOnline(String robotCode, Boolean busy, Boolean online);
+
+
 }

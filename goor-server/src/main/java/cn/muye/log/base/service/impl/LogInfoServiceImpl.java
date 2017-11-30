@@ -1,7 +1,7 @@
 package cn.muye.log.base.service.impl;
 
 import cn.mrobot.bean.log.LogInfo;
-import cn.mrobot.utils.DateTimeUtils;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
@@ -80,6 +80,17 @@ public class LogInfoServiceImpl implements LogInfoService {
         for (LogInfo logInfo : logInfoList) {
             logInfoMapper.delete(logInfo);
         }
+    }
+
+    @Override
+    public List<LogInfo> listWarningLogsByRobotAndTime(String robotCode, Date fromTime, Date toTime) {
+        Example example = new Example(LogInfo.class);
+        example.createCriteria().andEqualTo("deviceId", robotCode)
+                .andEqualTo("logLevel", LogType.WARNING.getName())
+                .andGreaterThanOrEqualTo("createTime", fromTime)
+                .andLessThanOrEqualTo("createTime", toTime);
+        example.setOrderByClause("CREATE_TIME DESC");
+        return logInfoMapper.selectByExample(example);
     }
 
 }

@@ -3,6 +3,7 @@ package cn.muye.log.base.service;
 import cn.mrobot.bean.log.LogInfo;
 import cn.mrobot.utils.WhereRequest;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -25,4 +26,6 @@ public interface LogInfoService {
     int update(LogInfo logInfo);
 
     void delete(List<LogInfo> logInfoList);
+
+    List<LogInfo> listWarningLogsByRobotAndTime(String robotCode, Date fromTime, Date toTime);
 }

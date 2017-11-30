@@ -1,5 +1,6 @@
 package cn.muye.order.bean;
 
+import cn.mrobot.bean.order.ApplyOrder;
 import cn.mrobot.bean.order.MessageBell;
 
 import java.util.List;
@@ -14,6 +15,8 @@ public class MessageBellVO {
     private boolean hasSend;
 
     private List<MessageBell> messageBellList;
+
+    private List<ApplyOrder> waitApplyOrders;  //为了PAD端请求接口合并
 
     public boolean isHasReceive() {
         return hasReceive;
@@ -37,5 +40,13 @@ public class MessageBellVO {
 
     public void setMessageBellList(List<MessageBell> messageBellList) {
         this.messageBellList = messageBellList;
+    }
+
+    public List<ApplyOrder> getWaitApplyOrders() {
+        return waitApplyOrders;
+    }
+
+    public void setWaitApplyOrders(List<ApplyOrder> waitApplyOrders) {
+        this.waitApplyOrders = waitApplyOrders;
     }
 }
