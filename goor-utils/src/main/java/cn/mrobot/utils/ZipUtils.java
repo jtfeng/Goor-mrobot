@@ -86,7 +86,6 @@ public class ZipUtils {
         ZipOutputStream zos = null;
         try {
             final File srcFile = new File(zipPath);
-            String dir = srcFile.getParentFile().getAbsolutePath();
             //判断压缩文件保存的路径是否为源文件路径的子文件夹，如果是，则抛出异常（防止无限递归压缩的发生）
             if (srcFile.isDirectory() && savePath.indexOf(zipPath) != -1) {
                 LOGGER.error("savePath must not be the child directory of zipPath");

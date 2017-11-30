@@ -39,7 +39,7 @@ public class MapZipServiceImpl implements MapZipService {
 
     @Override
     public void update(MapZip mapZip) {
-        mapZipMapper.updateByPrimaryKey(mapZip);
+        mapZipMapper.updateByPrimaryKeySelective(mapZip);
     }
 
     @Override

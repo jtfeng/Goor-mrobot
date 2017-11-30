@@ -5,7 +5,6 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
-import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.FileValidCreateUtil;
 import cn.mrobot.utils.ZipUtils;
 import cn.muye.base.bean.MessageInfo;
@@ -18,6 +17,7 @@ import com.alibaba.fastjson.JSON;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.messages.Message;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
@@ -93,7 +93,6 @@ public class HttpDownloader extends Thread {
 //                    this.fileCheck();
 //                }
                 if (isDone && MessageType.EXECUTOR_MAP.equals(messageInfo.getMessageType())) {//地图下载
-//                    this.fileCheck();
                     logger.info("地图文件下载完成，开始解压");
                     unzipMapFile();
                 }
@@ -146,21 +145,11 @@ public class HttpDownloader extends Thread {
             File newZipFile = new File(moveFilePath);
             FileUtils.copyFile(new File(zipFilePath), newZipFile);
             logger.info("移动文件成功 ");
-//            FileUtils.deleteDir(new File(localPath)); //文件不做删除
-
             boolean unzipFlag = ZipUtils.unzip(moveFilePath, localPath, false);
             if (unzipFlag) {
                 logger.info("解压完成。删除压缩包 ");
                 System.gc();
                 newZipFile.delete();
-                //更改文件夹权限 将maps文件夹下所有文件的owner更改为robot
-//                String os = System.getProperty("os.name");
-//                logger.info("系统,更改权限，os=" + os);
-//                if (os.toLowerCase().startsWith("lin")) {
-//                    logger.info("Linux系统,更改权限");
-////                    Runtime.getRuntime().exec("chmod 777 -R /home/robot/catkin_ws/install/share/map_server/maps");
-//                    changePermission(localPath);
-//                }
                 //更新数据库状态为解压完成
                 logger.info("解压完成。回执消息 ");
                 messageInfo.setRelyMessage("resource unzip success");
