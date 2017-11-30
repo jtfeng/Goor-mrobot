@@ -32,6 +32,7 @@ import edu.wpi.rail.jrosbridge.messages.Message;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
@@ -61,6 +62,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private AppSubService appSubService;
 
+    @Value("${server.mapPath}")
+    private String mapPath;
     public ScheduledHandleServiceImp() {
 
     }
@@ -198,6 +201,14 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     public AjaxResult downloadResource(Ros ros, MessageInfo messageInfo) throws Exception {
         try {
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
+            //地图的存放位置配置在goor端的配置文件中,需要重新设置
+            if (MessageType.EXECUTOR_MAP.equals(messageInfo.getMessageType())) {
+                CommonInfo commonInfo = JSON.parseObject(messageInfo.getMessageText(),CommonInfo.class);
+                if (StringUtil.isBlank(commonInfo.getLocalPath())){
+                    commonInfo.setLocalPath(mapPath);
+                    messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+                }
+            }
             return DownloadHandle.downloadCheck(ros, messageInfo, receiveMessageService);
         } catch (final Exception e) {
             logger.error("Scheduled downloadResource Exception", e);

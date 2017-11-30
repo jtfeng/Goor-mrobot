@@ -41,6 +41,9 @@ public class ConsumerCommon {
     @Autowired
     private ReceiveMessageService receiveMessageService;
 
+    @Autowired
+    private ScheduledHandleService scheduledHandleService;
+
     /**
      * 接收命令消息（无回执）
      * @param messageInfo
@@ -156,7 +159,6 @@ public class ConsumerCommon {
             if (messageInfo != null) {
                 this.receiveMessageSave(messageInfo);
                 ScheduledHandleService service = new ScheduledHandleServiceImp();
-                service.downloadResource(ros, messageInfo);
                 logger.info("topicResourceMessage=========" + messageInfo);
             }
         }catch (Exception e){
@@ -175,8 +177,7 @@ public class ConsumerCommon {
             if (messageInfo != null) {
                 logger.info("topicResourceAndReceiveMessage=========" + messageInfo);
                 this.receiveMessageSave(messageInfo);
-                ScheduledHandleService service = new ScheduledHandleServiceImp();
-                return service.downloadResource(ros, messageInfo);
+                return scheduledHandleService.downloadResource(ros, messageInfo);
             }
         }catch (Exception e){
             logger.error("topicResourceAndReceiveMessage Exception", e);

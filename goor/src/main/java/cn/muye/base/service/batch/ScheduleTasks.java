@@ -45,8 +45,8 @@ public class ScheduleTasks {
     @Value("${local.robot.SN}")
     private String localRobotSN;
 
-    @Value("${server.mapPath}")
-    private String mapPath;
+    @Value("${server.mapPath_temp}")
+    private String mapPathTemp;
 
     @Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
     private String topicCommandAndReceiveSN;
@@ -136,7 +136,7 @@ public class ScheduleTasks {
     public void deleteZipMapFile() {
         logger.info("Scheduled delete Zip map file");
         try {
-            File mapPathDir = new File(mapPath);
+            File mapPathDir = new File(mapPathTemp);
             if (mapPathDir.exists() && mapPathDir.isDirectory()) {
                 File parentDir = new File(mapPathDir.getParent());
                 File[] files = parentDir.listFiles();

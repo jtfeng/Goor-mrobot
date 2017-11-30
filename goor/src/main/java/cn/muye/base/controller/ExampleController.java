@@ -9,6 +9,7 @@ import cn.muye.publisher.AppSubService;
 import cn.muye.service.FixFilePathService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
 import edu.wpi.rail.jrosbridge.messages.Message;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 @Controller
 public class ExampleController {
@@ -156,6 +159,12 @@ public class ExampleController {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.AGENT_LOCAL_MAP_UPLOAD);
+            List<String> sceneNames = Lists.newArrayList();
+            sceneNames.add("example");
+            sceneNames.add("office");
+            JSONObject dataObject = new JSONObject();
+            dataObject.put(TopicConstants.SCENE_NAME, sceneNames);
+            jsonObject.put(TopicConstants.DATA, dataObject);
             jsonObject.put(TopicConstants.UUID, uuid);
             logger.info("发送地图上传topic");
             appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
