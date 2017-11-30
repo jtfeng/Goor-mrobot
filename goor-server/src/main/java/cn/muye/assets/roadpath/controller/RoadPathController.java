@@ -83,7 +83,7 @@ public class RoadPathController {
      * @param sceneId
      * @return
      */
-    @ RequestMapping(value = "/asset/roadPath/deleteBySceneId/{sceneId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/asset/roadPath/deleteBySceneId/{sceneId}", method = RequestMethod.DELETE)
     public AjaxResult deleteRoadPathBySceneId(@PathVariable("sceneId") Long sceneId){
         try {
             Scene scene = sceneService.getSceneById(sceneId);
@@ -92,6 +92,27 @@ public class RoadPathController {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
             }
             this.roadPathService.deleteBySceneName(sceneName);
+            return AjaxResult.success("操作成功");
+        }catch (Exception e){
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 删除指定场景的所有路径，包括云端路径和工控路径
+     * @param sceneId
+     * @return
+     */
+    @RequestMapping(value = "/asset/roadPath/deleteBySceneIdType", method = RequestMethod.DELETE)
+    public AjaxResult deleteRoadPathBySceneIdType(@RequestParam(value = "sceneId", required = true) Long sceneId,
+                                                  @RequestParam(value = "pathType", required = false) Integer pathType){
+        try {
+            Scene scene = sceneService.getSceneById(sceneId);
+            String sceneName = scene.getMapSceneName();
+            if(StringUtil.isNullOrEmpty(sceneName)) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+            }
+            this.roadPathService.deleteBySceneNameType(sceneName, pathType);
             return AjaxResult.success("操作成功");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
