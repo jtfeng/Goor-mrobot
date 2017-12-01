@@ -1,15 +1,23 @@
 package cn.muye.assets.elevator.service.impl;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.*;
+import cn.mrobot.bean.assets.roadpath.RoadPath;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.point.service.PointService;
+import cn.muye.area.point.service.impl.PointServiceImpl;
 import cn.muye.assets.elevator.mapper.ElevatorMapper;
 import cn.muye.assets.elevator.mapper.ElevatorModeMapper;
 import cn.muye.assets.elevator.mapper.ElevatorPointCombinationMapper;
 import cn.muye.assets.elevator.mapper.ElevatorShaftMapper;
 import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
+import cn.muye.assets.roadpath.service.RoadPathService;
+import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -20,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -41,6 +50,10 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     private ElevatorModeMapper elevatorModeMapper;
     @Autowired
     private ElevatorPointCombinationService elevatorPointCombinationService;
+    @Autowired
+    private RoadPathService roadPathService;
+    @Autowired
+    private PointService pointService;
 
     @Transactional
     @Override
@@ -175,7 +188,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
      * @param robotCode
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateElevatorLockStateWithRobotCodeInner(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
         checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
@@ -216,29 +229,64 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return flag;
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void createElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //保存电梯信息
         save(elevator);
-        //删除旧的关系
-        elevatorMapper.deleteRelationsByElevatorId(elevator.getId());
+        //更新电梯四点对象关联关系，并维护假的地图四点对象路径
+        updateElevatorFakePathAndCombination(elevator, combinationIds);
+    }
+
+    /**
+     * 更新电梯四点对象关联关系，并维护假的地图四点对象路径
+     * @param elevator
+     * @param combinationIds
+     * @throws Exception
+     */
+    private void updateElevatorFakePathAndCombination (Elevator elevator, List<Long> combinationIds) throws Exception {
+        //todo 每次保存电梯，要根据电梯新四点对象删除图缓存，删除原假的电梯的对象路径。生成新电梯四点对象路径，并更新（重新生成）原云端路径缓存。
+        updateElevatorFakePath(elevator);
+
         if (combinationIds.size() != 0) {
             //添加新的关系
             elevatorMapper.insertRelationsByElevatorId(elevator.getId(), combinationIds);
         }
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateElevator(Elevator elevator, List<Long> combinationIds) throws Exception {
         //更新电梯信息
         this.updateSelective(elevator);
-        //删除旧的关系
+        //更新电梯四点对象关联关系，并维护假的地图四点对象路径
+        updateElevatorFakePathAndCombination(elevator, combinationIds);
+    }
+
+    /**
+     * 每次保存电梯，要根据电梯新四点对象删除图缓存，删除原假的电梯的对象路径。生成新电梯四点对象路径，并更新（重新生成）原云端路径缓存。
+     * @param elevator
+     */
+    private void updateElevatorFakePath(Elevator elevator) throws Exception {
+        String sceneName = elevator.getSceneName();
+        //清空路径图的缓存
+        CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+
+        List<ElevatorPointCombination> elevatorCombinationDBOld = this.elevatorPointCombinationService.findByElevatorId(elevator.getId());
+        //删除原假的电梯的对象路径
+        if(elevatorCombinationDBOld != null && elevatorCombinationDBOld.size() > 0) {
+            for(ElevatorPointCombination elevatorPointCombination : elevatorCombinationDBOld) {
+                roadPathService.deleteByStartEndPointIdType(elevatorPointCombination.getWaitPoint(), null , Constant.PATH_TYPE_CLOUD, sceneName);
+                roadPathService.deleteByStartEndPointIdType(null, elevatorPointCombination.getOutPoint(), Constant.PATH_TYPE_CLOUD, sceneName);
+            }
+        }
+
+        //删除旧的四点对象关系关系
         elevatorMapper.deleteRelationsByElevatorId(elevator.getId());
-        if (combinationIds.size() != 0) {
-            //添加新的关系
-            elevatorMapper.insertRelationsByElevatorId(elevator.getId(), combinationIds);
+
+        //生成新的该电梯的假的四点对象路径
+        if(elevator.getElevatorPointCombinations() != null && elevator.getElevatorPointCombinations().size() > 0) {
+            generateFakePathByElevator(elevator);
         }
     }
 
@@ -334,5 +382,123 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
         return elevators;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public AjaxResult generateFakePathByElevator(Elevator elevator) throws Exception{
+        String placeholder = " | ----- | ";
+        String sceneName = elevator.getSceneName();
+        List<ElevatorPointCombination> elevatorPointCombinations = new ArrayList<>();
+        //从数据库查出四点对象
+        for(ElevatorPointCombination tempCombination : elevator.getElevatorPointCombinations()) {
+            tempCombination = elevatorPointCombinationService.findById(tempCombination.getId());
 
+            if(tempCombination == null) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,"四点对象不存在，参数错误！");
+            }
+            elevatorPointCombinations.add(tempCombination);
+        }
+
+        log.info(placeholder + "elevatorPointCombinations、" + elevatorPointCombinations.toString());
+        //遍历同一部电梯的四点对象，生成两两之间的假工控路径
+        for(ElevatorPointCombination startCombination : elevatorPointCombinations) {
+            log.info(placeholder + "startCombination、" + startCombination.toString());
+            MapPoint startCombinePoint = startCombination.getwPoint();
+            log.info(placeholder + "startCombinePoint、" + startCombinePoint.toString());
+            if(startCombinePoint == null || startCombinePoint.getId() == null) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点为空，生成错误！");
+            }
+            for(ElevatorPointCombination endCombination : elevatorPointCombinations) {
+                log.info(placeholder + "endCombination、" + endCombination.toString());
+                //跳过相同的四点集合
+                if(endCombination.getId().equals(startCombination.getId())) {
+                    continue;
+                }
+                MapPoint endCombinePoint = endCombination.getoPoint();
+                if(endCombinePoint == null || endCombinePoint.getId() == null) {
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'出去点为空，生成错误！");
+                }
+                log.info(placeholder + "endCombinePoint、" + endCombinePoint.toString());
+
+                //电梯云端路径起点是出发楼层工控路径终点
+                MapPoint startPathPoint = PointServiceImpl.findPathPointByXYTH(sceneName,
+                        startCombinePoint.getMapName(),startCombinePoint.getX(),startCombinePoint.getY(),startCombinePoint.getTh(),null, pointService);
+                if(startPathPoint == null) {
+                    log.info(placeholder + "startPathPoint is null");
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点相关联的path路径点为空，生成错误！");
+                }
+
+                log.info(placeholder + "startPathPoint、" + startPathPoint.toString());
+                Long startPathPointId = startPathPoint.getId();
+                Long startCombinePointId = startCombinePoint.getId();
+                Long endCombinePointId = endCombinePoint.getId();
+                //没有则新建
+                RoadPath roadPath = new RoadPath();
+                roadPath.setWeight(Constant.DEFAULT_ELEVATOR_X86_WEIGHT);
+                roadPath.setMapName(startCombinePoint.getMapName());
+                roadPath.setSceneName(sceneName);
+                roadPath.setData("");
+                roadPath.setEndPoint(endCombinePointId);
+                roadPath.setStartPoint(startPathPointId);
+                roadPath.setPattern("");
+                roadPath.setPathName(elevator.getName() + "_"
+                        + startCombinePoint.getPointAlias() + "_" + startCombinePoint.getMapName() + "_" + startCombinePoint.getSceneName()
+                        + "_to_"
+                        + endCombinePoint.getPointAlias() + "_" + endCombinePoint.getMapName() + "_" + endCombinePoint.getSceneName() + "_auto");
+                roadPath.setCreateTime(new Date());
+                roadPath.setPathType(Constant.PATH_TYPE_CLOUD);
+                roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                log.info(placeholder + "roadPath、" + roadPath.toString());
+                List<Long> pointIds = new ArrayList<>();
+                pointIds.add(startPathPointId);
+                pointIds.add(startCombinePointId);
+                pointIds.add(endCombinePointId);
+                log.info(placeholder + "pointIds、" + pointIds.toString());
+
+                roadPathService.createOrUpdateRoadPathByStartAndEndPoint(startPathPointId,
+                        endCombinePointId,sceneName,null,Constant.PATH_TYPE_CLOUD,
+                        roadPath,pointIds);
+            }
+        }
+        return AjaxResult.success();
+    }
+
+    /**
+     *
+     * @param elevatorList
+     * @return
+     * @throws Exception
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public AjaxResult generateFakePathByElevatorList(List<Elevator> elevatorList) throws Exception {
+        String placeholder = " | ----- | ";
+        /*
+        * 插入电梯点之间的路径
+        * **/
+        //遍历循环电梯列表，建立同一个电梯的电梯四点对象两两间等待点到出电梯的path点的假工控路径(不同电梯之间是没有路径的)
+        for(Elevator elevator:elevatorList) {
+            log.info(placeholder + "elevator、" + elevator.toString());
+            //该电梯至少得有两个四点对象才能建立电梯楼层间云端路径
+            if (elevator == null ||
+                    elevator.getElevatorPointCombinations() == null ||
+                    elevator.getElevatorPointCombinations().size() <= 1) {
+                continue;
+            }
+            AjaxResult ajaxResult = generateFakePathByElevator(elevator);
+            if(!ajaxResult.isSuccess()) {
+                return ajaxResult;
+            }
+        }
+        return AjaxResult.success();
+    }
+
+    @Override
+    public List<Elevator> listByShaftId(Long id) {
+        Example example = new Example(Elevator.class);
+        example.createCriteria().andCondition("ELEVATORSHAFT_ID =", id);
+        List<Elevator> elevators = myMapper.selectByExample(example);
+        bindElevatorShaft(elevators);
+        bindElevatorPointCombination(elevators);
+        return elevators;
+    }
 }

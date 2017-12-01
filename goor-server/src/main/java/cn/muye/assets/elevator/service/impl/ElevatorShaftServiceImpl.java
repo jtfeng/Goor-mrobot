@@ -35,6 +35,8 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
     private ElevatorMapper elevatorMapper;
     @Autowired
     private ElevatorShaftMapper elevatorShaftMapper;
+    @Autowired
+    private ElevatorService elevatorService;
 
     @Transactional
     @Override
@@ -57,9 +59,11 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
                 checkNotNull(elevatorShaft.getId());
                 log.info(" - - - - - ");
                 log.info(String.format("电梯井的 ID 编号为：%s", elevatorShaft.getId()));
-                List<Elevator> elevators = this.elevatorMapper.select(new Elevator(){{
+                List<Elevator> elevators = elevatorService.listByShaftId(elevatorShaft.getId());
+                //TODO 20171201以下方法查不到，不知道为什么——wlkfec之前测试的是可以的吗？
+                /*List<Elevator> elevators = this.elevatorMapper.select(new Elevator(){{
                     setElevatorshaftId(elevatorShaft.getId());
-                }});
+                }});*/
                 log.info(String.format("该电梯井下属的电梯有：%s", elevators.toString()));
                 log.info(" - - - - - ");
                 elevatorShaft.setElevators(elevators);

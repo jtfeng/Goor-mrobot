@@ -195,76 +195,9 @@ public class DijkstraController {
             /*
             * 插入电梯点之间的路径
             * **/
-            //遍历循环电梯列表，建立同一个电梯的电梯四点对象两两间等待点到出电梯的path点的假工控路径(不同电梯之间是没有路径的)
-            for(Elevator elevator:elevatorList) {
-                log.info(placeholder + "elevator、" + elevator.toString());
-                //该电梯至少得有两个四点对象才能建立电梯楼层间云端路径
-                if (elevator == null ||
-                        elevator.getElevatorPointCombinations() == null ||
-                        elevator.getElevatorPointCombinations().size() <= 1) {
-                    continue;
-                }
-                List<ElevatorPointCombination> elevatorPointCombinations = elevator.getElevatorPointCombinations();
-                log.info(placeholder + "elevatorPointCombinations、" + elevatorPointCombinations.toString());
-                //遍历同一部电梯的四点对象，生成两两之间的假工控路径
-                for(ElevatorPointCombination startCombination : elevatorPointCombinations) {
-                    log.info(placeholder + "startCombination、" + startCombination.toString());
-                    MapPoint startCombinePoint = startCombination.getwPoint();
-                    log.info(placeholder + "startCombinePoint、" + startCombinePoint.toString());
-                    if(startCombinePoint == null || startCombinePoint.getId() == null) {
-                        return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点为空，生成错误！");
-                    }
-                    for(ElevatorPointCombination endCombination : elevatorPointCombinations) {
-                        log.info(placeholder + "endCombination、" + endCombination.toString());
-                        //跳过相同的四点集合
-                        if(endCombination.getId().equals(startCombination.getId())) {
-                            continue;
-                        }
-                        MapPoint endCombinePoint = endCombination.getoPoint();
-                        if(endCombinePoint == null || endCombinePoint.getId() == null) {
-                            return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'出去点为空，生成错误！");
-                        }
-                        log.info(placeholder + "endCombinePoint、" + endCombinePoint.toString());
-
-                        //电梯云端路径起点是出发楼层工控路径终点
-                        MapPoint startPathPoint = PointServiceImpl.findPathPointByXYTH(sceneName,
-                                startCombinePoint.getMapName(),startCombinePoint.getX(),startCombinePoint.getY(),startCombinePoint.getTh(),null, pointService);
-                        if(startPathPoint == null) {
-                            log.info(placeholder + "startPathPoint is null");
-                            return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点相关联的path路径点为空，生成错误！");
-                        }
-
-                        log.info(placeholder + "startPathPoint、" + startPathPoint.toString());
-                        Long startPathPointId = startPathPoint.getId();
-                        Long startCombinePointId = startCombinePoint.getId();
-                        Long endCombinePointId = endCombinePoint.getId();
-                        //没有则新建
-                        RoadPath roadPath = new RoadPath();
-                        roadPath.setWeight(Constant.DEFAULT_ELEVATOR_X86_WEIGHT);
-                        roadPath.setMapName(startCombinePoint.getMapName());
-                        roadPath.setSceneName(sceneName);
-                        roadPath.setData("");
-                        roadPath.setEndPoint(endCombinePointId);
-                        roadPath.setStartPoint(startPathPointId);
-                        roadPath.setPattern("");
-                        roadPath.setPathName(startCombinePoint.getPointAlias() + "_" + startCombinePoint.getMapName() + "_" + startCombinePoint.getSceneName()
-                                + "_to_"
-                                + endCombinePoint.getPointAlias() + "_" + endCombinePoint.getMapName() + "_" + endCombinePoint.getSceneName() + "_auto");
-                        roadPath.setCreateTime(new Date());
-                        roadPath.setPathType(Constant.PATH_TYPE_CLOUD);
-                        roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                        log.info(placeholder + "roadPath、" + roadPath.toString());
-                        List<Long> pointIds = new ArrayList<>();
-                        pointIds.add(startPathPointId);
-                        pointIds.add(startCombinePointId);
-                        pointIds.add(endCombinePointId);
-                        log.info(placeholder + "pointIds、" + pointIds.toString());
-
-                        roadPathService.createOrUpdateRoadPathByStartAndEndPoint(startPathPointId,
-                                endCombinePointId,sceneName,null,Constant.PATH_TYPE_CLOUD,
-                                roadPath,pointIds);
-                    }
-                }
+            AjaxResult ajaxResult = elevatorService.generateFakePathByElevatorList(elevatorList);
+            if(!ajaxResult.isSuccess()) {
+                return ajaxResult;
             }
 
             //清空路径图的缓存

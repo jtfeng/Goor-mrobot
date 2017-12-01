@@ -1,9 +1,11 @@
 package cn.muye.assets.elevator.service;
 
+import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorModeEnum;
+import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
@@ -89,4 +91,22 @@ public interface ElevatorService extends BaseService<Elevator> {
      * @return
      */
     List<Elevator> listBySceneName(String sceneName);
+
+    /**
+     * 根据一部电梯四点对象生成假的云端路径
+     * @param elevator
+     * @throws Exception 程序出现异常
+     * @return
+     */
+    AjaxResult generateFakePathByElevator(Elevator elevator) throws Exception;
+
+    /**
+     * 根据电梯列表，遍历根据每部电梯四点对象生成假的云端路径
+     * @param elevatorList
+     * @return
+     * @throws Exception
+     */
+    AjaxResult generateFakePathByElevatorList(List<Elevator> elevatorList) throws Exception;
+
+    List<Elevator> listByShaftId(Long id);
 }
