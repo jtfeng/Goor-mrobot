@@ -95,8 +95,9 @@ public interface RoadPathService extends BaseService<RoadPath> {
      * 删除某场景某类型的所有路径对象
      * @param sceneName
      * @param pathType
+     * @param mapName
      */
-    void deleteBySceneNameType(String sceneName, Integer pathType);
+    void deleteBySceneMapNameType(String sceneName, Integer pathType, String mapName);
 
     /**
      * 删除某场景下，某类型的

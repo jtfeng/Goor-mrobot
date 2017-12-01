@@ -105,14 +105,15 @@ public class RoadPathController {
      */
     @RequestMapping(value = "/asset/roadPath/deleteBySceneIdType", method = RequestMethod.DELETE)
     public AjaxResult deleteRoadPathBySceneIdType(@RequestParam(value = "sceneId", required = true) Long sceneId,
-                                                  @RequestParam(value = "pathType", required = false) Integer pathType){
+                                                  @RequestParam(value = "pathType", required = false) Integer pathType,
+                                                  @RequestParam(required = false) String mapName){
         try {
             Scene scene = sceneService.getSceneById(sceneId);
             String sceneName = scene.getMapSceneName();
             if(StringUtil.isNullOrEmpty(sceneName)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
             }
-            this.roadPathService.deleteBySceneNameType(sceneName, pathType);
+            this.roadPathService.deleteBySceneMapNameType(sceneName, pathType, mapName);
             return AjaxResult.success("操作成功");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());

@@ -645,7 +645,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public void deleteBySceneNameType(String sceneName, Integer pathType) {
+    public void deleteBySceneMapNameType(String sceneName, Integer pathType, String mapName) {
         try {
             List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, pathType);
             if(roadPaths != null && roadPaths.size() > 0) {
@@ -662,6 +662,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 criteria.andCondition("SCENE_NAME = ", sceneName);
                 if(pathType != null) {
                     criteria.andCondition("PATH_TYPE = ", pathType);
+                }
+                if(mapName != null) {
+                    criteria.andCondition("MAP_NAME = ", mapName);
                 }
                 this.roadPathMapper.deleteByExample(example);
             }
