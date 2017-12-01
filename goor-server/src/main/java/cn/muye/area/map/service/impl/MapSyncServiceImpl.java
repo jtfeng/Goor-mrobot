@@ -24,6 +24,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.log.base.LogInfoUtils;
 import com.alibaba.fastjson.JSON;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -76,7 +77,6 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
 
     @Override
     public Object syncMap(MapZip mapZip, List<Robot> robotList) {
-        //TODO 向机器人发送消息，更新地图
         return sendMapSyncMessage(robotList, mapZip);
     }
 
@@ -110,8 +110,15 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
 
     @Override
     public Object sendMapSyncMessageNew(List<Robot> robotList, String mapSceneName, Long sceneId) {
-        String mapSceneNameDir = DOWNLOAD_HOME + File.separator +  Constant.MAP_FILE_PATH + File.separator + mapSceneName;
+        LOGGER.info("开始同步地图,robotList.size()=" + robotList.size() + ",mapSceneName=" + mapSceneName);
+        String mapSceneNameDir = DOWNLOAD_HOME + File.separator + SearchConstants.FAKE_MERCHANT_STORE_ID +
+                File.separator +  Constant.FILE_UPLOAD_TYPE_MAP + File.separator + mapSceneName;
+        if (!checkApplicationContextAndRabbitTemplate()) {
+            LOGGER.error("ApplicationContext And RabbitTemplate 参数为null");
+            return null;
+        }
         File mapSceneNameDirFile = new File(mapSceneNameDir);
+        File zipFile = null;
         if ( !mapSceneNameDirFile.exists() ||
                 !mapSceneNameDirFile.isDirectory() ||
                 mapSceneNameDirFile.listFiles().length <= 0){
@@ -120,7 +127,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
             return AjaxResult.failed("发送地图更新信息失败，该地图场景文件夹不存在 "+ mapSceneName);
         }
         try {
-            File zipFile = zipMapFile(mapSceneNameDir, mapSceneName);
+            zipFile = zipMapFile(mapSceneNameDir, mapSceneName);
             if (null == zipFile){
                 return AjaxResult.failed("压缩地图出错");
             }
@@ -141,7 +148,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         mapZip.setDeviceId(Constant.GOOR_SERVER);
         mapZip.setFileName(zipFile.getName());
         String absolutePath = zipFile.getAbsolutePath();
-        String filePath = absolutePath.substring(absolutePath.indexOf(DOWNLOAD_HOME) + 1);
+        String filePath = absolutePath.replace(DOWNLOAD_HOME, "");
         mapZip.setFilePath(filePath);
         mapZip.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         mapZipService.save(mapZip);
@@ -180,9 +187,17 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
     }
 
     private File zipMapFile(String filePath, String mapSceneName) throws Exception{
-        String zipFileSavePath = DOWNLOAD_HOME + File.separator + Constant.MAP_SYNCED_FILE_PATH;
+        String zipFileSavePath = DOWNLOAD_HOME + File.separator +
+                SearchConstants.FAKE_MERCHANT_STORE_ID + File.separator + Constant.MAP_SYNCED_FILE_PATH;
         String ZipFileName = mapSceneName + "_" + DateTimeUtils.getNormalNameDateTime() + Constant.ZIP_FILE_SUFFIX;
-        boolean zipResult =  ZipUtils.zip(filePath, zipFileSavePath, ZipFileName );
+        //新建一个名称为该场景名的临时文件夹，将场景的信息拷贝到新目录，以保持压缩包目录 层级一致
+        String tempDirPath = zipFileSavePath + File.separator + mapSceneName;
+        File tempDir = new File(tempDirPath);
+        FileUtils.deleteDirectory(tempDir);
+
+        FileUtils.copyDirectoryToDirectory(new File(filePath), tempDir);
+        //压缩临时文件夹
+        boolean zipResult =  ZipUtils.zip(tempDirPath, zipFileSavePath, ZipFileName );
         if (zipResult){
             return new File(zipFileSavePath + File.separator + ZipFileName);
         }
@@ -242,7 +257,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         Boolean isOnline = CacheInfoManager.getRobotOnlineCache(robotCode);
         if (isOnline == null || !isOnline) {
             LOGGER.info("机器人 +" + robotCode + "不在线，未同步地图");
-            return AjaxResult.failed();
+            return AjaxResult.failed("机器人 +" + robotCode + "不在线，未同步地图");
         }
         String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(robotCode, true, MessageType.EXECUTOR_MAP.name());
         AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);

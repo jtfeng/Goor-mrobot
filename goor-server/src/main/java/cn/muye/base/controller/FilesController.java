@@ -216,10 +216,8 @@ public class FilesController {
                         }
                     }).start();
                 }
-            } catch (IOException e) {
-                return AjaxResponse.failed(-1, "文件上传失败");
             }catch (Exception e) {
-                return AjaxResponse.failed(-1, e.getMessage());
+                LOGGER.error("文件上传出错", e);
             }
         }
     }

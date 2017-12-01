@@ -85,5 +85,25 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName);
 
+    /**
+     * 删除某场景下的所有路径对象
+     * @param sceneName
+     */
     void deleteBySceneName(String sceneName);
+
+    /**
+     * 删除某场景某类型的所有路径对象
+     * @param sceneName
+     * @param pathType
+     */
+    void deleteBySceneNameType(String sceneName, Integer pathType);
+
+    /**
+     * 删除某场景下，某类型的
+     * @param waitPoint
+     * @param endPointId
+     * @param pathType
+     * @param sceneName
+     */
+    void deleteByStartEndPointIdType(Long startPointId, Long endPointId, Integer pathType, String sceneName);
 }

@@ -55,11 +55,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private MapSyncService mapSyncService;
     @Autowired
     private RobotService robotService;
-
     @Autowired
     private SceneMapper sceneMapper;
-    @Autowired
-    private RobotMapper robotMapper;
     @Autowired
     private MapZipMapper mapZipMapper;
     @Autowired
@@ -145,26 +142,27 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     private Object updateMap(Scene scene) throws Exception {
-        List<Robot> sceneRobotList = scene.getRobots();
-        if (sceneRobotList != null && !sceneRobotList.isEmpty()) {
-            //自动下发地图
-            log.info("更新场景信息，scene.getMapSceneName()=" + scene.getMapSceneName() + ", scene.getStoreId()" + scene.getStoreId());
-            List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
-            List<Robot> robots = new ArrayList<>();
-            for (Robot robot : sceneRobotList) {
-                robots.add(robotMapper.selectByPrimaryKey(robot.getId()));
-            }
-            log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
-            if (mapInfos.size() != 0 && robots.size() != 0) {
-                log.info("场景同步地图");
-                return mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
-            }else {
-                updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
-                return AjaxResult.failed("未找到该场景关联的地图场景或场景无绑定机器人");
-            }
+        List<Robot> robots = this.sceneMapper.findRobotBySceneId(scene.getId());
+        if (robots != null && !robots.isEmpty()) {
+            return updateMap(scene, robots);
         }else {
             updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
             return AjaxResult.failed("场景无绑定机器人");
+        }
+    }
+
+    private Object updateMap(Scene scene, List<Robot> robots) throws Exception {
+        //自动下发地图
+        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
+        log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
+        if (mapInfos.size() != 0 && robots.size() != 0) {
+            log.info("场景同步地图");
+            return mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
+            //TODO 20171130 Artemis支持选择场景上传地图后需要放开次方法进行联调
+//            return mapSyncService.sendMapSyncMessageNew(robots, scene.getMapSceneName(), scene.getId());
+        }else {
+            updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
+            return AjaxResult.failed("未找到该场景关联的地图场景或场景无绑定机器人");
         }
     }
 
@@ -238,16 +236,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Override
     public Object sendSyncMapMessageToRobots(Long sceneId) throws Exception {
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
-        List<Robot> robots = this.sceneMapper.findRobotBySceneId(sceneId);
-        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
-        if (robots.size() == 0 || mapInfos.size() == 0) {
-            return null;
-        }
-        Preconditions.checkNotNull(mapInfos);
-        Preconditions.checkArgument(mapInfos.size() != 0, "该场景没有绑定地图，请绑定地图后重试!");
-        MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
+        String mapSceneName = sceneMapper.getRelatedMapNameBySceneId(sceneId);
+        scene.setMapSceneName(mapSceneName);
         sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
-        return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
+        return updateMap(scene);
     }
 
     /**
@@ -273,15 +265,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
         List<Robot> robots = this.sceneMapper.findRobotBySceneIdAndRobotIds(params);
         foreachList(robots);
-        List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(sceneId, scene.getStoreId());
-        if (robots.size() == 0 || mapInfos.size() == 0) {
-            return null;
-        }
-        Preconditions.checkNotNull(mapInfos);
-        Preconditions.checkArgument(mapInfos.size() != 0, "该场景没有绑定地图，请绑定地图后重试!");
-        MapZip mapZip = this.mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId());
+        String mapSceneName = sceneMapper.getRelatedMapNameBySceneId(sceneId);
+        scene.setMapSceneName(mapSceneName);
         sceneMapper.setSceneState(scene.getName(), scene.getStoreId(), 0);//将状态更改为正在上传
-        return mapSyncService.sendMapSyncMessage(robots, mapZip, sceneId);
+        return updateMap(scene, robots);
     }
 
     @Override

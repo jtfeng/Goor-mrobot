@@ -643,4 +643,62 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void deleteBySceneNameType(String sceneName, Integer pathType) {
+        try {
+            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, pathType);
+            if(roadPaths != null && roadPaths.size() > 0) {
+                //如果是云端路径，则先删除roadPathPoint表
+                if(pathType.equals(Constant.PATH_TYPE_CLOUD)) {
+                    for(RoadPath roadPath : roadPaths) {
+                        this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
+                    }
+                }
+
+                //再删除该场景下所有roadPath
+                Example example = new Example(RoadPath.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andCondition("SCENE_NAME = ", sceneName);
+                if(pathType != null) {
+                    criteria.andCondition("PATH_TYPE = ", pathType);
+                }
+                this.roadPathMapper.deleteByExample(example);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void deleteByStartEndPointIdType(Long startPointId, Long endPointId, Integer pathType, String sceneName) {
+        try {
+            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null);
+            if(roadPaths != null && roadPaths.size() > 0) {
+                //如果是云端路径，则先删除roadPathPoint表
+                for(RoadPath roadPath : roadPaths) {
+                    if(roadPath.getPathType().equals(Constant.PATH_TYPE_CLOUD)) {
+                        this.roadPathMapper.deleteRoadPathPointsByPathId(roadPath.getId());
+                    }
+                }
+
+                //再删除该场景下所有roadPath
+                Example example = new Example(RoadPath.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andCondition("SCENE_NAME = ", sceneName);
+                if(pathType != null) {
+                    criteria.andCondition("PATH_TYPE = ", pathType);
+                }
+                if(startPointId != null) {
+                    criteria.andCondition("START_POINT = ", startPointId);
+                }
+                if(endPointId != null) {
+                    criteria.andCondition("END_POINT = ", endPointId);
+                }
+                this.roadPathMapper.deleteByExample(example);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

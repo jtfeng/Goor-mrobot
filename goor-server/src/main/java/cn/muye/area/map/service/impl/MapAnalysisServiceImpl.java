@@ -67,6 +67,11 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
         MapZip mapZip = JSON.parseObject(JSON.toJSONString(info), MapZip.class);
         mapZip.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         mapZip.setCreateTime(new Date());
+        //预设为空串，防止因数据库设置为非空字段导致保存出错
+        mapZip.setSceneName("");
+        mapZipService.save(mapZip);
+        //保存当前的地图压缩包ID
+        newMapZipId = mapZip.getId();
         Object sceneMapObject = info.get(Constant.SCENE_MAP_NAME);
 
         List<String> sceneNames = new ArrayList<>();
@@ -79,10 +84,9 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
             stringBuffer.append(sceneNames.get(i)).append(",");
         }
         mapZip.setSceneName(stringBuffer.toString());
-        mapZipService.save(mapZip);
-        newMapZipId = mapZip.getId();  //保存当前的地图压缩包ID
-
-        File saveFile = unzipMapZipFile(mapZip); //TODO 文件不存在新增，有则更新
+        mapZipService.update(mapZip);
+        //文件不存在新增，有则更新
+        File saveFile = unzipMapZipFile(mapZip);
         if (saveFile.exists()) {
             analysisFile(saveFile, sceneNames, mapZip);
         }
@@ -92,10 +96,8 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
     public File unzipMapZipFile(MapZip mapZip) {
         //解压文件夹到固定路径
         File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", mapZip.getDeviceId());
-        if (saveFile.exists()) {
-            FileUtils.deleteDir(saveFile);
-        }
-        saveFile.mkdirs();
+        //TODO 20171130 Artemis选择场景上传地图需要放开此项进行联调
+//        File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Constant.FILE_UPLOAD_TYPE_MAP);
         boolean result = ZipUtils.unzip(DOWNLOAD_HOME + mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
         if (!result) {
             LOGGER.info("地图文件解压失败");
