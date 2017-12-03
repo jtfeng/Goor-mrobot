@@ -432,7 +432,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static RoadPathMaps setRoadPathMapsCache(Long storeId, String sceneName, RoadPathService roadPathService) {
-        List<RoadPath> roadPathList = roadPathService.listRoadPathsBySceneNamePathType(sceneName,null);
+        List<RoadPath> roadPathList = roadPathService.listRoadPathsBySceneNamePathTypeOrderByStart(sceneName,null);
         RoadPathMaps roadPathMaps = null;
         if(roadPathList != null && roadPathList.size() > 0) {
             roadPathMaps = new RoadPathMaps();

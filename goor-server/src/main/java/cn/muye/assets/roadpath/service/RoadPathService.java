@@ -81,7 +81,21 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     RoadPath findRoadPath(RoadPath roadPath) throws Exception ;
 
+    /**
+     * 按场景和类型查询路径列表
+     * @param sceneName
+     * @param pathType
+     * @return
+     */
     List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType);
+
+    /**
+     * 为了算法使用的排序查询路径方法
+     * @param sceneName
+     * @param pathType
+     * @return
+     */
+    List<RoadPath> listRoadPathsBySceneNamePathTypeOrderByStart(String sceneName, Integer pathType);
 
     RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName);
 

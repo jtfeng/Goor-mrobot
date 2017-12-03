@@ -292,7 +292,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             // 可能为空
             String mapNameKeyword = queryObject.getString("MAP_NAME".toLowerCase());
             if (mapNameKeyword != null && !"".equals(mapNameKeyword.trim())) {
-                criteria.andCondition(" MAP_NAME LIKE ", "%"+mapNameKeyword.trim()+"%");
+                criteria.andCondition(" MAP_NAME = ", mapNameKeyword);
             }
             // 可能为空(此处暂定为 0 表示云端配置 1 代表工控上传）)
             String pathType = queryObject.getString("PATH_TYPE".toLowerCase());
@@ -344,6 +344,20 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
     @Override
     public List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType) {
+        Example example = new Example(RoadPath.class);
+        Example.Criteria criteria = example.createCriteria();
+        if (sceneName != null) {
+            criteria.andCondition("SCENE_NAME = ", sceneName);
+        }
+        if (pathType != null) {
+            criteria.andCondition("PATH_TYPE = ", pathType);
+        }
+        List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
+        return roadPaths;
+    }
+
+    @Override
+    public List<RoadPath> listRoadPathsBySceneNamePathTypeOrderByStart(String sceneName, Integer pathType) {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         if (sceneName != null) {
