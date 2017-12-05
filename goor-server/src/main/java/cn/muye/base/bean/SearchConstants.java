@@ -22,6 +22,11 @@ public class SearchConstants {
 	public static String SEARCH_LOG_TYPE = "logType";
 	public static String SEARCH_DEVICE_ID = "deviceId";
 	public static String SEARCH_NAME = "name";
+	//器械的查询名称
+	public static String SEARCH_SEARCH_NAME = "searchName";
+	public static String SEARCH_DEPARTMENT_TYPE = "departmentType";
+	public static String SEARCH_PACKAGE_TYPE = "packageType";
+
 	public static String SEARCH_TYPE = "type";
 	public static String SEARCH_CODE = "code";
 	public static String SEARCH_ERROR_CODE = "error_code";
