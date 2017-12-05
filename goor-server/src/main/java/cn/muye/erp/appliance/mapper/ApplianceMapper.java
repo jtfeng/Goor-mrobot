@@ -1,0 +1,34 @@
+package cn.muye.erp.appliance.mapper;
+
+import cn.mrobot.bean.erp.appliance.Appliance;
+import cn.muye.util.MyMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+/**
+ *
+ * @author Jelynn
+ * @date 2017/12/1
+ */
+public interface ApplianceMapper extends MyMapper<Appliance>{
+
+    Appliance findApplianceById(Long id);
+
+
+    List<Appliance> listApplianceByCondition(@Param("name") String name,
+                                             @Param("searchName") String searchName,
+                                             @Param("departmentType") String departmentType,
+                                             @Param("packageType") String packageType,
+                                             @Param("storeId") Long storeId);
+
+    List<Appliance> listAllAppliance(Long storeId);
+
+    List<Appliance> listBySearchNameTwo(@Param("searchName") String searchName, @Param("storeId")Long storeId);
+
+    List<Appliance> listBySearchNameThree(@Param("searchName")String searchName, @Param("storeId")Long storeId);
+
+    List<Appliance> findByNameAndCode(@Param("name") String name,
+                                @Param("departmentTypeCode") int departmentTypeCode,
+                                @Param("packageTypeCode") int packageTypeCode);
+}
