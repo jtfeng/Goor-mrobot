@@ -10,6 +10,8 @@ import cn.mrobot.bean.assets.door.DoorType;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.erp.appliance.DepartmentType;
+import cn.mrobot.bean.erp.appliance.PackageType;
 import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
@@ -29,6 +31,8 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.erp.appliance.service.DepartmentTypeService;
+import cn.muye.erp.appliance.service.PackageTypeService;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
@@ -38,8 +42,11 @@ import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.apache.commons.net.util.Base64;
 import org.apache.log4j.Logger;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,8 +59,9 @@ import java.util.Map;
  * Created by Ray.Fu on 2017/6/13.
  */
 @Controller
-public class UserController {
+public class UserController implements ApplicationContextAware{
 
+    private static ApplicationContext applicationContext;
     private static Logger LOGGER = Logger.getLogger(UserController.class);
 
     @Autowired
@@ -70,7 +78,6 @@ public class UserController {
 
     @Autowired
     private OrderSettingService orderSettingService;
-
     @Value("${authServer.host}")
     private String authServerHost;
 
@@ -335,9 +342,9 @@ public class UserController {
             //判断token不等于null，说明已经登录
             if (token != null) {
                 //查询用户的
-                List<User> list = userService.getUser(userName, password);
-                if (list != null) {
-                    return list.get(0);
+                List<User> listAll = userService.getUser(userName, password);
+                if (listAll != null) {
+                    return listAll.get(0);
                 } else {
                     return null;
                 }
@@ -494,6 +501,8 @@ public class UserController {
         map.put("doorType", DoorType.list());
         map.put("employeeType", EmployeeTypeEnum.list());
         map.put("logLevel", LogLevel.list());
+        map.put("applianceDepartmentType", getApplianceDepartmentTypeList());
+        map.put("appliancePackageType", getAppliancePackageTypeList());
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO != null) {
@@ -545,5 +554,36 @@ public class UserController {
         dto.setId(role.getId());
         dto.setName(role.getCnName());
         return dto;
+    }
+
+    public static List<Map> getApplianceDepartmentTypeList() {
+        List<Map> resultList = new ArrayList<Map>();
+        DepartmentTypeService departmentTypeService = applicationContext.getBean(DepartmentTypeService.class);
+        List<DepartmentType>  departmentTypeList = departmentTypeService.listAll();
+        for (DepartmentType departmentType : departmentTypeList) {
+            Map result = new HashMap<String,Object>();
+            result.put("name",departmentType.getName());
+            result.put("value",departmentType.getCode());
+            resultList.add(result) ;
+        }
+        return resultList;
+    }
+
+    private static List<Map> getAppliancePackageTypeList() {
+        List<Map> resultList = new ArrayList<Map>();
+        PackageTypeService packageTypeService = applicationContext.getBean(PackageTypeService.class);
+        List<PackageType> packageTypeList = packageTypeService.listAll();
+        for (PackageType packageType : packageTypeList) {
+            Map result = new HashMap<String,Object>();
+            result.put("name",packageType.getName());
+            result.put("value",packageType.getCode());
+            resultList.add(result) ;
+        }
+        return resultList;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        UserController.applicationContext = applicationContext;
     }
 }
