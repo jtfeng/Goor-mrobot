@@ -232,10 +232,10 @@ public class DijkstraController {
             }
 
             //创建电梯间路径
-            AjaxResult elevatorAjaxResult = generateElevatorPath(sceneId);
+            /*AjaxResult elevatorAjaxResult = generateElevatorPath(sceneId);
             if(!elevatorAjaxResult.isSuccess()) {
                 return elevatorAjaxResult;
-            }
+            }*/
 
             //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
             RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
