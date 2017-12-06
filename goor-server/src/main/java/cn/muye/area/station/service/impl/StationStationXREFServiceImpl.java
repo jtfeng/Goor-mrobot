@@ -1,5 +1,6 @@
 package cn.muye.area.station.service.impl;
 
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationStationXREF;
 import cn.muye.area.station.mapper.StationStationXREFMapper;
 import cn.muye.area.station.service.StationStationXREFService;
@@ -34,6 +35,20 @@ public class StationStationXREFServiceImpl implements StationStationXREFService 
     }
 
     @Override
+    public void saveByStationList(Long originStationId, List<Station> accessArriveStationIdList) {
+        Example example = new Example(StationStationXREF.class);
+        example.createCriteria().andCondition("ORIGIN_STATION_ID=", originStationId);
+        stationStationXREFMapper.deleteByExample(example);
+        accessArriveStationIdList.stream().forEach(station ->{
+            StationStationXREF xref = new StationStationXREF();
+            xref.setOriginStationId(originStationId);
+            xref.setDestinationStationId(station.getId());
+            xref.setOrderIndex(station.getOrderIndex());
+            stationStationXREFMapper.insert(xref);
+        });
+    }
+
+    @Override
     public List<StationStationXREF> list(Long id) {
         Example example = new Example(StationStationXREF.class);
         example.createCriteria().andCondition("ORIGIN_STATION_ID=", id);
@@ -44,6 +59,7 @@ public class StationStationXREFServiceImpl implements StationStationXREFService 
     public List<StationStationXREF> listByDestinationStationId(Long destId) {
         Example example = new Example(StationStationXREF.class);
         example.createCriteria().andCondition("DESTINATION_STATION_ID=", destId);
+        example.setOrderByClause("ORDER_INDEX ASC");
         return stationStationXREFMapper.selectByExample(example);
     }
 }

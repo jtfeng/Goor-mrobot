@@ -12,6 +12,11 @@ public class StationStationXREF {
 
     private Long destinationStationId;
 
+    /**
+     * 目标站排序索引，这样可以控制目标站的排序
+     */
+    private Integer orderIndex;
+
     public Long getOriginStationId() {
         return originStationId;
     }
@@ -26,5 +31,13 @@ public class StationStationXREF {
 
     public void setDestinationStationId(Long destinationStationId) {
         this.destinationStationId = destinationStationId;
+    }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
     }
 }

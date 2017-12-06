@@ -453,7 +453,8 @@ public class StationController {
             if (stationIdList.contains(station.getId())) {
                 return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"可到达的站不能绑定自己");
             }
-            stationStationXREFService.save(station.getId(), stationIdList);
+//            stationStationXREFService.save(station.getId(), stationIdList);
+            stationStationXREFService.saveByStationList(station.getId(), accessArriveStationIdList);
         }
         return AjaxResult.success(station,"绑定成功");
     }

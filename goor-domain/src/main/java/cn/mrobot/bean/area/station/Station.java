@@ -93,6 +93,12 @@ public class Station extends BaseBean{
     @Transient
     private List<Station> accessArriveStationIdList;
 
+    /**
+     * 排序索引，作为可到达站时使用
+     */
+    @Transient
+    private Integer orderIndex;
+
     public String getName() {
         return name;
     }
@@ -163,5 +169,13 @@ public class Station extends BaseBean{
 
     public void setResscene(String resscene) {
         this.resscene = resscene;
+    }
+
+    public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
     }
 }
