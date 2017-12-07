@@ -66,7 +66,8 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     @Override
     public List<Appliance> lists(WhereRequest whereRequest) {
         Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
-        if (StringUtil.isNotBlank(whereRequest.getQueryObj())) {
+        String queryObj = whereRequest.getQueryObj();
+        if (StringUtil.isNotBlank(queryObj)) {
             JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
             String name = map.getString(SearchConstants.SEARCH_NAME);
             String searchName = map.getString(SearchConstants.SEARCH_SEARCH_NAME);

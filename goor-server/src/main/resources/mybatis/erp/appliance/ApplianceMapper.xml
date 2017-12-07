@@ -72,10 +72,10 @@
     <select id="listAllAppliance" resultMap="appliance">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE a
+        FROM ERP_APPLIANCE
         <where>
             <if test="storeId != null">
-                AND a.STORE_ID = #{storeId}
+                AND STORE_ID = #{storeId}
             </if>
         </where>
     </select>
