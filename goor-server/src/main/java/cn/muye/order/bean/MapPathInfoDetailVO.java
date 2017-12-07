@@ -1,42 +1,26 @@
 package cn.muye.order.bean;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Selim on 2017/11/29.
  */
 public class MapPathInfoDetailVO {
 
-    private String name; //地图名称
+    private Map<String, Object> mapInfo = Maps.newHashMap();  //记录地图信息
 
-    private String imgRosPicUrl; //ros地图url
+    private List<MapPointVO> mapPointList = Lists.newArrayList();   //点集合
 
-    private String imgOptimizePicUrl;  //优化ros地图url
-
-    private List<MapPointVO> mapPointList;   //点集合
-
-    public String getName() {
-        return name;
+    public Map<String, Object> getMapInfo() {
+        return mapInfo;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getImgRosPicUrl() {
-        return imgRosPicUrl;
-    }
-
-    public void setImgRosPicUrl(String imgRosPicUrl) {
-        this.imgRosPicUrl = imgRosPicUrl;
-    }
-
-    public String getImgOptimizePicUrl() {
-        return imgOptimizePicUrl;
-    }
-
-    public void setImgOptimizePicUrl(String imgOptimizePicUrl) {
-        this.imgOptimizePicUrl = imgOptimizePicUrl;
+    public void setMapInfo(Map<String, Object> mapInfo) {
+        this.mapInfo = mapInfo;
     }
 
     public List<MapPointVO> getMapPointList() {

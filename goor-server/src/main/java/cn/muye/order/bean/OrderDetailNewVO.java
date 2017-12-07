@@ -1,7 +1,6 @@
 package cn.muye.order.bean;
 
 import java.util.List;
-
 /**
  * Created by Selim on 2017/11/30.
  * 护士平板查看显示类
@@ -14,7 +13,7 @@ public class OrderDetailNewVO {
 
     private String transferInfo; //当前运输详情
 
-    private MapPathInfoVO mapPathInfoVO;   //
+    private MapPathInfoVO mapPathInfoVO;   //地图信息
 
     private String orderYear;  //下单时间（年月日）
 
@@ -64,8 +63,13 @@ public class OrderDetailNewVO {
         this.transferInfo = transferInfo;
     }
 
+    public MapPathInfoVO getMapPathInfoVO() {
+        return mapPathInfoVO;
+    }
 
-
+    public void setMapPathInfoVO(MapPathInfoVO mapPathInfoVO) {
+        this.mapPathInfoVO = mapPathInfoVO;
+    }
 
     public String getOrderYear() {
         return orderYear;

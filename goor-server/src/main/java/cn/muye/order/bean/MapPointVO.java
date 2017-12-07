@@ -12,6 +12,10 @@ public class MapPointVO {
 
     private Double th;
 
+    private String mapName; //地图名称
+
+    private String sceneName;  //场景名称
+
     private String name; //坐标关联的位置名称
 
     public Double getX() {
@@ -36,6 +40,22 @@ public class MapPointVO {
 
     public void setTh(Double th) {
         this.th = th;
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
+    }
+
+    public String getSceneName() {
+        return sceneName;
+    }
+
+    public void setSceneName(String sceneName) {
+        this.sceneName = sceneName;
     }
 
     public String getName() {
