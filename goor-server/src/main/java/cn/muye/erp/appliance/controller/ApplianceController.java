@@ -39,18 +39,18 @@ public class ApplianceController {
 
     @RequestMapping(value = "appliance", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody Appliance appliance) {
-        if (null == appliance){
+        if (null == appliance) {
             return AjaxResult.failed("保存对象不能为空");
         }
         if (StringUtil.isBlank(appliance.getName()) ||
                 appliance.getDepartmentTypeCode() == 0 ||
-                appliance.getPackageTypeCode() == 0){
+                appliance.getPackageTypeCode() == 0) {
             return AjaxResult.failed("保存对象关键属性不能为空");
         }
         //根据name,departmentTypeCode,packageTypeCode进行重复校验
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),
                 appliance.getDepartmentTypeCode(), appliance.getPackageTypeCode());
-        if (null != applianceList && applianceList.size() > 0 ){
+        if (null != applianceList && applianceList.size() > 0) {
             return AjaxResult.failed("添加失败，同名称，类别，包装类型数据已经存在");
         }
 
@@ -62,19 +62,19 @@ public class ApplianceController {
 
     @RequestMapping(value = "appliance", method = RequestMethod.PUT)
     public AjaxResult update(@RequestBody Appliance appliance) {
-        if (null == appliance){
+        if (null == appliance) {
             return AjaxResult.failed("修改对象不能为空");
         }
-        if (StringUtil.isBlank(appliance.getName())){
+        if (StringUtil.isBlank(appliance.getName())) {
             return AjaxResult.failed("修改对象名称不能为空");
         }
-        if (null == appliance.getId()){
+        if (null == appliance.getId()) {
             return AjaxResult.failed("修改对象ID不能为空");
         }
         //根据name,departmentTypeCode,packageTypeCode进行重复校验
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),
                 appliance.getDepartmentTypeCode(), appliance.getPackageTypeCode());
-        if (null != applianceList && applianceList.size() > 0 ){
+        if (null != applianceList && applianceList.size() > 0) {
             return AjaxResult.failed("修改失败，同名称，类别，包装类型数据已经存在");
         }
 
@@ -90,16 +90,16 @@ public class ApplianceController {
 
     @RequestMapping(value = "appliance/{id}", method = RequestMethod.GET)
     public AjaxResult get(@PathVariable Long id) {
-        if (null == id){
+        if (null == id) {
             return AjaxResult.failed("ID不能为空");
         }
         Appliance applianceDB = applianceService.findApplianceById(id);
-        return AjaxResult.success(applianceDB,"修改成功");
+        return AjaxResult.success(applianceDB, "修改成功");
     }
 
     @RequestMapping(value = "appliance/{id}", method = RequestMethod.DELETE)
     public AjaxResult delete(@PathVariable Long id) {
-        if (null == id){
+        if (null == id) {
             return AjaxResult.failed("ID不能为空");
         }
         applianceService.deleteById(id);
@@ -107,14 +107,14 @@ public class ApplianceController {
     }
 
     @RequestMapping(value = "appliance/searchName", method = RequestMethod.GET)
-    public AjaxResult list(@RequestParam("searchName") String  searchName) {
-        if (StringUtil.isBlank(searchName)){
+    public AjaxResult list(@RequestParam("searchName") String searchName) {
+        if (StringUtil.isBlank(searchName)) {
             return AjaxResult.failed("器械查询名称不能为空");
         }
-    searchName = searchName.toUpperCase();
-    List<Appliance> applianceList = applianceService.listBySearchName(searchName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-        return AjaxResult.success(applianceList,"查询成功");
-}
+        searchName = searchName.toUpperCase();
+        List<Appliance> applianceList = applianceService.listBySearchName(searchName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        return AjaxResult.success(applianceList, "查询成功");
+    }
 
     @RequestMapping(value = "appliance", method = RequestMethod.GET)
     public AjaxResult list(WhereRequest whereRequest) {
@@ -128,7 +128,7 @@ public class ApplianceController {
         List<Appliance> applianceList = applianceService.lists(whereRequest);
         PageInfo<Appliance> page = new PageInfo<Appliance>(applianceList);
 
-        return AjaxResult.success(page,"查询成功");
+        return AjaxResult.success(page, "查询成功");
     }
 
     @RequestMapping(value = "appliance/import", method = RequestMethod.POST)

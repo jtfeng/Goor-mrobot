@@ -7,11 +7,10 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- *
  * @author Jelynn
  * @date 2017/12/1
  */
-public interface ApplianceMapper extends MyMapper<Appliance>{
+public interface ApplianceMapper extends MyMapper<Appliance> {
 
     Appliance findApplianceById(Long id);
 
@@ -22,13 +21,13 @@ public interface ApplianceMapper extends MyMapper<Appliance>{
                                              @Param("packageType") String packageType,
                                              @Param("storeId") Long storeId);
 
-    List<Appliance> listAllAppliance(Long storeId);
+    List<Appliance> listAllAppliance(@Param("storeId") Long storeId);
 
-    List<Appliance> listBySearchNameTwo(@Param("searchName") String searchName, @Param("storeId")Long storeId);
+    List<Appliance> listBySearchNameTwo(@Param("searchName") String searchName, @Param("storeId") Long storeId);
 
-    List<Appliance> listBySearchNameThree(@Param("searchName")String searchName, @Param("storeId")Long storeId);
+    List<Appliance> listBySearchNameThree(@Param("searchName") String searchName, @Param("storeId") Long storeId);
 
     List<Appliance> findByNameAndCode(@Param("name") String name,
-                                @Param("departmentTypeCode") int departmentTypeCode,
-                                @Param("packageTypeCode") int packageTypeCode);
+                                      @Param("departmentTypeCode") int departmentTypeCode,
+                                      @Param("packageTypeCode") int packageTypeCode);
 }
