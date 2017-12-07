@@ -56,7 +56,9 @@ public class ApplianceController {
 
         appliance.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         appliance.setCreateTime(new Date());
-        appliance.setSearchName(applianceService.getSearchName(appliance.getName()));
+        if (StringUtil.isBlank(appliance.getSearchName())){
+            appliance.setSearchName(applianceService.getSearchName(appliance.getName()));
+        }
         applianceService.save(appliance);
         return AjaxResult.success(appliance, "添加成功");
     }
