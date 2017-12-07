@@ -67,6 +67,7 @@
                 AND a.STORE_ID = #{storeId}
             </if>
         </where>
+         ORDER BY CREATE_TIME DESC
     </select>
 
     <select id="listAllAppliance" resultMap="appliance">
@@ -78,24 +79,25 @@
                 AND STORE_ID = #{storeId}
             </if>
         </where>
+        ORDER BY CREATE_TIME DESC
     </select>
 
     <select id="findByNameAndCode" resultMap="appliance">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE NAME = #{name} AND DEPARTMENT_TYPE_CODE = #{departmentTypeCode} AND PACKAGE_TYPE_CODE = #{packageTypeCode}
+        FROM ERP_APPLIANCE WHERE NAME = #{name} AND DEPARTMENT_TYPE_CODE = #{departmentTypeCode} AND PACKAGE_TYPE_CODE = #{packageTypeCode}  ORDER BY CREATE_TIME DESC
     </select>
 
 
     <select id="listBySearchNameTwo" resultMap="appliance">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('',#{searchName},'%')
+        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('',#{searchName},'%')  ORDER BY CREATE_TIME DESC
     </select>
 
     <select id="listBySearchNameThree" resultMap="appliance">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('%',#{searchName},'%')
+        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('%',#{searchName},'%')  ORDER BY CREATE_TIME DESC
     </select>
 </mapper>
