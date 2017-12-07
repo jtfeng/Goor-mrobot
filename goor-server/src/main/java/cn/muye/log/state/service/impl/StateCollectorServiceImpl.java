@@ -417,7 +417,9 @@ public class StateCollectorServiceImpl implements StateCollectorService {
             if (StringUtil.isNullOrEmpty(state)) {
                 stateDetail.setCHValue(MissionState.STATE_INIT.getName());
             } else {
-                stateDetail.setCHValue(MissionState.getMissionState(state).getName());
+                MissionState missionState = MissionState.getMissionState(state);
+                String chValue = missionState != null ? missionState.getName() : MissionState.STATE_INIT.getName();
+                stateDetail.setCHValue(chValue);
             }
             stateDetailList.add(stateDetail);
         }

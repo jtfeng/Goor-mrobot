@@ -10,7 +10,8 @@ public enum MissionState {
     STATE_FINISHED("finished", "已经完成"),
     STATE_EXECUTING("executing", "正在执行"),
     STATE_PAUSED("paused", "暂停中"),
-    STATE_CANCELED("canceled", "被取消");
+    STATE_CANCELED("canceled", "被取消"),
+    STATE_FAILED("failed", "失败");
 
     private String code;
 

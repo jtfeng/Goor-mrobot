@@ -195,7 +195,9 @@ public class MapInfoServiceImpl implements MapInfoService {
             currentInfo.setMission(stateCollectorService.collectTaskLog(code));
 
             //设置任务状态码
-            currentInfo.setTaskStateCode(getTaskState(code).getCode());
+            TaskState taskState = getTaskState(code);
+            LOGGER.info("机器人 "+ code +" 的任务状态为 " + taskState);
+            currentInfo.setTaskStateCode(taskState.getCode());
 
             //设置故障
             currentInfo.setFault(getFault(code));
@@ -225,6 +227,7 @@ public class MapInfoServiceImpl implements MapInfoService {
      * @return
      */
     private TaskState getTaskState(String code) {
+        LOGGER.info("获取任务状态 运输中/充电/待命. code=" + code);
         Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (robot.getBusy()) {
             return TaskState.TRANSPORTING;
