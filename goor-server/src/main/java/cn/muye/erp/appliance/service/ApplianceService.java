@@ -13,6 +13,8 @@ import java.util.List;
  */
 public interface ApplianceService extends BaseService<Appliance> {
 
+    String getSearchName(String name);
+
     Appliance findApplianceById(Long id);
 
     boolean importExcel(File file);
