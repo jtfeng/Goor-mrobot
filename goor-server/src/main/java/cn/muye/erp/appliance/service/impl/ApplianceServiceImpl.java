@@ -149,7 +149,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
      * @param name
      * @return
      */
-    private String getSearchName(String name) {
+    public String getSearchName(String name) {
         int length = name.length();
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < length; i++) {
