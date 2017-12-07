@@ -3,6 +3,8 @@ package cn.muye.area.map.mapper;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -15,6 +17,7 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
+@Component
 public interface MapInfoMapper extends MyMapper<MapInfo> {
 
     void updateDeleteFlag(@Param("storeId") long storeId, @Param("mapZipId") long mapZipId, @Param("deleteFlag") int deleteFlag);

@@ -44,7 +44,7 @@ public interface SceneService extends BaseService<Scene> {
 
     void bindSceneAndMapRelations(Scene scene) throws Exception;
 
-    boolean bindSceneAndRobotRelations(Scene scene) throws Exception;
+    boolean bindSceneAndRobotRelations(Scene scene, List<Long> distinctIDS) throws Exception;
 
     boolean checkSceneIsNeedToBeUpdated(String mapSceneName, String storeId) throws Exception;
 
@@ -53,4 +53,10 @@ public interface SceneService extends BaseService<Scene> {
     Scene storeSceneInfoToSession(String source, String sceneId, String token) throws Exception;
    
     String getRelatedMapNameBySceneId(Long sceneId);
+
+    /**
+     * 机器人开机管理获取云端相关资源 - （场景、地图、站）- 返回一个 JSON 字符串
+     * @return
+     */
+    String getRobotStartAssets();
 }

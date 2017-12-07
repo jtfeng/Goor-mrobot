@@ -4,6 +4,7 @@ package cn.muye.area.station.mapper;
 import cn.mrobot.bean.area.station.Station;
 import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
+@Component
 public interface StationMapper  extends MyMapper<Station> {
 
 //	long save(Station station);

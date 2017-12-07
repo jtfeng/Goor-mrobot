@@ -5,13 +5,16 @@ import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.mapper.MapInfoMapper;
 import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.RobotMapZipXREFService;
+import cn.muye.area.station.mapper.StationMapper;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
@@ -20,6 +23,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -31,11 +35,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -60,6 +62,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Autowired
     private MapZipMapper mapZipMapper;
     @Autowired
+    private StationMapper stationMapper;
+    @Autowired
+    private MapInfoMapper mapInfoMapper;
+    @Autowired
     private RobotMapZipXREFService robotMapZipXREFService;
     //保存添加场景与机器人之间的关系时候，需要加锁，以免事务未提交读取到脏数据
     private ReentrantLock lock = new ReentrantLock();
@@ -72,6 +78,41 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return sceneMapper.selectAll();
     }
 
+//    "scene”:[{
+//    id:’',
+//    name:’',
+//    map:[{“id”:’’, name:’’}, … ],
+//    station:[{id:’’, name:''}, ...]
+//}
+//	    ,...]
+
+    @Override
+    public String getRobotStartAssets() {
+        Map baseData = new HashMap();
+        List sceneList = new ArrayList();
+        // 获取所有的场景信息
+        List<Scene> scenes = sceneMapper.selectAll();
+        for (Scene scene : scenes) {
+            //依次遍历场景并且获取场景下对应的地图和站信息
+            Map eachScene = new HashMap();
+            eachScene.put("id", scene.getId());
+            eachScene.put("name", scene.getName());
+            //设置站
+            Example stationExample = new Example(Station.class);
+            stationExample.createCriteria().andCondition("SCENE_ID =", scene.getId());
+            eachScene.put("station", stationMapper.selectByExample(stationExample));
+            //
+            //设置地图
+            Example mapExample = new Example(MapInfo.class);
+            mapExample.createCriteria().andCondition("SCENE_NAME =", scene.getName());
+            eachScene.put("map", mapInfoMapper.selectByExample(mapExample));
+            //
+            sceneList.add(eachScene);
+        }
+        baseData.put("scene", sceneList);
+        return JSONObject.toJSONString(baseData);
+    }
+
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
     @Override
     public Object saveScene(Scene scene) throws Exception {
@@ -80,7 +121,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         this.save(scene);//数据库中插入这条场景记录
 
         this.deleteRobotAndSceneRelations(scene.getId());
-        boolean flag = bindSceneAndRobotRelations(scene);//绑定场景与机器人之间的对应关系
+        boolean flag = bindSceneAndRobotRelations(scene, null);//绑定场景与机器人之间的对应关系
 
         this.deleteMapAndSceneRelations(scene.getId());
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
@@ -122,21 +163,37 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public Object updateScene(Scene scene) throws Exception {
         log.info("更新场景信息，scene=" + JSON.toJSONString(scene));
         Long sceneId = scene.getId();
+        List<Robot> previousRobots = sceneMapper.findRobotBySceneId(scene.getId());
+        List<Robot> nowRobots = scene.getRobots();
+        List<Long> previousRobotsIds = Lists.newArrayList();
+        List<Long> nowRobotsIds = Lists.newArrayList();
+        if (previousRobots != null) {
+            previousRobots.forEach(robot -> previousRobotsIds.add(robot.getId()));
+        }
+        if (nowRobots != null) {
+            nowRobots.forEach(robot -> nowRobotsIds.add(robot.getId()));
+        }
+        // 需要取消充电桩的机器人编号
+        List<Long> distinctIDS = Lists.newArrayList();
+        previousRobotsIds.forEach(id->{
+            if (nowRobotsIds.indexOf(id) == -1) {
+                distinctIDS.add(id);
+            }
+        });
         //设置默认 store ID
         scene.setStoreId(STORE_ID);
         scene.setCreateTime(new Date());
         this.deleteRobotAndSceneRelations(sceneId);
-        boolean flag = bindSceneAndRobotRelations(scene);//更新场景与机器人之间的绑定关系
-
-
+        //更新场景与机器人之间的绑定关系
+        boolean flag = bindSceneAndRobotRelations(scene, distinctIDS);
         if (flag) {
             // 实际有机器人需要进行地图下发操作
             scene.setState(0);
         } else {
             scene.setState(1);
         }
-        updateSelective(scene);//更新对应的场景信息
-
+        //更新对应的场景信息
+        updateSelective(scene);
         Object taskResult = updateMap(scene);
         return taskResult;
     }
@@ -309,18 +366,24 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private static final String ROBOT_ERROR_MESSAGE = "传入的机器人信息不存在或者机器人已经被绑定到云端场景，请重新选择!";
 
     @Override
-    public boolean bindSceneAndRobotRelations(Scene scene) throws Exception {
+    public boolean bindSceneAndRobotRelations(Scene scene,  List<Long> distinctIDS) throws Exception {
         boolean flag = false;
         try {
             lock.lock();//操作开始前先上锁
             Long sceneId = scene.getId();
             List<Robot> robots = scene.getRobots();//可能为空或者为一个空数组
             List<Long> ids = new ArrayList<>();//真正需要以及将会插入到关系表中的 ID 信息数据
+            // 当前更新对应的机器人信息
+            List<Robot> currentRobots = scene.getRobots();
+            // 旧的机器人列表信息，如果取消了的话，需要解绑对应的充电桩点
             for (Robot robot : robots) {
                 if (this.sceneMapper.checkRobotLegal(robot.getId()) > 0 && this.sceneMapper.checkRobot(robot.getId()) == 0) {
                     //机器人合法并且机器人没有绑定到已有场景的条件
-                    robotService.bindChargerMapPoint(robot.getId(), null);
+//                    robotService.bindChargerMapPoint(robot.getId(), null);
                     ids.add(robot.getId());
+                }
+                if (distinctIDS != null && distinctIDS.size()!=0){
+                    distinctIDS.forEach( id -> robotService.bindChargerMapPoint(id, null) );
                 }
             }
             if (ids.size() != 0) {

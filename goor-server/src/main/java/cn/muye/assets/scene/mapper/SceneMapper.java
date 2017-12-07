@@ -6,10 +6,12 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 
+@Component
 public interface SceneMapper extends MyMapper<Scene> {
 
     int insertSceneAndMapRelations(Long sceneId, String mapSceneName);
@@ -43,4 +45,6 @@ public interface SceneMapper extends MyMapper<Scene> {
     void setSceneStateForUpload(Long sceneId, Integer state);
 
     String getRelatedMapNameBySceneId(@Param("sceneId") Long sceneId);
+
+    List<Robot> selectRobotIdsBySceneRelations(Long sceneId);
 }
