@@ -114,8 +114,9 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
             }
         } catch (Exception e) {
             LOGGER.error("解析文件出错", e);
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void createAndSave(Map<String, Object> map) {
@@ -149,6 +150,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
      * @param name
      * @return
      */
+    @Override
     public String getSearchName(String name) {
         int length = name.length();
         StringBuilder stringBuilder = new StringBuilder();
