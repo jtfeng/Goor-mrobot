@@ -8,7 +8,11 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapInfoMapper;
 import cn.muye.area.map.mapper.MapZipMapper;
@@ -19,10 +23,13 @@ import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -67,6 +74,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private MapInfoMapper mapInfoMapper;
     @Autowired
     private RobotMapZipXREFService robotMapZipXREFService;
+    @Autowired
+    private MessageSendHandleService messageSendHandleService;
     //保存添加场景与机器人之间的关系时候，需要加锁，以免事务未提交读取到脏数据
     private ReentrantLock lock = new ReentrantLock();
 
@@ -87,7 +96,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 //	    ,...]
 
     @Override
-    public String getRobotStartAssets() {
+    public Map getRobotStartAssets() {
         Map baseData = new HashMap();
         List sceneList = new ArrayList();
         // 获取所有的场景信息
@@ -100,17 +109,57 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             //设置站
             Example stationExample = new Example(Station.class);
             stationExample.createCriteria().andCondition("SCENE_ID =", scene.getId());
-            eachScene.put("station", stationMapper.selectByExample(stationExample));
+            JSONArray stationJSONArray = new JSONArray();
+            stationMapper.selectByExample(stationExample).forEach(ele -> {
+                JSONObject jsonObject = new JSONObject() {{
+                    put("id", ele.getId()); put("name", ele.getName());
+                }};
+                stationJSONArray.add(jsonObject);
+            });
+            eachScene.put("station", stationJSONArray);
             //
             //设置地图
             Example mapExample = new Example(MapInfo.class);
             mapExample.createCriteria().andCondition("SCENE_NAME =", scene.getName());
-            eachScene.put("map", mapInfoMapper.selectByExample(mapExample));
+            JSONArray mapJSONArray = new JSONArray();
+            mapInfoMapper.selectByExample(mapExample).forEach(ele -> {
+                JSONObject jsonObject = new JSONObject() {{
+                    put("id", ele.getId()); put("name", ele.getMapName()); put("aliaName", ele.getMapAlias());
+                }};
+                mapJSONArray.add(jsonObject);
+            });
+            eachScene.put("map", mapJSONArray);
             //
             sceneList.add(eachScene);
         }
         baseData.put("scene", sceneList);
-        return JSONObject.toJSONString(baseData);
+        return baseData;
+    }
+
+    @Override
+    public void replyGetRobotStartAssets(String uuid, String robotCode) {
+        Map assetData = this.getRobotStartAssets();
+        // 传回云端资源给开机管理请求的机器人    ||
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>() {{
+            put("pub_name", TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY);
+            put("uuid", uuid);
+            put("data", JSONObject.toJSONString(assetData));
+            put("error_code", "0");
+        }}))));
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setReceiverId(robotCode);
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+        try {
+            messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)

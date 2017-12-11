@@ -58,5 +58,10 @@ public interface SceneService extends BaseService<Scene> {
      * 机器人开机管理获取云端相关资源 - （场景、地图、站）- 返回一个 JSON 字符串
      * @return
      */
-    String getRobotStartAssets();
+    Map getRobotStartAssets();
+
+    /**
+     * 返回云端相关资源给机器人开机管理
+     */
+    void replyGetRobotStartAssets(String uuid, String robotCode);
 }

@@ -28,6 +28,7 @@ import cn.muye.area.map.service.MapInfoService;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
@@ -100,6 +101,9 @@ public class ConsumerCommon {
 
     @Autowired
     private FixPathService fixPathService;
+
+    @Autowired
+    private SceneService sceneService;
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -151,12 +155,14 @@ public class ConsumerCommon {
                 String uuid = jsonObjectData.getString(TopicConstants.UUID);
                 String robotCode = messageInfo.getSenderId();
                 //TODO 根据不同的pub_name或者sub_name,处理不同的业务逻辑，如下获取当前地图信息
-                if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) { //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
+                if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.PUB_SUB_NAME_ROBOT_INFO)) {
+                    //订阅应用发出的查询机器人信息(暂时只拿电量阈值和sn)请求,回执给其所需的机器人信息
                     Robot robotDb = robotService.getByCodeByXml(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
                     if (!StringUtil.isNullOrEmpty(uuid)) {
                         syncRosRobotConfig(robotDb, uuid);
                     }
-                } else if (!StringUtils.isEmpty(messageName) && (messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER) || messageName.equals(TopicConstants.VERIFY_ELEVATOR_ADMIN_NUMBER))) {
+                } else if (!StringUtils.isEmpty(messageName) && (messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)
+                        || messageName.equals(TopicConstants.VERIFY_ELEVATOR_ADMIN_NUMBER))) {
                     String jsonData = jsonObjectData.getString(TopicConstants.DATA);
                     logger.info(" verify_emplyee_number  jsonData : " + JSON.toJSONString(jsonData));
                     JSONObject employeeObj = JSON.parseObject(jsonData);
@@ -169,6 +175,11 @@ public class ConsumerCommon {
                     //PUB AND SUB NAME : check_operate_pwd
                     robotService.checkPasswordIsValid(uuid, robotCode,
                             jsonObjectData.getString("input_pwd"));
+                } else if (!StringUtils.isEmpty(messageName)  &&
+                        messageName.equals(TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY)) {
+                    // 机器人开机获取云端相关资源
+                    sceneService.replyGetRobotStartAssets(uuid, robotCode);
+
                 }
             }
         } catch (Exception e) {

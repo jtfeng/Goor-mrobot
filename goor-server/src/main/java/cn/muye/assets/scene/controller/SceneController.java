@@ -157,4 +157,9 @@ public class SceneController {
         this.sceneService.checkSceneIsNeedToBeUpdated(mapSceneName, storeId);
         return Arrays.asList("ok", "jay");
     }
+
+    @GetMapping("/getRobotStartAssets")
+    public Object getRobotStartAssets() throws Exception {
+        return sceneService.getRobotStartAssets();
+    }
 }
