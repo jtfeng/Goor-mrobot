@@ -153,6 +153,7 @@ public class ApplianceController {
                 dest.createNewFile();
             }
             file.transferTo(dest);
+            //TODO 添加数据模板校验
             boolean result = applianceService.importExcel(dest);
             return result ? AjaxResult.success("导入成功") : AjaxResult.failed("导入文件出错");
         } catch (Exception e) {
