@@ -14,6 +14,8 @@ public class Constant {
     public static final int UPLOAD_SUCCESS = 1;
     public static final int UPLOAD_FAIL = 2;
 
+    //排序索引默认值
+    public static final int INDEX_ZERO = 0;
 
     public static final String REQUEST = "request";
 

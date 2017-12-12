@@ -2,6 +2,7 @@ package cn.muye.area.station.service.impl;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationStationXREF;
+import cn.mrobot.bean.constant.Constant;
 import cn.muye.area.station.mapper.StationStationXREFMapper;
 import cn.muye.area.station.service.StationStationXREFService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class StationStationXREFServiceImpl implements StationStationXREFService 
             StationStationXREF xref = new StationStationXREF();
             xref.setOriginStationId(originStationId);
             xref.setDestinationStationId(station.getId());
-            xref.setOrderIndex(station.getOrderIndex());
+            xref.setOrderIndex(station.getOrderIndex() == null ? Constant.INDEX_ZERO : station.getOrderIndex());
             stationStationXREFMapper.insert(xref);
         });
     }
