@@ -4217,7 +4217,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
         }
         MissionItemTask mp3loadFinishTask = getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD_FINISH);
-        mp3loadFinishTask.setIgnorable(missionItemConcurrentable);
+        //独立的任务，必须要设置成不可忽略才能执行
+        mp3loadFinishTask.setIgnorable(false);
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(mp3loadFinishTask);
         loadFinishTask.setMissionItemTasks(missionItemTasks);
