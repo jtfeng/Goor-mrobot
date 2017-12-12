@@ -15,7 +15,8 @@ public enum StationType {
 
 	CENTER(1, "中心站点"),
 	NORMAL(2, "一般站点"),
-	CHARGE(3, "充电站点");
+	CHARGE(3, "充电站点"),
+	OPERATION(4, "手术室站点");
 
 	private String value;
 

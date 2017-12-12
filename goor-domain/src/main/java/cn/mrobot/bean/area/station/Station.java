@@ -99,6 +99,11 @@ public class Station extends BaseBean{
     @Transient
     private Integer orderIndex;
 
+    //是否绑定平板。目前手术室下单系统使用
+    @Transient
+    private boolean bindingState;
+
+
     public String getName() {
         return name;
     }
@@ -177,5 +182,13 @@ public class Station extends BaseBean{
 
     public void setOrderIndex(Integer orderIndex) {
         this.orderIndex = orderIndex;
+    }
+
+    public boolean isBindingState() {
+        return bindingState;
+    }
+
+    public void setBindingState(boolean bindingState) {
+        this.bindingState = bindingState;
     }
 }

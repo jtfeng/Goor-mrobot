@@ -281,5 +281,14 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     public List<Station> listStationsBySceneAndMapPointType(Long sceneId, Integer type) {
         return collectPoints(stationMapper.listStationsBySceneAndMapPointType(sceneId, type));
     }
+
+    @Override
+    public List<Station> listStationsByStationTypeCode(int stationTypeCode) {
+        Example example = new Example(Station.class);
+        example.createCriteria().andCondition("STATION_TYPE_ID=", stationTypeCode)
+                .andCondition("ACTIVE =", Constant.NORMAL);
+        example.setOrderByClause("NAME asc");
+        return stationMapper.selectByExample(example);
+    }
 }
 
