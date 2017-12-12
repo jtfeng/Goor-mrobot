@@ -114,8 +114,9 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
             }
         } catch (Exception e) {
             LOGGER.error("解析文件出错", e);
+            return false;
         }
-        return false;
+        return true;
     }
 
     private void createAndSave(Map<String, Object> map) {
@@ -130,7 +131,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         int packageTypeCode = packageType.getCode();
         //重复数据校验
         List<Appliance> applianceList = findByNameAndCode(chName, departmentTypeCode, packageTypeCode);
-        if (null != applianceList || applianceList.size() > 0){
+        if (null != applianceList && applianceList.size() > 0){
             return;
         }
         Appliance appliance = new Appliance();
@@ -149,6 +150,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
      * @param name
      * @return
      */
+    @Override
     public String getSearchName(String name) {
         int length = name.length();
         StringBuilder stringBuilder = new StringBuilder();

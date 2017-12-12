@@ -22,8 +22,6 @@ import java.util.List;
 @RestController
 public class OperationPakPasswordXREFController {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(OperationPakPasswordXREFController.class);
-
     @Autowired
     private OperationPadPasswordXREFService operationPakPasswordXREFService;
 
