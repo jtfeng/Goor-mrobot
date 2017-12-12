@@ -1887,6 +1887,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         OrderDetail currentOrderDetail = null;
         List<String> employee_num_list = null;
+        //根据orderDetailMP查找订单的orderDetail
         if (!StringUtil.isNullOrEmpty(orderDetailMP) && !str_zero.equalsIgnoreCase(orderDetailMP)){
             Long id = Long.valueOf(orderDetailMP);
             if (id != null && order.getDetailList() != null){
@@ -1898,12 +1899,20 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }
             }
         }
-        if(currentOrderDetail!= null){
-            employee_num_list = employeeService.listAvailableEmployees(currentOrderDetail.getStationId(),Constant.EMPLOYEE_TYPE_NORMAL);
+        JsonMissionItemDataLoadNoShelf json = new JsonMissionItemDataLoadNoShelf();
+        if(currentOrderDetail!= null) {
+            //判定是否需要签收
+            Boolean needSign = order.getOrderSetting().getNeedSign();
+            json.setSign_in_mode(needSign ? OrderConstant.ORDER_NEED_SIGN_YES : OrderConstant.ORDER_NEED_SIGN_NO);
+
+            //如果需要签收，则查询员工列表
+            if(needSign) {
+                //可校验的员工列表
+                List<String> employeeCodeList = employeeService.listAvailableEmployees(currentOrderDetail.getStationId(), Constant.EMPLOYEE_TYPE_NORMAL);
+                json.setEmployee_num_list(employeeCodeList);
+            }
         }
-        JsonMissionItemDataEmployee jsonMissionItemDataEmployee = new JsonMissionItemDataEmployee();
-        jsonMissionItemDataEmployee.setEmployee_num_list(employee_num_list);
-        itemTask.setData(JsonUtils.toJson(jsonMissionItemDataEmployee, new TypeToken<JsonMissionItemDataEmployee>(){}.getType()));
+        itemTask.setData(JsonUtils.toJson(json, new TypeToken<JsonMissionItemDataLoadNoShelf>(){}.getType()));
 
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_loadNoShelf);
@@ -4092,6 +4101,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //
 //        missionListTask.getMissionTasks().add(waitingTask);
 
+        logger.info("+_!!!!!!!!!!!!!!!!!!!missionItemConcurrentable!!!!!!!!!!!!" + missionItemConcurrentable);
         if (!missionItemConcurrentable){
             MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
             if (isSetOrderDetailMP){
@@ -4201,7 +4211,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        }
 //        missionListTask.getMissionTasks().add(mp3loadFinishTask);
 
-        //并行执行装载完毕语音任务
+        //并行执行装载完毕语音任务。这是一个独立的并行语音任务。不与导航任务同时执行。
         MissionTask loadFinishTask = getCommonMissionTask(order , parentName, "语音任务");
         if (isSetOrderDetailMP){
             loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
