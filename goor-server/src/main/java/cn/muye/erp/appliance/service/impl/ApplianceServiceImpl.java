@@ -46,7 +46,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
 
     private static Logger LOGGER = LoggerFactory.getLogger(ApplianceServiceImpl.class);
 
-    private static final String[] EXCEL_TITLE = {"类型", "类别", "包装类型"};
+    public static final String[] EXCEL_TITLE = {"类型", "类别", "包装类型"};
     @Autowired
     private ApplianceMapper applianceMapper;
 

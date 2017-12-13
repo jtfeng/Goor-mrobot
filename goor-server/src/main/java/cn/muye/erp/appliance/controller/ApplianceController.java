@@ -2,11 +2,13 @@ package cn.muye.erp.appliance.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.erp.appliance.Appliance;
+import cn.mrobot.utils.ExcelUtil;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.erp.appliance.service.ApplianceService;
+import cn.muye.erp.appliance.service.impl.ApplianceServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -35,6 +37,9 @@ public class ApplianceController {
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
 
+    @Value("${goor.push.http}")
+    private String DOWNLOAD_HTTP;
+
     private static String APPLIANCE_IMPORT_FILE_PATH = "appliance_import_file";
 
     @RequestMapping(value = "appliance", method = RequestMethod.POST)
@@ -56,7 +61,7 @@ public class ApplianceController {
 
         appliance.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         appliance.setCreateTime(new Date());
-        if (StringUtil.isBlank(appliance.getSearchName())){
+        if (StringUtil.isBlank(appliance.getSearchName())) {
             appliance.setSearchName(applianceService.getSearchName(appliance.getName()));
         }
         applianceService.save(appliance);
@@ -153,12 +158,49 @@ public class ApplianceController {
                 dest.createNewFile();
             }
             file.transferTo(dest);
-            //TODO 添加数据模板校验
+            //校验文件格式
+            boolean isExcelFile = ExcelUtil.isExcelFile(dest.getName());
+            if (!isExcelFile) {
+                return AjaxResult.failed("导入失败，请上传excel文件");
+            }
+            //校验excel表头
+            List<String> headerList = ExcelUtil.getTableSheetDeader(dest);
+            boolean validateResult = validateHeader(headerList);
+            if (!validateResult) {
+                return AjaxResult.failed("导入失败，数据模板不匹配，请参照模板上传数据");
+            }
             boolean result = applianceService.importExcel(dest);
             return result ? AjaxResult.success("导入成功") : AjaxResult.failed("导入文件出错");
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);
             return AjaxResult.failed("导入文件出错");
         }
+    }
+
+    /**
+     * 数据的导入模板下载
+     *
+     * @return
+     */
+    @RequestMapping(value = "appliance/import/templateDownload", method = RequestMethod.GET)
+    public AjaxResult templateDownload() {
+        String url = DOWNLOAD_HTTP + "/100/templates/器械明细-导入数据模板.xlsx";
+        LOGGER.info("额外器械数据的导入模板下载地址= " + url);
+        return AjaxResult.success(url, "操作成功");
+    }
+
+    private boolean validateHeader(List<String> headerList) {
+        String[] titles = ApplianceServiceImpl.EXCEL_TITLE;
+        if (headerList.size() != titles.length) {
+            return false;
+        }
+        for (int i = 0; i < headerList.size(); i++) {
+            if (headerList.get(i).equals(titles[i])) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -20,10 +20,14 @@ public class ExcelUtil {
 
     private static final Logger log = LoggerFactory.getLogger(ExcelUtil.class);
 
+    private static final String SUFFIX_2007 = "xls";
+    private static final String SUFFIX_2013 = "xlsx";
+
     /**
      * 读取excel表中的数据
-     *
+     * <p>
      * map的key为工作表名称，list为工作表中列名和数据的键值对
+     *
      * @param file
      * @return
      */
@@ -34,6 +38,47 @@ public class ExcelUtil {
         return getExcelData(file);
     }
 
+    /**
+     * 读取excel表的表头，验证excel模板
+     *
+     * @param file
+     * @return
+     */
+    public static List<String> getTableSheetDeader(File file) {
+        if (!file.exists()) {
+            return null;
+        }
+        List<String> headerList = new ArrayList<>();
+        Row headerRow = getTableSheetDeaderRow(file);
+        for (int i = 0; i < headerRow.getLastCellNum(); i++) {
+            headerList.add(headerRow.getCell(i).toString());
+        }
+        return headerList;
+    }
+
+    public static boolean isExcelFile(String fileName) {
+        return fileName.endsWith(SUFFIX_2007) || fileName.endsWith(SUFFIX_2013);
+    }
+
+    private static Row getTableSheetDeaderRow(File file) {
+        try {
+            Workbook workbook = WorkbookFactory.create(file);
+            if (null == workbook) {
+                log.error("未知文件格式");
+                return null;
+            }
+            //获取工作表数量
+            int sheetNumber = workbook.getNumberOfSheets();
+            for (int i = 0; i < sheetNumber; i++) {
+                Sheet sheet = workbook.getSheetAt(i);
+                return sheet.getRow(0);
+            }
+        } catch (Exception e) {
+            log.error("解析文件出错", e);
+        }
+        return null;
+    }
+
     private static Map<String, List<Map<String, Object>>> getExcelData(File file) {
         try {
             Workbook workbook = WorkbookFactory.create(file);
@@ -42,6 +87,7 @@ public class ExcelUtil {
                 return null;
             }
             Map<String, List<Map<String, Object>>> result = new HashMap<String, List<Map<String, Object>>>();
+            //获取工作表数量
             int sheetNumber = workbook.getNumberOfSheets();
             for (int i = 0; i < sheetNumber; i++) {
                 List<Map<String, Object>> sheet_data = new ArrayList<Map<String, Object>>();
@@ -49,14 +95,17 @@ public class ExcelUtil {
                 if (ifSheetNullOrEmpty(sheet)) {
                     continue;
                 }
+                //工作表名称
                 String sheet_name = workbook.getSheetName(i);
-                System.out.println(sheet.getLastRowNum());
-                for (int j = 1; j <= sheet.getLastRowNum(); j++) {
+                int num = sheet.getLastRowNum();
+                System.out.println("工作表" + sheet_name + " 数据有" + num + "行");
+                for (int j = 1; j <= num; j++) {
                     Row row = sheet.getRow(j);
                     if (ifRowNullOrEmpty(row)) {
                         continue;
                     }
                     Map<String, Object> record = new HashMap<String, Object>();
+                    //获取表头
                     Row first = sheet.getRow(0);
                     getRowData(row, record, first);
                     sheet_data.add(record);
