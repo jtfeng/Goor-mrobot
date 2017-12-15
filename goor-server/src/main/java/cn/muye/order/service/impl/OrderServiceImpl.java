@@ -6,6 +6,7 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
@@ -17,6 +18,7 @@ import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.area.station.mapper.StationRobotXREFMapper;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
@@ -83,6 +85,8 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     private StationService stationService;
     @Autowired
     private ApplyOrderService applyOrderService;
+    @Autowired
+    private SceneService sceneService;
 
     @Override
     public void saveWaitOrder(Order order) {
@@ -169,6 +173,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             Station startStation = stationService.findById(getOrder.getStartStation().getId());
             if(startStation !=null){
                 getOrder.setResscene(startStation.getResscene());
+            }
+            if(getOrder.getScene() != null) {
+                getOrder.setScene(sceneService.findById(getOrder.getScene().getId()));
             }
         }
         return getOrder;
