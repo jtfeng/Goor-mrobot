@@ -6,27 +6,36 @@ import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotChargerMapPointXREF;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
+import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapInfoMapper;
 import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.RobotMapZipXREFService;
 import cn.muye.area.station.mapper.StationMapper;
+import cn.muye.area.station.mapper.StationRobotXREFMapper;
+import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.mapper.RobotMapper;
+import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.log.base.LogInfoUtils;
 import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -71,11 +80,17 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Autowired
     private StationMapper stationMapper;
     @Autowired
+    private StationService stationService;
+    @Autowired
     private MapInfoMapper mapInfoMapper;
+    @Autowired
+    private StationRobotXREFMapper stationRobotXREFMapper;
     @Autowired
     private RobotMapZipXREFService robotMapZipXREFService;
     @Autowired
     private MessageSendHandleService messageSendHandleService;
+    @Autowired
+    private RobotChargerMapPointXREFService robotChargerMapPointXREFService;
     //保存添加场景与机器人之间的关系时候，需要加锁，以免事务未提交读取到脏数据
     private ReentrantLock lock = new ReentrantLock();
 
@@ -96,16 +111,18 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 //	    ,...]
 
     @Override
-    public Map getRobotStartAssets() {
-        Map baseData = new HashMap();
-        List sceneList = new ArrayList();
+    public Map getRobotStartAssets(String robotCode) {
+        Map<String, Object> baseData = new HashMap<String, Object>(2);
+        List<Map<String, Object>> sceneList = Lists.newArrayList();
         // 获取所有的场景信息
         List<Scene> scenes = sceneMapper.selectAll();
         for (Scene scene : scenes) {
             //依次遍历场景并且获取场景下对应的地图和站信息
-            Map eachScene = new HashMap();
+            Map<String, Object> eachScene = new HashMap<String, Object>(5);
+            //name:’',//工控名称    alias:'', //中文别名
             eachScene.put("id", scene.getId());
-            eachScene.put("name", scene.getName());
+            eachScene.put("name", sceneMapper.getRelatedMapNameBySceneId(scene.getId()));
+            eachScene.put("alias", scene.getName());
             //设置站
             Example stationExample = new Example(Station.class);
             stationExample.createCriteria().andCondition("SCENE_ID =", scene.getId());
@@ -124,21 +141,84 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             JSONArray mapJSONArray = new JSONArray();
             mapInfoMapper.selectByExample(mapExample).forEach(ele -> {
                 JSONObject jsonObject = new JSONObject() {{
-                    put("id", ele.getId()); put("name", ele.getMapName()); put("aliaName", ele.getMapAlias());
+                    //name:’',//工控名称    alias:'', //中文别名
+                    put("id", ele.getId());
+                    put("name", ele.getMapName());
+                    put("alias", ele.getMapAlias());
                 }};
                 mapJSONArray.add(jsonObject);
             });
             eachScene.put("map", mapJSONArray);
             //
+            // 设置充电桩
+            List<MapPoint> mapPointListDb = sceneMapper.findMapPointBySceneId(scene.getId(),
+                    SearchConstants.FAKE_MERCHANT_STORE_ID, 3L);
+            eachScene.put("chargePoint", mapPointListDb);
+            //
             sceneList.add(eachScene);
         }
+        // (当前云端中存储的所有地图、站、充电桩等信息)
         baseData.put("scene", sceneList);
+        // (查询并且返回当前指定机器人所绑定的资源关系)
+        JSONObject robotAssets = new JSONObject();
+        // 第一部分：绑定的站
+        robotAssets.put("station", stationService.findStationsByRobotCode(robotCode));
+        // 第二部分：绑定的充电桩
+        robotAssets.put("chargePoint", robotService.getChargerMapPointByRobotCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID));
+        Scene currentScene = sceneMapper.findSceneByRobotCode(robotCode).get(0);
+        JSONObject currentSceneObject = new JSONObject();
+        currentSceneObject.put("id", currentScene.getId());
+        currentSceneObject.put("name", sceneMapper.getRelatedMapNameBySceneId(currentScene.getId()));
+        currentSceneObject.put("alias", currentScene.getName());
+        // 第三部分：绑定关系绑定的场景信息
+        robotAssets.put("scene", currentSceneObject);
+        baseData.put("robotAssets", robotAssets);
         return baseData;
+    }
+
+    /**
+     * 更新机器人与资源的绑定关系
+     * @param latestRobotAssets 最新反馈的资源绑定关系
+     */
+    @Override
+    public void updateGetRobotStartAssets(JSONObject latestRobotAssets) {
+        // 机器人编号
+        String robotCode = latestRobotAssets.getString("robotCode");
+        // 站 ID 编号
+        JSONArray stationIds = latestRobotAssets.getJSONArray("stationIds");
+        JSONArray chargerMapPointIds = latestRobotAssets.getJSONArray("chargerMapPointIds");
+        // 重新更新机器人与站之间的绑定关系
+        for (int i = 0 ; i < stationIds.size() ; i++) {
+            Long stationId = stationIds.getLong(i);
+            // 删除初始机器人与站点的绑定关系
+            stationMapper.deleteStationWithRobotRelationByRobotCode(robotCode);
+            // 添加新的机器人与站点之间的绑定关系
+            StationRobotXREF stationRobotXREF = new StationRobotXREF() {
+                {
+                    setRobotId(robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId());
+                    setStationId(stationId);
+                }};
+            stationRobotXREFMapper.insert(stationRobotXREF);
+        }
+        // 重新更新机器人与充电桩之间的绑定关系
+        for (int i = 0 ; i < chargerMapPointIds.size() ; i++) {
+            Long robotId = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId();
+            Long chargerMapPointId = chargerMapPointIds.getLong(i);
+            // 删除初始机器人与充电桩点的绑定关系
+            robotChargerMapPointXREFService.deleteByRobotId(robotId);
+            // 添加新的机器人与充电桩点之间的绑定关系
+            RobotChargerMapPointXREF robotChargerMapPointXREF = new RobotChargerMapPointXREF(){{
+                setRobotId(robotId);
+                setChargerMapPointId(chargerMapPointId);
+            }};
+            robotChargerMapPointXREFService.save(robotChargerMapPointXREF);
+        }
     }
 
     @Override
     public void replyGetRobotStartAssets(String uuid, String robotCode) {
-        Map assetData = this.getRobotStartAssets();
+        LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, "机器人开机获取云端资源 - 开始");
+        Map assetData = this.getRobotStartAssets(robotCode);
         // 传回云端资源给开机管理请求的机器人    ||
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName(TopicConstants.AGENT_PUB);
@@ -157,8 +237,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         messageInfo.setMessageText(JSON.toJSONString(commonInfo));
         try {
             messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
+            LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, "机器人开机获取云端资源 - 结束");
         } catch (Exception e) {
             e.printStackTrace();
+            LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, e.getMessage());
         }
     }
 

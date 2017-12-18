@@ -14,4 +14,6 @@ public interface StationRobotXREFService {
     int deleteByStationId(Long id);
 
     List<StationRobotXREF> getByStationId(Long id);
+
+    List<StationRobotXREF> getByRobotId(Long id);
 }

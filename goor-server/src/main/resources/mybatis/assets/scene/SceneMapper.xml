@@ -2,6 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.muye.assets.scene.mapper.SceneMapper">
 
+    <resultMap id="SceneSimpleMap" type="cn.mrobot.bean.assets.scene.Scene">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+    </resultMap>
     <resultMap id="RobotSimpleMap" type="cn.mrobot.bean.assets.robot.Robot">
         <result property="id" column="ID"/>
         <result property="name" column="NAME"/>
@@ -41,6 +45,12 @@
         <result property="ICPointType" column="IC_POINT_TYPE"/>
         <result property="cloudMapPointTypeId" column="CLOUD_POINT_TYPE_ID"/>
     </resultMap>
+    <select id="findSceneByRobotCode" resultMap="SceneSimpleMap" parameterType="java.lang.String">
+        SELECT DISTINCT s.ID, s.NAME
+        FROM SCENES_ROBOTS_RELATIONS r LEFT JOIN AS_SCENE s
+                ON s.ID = r.SCENE_ID
+            LEFT JOIN AS_ROBOT R2 ON r.ROBOT_ID = R2.ID WHERE R2.CODE = #{0}
+    </select>
     <select id="findRobotBySceneId" resultMap="RobotSimpleMap" parameterType="java.lang.Long">
         SELECT
             robot.ID,
@@ -86,6 +96,11 @@
         WHERE i.SCENE_NAME = #{param1} AND i.STORE_ID = #{param2}
     </select>
 
+    <delete id="deleteRobotAndSceneRelations" parameterType="java.lang.Long">
+        DELETE FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
+    </delete>
+
+    <!-- 根据机器人编号删除机器人与场景的对应关系 -->
     <delete id="deleteRobotAndSceneRelations" parameterType="java.lang.Long">
         DELETE FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
     </delete>

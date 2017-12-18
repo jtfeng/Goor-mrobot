@@ -41,4 +41,12 @@ public class StationRobotXREFServiceImpl implements StationRobotXREFService {
         List<StationRobotXREF> list = stationRobotXREFMapper.selectByExample(example);
         return list;
     }
+
+    @Override
+    public List<StationRobotXREF> getByRobotId(Long id) {
+        Example example = new Example(StationRobotXREF.class);
+        Example.Criteria criteria = example.createCriteria();
+        criteria.andCondition("ROBOT_ID=", id);
+        return stationRobotXREFMapper.selectByExample(example);
+    }
 }

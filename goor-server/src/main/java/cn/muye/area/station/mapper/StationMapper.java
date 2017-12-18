@@ -31,5 +31,11 @@ public interface StationMapper  extends MyMapper<Station> {
 	List<Station> findStationsByRobotCode(String robotCode);
 
 	List<Station> listStationsBySceneAndMapPointType(@Param("sceneId")Long sceneId, @Param("type")Integer type);
+
+	/**
+	 * 删除原始机器人和站之间的绑定关系
+	 * @param robotCode
+	 */
+	void deleteStationWithRobotRelationByRobotCode(String robotCode);
 }
 

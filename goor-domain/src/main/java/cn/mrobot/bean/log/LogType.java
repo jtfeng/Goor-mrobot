@@ -40,7 +40,8 @@ public enum LogType{
 	WARNING_PEOPLE_ON_CAR("WARNING_PEOPLE_ON_CAR", "人搭乘小车警告"),  //人搭乘小车警告
 	WARNING_BUMP("WARNING_BUMP", "颠簸警告"),  //颠簸警告
 	WARNING_SHOPPING_CART_TIMEOUT("WARNING_SHOPPING_CART_TIMEOUT", "超时无人处理购物车报警"),  //超时无人处理购物车报警
-	STATION_AVAILABLE_ROBOT_COUNT("STATION_AVAILABLE_ROBOT_COUNT", "获取站可用机器人");  //超时无人处理购物车报警
+	STATION_AVAILABLE_ROBOT_COUNT("STATION_AVAILABLE_ROBOT_COUNT", "获取站可用机器人"),  //超时无人处理购物车报警
+	BOOT_GET_ASSETS("BOOT_GET_ASSETS", "机器人开机获取云端的相关资源");
 
 	private String name;
 	private String value;

@@ -47,4 +47,6 @@ public interface SceneMapper extends MyMapper<Scene> {
     String getRelatedMapNameBySceneId(@Param("sceneId") Long sceneId);
 
     List<Robot> selectRobotIdsBySceneRelations(Long sceneId);
+
+    List<Scene> findSceneByRobotCode(String robotCode);
 }

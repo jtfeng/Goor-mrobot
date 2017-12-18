@@ -179,7 +179,6 @@ public class ConsumerCommon {
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY)) {
                     // 机器人开机获取云端相关资源
                     sceneService.replyGetRobotStartAssets(uuid, robotCode);
-
                 }
             }
         } catch (Exception e) {

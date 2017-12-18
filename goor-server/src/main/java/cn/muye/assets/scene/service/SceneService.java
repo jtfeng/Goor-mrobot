@@ -4,6 +4,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
+import com.alibaba.fastjson.JSONObject;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -58,10 +59,16 @@ public interface SceneService extends BaseService<Scene> {
      * 机器人开机管理获取云端相关资源 - （场景、地图、站）- 返回一个 JSON 字符串
      * @return
      */
-    Map getRobotStartAssets();
+    Map getRobotStartAssets(String robotCode);
 
     /**
      * 返回云端相关资源给机器人开机管理
      */
     void replyGetRobotStartAssets(String uuid, String robotCode);
+
+    /**
+     * 根据反馈更新数据关系
+     * @param latestRobotAssets
+     */
+    void updateGetRobotStartAssets(JSONObject latestRobotAssets);
 }
