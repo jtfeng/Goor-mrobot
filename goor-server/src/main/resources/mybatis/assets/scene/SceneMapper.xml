@@ -100,11 +100,6 @@
         DELETE FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
     </delete>
 
-    <!-- 根据机器人编号删除机器人与场景的对应关系 -->
-    <delete id="deleteRobotAndSceneRelations" parameterType="java.lang.Long">
-        DELETE FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
-    </delete>
-
     <select id="selectRobotIdsBySceneRelations" parameterType="java.lang.Long" resultMap="RobotSimpleMap">
         SELECT ROBOT_ID as id FROM SCENES_ROBOTS_RELATIONS WHERE SCENE_ID = #{0}
     </select>

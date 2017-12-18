@@ -158,8 +158,8 @@ public class SceneController {
         return Arrays.asList("ok", "jay");
     }
 
-    @GetMapping("/getRobotStartAssets")
-    public Object getRobotStartAssets() throws Exception {
-        return sceneService.getRobotStartAssets();
+    @GetMapping("/getRobotStartAssets/{robotCode}")
+    public Object getRobotStartAssets(@PathVariable("robotCode") String robotCode) throws Exception {
+        return sceneService.getRobotStartAssets(robotCode);
     }
 }
