@@ -356,7 +356,7 @@ public class MapInfoServiceImpl implements MapInfoService {
     }
 
     private String parseLocalPath(String localPath) {
-        if (StringUtil.isNullOrEmpty(localPath)){
+        if (StringUtil.isBlank(localPath)){
             return "";
         }
         //将文件路径封装成http路径

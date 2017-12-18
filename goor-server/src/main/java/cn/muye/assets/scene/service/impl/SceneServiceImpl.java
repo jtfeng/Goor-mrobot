@@ -17,6 +17,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.enums.ModuleEnums;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.mapper.MapInfoMapper;
 import cn.muye.area.map.mapper.MapZipMapper;
@@ -365,10 +366,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         if (mapInfos != null && mapInfos.size() != 0) {
             scene.setMapSceneName(mapInfos.get(0).getSceneName());
             mapInfos.forEach(mapInfo -> {
-                if (mapInfo.getPngImageLocalPath() != null) {
+                if (StringUtil.isNotBlank(mapInfo.getPngImageLocalPath())) {
                     mapInfo.setPngImageHttpPath(DOWNLOAD_HTTP + mapInfo.getPngImageLocalPath());
                 }
-                if (mapInfo.getPngDesigned() != null) {
+                if (StringUtil.isNotBlank(mapInfo.getPngDesigned())) {
                     mapInfo.setPngDesignedHttpPath(DOWNLOAD_HTTP + mapInfo.getPngDesigned());
                 }
             });
