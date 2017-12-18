@@ -1,9 +1,11 @@
 package cn.mrobot.bean.erp.appliance;
 
 import cn.mrobot.bean.base.BaseBean;
+import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.Date;
 
 /**
  * @author Jelynn
@@ -21,13 +23,18 @@ public class Appliance extends BaseBean{
     //科室类别 （一级分类）
     private int departmentTypeCode;
 
-    private int packageTypeCode;
+    private Long packageTypeId;
+
+    private int deleteFlag;   //数据库删除状态 0 :正常 1：删除
+
+    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
+    private Date deleteTime;   //数据库删除时间
 
     @Transient
-    private DepartmentType departmentType;
+    private ApplianceDepartmentType departmentType;
 
     @Transient
-    private PackageType packageType;
+    private AppliancePackageType packageType;
 
     public String getName() {
         return name;
@@ -53,27 +60,43 @@ public class Appliance extends BaseBean{
         this.departmentTypeCode = departmentTypeCode;
     }
 
-    public int getPackageTypeCode() {
-        return packageTypeCode;
+    public Long getPackageTypeId() {
+        return packageTypeId;
     }
 
-    public void setPackageTypeCode(int packageTypeCode) {
-        this.packageTypeCode = packageTypeCode;
+    public void setPackageTypeId(Long packageTypeId) {
+        this.packageTypeId = packageTypeId;
     }
 
-    public DepartmentType getDepartmentType() {
+    public ApplianceDepartmentType getDepartmentType() {
         return departmentType;
     }
 
-    public void setDepartmentType(DepartmentType departmentType) {
+    public void setDepartmentType(ApplianceDepartmentType departmentType) {
         this.departmentType = departmentType;
     }
 
-    public PackageType getPackageType() {
+    public AppliancePackageType getPackageType() {
         return packageType;
     }
 
-    public void setPackageType(PackageType packageType) {
+    public void setPackageType(AppliancePackageType packageType) {
         this.packageType = packageType;
+    }
+
+    public int getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(int deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public Date getDeleteTime() {
+        return deleteTime;
+    }
+
+    public void setDeleteTime(Date deleteTime) {
+        this.deleteTime = deleteTime;
     }
 }

@@ -11,13 +11,14 @@
         <result property="name" column="NAME"/>
         <result property="searchName" column="SEARCH_NAME"/>
         <result property="departmentTypeCode" column="DEPARTMENT_TYPE_CODE"/>
-        <result property="packageTypeCode" column="PACKAGE_TYPE_CODE"/>
+        <result property="packageTypeId" column="PACKAGE_TYPE_ID"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
         <association property="departmentType" column="DEPARTMENT_TYPE_CODE"
-                     javaType="cn.mrobot.bean.erp.appliance.DepartmentType"
-                     select="getDepartmentType"/>
-        <association property="packageType" column="PACKAGE_TYPE_CODE"
-                     javaType="cn.mrobot.bean.erp.appliance.PackageType"
-                     select="getPackageType"/>
+                     javaType="cn.mrobot.bean.erp.appliance.ApplianceDepartmentType"
+                     select="cn.muye.erp.appliance.mapper.ApplianceDepartmentTypeMapper.findByCode"/>
+        <association property="packageType" column="PACKAGE_TYPE_ID"
+                     javaType="cn.mrobot.bean.erp.appliance.AppliancePackageType"
+                     select="cn.muye.erp.appliance.mapper.AppliancePackageTypeMapper.findTypeById"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -28,22 +29,15 @@
     NAME,
     SEARCH_NAME,
     DEPARTMENT_TYPE_CODE,
-    PACKAGE_TYPE_CODE
+    PACKAGE_TYPE_ID,
+    DELETE_FLAG
   </sql>
 
-
-    <select id="getDepartmentType" parameterType="int" resultType="cn.mrobot.bean.erp.appliance.DepartmentType">
-      SELECT * FROM ERP_DEPARTMENT_TYPE WHERE CODE = #{DEPARTMENT_TYPE_CODE};
-    </select>
-
-    <select id="getPackageType" parameterType="int" resultType="cn.mrobot.bean.erp.appliance.PackageType">
-      SELECT * FROM ERP_PACKAGE_TYPE WHERE CODE = #{PACKAGE_TYPE_CODE};
-    </select>
 
     <select id="findApplianceById" resultMap="appliance">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE ID = #{id}
+        FROM ERP_APPLIANCE WHERE ID = #{id} AND DELETE_FLAG = 0
     </select>
 
     <select id="listApplianceByCondition" resultMap="appliance">
@@ -61,11 +55,12 @@
                 AND a.DEPARTMENT_TYPE_CODE = #{departmentType}
             </if>
             <if test="packageType != null">
-                AND a.PACKAGE_TYPE_CODE = #{packageType}
+                AND a.PACKAGE_TYPE_ID = #{packageType}
             </if>
             <if test="storeId != null">
                 AND a.STORE_ID = #{storeId}
             </if>
+            AND DELETE_FLAG = 0
         </where>
         ORDER BY CREATE_TIME DESC
     </select>
@@ -78,28 +73,22 @@
             <if test="storeId != null">
                 AND STORE_ID = #{storeId}
             </if>
+            AND DELETE_FLAG = 0
         </where>
         ORDER BY CREATE_TIME DESC
     </select>
 
-    <select id="findByNameAndCode" resultMap="appliance">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE NAME = #{name} AND DEPARTMENT_TYPE_CODE = #{departmentTypeCode} AND PACKAGE_TYPE_CODE = #{packageTypeCode}
-    </select>
-
-
     <select id="listBySearchNameTwo" resultMap="appliance">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('',#{searchName},'%')
+        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('',#{searchName},'%') AND DELETE_FLAG = 0
         ORDER BY CREATE_TIME DESC
     </select>
 
     <select id="listBySearchNameThree" resultMap="appliance">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('%',#{searchName},'%')
+        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('%',#{searchName},'%') AND DELETE_FLAG = 0
         ORDER BY CREATE_TIME DESC
     </select>
 </mapper>

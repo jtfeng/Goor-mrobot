@@ -1,25 +1,28 @@
 package cn.muye.erp.appliance.service.impl;
 
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.erp.appliance.Appliance;
-import cn.mrobot.bean.erp.appliance.DepartmentType;
-import cn.mrobot.bean.erp.appliance.PackageType;
+import cn.mrobot.bean.erp.appliance.ApplianceDepartmentType;
+import cn.mrobot.bean.erp.appliance.AppliancePackageType;
 import cn.mrobot.utils.ExcelUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.erp.appliance.mapper.ApplianceDepartmentTypeMapper;
 import cn.muye.erp.appliance.mapper.ApplianceMapper;
-import cn.muye.erp.appliance.mapper.DepartmentTypeMapper;
-import cn.muye.erp.appliance.mapper.PackageTypeMapper;
+import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.appliance.service.ApplianceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import net.sourceforge.pinyin4j.PinyinHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
 import java.util.Date;
@@ -38,9 +41,9 @@ import java.util.concurrent.Executors;
 public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements ApplianceService {
 
     @Autowired
-    private DepartmentTypeMapper departmentTypeMapper;
+    private ApplianceDepartmentTypeMapper applianceDepartmentTypeMapper;
     @Autowired
-    private PackageTypeMapper packageTypeMapper;
+    private AppliancePackageTypeService appliancePackageTypeService;
 
     private static final Logger logger = LoggerFactory.getLogger(ApplianceServiceImpl.class);
 
@@ -68,7 +71,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
         String queryObj = whereRequest.getQueryObj();
         if (StringUtil.isNotBlank(queryObj)) {
-            JSONObject map = JSON.parseObject(whereRequest.getQueryObj());
+            JSONObject map = JSON.parseObject(queryObj);
             String name = map.getString(SearchConstants.SEARCH_NAME);
             String searchName = map.getString(SearchConstants.SEARCH_SEARCH_NAME);
             String departmentType = map.getString(SearchConstants.SEARCH_DEPARTMENT_TYPE);
@@ -89,8 +92,25 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     }
 
     @Override
-    public List<Appliance> findByNameAndCode(String name, int departmentTypeCode, int packageTypeCode) {
-        return applianceMapper.findByNameAndCode(name, departmentTypeCode, packageTypeCode);
+    public List<Appliance> findByNameAndCode(String name, int departmentTypeCode, Long packageTypeId) {
+        if (StringUtil.isBlank(name) || departmentTypeCode == 0 || null == packageTypeId){
+            return Lists.newArrayList();
+        }
+        Example example = new Example(Appliance.class);
+        example.createCriteria().andCondition("DEPARTMENT_TYPE_CODE=" + departmentTypeCode)
+                .andCondition("NAME='"+name+"'")
+                .andCondition("PACKAGE_TYPE_ID="+packageTypeId)
+                .andCondition("DELETE_FLAG="+Constant.NORMAL);
+        return applianceMapper.selectByExample(example);
+    }
+
+    @Override
+    public int removeById(Long id) {
+        Appliance appliance = new Appliance();
+        appliance.setId(id);
+        appliance.setDeleteFlag(Constant.DELETE);
+        appliance.setDeleteTime(new Date());
+        return applianceMapper.updateByPrimaryKeySelective(appliance);
     }
 
     private boolean analysisExcel(File file) {
@@ -123,22 +143,22 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         String chName = map.get(EXCEL_TITLE[0]).toString();
         String departmentTypeName = map.get(EXCEL_TITLE[1]).toString();
         logger.info("departmentTypeName = " + departmentTypeName);
-        DepartmentType departmentType = departmentTypeMapper.findByName(departmentTypeName);
+        ApplianceDepartmentType departmentType = applianceDepartmentTypeMapper.findByName(departmentTypeName);
         int departmentTypeCode = departmentType.getCode();
         String packageTypeName = map.get(EXCEL_TITLE[2]).toString();
-        logger.info("packageTypeName = " + departmentTypeName);
-        PackageType packageType = packageTypeMapper.findByName(packageTypeName);
-        int packageTypeCode = packageType.getCode();
+        logger.info("packageTypeName = " + packageTypeName);
+        AppliancePackageType packageType = appliancePackageTypeService.findByName(packageTypeName);
+        Long packageTypeCode = packageType.getId();
         //重复数据校验
         List<Appliance> applianceList = findByNameAndCode(chName, departmentTypeCode, packageTypeCode);
-        if (null != applianceList && applianceList.size() > 0){
+        if (null != applianceList && applianceList.size() > 0) {
             return;
         }
         Appliance appliance = new Appliance();
         appliance.setName(chName);
         appliance.setSearchName(getSearchName(chName));
         appliance.setDepartmentTypeCode(departmentTypeCode);
-        appliance.setPackageTypeCode(packageTypeCode);
+        appliance.setPackageTypeId(packageTypeCode);
         appliance.setCreateTime(new Date());
         appliance.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         save(appliance);

@@ -23,5 +23,13 @@ public interface ApplianceService extends BaseService<Appliance> {
 
     List<Appliance> listBySearchName(String searchName, Long fakeMerchantStoreId);
 
-    List<Appliance> findByNameAndCode(String name, int departmentTypeCode, int packageTypeCode);
+    List<Appliance> findByNameAndCode(String name, int departmentTypeCode, Long packageTypeId);
+
+    /**
+     * 假删除，置DeleteFlag为0
+     * @param id
+     * @return
+     */
+    int removeById(Long id);
+
 }

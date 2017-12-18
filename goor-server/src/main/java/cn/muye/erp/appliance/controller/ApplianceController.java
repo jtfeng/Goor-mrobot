@@ -49,12 +49,12 @@ public class ApplianceController {
         }
         if (StringUtil.isBlank(appliance.getName()) ||
                 appliance.getDepartmentTypeCode() == 0 ||
-                appliance.getPackageTypeCode() == 0) {
+                appliance.getPackageTypeId() == null) {
             return AjaxResult.failed("保存对象关键属性不能为空");
         }
         //根据name,departmentTypeCode,packageTypeCode进行重复校验
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),
-                appliance.getDepartmentTypeCode(), appliance.getPackageTypeCode());
+                appliance.getDepartmentTypeCode(), appliance.getPackageTypeId());
         if (null != applianceList && applianceList.size() > 0) {
             return AjaxResult.failed("添加失败，同名称，类别，包装类型数据已经存在");
         }
@@ -81,14 +81,15 @@ public class ApplianceController {
         }
         //根据name,departmentTypeCode,packageTypeCode进行重复校验
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),
-                appliance.getDepartmentTypeCode(), appliance.getPackageTypeCode());
+                appliance.getDepartmentTypeCode(), appliance.getPackageTypeId());
         if (null != applianceList && applianceList.size() > 0) {
             return AjaxResult.failed("修改失败，同名称，类别，包装类型数据已经存在");
         }
 
         Appliance applianceDB = applianceService.findApplianceById(appliance.getId());
+        String name = appliance.getName();
         applianceDB.setName(appliance.getName());
-        applianceDB.setSearchName(appliance.getSearchName());
+        applianceDB.setSearchName(applianceService.getSearchName(name));
         applianceDB.setDepartmentType(appliance.getDepartmentType());
         applianceDB.setPackageType(appliance.getPackageType());
         applianceDB.setCreateTime(new Date());
@@ -110,7 +111,7 @@ public class ApplianceController {
         if (null == id) {
             return AjaxResult.failed("ID不能为空");
         }
-        applianceService.deleteById(id);
+        applianceService.removeById(id);
         return AjaxResult.success("删除成功");
     }
 

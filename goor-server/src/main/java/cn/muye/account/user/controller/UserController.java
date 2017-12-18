@@ -10,8 +10,8 @@ import cn.mrobot.bean.assets.door.DoorType;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.bean.erp.appliance.DepartmentType;
-import cn.mrobot.bean.erp.appliance.PackageType;
+import cn.mrobot.bean.erp.appliance.ApplianceDepartmentType;
+import cn.mrobot.bean.erp.appliance.AppliancePackageType;
 import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
@@ -31,8 +31,8 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.erp.appliance.service.DepartmentTypeService;
-import cn.muye.erp.appliance.service.PackageTypeService;
+import cn.muye.erp.appliance.service.ApplianceDepartmentTypeService;
+import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
@@ -558,9 +558,9 @@ public class UserController implements ApplicationContextAware{
 
     public static List<Map> getApplianceDepartmentTypeList() {
         List<Map> resultList = new ArrayList<Map>();
-        DepartmentTypeService departmentTypeService = applicationContext.getBean(DepartmentTypeService.class);
-        List<DepartmentType>  departmentTypeList = departmentTypeService.listAll();
-        for (DepartmentType departmentType : departmentTypeList) {
+        ApplianceDepartmentTypeService applianceDepartmentTypeService = applicationContext.getBean(ApplianceDepartmentTypeService.class);
+        List<ApplianceDepartmentType>  departmentTypeList = applianceDepartmentTypeService.listAll();
+        for (ApplianceDepartmentType departmentType : departmentTypeList) {
             Map result = new HashMap<String,Object>();
             result.put("name",departmentType.getName());
             result.put("value",departmentType.getCode());
@@ -571,12 +571,12 @@ public class UserController implements ApplicationContextAware{
 
     private static List<Map> getAppliancePackageTypeList() {
         List<Map> resultList = new ArrayList<Map>();
-        PackageTypeService packageTypeService = applicationContext.getBean(PackageTypeService.class);
-        List<PackageType> packageTypeList = packageTypeService.listAll();
-        for (PackageType packageType : packageTypeList) {
+        AppliancePackageTypeService appliancePackageTypeService = applicationContext.getBean(AppliancePackageTypeService.class);
+        List<AppliancePackageType> packageTypeList = appliancePackageTypeService.listAll();
+        for (AppliancePackageType packageType : packageTypeList) {
             Map result = new HashMap<String,Object>();
             result.put("name",packageType.getName());
-            result.put("value",packageType.getCode());
+            result.put("value",packageType.getId());
             resultList.add(result) ;
         }
         return resultList;

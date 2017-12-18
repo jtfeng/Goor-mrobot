@@ -3,11 +3,12 @@ package cn.mrobot.bean.erp.appliance;
 import javax.persistence.Table;
 
 /**
+ *
  * @author Jelynn
  * @date 2017/12/1
  */
-@Table(name = "ERP_PACKAGE_TYPE")
-public class PackageType{
+@Table(name = "ERP_APPLIANCE_DEPARTMENT_TYPE")
+public class ApplianceDepartmentType {
 
     private int code;
 
