@@ -2,6 +2,7 @@ package cn.mrobot.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import net.sourceforge.pinyin4j.PinyinHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -496,5 +497,36 @@ public class StringUtil extends StringUtils{
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 根据名称获取searchName()
+     * 去除名称中的符号，保留数字，字母，汉字首字母大写，最终返回结果为数字+大写字母
+     * @param name
+     * @return
+     */
+    public static String getSearchName(String name) {
+        int length = name.length();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            char ch = name.charAt(i);
+            String chStr = String.valueOf(ch);
+            if (StringUtil.isNumeric(chStr)) {
+                stringBuilder.append(chStr);
+            } else if (StringUtil.isCharacter(chStr)) {
+                stringBuilder.append(chStr.toUpperCase());
+            } else if (StringUtil.isContainChinese(chStr)) {
+                String[] pinyins = PinyinHelper.toHanyuPinyinStringArray(name.charAt(i));
+                if (null != pinyins) {
+                    //中文多音字默认取第一个拼音
+                    String pinyin = pinyins[0];
+                    char pinyinCh = pinyin.charAt(0);
+                    stringBuilder.append(String.valueOf(pinyinCh).toUpperCase());
+                }
+            } else {
+                continue;
+            }
+        }
+        return stringBuilder.toString();
     }
 }
