@@ -113,97 +113,117 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Override
     public Map getRobotStartAssets(String robotCode) {
+        // 存放查询结果
         Map<String, Object> baseData = new HashMap<String, Object>(2);
+        // 存放全部场景的详细信息
         List<Map<String, Object>> sceneList = Lists.newArrayList();
-        // 获取所有的场景信息
+        // 获取全部场景信息
         List<Scene> scenes = sceneMapper.selectAll();
         for (Scene scene : scenes) {
-            //依次遍历场景并且获取场景下对应的地图和站信息
+            // 遍历每一个场景，查询归属的子内容，定义一个容器存放对应的信息
             Map<String, Object> eachScene = new HashMap<String, Object>(5);
-            //name:’',//工控名称    alias:'', //中文别名
+            // 存放 ID 信息
             eachScene.put("id", scene.getId());
+            // 存放工控场景名称
             eachScene.put("name", sceneMapper.getRelatedMapNameBySceneId(scene.getId()));
+            // 存放云端场景别名信息
             eachScene.put("alias", scene.getName());
-            //设置站
+            // 存放所属场景下站的信息 - Station - 站
             Example stationExample = new Example(Station.class);
+            // 创建查询条件
             stationExample.createCriteria().andCondition("SCENE_ID =", scene.getId());
+            // 站的 JSON 数组
             JSONArray stationJSONArray = new JSONArray();
             stationMapper.selectByExample(stationExample).forEach(ele -> {
-                JSONObject jsonObject = new JSONObject() {{
-                    put("id", ele.getId()); put("name", ele.getName());
-                }};
+                // 遍历每一个站信息进行内容转换
+                JSONObject jsonObject = new JSONObject() {{ put("id", ele.getId()); put("name", ele.getName()); }};
                 stationJSONArray.add(jsonObject);
             });
             eachScene.put("station", stationJSONArray);
-            //
-            //设置地图
+            // 存放所属场景下的地图信息 - Map - 地图
             Example mapExample = new Example(MapInfo.class);
             mapExample.createCriteria().andCondition("SCENE_NAME =", scene.getName());
+            // 存放地图信息的 JSON 数组
             JSONArray mapJSONArray = new JSONArray();
             mapInfoMapper.selectByExample(mapExample).forEach(ele -> {
                 JSONObject jsonObject = new JSONObject() {{
-                    //name:’',//工控名称    alias:'', //中文别名
-                    put("id", ele.getId());
-                    put("name", ele.getMapName());
-                    put("alias", ele.getMapAlias());
-                }};
+                    // 遍历每一个地图信息进行内容转换
+                    put("id", ele.getId());put("name", ele.getMapName());put("alias", ele.getMapAlias()); }};
                 mapJSONArray.add(jsonObject);
             });
             eachScene.put("map", mapJSONArray);
-            //
-            // 设置充电桩
-            List<MapPoint> mapPointListDb = sceneMapper.findMapPointBySceneId(scene.getId(),
-                    SearchConstants.FAKE_MERCHANT_STORE_ID, 3L);
+            // 存放所属场景下的充电桩信息
+            List<MapPoint> mapPointListDb = sceneMapper.findMapPointBySceneId(scene.getId(), SearchConstants.FAKE_MERCHANT_STORE_ID, 3L);
             eachScene.put("chargePoint", mapPointListDb);
             //
             sceneList.add(eachScene);
         }
-        // (当前云端中存储的所有地图、站、充电桩等信息)
         baseData.put("scene", sceneList);
-        // (查询并且返回当前指定机器人所绑定的资源关系)
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        // 存放当前指定机器人所属的资源关系
         JSONObject robotAssets = new JSONObject();
-        // 第一部分：绑定的站
+        // 当前机器人所绑定的 站 信息
         robotAssets.put("station", stationService.findStationsByRobotCode(robotCode));
-        // 第二部分：绑定的充电桩
-        robotAssets.put("chargePoint", robotService.getChargerMapPointByRobotCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID));
-        Scene currentScene = sceneMapper.findSceneByRobotCode(robotCode).get(0);
+        // 当前机器人所绑定的 充电桩 信息
+        robotAssets.put("chargePoint", robotService.getChargerMapPointByRobotCode(robotCode,
+                SearchConstants.FAKE_MERCHANT_STORE_ID));
+        List<Scene> list = sceneMapper.findSceneByRobotCode(robotCode);
         JSONObject currentSceneObject = new JSONObject();
-        currentSceneObject.put("id", currentScene.getId());
-        currentSceneObject.put("name", sceneMapper.getRelatedMapNameBySceneId(currentScene.getId()));
-        currentSceneObject.put("alias", currentScene.getName());
-        // 第三部分：绑定关系绑定的场景信息
+        if (list != null && list.size() != 0) {
+            Scene currentScene = list.get(0);
+            currentSceneObject.put("id", currentScene.getId());
+            currentSceneObject.put("name", sceneMapper.getRelatedMapNameBySceneId(currentScene.getId()));
+            currentSceneObject.put("alias", currentScene.getName());
+        } else {
+            currentSceneObject.put("id", "");currentSceneObject.put("name", "");currentSceneObject.put("alias", "");
+        }
+        // 当前机器人所绑定的场景信息
         robotAssets.put("scene", currentSceneObject);
         baseData.put("robotAssets", robotAssets);
         return baseData;
     }
 
     /**
-     * 更新机器人与资源的绑定关系
+     * 更新机器人与资源的绑定关系，更新最新关系
      * @param latestRobotAssets 最新反馈的资源绑定关系
      */
     @Override
     public void updateGetRobotStartAssets(JSONObject latestRobotAssets) {
-        // 机器人编号
+        // 传递的指定机器人的机器人编号
         String robotCode = latestRobotAssets.getString("robotCode");
-        // 站 ID 编号
+        Robot currentRobot = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (currentRobot == null) {return;}
+        // 当前指定机器人的 ID 编号信息
+        Long robotId = currentRobot.getId();
+        // 新选择的场景 ID 编号（sceneId、stationIds、chargerMapPointIds）
+        Long sceneId = latestRobotAssets.getLong("sceneId");
+        // 新选择的站 ID 编号数组信息
         JSONArray stationIds = latestRobotAssets.getJSONArray("stationIds");
+        // 新选择的充电桩 ID 编号数组信息
         JSONArray chargerMapPointIds = latestRobotAssets.getJSONArray("chargerMapPointIds");
+        // + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+        // + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
+        // 重新更新机器人与场景之间的绑定关系
+        sceneMapper.deleteRobotAndSceneRelationsByRobotCode(robotCode);
+        sceneMapper.insertSceneAndRobotRelations(sceneId, Lists.newArrayList(robotId));
         // 重新更新机器人与站之间的绑定关系
         for (int i = 0 ; i < stationIds.size() ; i++) {
+            // 遍历每一个站
             Long stationId = stationIds.getLong(i);
             // 删除初始机器人与站点的绑定关系
             stationMapper.deleteStationWithRobotRelationByRobotCode(robotCode);
             // 添加新的机器人与站点之间的绑定关系
-            StationRobotXREF stationRobotXREF = new StationRobotXREF() {
-                {
-                    setRobotId(robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId());
-                    setStationId(stationId);
-                }};
+            StationRobotXREF stationRobotXREF = new StationRobotXREF() {{
+                setRobotId(robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId());
+                setStationId(stationId);
+            }};
             stationRobotXREFMapper.insert(stationRobotXREF);
         }
         // 重新更新机器人与充电桩之间的绑定关系
         for (int i = 0 ; i < chargerMapPointIds.size() ; i++) {
-            Long robotId = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId();
+            // 遍历每一个充电桩
             Long chargerMapPointId = chargerMapPointIds.getLong(i);
             // 删除初始机器人与充电桩点的绑定关系
             robotChargerMapPointXREFService.deleteByRobotId(robotId);

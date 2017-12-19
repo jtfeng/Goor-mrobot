@@ -28,6 +28,8 @@ public interface SceneMapper extends MyMapper<Scene> {
 
     void deleteRobotAndSceneRelations(Long sceneId);
 
+    void deleteRobotAndSceneRelationsByRobotCode(String robotCode);
+
     void deleteMapAndSceneRelations(Long sceneId);
 
     int checkRobot(Long robotId);
