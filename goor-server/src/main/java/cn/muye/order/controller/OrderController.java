@@ -153,9 +153,12 @@ public class OrderController extends BaseController {
         try {
             //注入发起站
             Long stationId = userUtil.getStationId();
-            order.setStartStation(new Station(stationId));
+            Station station = stationService.findById(stationId);
+            order.setStartStation(station);
+//            order.setStartStation(new Station(stationId));
             //注入场景
-            Scene scene = SessionUtil.getScene();
+//            Scene scene = SessionUtil.getScene();
+            Scene scene = sceneService.findById(station.getSceneId());
             order.setScene(scene);
             //现在orderSetting后台默认注入默认配置
 //            if(order.getOrderSetting() == null){
@@ -180,7 +183,8 @@ public class OrderController extends BaseController {
             }
             //根据 站点id 和 机器人类型 自动选择机器人
             arrangeRobot = robotService.getAvailableRobotByStationId(stationId, robotTypeId);
-            //arrangeRobot = robotService.findById(319L);
+//            arrangeRobot = robotService.getNearestAvailableRobotByStationId(stationId, robotTypeId);
+//            arrangeRobot = robotService.findById(323L);
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功
                 logger.info("本次请求未获取到可用机器人");
