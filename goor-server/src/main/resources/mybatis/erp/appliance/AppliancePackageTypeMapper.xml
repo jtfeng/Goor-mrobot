@@ -26,7 +26,7 @@
     <select id="listByName" resultMap="appliancePackageType">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE_PACKAGE_TYPE WHERE NAME = #{name} AND DELETE_FLAG = 0
+        FROM ERP_APPLIANCE_PACKAGE_TYPE WHERE NAME LIKE  CONCAT('%',#{name},'%') AND DELETE_FLAG = 0
         ORDER BY CREATE_TIME desc
     </select>
 
