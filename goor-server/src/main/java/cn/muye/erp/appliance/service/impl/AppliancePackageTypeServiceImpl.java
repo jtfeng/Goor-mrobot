@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;
@@ -28,7 +29,7 @@ public class AppliancePackageTypeServiceImpl extends BaseServiceImpl<AppliancePa
 
     @Override
     public AppliancePackageType findByName(String name) {
-        AppliancePackageType appliancePackageType = new AppliancePackageType.Builder().name(name).deleteFlag(Constant.NORMAL).build();
+        AppliancePackageType appliancePackageType = new AppliancePackageType.Builder().name(name.trim()).deleteFlag(Constant.NORMAL).build();
         List<AppliancePackageType> appliancePackageTypes = appliancePackageTypeMapper.select(appliancePackageType);
         if (appliancePackageTypes.size() > 0) {
             return appliancePackageTypes.get(0);
@@ -44,8 +45,10 @@ public class AppliancePackageTypeServiceImpl extends BaseServiceImpl<AppliancePa
 
     @Override
     public List<AppliancePackageType> listAllPackageType() {
-        AppliancePackageType appliancePackageType = new AppliancePackageType.Builder().deleteFlag(Constant.NORMAL).build();
-        return appliancePackageTypeMapper.select(appliancePackageType);
+        Example example = new Example(AppliancePackageType.class);
+        example.createCriteria().andCondition("DELETE_FLAG="+Constant.NORMAL);
+        example.setOrderByClause("CREATE_TIME desc");
+        return appliancePackageTypeMapper.selectByExample(example);
     }
 
     @Override
@@ -61,7 +64,7 @@ public class AppliancePackageTypeServiceImpl extends BaseServiceImpl<AppliancePa
         if (StringUtil.isNotBlank(obj)) {
             JSONObject map = JSON.parseObject(obj);
             String name = map.getString(SearchConstants.SEARCH_NAME);
-            return appliancePackageTypeMapper.listByName(name);
+            return appliancePackageTypeMapper.listByName(name.trim());
         } else {
             return listAllPackageType();
         }

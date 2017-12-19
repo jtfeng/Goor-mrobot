@@ -16,7 +16,6 @@ import cn.muye.erp.appliance.service.ApplianceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
-import net.sourceforge.pinyin4j.PinyinHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +97,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         }
         Example example = new Example(Appliance.class);
         example.createCriteria().andCondition("DEPARTMENT_TYPE_CODE=" + departmentTypeCode)
-                .andCondition("NAME='"+name+"'")
+                .andCondition("NAME='"+name.trim()+"'")
                 .andCondition("PACKAGE_TYPE_ID="+packageTypeId)
                 .andCondition("DELETE_FLAG="+Constant.NORMAL);
         return applianceMapper.selectByExample(example);
@@ -143,11 +142,11 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         String chName = map.get(EXCEL_TITLE[0]).toString();
         String departmentTypeName = map.get(EXCEL_TITLE[1]).toString();
         logger.info("departmentTypeName = " + departmentTypeName);
-        ApplianceDepartmentType departmentType = applianceDepartmentTypeMapper.findByName(departmentTypeName);
+        ApplianceDepartmentType departmentType = applianceDepartmentTypeMapper.findByName(departmentTypeName.trim());
         int departmentTypeCode = departmentType.getCode();
         String packageTypeName = map.get(EXCEL_TITLE[2]).toString();
         logger.info("packageTypeName = " + packageTypeName);
-        AppliancePackageType packageType = appliancePackageTypeService.findByName(packageTypeName);
+        AppliancePackageType packageType = appliancePackageTypeService.findByName(packageTypeName.trim());
         Long packageTypeCode = packageType.getId();
         //重复数据校验
         List<Appliance> applianceList = findByNameAndCode(chName, departmentTypeCode, packageTypeCode);
@@ -156,43 +155,11 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         }
         Appliance appliance = new Appliance();
         appliance.setName(chName);
-        appliance.setSearchName(getSearchName(chName));
+        appliance.setSearchName(StringUtil.getSearchName(chName));
         appliance.setDepartmentTypeCode(departmentTypeCode);
         appliance.setPackageTypeId(packageTypeCode);
         appliance.setCreateTime(new Date());
         appliance.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         save(appliance);
-    }
-
-    /**
-     * 根据名称获取searchName
-     *
-     * @param name
-     * @return
-     */
-    @Override
-    public String getSearchName(String name) {
-        int length = name.length();
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            char ch = name.charAt(i);
-            String chStr = String.valueOf(ch);
-            if (StringUtil.isNumeric(chStr)) {
-                stringBuilder.append(chStr);
-            } else if (StringUtil.isCharacter(chStr)) {
-                stringBuilder.append(chStr.toUpperCase());
-            } else if (StringUtil.isContainChinese(chStr)) {
-                String[] pinyins = PinyinHelper.toHanyuPinyinStringArray(name.charAt(i));
-                if (null != pinyins) {
-                    //中文多音字默认取第一个拼音
-                    String pinyin = pinyins[0];
-                    char pinyinCh = pinyin.charAt(0);
-                    stringBuilder.append(String.valueOf(pinyinCh).toUpperCase());
-                }
-            } else {
-                continue;
-            }
-        }
-        return stringBuilder.toString();
     }
 }

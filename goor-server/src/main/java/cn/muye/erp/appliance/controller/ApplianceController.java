@@ -73,7 +73,7 @@ public class ApplianceController {
         appliance.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         appliance.setCreateTime(new Date());
         if (StringUtil.isBlank(appliance.getSearchName())) {
-            appliance.setSearchName(applianceService.getSearchName(appliance.getName()));
+            appliance.setSearchName(StringUtil.getSearchName(appliance.getName()));
         }
         applianceService.save(appliance);
         return AjaxResult.success(appliance, "添加成功");
@@ -90,7 +90,7 @@ public class ApplianceController {
         if (null == appliance.getId()) {
             return AjaxResult.failed("修改对象ID不能为空");
         }
-        //根据name,departmentTypeCode,packageTypeCode进行重复校验
+        //根据name,departmentTypeCode,packageTypeId进行重复校验
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),
                 appliance.getDepartmentTypeCode(), appliance.getPackageTypeId());
         if (null != applianceList && applianceList.size() > 0) {
@@ -100,7 +100,7 @@ public class ApplianceController {
         Appliance applianceDB = applianceService.findApplianceById(appliance.getId());
         String name = appliance.getName();
         applianceDB.setName(appliance.getName());
-        applianceDB.setSearchName(applianceService.getSearchName(name));
+        applianceDB.setSearchName(StringUtil.getSearchName(name));
         applianceDB.setDepartmentType(appliance.getDepartmentType());
         applianceDB.setPackageType(appliance.getPackageType());
         applianceDB.setCreateTime(new Date());
