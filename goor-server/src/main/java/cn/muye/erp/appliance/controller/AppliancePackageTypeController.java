@@ -33,7 +33,7 @@ public class AppliancePackageTypeController {
     @RequestMapping(value = "appliance/packageType", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody AppliancePackageType appliancePackageType) {
         AppliancePackageType appliancePackageTypeDB = appliancePackageTypeService.findByName(appliancePackageType.getName());
-        if (appliancePackageTypeDB != null){
+        if (appliancePackageTypeDB != null) {
             return AjaxResult.failed("该包装类型已经存在，请勿重复添加！");
         }
         appliancePackageType.setDeleteFlag(Constant.NORMAL);
@@ -43,19 +43,37 @@ public class AppliancePackageTypeController {
         return AjaxResult.success(appliancePackageType, "添加成功");
     }
 
+    @RequestMapping(value = "appliance/packageType", method = RequestMethod.PUT)
+    public AjaxResult update(@RequestBody AppliancePackageType appliancePackageType) {
+        Long id = appliancePackageType.getId();
+        if (null == id) {
+            return AjaxResult.failed("ID不能为空");
+        }
+        AppliancePackageType appliancePackageTypeDB = appliancePackageTypeService.findTypeById(id);
+        if (appliancePackageTypeDB == null) {
+            return AjaxResult.failed("该包装类型不存在");
+        }
+        AppliancePackageType packageType = appliancePackageTypeService.findByName(appliancePackageType.getName());
+        if (null != packageType) {
+            return AjaxResult.failed(appliancePackageType.getName() + "该名称的包装类型存在");
+        }
+        appliancePackageTypeService.updateSelective(appliancePackageType);
+        return AjaxResult.success(appliancePackageType, "修改成功");
+    }
+
     @RequestMapping(value = "appliance/packageType/{id}", method = RequestMethod.GET)
     public AjaxResult findById(@PathVariable Long id) {
-        if (null == id){
+        if (null == id) {
             return AjaxResult.failed("查询ID不能为空");
         }
         AppliancePackageType appliancePackageType = appliancePackageTypeService.findTypeById(id);
-        return AjaxResult.success( appliancePackageType, "查询成功");
+        return AjaxResult.success(appliancePackageType, "查询成功");
     }
 
     @RequestMapping(value = "appliance/packageType/{id}", method = RequestMethod.DELETE)
     public AjaxResult delete(@PathVariable Long id) {
         appliancePackageTypeService.removeById(id);
-        return AjaxResult.success( "删除成功");
+        return AjaxResult.success("删除成功");
     }
 
     @RequestMapping(value = "appliance/packageType", method = RequestMethod.GET)

@@ -30,17 +30,35 @@ public class OperationDepartmentTypeController {
             return AjaxResult.failed("手术科室类别名称不能为空");
         }
         OperationDepartmentType operationDepartmentTypeDB = operationDepartmentTypeService.findByName(name);
-        if (null != operationDepartmentTypeDB){
-            return AjaxResult.failed("该手术科室类别名称已经存在");
+        if (null != operationDepartmentTypeDB) {
+            return AjaxResult.failed(name + "该手术科室类别名称已经存在");
         }
         operationDepartmentType.init();
         operationDepartmentTypeService.save(operationDepartmentType);
         return AjaxResult.success(operationDepartmentType, "添加成功");
     }
 
+    @RequestMapping(value = "operation/departmentType", method = RequestMethod.PUT)
+    public AjaxResult update(@RequestBody OperationDepartmentType operationDepartmentType) {
+        Long id = operationDepartmentType.getId();
+        if (null == id) {
+            return AjaxResult.failed("ID不能为空");
+        }
+        OperationDepartmentType operationDepartmentTypeDB = operationDepartmentTypeService.findTypeById(id);
+        if (null == operationDepartmentTypeDB) {
+            return AjaxResult.failed(operationDepartmentType.getName() + "该手术科室类别不存在");
+        }
+        OperationDepartmentType departmentType = operationDepartmentTypeService.findByName(operationDepartmentType.getName());
+        if (null != departmentType) {
+            return AjaxResult.failed(departmentType.getName() + "该手术科室类别名称存在");
+        }
+        operationDepartmentTypeService.updateSelective(operationDepartmentType);
+        return AjaxResult.success(operationDepartmentType, "修改成功");
+    }
+
     @RequestMapping(value = "operation/departmentType/{id}", method = RequestMethod.GET)
     public AjaxResult findById(@PathVariable Long id) {
-            if (null == id) {
+        if (null == id) {
             return AjaxResult.failed("ID不能为空");
         }
         OperationDepartmentType operationDepartmentType = operationDepartmentTypeService.findTypeById(id);
@@ -53,7 +71,7 @@ public class OperationDepartmentTypeController {
             return AjaxResult.failed("ID不能为空");
         }
         operationDepartmentTypeService.removeById(id);
-        return AjaxResult.success( "删除成功");
+        return AjaxResult.success("删除成功");
     }
 
     @RequestMapping(value = "operation/departmentType", method = RequestMethod.GET)
