@@ -20,6 +20,8 @@ public class AppliancePackageType extends BaseBean {
     @JSONField(format = "yyyy-MM-dd HH:mm:ss")
     private Date deleteTime;   //数据库删除时间
 
+    public AppliancePackageType() {
+    }
 
     public String getName() {
         return name;
@@ -43,5 +45,43 @@ public class AppliancePackageType extends BaseBean {
 
     public void setDeleteTime(Date deleteTime) {
         this.deleteTime = deleteTime;
+    }
+
+    public static class Builder {
+        private String name;
+        private int deleteFlag;
+        private Date deleteTime;
+        private Long id;
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder deleteFlag(int deleteFlag) {
+            this.deleteFlag = deleteFlag;
+            return this;
+        }
+
+        public Builder deleteTime(Date deleteTime) {
+            this.deleteTime = deleteTime;
+            return this;
+        }
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public AppliancePackageType build() {
+            return new AppliancePackageType(this);
+        }
+    }
+
+    public AppliancePackageType(Builder builder) {
+        this.setId(builder.id);
+        this.deleteFlag = builder.deleteFlag;
+        this.deleteTime = builder.deleteTime;
+        this.name = builder.name;
     }
 }

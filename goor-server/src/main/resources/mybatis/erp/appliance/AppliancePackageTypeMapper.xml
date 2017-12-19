@@ -8,6 +8,8 @@
         <result property="createdBy" column="CREATED_BY"/>
         <result property="createTime" column="CREATE_TIME"/>
         <result property="name" column="NAME"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
+        <result property="deleteTime" column="DELETE_TIME"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -15,19 +17,22 @@
         STORE_ID,
         CREATED_BY,
         CREATE_TIME,
-        NAME
+        NAME,
+        DELETE_FLAG,
+        DELETE_TIME
     </sql>
+
+
+    <select id="listByName" resultMap="appliancePackageType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ERP_APPLIANCE_PACKAGE_TYPE WHERE NAME = #{name} AND DELETE_FLAG = 0;
+    </select>
 
     <select id="findTypeById" parameterType="int" resultMap="appliancePackageType">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE_PACKAGE_TYPE WHERE ID = #{id}
-    </select>
-
-    <select id="listAll" resultMap="appliancePackageType">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE_PACKAGE_TYPE
+        FROM ERP_APPLIANCE_PACKAGE_TYPE WHERE ID = #{id} AND DELETE_FLAG = 0;
     </select>
 
 </mapper>

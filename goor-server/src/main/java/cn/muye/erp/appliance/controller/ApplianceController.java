@@ -2,15 +2,18 @@ package cn.muye.erp.appliance.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.erp.appliance.Appliance;
+import cn.mrobot.bean.erp.appliance.AppliancePackageType;
 import cn.mrobot.utils.ExcelUtil;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.appliance.service.ApplianceService;
 import cn.muye.erp.appliance.service.impl.ApplianceServiceImpl;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import groovy.transform.ASTTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class ApplianceController {
     @Autowired
     private ApplianceService applianceService;
 
+    @Autowired
+    private AppliancePackageTypeService appliancePackageTypeService;
+
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
 
@@ -51,6 +57,11 @@ public class ApplianceController {
                 appliance.getDepartmentTypeCode() == 0 ||
                 appliance.getPackageTypeId() == null) {
             return AjaxResult.failed("保存对象关键属性不能为空");
+        }
+        //校验包装类别
+        AppliancePackageType appliancePackageType = appliancePackageTypeService.findTypeById(appliance.getPackageTypeId());
+        if (null == appliancePackageType){
+            return AjaxResult.failed("包装类别不存在或已删除，请预添加");
         }
         //根据name,departmentTypeCode,packageTypeCode进行重复校验
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),

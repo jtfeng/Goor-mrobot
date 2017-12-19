@@ -572,7 +572,7 @@ public class UserController implements ApplicationContextAware{
     private static List<Map> getAppliancePackageTypeList() {
         List<Map> resultList = new ArrayList<Map>();
         AppliancePackageTypeService appliancePackageTypeService = applicationContext.getBean(AppliancePackageTypeService.class);
-        List<AppliancePackageType> packageTypeList = appliancePackageTypeService.listAll();
+        List<AppliancePackageType> packageTypeList = appliancePackageTypeService.listAllPackageType();
         for (AppliancePackageType packageType : packageTypeList) {
             Map result = new HashMap<String,Object>();
             result.put("name",packageType.getName());
