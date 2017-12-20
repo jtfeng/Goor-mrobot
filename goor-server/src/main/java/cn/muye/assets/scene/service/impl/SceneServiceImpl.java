@@ -25,6 +25,7 @@ import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.RobotMapZipXREFService;
 import cn.muye.area.station.mapper.StationMapper;
 import cn.muye.area.station.mapper.StationRobotXREFMapper;
+import cn.muye.area.station.mapper.StationStationXREFMapper;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
@@ -87,6 +88,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Autowired
     private StationRobotXREFMapper stationRobotXREFMapper;
     @Autowired
+    private StationStationXREFMapper stationStationXREFMapper;
+    @Autowired
     private RobotMapZipXREFService robotMapZipXREFService;
     @Autowired
     private MessageSendHandleService messageSendHandleService;
@@ -134,7 +137,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             stationExample.createCriteria().andCondition("SCENE_ID =", scene.getId());
             // 站的 JSON 数组
             JSONArray stationJSONArray = new JSONArray();
+                // 全部的出发点
+            List<Long> originStationIds = Lists.newArrayList();
+            stationStationXREFMapper.selectAll().forEach( stationStationXREF -> originStationIds.add(stationStationXREF.getOriginStationId()));
             stationMapper.selectByExample(stationExample).forEach(ele -> {
+                if (originStationIds.indexOf(ele.getId()) == -1) {
+                    // 不是出发点，则不提供选择
+                    return;
+                }
                 // 遍历每一个站信息进行内容转换
                 JSONObject jsonObject = new JSONObject() {{ put("id", ele.getId()); put("name", ele.getName()); }};
                 stationJSONArray.add(jsonObject);
@@ -190,9 +200,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @param latestRobotAssets 最新反馈的资源绑定关系
      */
     @Override
-    public void updateGetRobotStartAssets(JSONObject latestRobotAssets) {
+    public void updateGetRobotStartAssets(String robotCode, JSONObject latestRobotAssets) {
         // 传递的指定机器人的机器人编号
-        String robotCode = latestRobotAssets.getString("robotCode");
         Robot currentRobot = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (currentRobot == null) {return;}
         // 当前指定机器人的 ID 编号信息

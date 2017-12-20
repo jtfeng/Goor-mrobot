@@ -177,12 +177,15 @@ public class ConsumerCommon {
                             jsonObjectData.getString("input_pwd"));
                 } else if (!StringUtils.isEmpty(messageName)  &&
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY)) {
+                    logger.info("   -| 机器人编号为：" + robotCode + "、发送的消息格式类型为：" + TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY);
                     // 机器人开机获取云端相关资源
                     sceneService.replyGetRobotStartAssets(uuid, robotCode);
                 } else if (!StringUtils.isEmpty(messageName)  &&
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE)) {
+                    logger.info("   -| 机器人编号为：" + robotCode + "、发送的消息格式类型为：" + TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE);
+                    logger.info("       -| 接收到的实际 JSON 字符串内容为：" + JSONObject.toJSONString(jsonObjectData));
                     // 机器人开机重新修改与指定机器人的绑定关系
-                    sceneService.updateGetRobotStartAssets(JSONObject.parseObject(jsonObjectData.getString(TopicConstants.DATA)));
+                    sceneService.updateGetRobotStartAssets(robotCode, JSONObject.parseObject(jsonObjectData.getString(TopicConstants.DATA)));
                 }
             }
         } catch (Exception e) {

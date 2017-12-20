@@ -70,5 +70,5 @@ public interface SceneService extends BaseService<Scene> {
      * 根据反馈更新数据关系
      * @param latestRobotAssets
      */
-    void updateGetRobotStartAssets(JSONObject latestRobotAssets);
+    void updateGetRobotStartAssets(String robotCode, JSONObject latestRobotAssets);
 }
