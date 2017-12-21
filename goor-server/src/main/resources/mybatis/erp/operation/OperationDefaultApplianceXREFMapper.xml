@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper">
+
+    <resultMap id="operationDefaultApplianceXREF" type="cn.mrobot.bean.erp.operation.OperationDefaultApplianceXREF">
+        <result property="operationTypeId" column="OPERATION_TYPE_ID"/>
+        <result property="number" column="NUMBER"/>
+        <association property="appliance" column="APPLIANCE_ID"
+                     javaType="cn.mrobot.bean.erp.appliance.Appliance"
+                     select="cn.muye.erp.appliance.mapper.ApplianceMapper.findApplianceById"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        OPERATION_TYPE_ID,
+        NUMBER,
+        APPLIANCE_ID
+    </sql>
+
+    <select id="findByOperationId" resultMap="operationDefaultApplianceXREF">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ERP_OPERATION_DEFAULT_APPLIANCE_XREF WHERE OPERATION_TYPE_ID = #{operationId}
+    </select>
+
+    <insert id="save" parameterType="cn.mrobot.bean.erp.operation.OperationType">
+        INSERT INTO ERP_OPERATION_DEFAULT_APPLIANCE_XREF(
+            OPERATION_TYPE_ID,
+            NUMBER,
+            APPLIANCE_ID
+        ) values (
+            #{operationTypeId},
+            #{number},
+            #{appliance.id}
+        )
+    </insert>
+
+    <delete id="deleteByOperationId" parameterType="java.lang.Long">
+        DELETE FROM ERP_OPERATION_DEFAULT_APPLIANCE_XREF WHERE OPERATION_TYPE_ID=#{operationTypeId}
+    </delete>
+</mapper>

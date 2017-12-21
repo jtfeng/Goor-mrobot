@@ -18,4 +18,6 @@ public interface ApplianceDepartmentTypeMapper {
     List<ApplianceDepartmentType> listAll();
 
     void save(ApplianceDepartmentType departmentType);
+
+    Integer findMaxCode();
 }

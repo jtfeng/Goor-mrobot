@@ -40,4 +40,10 @@
         );
     </insert>
 
+    <select id="findMaxCode" resultType="java.lang.Integer">
+        SELECT
+	        MAX(`CODE`)
+        FROM
+	        ERP_APPLIANCE_DEPARTMENT_TYPE
+    </select>
 </mapper>

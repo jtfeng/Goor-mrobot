@@ -1,7 +1,6 @@
 package cn.muye.erp.operation.controller;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.erp.appliance.AppliancePackageType;
 import cn.mrobot.bean.erp.operation.OperationDepartmentType;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
@@ -31,7 +30,7 @@ public class OperationDepartmentTypeController {
         }
         OperationDepartmentType operationDepartmentTypeDB = operationDepartmentTypeService.findByName(name);
         if (null != operationDepartmentTypeDB) {
-            return AjaxResult.failed(name + "该手术科室类别名称已经存在");
+            return AjaxResult.failed("(" + name + ") 该手术科室类别名称已经存在");
         }
         operationDepartmentType.init();
         operationDepartmentTypeService.save(operationDepartmentType);
@@ -46,11 +45,11 @@ public class OperationDepartmentTypeController {
         }
         OperationDepartmentType operationDepartmentTypeDB = operationDepartmentTypeService.findTypeById(id);
         if (null == operationDepartmentTypeDB) {
-            return AjaxResult.failed(operationDepartmentType.getName() + "该手术科室类别不存在");
+            return AjaxResult.failed("(" + operationDepartmentType.getName() + ")该手术科室类别不存在");
         }
         OperationDepartmentType departmentType = operationDepartmentTypeService.findByName(operationDepartmentType.getName());
-        if (null != departmentType) {
-            return AjaxResult.failed(departmentType.getName() + "该手术科室类别名称存在");
+        if (null != departmentType && !id.equals(departmentType.getId())) {
+            return AjaxResult.failed("(" + departmentType.getName() + ") 该手术科室类别名称存在");
         }
         operationDepartmentTypeService.updateSelective(operationDepartmentType);
         return AjaxResult.success(operationDepartmentType, "修改成功");

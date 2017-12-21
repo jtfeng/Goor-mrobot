@@ -12,6 +12,7 @@ import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.erp.appliance.ApplianceDepartmentType;
 import cn.mrobot.bean.erp.appliance.AppliancePackageType;
+import cn.mrobot.bean.erp.operation.OperationDepartmentType;
 import cn.mrobot.bean.log.LogLevel;
 import cn.mrobot.bean.mission.MissionListTypeEnum;
 import cn.mrobot.bean.mission.MissionTypeEnum;
@@ -33,6 +34,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.erp.appliance.service.ApplianceDepartmentTypeService;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
+import cn.muye.erp.operation.service.OperationDepartmentTypeService;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
@@ -503,6 +505,8 @@ public class UserController implements ApplicationContextAware{
         map.put("logLevel", LogLevel.list());
         map.put("applianceDepartmentType", getApplianceDepartmentTypeList());
         map.put("appliancePackageType", getAppliancePackageTypeList());
+        map.put("operationDepartmentType", getOperationDepartmentTypeList());
+
         //把当前用户能新建什么角色的用户放入常量返回前端
         List<RoleDTO> listNew = new ArrayList<>();
         if (userDTO != null) {
@@ -577,6 +581,19 @@ public class UserController implements ApplicationContextAware{
             Map result = new HashMap<String,Object>();
             result.put("name",packageType.getName());
             result.put("value",packageType.getId());
+            resultList.add(result) ;
+        }
+        return resultList;
+    }
+
+    private static List<Map> getOperationDepartmentTypeList() {
+        List<Map> resultList = new ArrayList<Map>();
+        OperationDepartmentTypeService operationDepartmentTypeService = applicationContext.getBean(OperationDepartmentTypeService.class);
+        List<OperationDepartmentType> departmentTypeList = operationDepartmentTypeService.listAllType();
+        for (OperationDepartmentType departmentType : departmentTypeList) {
+            Map result = new HashMap<String,Object>();
+            result.put("name",departmentType.getName());
+            result.put("value",departmentType.getId());
             resultList.add(result) ;
         }
         return resultList;

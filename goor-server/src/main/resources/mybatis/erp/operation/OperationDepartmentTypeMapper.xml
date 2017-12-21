@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.erp.operation.mapper.OperationDepartmentTypeMapper">
+
+    <resultMap id="operationType" type="cn.mrobot.bean.erp.operation.OperationDepartmentType">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+
+        <result property="name" column="NAME"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
+        <result property="deleteTime" column="DELETE_TIME"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
+        NAME,
+        DELETE_FLAG,
+        DELETE_TIME
+    </sql>
+
+    <select id="findDepartmentTypeById" resultMap="operationType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ERP_OPERATION_DEPARTMENT_TYPE WHERE ID = #{id}
+    </select>
+
+</mapper>

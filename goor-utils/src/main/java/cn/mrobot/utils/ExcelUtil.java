@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -80,8 +81,9 @@ public class ExcelUtil {
     }
 
     private static Map<String, List<Map<String, Object>>> getExcelData(File file) {
+        Workbook workbook = null;
         try {
-            Workbook workbook = WorkbookFactory.create(file);
+            workbook = WorkbookFactory.create(file);
             if (null == workbook) {
                 log.error("未知文件格式");
                 return null;
@@ -115,6 +117,14 @@ public class ExcelUtil {
             return result;
         } catch (Exception e) {
             log.error("解析文件出错", e);
+        }finally {
+            if (null != workbook){
+                try {
+                    workbook.close();
+                } catch (IOException e) {
+                    log.error("解析文件出错", e);
+                }
+            }
         }
         return null;
     }

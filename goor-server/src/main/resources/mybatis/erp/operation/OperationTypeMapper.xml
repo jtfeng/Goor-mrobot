@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.erp.operation.mapper.OperationTypeMapper">
+
+    <resultMap id="operationType" type="cn.mrobot.bean.erp.operation.OperationType">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+
+        <result property="name" column="NAME"/>
+        <result property="searchName" column="SEARCH_NAME"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
+        <result property="deleteTime" column="DELETE_TIME"/>
+        <association property="operationDepartmentType" column="OPERATION_DEPARTMENT_TYPE_ID"
+                     javaType="cn.mrobot.bean.erp.operation.OperationDepartmentType"
+                     select="cn.muye.erp.operation.mapper.OperationDepartmentTypeMapper.findDepartmentTypeById"/>
+        <collection property="applianceList" column="ID"
+                    ofType="cn.mrobot.bean.erp.operation.OperationDefaultApplianceXREF"
+                    select="cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper.findByOperationId"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
+        NAME,
+        SEARCH_NAME,
+        OPERATION_DEPARTMENT_TYPE_ID,
+        DELETE_FLAG,
+        DELETE_TIME
+    </sql>
+
+    <insert id="saveOperationType" parameterType="cn.mrobot.bean.erp.operation.OperationType" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO ERP_OPERATION_TYPE(
+        ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
+        NAME,
+        SEARCH_NAME,
+        OPERATION_DEPARTMENT_TYPE_ID,
+        DELETE_FLAG,
+        DELETE_TIME
+        ) values (
+        #{id},
+        #{storeId},
+        #{createdBy},
+        #{createTime},
+        #{name},
+        #{searchName},
+        #{operationDepartmentType.id},
+        #{deleteFlag},
+        #{deleteTime}
+        )
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <select id="findOperationTypeById" resultMap="operationType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ERP_OPERATION_TYPE WHERE ID = #{id} AND DELETE_FLAG = 0
+    </select>
+
+    <update id="updateOperationType" parameterType="cn.mrobot.bean.erp.operation.OperationType">
+        UPDATE ERP_OPERATION_TYPE
+        <trim prefix="set" suffixOverrides=",">
+            <if test="name != null">
+                NAME = #{name},
+            </if>
+            <if test="searchName != null">
+                SEARCH_NAME = #{searchName},
+            </if>
+            <if test="operationDepartmentType != null">
+                OPERATION_DEPARTMENT_TYPE_ID = #{operationDepartmentType.id},
+            </if>
+        </trim>
+        WHERE ID = #{id}
+    </update>
+
+    <select id="listAllOperationType" resultMap="operationType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ERP_OPERATION_TYPE WHERE DELETE_FLAG = 0
+    </select>
+
+    <select id="listOperationTypeBy" resultMap="operationType">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM ERP_OPERATION_TYPE o
+        <where>
+            <if test="name != null">
+                AND o.NAME like CONCAT('%',#{name},'%')
+            </if>
+            <if test="searchName != null">
+                AND o.SEARCH_NAME like CONCAT('%',#{searchName},'%')
+            </if>
+            <if test="operationDepartmentTypeId != null">
+                AND o.OPERATION_DEPARTMENT_TYPE_ID =#{operationDepartmentTypeId}
+            </if>
+        </where>
+        AND DELETE_FLAG = 0
+        ORDER BY CREATE_TIME DESC
+    </select>
+</mapper>

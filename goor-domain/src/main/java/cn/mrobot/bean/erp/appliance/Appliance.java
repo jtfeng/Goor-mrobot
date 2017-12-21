@@ -1,6 +1,7 @@
 package cn.mrobot.bean.erp.appliance;
 
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.constant.Constant;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.Table;
@@ -98,5 +99,11 @@ public class Appliance extends BaseBean{
 
     public void setDeleteTime(Date deleteTime) {
         this.deleteTime = deleteTime;
+    }
+
+    public void init(){
+        this.setCreateTime(new Date());
+        this.setStoreId(100L);
+        this.setDeleteFlag(Constant.NORMAL);
     }
 }

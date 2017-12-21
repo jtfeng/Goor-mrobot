@@ -20,16 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.File;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Jelynn
@@ -52,11 +51,22 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     @Autowired
     private ApplianceMapper applianceMapper;
 
+    //用户缓存新增的科室类别的code，避免多线程事务问题
+    private Map<String, Integer> newDepartmentTypeCodeMap = new HashMap<>();
+
+    private ReentrantLock departmentTypelock = new ReentrantLock();
+
+    //用户缓存新增的包装类型的ID，避免多线程事务问题
+    private Map<String, Long> newPackageTypeIdMap = new HashMap<>();
+
+    private ReentrantLock packageTypelock = new ReentrantLock();
+
     @Override
     public Appliance findApplianceById(Long id) {
         return applianceMapper.findApplianceById(id);
     }
 
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     @Override
     public boolean importExcel(File file) {
         if (!file.exists()) {
@@ -75,7 +85,10 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
             String searchName = map.getString(SearchConstants.SEARCH_SEARCH_NAME);
             String departmentType = map.getString(SearchConstants.SEARCH_DEPARTMENT_TYPE);
             String packageType = map.getString(SearchConstants.SEARCH_PACKAGE_TYPE);
-            return applianceMapper.listApplianceByCondition(name, searchName, departmentType, packageType, storeId);
+            if (StringUtil.isNotBlank(searchName)) {
+                searchName = searchName.toUpperCase();
+            }
+            return applianceMapper.listApplianceByCondition(name.trim(), searchName, departmentType, packageType, storeId);
         } else {
             return applianceMapper.listAllAppliance(storeId);
         }
@@ -91,15 +104,14 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     }
 
     @Override
-    public List<Appliance> findByNameAndCode(String name, int departmentTypeCode, Long packageTypeId) {
-        if (StringUtil.isBlank(name) || departmentTypeCode == 0 || null == packageTypeId){
+    public List<Appliance> findByNameAndCode(String name, int departmentTypeCode) {
+        if (StringUtil.isBlank(name) || departmentTypeCode == 0) {
             return Lists.newArrayList();
         }
         Example example = new Example(Appliance.class);
         example.createCriteria().andCondition("DEPARTMENT_TYPE_CODE=" + departmentTypeCode)
-                .andCondition("NAME='"+name.trim()+"'")
-                .andCondition("PACKAGE_TYPE_ID="+packageTypeId)
-                .andCondition("DELETE_FLAG="+Constant.NORMAL);
+                .andCondition("NAME='" + name.trim() + "'")
+                .andCondition("DELETE_FLAG=" + Constant.NORMAL);
         return applianceMapper.selectByExample(example);
     }
 
@@ -140,26 +152,81 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
 
     private void createAndSave(Map<String, Object> map) {
         String chName = map.get(EXCEL_TITLE[0]).toString();
+        logger.info("器械名称 = " + chName);
         String departmentTypeName = map.get(EXCEL_TITLE[1]).toString();
-        logger.info("departmentTypeName = " + departmentTypeName);
-        ApplianceDepartmentType departmentType = applianceDepartmentTypeMapper.findByName(departmentTypeName.trim());
-        int departmentTypeCode = departmentType.getCode();
+        logger.info("类别 = " + departmentTypeName);
+        int departmentTypeCode = getDepartmentTypeCode(departmentTypeName.trim());
         String packageTypeName = map.get(EXCEL_TITLE[2]).toString();
-        logger.info("packageTypeName = " + packageTypeName);
-        AppliancePackageType packageType = appliancePackageTypeService.findByName(packageTypeName.trim());
-        Long packageTypeCode = packageType.getId();
+        logger.info("包装类型 = " + packageTypeName);
+        Long packageTypeId = getPackageTypeId(packageTypeName.trim());
         //重复数据校验
-        List<Appliance> applianceList = findByNameAndCode(chName, departmentTypeCode, packageTypeCode);
+        List<Appliance> applianceList = findByNameAndCode(chName, departmentTypeCode);
         if (null != applianceList && applianceList.size() > 0) {
             return;
         }
         Appliance appliance = new Appliance();
+        appliance.init();
         appliance.setName(chName);
         appliance.setSearchName(StringUtil.getSearchName(chName));
         appliance.setDepartmentTypeCode(departmentTypeCode);
-        appliance.setPackageTypeId(packageTypeCode);
-        appliance.setCreateTime(new Date());
-        appliance.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+        appliance.setPackageTypeId(packageTypeId);
         save(appliance);
+    }
+
+    private Long getPackageTypeId(String packageTypeName) {
+        AppliancePackageType packageType = appliancePackageTypeService.findByName(packageTypeName);
+        //如果包装类别不存在，则新增
+        Long packageTypeId = null;
+        if (null == packageType) {
+            try {
+                packageTypelock.lock();
+                packageTypeId = newPackageTypeIdMap.get(packageTypeName);
+                if (null == packageTypeId) {
+                    packageType = new AppliancePackageType();
+                    packageType.init();
+                    packageType.setName(packageTypeName);
+                    appliancePackageTypeService.save(packageType);
+                    packageTypeId = packageType.getId();
+                    newPackageTypeIdMap.put(packageTypeName, packageTypeId);
+                }
+            } finally {
+                packageTypelock.unlock();
+            }
+        } else {
+            packageTypeId = packageType.getId();
+        }
+        return packageTypeId;
+    }
+
+    private int getDepartmentTypeCode(String departmentTypeName) {
+        ApplianceDepartmentType departmentType = applianceDepartmentTypeMapper.findByName(departmentTypeName);
+        int departmentTypeCode = 0;
+        if (null == departmentType) {
+            try {
+                departmentTypelock.lock();
+                Integer departmentTypeCodeObj = newDepartmentTypeCodeMap.get(departmentTypeName);
+                if (departmentTypeCodeObj == null) {
+                    Integer currentMaxCode = applianceDepartmentTypeMapper.findMaxCode();
+                    if (null == currentMaxCode) {
+                        departmentTypeCode = 1;
+                    } else {
+                        departmentTypeCode = currentMaxCode + 1;
+                    }
+
+                    departmentType = new ApplianceDepartmentType();
+                    departmentType.setCode(departmentTypeCode);
+                    departmentType.setName(departmentTypeName);
+                    applianceDepartmentTypeMapper.save(departmentType);
+                    newDepartmentTypeCodeMap.put(departmentTypeName, departmentTypeCode);
+                } else {
+                    departmentTypeCode = departmentTypeCodeObj;
+                }
+            } finally {
+                departmentTypelock.unlock();
+            }
+        } else {
+            departmentTypeCode = departmentType.getCode();
+        }
+        return departmentTypeCode;
     }
 }
