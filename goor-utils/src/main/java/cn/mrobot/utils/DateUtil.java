@@ -15,8 +15,8 @@ import java.util.Locale;
 
 public class DateUtil {
 
-    private Date startDate = new Date(new Date().getTime());
-    private Date endDate = new Date(new Date().getTime());
+    private Date startDate = new Date(System.currentTimeMillis());
+    private Date endDate = new Date(System.currentTimeMillis());
     private static final Logger LOGGER = LoggerFactory.getLogger(DateUtil.class);
     private final static String LONGDATE_FORMAT = "EEE, d MMM yyyy HH:mm:ss Z";
 
@@ -45,8 +45,8 @@ public class DateUtil {
     public static Date getZeroClockOfDate(Date date) {
         GregorianCalendar gc = new GregorianCalendar();
         gc.setTime(date);
-        Date dateZero = new Date(date.getTime() - gc.get(gc.HOUR_OF_DAY) * 60 * 60
-                * 1000 - gc.get(gc.MINUTE) * 60 * 1000 - gc.get(gc.SECOND)
+        Date dateZero = new Date(date.getTime() - gc.get(GregorianCalendar.HOUR_OF_DAY) * 60 * 60
+                * 1000 - gc.get(GregorianCalendar.MINUTE) * 60 * 1000 - gc.get(GregorianCalendar.SECOND)
                 * 1000);
         return new Date(dateZero.getTime());
     }
@@ -60,12 +60,12 @@ public class DateUtil {
     public static Date getNextDayOfDate(Date date, int hour, int minute, int second) {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(date);
-        calendar.add(calendar.DATE, 1);//把日期往后增加一天.整数往后推,负数往前移动
+        calendar.add(GregorianCalendar.DATE, 1);//把日期往后增加一天.整数往后推,负数往前移动
         date = calendar.getTime();   //这个时间就是日期往后推一天的结果
         calendar.setTime(date);
-        calendar.set(calendar.HOUR_OF_DAY, hour);
-        calendar.set(calendar.MINUTE, minute);
-        calendar.set(calendar.SECOND, second);
+        calendar.set(GregorianCalendar.HOUR_OF_DAY, hour);
+        calendar.set(GregorianCalendar.MINUTE, minute);
+        calendar.set(GregorianCalendar.SECOND, second);
         return calendar.getTime();
     }
 
@@ -134,7 +134,7 @@ public class DateUtil {
 
     public static Date getDate() {
 
-        return new Date(new Date().getTime());
+        return new Date(System.currentTimeMillis());
 
     }
 
