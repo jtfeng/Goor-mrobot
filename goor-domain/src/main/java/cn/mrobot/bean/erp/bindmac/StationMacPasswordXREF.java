@@ -1,24 +1,23 @@
-package cn.mrobot.bean.erp.password;
+package cn.mrobot.bean.erp.bindmac;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.util.Date;
 
 /**
- *
+ *  手术室 ：  电脑MAC和手术室的绑定关系
  * @author Jelynn
  * @date 2017/12/7
  */
-@Table(name = "ERP_STATION_PAD_PASSWORD_XREF")
-public class OperationPadPasswordXREF extends BaseBean{
+@Table(name = "ERP_STATION_MAC_PASSWORD_XREF")
+public class StationMacPasswordXREF extends BaseBean{
 
     private String password;
 
     private String mac;
-
-    private Long stationId;
 
     private int type;  //1:无菌器械室  2：手术室
 
@@ -41,14 +40,6 @@ public class OperationPadPasswordXREF extends BaseBean{
         this.mac = mac;
     }
 
-    public Long getStationId() {
-        return stationId;
-    }
-
-    public void setStationId(Long stationId) {
-        this.stationId = stationId;
-    }
-
     public Station getStation() {
         return station;
     }
@@ -63,5 +54,30 @@ public class OperationPadPasswordXREF extends BaseBean{
 
     public void setType(int type) {
         this.type = type;
+    }
+
+
+    public enum  Type{
+        ASEPTIC_APPARATUS_ROOM(1),
+        OPERATION(2);
+
+        private int code;
+
+        private Type(int code){
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
+
+        public void setCode(int code) {
+            this.code = code;
+        }
+    }
+
+    public void init(){
+        this.setCreateTime(new Date());
+        this.setStoreId(100L);
     }
 }

@@ -9,7 +9,7 @@ import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.bean.erp.password.OperationPadPasswordXREF;
+import cn.mrobot.bean.erp.bindmac.StationMacPasswordXREF;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
@@ -18,7 +18,7 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.area.station.service.StationStationXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
-import cn.muye.erp.password.service.OperationPadPasswordXREFService;
+import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
@@ -64,7 +64,7 @@ public class StationController {
     private RobotService robotService;
 
     @Autowired
-    private OperationPadPasswordXREFService operationPadPasswordXREFService;
+    private StationMacPasswordXREFService stationMacPasswordXREFService;
     /**
      * 分页查询资源
      *
@@ -173,27 +173,12 @@ public class StationController {
                 return AjaxResult.failed("该类型站点不存在。caption=" + caption);
             }
             List<Station> stationList = stationService.listStationsByStationTypeCode(caption);
-            //添加站是否绑定pad标识
-            List<Station> result = hasBindPad(stationList);
-            return AjaxResult.success(result, "查询成功");
+            return AjaxResult.success(stationList, "查询成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("查询列表失败");
         }
     }
-
-    private List<Station> hasBindPad(List<Station> stationList) {
-        for (int i = 0; i < stationList.size(); i ++){
-            Station station = stationList.get(i);
-            List<OperationPadPasswordXREF> list = operationPadPasswordXREFService.findByStationId(station.getId());
-            if (list != null && list.size() > 0){
-                station.setBindingState(true);
-            }
-            stationList.set(i, station);
-        }
-        return stationList;
-    }
-
 
     /**
      * 新增或修改站

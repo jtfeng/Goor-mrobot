@@ -50,6 +50,11 @@ public class Station extends BaseBean{
      */
     private String resscene;
 
+    /**
+     * 机器人是否可达
+     */
+    private int robotAccess;  //0：机器人可达，1 ：机器人不可达
+
     public Long getSceneId() {
         return sceneId;
     }
@@ -190,5 +195,13 @@ public class Station extends BaseBean{
 
     public void setBindingState(boolean bindingState) {
         this.bindingState = bindingState;
+    }
+
+    public int getRobotAccess() {
+        return robotAccess;
+    }
+
+    public void setRobotAccess(int robotAccess) {
+        this.robotAccess = robotAccess;
     }
 }
