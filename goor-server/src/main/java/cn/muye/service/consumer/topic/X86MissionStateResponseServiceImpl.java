@@ -20,6 +20,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by abel on 17-7-18.
  */
@@ -148,20 +150,36 @@ public class X86MissionStateResponseServiceImpl
                         }
                         missionTaskService.updateSelective(missionTask);
                         //判断当前如果关联了order detail,则置状态
-                        if (MissionFuncsServiceImpl.MissionStateFinished.equalsIgnoreCase(en.getState()) &&
-                                !StringUtil.isNullOrEmpty(missionTask.getOrderDetailMission()) &&
+                        if (!StringUtil.isNullOrEmpty(missionTask.getOrderDetailMission()) &&
                                 !MissionFuncsServiceImpl.str_zero.equalsIgnoreCase(missionTask.getOrderDetailMission())){
-                            //
                             Long id = null;
                             try {
                                 id = Long.valueOf(missionTask.getOrderDetailMission());
                             } catch (NumberFormatException e) {
                                 logger.error("设置order detail失败。id转换失败。mission id is: "+ missionTask.getId());
                             }
-                            if (id != null){
-                                //设置order detail的单子状态为完成
-                                logger.info("### set finishedDetailTask " + id);
-                                orderDetailService.finishedDetailTask(id, OrderConstant.ORDER_DETAIL_STATUS_GET);
+                            if(MissionFuncsServiceImpl.MissionStateFinished.equalsIgnoreCase(en.getState())){
+                                if (id != null){
+                                    //设置order detail的单子状态为完成
+                                    logger.info("### set finishedDetailTask " + id);
+                                    orderDetailService.finishedDetailTask(id, OrderConstant.ORDER_DETAIL_STATUS_GET);
+                                }
+
+                            } else if(MissionFuncsServiceImpl.MissionStateCanceled.equalsIgnoreCase(en.getState())){
+                                //在此之前判断missionItem的状态值
+                                List<MissionItemTask> missionItemTaskList = missionItemTaskService.findByListIdAndMissionId(missionListTask.getId(),missionTask.getId());
+                                if(missionItemTaskList.size() == 1){
+                                    MissionItemTask missionItemTask = missionItemTaskList.get(0);
+                                    //cancel 状态下
+                                    if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
+                                            ||missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload)){
+                                        if (id != null){
+                                            //设置order detail的单子状态为完成
+                                            logger.info("### set finishedDetailTask " + id);
+                                            orderDetailService.finishedDetailTask(id, OrderConstant.ORDER_DETAIL_STATUS_GET);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

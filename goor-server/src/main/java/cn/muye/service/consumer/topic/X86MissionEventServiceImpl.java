@@ -85,8 +85,6 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                         //update MissionItemTask
                         String itemName = jsonLogMission.getMission_item_name();
                         if(itemName.equals(MissionFuncsServiceImpl.MissionItemName_load)
-                                || itemName.equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
-                                || itemName.equals(MissionFuncsServiceImpl.MissionItemName_unload)
                                 || itemName.equals(MissionFuncsServiceImpl.MissionItemName_finalUnload)){
                             if(jsonLogMission.getEvent().equals(LogMission.event_start_success)){
                                 MissionItemTask missionItemTask = new MissionItemTask();
@@ -97,6 +95,19 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                                 MissionItemTask missionItemTask = new MissionItemTask();
                                 missionItemTask.setMissionId(jsonLogMission.getMission_item_id());
                                 missionItemTask.setFinishDate(new Date(jsonLogMission.getTime()*1000L));
+                                missionItemTaskService.updateSelective(missionItemTask);
+                            }
+                        }else if ( itemName.equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
+                            || itemName.equals(MissionFuncsServiceImpl.MissionItemName_unload)){
+                            if(jsonLogMission.getEvent().equals(LogMission.event_start_success)){
+                                MissionItemTask missionItemTask = new MissionItemTask();
+                                missionItemTask.setMissionId(jsonLogMission.getMission_item_id());
+                                missionItemTask.setStartDate(new Date(jsonLogMission.getTime()*1000L));
+                                missionItemTaskService.updateSelective(missionItemTask);
+                            }else if(jsonLogMission.getEvent().equals(LogMission.event_cancel_success)) {
+                                MissionItemTask missionItemTask = new MissionItemTask();
+                                missionItemTask.setMissionId(jsonLogMission.getMission_item_id());
+                                missionItemTask.setFinishDate(new Date(jsonLogMission.getTime() * 1000L));
                                 missionItemTaskService.updateSelective(missionItemTask);
                             }
                         }
