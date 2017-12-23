@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author wlkfec
+ */
 @RestController
 @RequestMapping("roadPathLock")
 public class RoadPathLockController {
@@ -184,5 +187,18 @@ public class RoadPathLockController {
         }
     }
 
-
+    /**
+     * 手动释放路径锁  -  roadPathLock/cloudReleaseRoadPathLock/{robotId}
+     * @return
+     */
+    @GetMapping("/cloudReleaseRoadPathLock/{robotId}")
+    public AjaxResult cloudReleaseRoadPathLock(@PathVariable("robotId") String robotId) {
+        boolean releaseResult = false;
+        try {
+            releaseResult = roadPathLockService.cloudReleaseRoadPathLock(robotId);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+        return releaseResult ? AjaxResult.success("手动释放路径锁成功!") : AjaxResult.failed("手动释放路径锁失败!");
+    }
 }
