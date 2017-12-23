@@ -21,6 +21,7 @@
     <contextName>SpringBootDemo</contextName>
     <property name="LOG_PATH" value="/home/robot/agent" />
     <!--<property name="LOG_PATH" value="/Users/wlkfec/Desktop/goor_logback" />-->
+    <!--<property name="LOG_PATH" value="/Users/wlkfec/Desktop/goor_logback" />-->
     <!--<property name="LOG_PATH" value="E:\\logs" />-->
     <!--设置系统日志目录-->
     <property name="APPDIR" value="logs" />

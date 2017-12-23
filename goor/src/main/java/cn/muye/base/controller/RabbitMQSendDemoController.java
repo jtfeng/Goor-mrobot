@@ -82,7 +82,7 @@ public class RabbitMQSendDemoController {
 			Map<String,String> map = new HashMap<String,String>(){{
 				put("data", JSONObject.toJSONString(new HashMap<String,String>(){{
 					put("input_pwd","xxxxx");
-					put("sub_name","check_operate_pwd");
+					put("sub_name","cloud_assets_query");
 					put("uuid",UUID.randomUUID().toString().replace("-", ""));
 					put("msg","");
 					put("error_code","");

@@ -286,7 +286,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     }
 
     /**
-     * 云端主动释放指定机器人的路径锁
+     * 云端主动释放(手动释放)指定机器人的路径锁
      * @param robotCode
      * @return
      * @throws Exception
@@ -300,7 +300,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         // 表示最后的解锁结果
         boolean result = true;
         for (RoadPathLock roadPathLock: locks) {
-            result = result && unlockInnerNewVersion(roadPathLock.getId(), robotCode);
+            // 手动解锁机器人路径锁，调用同步方法完成
+            result = result && unlock(roadPathLock.getId(), robotCode);
         }
         return result;
     }
