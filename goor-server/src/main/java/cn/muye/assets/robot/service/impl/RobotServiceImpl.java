@@ -1,23 +1,36 @@
 package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
+import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.robot.*;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.dijkstra.RoadPathMaps;
+import cn.mrobot.bean.dijkstra.RoadPathResult;
+import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
+import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.bean.CurrentInfo;
+import cn.muye.area.map.bean.RosCurrentPose;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
+import cn.muye.area.point.service.impl.PointServiceImpl;
 import cn.muye.area.station.service.StationRobotXREFService;
+import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
 import cn.muye.assets.robot.service.RobotConfigService;
@@ -28,7 +41,9 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.dijkstra.service.RoadPathResultService;
 import cn.muye.log.base.LogInfoUtils;
+import cn.muye.util.PathUtil;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -81,6 +96,15 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     @Autowired
     private MessageSendHandleService messageSendHandleService;
+
+    @Autowired
+    private RoadPathResultService roadPathResultService;
+
+    @Autowired
+    private RoadPathService roadPathService;
+
+    @Autowired
+    private MapInfoService mapInfoService;
 
     public static final Lock lock1 = new ReentrantLock();
 
@@ -217,6 +241,115 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             super.updateSelective(availableRobot);
         }
         return availableRobot;
+    }
+
+    @Override
+    public RobotRoadPathResult getNearestAvailableRobotByOrder(Integer typeId, Order order) throws Exception {
+        StringBuffer stringBuffer = new StringBuffer();
+        //获取下单站ID
+        Long orderStationId = order.getStartStation().getId();
+
+        //根据下单站查询下单站可以调度的机器人
+        List<StationRobotXREF> list = stationRobotXREFService.getByStationId(orderStationId);
+        Robot availableRobot = null;
+        RobotRoadPathResult robotRoadPathResultReturn = null;
+
+        //站未绑定机器人直接返回
+        if(list == null || list.size() == 0) {
+            return null;
+        }
+
+        /**根据订单设置，有没有装货站来判断选哪个点作为下单的第一个目的地点**/
+
+        MapPoint pathStationPoint = PathUtil.getFirstPathStationPointByOrder(order, pointService);
+        if(pathStationPoint == null) {
+            stringBuffer.append("下单获取可用机器,失败。原因：下单信息错误，没有装货站且没有要去的站，无效订单。");
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            return null;
+        }
+        //查找与站点同属性的路径点，作为查询路径的终点
+        String sceneName = pathStationPoint.getSceneName();
+
+        //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
+        RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
+
+        if(roadPathMaps == null) {
+            stringBuffer.append("下单获取可用机器,失败。原因：未找到可供算法使用的图。");
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            return null;
+        }
+
+        List<RobotRoadPathResult> robotRoadPathResultList= new ArrayList<RobotRoadPathResult>();
+        //遍历循环机器人列表，按照空闲且距离远近排序
+        for(StationRobotXREF xref : list) {
+            Long robotId = xref.getRobotId();
+            Robot robotDb = getById(robotId);
+
+            //如果关联数据库机器人不存在
+            if(robotDb == null) {
+                continue;
+            }
+
+            RoadPathResult result = roadPathResultService.getNearestPathResultByRobotCode(robotDb, pathStationPoint, roadPathMaps);
+
+            //未找到路径,或者只找到一个点(工控路径至少两个点)则继续
+            if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
+                stringBuffer.append("下单获取可用机器：" + robotDb.getCode()  + "不可用。未找到机器人所在位置匹配的可到达目的地的路径！");
+                LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                continue;
+            }
+            RobotRoadPathResult robotRoadPathResult = new RobotRoadPathResult();
+            robotRoadPathResult.setRobot(robotDb);
+            robotRoadPathResult.setRoadPathResult(result);
+            robotRoadPathResultList.add(robotRoadPathResult);
+        }
+
+        if(robotRoadPathResultList == null || robotRoadPathResultList.size() == 0) {
+            stringBuffer.append("下单获取可用机器,失败。原因：未找到该站关联的可用机器人。");
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            return null;
+        }
+
+        //对查找出的路径结果进行从小到大排序
+        PathUtil.sortByRobotRoadPathResultList(robotRoadPathResultList);
+
+        //遍历排序后的结果集，依次取第一个可用的机器人作为下单机器人
+        for(RobotRoadPathResult robotRoadPathResult : robotRoadPathResultList) {
+            Robot robotDb = robotRoadPathResult.getRobot();
+
+            //todo 紧急制动以后在做
+            AjaxResult ajaxResult = testSendRobotMessage(robotDb);
+            if(ajaxResult == null || !ajaxResult.isSuccess() || robotDb.getBusy() || robotDb.isLowPowerState() ) {
+                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (ajaxResult != null && ajaxResult.isSuccess() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                continue;
+            }
+
+            //if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
+            if(typeId != null){
+                if(robotDb.getTypeId().equals(typeId)){
+                    availableRobot = robotDb;
+                }else {
+                    stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：机器人类型不匹配");
+                    LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                    continue;
+                }
+            }else{
+                availableRobot = robotDb;
+                //如果找到了可用机器人，就返回结果
+                robotRoadPathResultReturn = robotRoadPathResult;
+            }
+            stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            break;
+        }
+        if (availableRobot != null) {
+            availableRobot.setBusy(true);
+            super.updateSelective(availableRobot);
+            robotRoadPathResultReturn.setRobot(availableRobot);
+        }
+
+        return robotRoadPathResultReturn;
     }
 
     /**

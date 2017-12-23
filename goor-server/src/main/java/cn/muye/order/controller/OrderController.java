@@ -11,6 +11,7 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
 import cn.mrobot.bean.order.*;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
@@ -29,7 +30,6 @@ import cn.muye.base.controller.BaseController;
 import cn.muye.order.bean.*;
 import cn.muye.order.service.*;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
-import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -182,8 +182,10 @@ public class OrderController extends BaseController {
                 robotTypeId = goodsType.getRobotTypeId();
             }
             //根据 站点id 和 机器人类型 自动选择机器人
-            arrangeRobot = robotService.getAvailableRobotByStationId(stationId, robotTypeId);
-//            arrangeRobot = robotService.getNearestAvailableRobotByStationId(stationId, robotTypeId);
+//            arrangeRobot = robotService.getAvailableRobotByStationId(stationId, robotTypeId);
+            RobotRoadPathResult robotRoadPathResult = robotService.getNearestAvailableRobotByOrder(robotTypeId, order);
+            order.setRobotRoadPathResult(robotRoadPathResult);
+            arrangeRobot = robotRoadPathResult == null ? null : robotRoadPathResult.getRobot();
 //            arrangeRobot = robotService.findById(323L);
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功

@@ -17,6 +17,13 @@ public class Constant {
     //排序索引默认值
     public static final int INDEX_ZERO = 0;
 
+    //工控TH，默认认为有效的小数位数
+    public static final int TH_SCALE = 3;
+    public static final int XYZ_SCALE = 3;
+
+    //工控固定路径导航可以开始的范围，单位mm
+    public static final Long PATH_NAVIGATION_SCALE = 1500L;
+
     public static final String REQUEST = "request";
 
     //数据库数据删除状态

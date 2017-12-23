@@ -75,7 +75,7 @@ public interface RoadPathService extends BaseService<RoadPath> {
 
     List<RoadPath> listRoadPathByStartAndEndPoint(Long startPoint, Long endPoint, String sceneName, String mapName, Integer pathType) throws Exception;
 
-    List<RoadPath> listRoadPaths(WhereRequest whereRequest) throws Exception;
+    List<RoadPath> listRoadPaths(WhereRequest whereRequest, Long storeId) throws Exception;
 
     Boolean hasRelatedRoadPath(Long id);
 
@@ -87,7 +87,7 @@ public interface RoadPathService extends BaseService<RoadPath> {
      * @param pathType
      * @return
      */
-    List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType);
+    List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType, Long storeId);
 
     /**
      * 为了算法使用的排序查询路径方法
@@ -95,15 +95,23 @@ public interface RoadPathService extends BaseService<RoadPath> {
      * @param pathType
      * @return
      */
-    List<RoadPath> listRoadPathsBySceneNamePathTypeOrderByStart(String sceneName, Integer pathType);
+    List<RoadPath> listRoadPathsBySceneNamePathTypeOrderByStart(String sceneName, Integer pathType, Long storeId);
 
-    RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName);
+    /**
+     * 根据场景、路径类型查询路径详细列表
+     * @param sceneName
+     * @param pathType
+     * @return
+     */
+    List<RoadPathDetail> listRoadPathDetailsBySceneNamePathType(String sceneName, Integer pathType, Long storeId);
+
+    RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName, Long storeId);
 
     /**
      * 删除某场景下的所有路径对象
      * @param sceneName
      */
-    void deleteBySceneName(String sceneName);
+    void deleteBySceneName(String sceneName, Long storeId);
 
     /**
      * 删除某场景某类型的所有路径对象
@@ -111,7 +119,7 @@ public interface RoadPathService extends BaseService<RoadPath> {
      * @param pathType
      * @param mapName
      */
-    void deleteBySceneMapNameType(String sceneName, Integer pathType, String mapName);
+    void deleteBySceneMapNameType(String sceneName, Integer pathType, String mapName, Long storeId);
 
     /**
      * 删除某场景下，某类型的
@@ -120,5 +128,5 @@ public interface RoadPathService extends BaseService<RoadPath> {
      * @param pathType
      * @param sceneName
      */
-    void deleteByStartEndPointIdType(Long startPointId, Long endPointId, Integer pathType, String sceneName);
+    void deleteByStartEndPointIdType(Long startPointId, Long endPointId, Integer pathType, String sceneName, Long storeId);
 }

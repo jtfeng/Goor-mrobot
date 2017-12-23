@@ -5,6 +5,7 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.base.BaseBean;
+import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
 
 import javax.persistence.Transient;
 import java.util.Date;
@@ -37,8 +38,19 @@ public class Order extends BaseBean{
     @Transient
     private Long applyOrderId;  //申请订单id
 
+    //对应robot及其到目的地的路径规划
+    @Transient
+    private RobotRoadPathResult robotRoadPathResult;
 
     public Order() {
+    }
+
+    public RobotRoadPathResult getRobotRoadPathResult() {
+        return robotRoadPathResult;
+    }
+
+    public void setRobotRoadPathResult(RobotRoadPathResult robotRoadPathResult) {
+        this.robotRoadPathResult = robotRoadPathResult;
     }
 
     public Scene getScene() {

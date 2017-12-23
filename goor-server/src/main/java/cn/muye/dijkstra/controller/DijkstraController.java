@@ -4,7 +4,6 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.elevator.Elevator;
-import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
@@ -24,6 +23,7 @@ import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -34,11 +34,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -61,7 +57,7 @@ public class DijkstraController {
     @Autowired
     private SceneService sceneService;
     @Autowired
-    private RoadPathResultService dijkstraService;
+    private RoadPathResultService roadPathResultService;
     /**
      * 读取工控路径文件并入库，相同坐标点重复加
      * @return
@@ -91,9 +87,8 @@ public class DijkstraController {
                         List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
                         roadPathService.saveOrUpdateRoadPathByPathDTOListDuplicatePoint(pathDTOList,sceneName);
 
-                        //清空路径图的缓存
-                        CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
-
+                        //清空某场景、某门店下的路径相关的缓存
+                        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
@@ -134,8 +129,8 @@ public class DijkstraController {
                         List<PathDTO> pathDTOList = JSONArray.parseArray(paths, PathDTO.class);
                         roadPathService.saveOrUpdateRoadPathByPathDTOListNoDuplicatePoint(pathDTOList,sceneName);
 
-                        //清空路径图的缓存
-                        CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+                        //清空某场景、某门店下的路径相关的缓存
+                        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
 
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
@@ -200,8 +195,8 @@ public class DijkstraController {
                 return ajaxResult;
             }
 
-            //清空路径图的缓存
-            CacheInfoManager.removeRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+            //清空某场景、某门店下的路径相关的缓存
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
 
             return AjaxResult.success("执行完毕，若同一部电梯关联的四点对象少于两个，则不会生成");
         } catch (Exception e) {
@@ -261,7 +256,7 @@ public class DijkstraController {
                 }
                 for(MapPoint startStationPoint : mapPoints) {
                     //查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
-                    MapPoint startPoint = PointServiceImpl.findPathPointByXYTH(sceneName,startStationPoint.getMapName(),
+                    MapPoint startPoint = PathUtil.findPathPointByXYTH(sceneName,startStationPoint.getMapName(),
                             startStationPoint.getX(),startStationPoint.getY(),startStationPoint.getTh(),null, pointService);
                     //没找到与站点相同的可用路径点，则跳过
                     if(startPoint == null) {
@@ -278,7 +273,7 @@ public class DijkstraController {
 
                         for(MapPoint endStationPoint : mapPoints1) {
                             //查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
-                            MapPoint endPoint = PointServiceImpl.findPathPointByXYTH(sceneName,endStationPoint.getMapName(),
+                            MapPoint endPoint = PathUtil.findPathPointByXYTH(sceneName,endStationPoint.getMapName(),
                                     endStationPoint.getX(),endStationPoint.getY(),endStationPoint.getTh(),null, pointService);
                             //没找到与站点相同的可用路径点，则跳过
                             if(endPoint == null) {
@@ -294,7 +289,7 @@ public class DijkstraController {
                                 continue;
                             }
 
-                            result = dijkstraService.getShortestCloudRoadPathForMission(startPoint, endPoint,roadPathMaps,result);
+                            result = roadPathResultService.getShortestCloudRoadPathForMission(startPoint, endPoint,roadPathMaps,result);
 
                             //未找到路径,或者只找到一个点(工控路径至少两个点)则继续
                             if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
@@ -351,7 +346,7 @@ public class DijkstraController {
     @ResponseBody
     public AjaxResult testGetStationPoint(Long id) {
         MapPoint endStationPoint = pointService.findById(id);
-        MapPoint endPoint = PointServiceImpl.findPathPointByXYTH(endStationPoint.getSceneName(),endStationPoint.getMapName(),
+        MapPoint endPoint = PathUtil.findPathPointByXYTH(endStationPoint.getSceneName(),endStationPoint.getMapName(),
                 endStationPoint.getX(),endStationPoint.getY(),endStationPoint.getTh(),null, pointService);
         return AjaxResult.success(endPoint);
     }
@@ -372,7 +367,7 @@ public class DijkstraController {
                 return AjaxResult.failed("未找到该云端场景下的工控路径");
             }
             RoadPathResult result = null;
-            result = dijkstraService.getShortestCloudRoadPathForMission(startPointId, endPointId,roadPathMaps,result);
+            result = roadPathResultService.getShortestCloudRoadPathForMission(startPointId, endPointId,roadPathMaps,result);
             return AjaxResult.success(result);
         } catch (Exception e) {
             e.printStackTrace();

@@ -3,6 +3,8 @@ package cn.muye.assets.robot.service;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
+import cn.mrobot.bean.order.Order;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 
@@ -37,6 +39,16 @@ public interface RobotService extends BaseService<Robot>{
     AjaxResult updateRobotAndBindChargerMapPoint(Robot robot, Integer lowBatteryThresholdDb, Integer sufficientBatteryThresholdDb, Integer lowRobotBatteryThreshold, Integer sufficientRobotBatteryThreshold, String robotCodeDb);
 
     Robot getAvailableRobotByStationId(Long stationId, Integer typeId) throws RuntimeException;
+
+    /**
+     * 由站点ID查询离订单第一个目的地点最近的可用在线的机器人
+     * 当订单的设置里面装货站为空的时候，取目的地列表的第一个作为目的地；当订单设置的装货站不为空的时候，取装货点作为目的地。
+     * @param typeId 点类型
+     * @param order
+     * @return
+     * @throws Exception
+     */
+    RobotRoadPathResult getNearestAvailableRobotByOrder(Integer typeId, Order order) throws Exception;
 
     /**
      * 根据站ID获取可用机器人数量

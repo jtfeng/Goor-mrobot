@@ -93,6 +93,12 @@ public class MapPoint extends BaseBean {
 
     private int deleteFlag;
 
+    public MapPoint() {}
+
+    public MapPoint(Long pointId) {
+        this.setId(pointId);
+    }
+
     public String getPointName() {
         return pointName;
     }

@@ -3,13 +3,27 @@ package cn.muye.dijkstra.service.impl;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.state.enums.ModuleEnums;
+import cn.mrobot.utils.StringUtil;
+import cn.muye.area.map.bean.CurrentInfo;
+import cn.muye.area.map.bean.Orientation;
+import cn.muye.area.map.bean.Position;
+import cn.muye.area.map.bean.RosCurrentPose;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
+import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.log.base.LogInfoUtils;
+import cn.muye.util.PathUtil;
+import com.alibaba.fastjson.JSON;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +39,13 @@ import java.util.List;
 @Service
 @Transactional
 public class RoadPathResultServiceImpl implements RoadPathResultService {
-    private static final Logger log = LoggerFactory.getLogger(RoadPathResultServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoadPathResultServiceImpl.class);
     @Autowired
     private RoadPathService roadPathService;
     @Autowired
     private PointService pointService;
+    @Autowired
+    private MapInfoService mapInfoService;
 
     /**
      * 遍历result的点序列，两点间有云端路径的话，把云端路径点添加到两点间
@@ -141,14 +157,102 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
             return result;
         }
-        //TODO 遍历result的点序列，替换为根据坐标、场景、地图名查找到的门等待点的点
+        //遍历result的点序列，替换为根据坐标、场景、地图名查找到的门等待点的点
         addCloudRoadPathPoint(result);
         replaceDoorWaitPoint(result , MapPointType.DOOR_WAIT);
+        result.setStartPoint(new MapPoint(startPointId));
+        result.setEndPoint(new MapPoint(endPointId));
         return result;
     }
 
     @Override
     public RoadPathResult getShortestCloudRoadPathForMission(MapPoint startPoint, MapPoint endPoint, RoadPathMaps roadPathMaps, RoadPathResult result) throws Exception {
         return getShortestCloudRoadPathForMission(startPoint.getId(),endPoint.getId(),roadPathMaps,result);
+    }
+
+    @Override
+    public RoadPathResult getNearestPathResultByRosCurrentPose(RoadPathMaps roadPathMaps, RosCurrentPose rosCurrentPose, MapPoint targetPoint, String sceneName, String mapName) throws Exception {
+        Orientation orientation = rosCurrentPose.getOrientation();
+        if(orientation == null) {
+            LOGGER.info("==============解析机器人坐标角度为空。");
+            return null;
+        }
+        Position position = rosCurrentPose.getPosition();
+        if(position == null) {
+            LOGGER.info("==============解析机器人坐标为空。");
+            return null;
+        }
+
+        //根据四元数换算欧拉角
+        double th = PathUtil.calThByOrientation(orientation);
+        LOGGER.info("================四元数w=" + orientation.getW() + ",换算的欧拉角(弧度)=" + th);
+        //我们认为保留3位小数换算出来TH，作为比较条件，后面几位精度基本可以忽略了
+        MapPoint rosPoint = PathUtil.findPathPointByXYTH(sceneName, mapName ,
+                PathUtil.floorDoubleByScale(position.getX(), Constant.XYZ_SCALE),
+                PathUtil.floorDoubleByScale(position.getY(), Constant.XYZ_SCALE),
+                PathUtil.floorDoubleByScale(th,Constant.TH_SCALE),
+                null, pointService );
+
+        RoadPathResult roadPathResult = new RoadPathResult();
+        roadPathResult.setEndPoint(targetPoint);
+        //如果精确匹配到了路径点，那么就返回匹配到的点，理论上机器人上传的应该还是误差挺大的
+        if(rosPoint != null) {
+            LOGGER.info("//==================找到与机器人位置相匹配的路径点" + rosPoint.getPointAlias()
+                    + ",mapName:" + rosPoint.getMapName() + ",sceneName:" + rosPoint.getSceneName());
+            //查询可用的任务路径(替换过门点和电梯点)
+            roadPathResult = getShortestCloudRoadPathForMission(rosPoint.getId(), targetPoint.getId(), roadPathMaps, roadPathResult);
+            roadPathResult.setStartPoint(rosPoint);
+            return roadPathResult;
+        }
+        //如果没有匹配到，则需要寻找离机器人位置点最近的路径点
+        else {
+            rosPoint = new MapPoint();
+            rosPoint.setY(position.getX());
+            rosPoint.setX(position.getY());
+            rosPoint.setTh(th);
+            rosPoint.setSceneName(sceneName);
+            rosPoint.setMapName(mapName);
+            LOGGER.info("//=================未找到与机器人位置相匹配的路径点，开始算法计算最近路径起点，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString());
+            //从缓存的路径去计算距离，然后取起点作为规划路径的代替点。
+            List<RoadPathDetail> roadPathDetails = CacheInfoManager.getRoadPathDetailsCache(SearchConstants.FAKE_MERCHANT_STORE_ID,
+                    sceneName, Constant.PATH_TYPE_X86, roadPathService);
+            if(roadPathDetails == null || roadPathDetails.size() == 0) {
+                LOGGER.info("==============未找到当前场景下的工控路径。");
+                return null;
+            }
+
+            //先计算离机器人位置最近的路径，然后计算路径起点到目的地点最近的路径起点作为输出
+            roadPathResult = PathUtil.calNearestPathPointByRoadPathDetails(roadPathMaps, roadPathDetails, rosPoint, targetPoint, this);
+            LOGGER.info("//=================算法计算最近路径起点结束，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString());
+            return roadPathResult;
+        }
+    }
+
+    @Override
+    public RoadPathResult getNearestPathResultByRobotCode(Robot robotDb, MapPoint targetPoint, RoadPathMaps roadPathMaps) throws Exception {
+        StringBuffer stringBuffer = new StringBuffer();
+        //获取机器人坐标
+        CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotDb.getCode());
+        String pose = currentInfo.getPose();
+        if(pose == null || StringUtil.isNullOrEmpty(pose)) {
+            stringBuffer.append("下单获取可用机器：" + robotDb.getCode()  + "不可用。未获取到机器人坐标！");
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            return null;
+        }
+
+        RosCurrentPose rosCurrentPose = null;
+        try {
+            rosCurrentPose = JSON.parseObject(pose,RosCurrentPose.class);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            stringBuffer.append("下单获取可用机器：" + robotDb.getCode()  + "不可用。获取到的机器人坐标格式解析错误！");
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            return null;
+        }
+
+        //通过机器人所在位置找到最近的路径的起点作为机器人的出发点，并计算出结果
+        RoadPathResult result = getNearestPathResultByRosCurrentPose(roadPathMaps ,rosCurrentPose,
+                targetPoint,currentInfo.getMapInfo().getSceneName(), currentInfo.getMapInfo().getMapName());
+        return result;
     }
 }

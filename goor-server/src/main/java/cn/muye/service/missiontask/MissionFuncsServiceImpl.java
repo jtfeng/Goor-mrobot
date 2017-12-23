@@ -11,13 +11,18 @@ import cn.mrobot.bean.assets.elevator.ElevatorModeEnum;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.dijkstra.RoadPathMaps;
+import cn.mrobot.bean.dijkstra.RoadPathResult;
+import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.mission.*;
 import cn.mrobot.bean.mission.task.*;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
+import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionItemDTO;
 import cn.mrobot.dto.mission.MissionListDTO;
@@ -32,12 +37,16 @@ import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.dijkstra.service.RoadPathResultService;
 import cn.muye.dispatch.service.FeatureItemService;
+import cn.muye.log.base.LogInfoUtils;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
 import cn.muye.mission.service.MissionWarningService;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
+import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
@@ -90,6 +99,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
     @Autowired
     RoadPathService roadPathService;
+
+    @Autowired
+    RoadPathResultService roadPathResultService;
 
     @Autowired
     private EmployeeService employeeService;
@@ -1537,7 +1549,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         data.setId(x86RoadPathId);
         String sceneName = mp.getSceneName();
         String mapName = mp.getMapName();
-        RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName);
+        RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if(roadPath == null) {
             logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
         }
@@ -2718,7 +2730,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         HashMap<MapPoint, MPointAtts> mpAttrs = new HashMap<>();
 
         //根据订单信息搜集任务点
-        collectPathMapPoints(order, mapPoints, mpAttrs);
+        AjaxResult collectResult = collectPathMapPoints(order, mapPoints, mpAttrs);
+
+        if(collectResult == null || !collectResult.isSuccess()){
+            logger.info("##############  collectPathMapPoints failed #################" + collectResult.getMessage());
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return collectResult;
+        }
 
         //根据任务点及其属性完善任务列表
         MissionListTask missionListTask = new MissionListTask();
@@ -2757,11 +2775,11 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
      * @param mapPoints
      * @param mpAttrs
      */
-    private void collectPathMapPoints(
+    private AjaxResult collectPathMapPoints(
             Order order,
             List<MapPoint> mapPoints,
             HashMap<MapPoint, MPointAtts> mpAttrs) {
-
+        StringBuffer stringBuffer = new StringBuffer();
         logger.info("### order is: " + JsonUtils.toJson(order, new TypeToken<Order>(){}.getType()));
 
         MPointAtts atts;
@@ -2780,6 +2798,41 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
         }
 
+        Robot robot = order.getRobot();
+        if(robot == null) {
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "下单机器人参数错误。");
+        }
+
+
+        if(order.getScene() == null) {
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "失败！订单所属云端场景为空。");
+        }
+        String sceneName = order.getScene().getMapSceneName();
+        //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
+        RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
+
+        if(roadPathMaps == null) {
+            stringBuffer.append("规划路径失败。原因：未找到可供算法使用的图。");
+            LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "未找到规划图。");
+        }
+
+        //prePoint从机器人位置取
+        RoadPathResult result = null;
+        try {
+            MapPoint startPathPoint = PathUtil.getFirstPathStationPointByOrder(order, pointService);
+            result = roadPathResultService.getNearestPathResultByRobotCode(robot, startPathPoint, roadPathMaps);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径出错！");
+        }
+        if(result == null) {
+            stringBuffer.append("规划路径,失败。原因：规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
+            LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
+        }
+        prePoint = result.getStartPoint();
+
         //判断中间站点，如果有中间站点，添加中间站点的地图点，如果中间点跨楼层，则要在两个任务中间插入电梯任务
         if (order.getDetailList() != null){
             for (OrderDetail od :
@@ -2788,16 +2841,23 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         od.getStationId() != null) {
                     logger.info("###### begin get order detail station ");
                     if(Objects.equals(od.getPlace(), OrderConstant.ORDER_DETAIL_PLACE_START)){
+                        //如果没有装货站，则跳过
+                        if(order.getOrderSetting().getStartStation() == null
+                                || order.getOrderSetting().getStartStation().getId() == null) {
+                            continue;
+                        }
+
                         //首先插入起点
                         Long stationId = order.getOrderSetting().getStartStation().getId();
                         MapPoint startPoint = pointService.findMapPointByStationIdAndCloudType(stationId, MapPointType.LOAD.getCaption());
 
-                        //判断充电点和起点的关系，加入相关任务
+                        /*//判断充电点和起点的关系，加入相关任务
                         if (chargePoint != null){
                             prePoint = chargePoint;
                         }else{
                             prePoint = null;
-                        }
+                        }*/
+
                         //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
                         addPathRoadPathPoint(startPoint, mapPoints, mpAttrs);
 
@@ -2813,6 +2873,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         }
                         logger.info("###### quhuo is ok ");
                     }else if(Objects.equals(od.getPlace(), OrderConstant.ORDER_DETAIL_PLACE_END)){
+                        //如果没有最终卸货站，则跳过
+                        if(order.getOrderSetting().getEndStation() == null
+                                || order.getOrderSetting().getEndStation().getId() == null) {
+                            continue;
+                        }
+
                         Long endStationId = order.getOrderSetting().getEndStation().getId();
                         MapPoint endPoint = pointService.findMapPointByStationIdAndCloudType(endStationId, MapPointType.FINAL_UNLOAD.getCaption());
                         if (endPoint != null) {
@@ -2867,6 +2933,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             }
                         }*/
 
+                        //TODO 将来根据订单是装货还是卸货任务去查询不同的任务类型
                         MapPoint songhuoPoint = pointService.findMapPointByStationIdAndCloudType(od.getStationId(), MapPointType.UNLOAD.getCaption());
                         if(songhuoPoint != null){
                             //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
@@ -2904,9 +2971,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 mpAttrs.put(chargePoint, atts);
                 logger.info("###### chongdian auto is ok ");
             }
-
-
         }
+
+        return AjaxResult.success();
     }
 
     /**
@@ -2926,27 +2993,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         }
 
         try {
-//            List<RoadPathDetail> roadPathDetails =
-//                    roadPathService.findRoadPathByStartAndEndPoint(
-//                            prePoint.getId(),
-//                            mp.getId(),
-//                            mp.getSceneName(),
-//                            null
-//                    );
-            List<RoadPathDetail> roadPathDetails =
-                    roadPathService.listRoadPathDetailByStartAndEndPointType(
-                            prePoint.getId(),
-                            mp.getId(),
-                            mp.getSceneName(),
-                            null,
-                            Constant.PATH_TYPE_CLOUD
-                    );
+            String sceneName = mp.getSceneName();
+            //获取从开始点到结束点的路径详细，如果数据库存在，则从数据库获取，如果数据库不存在，则实时计算
+            List<RoadPathDetail> roadPathDetails = PathUtil.getRoadPathDetailsByStartEnd(prePoint, mp, sceneName,
+                    SearchConstants.FAKE_MERCHANT_STORE_ID, roadPathService, roadPathResultService, pointService);
+
             //取第一个有效的进行任务插入
             MapPoint temp = null;
             if (roadPathDetails != null){
                 for (RoadPathDetail rpd :
                         roadPathDetails) {
-                    if (rpd != null &&
+                     if (rpd != null &&
                             rpd.getStart() != null &&
                             rpd.getEnd() != null &&
                             rpd.getRelatePoints() != null) {
@@ -3003,14 +3060,16 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             List<MapPoint> mapPoints,
             HashMap<MapPoint, MPointAtts> mpAttrs) {
         try {
-            List<RoadPath> roadPaths =
-                    roadPathService.listRoadPathByStartAndEndPoint(
-                            prePoint.getId(),
-                            point.getId(),
-                            prePoint.getSceneName(),
-                            prePoint.getMapName(),
-                            Constant.PATH_TYPE_X86
-                    );
+            Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+            Long startId = prePoint.getId();
+            Long endId = point.getId();
+            String sceneName = prePoint.getSceneName();
+            String mapName = prePoint.getMapName();
+            Integer pathType = Constant.PATH_TYPE_X86;
+            //从缓存取匹配的工控路径，如果不存在则从数据库查询
+            List<RoadPath> roadPaths = PathUtil.getRoadPathByStartEndType(startId, endId,
+                    pathType, mapName,  sceneName, storeId, roadPathService);
+
             if (roadPaths != null){
                 for (RoadPath rp :
                         roadPaths) {
@@ -3063,22 +3122,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             //楼层不一样，需要新增电梯任务
             MapPoint temp = new MapPoint();
             MapPoint.copyValue(temp,currentMp);
-//            temp.setCloudMapPointTypeId(currentMp.getCloudMapPointTypeId());
-//            temp.setDeleteFlag(currentMp.getDeleteFlag());
-//            temp.setICPointType(currentMp.getICPointType());
-//            temp.setLabel(currentMp.getLabel());
-//            temp.setMapName(currentMp.getMapName());
-//            temp.setMapPointTypeId(currentMp.getMapPointTypeId());
-//            temp.setMapZipId(currentMp.getMapZipId());
-//            temp.setPointAlias(currentMp.getPointAlias());
-//            temp.setPointLevel(currentMp.getPointLevel());
-//            temp.setPointName(currentMp.getPointName());
-//            temp.setSceneName(currentMp.getSceneName());
-//            temp.setStoreId(currentMp.getStoreId());
-//            temp.setTh(currentMp.getTh());
-//            temp.setX(currentMp.getX());
-//            temp.setY(currentMp.getY());
-            //
             mapPoints.add(temp);
             //标记该点的属性
             MPointAtts atts = new MPointAtts();
@@ -3594,7 +3637,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 String sceneName = door.getoPoint().getSceneName();
                                 String mapName = door.getoPoint().getMapName();
                                 path.setMap_name(mapName);
-                                RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName);
+                                RoadPath roadPath = roadPathService.findBySceneAndX86RoadPathId(x86RoadPathId,sceneName,mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
                                 if(roadPath == null) {
                                     logger.error("###find roadPath error###,x86RoadPathId: {}, sceneName: {} roadPath not found!!" , x86RoadPathId,sceneName);
                                 }

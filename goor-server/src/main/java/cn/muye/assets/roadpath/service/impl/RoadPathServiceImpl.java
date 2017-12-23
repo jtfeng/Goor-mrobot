@@ -8,7 +8,6 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.dto.area.PathDTO;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.area.fixpath.service.impl.FixPathServiceImpl;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
@@ -19,6 +18,7 @@ import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -125,6 +124,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 this.roadPathMapper.insert(roadPath);
             }
 
+            //清空某场景、某门店下的路径相关的缓存
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -194,7 +195,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 log.info("当前更新的数据记录条数为 ：" + updateCount);
             }
 
-
+            //清空某场景、某门店下的路径相关的缓存
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -270,12 +272,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public List<RoadPath> listRoadPaths(WhereRequest whereRequest) throws Exception {
+    public List<RoadPath> listRoadPaths(WhereRequest whereRequest, Long storeId) throws Exception {
 
         PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID);
+        criteria.andCondition("STORE_ID =", storeId);
         // 判断分页查询的时候是否有传入查询关键字
         if (whereRequest.getQueryObj() != null && !"".equals(whereRequest.getQueryObj().trim())) {
             JSONObject queryObject = JSONObject.parseObject(whereRequest.getQueryObj());
@@ -325,7 +327,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName) {
+    public RoadPath findBySceneAndX86RoadPathId(Long x86RoadPathId, String sceneName, String mapName, Long storeId) {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         if (sceneName != null) {
@@ -337,13 +339,16 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (x86RoadPathId != null) {
             criteria.andCondition("PATH_ID = ", x86RoadPathId);
         }
+        if(storeId != null) {
+            criteria.andCondition("STORE_ID = ", storeId);
+        }
         example.setOrderByClause("ID ASC");
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
         return roadPaths == null || roadPaths.size() == 0 ? null : roadPaths.get(0);
     }
 
     @Override
-    public List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType) {
+    public List<RoadPath> listRoadPathsBySceneNamePathType(String sceneName, Integer pathType, Long storeId) {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         if (sceneName != null) {
@@ -351,13 +356,16 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         }
         if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
+        }
+        if(storeId != null) {
+            criteria.andCondition("STORE_ID = ", storeId);
         }
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
         return roadPaths;
     }
 
     @Override
-    public List<RoadPath> listRoadPathsBySceneNamePathTypeOrderByStart(String sceneName, Integer pathType) {
+    public List<RoadPath> listRoadPathsBySceneNamePathTypeOrderByStart(String sceneName, Integer pathType, Long storeId) {
         Example example = new Example(RoadPath.class);
         Example.Criteria criteria = example.createCriteria();
         if (sceneName != null) {
@@ -366,9 +374,17 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         if (pathType != null) {
             criteria.andCondition("PATH_TYPE = ", pathType);
         }
+        if(storeId != null) {
+            criteria.andCondition("STORE_ID = ", storeId);
+        }
         example.setOrderByClause("START_POINT ASC,ID ASC");
         List<RoadPath> roadPaths = this.roadPathMapper.selectByExample(example);
         return roadPaths;
+    }
+
+    @Override
+    public List<RoadPathDetail> listRoadPathDetailsBySceneNamePathType(String sceneName, Integer pathType, Long storeId) {
+        return packageRoadPathDetail(listRoadPathsBySceneNamePathType(sceneName, pathType, storeId));
     }
 
     private List<RoadPathDetail> packageRoadPathDetail(List<RoadPath> roadPaths) {
@@ -404,6 +420,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     public void createRoadPathByRoadPathPointList(RoadPath roadPath,List<Long> roadPathPointIds) throws Exception {
         this.roadPathMapper.insert(roadPath);
         packageRoadPathRelations(roadPathPointIds, roadPath);
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
     }
 
     @Override
@@ -413,6 +431,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         criteria.andCondition("ID=" + roadPath.getId());
         this.roadPathMapper.updateByExampleSelective(roadPath,example);
         packageRoadPathRelations(roadPathPointIds, roadPath);
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
     }
 
     @Override
@@ -428,6 +448,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setId(roadPathDB.getId());
             updateRoadPathByRoadPathPointList(roadPath,roadPathPointIds);
         }
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
     }
 
     @Autowired
@@ -448,6 +470,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             return;
         }
 
+        Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
+
         //先删除该场景下的所有路径，云端路径和工控路径都删除
         //deleteBySceneName(sceneName);
 
@@ -463,19 +487,19 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             }
 
             //把开始点所属的MapInfo插入数据库(如果存在则不新建，如果不存在则新建)
-            FixPathServiceImpl.findOrSaveMapInfoByPath(sceneName, pathDTO, true, mapInfoService);
+            PathUtil.findOrSaveMapInfoByPath(sceneName, pathDTO, true, mapInfoService, storeId);
             //把开始点所属的MapInfo插入数据库(如果存在则不新建，如果不存在则新建)
-            FixPathServiceImpl.findOrSaveMapInfoByPath(sceneName, pathDTO, false, mapInfoService);
+            PathUtil.findOrSaveMapInfoByPath(sceneName, pathDTO, false, mapInfoService, storeId);
 
             MapPoint startPoint = null;
             MapPoint endPoint = null;
             if(isPointDuplicate) {
-                startPoint = FixPathServiceImpl.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, true,pointService);
-                endPoint = FixPathServiceImpl.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, false,pointService);
+                startPoint = PathUtil.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, true,pointService, storeId);
+                endPoint = PathUtil.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, false,pointService, storeId);
             }
             else {
-                startPoint = FixPathServiceImpl.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, true,pointService);
-                endPoint = FixPathServiceImpl.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, false,pointService);
+                startPoint = PathUtil.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, true,pointService, storeId);
+                endPoint = PathUtil.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, false,pointService, storeId);
             }
 
             //封装RoadPath对象，保存数据库
@@ -494,7 +518,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
 //            roadPath.setWeight(Constant.DEFAULT_ROAD_PATH_X86_WEIGHT);
             //取两点间长度作为路径权值
-            roadPath.setWeight(getDistance(startPoint, endPoint));
+            roadPath.setWeight(PathUtil.calDistance(startPoint, endPoint));
             roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
             //根据数据库查询结果判断是更新还是新增
             if (null != roadPathDB) {
@@ -506,39 +530,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 save(roadPath);
             }
         }
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
     }
-
-    /**
-     * 计算两点间坐标的长度，最终单位cm
-     * @param start
-     * @param end
-     * @return
-     */
-    private Long getDistance(MapPoint start, MapPoint end) {
-        Long result = 0L;
-        Double db = Math.sqrt(
-                Math.pow((start.getX() - end.getX()),2L)
-                        + Math.pow((start.getY() - end.getY()),2L)
-        ) * 100;//换算成cm
-        result = new BigDecimal(db + "").setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
-        return result;
-    }
-
-    /**
-     * 测试计算坐标长度函数
-     */
-    /*public static void main(String[] args) {
-        MapPoint start = new MapPoint();
-        MapPoint end = new MapPoint();
-        start.setX(0L);
-        start.setY(0L);
-        end.setX(3L);
-        end.setY(4L);
-        RoadPathServiceImpl roadPathService = new RoadPathServiceImpl();
-        System.out.println(roadPathService.getDistance(start, end));
-    }*/
-
-
 
     @Override
     public void saveOrUpdateRoadPathByPathDTOListDuplicatePoint(List<PathDTO> pathDTOList, String sceneName) throws Exception {
@@ -584,6 +578,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         try {
             int deleteRowCount = super.deleteById(id);
             this.roadPathMapper.deleteRoadPathPointsByPathId(id);//删除与路径关联的 MapPoint 信息
+            //清空某场景、某门店下的路径相关的缓存
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
             return deleteRowCount;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -600,7 +596,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             Long pointId = Long.parseLong(String.valueOf(pointIdOrign));
             RoadPathPoint roadPathPoint = new RoadPathPoint();
             roadPathPoint.setCreateTime(new Date());
-            roadPathPoint.setStoreId(100L);
+            roadPathPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
             roadPathPoint.setRoadPathId(roadPath.getId());// 设置路径信息 id 编号
             roadPathPoint.setPointId(pointId);// 当前点 id
             roadPathPoint.setOrderIndex(j);//设置排序索引
@@ -636,9 +632,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
      * @param sceneName
      */
     @Override
-    public void deleteBySceneName(String sceneName) {
+    public void deleteBySceneName(String sceneName, Long storeId) {
         try {
-            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null);
+            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null, storeId);
             if(roadPaths != null && roadPaths.size() > 0) {
                 //如果是云端路径，则先删除roadPathPoint表
                 for(RoadPath roadPath : roadPaths) {
@@ -652,6 +648,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 Example.Criteria criteria = example.createCriteria();
                 criteria.andCondition("SCENE_NAME = ", sceneName);
                 this.roadPathMapper.deleteByExample(example);
+                //清空某场景、某门店下的路径相关的缓存
+                PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -659,9 +657,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public void deleteBySceneMapNameType(String sceneName, Integer pathType, String mapName) {
+    public void deleteBySceneMapNameType(String sceneName, Integer pathType, String mapName, Long storeId) {
         try {
-            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, pathType);
+            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, pathType, storeId);
             if(roadPaths != null && roadPaths.size() > 0) {
                 //如果是云端路径，则先删除roadPathPoint表
                 if(pathType.equals(Constant.PATH_TYPE_CLOUD)) {
@@ -681,6 +679,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     criteria.andCondition("MAP_NAME = ", mapName);
                 }
                 this.roadPathMapper.deleteByExample(example);
+                //清空某场景、某门店下的路径相关的缓存
+                PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -688,9 +688,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public void deleteByStartEndPointIdType(Long startPointId, Long endPointId, Integer pathType, String sceneName) {
+    public void deleteByStartEndPointIdType(Long startPointId, Long endPointId, Integer pathType, String sceneName, Long storeId) {
         try {
-            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null);
+            List<RoadPath> roadPaths = listRoadPathsBySceneNamePathType(sceneName, null, storeId);
             if(roadPaths != null && roadPaths.size() > 0) {
                 //如果是云端路径，则先删除roadPathPoint表
                 for(RoadPath roadPath : roadPaths) {
@@ -713,6 +713,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     criteria.andCondition("END_POINT = ", endPointId);
                 }
                 this.roadPathMapper.deleteByExample(example);
+                //清空某场景、某门店下的路径相关的缓存
+                PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

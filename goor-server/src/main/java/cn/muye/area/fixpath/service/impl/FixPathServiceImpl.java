@@ -18,6 +18,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.service.consumer.topic.BaseMessageService;
+import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -107,127 +108,5 @@ public class FixPathServiceImpl implements FixPathService {
             CacheInfoManager.setFixpathSceneNameCache(mapSceneName);
         }
         return ajaxResult;
-    }
-
-    /**
-     * 查询或者保存点_路径交叉点不重复
-     *
-     * @param sceneName 场景名
-     * @param pathDTO   固定路径对象
-     * @param start     是否为固定路径开始点   true:开始点 false:结束点
-     * @return 导航目标点
-     */
-    public static MapPoint findOrSaveMapPointByPathNoDuplicate(String sceneName, PathDTO pathDTO, boolean start, PointService pointService) {
-        return findOrSaveMapPointByPath(sceneName, pathDTO, start, pointService, false);
-    }
-
-    /**
-     * 查询或者保存点——点名根据路径取，用于路径点交叉重复存储点方式
-     *
-     * @param sceneName 场景名
-     * @param pathDTO   固定路径对象
-     * @param start     是否为固定路径开始点   true:开始点 false:结束点
-     * @return 导航目标点
-     */
-    public static MapPoint findOrSaveMapPointByPathDuplicate(String sceneName, PathDTO pathDTO, boolean start , PointService pointService) {
-        return findOrSaveMapPointByPath(sceneName, pathDTO, start, pointService, true);
-    }
-
-    /**
-     * 查询或者保存点_路径交叉点重复或者不重复命名规则不同
-     *
-     * @param sceneName 场景名
-     * @param pathDTO   固定路径对象
-     * @param start     是否为固定路径开始点   true:开始点 false:结束点
-     * @param isDuplicate   根据路径交叉点是否需要重复建点，采用不同的命名规则
-     * @return 导航目标点
-     */
-    public static MapPoint findOrSaveMapPointByPath(String sceneName,
-                                                    PathDTO pathDTO,
-                                                    boolean start,
-                                                    PointService pointService,
-                                                    boolean isDuplicate) {
-        String pointNameResult = "";
-        String pointAliasResult = "";
-        String mapName = pathDTO.getStartMap();
-        String pointName = "";
-        //根据路径交叉点是否需要重复建点，采用不同的命名规则
-        if(isDuplicate) {
-            pointName = Constant.PATH + pathDTO.getId() + ( start ? "start" : "end" );
-            String pointNamePre = start ? pathDTO.getStartId() : pathDTO.getEndId();
-            pointNameResult = pointNamePre + "_" + pointName;
-            pointAliasResult = pointName;
-        }
-        else {
-            pointName = start ? pathDTO.getStartId() : pathDTO.getEndId();
-            pointNameResult = pointName;
-            pointAliasResult = pointName + "_" + Constant.PATH + pathDTO.getId() + ( start ? "start" : "end" );
-        }
-
-
-        //只查找未配置的云端类型点，其他用于特殊任务的复制点，不在查找之列
-        List<MapPoint> pointList = pointService.findByNameCloudType(pointName, sceneName, mapName,
-                SearchConstants.FAKE_MERCHANT_STORE_ID, MapPointType.UNDEFINED);
-
-        if (null != pointList && pointList.size() > 0) {
-            MapPoint mapPointDB = pointList.get(0);
-            logger.info("!!!!!!!FixPathServiceImpl --> findOrSaveMapPointByPath:"+ pointName + ",sceneName:" + sceneName + "/" + mapName +" found = " + pointList.size());
-            //对于旧的未定义类型点，别名如果没含路径点path关键字，则修改别名
-            if(!mapPointDB.getPointAlias().contains(Constant.PATH)) {
-                mapPointDB.setPointName(pointNameResult);
-                mapPointDB.setPointAlias(pointAliasResult);
-                pointService.update(mapPointDB);
-            }
-            return mapPointDB;
-        }
-        logger.info("!!!!!!!!FixPathServiceImpl --> findOrSaveMapPointByPath:"+ pointName + ",sceneName:" + sceneName + "/" + mapName + " not found ");
-        //封装mapPoint对象，保存数据库
-        MapPoint mapPoint = new MapPoint();
-        mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        mapPoint.setSceneName(sceneName);
-        mapPoint.setMapName(mapName);
-        mapPoint.setCreateTime(new Date());
-        mapPoint.setPointName(pointNameResult);
-        mapPoint.setPointAlias(pointAliasResult);
-        mapPoint.setX(start ? pathDTO.getStartX() : pathDTO.getEndX());
-        mapPoint.setY(start ? pathDTO.getStartY() : pathDTO.getEndY());
-        mapPoint.setTh(start ? pathDTO.getStartTh() : pathDTO.getEndTh());
-        pointService.save(mapPoint);
-        return mapPoint;
-    }
-
-    /**
-     * 根据场景名、固定路径对象查询或者保存MapInfo——名称根据路径的起点和终点取
-     *
-     * @param sceneName 场景名
-     * @param pathDTO   固定路径对象
-     * @param start     是否为固定路径开始点   true:开始点 false:结束点
-     * @return 导航目标点
-     */
-    public static MapInfo findOrSaveMapInfoByPath(String sceneName, PathDTO pathDTO, boolean start , MapInfoService infoService) {
-        String mapName = start?pathDTO.getStartMap() : pathDTO.getEndMap();
-        return findOrSaveMapInfoBySceneMapName(sceneName,mapName,infoService);
-    }
-
-    /**
-     * 根据场景名、地图名查询或者保存MapInfo——名称根据路径的起点和终点取
-     *
-     * @param sceneName 场景名
-     * @param mapName   地图名
-     * @return 地图信息
-     */
-    public static MapInfo findOrSaveMapInfoBySceneMapName(String sceneName, String mapName, MapInfoService infoService) {
-        List<MapInfo> infoList = infoService.listByName(sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if (null != infoList && infoList.size() > 0) {
-            return infoList.get(0);
-        }
-        //封装MapInfo对象，保存数据库
-        MapInfo mapInfo = new MapInfo();
-        mapInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-        mapInfo.setSceneName(sceneName);
-        mapInfo.setMapName(mapName);
-        mapInfo.setCreateTime(new Date());
-        infoService.save(mapInfo);
-        return mapInfo;
     }
 }

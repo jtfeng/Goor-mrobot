@@ -3,8 +3,11 @@ package cn.muye.area.point.service;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
+import cn.mrobot.bean.dijkstra.RoadPathMaps;
+import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.bean.RosCurrentPose;
 
 import java.util.List;
 
@@ -53,9 +56,24 @@ public interface PointService {
 
     List<MapPoint> listByMapSceneNameAndPointType(String mapSceneName, Integer type, Long storeId);
 
-    MapPoint findMapPointByStationIdAndCloudType(Long stationId, int caption);
+    /**
+     * 根据站ID和点类型查找对应的站里面的点，只返回第一个点
+     * @param stationId
+     * @param pointType
+     * @return
+     */
+    MapPoint findMapPointByStationIdAndCloudType(Long stationId, int pointType);
+
+    /**
+     * 根据站ID和点类型查找与对应的站里面的该类型的点相同属性的路径点，只返回第一个点
+     * @param stationId
+     * @param pointType
+     * @return
+     */
+    MapPoint findPathMapPointByStationIdAndCloudType(Long stationId, int pointType);
 
     List<MapPoint> listBySceneMapXYTH(String sceneName, String mapName, double x, double y, double th, MapPointType mapPointType);
+
 
 
 }

@@ -8,6 +8,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,7 +92,7 @@ public class RoadPathController {
             if(StringUtil.isNullOrEmpty(sceneName)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
             }
-            this.roadPathService.deleteBySceneName(sceneName);
+            this.roadPathService.deleteBySceneName(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
             return AjaxResult.success("操作成功");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
@@ -113,7 +114,7 @@ public class RoadPathController {
             if(StringUtil.isNullOrEmpty(sceneName)) {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
             }
-            this.roadPathService.deleteBySceneMapNameType(sceneName, pathType, mapName);
+            this.roadPathService.deleteBySceneMapNameType(sceneName, pathType, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
             return AjaxResult.success("操作成功");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
@@ -128,7 +129,7 @@ public class RoadPathController {
     @GetMapping("/asset/roadPath")
     public AjaxResult roadPathList(WhereRequest whereRequest) {
         try {
-            List<RoadPath> list = roadPathService.listRoadPaths(whereRequest);
+            List<RoadPath> list = roadPathService.listRoadPaths(whereRequest , SearchConstants.FAKE_MERCHANT_STORE_ID);
             PageInfo<RoadPath> pageList = new PageInfo<>(list);
             return AjaxResult.success(pageList, "查询成功");
         } catch (Exception e) {

@@ -6,19 +6,29 @@ import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadeMapPointType;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.area.station.StationMapPointXREF;
+import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.dijkstra.RoadPathMaps;
+import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.bean.Orientation;
+import cn.muye.area.map.bean.Position;
+import cn.muye.area.map.bean.RosCurrentPose;
 import cn.muye.area.point.mapper.PointMapper;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationMapPointXREFService;
+import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.joda.time.DateTimeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,6 +60,8 @@ public class PointServiceImpl implements PointService {
     private SceneService sceneService;
     @Autowired
     private StationMapPointXREFService stationMapPointXREFService;
+    @Autowired
+    private RoadPathService roadPathService;
 
 
     private static final int LEVEL_ONE = 1;
@@ -61,16 +73,25 @@ public class PointServiceImpl implements PointService {
 
     @Override
     public long save(MapPoint mapPoint) {
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, mapPoint.getSceneName());
         return pointMapper.insert(mapPoint);
     }
 
     @Override
     public int save(List<MapPoint> mapPointList) {
+        if(mapPointList == null || mapPointList.size() == 0) {
+            return 0;
+        }
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, mapPointList.get(0).getSceneName());
         return pointMapper.insertList(mapPointList);
     }
 
     @Override
     public void delete(MapPoint mapPoint) {
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, mapPoint.getSceneName());
         pointMapper.delete(mapPoint);
     }
 
@@ -88,11 +109,15 @@ public class PointServiceImpl implements PointService {
                 .andCondition("SCENE_NAME ='" + sceneName + "'")
                 .andCondition("STORE_ID =" + storeId);
         pointMapper.deleteByExample(condition);
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(storeId, sceneName);
     }
 
     @Override
     public void update(MapPoint mapPoint) {
         pointMapper.updateByPrimaryKeySelective(mapPoint);
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, mapPoint.getSceneName());
     }
 
     @Override
@@ -295,17 +320,26 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public MapPoint findMapPointByStationIdAndCloudType(Long stationId, int status) {
+    public MapPoint findMapPointByStationIdAndCloudType(Long stationId, int cloudType) {
         List<StationMapPointXREF> stationMapPointXREFs = stationMapPointXREFService.listByStationId(stationId);
         MapPoint mapPoint = null;
         for (StationMapPointXREF stationMapPointXREF : stationMapPointXREFs) {
             MapPoint findPoint = pointMapper.selectByPrimaryKey(stationMapPointXREF.getMapPointId());
-            if(findPoint.getCloudMapPointTypeId() == status){
+            if(findPoint.getCloudMapPointTypeId() == cloudType){
                 mapPoint = findPoint;
                 break;
             }
         }
         return mapPoint;
+    }
+
+    @Override
+    public MapPoint findPathMapPointByStationIdAndCloudType(Long stationId, int cloudType) {
+        //查找站点对应的装货点，作为规划路径的终点
+        MapPoint stationPoint = findMapPointByStationIdAndCloudType(stationId, cloudType);
+        //查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
+        return PathUtil.findPathPointByXYTH(stationPoint.getSceneName(),stationPoint.getMapName(),
+                stationPoint.getX(),stationPoint.getY(),stationPoint.getTh(),null, this);
     }
 
     /**
@@ -378,29 +412,5 @@ public class PointServiceImpl implements PointService {
 
     private List<MapPoint> getMapPoint(String sceneName, String mapName, int pointTypeId) {
         return pointMapper.selectPointByPointTypeMapName(sceneName, mapName, pointTypeId, SearchConstants.FAKE_MERCHANT_STORE_ID);
-    }
-
-    /**
-     * 查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
-     * @param sceneName
-     * @param mapName
-     * @param x
-     * @param y
-     * @param th
-     * @return
-     */
-    public static MapPoint findPathPointByXYTH(String sceneName,String mapName,
-                                               double x,double y,double th ,MapPointType mapPointType,PointService pointService) {
-        List<MapPoint> startPointList = pointService.listBySceneMapXYTH(
-                sceneName,mapName,x,y,th,mapPointType);
-        if(startPointList == null || startPointList.size() == 0) {
-            return null;
-        }
-        for(MapPoint tempPoint : startPointList) {
-            if(tempPoint.getPointAlias().indexOf(Constant.PATH) > -1) {
-                return tempPoint;
-            }
-        }
-        return null;
     }
 }
