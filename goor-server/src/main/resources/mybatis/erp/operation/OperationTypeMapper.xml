@@ -106,4 +106,50 @@
         AND DELETE_FLAG = 0
         ORDER BY CREATE_TIME DESC
     </select>
+
+    <!--<select id="listBySearchName" resultMap="operationType" statementType="CALLABLE">-->
+         <!--CALL `agv-18`.get_operationType_by_searchName(#{searchName})-->
+    <!--</select>-->
+
+    <select id="listBySearchName" resultMap="operationType">
+    (
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+        ERP_OPERATION_TYPE
+    WHERE
+    SEARCH_NAME =#{searchName}
+    AND
+    DELETE_FLAG = 0
+    ORDER BY
+    CREATE_TIME DESC
+    )
+    UNION
+    (
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+        ERP_OPERATION_TYPE
+    WHERE
+    SEARCH_NAME like CONCAT(#{searchName},'%')
+    AND
+    DELETE_FLAG = 0
+    ORDER BY
+    CREATE_TIME DESC
+    )
+    UNION
+    (
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+        ERP_OPERATION_TYPE
+    WHERE
+    SEARCH_NAME like CONCAT('%',#{searchName},'%')
+    AND
+    DELETE_FLAG = 0
+    ORDER BY
+    CREATE_TIME DESC
+    )
+    </select>
+
 </mapper>

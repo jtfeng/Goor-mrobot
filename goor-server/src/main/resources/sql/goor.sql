@@ -2035,7 +2035,7 @@ CREATE TABLE `ERP_APPLIANCE` (
 
 ALTER TABLE `ERP_APPLIANCE` ADD COLUMN `DELETE_FLAG` int DEFAULT 1 COMMENT '数据库删除状态 0 :正常 1：删除';
 ALTER TABLE `ERP_APPLIANCE` ADD COLUMN `DELETE_TIME` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '删除时间';
-
+ALTER TABLE `ERP_APPLIANCE` ADD INDEX idx_appliance_searchName ( `SEARCH_NAME` ) ;
 -- ----------------------------
 -- Table structure for ERP_APPLIANCE_DEPARTMENT_TYPE
 -- ----------------------------
@@ -2242,7 +2242,7 @@ CREATE TABLE `ERP_OPERATION_TYPE` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-
+ALTER TABLE `ERP_OPERATION_TYPE` ADD INDEX idx_operation_type_searchName ( `SEARCH_NAME` ) ;
 -- ----------------------------
 -- Table structure for ERP_STATION_MAC_PASSWORD_XREF
 -- ----------------------------
@@ -2287,3 +2287,84 @@ CREATE TABLE `ERP_OPERATION_ORDER` (
   `STATE` bit(1) COMMENT '订单状态',
     PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- CREATE PROCEDURE `agv-18`.get_appliance_by_searchName (searchName VARCHAR(100))
+-- BEGIN
+-- 	SET @name = searchName;
+-- 	(
+-- 		SELECT
+-- 			*
+-- 		FROM
+-- 			ERP_APPLIANCE
+-- 		WHERE
+-- 			SEARCH_NAME = @name
+-- 		AND DELETE_FLAG = 0
+-- 		ORDER BY
+-- 			CREATE_TIME DESC
+-- 	)
+-- UNION
+-- 	(
+-- 		SELECT
+-- 			*
+-- 		FROM
+-- 			ERP_APPLIANCE
+-- 		WHERE
+-- 			SEARCH_NAME LIKE CONCAT(@name, '%')
+-- 		AND DELETE_FLAG = 0
+-- 		ORDER BY
+-- 			CREATE_TIME DESC
+-- 	)
+-- UNION
+-- 	(
+-- 		SELECT
+-- 			*
+-- 		FROM
+-- 			ERP_APPLIANCE
+-- 		WHERE
+-- 			SEARCH_NAME LIKE CONCAT('%', @name, '%')
+-- 		AND DELETE_FLAG = 0
+-- 		ORDER BY
+-- 			CREATE_TIME DESC
+-- 	);
+-- END;
+--
+-- CREATE PROCEDURE `agv-18`.get_operationType_by_searchName (searchName VARCHAR(100))
+-- BEGIN
+-- 	SET @name = searchName;
+-- 	(
+-- 		SELECT
+-- 			*
+-- 		FROM
+-- 			ERP_OPERATION_TYPE
+-- 		WHERE
+-- 			SEARCH_NAME = @name
+-- 		AND DELETE_FLAG = 0
+-- 		ORDER BY
+-- 			CREATE_TIME DESC
+-- 	)
+-- UNION
+-- 	(
+-- 		SELECT
+-- 			*
+-- 		FROM
+-- 			ERP_OPERATION_TYPE
+-- 		WHERE
+-- 			SEARCH_NAME LIKE CONCAT(@name, '%')
+-- 		AND DELETE_FLAG = 0
+-- 		ORDER BY
+-- 			CREATE_TIME DESC
+-- 	)
+-- UNION
+-- 	(
+-- 		SELECT
+-- 			*
+-- 		FROM
+-- 			ERP_OPERATION_TYPE
+-- 		WHERE
+-- 			SEARCH_NAME LIKE CONCAT('%', @name, '%')
+-- 		AND DELETE_FLAG = 0
+-- 		ORDER BY
+-- 			CREATE_TIME DESC
+-- 	);
+-- END;

@@ -31,4 +31,6 @@ public interface OperationTypeService extends BaseCrudService<OperationType> {
     List<OperationType> listAllOperationType(WhereRequest whereRequest);
 
     boolean importExcel(File uploadFile);
+
+    List<OperationType> listBySearchName(String searchName);
 }

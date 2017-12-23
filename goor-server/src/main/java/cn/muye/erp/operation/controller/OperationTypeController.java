@@ -128,6 +128,21 @@ public class OperationTypeController {
         return AjaxResult.success(url, "操作成功");
     }
 
+    /**
+     * 根据用户输入的字母和数字，查询出匹配结果排序规则按照全匹配，头匹配，包含匹配排序，每一种匹配规则又按照createTime倒序
+     * @param searchName
+     * @return
+     */
+    @RequestMapping(value = "services/operation/type/searchName", method = RequestMethod.GET)
+    public AjaxResult listBySearchName(@RequestParam("searchName") String searchName) {
+        if (StringUtil.isBlank(searchName)) {
+            return AjaxResult.failed("器械查询名称不能为空");
+        }
+        searchName = searchName.toUpperCase();
+        List<OperationType> operationTypeList = operationTypeService.listBySearchName(searchName);
+        return AjaxResult.success(operationTypeList, "查询成功");
+    }
+
     private void updateOperationDefaultApplianceXREF(Long operationTypeId, List<OperationDefaultApplianceXREF> applianceList) {
         if (null == applianceList) {
             return;

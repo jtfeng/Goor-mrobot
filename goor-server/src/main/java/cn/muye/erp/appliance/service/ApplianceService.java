@@ -19,7 +19,7 @@ public interface ApplianceService extends BaseService<Appliance> {
 
     List<Appliance> lists(WhereRequest whereRequest);
 
-    List<Appliance> listBySearchName(String searchName, Long fakeMerchantStoreId);
+    List<Appliance> listBySearchName(String searchName);
 
     /**
      * 器械名称和科室名称得组合唯一。

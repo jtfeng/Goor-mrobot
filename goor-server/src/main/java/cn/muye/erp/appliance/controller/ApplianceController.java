@@ -140,13 +140,18 @@ public class ApplianceController {
         return AjaxResult.success("删除成功");
     }
 
-    @RequestMapping(value = "appliance/searchName", method = RequestMethod.GET)
+    /**
+     * 根据用户输入的字母和数字，查询出匹配结果排序规则按照全匹配，头匹配，包含匹配排序，每一种匹配规则又按照createTime倒序
+     * @param searchName
+     * @return
+     */
+    @RequestMapping(value = "services/appliance/searchName", method = RequestMethod.GET)
     public AjaxResult list(@RequestParam("searchName") String searchName) {
         if (StringUtil.isBlank(searchName)) {
             return AjaxResult.failed("器械查询名称不能为空");
         }
         searchName = searchName.toUpperCase();
-        List<Appliance> applianceList = applianceService.listBySearchName(searchName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        List<Appliance> applianceList = applianceService.listBySearchName(searchName);
         return AjaxResult.success(applianceList, "查询成功");
     }
 

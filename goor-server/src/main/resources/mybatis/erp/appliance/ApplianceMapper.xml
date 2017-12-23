@@ -78,17 +78,48 @@
         ORDER BY CREATE_TIME DESC
     </select>
 
-    <select id="listBySearchNameTwo" resultMap="appliance">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('',#{searchName},'%') AND DELETE_FLAG = 0
-        ORDER BY CREATE_TIME DESC
-    </select>
+    <!--<select id="listBySearchName" resultMap="appliance" statementType="CALLABLE">-->
+        <!--CALL `agv-18`.get_appliance_by_searchName(#{searchName})-->
+    <!--</select>-->
 
-    <select id="listBySearchNameThree" resultMap="appliance">
+    <select id="listBySearchName" resultMap="appliance">
+        (
         SELECT
-        <include refid="Base_Column_List"/>
-        FROM ERP_APPLIANCE WHERE SEARCH_NAME like CONCAT('%',#{searchName},'%') AND DELETE_FLAG = 0
-        ORDER BY CREATE_TIME DESC
+          <include refid="Base_Column_List"/>
+        FROM
+          ERP_APPLIANCE
+        WHERE
+          SEARCH_NAME =#{searchName}
+        AND
+          DELETE_FLAG = 0
+        ORDER BY
+          CREATE_TIME DESC
+        )
+        UNION
+        (
+        SELECT
+          <include refid="Base_Column_List"/>
+        FROM
+          ERP_APPLIANCE
+        WHERE
+          SEARCH_NAME like CONCAT(#{searchName},'%')
+        AND
+          DELETE_FLAG = 0
+        ORDER BY
+          CREATE_TIME DESC
+        )
+        UNION
+        (
+        SELECT
+          <include refid="Base_Column_List"/>
+        FROM
+          ERP_APPLIANCE
+        WHERE
+          SEARCH_NAME like CONCAT('%',#{searchName},'%')
+        AND
+          DELETE_FLAG = 0
+        ORDER BY
+          CREATE_TIME DESC
+        )
     </select>
 </mapper>

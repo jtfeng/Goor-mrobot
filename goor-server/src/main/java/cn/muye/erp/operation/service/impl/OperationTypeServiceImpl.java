@@ -107,6 +107,11 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
         return analysisExcel(file);
     }
 
+    @Override
+    public List<OperationType> listBySearchName(String searchName) {
+        return operationTypeMapper.listBySearchName(searchName);
+    }
+
     private boolean analysisExcel(File file) {
         try {
             Map<String, List<Map<String, Object>>> result = ExcelUtil.getTableSheetData(file);

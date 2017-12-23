@@ -23,7 +23,5 @@ public interface ApplianceMapper extends MyMapper<Appliance> {
 
     List<Appliance> listAllAppliance(@Param("storeId") Long storeId);
 
-    List<Appliance> listBySearchNameTwo(@Param("searchName") String searchName, @Param("storeId") Long storeId);
-
-    List<Appliance> listBySearchNameThree(@Param("searchName") String searchName, @Param("storeId") Long storeId);
+    List<Appliance> listBySearchName(@Param("searchName") String searchName);
 }

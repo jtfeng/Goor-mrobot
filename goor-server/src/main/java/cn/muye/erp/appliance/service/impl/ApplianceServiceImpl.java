@@ -95,12 +95,8 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     }
 
     @Override
-    public List<Appliance> listBySearchName(String searchName, Long storeId) {
-        if (searchName.length() < 3) {
-            return applianceMapper.listBySearchNameTwo(searchName, storeId);
-        } else {
-            return applianceMapper.listBySearchNameThree(searchName, storeId);
-        }
+    public List<Appliance> listBySearchName(String searchName) {
+        return applianceMapper.listBySearchName(searchName);
     }
 
     @Override
