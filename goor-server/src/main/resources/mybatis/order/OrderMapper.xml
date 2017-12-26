@@ -74,7 +74,7 @@
                 status = #{status},
             </if>
             <if test="finishDate != null" >
-                o.finish_date = #{finishDate}
+                finish_date = #{finishDate}
             </if>
         </set>
         WHERE id = #{id}
