@@ -9,6 +9,7 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
@@ -238,7 +239,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
      * 查询数据库内排列订单并处理,暂只处理一个
      */
     @Override
-    public void checkWaitOrders() {
+    public void checkWaitOrders() throws Exception{
         Order domain = new Order();
         domain.setStatus(OrderConstant.ORDER_STATUS_WAIT);
         List<Order> waitOrders = orderMapper.listByDomain(domain);
@@ -247,11 +248,17 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             Order sqlOrder = getOrder(waitOrder.getId());
             GoodsType goodsType = sqlOrder.getOrderSetting().getGoodsType();
             Robot availableRobot = null;
+            RobotRoadPathResult robotRoadPathResult = null;
             if(goodsType == null){
-                availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),null);
+//                availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),null);
+                 robotRoadPathResult = robotService.getNearestAvailableRobotByOrder(null, sqlOrder);
+
             }else {
-                availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),goodsType.getRobotTypeId());
+//                availableRobot = robotService.getAvailableRobotByStationId(sqlOrder.getStartStation().getId(),goodsType.getRobotTypeId());
+                robotRoadPathResult = robotService.getNearestAvailableRobotByOrder(goodsType.getRobotTypeId(), sqlOrder);
             }
+            sqlOrder.setRobotRoadPathResult(robotRoadPathResult);
+            availableRobot = robotRoadPathResult == null ? null : robotRoadPathResult.getRobot();
             if(availableRobot == null){
                 //依旧无可用机器
                 logger.info("未获取到可使用机器人");

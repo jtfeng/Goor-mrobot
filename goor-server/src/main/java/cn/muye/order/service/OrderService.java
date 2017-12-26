@@ -21,7 +21,7 @@ public interface OrderService {
 
     void backToStartPoint(String robotCode, MapPoint mapPoint);
 
-    void checkWaitOrders();
+    void checkWaitOrders() throws Exception;
 
     void robotRequestWaitOrder(String robotCode);
 
