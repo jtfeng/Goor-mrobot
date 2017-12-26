@@ -24,7 +24,7 @@ public interface SceneMapper extends MyMapper<Scene> {
 
     List<MapInfo> findMapBySceneId(Long sceneId, Long storeId);
 
-    List<MapPoint> findMapPointBySceneId(Long sceneId, Long storeId, Long cloudMapPointTypeId);
+    List<MapPoint> findMapPointBySceneId(Long sceneId, Long storeId, Integer cloudMapPointTypeId);
 
     void deleteRobotAndSceneRelations(Long sceneId);
 

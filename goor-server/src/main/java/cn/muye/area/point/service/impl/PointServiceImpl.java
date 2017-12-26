@@ -193,7 +193,7 @@ public class PointServiceImpl implements PointService {
         List<MapPoint> mapPointList = null;
         if (whereRequest != null && whereRequest.getQueryObj() != null) {
             JSONObject jsonObject = JSON.parseObject(whereRequest.getQueryObj());
-            Long cloudMapPointTypeId = Long.valueOf(jsonObject.getString(SearchConstants.SEARCH_CLOUD_POINT_TYPE));
+            Integer cloudMapPointTypeId = Integer.valueOf(jsonObject.getString(SearchConstants.SEARCH_CLOUD_POINT_TYPE));
             Long sceneId = jsonObject.getLong(SearchConstants.SEARCH_SCENE_ID);
             try {
                 mapPointList = sceneService.listMapPointIdBySceneId(sceneId, storeId, cloudMapPointTypeId);

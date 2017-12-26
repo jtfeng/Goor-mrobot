@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.Robot;
@@ -166,7 +167,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             eachScene.put("map", mapJSONArray);
             // 存放所属场景下的充电桩信息
             JSONArray mapPointListDbJSONArray = new JSONArray();
-            sceneMapper.findMapPointBySceneId(scene.getId(), SearchConstants.FAKE_MERCHANT_STORE_ID, 3L)
+            sceneMapper.findMapPointBySceneId(scene.getId(), SearchConstants.FAKE_MERCHANT_STORE_ID, MapPointType.CHARGER.getCaption())
                     .forEach(eachP -> {
                         JSONObject j = new JSONObject();
                         j.put("id", eachP.getId());j.put("name", eachP.getPointName());j.put("alias", eachP.getPointAlias());
@@ -433,7 +434,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     }
 
     @Override
-    public List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Long cloudMapPointTypeId) throws Exception {
+    public List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Integer cloudMapPointTypeId) throws Exception {
         List<MapPoint> mapPointListDb = sceneMapper.findMapPointBySceneId(sceneId, storeId, cloudMapPointTypeId);
         return mapPointListDb;
     }

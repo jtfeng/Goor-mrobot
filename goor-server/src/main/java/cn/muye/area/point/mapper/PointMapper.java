@@ -3,6 +3,7 @@ package cn.muye.area.point.mapper;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
  * Describe:
  * Version:1.0
  */
+@Component
 public interface PointMapper extends MyMapper<MapPoint> {
 
     List<String> selectMapName(long storeId);

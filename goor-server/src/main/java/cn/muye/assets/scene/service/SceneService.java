@@ -21,7 +21,7 @@ public interface SceneService extends BaseService<Scene> {
 
     Scene getSceneById(Long id) throws Exception;
 
-    List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Long cloudMapPointTypeId) throws Exception;
+    List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Integer cloudMapPointTypeId) throws Exception;
 
     Object updateScene(Scene scene) throws Exception;
 
