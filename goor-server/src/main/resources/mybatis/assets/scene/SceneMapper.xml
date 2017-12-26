@@ -84,7 +84,7 @@
     </select>
 
     <!-- 根据场景ID查询充电桩点 -->
-    <select id="findMapPointBySceneId" resultMap="MapPointSimpleMap" parameterType="java.lang.Long">
+    <select id="findMapPointBySceneId" resultMap="MapPointSimpleMap">
         SELECT i.* FROM A_MAP_POINT i LEFT JOIN SCENES_MAPS_RELATIONS smr ON i.SCENE_NAME = smr.MAP_SCENENAME
         WHERE smr.SCENE_ID = #{param1} AND i.STORE_ID = #{param2} AND i.CLOUD_POINT_TYPE_ID = #{param3}
         ORDER  BY  SCENE_NAME, MAP_NAME,POINT_NAME ASC
