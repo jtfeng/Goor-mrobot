@@ -139,8 +139,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             JSONArray stationJSONArray = new JSONArray();
                 // 全部的出发点
             List<Long> originStationIds = Lists.newArrayList();
+            log.info("全部的出发点为：" + originStationIds);
             stationStationXREFMapper.selectAll().forEach( stationStationXREF -> originStationIds.add(stationStationXREF.getOriginStationId()));
             stationMapper.selectByExample(stationExample).forEach(ele -> {
+                log.info("当前遍历的站 ID 编号为：" + ele.getId());
                 if (originStationIds.indexOf(ele.getId()) == -1) {
                     // 不是出发点，则不提供选择
                     return;
@@ -152,7 +154,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             eachScene.put("station", stationJSONArray);
             // 存放所属场景下的地图信息 - Map - 地图
             Example mapExample = new Example(MapInfo.class);
-            mapExample.createCriteria().andCondition("SCENE_NAME =", scene.getName());
+            mapExample.createCriteria().andCondition("SCENE_NAME =", String.valueOf(eachScene.get("name")));
             // 存放地图信息的 JSON 数组
             JSONArray mapJSONArray = new JSONArray();
             mapInfoMapper.selectByExample(mapExample).forEach(ele -> {
@@ -163,8 +165,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             });
             eachScene.put("map", mapJSONArray);
             // 存放所属场景下的充电桩信息
-            List<MapPoint> mapPointListDb = sceneMapper.findMapPointBySceneId(scene.getId(), SearchConstants.FAKE_MERCHANT_STORE_ID, 3L);
-            eachScene.put("chargePoint", mapPointListDb);
+            JSONArray mapPointListDbJSONArray = new JSONArray();
+            sceneMapper.findMapPointBySceneId(scene.getId(), SearchConstants.FAKE_MERCHANT_STORE_ID, 3L)
+                    .forEach(eachP -> {
+                        JSONObject j = new JSONObject();
+                        j.put("id", eachP.getId());j.put("name", eachP.getPointName());j.put("alias", eachP.getPointAlias());
+                        mapPointListDbJSONArray.add(j);
+                    });
+            eachScene.put("chargePoint", mapPointListDbJSONArray);
             //
             sceneList.add(eachScene);
         }
@@ -175,10 +183,22 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         // 存放当前指定机器人所属的资源关系
         JSONObject robotAssets = new JSONObject();
         // 当前机器人所绑定的 站 信息
-        robotAssets.put("station", stationService.findStationsByRobotCode(robotCode));
+        JSONArray robotJSONArray = new JSONArray();
+        stationService.findStationsByRobotCode(robotCode).forEach(es -> {
+            JSONObject j = new JSONObject();
+            j.put("id", es.getId()); j.put("name", es.getName());
+            robotJSONArray.add(j);
+        });
+        robotAssets.put("station", robotJSONArray);
         // 当前机器人所绑定的 充电桩 信息
-        robotAssets.put("chargePoint", robotService.getChargerMapPointByRobotCode(robotCode,
-                SearchConstants.FAKE_MERCHANT_STORE_ID));
+        JSONArray robotMapPointListDbJSONArray = new JSONArray();
+        robotService.getChargerMapPointByRobotCode(robotCode,
+                SearchConstants.FAKE_MERCHANT_STORE_ID).forEach(eachP -> {
+            JSONObject j = new JSONObject();
+            j.put("id", eachP.getId());j.put("name", eachP.getPointName());j.put("alias", eachP.getPointAlias());
+            robotMapPointListDbJSONArray.add(j);
+        });
+        robotAssets.put("chargePoint", robotMapPointListDbJSONArray);
         List<Scene> list = sceneMapper.findSceneByRobotCode(robotCode);
         JSONObject currentSceneObject = new JSONObject();
         if (list != null && list.size() != 0) {
@@ -218,11 +238,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         sceneMapper.deleteRobotAndSceneRelationsByRobotCode(robotCode);
         sceneMapper.insertSceneAndRobotRelations(sceneId, Lists.newArrayList(robotId));
         // 重新更新机器人与站之间的绑定关系
+        stationMapper.deleteStationWithRobotRelationByRobotCode(robotCode);
         for (int i = 0 ; i < stationIds.size() ; i++) {
             // 遍历每一个站
             Long stationId = stationIds.getLong(i);
             // 删除初始机器人与站点的绑定关系
-            stationMapper.deleteStationWithRobotRelationByRobotCode(robotCode);
             // 添加新的机器人与站点之间的绑定关系
             StationRobotXREF stationRobotXREF = new StationRobotXREF() {{
                 setRobotId(robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId());
@@ -231,11 +251,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             stationRobotXREFMapper.insert(stationRobotXREF);
         }
         // 重新更新机器人与充电桩之间的绑定关系
+        robotChargerMapPointXREFService.deleteByRobotId(robotId);
         for (int i = 0 ; i < chargerMapPointIds.size() ; i++) {
             // 遍历每一个充电桩
             Long chargerMapPointId = chargerMapPointIds.getLong(i);
             // 删除初始机器人与充电桩点的绑定关系
-            robotChargerMapPointXREFService.deleteByRobotId(robotId);
             // 添加新的机器人与充电桩点之间的绑定关系
             RobotChargerMapPointXREF robotChargerMapPointXREF = new RobotChargerMapPointXREF(){{
                 setRobotId(robotId);
@@ -249,6 +269,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     public void replyGetRobotStartAssets(String uuid, String robotCode) {
         LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, "机器人开机获取云端资源 - 开始");
         Map assetData = this.getRobotStartAssets(robotCode);
+        log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
+        log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
+        log.info(JSONObject.toJSONString(assetData));
+        log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
+        log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
         // 传回云端资源给开机管理请求的机器人    ||
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName(TopicConstants.AGENT_PUB);

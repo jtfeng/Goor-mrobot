@@ -1,11 +1,15 @@
 package cn.muye.assets.scene.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.scene.service.SceneService;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.util.UserUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,6 +164,29 @@ public class SceneController {
 
     @GetMapping("/getRobotStartAssets/{robotCode}")
     public Object getRobotStartAssets(@PathVariable("robotCode") String robotCode) throws Exception {
+        // Noah_A005
+
+
+//        // 当前指定机器人的 ID 编号信息
+//        Long robotId = currentRobot.getId();
+//        // 新选择的场景 ID 编号（sceneId、stationIds、chargerMapPointIds）
+//        Long sceneId = latestRobotAssets.getLong("sceneId");
+//        // 新选择的站 ID 编号数组信息
+//        JSONArray stationIds = latestRobotAssets.getJSONArray("stationIds");
+//        // 新选择的充电桩 ID 编号数组信息
+//        JSONArray chargerMapPointIds = latestRobotAssets.getJSONArray("chargerMapPointIds");
+
+
+        JSONObject test = new JSONObject();
+        test.put("sceneId", 85);
+        JSONArray stationIds = new JSONArray();
+        stationIds.add(37);stationIds.add(38);
+        JSONArray chargerMapPointIds = new JSONArray();
+        chargerMapPointIds.add(1589);chargerMapPointIds.add(1590);
+        test.put("stationIds", stationIds);
+        test.put("chargerMapPointIds", chargerMapPointIds);
+
+        sceneService.updateGetRobotStartAssets(robotCode,test);
         return sceneService.getRobotStartAssets(robotCode);
     }
 }
