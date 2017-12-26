@@ -72,7 +72,7 @@ public class ZipUtils {
     /**
      * 对文件或文件目录进行压缩
      *
-     * @param zipPath    要压缩的源文件路径。
+     * @param zipPath     要压缩的源文件路径。
      * @param savePath    压缩文件保存的路径。注意：zipPath不能是srcPath路径下的子文件夹
      * @param zipFileName 压缩文件名
      * @throws Exception
@@ -172,14 +172,18 @@ public class ZipUtils {
             while (entries.hasMoreElements()) {
                 entry = entries.nextElement();
                 //构建压缩包中一个文件解压后保存的文件全路径
-                entryFilePath = unzipFilePath + File.separator + entry.getName();
+                LOGGER.info("解压entry = " + entry.getName());
+                String entryName = entry.getName().replaceAll("\\\\", File.separator);
+                entryFilePath = unzipFilePath + File.separator + entryName;
                 //构建解压后保存的文件夹路径
+                LOGGER.info("构建解压后保存的文件夹路径 entryFilePath= " + entryFilePath);
                 index = entryFilePath.lastIndexOf(File.separator);
                 if (index != -1) {
                     entryDirPath = entryFilePath.substring(0, index);
                 } else {
                     entryDirPath = "";
                 }
+                LOGGER.info("构建解压后保存的文件夹路径 entryDirPath= " + entryDirPath);
                 entryDir = new File(entryDirPath);
                 //如果文件夹路径不存在，则创建文件夹
                 if (!entryDir.exists() || !entryDir.isDirectory()) {
@@ -191,6 +195,7 @@ public class ZipUtils {
                     //删除已存在的目标文件
                     entryFile.delete();
                 }
+                LOGGER.info("解压后保存的文件夹路径 entryFilePath= " + entryFilePath);
                 String parent = entryFile.getParent();
                 File parentFile = new File(parent);
                 if (!parentFile.exists())

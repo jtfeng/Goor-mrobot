@@ -48,6 +48,9 @@ public class ScheduleTasks {
     @Value("${server.mapPath_temp}")
     private String mapPathTemp;
 
+    @Value("${server.mapPath}")
+    private String mapPath;
+
     @Value(TopicConstants.TOPIC_RECEIVE_COMMAND)
     private String topicCommandAndReceiveSN;
 
@@ -136,22 +139,27 @@ public class ScheduleTasks {
     public void deleteZipMapFile() {
         logger.info("Scheduled delete Zip map file");
         try {
-            File mapPathDir = new File(mapPathTemp);
-            if (mapPathDir.exists() && mapPathDir.isDirectory()) {
-                File parentDir = new File(mapPathDir.getParent());
-                File[] files = parentDir.listFiles();
-                for (int i = 0; i < files.length; i++) {
-                    File file = files[i];
-                    if (file.getName().lastIndexOf(".zip") >= 0 || file.getName().lastIndexOf(".flags") >= 0) {
-                        file.delete();
-                    }
-                }
-            }
+            File mapPathTempDir = new File(mapPathTemp);
+            clearFiles(mapPathTempDir);
+            File mapPathDir = new File(mapPath);
+            clearFiles(mapPathDir);
         } catch (Exception e) {
             logger.error("Scheduled clear message error", e);
         }
     }
 
+    private void clearFiles(File dirName){
+        if (dirName.exists() && dirName.isDirectory()) {
+            File parentDir = new File(dirName.getParent());
+            File[] files = parentDir.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                File file = files[i];
+                if (file.getName().lastIndexOf(".zip") >= 0 || file.getName().lastIndexOf(".flags") >= 0) {
+                    file.delete();
+                }
+            }
+        }
+    }
     //TODO 添加定时任务，当定时任务出现未执行情况时，查看数据库，重新new ScheduledHandle(scheduledExecutor)的未执行的方法;两个重要1：定时任务，2：删除历史数据
 
     ///**
