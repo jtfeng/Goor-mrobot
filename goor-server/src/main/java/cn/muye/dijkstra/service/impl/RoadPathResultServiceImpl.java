@@ -207,8 +207,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         //如果没有匹配到，则需要寻找离机器人位置点最近的路径点
         else {
             rosPoint = new MapPoint();
-            rosPoint.setY(position.getX());
-            rosPoint.setX(position.getY());
+            rosPoint.setY(position.getY());
+            rosPoint.setX(position.getX());
             rosPoint.setTh(th);
             rosPoint.setSceneName(sceneName);
             rosPoint.setMapName(mapName);
