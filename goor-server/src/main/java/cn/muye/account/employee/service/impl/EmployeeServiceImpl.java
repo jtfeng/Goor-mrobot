@@ -192,6 +192,10 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
                 LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " not found");
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "输入信息错误");
             } else {
+                // 用于开机管理的特殊校验，此时没有实际意义的 missionid，传入"-1"表示此种类型
+                if (missionItemId == -1) {
+                    return AjaxResult.success("校验成功");
+                }
                 if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
                     Map map = Maps.newHashMap();
                     map.put("code", code);

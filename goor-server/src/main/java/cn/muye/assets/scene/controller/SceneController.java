@@ -186,7 +186,7 @@ public class SceneController {
         test.put("stationIds", stationIds);
         test.put("chargerMapPointIds", chargerMapPointIds);
 
-        sceneService.updateGetRobotStartAssets(robotCode,test);
+//        sceneService.updateGetRobotStartAssets(robotCode,test);
         return sceneService.getRobotStartAssets(robotCode);
     }
 }
