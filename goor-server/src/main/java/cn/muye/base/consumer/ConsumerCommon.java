@@ -163,6 +163,7 @@ public class ConsumerCommon {
                     }
                 } else if (!StringUtils.isEmpty(messageName) && (messageName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)
                         || messageName.equals(TopicConstants.VERIFY_ELEVATOR_ADMIN_NUMBER))) {
+                    // 员工工号取货校验
                     String jsonData = jsonObjectData.getString(TopicConstants.DATA);
                     logger.info(" verify_emplyee_number  jsonData : " + JSON.toJSONString(jsonData));
                     JSONObject employeeObj = JSON.parseObject(jsonData);
