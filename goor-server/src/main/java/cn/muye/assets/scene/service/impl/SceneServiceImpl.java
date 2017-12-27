@@ -170,7 +170,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             sceneMapper.findMapPointBySceneId(scene.getId(), SearchConstants.FAKE_MERCHANT_STORE_ID, MapPointType.CHARGER.getCaption())
                     .forEach(eachP -> {
                         JSONObject j = new JSONObject();
-                        j.put("id", eachP.getId());j.put("name", eachP.getPointName());j.put("alias", eachP.getPointAlias());
+                        j.put("id", eachP.getId());j.put("name", eachP.getPointAlias());
                         mapPointListDbJSONArray.add(j);
                     });
             eachScene.put("chargePoint", mapPointListDbJSONArray);

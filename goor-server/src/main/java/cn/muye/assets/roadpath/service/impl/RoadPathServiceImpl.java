@@ -84,8 +84,14 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             checkNotNull(pathTypeInt, "路径类型不能为空");
             List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
 
+            Long restrictedStarttimeLongTime = null, restrictedEndtimeLongTime = null;
+            if (pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
+                restrictedStarttimeLongTime = Long.valueOf(String.valueOf(body.get("restrictedStarttimeLongTime")));
+                restrictedEndtimeLongTime = Long.valueOf(String.valueOf(body.get("restrictedEndtimeLongTime")));
+            }
+
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
-            if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
+            if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD) || pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
                 checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
                 Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
                 RoadPath roadPath = new RoadPath() {{
@@ -100,6 +106,10 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     setPathId("");//云端路径没有PathId
                     setPathType(pathTypeInt);
                 }};
+                if (pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
+                    roadPath.setRestrictedStarttimeLongTime(restrictedStarttimeLongTime);
+                    roadPath.setRestrictedEndtimeLongTime(restrictedEndtimeLongTime);
+                }
                 setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 this.roadPathMapper.insert(roadPath);
                 packageRoadPathRelations(points, roadPath);

@@ -3,6 +3,8 @@ package cn.mrobot.bean.assets.roadpath;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import java.util.Date;
 
 @Table(name = "AS_ROADPATH")
 public class RoadPath extends BaseBean{
@@ -31,6 +33,16 @@ public class RoadPath extends BaseBean{
     private Long pathLock;
     //工控路径类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向要求工控路径）
     private Integer x86PathType;
+    //受管路径的开始限制时间
+    private Date restrictedStarttime;
+    //受管路径的结束限制时间
+    private Date restrictedEndtime;
+    //受管路径的开始限制时间(前台接收)
+    @Transient
+    private Long restrictedStarttimeLongTime;
+    //受管路径的结束限制时间(前台接收)
+    @Transient
+    private Long restrictedEndtimeLongTime;
 
 
     public RoadPath(){}
@@ -129,6 +141,40 @@ public class RoadPath extends BaseBean{
 
     public void setX86PathType(Integer x86PathType) {
         this.x86PathType = x86PathType;
+    }
+
+    public Date getRestrictedStarttime() {
+        return restrictedStarttime;
+    }
+
+    public void setRestrictedStarttime(Date restrictedStarttime) {
+        this.restrictedStarttime = restrictedStarttime;
+    }
+
+    public Date getRestrictedEndtime() {
+        return restrictedEndtime;
+    }
+
+    public void setRestrictedEndtime(Date restrictedEndtime) {
+        this.restrictedEndtime = restrictedEndtime;
+    }
+
+    public Long getRestrictedStarttimeLongTime() {
+        return restrictedStarttimeLongTime;
+    }
+
+    public void setRestrictedStarttimeLongTime(Long restrictedStarttimeLongTime) {
+        this.restrictedStarttimeLongTime = restrictedStarttimeLongTime;
+        this.restrictedStarttime = new Date(restrictedStarttimeLongTime);
+    }
+
+    public Long getRestrictedEndtimeLongTime() {
+        return restrictedEndtimeLongTime;
+    }
+
+    public void setRestrictedEndtimeLongTime(Long restrictedEndtimeLongTime) {
+        this.restrictedEndtimeLongTime = restrictedEndtimeLongTime;
+        this.restrictedEndtime = new Date(restrictedEndtimeLongTime);
     }
 
     @Override
