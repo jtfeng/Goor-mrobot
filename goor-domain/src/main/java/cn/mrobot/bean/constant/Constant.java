@@ -22,7 +22,13 @@ public class Constant {
     public static final int XYZ_SCALE = 3;
 
     //工控固定路径导航可以开始的范围，单位mm
-    public static final Long PATH_NAVIGATION_SCALE = 1500L;
+    public static final Long PATH_NAVIGATION_SCALE = 1000L;
+
+    /**以哪个点来计算路径起点的常量
+     * 以路径起点，还是以机器人所在位置在路径的投影
+     */
+    public static final int CAL_ROAD_PATH_START_PATH = 1;
+    public static final int CAL_ROAD_PATH_START_SHADOW = 2;
 
     public static final String REQUEST = "request";
 

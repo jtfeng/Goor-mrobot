@@ -2821,7 +2821,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         RoadPathResult result = null;
         try {
             MapPoint startPathPoint = PathUtil.getFirstPathStationPointByOrder(order, pointService);
-            result = roadPathResultService.getNearestPathResultByRobotCode(robot, startPathPoint, roadPathMaps);
+            result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
         } catch (Exception e) {
             logger.error(e.getMessage());
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径出错！");

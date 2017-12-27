@@ -175,7 +175,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
     }
 
     @Override
-    public RoadPathResult getNearestPathResultByRosCurrentPose(RoadPathMaps roadPathMaps, RosCurrentPose rosCurrentPose, MapPoint targetPoint, String sceneName, String mapName) throws Exception {
+    public RoadPathResult getNearestPathResultByRosCurrentPose(RoadPathMaps roadPathMaps, int startPointType, RosCurrentPose rosCurrentPose, MapPoint targetPoint, String sceneName, String mapName) throws Exception {
         Orientation orientation = rosCurrentPose.getOrientation();
         if(orientation == null) {
             LOGGER.info("==============解析机器人坐标角度为空。");
@@ -225,8 +225,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
                 return null;
             }
 
-            //先计算离机器人位置最近的路径，然后计算路径起点到目的地点最近的路径起点作为输出
-            roadPathResult = PathUtil.calNearestPathPointByRoadPathDetails(roadPathMaps, roadPathDetails, rosPoint, targetPoint, this);
+            //先计算离机器人位置最近的路径，然后计算路径起点到目的地点最近的路径起点作为输出,权值计算根据类型取路径起点，还是取投影点
+            roadPathResult = PathUtil.calNearestPathPointByRoadPathDetails(roadPathMaps, startPointType, roadPathDetails, rosPoint, targetPoint, this);
             LOGGER.info("//=================算法计算最近路径起点结束，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString() + roadPathResult == null ? "结果为空，未找到路径！"
                 : "总权值:" + roadPathResult.getTotalWeight() + ",点序列：" + roadPathResult.getPointIds());
             return roadPathResult;
@@ -234,7 +234,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
     }
 
     @Override
-    public RoadPathResult getNearestPathResultByRobotCode(Robot robotDb, MapPoint targetPoint, RoadPathMaps roadPathMaps) throws Exception {
+    public RoadPathResult getNearestPathResultByRobotCode(Robot robotDb, int startPointType, MapPoint targetPoint, RoadPathMaps roadPathMaps) throws Exception {
         StringBuffer stringBuffer = new StringBuffer();
         //获取机器人坐标
         CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotDb.getCode());
@@ -254,10 +254,20 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
-
         //通过机器人所在位置找到最近的路径的起点作为机器人的出发点，并计算出结果
-        RoadPathResult result = getNearestPathResultByRosCurrentPose(roadPathMaps ,rosCurrentPose,
-                targetPoint,currentInfo.getMapInfo().getSceneName(), currentInfo.getMapInfo().getMapName());
+        RoadPathResult result = getNearestPathResultByRosCurrentPose(roadPathMaps, startPointType,
+                        rosCurrentPose, targetPoint, currentInfo.getMapInfo().getSceneName(), currentInfo.getMapInfo().getMapName());
+
         return result;
+    }
+
+    @Override
+    public RoadPathResult getNearestPathResultStartShadowPointByRobotCode(Robot robotDb, MapPoint targetPoint, RoadPathMaps roadPathMaps) throws Exception {
+        return getNearestPathResultByRobotCode(robotDb, Constant.CAL_ROAD_PATH_START_SHADOW, targetPoint, roadPathMaps);
+    }
+
+    @Override
+    public RoadPathResult getNearestPathResultStartPathPointByRobotCode(Robot robotDb, MapPoint targetPoint, RoadPathMaps roadPathMaps) throws Exception {
+        return getNearestPathResultByRobotCode(robotDb, Constant.CAL_ROAD_PATH_START_PATH, targetPoint, roadPathMaps);
     }
 }

@@ -1,12 +1,8 @@
 package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.area.point.MapPointType;
-import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
-import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.robot.*;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
@@ -24,11 +20,8 @@ import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
-import cn.muye.area.map.bean.CurrentInfo;
-import cn.muye.area.map.bean.RosCurrentPose;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
-import cn.muye.area.point.service.impl.PointServiceImpl;
 import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.robot.mapper.RobotMapper;
@@ -296,7 +289,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 continue;
             }
 
-            RoadPathResult result = roadPathResultService.getNearestPathResultByRobotCode(robotDb, pathStationPoint, roadPathMaps);
+            //以机器人在路径上的投影点与路径的关系为计算远近条件，做权值的补偿，以满足同一路径附近如果有多个机器人也能正确排序
+            RoadPathResult result = roadPathResultService.getNearestPathResultStartShadowPointByRobotCode(robotDb, pathStationPoint, roadPathMaps);
 
             //未找到路径则继续，只有一个点可能就是起点附近
             if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 0) {
