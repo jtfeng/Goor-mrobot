@@ -385,7 +385,6 @@ public class PathUtil {
         //默认权值设置到最大值
         roadPathResult.setTotalWeight(Long.MAX_VALUE);
 
-
         for(RoadPathDetail roadPathDetail : roadPathDetails) {
             //判断是同场景和同地图的路径才计算
             if(!roadPathDetail.getSceneName().equals(robotPosition.getSceneName())
@@ -399,6 +398,8 @@ public class PathUtil {
                 continue;
             }
             RoadPathResult resultTemp = new RoadPathResult();
+            logger.info("找到离机器人坐标1.5米内的路径：" + roadPathDetail.getPathId() + ","
+                    + roadPathDetail.getMapName() + "," + roadPathDetail.getSceneName());
             resultTemp = roadPathResultService.getShortestCloudRoadPathForMission(roadPathDetail.getStartPoint(),
                     targetPosition.getId(), roadPathMaps, resultTemp);
 
@@ -412,6 +413,7 @@ public class PathUtil {
         }
         //设置
         roadPathResult.setEndPoint(targetPosition);
+        logger.info("找到的最短路径为:" + roadPathResult.getPointIds() + "总权值:" + roadPathResult.getTotalWeight());
         return roadPathResult;
     }
 
@@ -745,6 +747,8 @@ public class PathUtil {
             }
             pathStationPoint = pointService.findPathMapPointByStationIdAndCloudType(firstStationId, MapPointType.FINAL_UNLOAD.getCaption());
         }
+        logger.info("#####################找到的第一个可用的目标点：" + pathStationPoint == null ? "未找到"
+                : pathStationPoint.getPointAlias() + "," + pathStationPoint.getMapName() + "," + pathStationPoint.getSceneName());
         return pathStationPoint;
     }
 }

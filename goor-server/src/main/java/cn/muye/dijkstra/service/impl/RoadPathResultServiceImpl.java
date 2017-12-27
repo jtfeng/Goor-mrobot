@@ -155,6 +155,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
     public RoadPathResult getShortestCloudRoadPathForMission(Long startPointId, Long endPointId, RoadPathMaps roadPathMaps, RoadPathResult result) throws Exception {
         result = roadPathMaps.getShortestPath(startPointId,endPointId);
         if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
+            LOGGER.info("查找点" + startPointId + "到目标点" + endPointId
+                    +"的可用的最短路径规划：" + result == null ? "未找到" : "找到" + result.getPointIds());
             return result;
         }
         //遍历result的点序列，替换为根据坐标、场景、地图名查找到的门等待点的点
@@ -162,6 +164,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         replaceDoorWaitPoint(result , MapPointType.DOOR_WAIT);
         result.setStartPoint(new MapPoint(startPointId));
         result.setEndPoint(new MapPoint(endPointId));
+        LOGGER.info("查找点" + startPointId + "到目标点" + endPointId
+                +"的可用的最短路径规划,并替换门、电梯任务点：" + result.getPointIds());
         return result;
     }
 
@@ -223,7 +227,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
 
             //先计算离机器人位置最近的路径，然后计算路径起点到目的地点最近的路径起点作为输出
             roadPathResult = PathUtil.calNearestPathPointByRoadPathDetails(roadPathMaps, roadPathDetails, rosPoint, targetPoint, this);
-            LOGGER.info("//=================算法计算最近路径起点结束，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString());
+            LOGGER.info("//=================算法计算最近路径起点结束，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString() + roadPathResult == null ? "结果为空，未找到路径！"
+                : "总权值:" + roadPathResult.getTotalWeight() + ",点序列：" + roadPathResult.getPointIds());
             return roadPathResult;
         }
     }
