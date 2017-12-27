@@ -1854,7 +1854,7 @@ create table AS_ROADPATH
   CREATED_BY bigint null,
   CREATE_TIME datetime null,
   STORE_ID bigint null,
-  PATH_NAME varchar(50) null,
+  PATH_NAME varchar(240) null,
   PATTERN varchar(50) null,
   DATA varchar(200) null,
   START_POINT bigint null,
@@ -1863,7 +1863,12 @@ create table AS_ROADPATH
   SCENE_NAME varchar(50) null,
   MAP_NAME varchar(50) null,
   PATH_ID varchar(32) null,
-  PATH_TYPE int(1) null
+  PATH_TYPE int(1) null,
+  PATH_LOCK bigint null,
+  PATH_INDEX int null,
+  X86_PATH_TYPE int default '0' null comment '工控路径类型：0 表示终点保持原样工控路径， 1 代表终点无朝向要求工控路径。',
+  RESTRICTED_STARTTIME datetime null comment '受管路径生效的 - 开始时间',
+  RESTRICTED_ENDTIME datetime null comment '受管路径限制的 - 结束时间'
 )ENGINE=MyISAM DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATH ADD PATH_LOCK BIGINT(20) NULL;
 ALTER TABLE AS_ROADPATH ADD X86_PATH_TYPE INT(11) default '0' NULL comment '工控路径类型：0 表示终点保持原样工控路径， 10 代表终点无朝向要求工控路径。';
