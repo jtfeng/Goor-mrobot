@@ -33,6 +33,7 @@ public class Constant {
     //PathType
     public final static Integer PATH_TYPE_CLOUD = 0; //云端路径
     public final static Integer PATH_TYPE_X86 = 1;  //工控路径
+    public final static Integer PATH_TYPE_RESTRICTED = 2;  //受管路径
 
     //X86PathType
     public final static Integer X86_PATH_TYPE_STRICT_DIRECTION = 0; //0 表示终点保持原样工控路径
