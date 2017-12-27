@@ -298,8 +298,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
             RoadPathResult result = roadPathResultService.getNearestPathResultByRobotCode(robotDb, pathStationPoint, roadPathMaps);
 
-            //未找到路径,或者只找到一个点(工控路径至少两个点)则继续
-            if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
+            //未找到路径则继续，只有一个点可能就是起点附近
+            if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 0) {
                 stringBuffer.append("下单获取可用机器：" + robotDb.getCode()  + "不可用。未找到机器人所在位置匹配的可到达目的地的路径！");
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;

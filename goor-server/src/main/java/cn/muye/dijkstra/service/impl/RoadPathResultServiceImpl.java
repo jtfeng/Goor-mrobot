@@ -154,9 +154,9 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
     @Override
     public RoadPathResult getShortestCloudRoadPathForMission(Long startPointId, Long endPointId, RoadPathMaps roadPathMaps, RoadPathResult result) throws Exception {
         result = roadPathMaps.getShortestPath(startPointId,endPointId);
-        if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 1) {
+        if(result == null || result.getPointIds() == null || result.getPointIds().size() == 0) {
             LOGGER.info("查找点" + startPointId + "到目标点" + endPointId
-                    +"的可用的最短路径规划：" + result == null ? "未找到" : "找到" + result.getPointIds());
+                    +"的可用的最短路径规划：" + (result == null ? "未找到" : "找到" + result.getPointIds()));
             return result;
         }
         //遍历result的点序列，替换为根据坐标、场景、地图名查找到的门等待点的点
