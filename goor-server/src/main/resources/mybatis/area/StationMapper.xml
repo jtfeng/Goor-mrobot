@@ -35,7 +35,7 @@
 
     <!-- 删除历史机器人和站之间的绑定关系，然后重新添加新的关系 -->
     <delete id="deleteStationWithRobotRelationByRobotCode" parameterType="java.lang.String">
-        DELETE FROM AC_STATION_ROBOT_XREF WHERE ROBOT_ID = (SELECT ROBOT_ID FROM AS_ROBOT WHERE CODE = #{0});
+        DELETE FROM AC_STATION_ROBOT_XREF WHERE ROBOT_ID = (SELECT ID FROM AS_ROBOT WHERE CODE = #{0});
     </delete>
 
     <sql id="Base_Column_List">
