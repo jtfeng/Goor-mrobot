@@ -19,7 +19,7 @@
            stdout将日志信息输出到控制上，为方便开发测试使用
     -->
     <contextName>SpringBootDemo</contextName>
-    <property name="LOG_PATH" value="/home/cloud/goorserver_logback" />
+    <property name="LOG_PATH" value="/mnt/server" />
     <!--<property name="LOG_PATH" value="/Users/wlkfec/Documents/desktop_origin/goor_logback" />-->
     <!--<property name="LOG_PATH" value="E:\\logs" />-->
     <!--设置系统日志目录-->
