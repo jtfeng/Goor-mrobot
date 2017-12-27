@@ -563,6 +563,13 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         int i = 0;
         for (RoadPath roadPath : roadPaths) {
             RoadPathDetail roadPathDetail = new RoadPathDetail();
+            //20171227 TODO 临时规避报错，记得去掉
+            Date temp = new Date();
+            roadPath.setRestrictedEndtime(temp);
+            roadPath.setRestrictedStarttime(temp);
+            roadPath.setRestrictedEndtimeLongTime(0L);
+            roadPath.setRestrictedStarttimeLongTime(0L);
+            //---------------------------
             BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
             roadPathDetail.setEnd(this.mapPointMapper.selectByPrimaryKey(roadPath.getEndPoint()));
