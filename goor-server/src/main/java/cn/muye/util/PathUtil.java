@@ -468,7 +468,7 @@ public class PathUtil {
             else {
                 Long SHADOW_AC = doubleToLongRoundHalfUp(triangleResult.getShadowAC() * 1000);
                 Long PC = doubleToLongRoundHalfUp(triangleResult.getAbsPC() * 1000);
-                resultTemp.setTotalWeight(weight + PC -SHADOW_AC);
+                resultTemp.setTotalWeight(weight + PC - Math.abs(SHADOW_AC));
             }
         }
         return resultTemp;
