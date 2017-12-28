@@ -8,6 +8,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.StringUtil;
+import cn.mrobot.utils.constants.LineMathUtil;
 import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.bean.Orientation;
 import cn.muye.area.map.bean.Position;
@@ -198,9 +199,9 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         LOGGER.info("================四元数w=" + orientation.getW() + ",换算的欧拉角(弧度)=" + th);
         //我们认为保留3位小数换算出来TH，作为比较条件，后面几位精度基本可以忽略了
         MapPoint rosPoint = PathUtil.findPathPointByXYTH(sceneName, mapName ,
-                PathUtil.floorDoubleByScale(position.getX(), Constant.XYZ_SCALE),
-                PathUtil.floorDoubleByScale(position.getY(), Constant.XYZ_SCALE),
-                PathUtil.floorDoubleByScale(th,Constant.TH_SCALE),
+                LineMathUtil.floorDoubleByScale(position.getX(), Constant.XYZ_SCALE),
+                LineMathUtil.floorDoubleByScale(position.getY(), Constant.XYZ_SCALE),
+                LineMathUtil.floorDoubleByScale(th,Constant.TH_SCALE),
                 null, pointService );
 
         RoadPathResult roadPathResult = new RoadPathResult();

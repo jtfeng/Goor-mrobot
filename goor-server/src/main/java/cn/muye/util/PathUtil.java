@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
@@ -12,6 +13,7 @@ import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
 import cn.mrobot.bean.dijkstra.TriangleResult;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.dto.area.PathDTO;
+import cn.mrobot.utils.constants.LineMathUtil;
 import cn.muye.area.map.bean.Orientation;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
@@ -22,10 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Created by chay on 2017/12/13.
@@ -42,9 +41,9 @@ public class PathUtil {
      */
     public static Long calDistance(MapPoint start, MapPoint end) {
         Long result = 0L;
-        Double db = calPointToPointDistance(start.getX(), start.getY(), end.getX(), end.getY())
+        Double db = LineMathUtil.calPointToPointDistance(start.getX(), start.getY(), end.getX(), end.getY())
                  * 1000;//换算成mm
-        result = doubleToLongRoundHalfUp(db);
+        result = LineMathUtil.doubleToLongRoundHalfUp(db);
         return result;
     }
 
@@ -66,8 +65,8 @@ public class PathUtil {
         double x2 = end.getX();
         double y2 = end.getY();
         //以离机器人最近的路径起点计算机器人到线段的距离,换算成mm
-        Double db = calPointToSegmentDistance(x0, y0, x1, y1, x2, y2) * 1000;
-        result = doubleToLongRoundHalfUp(db);
+        Double db = LineMathUtil.calPointToSegmentDistance(x0, y0, x1, y1, x2, y2) * 1000;
+        result = LineMathUtil.doubleToLongRoundHalfUp(db);
         logger.info("=================计算机器人点(" + x0 + "," + y0 + ")到路径'" + roadPathDetail.getPathName() + "'的距离" + result + "mm");
         return result;
     }
@@ -85,95 +84,6 @@ public class PathUtil {
         RoadPathServiceImpl roadPathService = new RoadPathServiceImpl();
         System.out.println(roadPathService.calDistance(start, end));
     }*/
-
-    /**
-     * * 已知两点的坐便(x1, y1); (x2, y2)
-     另外一个点的坐标是(x0, y0);
-     求(x0, y0)到经过(x1, y1); (x2, y2)直线的距离。
-     直线方程中
-     A = y2 - y1,
-     B = x1- x2,
-     C = x2 * y1 - x1 * y2;
-     点的直线的距离公式为:
-     double d = (fabs((y2 - y1) * x0 +(x1 - x2) * y0 + ((x2 * y1) -(x1 * y2)))) / (sqrt(pow(y2 - y1, 2) + pow(x1 - x2, 2)));
-     * @param x0
-     * @param y0
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @return
-     */
-    public static double calPointToLineDistance(double x0, double y0,
-                                                double x1, double y1,
-                                                double x2, double y2) {
-        double A = y2 - y1;
-        double B = x1 - x2;
-        double C = x2 * y1 - x1 * y2;
-        double d = (Math.abs(A * x0 +B * y0 + C)) / (Math.sqrt(Math.pow(A, 2) + Math.pow(B, 2)));
-        logger.info("####################" +
-                "计算点(" + x0 + "," + y0 + ")到直线上的点(" + x1 + "," + y1 + "),(" + x2 + "," + y2 +")的距离为" + d );
-        return d;
-    }
-
-    /**
-     * 计算点到线段的距离。
-     * 与到直线距离区别是线段是有长度的，所以要考虑点到线段的投影是不是在线段上，如果是，则取到直线的距离，如果不是，则取点到最近的端点的距离。
-     * r=(AP向量*AB向量)/(AB向量模)^2=AP向量的模/AB向量的模*cosΘ,Θ为AP向量与AB向量的夹角
-     * 向量AP在向量AB上的投影:向量AC = r*AB向量
-     *
-     * P(x0,y0)到线段A(x1,y1),B(x2,y2)的距离为:
-     * r<=0,AP向量的模
-     * r>=1,BP向量的模
-     * 其他,CP向量的模，C是P在AB向量上的投影点
-     * @param x0
-     * @param y0
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @return
-     */
-    public static double calPointToSegmentDistance(double x0, double y0,
-                                                double x1, double y1,
-                                                double x2, double y2) {
-        //计算r的分子
-        double cross = (x2 - x1) * (x0 - x1) + (y2 - y1) * (y0 - y1);
-        //分子小于等于0，说明r<=0
-        if (cross <= 0) {
-            //返回AP向量的模
-            return calPointToPointDistance(x0, y0, x1, y1);
-        }
-
-        //计算r的分母，AB向量模的平方
-        double d2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-        if (cross >= d2) {
-            //如果r>=1,则返回BP向量的模
-            return calPointToPointDistance(x0, y0, x2, y2);
-        }
-
-        //其他情况，则返回CP向量的膜
-        double r = cross / d2;
-        double px = x1 + (x2 - x1) * r;
-        double py = y1 + (y2 - y1) * r;
-        return calPointToPointDistance(x0, y0, px, py);
-    }
-
-    /**
-     * 计算两点间距离
-     * @param x0
-     * @param y0
-     * @param x1
-     * @param y1
-     * @return
-     */
-    public static double calPointToPointDistance(double x0, double y0,
-                                                double x1,double y1) {
-        double d = Math.sqrt((x0 - x1) * (x0 - x1) + (y0 - y1) * (y0 - y1));
-        logger.info("####################" +
-                "计算点(" + x0 + "," + y0 + ")到点(" + x1 + "," + y1 + ")的距离为" + d );
-        return d;
-    }
 
     /**
      * 查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
@@ -338,28 +248,6 @@ public class PathUtil {
     }
 
     /**
-     * 根据小数位数四舍五入double数
-     * @param x
-     * @param scale
-     * @return
-     */
-    public static double roundDoubleByScale(double x, int scale) {
-        BigDecimal b =  new  BigDecimal(x);
-        return b.setScale(scale, BigDecimal.ROUND_HALF_UP).doubleValue();
-    }
-
-    /**
-     * 根据小数位数截取double数，注意不是四舍五入
-     * @param x
-     * @param scale
-     * @return
-     */
-    public static double floorDoubleByScale(double x, int scale) {
-        BigDecimal b =  new  BigDecimal(x);
-        return b.setScale(scale, BigDecimal.ROUND_FLOOR).doubleValue();
-    }
-
-    /**
      * 清空某场景、某门店下的路径相关的缓存
      * @param storeId
      * @param sceneName
@@ -466,36 +354,27 @@ public class PathUtil {
             //当r<=0,P的投影C在线段AB的A端，补偿路径为PA的长度
             if(r <= 0) {
                 //转化成mm且四舍五入取整作为权值
-                Long PA = doubleToLongRoundHalfUp(triangleResult.getAbsAP() * 1000);
+                Long PA = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsAP() * 1000);
                 logger.info("r<=0,P的投影C在线段AB的A端，补偿路径为PA的长度,PA=" + PA);
                 resultTemp.setTotalWeight(weight + PA);
             }
             //当r>=1,P的投影C在线段AB的B端，补偿路径为BP的长度-AB的长度
             else if(r >= 1) {
-                Long AB = doubleToLongRoundHalfUp(triangleResult.getAbsAB() * 1000);
-                Long BP = doubleToLongRoundHalfUp(triangleResult.getAbsBP() * 1000);
+                Long AB = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsAB() * 1000);
+                Long BP = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsBP() * 1000);
                 logger.info("r>=1,P的投影C在线段AB的B端，补偿路径为BP的长度-AB的长度,AB=" + AB + ",BP=" + BP);
                 resultTemp.setTotalWeight(weight + BP - AB);
             }
             //其他，P的投影C在线段AB中间，补偿路径为PC的长度-AC的长度
             else {
-                Long SHADOW_AC = doubleToLongRoundHalfUp(triangleResult.getShadowAC() * 1000);
-                Long PC = doubleToLongRoundHalfUp(triangleResult.getAbsPC() * 1000);
+                Long SHADOW_AC = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getShadowAC() * 1000);
+                Long PC = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsPC() * 1000);
                 logger.info("其他，P的投影C在线段AB中间，补偿路径为PC的长度-AC的长度,SHADOW_AC=" + SHADOW_AC + ",PC =" + PC);
                 resultTemp.setTotalWeight(weight + PC - Math.abs(SHADOW_AC));
             }
         }
         logger.info("补偿后权值：" + resultTemp.getTotalWeight() + ",pointIds=" + resultTemp.getPointIds());
         return resultTemp;
-    }
-
-    /**
-     * 把double转换成Long,四舍五入
-     * @param x
-     * @return
-     */
-    public static Long doubleToLongRoundHalfUp(double x) {
-        return new BigDecimal(x + "").setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
     }
 
     /**
@@ -511,11 +390,11 @@ public class PathUtil {
      */
     private static TriangleResult calTriangleResult(double x0, double y0, double x1, double y1, double x2, double y2) {
         TriangleResult triangleResult = new TriangleResult();
-        double absAB = calPointToPointDistance(x1, y1, x2, y2);
+        double absAB = LineMathUtil.calPointToPointDistance(x1, y1, x2, y2);
         triangleResult.setAbsAB(absAB);
-        triangleResult.setAbsAP(calPointToPointDistance(x1, y1, x0, y0));
-        triangleResult.setAbsBP(calPointToPointDistance(x2, y2, x0, y0));
-        triangleResult.setAbsPC(calPointToLineDistance(x0, y0, x1, y1, x2, y2));
+        triangleResult.setAbsAP(LineMathUtil.calPointToPointDistance(x1, y1, x0, y0));
+        triangleResult.setAbsBP(LineMathUtil.calPointToPointDistance(x2, y2, x0, y0));
+        triangleResult.setAbsPC(LineMathUtil.calPointToLineDistance(x0, y0, x1, y1, x2, y2));
         //计算r的分子
         double cross = (x2 - x1) * (x0 - x1) + (y2 - y1) * (y0 - y1);
         //计算r的分母，AB向量模的平方
@@ -699,8 +578,10 @@ public class PathUtil {
      * @throws Exception
      */
     public static List<RobotRoadPathResult> sortByRobotRoadPathResultList(List<RobotRoadPathResult> robotRoadPathResultList) throws Exception{
+        logger.info("----------------------对机器人路径查询结果从短到长进行排序");
         //如果只有一个元素，则不需要排序，直接返回
         if(robotRoadPathResultList == null || robotRoadPathResultList.size() <= 1) {
+            logger.info("--------------------只有一个元素，则不需要排序，直接返回");
             return robotRoadPathResultList;
         }
         //使用快速排序
@@ -711,6 +592,7 @@ public class PathUtil {
         //使用JAVA自带的归并排序
         Collections.sort(robotRoadPathResultList);
 
+        logger.info("----------------------对机器人路径查询结果从短到长进行排序:" + robotRoadPathResultList);
         return robotRoadPathResultList;
     }
 
@@ -780,7 +662,7 @@ public class PathUtil {
         List<RobotRoadPathResult> robotRoadPathResultList = new ArrayList<RobotRoadPathResult>();
         for(int i = 15;i > 0;i--) {
             Robot robot = new Robot();
-            robot.setName("testName" + i);
+            robot.setName("NOAH_A00" + i);
             RoadPathResult roadPathResult = new RoadPathResult();
             roadPathResult.setTotalWeight(new Random().nextInt(3) + 0L);
             robotRoadPathResultList.add(new RobotRoadPathResult(robot, roadPathResult));

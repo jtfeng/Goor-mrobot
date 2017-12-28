@@ -374,4 +374,53 @@ public class DijkstraController {
             return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
         }
     }
+
+    /**
+     * 更新某场景工控路径权值
+     * @return
+     */
+    @RequestMapping(value = "/services/roadPath/updateX86PathWeight")
+    @ResponseBody
+    public AjaxResult updateX86PathWeight(Long sceneId) {
+        try {
+            Scene scene = sceneService.getSceneById(sceneId);
+            String sceneName = scene.getMapSceneName();
+            if(StringUtil.isNullOrEmpty(sceneName)) {
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+            }
+
+            List<RoadPath> x86RoadPaths = roadPathService.listRoadPathsBySceneNamePathType(sceneName,
+                    Constant.PATH_TYPE_X86, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            if(x86RoadPaths == null || x86RoadPaths.size() <= 0) {
+                return AjaxResult.failed("该场景无工控路径");
+            }
+
+            for(RoadPath roadPath : x86RoadPaths) {
+                if(roadPath == null || roadPath.getStartPoint() == null
+                        || roadPath.getEndPoint() == null) {
+                    log.error(roadPath.getPathName() + "路径为空或起点、终点ID中有空值，跳过");
+                    continue;
+                }
+                MapPoint startPoint = pointService.findById(roadPath.getStartPoint());
+                MapPoint endPoint = pointService.findById(roadPath.getEndPoint());
+                if(startPoint == null || endPoint == null) {
+                    log.error(roadPath.getPathName() + "路径关联的"+ (startPoint == null ?"起点对象," : ",")
+                            +(endPoint == null ? "终点对象" : "") + "不存在");
+                    continue;
+                }
+                //取两点间长度作为路径权值
+                roadPath.setWeight(PathUtil.calDistance(startPoint, endPoint));
+                roadPathService.updateSelective(roadPath);
+            }
+
+            //清除路径缓存
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID , sceneName);
+
+            return AjaxResult.success("更新成功");
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
+        }
+    }
 }
