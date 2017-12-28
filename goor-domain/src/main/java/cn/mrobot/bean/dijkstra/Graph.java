@@ -1,5 +1,7 @@
 package cn.mrobot.bean.dijkstra;
 
+import cn.mrobot.bean.area.point.MapPoint;
+
 import java.util.*;
 
 public class Graph {
@@ -18,6 +20,17 @@ public class Graph {
     public RoadPathResult getShortestPath(Long start, Long finish) {
         RoadPathResult roadPathResult = new RoadPathResult();
         Long totalWeight = 0L;
+        roadPathResult.setTotalWeight(totalWeight);
+        roadPathResult.setStartPoint(new MapPoint(start));
+        roadPathResult.setEndPoint(new MapPoint(finish));
+        //当起点和终点是同一个点的时候，直接返回这个点序列，权值为0
+        if(start.equals(finish)) {
+            List<Long> ids = new ArrayList<Long>();
+            ids.add(start);
+            roadPathResult.setPointIds(ids);
+            return roadPathResult;
+        }
+
         final Map<Long, Long> distances = new HashMap<>();
         final Map<Long, Vertex> previous = new HashMap<Long, Vertex>();
         PriorityQueue<Vertex> nodes = new PriorityQueue<Vertex>();

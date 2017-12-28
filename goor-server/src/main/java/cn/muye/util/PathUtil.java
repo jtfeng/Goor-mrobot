@@ -434,12 +434,15 @@ public class PathUtil {
      * @return
      */
     private static RoadPathResult compensateRoadPathResultByStartPointType(RoadPathDetail roadPathDetail, MapPoint robotPosition, RoadPathResult resultTemp, int startPointType) {
+        logger.info("补偿前权值：" + resultTemp.getTotalWeight() + ",pointIds=" + resultTemp.getPointIds());
         //如果是以路径起点为权值计算起点，则不需要补偿
         if(startPointType == Constant.CAL_ROAD_PATH_START_PATH) {
+            logger.info("##########以路径起点为权值计算起点，不需要补偿");
             return resultTemp;
         }
         //如果是根据路径的投影点来计算起点，则需要补偿
         else if(startPointType == Constant.CAL_ROAD_PATH_START_SHADOW) {
+            logger.info("##########以路径投影点为权值计算起点，需要补偿");
             Long weight = resultTemp.getTotalWeight();
             MapPoint start = roadPathDetail.getStart();
             MapPoint end = roadPathDetail.getEnd();
@@ -452,25 +455,30 @@ public class PathUtil {
             TriangleResult triangleResult = calTriangleResult(x0 , y0, x1, y1, x2, y2);
 
             double r = triangleResult.getR();
+            logger.info("##########补偿计算的r=" + r);
             //当r<=0,P的投影C在线段AB的A端，补偿路径为PA的长度
             if(r <= 0) {
                 //转化成mm且四舍五入取整作为权值
                 Long PA = doubleToLongRoundHalfUp(triangleResult.getAbsAP() * 1000);
+                logger.info("r<=0,P的投影C在线段AB的A端，补偿路径为PA的长度,PA=" + PA);
                 resultTemp.setTotalWeight(weight + PA);
             }
             //当r>=1,P的投影C在线段AB的B端，补偿路径为BP的长度-AB的长度
             else if(r >= 1) {
                 Long AB = doubleToLongRoundHalfUp(triangleResult.getAbsAB() * 1000);
                 Long BP = doubleToLongRoundHalfUp(triangleResult.getAbsBP() * 1000);
+                logger.info("r>=1,P的投影C在线段AB的B端，补偿路径为BP的长度-AB的长度,AB=" + AB + ",BP=" + BP);
                 resultTemp.setTotalWeight(weight + BP - AB);
             }
             //其他，P的投影C在线段AB中间，补偿路径为PC的长度-AC的长度
             else {
                 Long SHADOW_AC = doubleToLongRoundHalfUp(triangleResult.getShadowAC() * 1000);
                 Long PC = doubleToLongRoundHalfUp(triangleResult.getAbsPC() * 1000);
+                logger.info("其他，P的投影C在线段AB中间，补偿路径为PC的长度-AC的长度,SHADOW_AC=" + SHADOW_AC + ",PC =" + PC);
                 resultTemp.setTotalWeight(weight + PC - Math.abs(SHADOW_AC));
             }
         }
+        logger.info("补偿后权值：" + resultTemp.getTotalWeight() + ",pointIds=" + resultTemp.getPointIds());
         return resultTemp;
     }
 
