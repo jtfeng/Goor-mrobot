@@ -169,47 +169,64 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
         MissionItemTask missionItemTaskListDb = missionItemTaskService.findById(missionItemId);
         //记录日志.单独开前程，避免影响主线程
         new Thread(() -> saveLogInfo(code, missionItemTaskListDb)).start();
+        //校验电梯员工，全查所有电梯员工
         if (subName.equals(TopicConstants.VERIFY_ELEVATOR_ADMIN_NUMBER)) {
             Employee employee = new Employee();
             employee.setType(Constant.EMPLOYEE_TYPE_ELEVATOR_ADMIN);
             employee.setCode(code);
             List<Employee> list = employeeMapper.select(employee);
+            if(list == null || list.size() == 0) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的电梯员工");
+            }
             List<String> codeList = Lists.newArrayList();
             list.forEach(oneEmployee -> {
                 codeList.add(oneEmployee.getCode());
             });
-            if (list != null && list.size() > 0 && codeList.contains(code)) {
+            if (codeList.contains(code)) {
                 return AjaxResult.success("校验成功");
             } else {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的电梯员工");
             }
-        } else if (subName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)) {
+        }
+        //校验普通员工
+        else if (subName.equals(TopicConstants.VERIFY_EMPLYEE_NUMBER)) {
+            //先全查当前工号的所有员工
             Employee employee = new Employee();
+            employee.setType(Constant.EMPLOYEE_TYPE_NORMAL);
             employee.setCode(code);
-//            employee.setActivated(true);
-            Employee employeeDb = employeeMapper.selectOne(employee);
-            if (employeeDb == null) {
+            List<Employee> list = employeeMapper.select(employee);
+            if(list == null || list.size() == 0) {
                 LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " not found");
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "输入信息错误");
-            } else {
-                // 用于开机管理的特殊校验，此时没有实际意义的 missionid，传入"-1"表示此种类型
-                if (missionItemId == -1) {
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的普通员工");
+            }
+
+            // 用于开机管理的特殊校验，此时没有实际意义的 missionid，传入"-1"表示此种类型，不需要区分站
+            if (missionItemId == -1) {
+                List<String> codeList = Lists.newArrayList();
+                list.forEach(oneEmployee -> {
+                    codeList.add(oneEmployee.getCode());
+                });
+                if (codeList.contains(code)) {
                     return AjaxResult.success("校验成功");
-                }
-                if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
-                    Map map = Maps.newHashMap();
-                    map.put("code", code);
-                    map.put("missionItemId", missionItemId);
-                    List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
-                    if (employeeListDb != null && employeeListDb.size() > 0) {
-                        return AjaxResult.success("校验成功");
-                    } else {
-                        LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " 没有权限");
-                        return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "没有权限");
-                    }
                 } else {
-                    LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : missionItemTaskListDb " + missionItemId + " not found or wrong missionItemTaskType");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的普通员工");
                 }
+            }
+            //用于任务员工的在线校验，需要根据员工关联站、任务类型去过滤
+            if (missionItemTaskListDb != null && Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER.contains(missionItemTaskListDb.getName())) {
+                Map map = Maps.newHashMap();
+                map.put("code", code);
+                map.put("missionItemId", missionItemId);
+                List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
+                if (employeeListDb != null && employeeListDb.size() > 0) {
+                    return AjaxResult.success("校验成功");
+                } else {
+                    LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " 没有权限");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "没有权限");
+                }
+            } else {
+                LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : missionItemTaskListDb " + missionItemId + " not found or wrong missionItemTaskType");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "非指定的校验普通员工任务，只支持" + Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER);
             }
         }
         return null;
