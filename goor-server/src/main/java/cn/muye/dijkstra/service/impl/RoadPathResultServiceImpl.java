@@ -115,13 +115,14 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
      */
     @Override
     public RoadPathResult replaceDoorWaitPoint(RoadPathResult result, MapPointType mapPointType) throws Exception {
+        //只有一个点的时候，说明就在当前点，不需要过门，直接返回
+        if(result == null || result.getPointIds() == null
+            || result.getPointIds().size() <= 1) {
+            return result;
+        }
         List<Long> idList = result.getPointIds();
         List<Long> returnIdList = new ArrayList<Long>();
         int size = idList.size();
-        //只有一个点的时候，说明就在当前点，不需要过门，直接返回
-        if(size == 1) {
-            return result;
-        }
 
         //最后一个点不用替换成门任务，因为没有下一个任务点，说明不需要过门
         for(int i=0;i< size - 1;i++) {

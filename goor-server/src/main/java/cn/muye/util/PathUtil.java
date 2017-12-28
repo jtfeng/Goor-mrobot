@@ -403,7 +403,7 @@ public class PathUtil {
                 continue;
             }
             RoadPathResult resultTemp = new RoadPathResult();
-            logger.info("找到离机器人坐标1.5米内的路径：" + roadPathDetail.getPathId() + ","
+            logger.info("找到离机器人坐标"+ Constant.PATH_NAVIGATION_SCALE + "毫米内的路径：" + roadPathDetail.getPathId() + ","
                     + roadPathDetail.getMapName() + "," + roadPathDetail.getSceneName());
             resultTemp = roadPathResultService.getShortestCloudRoadPathForMission(roadPathDetail.getStartPoint(),
                     targetPosition.getId(), roadPathMaps, resultTemp);
