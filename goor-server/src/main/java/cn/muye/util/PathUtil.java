@@ -480,7 +480,7 @@ public class PathUtil {
      * @return
      */
     public static Long doubleToLongRoundHalfUp(double x) {
-        return new BigDecimal(x * 1000 + "").setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
+        return new BigDecimal(x + "").setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
     }
 
     /**
