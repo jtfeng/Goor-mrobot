@@ -2,6 +2,7 @@ package cn.mrobot.bean.erp.appliance;
 
 import cn.mrobot.bean.base.BaseBean;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.erp.DeleteBase;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.persistence.Table;
@@ -12,14 +13,9 @@ import java.util.Date;
  * @date 2017/12/1
  */
 @Table(name = "ERP_APPLIANCE_PACKAGE_TYPE")
-public class AppliancePackageType extends BaseBean {
+public class AppliancePackageType extends DeleteBase {
 
     private String name;
-
-    private int deleteFlag;   // //数据库删除状态 0 :正常 1：删除
-
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private Date deleteTime;   //数据库删除时间
 
     public AppliancePackageType() {
     }
@@ -30,22 +26,6 @@ public class AppliancePackageType extends BaseBean {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public int getDeleteFlag() {
-        return deleteFlag;
-    }
-
-    public void setDeleteFlag(int deleteFlag) {
-        this.deleteFlag = deleteFlag;
-    }
-
-    public Date getDeleteTime() {
-        return deleteTime;
-    }
-
-    public void setDeleteTime(Date deleteTime) {
-        this.deleteTime = deleteTime;
     }
 
     public static class Builder {
@@ -81,8 +61,8 @@ public class AppliancePackageType extends BaseBean {
 
     public AppliancePackageType(Builder builder) {
         this.setId(builder.id);
-        this.deleteFlag = builder.deleteFlag;
-        this.deleteTime = builder.deleteTime;
+        this.setDeleteFlag(builder.deleteFlag);
+        this.setDeleteTime(builder.deleteTime);
         this.name = builder.name;
     }
 

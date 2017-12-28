@@ -2,6 +2,7 @@ package cn.mrobot.bean.erp.operation;
 
 import cn.mrobot.bean.base.BaseBean;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.erp.DeleteBase;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import javax.naming.directory.SearchControls;
@@ -15,14 +16,9 @@ import java.util.Date;
  * @date 2017/12/19
  */
 @Table(name = "ERP_OPERATION_DEPARTMENT_TYPE")
-public class OperationDepartmentType extends BaseBean {
+public class OperationDepartmentType extends DeleteBase {
 
     private String name;
-
-    private int deleteFlag;   // //数据库删除状态 0 :正常 1：删除
-
-    @JSONField(format = "yyyy-MM-dd HH:mm:ss")
-    private Date deleteTime;   //数据库删除时间
 
     public OperationDepartmentType() {
     }
@@ -35,23 +31,7 @@ public class OperationDepartmentType extends BaseBean {
         this.name = name;
     }
 
-    public int getDeleteFlag() {
-        return deleteFlag;
-    }
-
-    public void setDeleteFlag(int deleteFlag) {
-        this.deleteFlag = deleteFlag;
-    }
-
-    public Date getDeleteTime() {
-        return deleteTime;
-    }
-
-    public void setDeleteTime(Date deleteTime) {
-        this.deleteTime = deleteTime;
-    }
-
-    public void init(){
+    public void init() {
         this.setDeleteFlag(Constant.NORMAL);
         this.setCreateTime(new Date());
         this.setStoreId(100L);
@@ -90,8 +70,8 @@ public class OperationDepartmentType extends BaseBean {
 
     public OperationDepartmentType(Builder builder) {
         this.setId(builder.id);
-        this.deleteFlag = builder.deleteFlag;
-        this.deleteTime = builder.deleteTime;
+        this.setDeleteFlag(builder.deleteFlag);
+        this.setDeleteTime(builder.deleteTime);
         this.name = builder.name;
     }
 }
