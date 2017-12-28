@@ -128,7 +128,7 @@ public class ApplianceController {
             return AjaxResult.failed("ID不能为空");
         }
         Appliance applianceDB = applianceService.findApplianceById(id);
-        return AjaxResult.success(applianceDB, "修改成功");
+        return AjaxResult.success(applianceDB, "查询成功");
     }
 
     @RequestMapping(value = "appliance/{id}", method = RequestMethod.DELETE)

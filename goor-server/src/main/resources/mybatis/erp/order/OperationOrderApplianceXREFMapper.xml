@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.erp.order.mapper.OperationOrderApplianceXREFMapper">
+
+    <resultMap id="operationOrderApplianceXREF" type="cn.mrobot.bean.erp.order.OperationOrderApplianceXREF">
+        <result property="number" column="NUMBER"/>
+        <result property="operationOrderId" column="OPERATION_ORDER_ID"/>
+        <association property="appliance" column="APPLIANCE_ID"
+                     javaType="cn.mrobot.bean.erp.appliance.Appliance"
+                     select="cn.muye.erp.appliance.mapper.ApplianceMapper.findApplianceById"/>
+    </resultMap>
+
+
+    <insert id="save" parameterType="cn.mrobot.bean.erp.order.OperationOrderApplianceXREF" useGeneratedKeys="false">
+        INSERT INTO ERP_OPERATION_ORDER_APPLIANCE_XREF(
+        NUMBER,
+        APPLIANCE_ID,
+        OPERATION_ORDER_ID
+        ) values (
+        #{number},
+        #{appliance.id},
+        #{operationOrderId}
+        );
+    </insert>
+
+    <select id="findByOperationOrderId" resultMap="operationOrderApplianceXREF">
+        SELECT * FROM ERP_OPERATION_ORDER_APPLIANCE_XREF WHERE OPERATION_ORDER_ID = #{operationOrderId}
+    </select>
+</mapper>

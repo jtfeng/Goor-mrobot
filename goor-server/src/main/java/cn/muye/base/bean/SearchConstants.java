@@ -31,6 +31,8 @@ public class SearchConstants {
 	public static String SEARCH_PASSWORD = "password";
 
 	public static String SEARCH_TYPE = "type";
+	public static String SEARCH_STATE = "state";
+	public static String SEARCH_APPLIANCE_ID = "applianceId";
 	public static String SEARCH_CODE = "code";
 	public static String SEARCH_ERROR_CODE = "error_code";
 	public static String SEARCH_STATION_ID = "stationId";

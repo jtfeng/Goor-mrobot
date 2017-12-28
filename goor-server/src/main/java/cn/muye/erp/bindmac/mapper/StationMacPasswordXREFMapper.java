@@ -23,4 +23,6 @@ public interface StationMacPasswordXREFMapper extends MyMapper<StationMacPasswor
     List<StationMacPasswordXREF> listByConditions(@Param("mac") String mac, @Param("stationId") Long stationId);
 
     List<StationMacPasswordXREF> listAll();
+
+    List<StationMacPasswordXREF> findByType(int code);
 }
