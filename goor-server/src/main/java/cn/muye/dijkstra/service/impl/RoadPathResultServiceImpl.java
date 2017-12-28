@@ -118,6 +118,11 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         List<Long> idList = result.getPointIds();
         List<Long> returnIdList = new ArrayList<Long>();
         int size = idList.size();
+        //只有一个点的时候，说明就在当前点，不需要过门，直接返回
+        if(size == 1) {
+            return result;
+        }
+
         //最后一个点不用替换成门任务，因为没有下一个任务点，说明不需要过门
         for(int i=0;i< size - 1;i++) {
             Long id = idList.get(i);
@@ -236,11 +241,12 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
     @Override
     public RoadPathResult getNearestPathResultByRobotCode(Robot robotDb, int startPointType, MapPoint targetPoint, RoadPathMaps roadPathMaps) throws Exception {
         StringBuffer stringBuffer = new StringBuffer();
+        String robotCode = robotDb.getCode();
         //获取机器人坐标
-        CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotDb.getCode());
+        CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotCode);
         String pose = currentInfo.getPose();
         if(pose == null || StringUtil.isNullOrEmpty(pose)) {
-            stringBuffer.append("下单获取可用机器：" + robotDb.getCode()  + "不可用。未获取到机器人坐标！");
+            stringBuffer.append("下单获取可用机器：" + robotCode  + "不可用。未获取到机器人坐标！");
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -250,10 +256,11 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
             rosCurrentPose = JSON.parseObject(pose,RosCurrentPose.class);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            stringBuffer.append("下单获取可用机器：" + robotDb.getCode()  + "不可用。获取到的机器人坐标格式解析错误！");
+            stringBuffer.append("下单获取可用机器：" + robotCode  + "不可用。获取到的机器人坐标格式解析错误！");
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
+        LOGGER.info("###############开始查找离" + robotCode + "机器人坐标最近的路径。");
         //通过机器人所在位置找到最近的路径的起点作为机器人的出发点，并计算出结果
         RoadPathResult result = getNearestPathResultByRosCurrentPose(roadPathMaps, startPointType,
                         rosCurrentPose, targetPoint, currentInfo.getMapInfo().getSceneName(), currentInfo.getMapInfo().getMapName());
