@@ -52,10 +52,7 @@ public class StationMacPasswordXREFServiceImpl extends BaseServiceImpl<StationMa
 
     @Override
     public List<StationMacPasswordXREF> findByType(StationMacPasswordXREF.Type type) {
-        Example example = new Example(StationMacPasswordXREF.class);
-        example.createCriteria().andCondition("TYPE=" + type.getCode() + "");
-        example.setOrderByClause("CREATE_TIME desc");
-        return mapper.selectByExample(example);
+        return mapper.findByType(type.getCode());
     }
 
     @Override

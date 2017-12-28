@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.erp.order.mapper.OperationOrderMapper">
+
+    <resultMap id="operationOrder" type="cn.mrobot.bean.erp.order.OperationOrder">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+
+        <result property="handleTime" column="HANDLE_TIME"/>
+        <result property="receiveTime" column="RECEIVE_TIME"/>
+        <result property="state" column="STATE"/>
+        <result property="type" column="TYPE"/>
+        <association property="station" column="STATION_ID"
+                     javaType="cn.mrobot.bean.area.station.Station"
+                     select="cn.muye.area.station.mapper.StationMapper.findById"/>
+        <association property="operationType" column="OPERATION_TYPE_ID"
+                     javaType="cn.mrobot.bean.erp.operation.OperationType"
+                     select="cn.muye.erp.operation.mapper.OperationTypeMapper.findOperationTypeById"/>
+        <collection property="applianceList" column="ID"
+                    ofType="cn.mrobot.bean.erp.order.OperationOrderApplianceXREF"
+                    select="cn.muye.erp.order.mapper.OperationOrderApplianceXREFMapper.findByOperationOrderId"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
+        STATION_ID,
+        HANDLE_TIME,
+        RECEIVE_TIME,
+        OPERATION_TYPE_ID,
+        STATE,
+        TYPE
+    </sql>
+
+    <insert id="saveOrder" parameterType="cn.mrobot.bean.erp.order.OperationOrder" useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO ERP_OPERATION_ORDER(
+        ID,
+        STORE_ID,
+        CREATED_BY,
+        CREATE_TIME,
+        STATION_ID,
+        HANDLE_TIME,
+        OPERATION_TYPE_ID,
+        STATE,
+        TYPE
+        ) values (
+        #{id},
+        #{storeId},
+        #{createdBy},
+        #{createTime},
+        #{station.id},
+        #{handleTime},
+        #{operationType.id},
+        #{state},
+        #{type}
+        );
+        <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID() AS ID
+        </selectKey>
+    </insert>
+
+    <select id="findOrderById" resultMap="operationOrder">
+        SELECT * FROM ERP_OPERATION_ORDER WHERE ID = #{id}
+    </select>
+
+    <update id="updateHandleTimeAndState">
+        UPDATE
+        ERP_OPERATION_ORDER
+        SET HANDLE_TIME = #{handleTime},STATE = #{state}
+        WHERE
+        ID = #{id}
+    </update>
+
+    <update id="updateReceiveTimeAndState">
+        UPDATE
+        ERP_OPERATION_ORDER
+        SET RECEIVE_TIME = #{receiveTime},STATE = #{state}
+        WHERE
+        ID = #{id}
+    </update>
+
+    <select id="listOperationOrderByConditions" resultMap="operationOrder">
+        SELECT * FROM ERP_OPERATION_ORDER
+        <where>
+            <if test="stationId != null">
+                AND STATION_ID = #{stationId}
+            </if>
+            <if test="state != null">
+                AND STATE = #{state}
+            </if>
+            <if test="type != null">
+                AND TYPE = #{type}
+            </if>
+            <if test="applianceId != null">
+                AND appliance_id = #{applianceId}
+            </if>
+        </where>
+        ORDER BY CREATE_TIME DESC
+    </select>
+
+    <select id="listAllOperationOrder" resultMap="operationOrder">
+        SELECT * FROM ERP_OPERATION_ORDER
+    </select>
+</mapper>
