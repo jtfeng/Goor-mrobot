@@ -408,6 +408,13 @@ public class PathUtil {
             resultTemp = roadPathResultService.getShortestCloudRoadPathForMission(roadPathDetail.getStartPoint(),
                     targetPosition.getId(), roadPathMaps, resultTemp);
 
+            if(resultTemp == null || resultTemp.getPointIds() == null || resultTemp.getPointIds().size() <= 0) {
+                logger.info("未找到可用规划路径：从路径" + roadPathDetail.getPathId() + ","
+                        + roadPathDetail.getMapName() + "," + roadPathDetail.getSceneName()
+                        + "到目标点" + targetPosition.getId());
+                continue;
+            }
+
             //根据startPointType来对路径权值做补偿。
             resultTemp = compensateRoadPathResultByStartPointType(roadPathDetail, robotPosition, resultTemp, startPointType);
 
