@@ -124,7 +124,7 @@ public class OperationOrderController {
         return AjaxResult.success(operationOrder, "绑定成功");
     }
 
-    @RequestMapping(value = "operation/order", method = RequestMethod.GET)
+    @RequestMapping(value = "services/operation/order", method = RequestMethod.GET)
     public AjaxResult list(WhereRequest whereRequest) {
         Integer pageNo = whereRequest.getPage();
         Integer pageSize = whereRequest.getPageSize();

@@ -239,7 +239,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setLocalFileName(mapZip.getFileName());
         commonInfo.setLocalPath(mapZip.getRobotPath());
-        String httpURL = DOWNLOAD_HTTP + mapZip.getFilePath();
+        String httpURL = DOWNLOAD_HTTP + mapZip.getFilePath().replaceAll("\\\\","/");
         LOGGER.info("压缩包http地址 = " + httpURL);
         commonInfo.setRemoteFileUrl(httpURL);
         commonInfo.setMD5(FileValidCreateUtil.fileMD5(DOWNLOAD_HOME + mapZip.getFilePath()));
