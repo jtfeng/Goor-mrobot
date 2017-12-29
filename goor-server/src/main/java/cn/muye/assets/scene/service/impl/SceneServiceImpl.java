@@ -401,9 +401,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
         if (mapInfos.size() != 0 && robots.size() != 0) {
             log.info("场景同步地图");
-            return mapSyncService.sendMapSyncMessage(robots, mapZipMapper.selectByPrimaryKey(mapInfos.get(0).getMapZipId()), scene.getId());
-            //TODO 20171130 Artemis支持选择场景上传地图后需要放开次方法进行联调
-//            return mapSyncService.sendMapSyncMessageNew(robots, scene.getMapSceneName(), scene.getId());
+            return mapSyncService.sendMapSyncMessageNew(robots, scene.getMapSceneName(), scene.getId());
         }else {
             updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
             return AjaxResult.failed("未找到该场景关联的地图场景或场景无绑定机器人");

@@ -139,13 +139,8 @@ public class HttpDownloader extends Thread {
         try {
             String localPath = commonInfo.getLocalPath(); //地图包机器人上路径
             String zipFilePath = localPath + File.separator + commonInfo.getLocalFileName();
-            //移动文件到上层目录
-            String moveFilePath = new File(localPath).getParent() + File.separator + commonInfo.getLocalFileName();
-            logger.info("移动文件到上层目录。path= " + moveFilePath);
-            File newZipFile = new File(moveFilePath);
-            FileUtils.copyFile(new File(zipFilePath), newZipFile);
-            logger.info("移动文件成功 ");
-            boolean unzipFlag = ZipUtils.unzip(moveFilePath, localPath, false);
+            File newZipFile = new File(zipFilePath);
+            boolean unzipFlag = ZipUtils.unzip(zipFilePath, localPath, false);
             if (unzipFlag) {
                 logger.info("解压完成。删除压缩包 ");
                 System.gc();

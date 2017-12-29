@@ -59,11 +59,10 @@ public class AgentSubListenerImpl implements TopicCallback, ApplicationContextAw
                     logger.info(" UUID 请求已处理, uuid=" + uuid);
                 }
                 if (TopicConstants.AGENT_LOCAL_MAP_UPLOAD.equals(subName) && (!handled)) {
+                    logger.info("上传地图,message = " + message.toString());
                     FileUploadService fileUploadService = applicationContext.getBean(FileUploadService.class);
                     fileUploadService.sendTopic("0", uuid, "请求接收成功");
-                    fileUploadService.uploadMapFile(uuid);
-                    //TODO 20171130 Artemis支持选择场景上传地图后需要放开次方法进行联调
-//                    fileUploadService.uploadMapFile(uuid, topicData);
+                    fileUploadService.uploadMapFile(uuid, topicData);
                     CacheInfoManager.setUUIDHandledCache(uuid);
                 } else if (TopicConstants.ROBOT_ONLINE_QUERY.equals(subName)) {
                     handleRobotOnlineQuery(topicData, uuid);

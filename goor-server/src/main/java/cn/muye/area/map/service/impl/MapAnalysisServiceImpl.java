@@ -95,9 +95,7 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
     @Override
     public File unzipMapZipFile(MapZip mapZip) {
         //解压文件夹到固定路径
-        File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", mapZip.getDeviceId());
-        //TODO 20171130 Artemis选择场景上传地图需要放开此项进行联调
-//        File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Constant.FILE_UPLOAD_TYPE_MAP);
+        File saveFile = FileUtils.getFile(DOWNLOAD_HOME, SearchConstants.FAKE_MERCHANT_STORE_ID + "", Constant.FILE_UPLOAD_TYPE_MAP);
         boolean result = ZipUtils.unzip(DOWNLOAD_HOME + mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
         if (!result) {
             LOGGER.info("地图文件解压失败");
