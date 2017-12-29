@@ -116,7 +116,7 @@ public class ApplianceController {
         //根据name,departmentTypeCode,packageTypeId进行重复校验
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),
                 appliance.getDepartmentTypeCode());
-        if (null != applianceList && applianceList.size() > 0) {
+        if (null != applianceList && applianceList.size() > 0 && !applianceList.get(0).getId().equals(appliance.getId())) {
             return AjaxResult.failed("修改失败，同名称，类别，包装类型数据已经存在");
         }
         return AjaxResult.success();

@@ -78,11 +78,12 @@ public class OperationTypeController {
             return AjaxResult.failed("手术名称或者手术科室不能为空");
         }
         List<OperationType> operationTypeList = operationTypeService.findByNameAndDepartmentType(name, departmentType.getId());
-        if (null != operationTypeList && operationTypeList.size() > 0) {
+        if (null != operationTypeList && operationTypeList.size() > 0 && !operationTypeList.get(0).getId().equals(operationType.getId())) {
             return AjaxResult.failed("(" + name + ")手术类型名称已经存在");
         }
         return AjaxResult.success();
     }
+
     @RequestMapping(value = "operation/type/{id}", method = RequestMethod.GET)
     public AjaxResult findById(@PathVariable Long id) {
         if (null == id) {
