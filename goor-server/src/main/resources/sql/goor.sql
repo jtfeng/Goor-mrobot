@@ -1398,7 +1398,7 @@ CREATE TABLE `oauth_access_token` (
   `CLIENT_ID` varchar(255) DEFAULT NULL,
   `AUTHENTICATION` blob,
   `REFRESH_TOKEN` varchar(255) DEFAULT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of oauth_access_token
@@ -1430,7 +1430,7 @@ CREATE TABLE `oauth_client_details` (
   `ADDITIONAL_INFORMATION` varchar(4096) DEFAULT NULL,
   `AUTOAPPROVE` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`CLIENT_ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of oauth_client_details
@@ -1766,7 +1766,7 @@ create table AS_ELEVATORSHAFT
   CREATED_BY bigint null,
   CREATE_TIME datetime null,
   STORE_ID bigint null
-)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ELEVATORSHAFT ADD LOCK_STATE int(1) NULL;
 ALTER TABLE AS_ELEVATORSHAFT ADD ROBOT_CODE varchar(50) NULL;
 
@@ -1789,7 +1789,7 @@ create table AS_ELEVATOR
   constraint AS_ELEVATOR_AS_ELEVATORSHAFT_ID_fk
   foreign key (ELEVATORSHAFT_ID) references AS_ELEVATORSHAFT (ID)
     on update cascade on delete cascade
-)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 create index AS_ELEVATOR_AS_ELEVATORSHAFT_ID_fk on AS_ELEVATOR (ELEVATORSHAFT_ID);
 ADD COLUMN `SCENE_NAME`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `DEFAULT_ELEVATOR`;
 
@@ -1823,7 +1823,7 @@ create table AS_ELEVATORPOINTCOMBINATION
   constraint fk_ipoint
   foreign key (INNER_POINT) references A_MAP_POINT (ID)
     on update cascade on delete cascade
-)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 create index fk_gpoint on AS_ELEVATORPOINTCOMBINATION (GO_POINT);
 create index fk_ipoint on AS_ELEVATORPOINTCOMBINATION (INNER_POINT);
 create index fk_opoint on AS_ELEVATORPOINTCOMBINATION (OUT_POINT);
@@ -1842,7 +1842,7 @@ create table ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS
   constraint fk_relation_combinationid
   foreign key (ELEVATORPOINTCOMBINATION_ID) references AS_ELEVATORPOINTCOMBINATION (ID)
     on update cascade on delete cascade
-)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 create index fk_relation_combinationid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATORPOINTCOMBINATION_ID);
 create index fk_relation_elevatorid on ELEVATOR_ELEVATORPOINTCOMBINATION_RELATIONS (ELEVATOR_ID);
 
@@ -1867,9 +1867,9 @@ create table AS_ROADPATH
   PATH_LOCK bigint null,
   PATH_INDEX int null,
   X86_PATH_TYPE int default '0' null comment '工控路径类型：0 表示终点保持原样工控路径， 1 代表终点无朝向要求工控路径。',
-  RESTRICTED_STARTTIME datetime null comment '受管路径生效的 - 开始时间',
-  RESTRICTED_ENDTIME datetime null comment '受管路径限制的 - 结束时间'
-)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  RESTRICTED_STARTTIME varchar(8) null,
+  RESTRICTED_ENDTIME varchar(8) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATH ADD PATH_LOCK BIGINT(20) NULL;
 ALTER TABLE AS_ROADPATH ADD X86_PATH_TYPE INT(11) default '0' NULL comment '工控路径类型：0 表示终点保持原样工控路径， 10 代表终点无朝向要求工控路径。';
 ALTER TABLE `AS_ROADPATH` MODIFY COLUMN `PATH_NAME`  varchar(254) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL AFTER `STORE_ID`;
@@ -1888,7 +1888,7 @@ create table AS_ROADPATHPOINT
   END_FLAG int(1) default '0' null,
   ROAD_PATH_ID bigint null,
   PREV_POINT_ID bigint null
-)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHPOINT
   ADD CONSTRAINT AS_ROADPATHPOINT_AS_ROADPATH_ID_fk
 FOREIGN KEY (ROAD_PATH_ID) REFERENCES AS_ROADPATH (ID) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1908,7 +1908,7 @@ create table AS_ROADPATHLOCK
   CURRENT_PASSCOUNT bigint null comment '当前路径中所排队的机器数量',
   ROBOT_CODES varchar(500) null comment '当前路径中所容纳的所有机器人编号信息，为了方便，增加冗余字段',
   DIRECTION bigint null comment '路径方向信息'
-)ENGINE=MyISAM DEFAULT CHARSET=utf8;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ALTER TABLE AS_ROADPATHLOCK ADD ROBOT_CODE varchar(50) NULL;
 
 DROP TABLE IF EXISTS `LOG_ALERT`;
