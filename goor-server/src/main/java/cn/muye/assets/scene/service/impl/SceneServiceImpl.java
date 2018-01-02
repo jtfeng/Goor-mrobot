@@ -200,7 +200,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         robotService.getChargerMapPointByRobotCode(robotCode,
                 SearchConstants.FAKE_MERCHANT_STORE_ID).forEach(eachP -> {
             JSONObject j = new JSONObject();
-            j.put("id", eachP.getId());j.put("name", eachP.getPointName());j.put("alias", eachP.getPointAlias());
+            // 别名名称用作客户端显示
+            j.put("id", eachP.getId());j.put("name", eachP.getPointAlias());
             robotMapPointListDbJSONArray.add(j);
         });
         robotAssets.put("chargePoint", robotMapPointListDbJSONArray);
@@ -243,7 +244,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         // 重新更新机器人与场景之间的绑定关系
         sceneMapper.deleteRobotAndSceneRelationsByRobotCode(robotCode);
         sceneMapper.insertSceneAndRobotRelations(sceneId, Lists.newArrayList(robotId));
-        // 重新更新机器人与站之间的绑定关系
+        // 重新更新机器人与站之间的绑定关系 (站绑定关系)
         stationMapper.deleteStationWithRobotRelationByRobotCode(robotCode);
         for (int i = 0 ; i < stationIds.size() ; i++) {
             // 遍历每一个站
@@ -251,12 +252,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             if(stationId != null) {
                 stationIdList.add(stationId);
             }
-            // 删除初始机器人与站点的绑定关系
             // 添加新的机器人与站点之间的绑定关系
-            StationRobotXREF stationRobotXREF = new StationRobotXREF() {{
-                setRobotId(robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId());
-                setStationId(stationId);
-            }};
+            StationRobotXREF stationRobotXREF = new StationRobotXREF();
+            stationRobotXREF.setRobotId(robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId());
+            stationRobotXREF.setStationId(stationId);
             stationRobotXREFMapper.insert(stationRobotXREF);
         }
         // 重新更新机器人与充电桩之间的绑定关系
@@ -266,10 +265,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             Long chargerMapPointId = chargerMapPointIds.getLong(i);
             // 删除初始机器人与充电桩点的绑定关系
             // 添加新的机器人与充电桩点之间的绑定关系
-            RobotChargerMapPointXREF robotChargerMapPointXREF = new RobotChargerMapPointXREF(){{
-                setRobotId(robotId);
-                setChargerMapPointId(chargerMapPointId);
-            }};
+            RobotChargerMapPointXREF robotChargerMapPointXREF = new RobotChargerMapPointXREF();
+            robotChargerMapPointXREF.setRobotId(robotId);
+            robotChargerMapPointXREF.setChargerMapPointId(chargerMapPointId);
             robotChargerMapPointXREFService.save(robotChargerMapPointXREF);
         }
 
