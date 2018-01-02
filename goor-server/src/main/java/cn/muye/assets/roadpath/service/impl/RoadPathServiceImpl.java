@@ -84,10 +84,10 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             checkNotNull(pathTypeInt, "路径类型不能为空");
             List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
 
-            Long restrictedStarttimeLongTime = null, restrictedEndtimeLongTime = null;
+            String restrictedStarttime = "", restrictedEndtime = "";
             if (pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
-                restrictedStarttimeLongTime = Long.valueOf(String.valueOf(body.get("restrictedStarttimeLongTime")));
-                restrictedEndtimeLongTime = Long.valueOf(String.valueOf(body.get("restrictedEndtimeLongTime")));
+                restrictedStarttime = String.valueOf(body.get("restrictedStarttime"));
+                restrictedEndtime = String.valueOf(body.get("restrictedEndtime"));
             }
 
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
@@ -101,14 +101,17 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     setCreateTime(new Date());
                     setStoreId(100L);
                     setWeight(weight);
-                    setStartPoint(startPointId);               // 设置开始点
-                    setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置结束点
-                    setPathId("");//云端路径没有PathId
+                    // 设置开始点
+                    setStartPoint(startPointId);
+                    // 设置结束点
+                    setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1))));
+                    //云端路径没有PathId
+                    setPathId("");
                     setPathType(pathTypeInt);
                 }};
                 if (pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
-                    roadPath.setRestrictedStarttimeLongTime(restrictedStarttimeLongTime);
-                    roadPath.setRestrictedEndtimeLongTime(restrictedEndtimeLongTime);
+                    roadPath.setRestrictedStarttime(restrictedStarttime);
+                    roadPath.setRestrictedEndtime(restrictedEndtime);
                 }
                 setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 this.roadPathMapper.insert(roadPath);
@@ -401,12 +404,6 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         List<RoadPathDetail> roadPathDetails = Lists.newArrayList();
         for (RoadPath roadPath : roadPaths) {
             RoadPathDetail roadPathDetail = new RoadPathDetail();
-            //20171227 TODO 临时规避报错，记得去掉
-            Date temp = new Date();
-            roadPath.setRestrictedEndtime(temp);
-            roadPath.setRestrictedStarttime(temp);
-            roadPath.setRestrictedEndtimeLongTime(0L);
-            roadPath.setRestrictedStarttimeLongTime(0L);
             //---------------------------
             BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
@@ -570,12 +567,6 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         int i = 0;
         for (RoadPath roadPath : roadPaths) {
             RoadPathDetail roadPathDetail = new RoadPathDetail();
-            //20171227 TODO 临时规避报错，记得去掉
-            Date temp = new Date();
-            roadPath.setRestrictedEndtime(temp);
-            roadPath.setRestrictedStarttime(temp);
-            roadPath.setRestrictedEndtimeLongTime(0L);
-            roadPath.setRestrictedStarttimeLongTime(0L);
             //---------------------------
             BeanUtils.copyProperties(roadPath, roadPathDetail); // 拷贝到一个新的对象中
             roadPathDetail.setStart(this.mapPointMapper.selectByPrimaryKey(roadPath.getStartPoint()));
