@@ -20,10 +20,10 @@ import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.service.missiontask.MissionFuncsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -696,11 +696,12 @@ public class PathUtil {
      * 如果订单设置的装货点不为空，则取装货点作为目的地点
      * 如果订单设置装货点不存在，则取目的地列表的第一个
      * 如果订单设置的装货点不存在，且目的地列表不存在，则取卸货点
+     * 如果卸货点不存在，则取机器人绑定的待命点的第一个点
      * @param order
-     * @param pointService
-     * @return
+     * @param robot
+     *@param pointService  @return
      */
-    public static MapPoint getFirstPathStationPointByOrder(Order order, PointService pointService) {
+    public static MapPoint getFirstPathStationPointByOrder(Order order, Robot robot, PointService pointService) {
         /**根据订单设置，有没有装货站来判断选哪个点作为下单的第一个目的地点**/
         //如果订单设置为空，直接返回
         if(order.getOrderSetting() == null) {
@@ -712,35 +713,65 @@ public class PathUtil {
                 && order.getOrderSetting().getStartStation().getId() != null;
         //条件：订单详细列表不为空且至少包含一条数据
         boolean orderDetailNotEmpty = order.getDetailList() != null && order.getDetailList().size() > 0;
+        //条件：订单详细卸货架点ID存在
         boolean orderSettingEndStationIdExist = order.getOrderSetting().getEndStation() != null
                 && order.getOrderSetting().getEndStation().getId() != null;
+        //条件：订单下单机器人存在，且机器人关联的待命点存在
+        boolean robotStandByPointExist = robot != null && robot.getOriginChargerMapPointList() != null
+                && robot.getOriginChargerMapPointList().size() > 0;
         Long firstStationId = null;
         MapPoint pathStationPoint = null;
         if( orderSettingStartStationIdExist ) {
+            logger.info("订单设置装货架点存在，找装货架点");
             firstStationId = order.getOrderSetting().getStartStation().getId();
             if(firstStationId == null) {
+                logger.info("订单设置装货架点ID为空");
                 return null;
             }
             pathStationPoint = pointService.findPathMapPointByStationIdAndCloudType(firstStationId, MapPointType.LOAD.getCaption());
         }
         //如果订单设置装货点不存在，则取目的地列表的第一个
         else if(!orderSettingStartStationIdExist && orderDetailNotEmpty){
+            logger.info("订单设置装货点不存在，则取目的地列表的第一个");
             firstStationId = order.getDetailList().get(0).getStationId();
             if(firstStationId == null) {
+                logger.info("目的地列表的第一个ID为空");
                 return null;
             }
             pathStationPoint = pointService.findPathMapPointByStationIdAndCloudType(firstStationId, MapPointType.UNLOAD.getCaption());
         }
         //如果订单设置的装货点不存在，且目的地列表不存在，则取卸货点
         else if(!orderSettingStartStationIdExist && !orderDetailNotEmpty && orderSettingEndStationIdExist) {
+            logger.info("订单设置的装货点不存在，且目的地列表不存在，则取卸货点");
             firstStationId = order.getOrderSetting().getEndStation().getId();
             if(firstStationId == null) {
+                logger.info("卸货点的第一个ID为空");
                 return null;
             }
             pathStationPoint = pointService.findPathMapPointByStationIdAndCloudType(firstStationId, MapPointType.FINAL_UNLOAD.getCaption());
         }
-        logger.info("#####################找到的第一个可用的目标点：" + pathStationPoint == null ? "未找到"
-                : pathStationPoint.getPointAlias() + "," + pathStationPoint.getMapName() + "," + pathStationPoint.getSceneName());
+        //如果订单设置的卸货点也不存在，则取机器人绑定的点
+        else if(!orderSettingStartStationIdExist && !orderDetailNotEmpty
+                && !orderSettingEndStationIdExist && robotStandByPointExist) {
+            logger.info("订单设置的卸货点也不存在，则取机器人绑定的待命点");
+            firstStationId = robot.getOriginChargerMapPointList().get(0).getId();
+            if(firstStationId == null) {
+                logger.info("机器人绑定的待命点为空");
+                return null;
+            }
+            pathStationPoint = pointService.findById(firstStationId);
+        }
+        logger.info("#####################找到的第一个可用的目标点："
+                +
+                (
+                    pathStationPoint == null ?
+                    "未找到"
+                    :
+                    (pathStationPoint.getPointAlias() + "," + pathStationPoint.getMapName() + "," + pathStationPoint.getSceneName())
+                )
+        );
         return pathStationPoint;
     }
+
+
 }

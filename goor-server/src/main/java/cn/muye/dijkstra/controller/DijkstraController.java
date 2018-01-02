@@ -3,8 +3,10 @@ package cn.muye.dijkstra.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
@@ -14,15 +16,18 @@ import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.point.service.impl.PointServiceImpl;
+import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.roadpath.service.RoadPathService;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -35,6 +40,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -419,6 +425,37 @@ public class DijkstraController {
             return AjaxResult.success("更新成功");
         } catch (Exception e) {
             log.error(e.getMessage());
+            e.printStackTrace();
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
+        }
+    }
+
+    /**
+     * 测试机器人到待命点
+     * @return
+     */
+    @Autowired
+    private RobotService robotService;
+    @Autowired
+    private MissionFuncsService missionFuncsService;
+    @Autowired
+    private StationRobotXREFService stationRobotXREFService;
+
+    @RequestMapping(value = "/services/roadPath/testSendRobotToStandByPoint")
+    @ResponseBody
+    public AjaxResult testSendRobotToStandByPoint(Long robotId,Long sceneId) {
+        try {
+            Robot robot = robotService.findById(robotId);
+            //TODO 第一阶段，先做机器人执行完开机管理后，自动去充电点，但不执行充电任务，
+            // 如果机器人没有绑定充电点，则执行去站的装货点。如果都没有，就原地待命。
+            List<StationRobotXREF> stationRobotXREFS = stationRobotXREFService.getByRobotId(robotId);
+            List<Long> stationIdList = new ArrayList<Long>();
+            for (StationRobotXREF st :
+                    stationRobotXREFS) {
+                stationIdList.add(st.getStationId());
+            }
+           return missionFuncsService.sendRobotToStandByPoint(robot, stationIdList, sceneId);
+        } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
         }

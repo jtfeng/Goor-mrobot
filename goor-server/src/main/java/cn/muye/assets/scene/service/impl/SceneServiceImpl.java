@@ -2,7 +2,6 @@ package cn.muye.assets.scene.service.impl;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.map.MapInfo;
-import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
@@ -24,11 +23,11 @@ import cn.muye.area.map.mapper.MapInfoMapper;
 import cn.muye.area.map.mapper.MapZipMapper;
 import cn.muye.area.map.service.MapSyncService;
 import cn.muye.area.map.service.RobotMapZipXREFService;
+import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.mapper.StationMapper;
 import cn.muye.area.station.mapper.StationRobotXREFMapper;
 import cn.muye.area.station.mapper.StationStationXREFMapper;
 import cn.muye.area.station.service.StationService;
-import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.mapper.SceneMapper;
@@ -39,6 +38,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.log.base.LogInfoUtils;
+import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -96,6 +96,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private MessageSendHandleService messageSendHandleService;
     @Autowired
     private RobotChargerMapPointXREFService robotChargerMapPointXREFService;
+    @Autowired
+    private MissionFuncsService missionFuncsService;
+    @Autowired
+    private PointService pointService;
     //保存添加场景与机器人之间的关系时候，需要加锁，以免事务未提交读取到脏数据
     private ReentrantLock lock = new ReentrantLock();
 
@@ -231,6 +235,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Long sceneId = latestRobotAssets.getLong("sceneId");
         // 新选择的站 ID 编号数组信息
         JSONArray stationIds = latestRobotAssets.getJSONArray("stationIds");
+        List<Long> stationIdList = new ArrayList<Long>();
         // 新选择的充电桩 ID 编号数组信息
         JSONArray chargerMapPointIds = latestRobotAssets.getJSONArray("chargerMapPointIds");
         // + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
@@ -243,6 +248,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         for (int i = 0 ; i < stationIds.size() ; i++) {
             // 遍历每一个站
             Long stationId = stationIds.getLong(i);
+            if(stationId != null) {
+                stationIdList.add(stationId);
+            }
             // 删除初始机器人与站点的绑定关系
             // 添加新的机器人与站点之间的绑定关系
             StationRobotXREF stationRobotXREF = new StationRobotXREF() {{
@@ -264,6 +272,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             }};
             robotChargerMapPointXREFService.save(robotChargerMapPointXREF);
         }
+
+        //TODO 第一阶段，先做机器人执行完开机管理后，自动去充电点，但不执行充电任务，
+        // 如果机器人没有绑定充电点，则执行去站的装货点。如果都没有，就原地待命。
+        missionFuncsService.sendRobotToStandByPoint(currentRobot, stationIdList, sceneId);
     }
 
     @Override

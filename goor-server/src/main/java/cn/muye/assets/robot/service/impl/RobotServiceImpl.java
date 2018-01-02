@@ -253,8 +253,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
 
         /**根据订单设置，有没有装货站来判断选哪个点作为下单的第一个目的地点**/
-
-        MapPoint pathStationPoint = PathUtil.getFirstPathStationPointByOrder(order, pointService);
+        MapPoint pathStationPoint = PathUtil.getFirstPathStationPointByOrder(order, null , pointService);
         if(pathStationPoint == null) {
             stringBuffer.append("下单获取可用机器,失败。原因：下单信息错误，没有装货站且没有要去的站，无效订单。");
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());

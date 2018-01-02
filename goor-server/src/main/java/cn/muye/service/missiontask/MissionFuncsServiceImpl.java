@@ -12,6 +12,7 @@ import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.assets.shelf.Shelf;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
@@ -22,6 +23,7 @@ import cn.mrobot.bean.mission.task.*;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
+import cn.mrobot.bean.order.OrderSetting;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.dto.mission.MissionDTO;
 import cn.mrobot.dto.mission.MissionItemDTO;
@@ -36,6 +38,7 @@ import cn.muye.assets.door.service.DoorService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
@@ -106,6 +109,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private SceneService sceneService;
+
     @Value("${mission.item.concurrentable}")
     private Boolean missionItemConcurrentable;
 
@@ -168,9 +174,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             logger.info("##############  createMissionLists successed #################");
             return ajaxResult;
         }
-
-
-
     }
 
 
@@ -2738,11 +2741,28 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             return collectResult;
         }
 
+        return generateAndSendMissionList(order, mapPoints, mpAttrs);
+    }
+
+    /**
+     * 生成任务序列并下发到机器人
+     * @param order
+     * @param mapPoints
+     * @param mpAttrs
+     * @return
+     */
+    private AjaxResult generateAndSendMissionList(Order order,
+                                                  List<MapPoint> mapPoints,
+                                                  HashMap<MapPoint, MPointAtts> mpAttrs) {
         //根据任务点及其属性完善任务列表
         MissionListTask missionListTask = new MissionListTask();
 
         //根据任务点，实例化任务列表
         initPathMissionListTask(missionListTask, order, mapPoints, mpAttrs);
+
+        if(missionListTask.getMissionTasks().size() <= 0) {
+            return AjaxResult.failed("生成的任务序列为空，不需要机器人");
+        }
 
         //任务列表实例化完成，将数据存储到数据库
         saveMissionListTask(missionListTask);
@@ -2803,7 +2823,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "下单机器人参数错误。");
         }
 
-
         if(order.getScene() == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "失败！订单所属云端场景为空。");
         }
@@ -2819,19 +2838,28 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         //prePoint从机器人位置取
         RoadPathResult result = null;
+        MapPoint startPathPoint = null;
         try {
-            MapPoint startPathPoint = PathUtil.getFirstPathStationPointByOrder(order, pointService);
-            result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
+            startPathPoint = PathUtil.getFirstPathStationPointByOrder(order, robot, pointService);
+            //如果没有第一目标点，则不需要规划机器人从当前位置到第一目的地的路径，机器人原地待命
+            if(startPathPoint == null) {
+                logger.info("无法获取机器人" + robot.getName() + "(" + robot.getCode() + ")要去的第一目的地点！");
+            }
+            //如果有第一目标点，则搜索可用的路径
+            else {
+                result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
+                if(result == null) {
+                    stringBuffer.append("规划路径,失败。原因：规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
+                    LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
+                }
+                //如果搜索到可用路径，则设置起点为prePoint
+                prePoint = result.getStartPoint();
+            }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径出错！");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到点" + startPathPoint.getPointAlias() +"路径出错！");
         }
-        if(result == null) {
-            stringBuffer.append("规划路径,失败。原因：规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
-            LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
-        }
-        prePoint = result.getStartPoint();
 
         //判断中间站点，如果有中间站点，添加中间站点的地图点，如果中间点跨楼层，则要在两个任务中间插入电梯任务
         if (order.getDetailList() != null){
@@ -2899,7 +2927,6 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         mpAttrs.put(endPoint, atts);
                         logger.info("###### xiahuo is ok ");
                     }else {
-
                         /*//取得站点对象
                         //TODO 以后AGV也需要按照切换的场景过滤
                         Station station = stationService.findById(od.getStationId(), od.getStoreId(),null);
@@ -4349,6 +4376,125 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //语音任务，感谢使用，我要出发了，再见？
 //        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
 //        missionListTask.getMissionTasks().add(voiceTask);
+    }
+
+
+    /**
+     * 让机器人从当前位置去待命点
+     * 第一阶段，先做机器人执行完开机管理后，自动去充电点，但不执行充电任务，
+     * 如果机器人没有绑定充电点，则执行去站的装货点-->卸货点。如果都没有，就原地待命。
+     * @param robot
+     * @param stationIdList
+     * @param sceneId
+     */
+    @Override
+    public AjaxResult sendRobotToStandByPoint(Robot robot, List<Long> stationIdList, Long sceneId) {
+        try {
+            String message = "";
+            if(robot == null) {
+                message = "开机管理：机器人对象参数错误：空对象";
+                return printAndLogPathPlanFailMessage(message);
+            }
+            Scene scene = sceneService.findById(sceneId);
+            if(scene == null) {
+                message = "开机管理：" + sceneId + "云端场景不存在";
+                return printAndLogPathPlanFailMessage(message);
+            }
+            String sceneName = scene.getMapSceneName();
+
+            List<MapPoint> standByPoints = robot.getOriginChargerMapPointList();
+            logger.info("机器人" + robot.getCode() + "待命点未" + standByPoints);
+            if(standByPoints == null || standByPoints.size() <= 0) {
+                logger.info("机器人未绑定待命点");
+            }
+
+            //创建假订单设置---------------------------------
+            OrderSetting orderSetting = new OrderSetting();
+            //插入不需要货架的任务
+            orderSetting.setNeedShelf(false);
+            orderSetting.setDefaultSetting(true);
+            //TODO 第一阶段：不需要充电任务，第二阶段待命点是必选，再根据点去做配置
+            orderSetting.setNeedAutoCharge(false);
+            orderSetting.setNeedSign(false);
+            orderSetting.setStoreId(robot.getStoreId());
+            orderSetting.setNickName("开机管理自动到待命点任务假设置" + System.currentTimeMillis());
+
+            //创建假订单---------------------------------
+            Order order = new Order();
+            order.setId(Constant.POWER_ON_ORDER_ID);
+            order.setOrderSetting(orderSetting);
+            order.setScene(scene);
+            order.setRobot(robot);
+
+            //获取第一个目标点,这里假订单，肯定获取到的是机器人绑定的待命点
+            MapPoint firstTarget = PathUtil.getFirstPathStationPointByOrder(order, robot, pointService);
+
+            if(firstTarget == null) {
+                logger.info("获取到的机器人待命点为空，第一阶段：取站列表第一个可用的装货点或卸货点");
+                if(stationIdList == null || stationIdList.size() <= 0) {
+                    message = "机器人管理的站列表为空，且没有关联待命点，机器人原地待命";
+                    return printAndLogPathPlanFailMessage(message);
+                }
+                for(Long stationId : stationIdList) {
+                    firstTarget = pointService.findPathMapPointByStationIdAndCloudType(stationId, MapPointType.LOAD.getCaption());
+                    if(firstTarget != null) {
+                        logger.info("获取到的机器人绑定站" + stationId + "有装货点" + firstTarget.getPointAlias());
+                        break;
+                    }
+                    logger.info("获取到的机器人绑定站" + stationId + "无装货点，尝试卸货点");
+                    firstTarget = pointService.findPathMapPointByStationIdAndCloudType(stationId, MapPointType.FINAL_UNLOAD.getCaption());
+                    if(firstTarget != null) {
+                        logger.info("获取到的机器人绑定站" + stationId + "有货架回收点" + firstTarget.getPointAlias());
+                        break;
+                    }
+                }
+            }
+
+            if(firstTarget == null) {
+                message = "开机管理：最终也未找到可用的机器人待命点，原地待命";
+                return printAndLogPathPlanFailMessage(message);
+            }
+
+            //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
+            RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
+
+            if(roadPathMaps == null) {
+                message = "开机管理：规划路径失败。原因：未找到可供算法使用的图。";
+                return printAndLogPathPlanFailMessage(message);
+            }
+
+            RoadPathResult result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,firstTarget, roadPathMaps);
+
+            if(result == null) {
+                message = "开机管理：规划路径失败。原因：未找到" + robot.getCode() + "到点" + firstTarget.getPointAlias() + "可用路径。";
+                return printAndLogPathPlanFailMessage(message);
+            }
+            prePoint = result.getStartPoint();
+
+            //定义地图点的集合
+            List<MapPoint> mapPoints = new ArrayList<>();
+            //定义地图点对应属性的map
+            HashMap<MapPoint, MPointAtts> mpAttrs = new HashMap<>();
+
+            //根据prePoint和firstTarget点生成点序列
+            addPathRoadPathPoint(firstTarget, mapPoints, mpAttrs);
+
+            //生成任务并下发
+            return generateAndSendMissionList(order, mapPoints, mpAttrs);
+        } catch (Exception e) {
+            return printAndLogPathPlanFailMessage(e.getMessage());
+        }
+    }
+
+    /**
+     * 打印并存库错误日志
+     * @param message
+     * @return
+     */
+    private AjaxResult printAndLogPathPlanFailMessage(String message) {
+        logger.info(message);
+        LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, message);
+        return AjaxResult.failed(AjaxResult.CODE_FAILED, message);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

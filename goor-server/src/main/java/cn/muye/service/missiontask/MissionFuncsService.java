@@ -1,6 +1,7 @@
 package cn.muye.service.missiontask;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.mission.MissionList;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
@@ -50,4 +51,13 @@ public interface MissionFuncsService {
     AjaxResult createMissionListTasksByMissionLists(String robotCode, List<MissionList> missionLists)  throws Exception;
 
 
+    /**
+     * 让机器人从当前位置去待命点
+     * 第一阶段，先做机器人执行完开机管理后，自动去充电点，但不执行充电任务，
+     * 如果机器人没有绑定充电点，则执行去站的装货点。如果都没有，就原地待命。
+     * @param robot
+     * @param stationIdList
+     * @param sceneId
+     */
+    public AjaxResult sendRobotToStandByPoint(Robot robot, List<Long> stationIdList, Long sceneId);
 }

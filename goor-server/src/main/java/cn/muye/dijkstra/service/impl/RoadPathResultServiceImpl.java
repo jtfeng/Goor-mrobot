@@ -243,7 +243,14 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
     @Override
     public RoadPathResult getNearestPathResultByRobotCode(Robot robotDb, int startPointType, MapPoint targetPoint, RoadPathMaps roadPathMaps) throws Exception {
         StringBuffer stringBuffer = new StringBuffer();
+
         String robotCode = robotDb.getCode();
+        if(targetPoint == null) {
+            stringBuffer.append("下单获取可用机器：" + robotCode  + "不可用。要去的第一目的地未空！");
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            return null;
+        }
+
         //获取机器人坐标
         CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotCode);
         String pose = currentInfo.getPose();
