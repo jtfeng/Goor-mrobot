@@ -273,7 +273,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
         //TODO 第一阶段，先做机器人执行完开机管理后，自动去充电点，但不执行充电任务，
         // 如果机器人没有绑定充电点，则执行去站的装货点。如果都没有，就原地待命。
-        missionFuncsService.sendRobotToStandByPoint(currentRobot, stationIdList, sceneId);
+//        missionFuncsService.sendRobotToStandByPoint(currentRobot, stationIdList, sceneId);
     }
 
     @Override
