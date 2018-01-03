@@ -13,14 +13,13 @@ import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
 import cn.mrobot.bean.dijkstra.TriangleResult;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.dto.area.PathDTO;
-import cn.mrobot.utils.constants.LineMathUtil;
+import cn.mrobot.utils.MathLineUtil;
 import cn.muye.area.map.bean.Orientation;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
-import cn.muye.service.missiontask.MissionFuncsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,9 +40,9 @@ public class PathUtil {
      */
     public static Long calDistance(MapPoint start, MapPoint end) {
         Long result = 0L;
-        Double db = LineMathUtil.calPointToPointDistance(start.getX(), start.getY(), end.getX(), end.getY())
+        Double db = MathLineUtil.calPointToPointDistance(start.getX(), start.getY(), end.getX(), end.getY())
                  * 1000;//换算成mm
-        result = LineMathUtil.doubleToLongRoundHalfUp(db);
+        result = MathLineUtil.doubleToLongRoundHalfUp(db);
         return result;
     }
 
@@ -65,8 +64,8 @@ public class PathUtil {
         double x2 = end.getX();
         double y2 = end.getY();
         //以离机器人最近的路径起点计算机器人到线段的距离,换算成mm
-        Double db = LineMathUtil.calPointToSegmentDistance(x0, y0, x1, y1, x2, y2) * 1000;
-        result = LineMathUtil.doubleToLongRoundHalfUp(db);
+        Double db = MathLineUtil.calPointToSegmentDistance(x0, y0, x1, y1, x2, y2) * 1000;
+        result = MathLineUtil.doubleToLongRoundHalfUp(db);
         logger.info("=================计算机器人点(" + x0 + "," + y0 + ")到路径'" + roadPathDetail.getPathName() + "'的距离" + result + "mm");
         return result;
     }
@@ -354,21 +353,21 @@ public class PathUtil {
             //当r<=0,P的投影C在线段AB的A端，补偿路径为PA的长度
             if(r <= 0) {
                 //转化成mm且四舍五入取整作为权值
-                Long PA = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsAP() * 1000);
+                Long PA = MathLineUtil.doubleToLongRoundHalfUp(triangleResult.getAbsAP() * 1000);
                 logger.info("r<=0,P的投影C在线段AB的A端，补偿路径为PA的长度,PA=" + PA);
                 resultTemp.setTotalWeight(weight + PA);
             }
             //当r>=1,P的投影C在线段AB的B端，补偿路径为BP的长度-AB的长度
             else if(r >= 1) {
-                Long AB = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsAB() * 1000);
-                Long BP = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsBP() * 1000);
+                Long AB = MathLineUtil.doubleToLongRoundHalfUp(triangleResult.getAbsAB() * 1000);
+                Long BP = MathLineUtil.doubleToLongRoundHalfUp(triangleResult.getAbsBP() * 1000);
                 logger.info("r>=1,P的投影C在线段AB的B端，补偿路径为BP的长度-AB的长度,AB=" + AB + ",BP=" + BP);
                 resultTemp.setTotalWeight(weight + BP - AB);
             }
             //其他，P的投影C在线段AB中间，补偿路径为PC的长度-AC的长度
             else {
-                Long SHADOW_AC = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getShadowAC() * 1000);
-                Long PC = LineMathUtil.doubleToLongRoundHalfUp(triangleResult.getAbsPC() * 1000);
+                Long SHADOW_AC = MathLineUtil.doubleToLongRoundHalfUp(triangleResult.getShadowAC() * 1000);
+                Long PC = MathLineUtil.doubleToLongRoundHalfUp(triangleResult.getAbsPC() * 1000);
                 logger.info("其他，P的投影C在线段AB中间，补偿路径为PC的长度-AC的长度,SHADOW_AC=" + SHADOW_AC + ",PC =" + PC);
                 resultTemp.setTotalWeight(weight + PC - Math.abs(SHADOW_AC));
             }
@@ -390,11 +389,11 @@ public class PathUtil {
      */
     private static TriangleResult calTriangleResult(double x0, double y0, double x1, double y1, double x2, double y2) {
         TriangleResult triangleResult = new TriangleResult();
-        double absAB = LineMathUtil.calPointToPointDistance(x1, y1, x2, y2);
+        double absAB = MathLineUtil.calPointToPointDistance(x1, y1, x2, y2);
         triangleResult.setAbsAB(absAB);
-        triangleResult.setAbsAP(LineMathUtil.calPointToPointDistance(x1, y1, x0, y0));
-        triangleResult.setAbsBP(LineMathUtil.calPointToPointDistance(x2, y2, x0, y0));
-        triangleResult.setAbsPC(LineMathUtil.calPointToLineDistance(x0, y0, x1, y1, x2, y2));
+        triangleResult.setAbsAP(MathLineUtil.calPointToPointDistance(x1, y1, x0, y0));
+        triangleResult.setAbsBP(MathLineUtil.calPointToPointDistance(x2, y2, x0, y0));
+        triangleResult.setAbsPC(MathLineUtil.calPointToLineDistance(x0, y0, x1, y1, x2, y2));
         //计算r的分子
         double cross = (x2 - x1) * (x0 - x1) + (y2 - y1) * (y0 - y1);
         //计算r的分母，AB向量模的平方
