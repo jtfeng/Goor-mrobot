@@ -33,17 +33,10 @@ public class RoadPath extends BaseBean{
     private Long pathLock;
     //工控路径类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向要求工控路径）
     private Integer x86PathType;
-    //受管路径的开始限制时间
-    private Date restrictedStarttime;
-    //受管路径的结束限制时间
-    private Date restrictedEndtime;
-    //受管路径的开始限制时间(前台接收)
-    @Transient
-    private Long restrictedStarttimeLongTime;
-    //受管路径的结束限制时间(前台接收)
-    @Transient
-    private Long restrictedEndtimeLongTime;
-
+    //受管路径开始时间
+    private String restrictedStarttime;
+    //受管路径结束时间
+    private String restrictedEndtime;
 
     public RoadPath(){}
 
@@ -143,38 +136,20 @@ public class RoadPath extends BaseBean{
         this.x86PathType = x86PathType;
     }
 
-    public Date getRestrictedStarttime() {
+    public String getRestrictedStarttime() {
         return restrictedStarttime;
     }
 
-    public void setRestrictedStarttime(Date restrictedStarttime) {
+    public void setRestrictedStarttime(String restrictedStarttime) {
         this.restrictedStarttime = restrictedStarttime;
     }
 
-    public Date getRestrictedEndtime() {
+    public String getRestrictedEndtime() {
         return restrictedEndtime;
     }
 
-    public void setRestrictedEndtime(Date restrictedEndtime) {
+    public void setRestrictedEndtime(String restrictedEndtime) {
         this.restrictedEndtime = restrictedEndtime;
-    }
-
-    public Long getRestrictedStarttimeLongTime() {
-        return restrictedStarttimeLongTime;
-    }
-
-    public void setRestrictedStarttimeLongTime(Long restrictedStarttimeLongTime) {
-        this.restrictedStarttimeLongTime = restrictedStarttimeLongTime;
-        this.restrictedStarttime = new Date(restrictedStarttimeLongTime);
-    }
-
-    public Long getRestrictedEndtimeLongTime() {
-        return restrictedEndtimeLongTime;
-    }
-
-    public void setRestrictedEndtimeLongTime(Long restrictedEndtimeLongTime) {
-        this.restrictedEndtimeLongTime = restrictedEndtimeLongTime;
-        this.restrictedEndtime = new Date(restrictedEndtimeLongTime);
     }
 
     @Override
@@ -192,6 +167,8 @@ public class RoadPath extends BaseBean{
                 ", pathType=" + pathType +
                 ", pathLock=" + pathLock +
                 ", x86PathType=" + x86PathType +
+                ", restrictedStarttime='" + restrictedStarttime + '\'' +
+                ", restrictedEndtime='" + restrictedEndtime + '\'' +
                 '}';
     }
 }

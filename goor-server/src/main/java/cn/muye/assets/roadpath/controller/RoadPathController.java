@@ -43,7 +43,7 @@ public class RoadPathController {
         // Long cloudSceneId
         try {
             roadPathService.createRoadPath(body);
-            return AjaxResult.success();
+            return AjaxResult.success("路径添加成功");
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }
