@@ -1,4 +1,4 @@
-package cn.mrobot.utils.constants;
+package cn.mrobot.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +9,8 @@ import java.math.BigDecimal;
  * @author Created by xiaoni on 2017/12/28.
  * 直线相关数学工具
  */
-public class LineMathUtil {
-    private final static Logger logger = LoggerFactory.getLogger(LineMathUtil.class);
+public class MathLineUtil {
+    private final static Logger logger = LoggerFactory.getLogger(MathLineUtil.class);
 
     /**
      * * 已知两点的坐便(x1, y1); (x2, y2)
