@@ -8,7 +8,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.StringUtil;
-import cn.mrobot.utils.constants.LineMathUtil;
+import cn.mrobot.utils.MathLineUtil;
 import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.bean.Orientation;
 import cn.muye.area.map.bean.Position;
@@ -18,7 +18,6 @@ import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.muye.dijkstra.service.RoadPathResultService;
@@ -199,9 +198,9 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         LOGGER.info("================四元数w=" + orientation.getW() + ",换算的欧拉角(弧度)=" + th);
         //我们认为保留3位小数换算出来TH，作为比较条件，后面几位精度基本可以忽略了
         MapPoint rosPoint = PathUtil.findPathPointByXYTH(sceneName, mapName ,
-                LineMathUtil.floorDoubleByScale(position.getX(), Constant.XYZ_SCALE),
-                LineMathUtil.floorDoubleByScale(position.getY(), Constant.XYZ_SCALE),
-                LineMathUtil.floorDoubleByScale(th,Constant.TH_SCALE),
+                MathLineUtil.floorDoubleByScale(position.getX(), Constant.XYZ_SCALE),
+                MathLineUtil.floorDoubleByScale(position.getY(), Constant.XYZ_SCALE),
+                MathLineUtil.floorDoubleByScale(th,Constant.TH_SCALE),
                 null, pointService );
 
         RoadPathResult roadPathResult = new RoadPathResult();
