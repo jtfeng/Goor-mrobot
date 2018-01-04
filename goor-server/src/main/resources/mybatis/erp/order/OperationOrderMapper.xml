@@ -104,6 +104,6 @@
     </select>
 
     <select id="listAllOperationOrder" resultMap="operationOrder">
-        SELECT * FROM ERP_OPERATION_ORDER
+        SELECT * FROM ERP_OPERATION_ORDER ORDER BY CREATE_TIME DESC
     </select>
 </mapper>

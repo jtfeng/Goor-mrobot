@@ -1,23 +1,27 @@
 package cn.muye.erp.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.erp.ApplianceXREF;
+import cn.mrobot.bean.erp.appliance.Appliance;
+import cn.mrobot.bean.erp.bindmac.StationMacPasswordXREF;
+import cn.mrobot.bean.erp.operation.OperationDefaultApplianceXREF;
 import cn.mrobot.bean.erp.operation.OperationType;
 import cn.mrobot.bean.erp.order.OperationOrder;
 import cn.mrobot.bean.erp.order.OperationOrderApplianceXREF;
-import cn.mrobot.bean.erp.bindmac.StationMacPasswordXREF;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.websocket.WSMessage;
 import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
+import cn.muye.erp.operation.service.OperationTypeService;
 import cn.muye.erp.order.service.OperationOrderApplianceXREFService;
 import cn.muye.erp.order.service.OperationOrderService;
-import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -30,6 +34,9 @@ public class OperationOrderController {
 
     @Autowired
     private OperationOrderService operationOrderService;
+
+    @Autowired
+    private OperationTypeService operationTypeService;
 
     @Autowired
     private OperationOrderApplianceXREFService operationOrderApplianceXREFService;
@@ -49,10 +56,15 @@ public class OperationOrderController {
     @RequestMapping(value = "services/operation/order", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody OperationOrder operationOrder) {
         List<OperationOrderApplianceXREF> applianceList = operationOrder.getApplianceList();
-        if (null == applianceList || applianceList.isEmpty()){
+        if (null == applianceList || applianceList.isEmpty()) {
             return AjaxResult.failed("器械列表不能为空");
         }
+        if (OperationOrder.Type.OPERATION_TYPE_ORDER.getCode() == operationOrder.getType() && operationOrder.getOperationType().getId() == null) {
+            return AjaxResult.failed("按手术类型申请手术类型ID不能为空");
+        }
         operationOrder.init();
+        //如果订单的type为1，则需要判断当前的器械列表是不是该手术类型的默认器械列表，如果不是，则将type置为3
+        checkOperationType(operationOrder);
         operationOrderService.saveOrder(operationOrder);
         //保存手术室订单和额外器械的关联关系
         saveOperationOrderApplianceXREF(operationOrder);
@@ -61,6 +73,52 @@ public class OperationOrderController {
         OperationOrder operationOrderDB = operationOrderService.findOrderById(operationOrder.getId());
         //向无菌器械室发送消息
         return sendOrderToAsepticApparatusRoom(operationOrderDB);
+    }
+
+    private void checkOperationType(OperationOrder operationOrder) {
+        List<OperationOrderApplianceXREF> operationOrderApplianceList = operationOrder.getApplianceList();
+        OperationType operationType = operationTypeService.findOperationTypeById(operationOrder.getOperationType().getId());
+        List<OperationDefaultApplianceXREF> operationDefaultApplianceXREFList = operationType.getApplianceList();
+        boolean isEquals = isEqualsApplianceList(operationOrderApplianceList, operationDefaultApplianceXREFList);
+        if (!isEquals) {
+            operationOrder.setType(OperationOrder.Type.OPERATION_TYPE_ORDER_WITHOUT_DEFAULT_APPLIANCE.getCode());
+        }
+    }
+
+    private boolean isEqualsApplianceList(List<OperationOrderApplianceXREF> operationOrderApplianceList,
+                                          List<OperationDefaultApplianceXREF> operationDefaultApplianceXREFList) {
+        if (operationOrderApplianceList.size() != operationDefaultApplianceXREFList.size()) {
+            return false;
+        }
+        sort(operationOrderApplianceList);
+        sort(operationDefaultApplianceXREFList);
+        for (int i = 0; i < operationOrderApplianceList.size(); i++) {
+            OperationOrderApplianceXREF operationOrderApplianceXREF = operationOrderApplianceList.get(i);
+            OperationDefaultApplianceXREF operationDefaultApplianceXREF = operationDefaultApplianceXREFList.get(i);
+            boolean flag = isEqualsApplianceXREF(operationOrderApplianceXREF, operationDefaultApplianceXREF);
+            if (!flag) {
+                return false;
+            }
+            continue;
+        }
+        return true;
+    }
+
+    private boolean isEqualsApplianceXREF(OperationOrderApplianceXREF operationOrderApplianceXREF, OperationDefaultApplianceXREF operationDefaultApplianceXREF) {
+        Appliance operationOrderAppliance = operationOrderApplianceXREF.getAppliance();
+        Appliance operationDefaultAppliance = operationDefaultApplianceXREF.getAppliance();
+        return operationOrderAppliance.getId().equals(operationDefaultAppliance.getId()) &&
+                operationOrderApplianceXREF.getNumber() == operationDefaultApplianceXREF.getNumber();
+    }
+
+    public <T extends ApplianceXREF> List<T> sort(List<T> list) {
+        Collections.sort(list, new Comparator<T>() {
+            @Override
+            public int compare(T o1, T o2) {
+                return o1.getAppliance().getId().compareTo(o2.getAppliance().getId());
+            }
+        });
+        return list;
     }
 
     /**
@@ -126,18 +184,19 @@ public class OperationOrderController {
 
     @RequestMapping(value = "services/operation/order", method = RequestMethod.GET)
     public AjaxResult list(WhereRequest whereRequest) {
-        Integer pageNo = whereRequest.getPage();
-        Integer pageSize = whereRequest.getPageSize();
-
-        pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
-        pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
-        PageHelper.startPage(pageNo, pageSize);
+//        Integer pageNo = whereRequest.getPage();
+//        Integer pageSize = whereRequest.getPageSize();
+//
+//        pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
+//        pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
+//        PageHelper.startPage(pageNo, pageSize);
         //用PageInfo对结果进行包装
         List<OperationOrder> operationTypeList = operationOrderService.listAllOperationOrder(whereRequest);
-        PageInfo<OperationOrder> page = new PageInfo<OperationOrder>(operationTypeList);
+//        PageInfo<OperationOrder> page = new PageInfo<OperationOrder>(operationTypeList);
 
-        return AjaxResult.success(page, "查询成功");
+        return AjaxResult.success(operationTypeList, "查询成功");
     }
+
     private void saveOperationOrderApplianceXREF(OperationOrder operationOrder) {
         Long operationOrderId = operationOrder.getId();
         if (operationOrderId != null) {

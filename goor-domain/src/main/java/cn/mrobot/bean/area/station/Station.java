@@ -14,7 +14,7 @@ import java.util.Map;
  * 护士站
  */
 @Table(name = "A_STATION")
-public class Station extends BaseBean{
+public class Station extends BaseBean {
     /**
      * 站名
      */
@@ -22,12 +22,12 @@ public class Station extends BaseBean{
 
     /**
      * 站类型索引
-     * */
+     */
     private Integer stationTypeId;
 
     /**
      * 关联场景
-     * */
+     */
     private Long sceneId;
 
     /**
@@ -80,7 +80,7 @@ public class Station extends BaseBean{
 
     /**
      * 关联点列表：卸货点、停车点、充电桩点、充电桩原点、装货点等
-     * */
+     */
     @Transient
     private List<MapPoint> mapPoints;
 
@@ -90,7 +90,7 @@ public class Station extends BaseBean{
      * list是点Id列表
      */
     @Transient
-    Map<String,List<MapPoint>> typePoints;
+    Map<String, List<MapPoint>> typePoints;
 
     @Transient
     private List<Robot> robotList;
@@ -203,5 +203,21 @@ public class Station extends BaseBean{
 
     public void setRobotAccess(int robotAccess) {
         this.robotAccess = robotAccess;
+    }
+
+    public enum RobotAccess {
+
+        ACCESS(0),
+        NOT_ACCESS(1);
+
+        private int code;
+
+        RobotAccess(int code) {
+            this.code = code;
+        }
+
+        public int getCode() {
+            return code;
+        }
     }
 }
