@@ -59,12 +59,15 @@ public class OperationOrderController {
         if (null == applianceList || applianceList.isEmpty()) {
             return AjaxResult.failed("器械列表不能为空");
         }
-        if (OperationOrder.Type.OPERATION_TYPE_ORDER.getCode() == operationOrder.getType() && operationOrder.getOperationType().getId() == null) {
-            return AjaxResult.failed("按手术类型申请手术类型ID不能为空");
+
+        if (OperationOrder.Type.OPERATION_TYPE_ORDER.getCode() == operationOrder.getType()) {
+            if (operationOrder.getOperationType().getId() == null) {
+                return AjaxResult.failed("按手术类型申请手术类型ID不能为空");
+            }
+            //如果订单的type为1，则需要判断当前的器械列表是不是该手术类型的默认器械列表，如果不是，则将type置为3
+            checkOperationType(operationOrder);
         }
         operationOrder.init();
-        //如果订单的type为1，则需要判断当前的器械列表是不是该手术类型的默认器械列表，如果不是，则将type置为3
-        checkOperationType(operationOrder);
         operationOrderService.saveOrder(operationOrder);
         //保存手术室订单和额外器械的关联关系
         saveOperationOrderApplianceXREF(operationOrder);

@@ -1,9 +1,12 @@
 package cn.muye.erp.bindmac.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.erp.bindmac.StationMacPasswordXREF;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.station.service.StationService;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -22,6 +25,9 @@ public class StationMacPasswordXREFController {
     @Autowired
     private StationMacPasswordXREFService stationMacPasswordXREFService;
 
+    @Autowired
+    private StationService stationService;
+
     /**
      * 保存
      *
@@ -30,6 +36,14 @@ public class StationMacPasswordXREFController {
      */
     @RequestMapping(value = "services/operation/mac/bind", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody StationMacPasswordXREF stationMacPasswordXREF) {
+        //如果绑定关系为无菌器械室，则查询出无菌器械室站点，关联信息，因为设置无菌器械室站点时没有站选择界面
+        if (StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM.getCode() == stationMacPasswordXREF.getType()){
+            List<Station> stationList = stationService.listStationsByStationTypeCode(StationType.ASEPTIC_APPARATUS_ROOM.getCaption());
+            if (null == stationList || stationList.size() <= 0){
+                return AjaxResult.failed("系统未配置无菌器械室站点");
+            }
+            stationMacPasswordXREF.setStation(stationList.get(0));
+        }
         return saveOrUpdate(stationMacPasswordXREF);
     }
 
