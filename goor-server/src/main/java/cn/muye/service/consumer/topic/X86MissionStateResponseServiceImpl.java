@@ -164,26 +164,24 @@ public class X86MissionStateResponseServiceImpl
                                     logger.info("### set finishedDetailTask " + id);
                                     orderDetailService.finishedDetailTask(id, OrderConstant.ORDER_DETAIL_STATUS_GET);
                                 }
-
                             } else if(MissionFuncsServiceImpl.MissionStateCanceled.equalsIgnoreCase(en.getState())){
                                 //在此之前判断missionItem的状态值
-                                List<MissionItemTask> missionItemTaskList = missionItemTaskService.findByListIdAndMissionId(missionListTask.getId(),missionTask.getId());
-                                if(missionItemTaskList.size() == 1){
-                                    MissionItemTask missionItemTask = missionItemTaskList.get(0);
-                                    //cancel 状态下
+                                List<MissionItemTask> missionItemTaskList = missionItemTaskService.findByListIdAndMissionId(missionListTask.getId(), missionTask.getId());
+                                for (MissionItemTask missionItemTask : missionItemTaskList) {
+                                    //遍历寻找到loadNoShelf或者unload状态下 修改为完成状态
                                     if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
                                             ||missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload)){
                                         if (id != null){
                                             //设置order detail的单子状态为完成
                                             logger.info("### set finishedDetailTask " + id);
                                             orderDetailService.finishedDetailTask(id, OrderConstant.ORDER_DETAIL_STATUS_GET);
+                                            break;
                                         }
                                     }
                                 }
                             }
                         }
                     }
-
                     //更新mission item state
                     if (en.getMission_item_set() != null){
                         for (JsonMissionStateResponse.Mission_listEntity.Mission_item_setEntity item:
