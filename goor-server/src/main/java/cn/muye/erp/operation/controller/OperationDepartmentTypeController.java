@@ -2,11 +2,14 @@ package cn.muye.erp.operation.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.erp.operation.OperationDepartmentType;
+import cn.mrobot.bean.erp.operation.OperationType;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.erp.operation.service.OperationDepartmentTypeService;
+import cn.muye.erp.operation.service.OperationTypeService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,8 +22,13 @@ import java.util.List;
 @RestController
 public class OperationDepartmentTypeController {
 
+    private static org.slf4j.Logger LOGGER = LoggerFactory.getLogger(OperationDepartmentTypeController.class);
+
     @Autowired
     private OperationDepartmentTypeService operationDepartmentTypeService;
+
+    @Autowired
+    private OperationTypeService operationTypeService;
 
     @RequestMapping(value = "operation/departmentType", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody OperationDepartmentType operationDepartmentType) {
@@ -68,6 +76,14 @@ public class OperationDepartmentTypeController {
     public AjaxResult delete(@PathVariable Long id) {
         if (null == id) {
             return AjaxResult.failed("ID不能为空");
+        }
+        //根据手术科室查询关联的手术类型，如果科室关联了手术类型,那么不能删除（提示用户已关联到器械，无法删除）；
+        // 如果该手术科室没有关联到任何手术类型，那么改手术科室可以修改和删除（需提示弹框提示）
+        LOGGER.info("删除手术科室,id=" + id);
+        List<OperationType> operationTypeList = operationTypeService.listByDepartmentTypeId(id);
+        OperationDepartmentType departmentType = operationDepartmentTypeService.findTypeById(id);
+        if (null != operationTypeList && operationTypeList.size() > 0) {
+            return AjaxResult.failed("手术科室（" + departmentType.getName() + "）已经关联手术类型，无法删除");
         }
         operationDepartmentTypeService.removeById(id);
         return AjaxResult.success("删除成功");

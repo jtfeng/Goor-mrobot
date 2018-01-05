@@ -38,4 +38,5 @@ public interface ApplianceService extends BaseService<Appliance> {
      */
     int removeById(Long id);
 
+    List<Appliance> listByPackageTypeId(Long packageTypeId);
 }

@@ -25,4 +25,6 @@ public interface OperationTypeMapper extends MyMapper<OperationType> {
     List<OperationType> listAllOperationType();
 
     List<OperationType> listBySearchName(@Param("searchName") String searchName);
+
+    List<OperationType> listByDepartmentTypeId(@Param("departmentTypeId") Long DepartmentTypeId);
 }

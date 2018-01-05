@@ -32,6 +32,17 @@
         DELETE_TIME
     </sql>
 
+    <sql id="o_Base_Column_List">
+        o.ID,
+        o.STORE_ID,
+        o.CREATED_BY,
+        o.CREATE_TIME,
+        o.NAME,
+        o.SEARCH_NAME,
+        o.OPERATION_DEPARTMENT_TYPE_ID,
+        o.DELETE_FLAG,
+        o.DELETE_TIME
+    </sql>
     <insert id="saveOperationType" parameterType="cn.mrobot.bean.erp.operation.OperationType" useGeneratedKeys="true"
             keyProperty="id">
         INSERT INTO ERP_OPERATION_TYPE(
@@ -104,6 +115,18 @@
             </if>
         </where>
         AND DELETE_FLAG = 0
+        ORDER BY CREATE_TIME DESC
+    </select>
+
+    <select id="listByDepartmentTypeId" resultMap="operationType">
+        SELECT
+          <include refid="o_Base_Column_List"/>
+        FROM
+          ERP_OPERATION_TYPE o, ERP_OPERATION_DEPARTMENT_TYPE d
+        WHERE
+          o.OPERATION_DEPARTMENT_TYPE_ID = d.ID
+        AND
+          d.ID=#{departmentTypeId}
         ORDER BY CREATE_TIME DESC
     </select>
 

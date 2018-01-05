@@ -120,6 +120,11 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         return applianceMapper.updateByPrimaryKeySelective(appliance);
     }
 
+    @Override
+    public List<Appliance> listByPackageTypeId(Long packageTypeId) {
+        return applianceMapper.listByPackageTypeId(packageTypeId);
+    }
+
     private boolean analysisExcel(File file) {
         try {
             Map<String, List<Map<String, Object>>> result = ExcelUtil.getTableSheetData(file);

@@ -2,10 +2,12 @@ package cn.muye.erp.appliance.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.erp.appliance.Appliance;
 import cn.mrobot.bean.erp.appliance.AppliancePackageType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
+import cn.muye.erp.appliance.service.ApplianceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -27,6 +29,9 @@ public class AppliancePackageTypeController {
 
     @Autowired
     private AppliancePackageTypeService appliancePackageTypeService;
+
+    @Autowired
+    private ApplianceService applianceService;
 
     @RequestMapping(value = "appliance/packageType", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody AppliancePackageType appliancePackageType) {
@@ -72,6 +77,13 @@ public class AppliancePackageTypeController {
 
     @RequestMapping(value = "appliance/packageType/{id}", method = RequestMethod.DELETE)
     public AjaxResult delete(@PathVariable Long id) {
+        //根据包装类别查询关联的额外器械，如果包装类型关联了额外器械,那么该不能删除（提示用户已关联到器械，无法删除）；如果该包装类型没有关联到任何某种手术器械，那么改包装类型可以修改和删除（需提示弹框提示）
+        LOGGER.info("删除包装类型，id=" + id);
+        List<Appliance> applianceList = applianceService.listByPackageTypeId(id);
+        AppliancePackageType appliancePackageType = appliancePackageTypeService.findTypeById(id);
+        if (null != applianceList && applianceList.size() > 0) {
+            return AjaxResult.failed("包装类型(" + appliancePackageType.getName() + ")已关联到器械，无法删除");
+        }
         appliancePackageTypeService.removeById(id);
         return AjaxResult.success("删除成功");
     }
