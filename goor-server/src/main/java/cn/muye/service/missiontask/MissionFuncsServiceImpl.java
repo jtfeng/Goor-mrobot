@@ -2020,7 +2020,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         MissionTask missionTask = getCommonMissionTask(order, parentName,  "终点卸货任务");
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
-        missionItemTasks.add(getFinalUnloadItemTask(order, mp, parentName,orderDetailMP));
+        missionItemTasks.add(getFinalUnloadItemTask(order, mp, parentName, orderDetailMP));
 
         missionTask.setMissionItemTasks(missionItemTasks);
 
@@ -2159,6 +2159,52 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 new TypeToken<JsonMissionItemDataTwoElevator>(){}.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_elevator);
+
+        return itemTask;
+    }
+
+    /**
+     * 双电梯半自动 消息通知
+     * @param mp
+     * @return
+     */
+    private MissionTask getElevatorNoticeTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonElevatorNotice json) {
+        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯通知任务");
+
+        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        missionItemTasks.add(getElevatorNoticeItemTask(order, mp, parentName, json));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+
+    /**
+     * 获取电梯解锁ITEM任务
+     * @param mp
+     * @return
+     */
+    private MissionItemTask getElevatorNoticeItemTask(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            JsonElevatorNotice json) {
+        MissionItemTask itemTask = new MissionItemTask();
+        if (order.getScene() != null) {
+            itemTask.setSceneId(order.getScene().getId());
+        }
+        itemTask.setDescription(parentName + "电梯通知Item");
+        itemTask.setName(MissionItemName_elevator_notice);
+        //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
+        itemTask.setData(JsonUtils.toJson(json,
+                new TypeToken<JsonElevatorNotice>(){}.getType()));
+        itemTask.setState(MissionStateInit);
+        itemTask.setFeatureValue(FeatureValue_elevator_notice);
 
         return itemTask;
     }
@@ -3910,6 +3956,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                             );
                             if (elevatorModeEnum != null){
                                 elevatorsEntities.get(count).setAuto_mode(elevatorModeEnum.getModelCode());
+                                //若为半自动
+                                if(elevatorModeEnum.getModelCode() == 0){
+                                    JsonElevatorNotice jsonElevatorNotice = new JsonElevatorNotice();
+                                    jsonElevatorNotice.setCallFloor(mPointAtts.currentFloor);
+                                    jsonElevatorNotice.setTargetFloor(mPointAtts.nextFloor);
+                                    jsonElevatorNotice.setElevatorId(ev.getId());
+                                    MissionTask elevatorNoticeTask = getElevatorNoticeTask(order,mp, parentName, jsonElevatorNotice);
+                                    missionListTask.getMissionTasks().add(elevatorNoticeTask);
+                                }
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -4531,6 +4586,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String FeatureValue_unload = "unload";//卸货
     public static final String FeatureValue_finalUnload = "finalUnload";//终点卸货
     public static final String FeatureValue_elevator = "elevator";//电梯
+    public static final String FeatureValue_elevator_notice = "elevatorNotice";//电梯
     public static final String FeatureValue_elevator_lock = "elevatorLock";
     public static final String FeatureValue_elevator_unlock = "elevatorUnlock";
     public static final String FeatureValue_roadpath_lock = "roadpathLock";
@@ -4553,6 +4609,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MissionItemName_unload = "unload";
     public static final String MissionItemName_finalUnload = "finalUnload";
     public static final String MissionItemName_elevator = "elevator";
+    public static final String MissionItemName_elevator_notice = "elevatorNotice";  //电梯通知
     public static final String MissionItemName_elevator_lock = "elevatorLock";
     public static final String MissionItemName_elevator_unlock = "elevatorUnlock";
     public static final String MissionItemName_roadpath_lock = "roadpathLock";
