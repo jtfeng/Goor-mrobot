@@ -33,6 +33,13 @@
         WHERE r.CODE = #{0} AND s.ACTIVE = 0
     </select>
 
+    <!-- 根据电梯信息查询对应绑定的电梯站信息 -->
+    <select id="findStationsByElevator" resultMap="station" parameterType="java.lang.Long">
+        SELECT s.*
+        FROM A_STATION s
+        WHERE s.ID = (SELECT xref.ELEVATORSTATION_ID FROM A_ELEVATORSTATION_ELEVATOR_XREF xref WHERE xref.ELEVATOR_ID = #{0})
+    </select>
+
     <!-- 删除历史机器人和站之间的绑定关系，然后重新添加新的关系 -->
     <delete id="deleteStationWithRobotRelationByRobotCode" parameterType="java.lang.String">
         DELETE FROM AC_STATION_ROBOT_XREF WHERE ROBOT_ID = (SELECT ID FROM AS_ROBOT WHERE CODE = #{0});

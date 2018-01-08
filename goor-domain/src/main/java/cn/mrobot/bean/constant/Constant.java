@@ -197,4 +197,6 @@ public class Constant {
     public static final String ONLINE = "online"; //在线
 
     public static final Integer USE_CALCULATE_ACTION_TIME = 10;
+
+    public static final String IS_BIND_ELEVATOR_STATION_FLAG = "isBindElevatorStationFlag";
 }

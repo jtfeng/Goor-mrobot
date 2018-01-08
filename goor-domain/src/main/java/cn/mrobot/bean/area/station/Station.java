@@ -1,6 +1,7 @@
 package cn.mrobot.bean.area.station;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.base.BaseBean;
 
@@ -108,6 +109,11 @@ public class Station extends BaseBean {
     @Transient
     private boolean bindingState;
 
+    /**
+     * 因为如果所选站点为电梯站点类型的话，则可能需要传递一系列的电梯(可能为空)
+     */
+    @Transient
+    private List<Elevator> elevators;
 
     public String getName() {
         return name;
@@ -132,6 +138,14 @@ public class Station extends BaseBean {
 //    public void setStationType(String stationType) {
 //        this.stationType = stationType;
 //    }
+
+    public List<Elevator> getElevators() {
+        return elevators;
+    }
+
+    public void setElevators(List<Elevator> elevators) {
+        this.elevators = elevators;
+    }
 
     public List<MapPoint> getMapPoints() {
         return mapPoints;

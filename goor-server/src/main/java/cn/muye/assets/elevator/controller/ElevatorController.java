@@ -32,6 +32,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -92,6 +93,20 @@ public class ElevatorController {
             return AjaxResult.success(list, "查询全部电梯信息成功");
         }catch (Exception e){
             return AjaxResult.failed(e,     "查询全部电梯信息失败");
+        }
+    }
+
+    /**
+     * 根据场景查询对应的电梯信息(供前端使用)
+     * @return
+     */
+    @RequestMapping(value = "listElevatorByScene/{sceneId}", method = RequestMethod.GET)
+    public AjaxResult listElevatorByScene(@PathVariable("sceneId") Long sceneId){
+        try {
+            List<Elevator> list = elevatorService.listElevatorByScene(sceneId);
+            return AjaxResult.success(list, "查询电梯信息成功");
+        }catch (Exception e){
+            return AjaxResult.failed(e,     "查询电梯信息失败");
         }
     }
 

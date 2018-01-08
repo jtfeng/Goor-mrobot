@@ -3,9 +3,11 @@ package cn.muye.area.station.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
+import cn.mrobot.bean.area.station.ElevatorstationElevatorXREF;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.area.station.StationType;
+import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
@@ -13,6 +15,7 @@ import cn.mrobot.bean.erp.bindmac.StationMacPasswordXREF;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
+import cn.muye.area.station.mapper.ElevatorstationElevatorXREFMapper;
 import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.area.station.service.StationStationXREFService;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import tk.mybatis.mapper.entity.Example;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,6 +66,8 @@ public class StationController {
     private UserUtil userUtil;
     @Autowired
     private RobotService robotService;
+    @Autowired
+    private ElevatorstationElevatorXREFMapper elevatorstationElevatorXREFMapper;
 
     @Autowired
     private StationMacPasswordXREFService stationMacPasswordXREFService;
@@ -261,8 +267,8 @@ public class StationController {
                 station.setMapPoints(tempStationPoints);
             }
 
-            if (station != null && id != null) { //修改
-
+            if (station != null && id != null) {
+                //修改
                 Station stationDb = stationService.findById(id, storeId, sceneId);
                 if (stationDb == null) {
                     return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要修改的对象不存在");
@@ -274,8 +280,24 @@ public class StationController {
                 stationDb.setResscene(station.getResscene());
 
                 stationService.update(stationDb);
+                // 如果是电梯站点，那么需要首先先删除旧的然后再重新绑定新的电梯站和电梯的关联关系(新增的一种关系)
+                Example example = new Example(ElevatorstationElevatorXREF.class);
+                Example.Criteria criteria = example.createCriteria();
+                criteria.andCondition(" ELEVATORSTATION_ID = ", stationDb.getId());
+                elevatorstationElevatorXREFMapper.deleteByExample(example);
+                if (station.getElevators() != null && station.getElevators().size() != 0) {
+                    for (Elevator elevator : station.getElevators()) {
+                        ElevatorstationElevatorXREF elevatorstationElevatorXREF = new ElevatorstationElevatorXREF(){{
+                            setElevatorstationId(stationDb.getId());
+                            setElevatorId(elevator.getId());
+                        }};
+                        elevatorstationElevatorXREFMapper.insert(elevatorstationElevatorXREF);
+                    }
+                }
+
                 return AjaxResult.success(toEntity(stationDb), "修改成功");
-            } else if (station != null && id == null) { //新增
+            } else if (station != null && id == null) {
+                //新增
                 station.setActive(Constant.NORMAL);
                 station.setSceneId(scene.getId());
                 station.setStoreId(storeId);
@@ -284,6 +306,16 @@ public class StationController {
                 station.setCreatedBy(SearchConstants.FAKE_MERCHANT_STORE_ID);
 
                 stationService.save(station);
+                // 如果是电梯站点，那么需要新增电梯站点和电梯的关联关系(新增的一种关系)
+                if (station.getElevators() != null && station.getElevators().size() != 0) {
+                    for (Elevator elevator : station.getElevators()) {
+                        ElevatorstationElevatorXREF elevatorstationElevatorXREF = new ElevatorstationElevatorXREF(){{
+                            setElevatorstationId(station.getId());
+                            setElevatorId(elevator.getId());
+                        }};
+                        elevatorstationElevatorXREFMapper.insert(elevatorstationElevatorXREF);
+                    }
+                }
 
                 return AjaxResult.success(toEntity(station), "新增成功");
             } else {

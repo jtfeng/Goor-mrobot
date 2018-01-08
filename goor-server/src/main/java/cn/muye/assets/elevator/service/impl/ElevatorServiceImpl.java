@@ -56,6 +56,11 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Autowired
     private PointService pointService;
 
+    @Override
+    public List<Elevator> listElevatorByScene(Long id) {
+        return elevatorMapper.listElevatorByScene(id);
+    }
+
     @Transactional
     @Override
     public List<Elevator> listElevators(WhereRequest whereRequest) throws Exception {

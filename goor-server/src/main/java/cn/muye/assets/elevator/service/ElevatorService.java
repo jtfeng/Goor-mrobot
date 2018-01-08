@@ -109,4 +109,6 @@ public interface ElevatorService extends BaseService<Elevator> {
     AjaxResult generateFakePathByElevatorList(List<Elevator> elevatorList) throws Exception;
 
     List<Elevator> listByShaftId(Long id);
+
+    List<Elevator> listElevatorByScene(Long id);
 }

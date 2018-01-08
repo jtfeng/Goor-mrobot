@@ -15,7 +15,17 @@ public class StationDTO4User {
 
     private Long sceneId;
 
+    private Integer stationTypeId;
+
     private List<Robot> robotList;
+
+    public Integer getStationTypeId() {
+        return stationTypeId;
+    }
+
+    public void setStationTypeId(Integer stationTypeId) {
+        this.stationTypeId = stationTypeId;
+    }
 
     public Long getId() {
         return id;

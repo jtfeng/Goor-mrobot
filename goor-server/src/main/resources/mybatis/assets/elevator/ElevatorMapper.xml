@@ -36,8 +36,21 @@
         <result property="deleteFlag" column="DELETE_FLAG"/>
     </resultMap>
 
+    <select id="listElevatorByScene" resultMap="ElevatorMap" parameterType="java.lang.Long">
+        SELECT e.*
+        FROM AS_ELEVATOR e
+        WHERE e.SCENE_NAME = (SELECT r.MAP_SCENENAME FROM SCENES_MAPS_RELATIONS r WHERE r.SCENE_ID = #{0})
+    </select>
+
     <select id="selectAllFlushCache" resultMap="ElevatorMap" flushCache="true">
         SELECT * FROM AS_ELEVATOR
+    </select>
+
+    <select id="findByElevatorStationId" resultMap="ElevatorMap" parameterType="java.lang.Long">
+        SELECT e.*
+        FROM AS_ELEVATOR e
+            LEFT JOIN A_ELEVATORSTATION_ELEVATOR_XREF xref ON e.ID = xref.ELEVATOR_ID
+        WHERE xref.ELEVATORSTATION_ID = #{0}
     </select>
 
     <select id="findByElevatorPointCombinationId" resultMap="ElevatorMap" parameterType="java.lang.Long">

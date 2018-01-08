@@ -37,5 +37,12 @@ public interface StationMapper  extends MyMapper<Station> {
 	 * @param robotCode
 	 */
 	void deleteStationWithRobotRelationByRobotCode(String robotCode);
-}
 
+	/**
+	 * 根据电梯信息查询所关联的电梯站信息
+	 * @param id
+	 * @return
+	 */
+	List<Station> findStationsByElevator(Long id);
+
+}

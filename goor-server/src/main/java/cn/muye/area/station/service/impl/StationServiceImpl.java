@@ -1,10 +1,7 @@
 package cn.muye.area.station.service.impl;
 
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.area.station.Station;
-import cn.mrobot.bean.area.station.StationMapPointXREF;
-import cn.mrobot.bean.area.station.StationRobotXREF;
-import cn.mrobot.bean.area.station.StationStationXREF;
+import cn.mrobot.bean.area.station.*;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
@@ -14,6 +11,7 @@ import cn.muye.area.station.service.StationMapPointXREFService;
 import cn.muye.area.station.service.StationRobotXREFService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.area.station.service.StationStationXREFService;
+import cn.muye.assets.elevator.mapper.ElevatorMapper;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
@@ -55,6 +53,8 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
     protected RobotService robotService;
     @Autowired
     private StationMapper stationMapper;
+    @Autowired
+    private ElevatorMapper elevatorMapper;
 
     @Override
     public int save(Station station) {
@@ -171,6 +171,7 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
         }
 
         collectPoints(stationList);
+        collectElevators(stationList);
         return stationList;
     }
 
@@ -229,6 +230,22 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
         return stationList;
     }
 
+
+    /**
+     * 站点信息如果是电梯站，需要查询其对应绑定的电梯信息
+     * @param stationList
+     * @return
+     */
+    private List<Station> collectElevators(List<Station> stationList) {
+        for (Station station : stationList) {
+            if (StationType.ELEVATOR.getCaption() == station.getStationTypeId()) {
+                // 表明这个站是电梯站，需要查询与其关联的电梯信息
+                station.setElevators(elevatorMapper.findByElevatorStationId(station.getId()));
+            }
+        }
+        return stationList;
+    }
+
     @Override
     public List<Station> listByName(String name,long storeId,long sceneId) {
         Example example = new Example(Station.class);
@@ -279,7 +296,10 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
 
     @Override
     public List<Station> listStationsBySceneAndMapPointType(Long sceneId, Integer type) {
-        return collectPoints(stationMapper.listStationsBySceneAndMapPointType(sceneId, type));
+        List<Station> stations = stationMapper.listStationsBySceneAndMapPointType(sceneId, type);
+        collectPoints(stations);
+        collectElevators(stations);
+        return stations;
     }
 
     @Override
