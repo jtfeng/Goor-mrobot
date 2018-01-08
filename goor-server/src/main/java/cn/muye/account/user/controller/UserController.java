@@ -315,6 +315,13 @@ public class UserController implements ApplicationContextAware{
                 defaultSetting = orderSettingService.getDefaultSetting(firstStation.getId());
             }
             map.put("orderSetting",defaultSetting);
+            for (StationDTO4User stationDTO4User : stationList) {
+                if (StationType.ELEVATOR.getCaption() == stationDTO4User.getStationTypeId()) {
+                    // 用户绑定了电梯站
+                    map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, 1);
+                    break;
+                }
+            }
             return AjaxResult.success(map, "登录成功");
         } else if (userDTO != null && stationList == null) {
             return AjaxResult.failed("账号异常，请联系客服");

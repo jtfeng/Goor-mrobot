@@ -6,6 +6,7 @@ import cn.muye.util.MyMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 @Component
 public interface ElevatorMapper extends MyMapper<Elevator> {
@@ -35,5 +36,7 @@ public interface ElevatorMapper extends MyMapper<Elevator> {
      * @return
      */
     List<Elevator> listElevatorByScene(Long id);
+
+    List<Elevator> listElevatorsByScene(Map map);
 
 }

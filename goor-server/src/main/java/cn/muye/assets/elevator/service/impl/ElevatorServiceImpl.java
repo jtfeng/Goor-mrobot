@@ -20,7 +20,10 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.PathUtil;
+import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -64,9 +64,13 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Transactional
     @Override
     public List<Elevator> listElevators(WhereRequest whereRequest) throws Exception {
-        List<Elevator> elevators = this.listPageByStoreIdAndOrder(whereRequest.getPage(),
-                whereRequest.getPageSize(), Elevator.class,"ID DESC");
-        return elevators;
+        Map params = Maps.newHashMap();
+        JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
+        params.put("sceneId", Long.parseLong(String.valueOf(jsonObject.get("sceneId"))));
+//        List<Elevator> elevators = this.listPageByStoreIdAndOrder(whereRequest.getPage(),
+//                whereRequest.getPageSize(), Elevator.class,"ID DESC");
+        PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
+        return elevatorMapper.listElevatorsByScene(params);
     }
 
     @Transactional

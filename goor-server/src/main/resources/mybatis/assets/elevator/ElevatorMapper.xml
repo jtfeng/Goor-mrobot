@@ -36,6 +36,12 @@
         <result property="deleteFlag" column="DELETE_FLAG"/>
     </resultMap>
 
+    <select id="listElevatorsByScene" resultMap="ElevatorMap" parameterType="java.util.Map">
+        SELECT e.*
+        FROM AS_ELEVATOR e
+        WHERE e.SCENE_NAME = (SELECT r.MAP_SCENENAME FROM SCENES_MAPS_RELATIONS r WHERE r.SCENE_ID = #{sceneId})
+    </select>
+
     <select id="listElevatorByScene" resultMap="ElevatorMap" parameterType="java.lang.Long">
         SELECT e.*
         FROM AS_ELEVATOR e
