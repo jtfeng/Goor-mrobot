@@ -3959,8 +3959,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 //若为半自动
                                 if(elevatorModeEnum.getModelCode() == 0){
                                     JsonElevatorNotice jsonElevatorNotice = new JsonElevatorNotice();
-                                    jsonElevatorNotice.setCallFloor(mPointAtts.currentFloor);
-                                    jsonElevatorNotice.setTargetFloor(mPointAtts.nextFloor);
+                                    jsonElevatorNotice.setTargetFloor(mPointAtts.logicFloor);
+                                    MapInfo currentMapInfo = mapInfoService.getMapInfo(mPointAtts.currentMapId);
+                                    jsonElevatorNotice.setCallFloor(currentMapInfo.getLogicFloor());
                                     jsonElevatorNotice.setElevatorId(ev.getId());
                                     MissionTask elevatorNoticeTask = getElevatorNoticeTask(order,mp, parentName, jsonElevatorNotice);
                                     missionListTask.getMissionTasks().add(elevatorNoticeTask);
