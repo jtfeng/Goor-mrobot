@@ -9,7 +9,6 @@ public enum  WSMessageType {
     SPECIFIC_TYPE,
     WARNING,
     POSE,
-    ORDER,
     STOP_SENDING;
 
     public boolean is(String msgType) {

@@ -2,6 +2,7 @@ package cn.muye.base.consumer;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.assets.elevator.ElevatorNotice;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.base.CommonInfo;
@@ -12,6 +13,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.mission.task.JsonElevatorNotice;
 import cn.mrobot.bean.mission.task.JsonMissionItemDataLaserNavigation;
 import cn.mrobot.bean.slam.SlamBody;
 import cn.mrobot.bean.state.StateCollectorAutoCharge;
@@ -25,6 +27,7 @@ import cn.muye.account.employee.service.EmployeeService;
 import cn.muye.area.fixpath.service.FixPathService;
 import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.service.MapInfoService;
+import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
@@ -104,6 +107,9 @@ public class ConsumerCommon {
 
     @Autowired
     private SceneService sceneService;
+
+    @Autowired
+    private ElevatorNoticeService elevatorNoticeService;
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -171,27 +177,56 @@ public class ConsumerCommon {
                     Long missionItemId = employeeObj.getLong("missionItemId");
                     AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(empNo, missionItemId, messageName);
                     replyVerification(robotCode, ajaxResult.getMessage(), ajaxResult.getCode(), uuid, messageName);
-                } else if (!StringUtils.isEmpty(messageName)  &&
+                } else if (!StringUtils.isEmpty(messageName) &&
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CHECK_OPERATE_PWD)) {
                     //PUB AND SUB NAME : check_operate_pwd
                     robotService.checkPasswordIsValid(uuid, robotCode,
                             jsonObjectData.getString("input_pwd"));
-                } else if (!StringUtils.isEmpty(messageName)  &&
+                } else if (!StringUtils.isEmpty(messageName) &&
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY)) {
                     logger.info("   -| 机器人编号为：" + robotCode + "、发送的消息格式类型为：" + TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY);
                     // 机器人开机获取云端相关资源
                     sceneService.replyGetRobotStartAssets(uuid, robotCode);
-                } else if (!StringUtils.isEmpty(messageName)  &&
+                } else if (!StringUtils.isEmpty(messageName) &&
                         messageName.equals(TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE)) {
                     logger.info("   -| 机器人编号为：" + robotCode + "、发送的消息格式类型为：" + TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE);
                     logger.info("       -| 接收到的实际 JSON 字符串内容为：" + JSONObject.toJSONString(jsonObjectData));
                     // 机器人开机重新修改与指定机器人的绑定关系
                     sceneService.updateGetRobotStartAssets(robotCode, JSONObject.parseObject(jsonObjectData.getString(TopicConstants.DATA)));
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.ELEVATOR_NOTICE)) {
+                    // 电梯pad消息通知,websocket消息通知电梯pad,pad接收成功后通知mission
+                    sendElevatorNotice(robotCode, jsonObjectData);
                 }
             }
         } catch (Exception e) {
             logger.error("consumer directAgentSub exception", e);
         }
+    }
+
+    /**
+     * 电梯pad消息通知
+     *
+     * @param robotCode
+     * @param jsonObjectData
+     */
+    private void sendElevatorNotice(String robotCode, JSONObject jsonObjectData) {
+        logger.info("电梯pad消息通知,jsonObjectData=" + jsonObjectData);
+        JsonElevatorNotice jsonElevatorNotice = JSON.parseObject(jsonObjectData.getString(TopicConstants.DATA), JsonElevatorNotice.class);
+        String uuid = jsonObjectData.getString(TopicConstants.UUID);
+        //将消息存入数据库
+        ElevatorNotice elevatorNotice = parseToElevatorNotice(robotCode, jsonElevatorNotice, uuid);
+        elevatorNoticeService.sendElevatorNoticeToWebSocket(elevatorNotice);
+    }
+
+    private ElevatorNotice parseToElevatorNotice(String robotCode, JsonElevatorNotice jsonElevatorNotice, String uuid) {
+        ElevatorNotice elevatorNotice = new ElevatorNotice();
+        elevatorNotice.init();
+        elevatorNotice.setRobotCode(robotCode);
+        elevatorNotice.setCallFloor(jsonElevatorNotice.getCallFloor());
+        elevatorNotice.setElevatorId(jsonElevatorNotice.getElevatorId());
+        elevatorNotice.setTargetFloor(jsonElevatorNotice.getTargetFloor());
+        elevatorNotice.setUuid(uuid);
+        return elevatorNotice;
     }
 
     /**
@@ -555,7 +590,7 @@ public class ConsumerCommon {
         Date date = new Date();
         long upTime = messageInfo.getSendTime().getTime();
         long downTime = date.getTime();
-        if ((downTime - upTime) < 10*1000 || (upTime - downTime) < 10*1000 ) {
+        if ((downTime - upTime) < 10 * 1000 || (upTime - downTime) < 10 * 1000) {
             return;
         } else {
             //发送带响应同步消息，获得10次时间平均延迟
@@ -624,17 +659,17 @@ public class ConsumerCommon {
         //保存低电量警告
         int powerPercent = chargeInfo.getPowerPercent();
         Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if (null == robot){
+        if (null == robot) {
             return;
         }
 
         RobotConfig robotConfig = robotConfigService.getByRobotId(robot.getId());
-        if (null == robotConfig){
+        if (null == robotConfig) {
             return;
         }
 
         Integer lowBatteryThreshold = robotConfig.getLowBatteryThreshold();
-        if (lowBatteryThreshold == null){
+        if (lowBatteryThreshold == null) {
             return;
         }
 

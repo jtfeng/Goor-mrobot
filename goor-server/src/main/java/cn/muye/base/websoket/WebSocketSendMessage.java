@@ -25,14 +25,15 @@ public class WebSocketSendMessage {
      * @param wsMessage
      * @throws Exception
      */
-    public void sendWebSocketMessage(WSMessage wsMessage){
+    public void sendWebSocketMessage(WSMessage wsMessage) {
         String deviceId = wsMessage.getDeviceId();
         //根据机器人code或者站编号 获取session
         Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(deviceId);
-        if (sessionSet == null)
-            return;
+        if (sessionSet == null) {
+            return ;
+        }
         for (Session session : sessionSet) {
-            if (CacheInfoManager.isWebSocketClientReceiveModule(session,wsMessage.getDeviceId(), wsMessage.getModule())) {
+            if (CacheInfoManager.isWebSocketClientReceiveModule(session, wsMessage.getDeviceId(), wsMessage.getModule())) {
                 sendWebSocketMessage(wsMessage, session);
             } else {
                 log.info(wsMessage.getDeviceId() + "停止接收(未设置接收) " + wsMessage.getModule() + " 信息");
@@ -46,7 +47,7 @@ public class WebSocketSendMessage {
      * @param wsMessage
      * @throws Exception
      */
-    protected void sendWebSocketMessage(WSMessage wsMessage, Session session){
+    protected void sendWebSocketMessage(WSMessage wsMessage, Session session) {
         if (null != session) {
             sendMessage(session, JSON.toJSONString(wsMessage));
         } else {

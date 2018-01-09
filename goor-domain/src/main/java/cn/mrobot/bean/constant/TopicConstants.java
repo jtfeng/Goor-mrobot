@@ -15,6 +15,11 @@ import com.alibaba.fastjson.JSON;
  */
 public class TopicConstants {
 
+	//topic的error_code值
+	public final static Integer ERROR_CODE_SUCCESS = 0; //成功
+	public final static Integer ERROR_CODE_FAIL = 1;  //失败
+
+
 	public static final boolean DEBUG = true;
 
 	public static final String LAGENT_PREFIX = "agent_local"; //需要agent本地处理的topic
@@ -69,6 +74,7 @@ public class TopicConstants {
 	public static final String PUB_SUB_NAME_CHECK_OPERATE_PWD = "check_operate_pwd"; // 应用请求操作机器人密码校验的 PUB 和 SUB 名称
 	public static final String PUB_SUB_NAME_CLOUD_ASSETS_QUERY = "cloud_assets_query"; // 机器人开机管理获取云端相关资源的 SUB 和 PUB 内容
 	public static final String PUB_SUB_NAME_CLOUD_ASSETS_UPDATE = "cloud_assets_update"; // 机器人开机管理更新云端相关资源的 SUB 和 PUB 内容
+	public static final String ELEVATOR_NOTICE = "elevator_notice"; //  电梯pad消息通知
 	public static final String FIXPATH_QUERY = "fixpath_query"; //  查询保存的路径
 	public static final String FIXPATH_FILE_QUERY = "fixpath_file_query"; //  查询保存的文件路径
 	public static final String PATHS = "paths"; //  查询保存的路径

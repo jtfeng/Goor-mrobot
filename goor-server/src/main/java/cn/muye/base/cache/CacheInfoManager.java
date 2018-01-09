@@ -107,6 +107,12 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<String,Boolean> fixpathSceneNameCache = new ConcurrentHashMapCache<String, Boolean>();
 
+    /**
+     * 电梯pad消息通知缓存
+     * //key: elevatorNoticeId
+     */
+    private static ConcurrentHashMapCache<Long,Boolean> elevatorNoticeCache = new ConcurrentHashMapCache<Long, Boolean>();
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -535,5 +541,26 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setFixpathSceneNameCache(String sceneName) {
         CacheInfoManager.fixpathSceneNameCache.put(sceneName, true);
+    }
+
+    public static List<Long> getElevatorNoticeCache() {
+        Iterator iterator = elevatorNoticeCache.iterator();
+        List<Long> elevatorNoticeIdList = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            Long key = entry.getKey();
+            if (null != key){
+                elevatorNoticeIdList.add(key);
+            }
+        }
+        return elevatorNoticeIdList;
+    }
+
+    public static void setElevatorNoticeCache(Long elevatorNoticeId) {
+        elevatorNoticeCache.put(elevatorNoticeId, true);
+    }
+
+    public static void removeElevatorNoticeCache(Long elevatorNoticeId) {
+        elevatorNoticeCache.remove(elevatorNoticeId);
     }
 }

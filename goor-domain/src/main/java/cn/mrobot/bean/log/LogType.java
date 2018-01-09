@@ -31,6 +31,7 @@ public enum LogType{
 	INFO_CURRENT_POSE("INFO_CURRENT_POSE", "当前位置"),  //当前位置
 	INFO_ORDER("INFO_ORDER", "订单"),  //订单
     INFO_PATH_PLANNING("INFO_PATH_PLANNING", "路径规划"),  //路径规划
+	ELEVATOR_NOTICE("ELEVATOR_NOTICE","电梯pad消息通知"),
 
 	WARNING("WARNING", "WARNING信息"),  //所有WARNING信息  与LogLevel有重复，添加此条主要是为了websocket信息的种类取值统一
 	WARNING_TIMEOUT("WARNING_TIMEOUT", "超时警告"),  //机器人超时警告

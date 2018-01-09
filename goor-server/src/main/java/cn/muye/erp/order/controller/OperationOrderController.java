@@ -228,7 +228,7 @@ public class OperationOrderController {
 
     private void sendWebSocketMessage(Long stationId, OperationOrder operationOrder) {
         WSMessage ws = new WSMessage.Builder()
-                .messageType(WSMessageType.ORDER)
+                .messageType(WSMessageType.NOTIFICATION)
                 .body(operationOrder)
                 .deviceId(String.valueOf(stationId))
                 .module(LogType.INFO_ORDER.getName()).build();

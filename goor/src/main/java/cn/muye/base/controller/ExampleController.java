@@ -337,4 +337,24 @@ public class ExampleController {
         appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
         return AjaxResult.success();
     }
+
+    /**
+     * 模拟发送电梯pad消息通知
+     *
+     * @return
+     */
+    @RequestMapping(value = "testElevatorNotice", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult testElevatorNotice(@RequestParam("uuid") String uuid) throws Exception {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ELEVATOR_NOTICE);
+        jsonObject.put(TopicConstants.UUID, uuid);
+        JSONObject dataObject = new JSONObject();
+        dataObject.put("callFloor", 4);
+        dataObject.put("targetFloor", 1);
+        dataObject.put("elevatorId", 5);
+        jsonObject.put(TopicConstants.DATA, JSON.toJSONString(dataObject));
+        appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
+        return AjaxResult.success();
+    }
 }
