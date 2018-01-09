@@ -235,9 +235,9 @@ public class ScheduleTasks {
     }
 
     /**
-     * 添加定时任务，没20秒检查一次有没有电梯pad消息缓存，有，取出消息进行推送
+     * 添加定时任务，没10秒检查一次有没有电梯pad消息缓存，有，取出消息进行推送
      */
-    @Scheduled(cron = "*/20 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     public void sendElevatorNoticeCache() {
         try {
             elevatorNoticeService.sendElevatorNoticeCache();

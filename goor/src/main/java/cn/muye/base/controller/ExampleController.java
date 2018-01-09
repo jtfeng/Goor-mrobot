@@ -345,14 +345,17 @@ public class ExampleController {
      */
     @RequestMapping(value = "testElevatorNotice", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult testElevatorNotice(@RequestParam("uuid") String uuid) throws Exception {
+    public AjaxResult testElevatorNotice(@RequestParam("uuid") String uuid,
+                                         @RequestParam("elevatorId") int elevatorId,
+                                         @RequestParam("callFloor") int callFloor,
+                                         @RequestParam("targetFloor") int targetFloor) throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ELEVATOR_NOTICE);
         jsonObject.put(TopicConstants.UUID, uuid);
         JSONObject dataObject = new JSONObject();
-        dataObject.put("callFloor", 4);
-        dataObject.put("targetFloor", 1);
-        dataObject.put("elevatorId", 5);
+        dataObject.put("callFloor", callFloor);
+        dataObject.put("targetFloor", targetFloor);
+        dataObject.put("elevatorId", elevatorId);
         jsonObject.put(TopicConstants.DATA, JSON.toJSONString(dataObject));
         appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
         return AjaxResult.success();

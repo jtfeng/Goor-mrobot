@@ -138,7 +138,9 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         if (null != elevatorNoticeIdList && elevatorNoticeIdList.size() > 0) {
             for (Long elevatorNoticeId : elevatorNoticeIdList) {
                 ElevatorNotice elevatorNotice = findById(elevatorNoticeId);
-                checkAndSendElevatorNotice(elevatorNotice);
+                if (null != elevatorNotice){
+                    checkAndSendElevatorNotice(elevatorNotice);
+                }
             }
         }
     }
