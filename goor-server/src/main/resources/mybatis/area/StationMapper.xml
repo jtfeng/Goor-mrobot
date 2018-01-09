@@ -119,7 +119,7 @@
         </if>
     </select>
 
-    <select id="listStationsBySceneAndMapPointType" resultType="cn.mrobot.bean.area.station.Station">
+    <select id="listStationsBySceneAndMapPointType" resultMap="station">
         SELECT ast.*
         FROM A_STATION ast
         LEFT JOIN A_STATION_MAP_POINT_XREF asmx ON ast.ID = asmx.STATION_ID
