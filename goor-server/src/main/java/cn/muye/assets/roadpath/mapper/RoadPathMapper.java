@@ -19,4 +19,6 @@ public interface RoadPathMapper extends MyMapper<RoadPath> {
 
     List<RoadPathPoint> findRoadPathPointByRoadPath(Long roadPathId);
 
+    List<String> findGongkongPathIds();
+
 }

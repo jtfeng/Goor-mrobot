@@ -181,4 +181,19 @@ public class RoadPathController {
         }
     }
 
+    /**
+     * 查询所有的工控路径 ID 编号信息
+     * @return
+     */
+    @RequestMapping(value = "/asset/roadPath/pathIds", method = RequestMethod.GET)
+    public AjaxResult pathIds(){
+        try {
+            List<String> ids = roadPathService.findGongkongPathIds();
+            return AjaxResult.success(ids);
+        }catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed("查询所有工控 id 信息失败");
+        }
+    }
+
 }

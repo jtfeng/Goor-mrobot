@@ -309,6 +309,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             if (mapNameKeyword != null && !"".equals(mapNameKeyword.trim())) {
                 criteria.andCondition(" MAP_NAME = ", mapNameKeyword);
             }
+            // 可能为空
+            String pathIdKeyword = queryObject.getString("pathId");
+            if (pathIdKeyword != null && !"".equals(pathIdKeyword.trim())) {
+                criteria.andCondition(" PATH_ID = ", pathIdKeyword);
+            }
+
             // 可能为空(此处暂定为 0 表示云端配置 1 代表工控上传）)
             String pathType = queryObject.getString("PATH_TYPE".toLowerCase());
             if (pathType != null && !"".equals(pathType.trim())) {
@@ -734,5 +740,10 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<String> findGongkongPathIds() {
+        return roadPathMapper.findGongkongPathIds();
     }
 }
