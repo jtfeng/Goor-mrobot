@@ -284,6 +284,7 @@ public class UserController implements ApplicationContextAware{
         if (userDTO != null && stationList != null) {
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
+            map.put(Constant.VERSION_NOAH_GOOR_SERVER_KEY, Constant.VERSION_NOAH_GOOR_SERVER);
             for (StationDTO4User stationDTO4User : stationList) {
                 if (StationType.ELEVATOR.getCaption() == stationDTO4User.getStationTypeId()) {
                     // 用户绑定了电梯站
@@ -309,6 +310,7 @@ public class UserController implements ApplicationContextAware{
             }
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
+            map.put(Constant.VERSION_NOAH_GOOR_SERVER_KEY, Constant.VERSION_NOAH_GOOR_SERVER);
             OrderSetting defaultSetting = null;
             if(stationList.size()> 0){
                 StationDTO4User firstStation = stationList.get(0);
