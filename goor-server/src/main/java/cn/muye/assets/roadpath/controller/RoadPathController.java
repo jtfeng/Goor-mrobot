@@ -10,6 +10,7 @@ import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -185,10 +186,13 @@ public class RoadPathController {
      * 查询所有的工控路径 ID 编号信息
      * @return
      */
-    @RequestMapping(value = "/asset/roadPath/pathIds", method = RequestMethod.GET)
-    public AjaxResult pathIds(){
+    @RequestMapping(value = "/asset/{sceneId}/roadPath/pathIds", method = RequestMethod.GET)
+    public AjaxResult pathIds(@PathVariable("sceneId") Long sceneId){
         try {
-            List<String> ids = roadPathService.findGongkongPathIds();
+            List<String> ids = roadPathService.findGongkongPathIds(sceneId);
+            if (ids == null) {
+                return AjaxResult.success(Lists.newArrayList());
+            }
             return AjaxResult.success(ids);
         }catch (Exception e) {
             log.error(e.getMessage(), e);

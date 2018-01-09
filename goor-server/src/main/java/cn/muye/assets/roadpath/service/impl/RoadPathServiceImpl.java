@@ -743,7 +743,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     }
 
     @Override
-    public List<String> findGongkongPathIds() {
-        return roadPathMapper.findGongkongPathIds();
+    public List<String> findGongkongPathIds(Long sceneId) {
+        return roadPathMapper.findGongkongPathIds(sceneId);
     }
 }

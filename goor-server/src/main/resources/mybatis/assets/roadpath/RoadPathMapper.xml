@@ -9,8 +9,11 @@
         <result column="POINT_ID" property="pointId" jdbcType="BIGINT"/>
     </resultMap>
 
-    <select id="findGongkongPathIds" resultType="java.lang.String">
-        SELECT DISTINCT r.PATH_ID FROM AS_ROADPATH r WHERE r.PATH_ID IS NOT NULL AND r.PATH_ID != '' ORDER BY r.PATH_ID
+    <select id="findGongkongPathIds" resultType="java.lang.String" parameterType="java.lang.Long">
+        SELECT DISTINCT r.PATH_ID FROM AS_ROADPATH r
+        WHERE r.PATH_ID IS NOT NULL AND r.PATH_ID != ''
+              AND r.SCENE_NAME = (SELECT s.MAP_SCENENAME FROM SCENES_MAPS_RELATIONS s WHERE s.SCENE_ID = #{0})
+        ORDER BY r.PATH_ID
     </select>
 
     <select id="findMapSceneName" parameterType="java.lang.Long" resultType="java.lang.String">

@@ -130,5 +130,5 @@ public interface RoadPathService extends BaseService<RoadPath> {
      */
     void deleteByStartEndPointIdType(Long startPointId, Long endPointId, Integer pathType, String sceneName, Long storeId);
 
-    List<String> findGongkongPathIds();
+    List<String> findGongkongPathIds(Long sceneId);
 }
