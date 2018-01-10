@@ -591,8 +591,6 @@ public class ElevatorController {
             elevatorNotice.setState(ElevatorNotice.State.RECEIVED.getCode());
             elevatorNoticeService.updateSelective(elevatorNotice);
             CacheInfoManager.removeElevatorNoticeCache(id);
-            //通过agent_pub反馈电梯pad已经收到消息,deviceId 置为空
-            elevatorNoticeService.sendElevatorNoticeToX86(elevatorNotice, TopicConstants.ERROR_CODE_SUCCESS, null, null);
             return AjaxResult.success("操作成功");
         } catch (Exception e) {
             return AjaxResult.failed(e, "操作失败");

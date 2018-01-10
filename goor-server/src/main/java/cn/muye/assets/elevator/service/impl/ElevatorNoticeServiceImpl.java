@@ -83,12 +83,11 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
 
     @Override
     public void sendElevatorNoticeToWebSocket(ElevatorNotice elevatorNotice) {
-        logger.info("向电梯pad发送websocket消息，elevatorNotice="+JSON.toJSONString(elevatorNotice));
+        logger.info("向电梯pad发送websocket消息，elevatorNotice=" + JSON.toJSONString(elevatorNotice));
         Long elevatorId = elevatorNotice.getElevatorId();
         //根据电梯获取其绑定的站
         List<Station> stationList = elevatorstationElevatorXREFService.findByElevator(elevatorId);
         if (null == stationList) {
-            sendElevatorNoticeToX86(elevatorNotice, TopicConstants.ERROR_CODE_FAIL, null, "电梯(" + elevatorId + ")没有归属站");
             return;
         }
         for (Station station : stationList) {
@@ -99,25 +98,19 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
     }
 
     private boolean checkAndSendElevatorNotice(ElevatorNotice elevatorNotice) {
-        logger.info("消息未接收，重新向电梯pad发送websocket消息，elevatorNotice="+JSON.toJSONString(elevatorNotice));
+        logger.info("消息未接收，重新向电梯pad发送websocket消息，elevatorNotice=" + JSON.toJSONString(elevatorNotice));
         boolean sendSuccess = false;  //pad端是否收到消息
         //添加缓存
         Long elevatorNoticeId = elevatorNotice.getId();
         CacheInfoManager.setElevatorNoticeCache(elevatorNoticeId);
-        try {
-            //发送之前校验消息是否接收到反馈
-            ElevatorNotice elevatorNoticeDB = findById(elevatorNoticeId);
-            if (ElevatorNotice.State.RECEIVED.getCode() == elevatorNoticeDB.getState()) {
-                sendSuccess = true;
-                //发送成功，删除缓存
-                CacheInfoManager.removeElevatorNoticeCache(elevatorNoticeId);
-            } else {
-                sendWebSocketSendMessage(elevatorNotice);
-            }
-        } finally {
-            if (sendSuccess) {
-                sendElevatorNoticeToX86(elevatorNotice, TopicConstants.ERROR_CODE_FAIL, null, null);
-            }
+        //发送之前校验消息是否接收到反馈
+        ElevatorNotice elevatorNoticeDB = findById(elevatorNoticeId);
+        if (ElevatorNotice.State.RECEIVED.getCode() == elevatorNoticeDB.getState()) {
+            sendSuccess = true;
+            //发送成功，删除缓存
+            CacheInfoManager.removeElevatorNoticeCache(elevatorNoticeId);
+        } else {
+            sendWebSocketSendMessage(elevatorNotice);
         }
         return sendSuccess;
     }
@@ -138,7 +131,7 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         if (null != elevatorNoticeIdList && elevatorNoticeIdList.size() > 0) {
             for (Long elevatorNoticeId : elevatorNoticeIdList) {
                 ElevatorNotice elevatorNotice = findById(elevatorNoticeId);
-                if (null != elevatorNotice){
+                if (null != elevatorNotice) {
                     checkAndSendElevatorNotice(elevatorNotice);
                 }
             }

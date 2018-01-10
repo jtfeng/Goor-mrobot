@@ -195,7 +195,11 @@ public class ConsumerCommon {
                     sceneService.updateGetRobotStartAssets(robotCode, JSONObject.parseObject(jsonObjectData.getString(TopicConstants.DATA)));
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.ELEVATOR_NOTICE)) {
                     // 电梯pad消息通知,websocket消息通知电梯pad,pad接收成功后通知mission
-                    sendElevatorNotice(robotCode, jsonObjectData);
+                    logger.info("电梯pad消息通知,jsonObjectData=" + jsonObjectData);
+                    ElevatorNotice elevatorNotice = parseToElevatorNotice(robotCode, jsonObjectData);
+                    //收到消息后立即反馈给mission
+                    elevatorNoticeService.sendElevatorNoticeToX86(elevatorNotice, TopicConstants.ERROR_CODE_SUCCESS, null, null);
+                    elevatorNoticeService.sendElevatorNoticeToWebSocket(elevatorNotice);
                 }
             }
         } catch (Exception e) {
@@ -203,22 +207,10 @@ public class ConsumerCommon {
         }
     }
 
-    /**
-     * 电梯pad消息通知
-     *
-     * @param robotCode
-     * @param jsonObjectData
-     */
-    private void sendElevatorNotice(String robotCode, JSONObject jsonObjectData) {
-        logger.info("电梯pad消息通知,jsonObjectData=" + jsonObjectData);
+    private ElevatorNotice parseToElevatorNotice(String robotCode, JSONObject jsonObjectData) {
         JsonElevatorNotice jsonElevatorNotice = JSON.parseObject(jsonObjectData.getString(TopicConstants.DATA), JsonElevatorNotice.class);
         String uuid = jsonObjectData.getString(TopicConstants.UUID);
         //将消息存入数据库
-        ElevatorNotice elevatorNotice = parseToElevatorNotice(robotCode, jsonElevatorNotice, uuid);
-        elevatorNoticeService.sendElevatorNoticeToWebSocket(elevatorNotice);
-    }
-
-    private ElevatorNotice parseToElevatorNotice(String robotCode, JsonElevatorNotice jsonElevatorNotice, String uuid) {
         ElevatorNotice elevatorNotice = new ElevatorNotice();
         elevatorNotice.init();
         elevatorNotice.setRobotCode(robotCode);
