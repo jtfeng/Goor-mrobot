@@ -23,6 +23,7 @@ public class ScheduledHandle {
         this.executeTwentyThreeAtNightPerDay();
         this.sendRobotInfo();
         this.x86MissionRosHealthCheckScheduled();
+        this.writeRosParamGoorVersion();
     }
 
 
@@ -174,4 +175,21 @@ public class ScheduledHandle {
         }, initDelay, oneDay, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * 定时任务接口，往参数服务器写版本号
+     */
+    public void writeRosParamGoorVersion() {
+        scheduledExecutor.scheduleWithFixedDelay(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    ScheduledHandleService service = new ScheduledHandleServiceImp();
+                    service.writeRosParamGoorVersion();
+                    logger.info("schedule writeRosParamGoorVersion");
+                } catch (Exception e) {
+                    logger.error("schedule writeRosParamGoorVersion exception", e);
+                }
+            }
+        }, 30, 120, TimeUnit.SECONDS);
+    }
 }

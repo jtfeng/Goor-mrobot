@@ -7,6 +7,7 @@ import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.base.PubX86HeartBeat;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.constant.VersionConstants;
 import cn.mrobot.bean.enums.MessageStatusType;
 import cn.mrobot.bean.enums.MessageType;
 import cn.mrobot.bean.slam.SlamBody;
@@ -21,6 +22,7 @@ import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
+import cn.muye.base.service.TestService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
 import cn.muye.publisher.AppSubService;
@@ -28,10 +30,14 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Topic;
+import edu.wpi.rail.jrosbridge.callback.ServiceCallback;
 import edu.wpi.rail.jrosbridge.messages.Message;
+import edu.wpi.rail.jrosbridge.services.ServiceRequest;
+import edu.wpi.rail.jrosbridge.services.ServiceResponse;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -476,5 +482,51 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         robot.setStoreId(robotInfoConfig.getRobotStoreId());
         robot.setTypeId(robotInfoConfig.getRobotTypeId());
         return robot;
+    }
+
+    @Override
+    public void writeRosParamGoorVersion() throws Exception {
+        logger.info("################写入参数服务器agent版本的定时任务");
+        ros = applicationContext.getBean(Ros.class);
+        if(ros == null) {
+            logger.info("还未连上ros");
+            return;
+        }
+        TestService getService = new TestService(this.ros, "/rosapi/get_param", "rosapi/GetParam");
+        TestService setService = new TestService(this.ros, "/rosapi/set_param", "rosapi/SetParam");
+        TestService deleteService = new TestService(this.ros, "/rosapi/delete_param", "rosapi/DeleteParam");
+        ServiceRequest setRequest = new ServiceRequest("{\"name\": \"" + VersionConstants.VERSION_NOAH_GOOR_KEY + "\", \"value\": \"" + VersionConstants.VERSION_NOAH_GOOR + "\"}");
+        ServiceRequest getRequest = new ServiceRequest("{\"name\": \"" + VersionConstants.VERSION_NOAH_GOOR_KEY + "\"}");
+        final String[] versionNow = {null};
+        getService.callService(getRequest, new ServiceCallback() {
+            @Override
+            public void handleServiceResponse(ServiceResponse response) {
+                versionNow[0] = response.toString();
+                logger.info("getServicegetServicegetServicegetService当前agent版本参数为 ==========: " + versionNow[0]);
+            }
+        });
+
+        if(VersionConstants.VERSION_NOAH_GOOR.equals(versionNow[0])) {
+            logger.info("检测当前agent版本参数与agent实际版本一致。");
+            return;
+        }
+
+        logger.info("检测当前agent版本参数与agent实际版本不一致，开始写入参数服务器。");
+
+        deleteService.callService(getRequest, new ServiceCallback() {
+            @Override
+            public void handleServiceResponse(ServiceResponse response) {
+                logger.info("deleteServicedeleteServicedeleteService ==========: " + response.toString());
+            }
+        });
+        setService.callService(setRequest, new ServiceCallback() {
+            @Override
+            public void handleServiceResponse(ServiceResponse response) {
+                logger.info("setServicesetServicesetServicesetService ==========: " + response.toString());
+                CacheInfoManager.setUUIDHandledCache("setRosParam");
+            }
+        });
+
+        Thread.sleep(3000L);
     }
 }

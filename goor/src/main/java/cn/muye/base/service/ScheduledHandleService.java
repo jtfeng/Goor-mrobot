@@ -42,4 +42,10 @@ public interface ScheduledHandleService {
      * @throws Exception
      */
     void robotOnlineStateQuery(String uuid) throws Exception;
+
+    /**
+     * 定时任务接口，往参数服务器写一次版本号
+     * @throws Exception
+     */
+    void writeRosParamGoorVersion() throws Exception;
 }

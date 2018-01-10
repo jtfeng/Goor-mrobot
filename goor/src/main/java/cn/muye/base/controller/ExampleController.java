@@ -2,7 +2,9 @@ package cn.muye.base.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.constant.VersionConstants;
 import cn.muye.base.bean.TopicHandleInfo;
 import cn.muye.base.service.FileUploadService;
 import cn.muye.publisher.AppSubService;
@@ -359,5 +361,17 @@ public class ExampleController {
         jsonObject.put(TopicConstants.DATA, JSON.toJSONString(dataObject));
         appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
         return AjaxResult.success();
+    }
+
+
+    /**
+     * 获取agent版本号
+     *
+     * @return
+     */
+    @RequestMapping(value = "getAgentV", method = RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult getGoorVersion() {
+        return AjaxResult.success(VersionConstants.VERSION_NOAH_GOOR);
     }
 }
