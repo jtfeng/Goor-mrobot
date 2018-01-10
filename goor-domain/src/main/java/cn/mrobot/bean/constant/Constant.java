@@ -41,11 +41,6 @@ public class Constant {
     public final static Integer PATH_TYPE_X86 = 1;  //工控路径
     public final static Integer PATH_TYPE_RESTRICTED = 2;  //受管路径
 
-    //版本信息
-    public final static String VERSION_NOAH_GOOR_SERVER_KEY = "goorServerVersion";//服务端：NOAH_GoorServer_Ver0.0.0.1012_test
-    public final static String VERSION_NOAH_GOOR_SERVER = "NOAH_GoorServer_Ver0.0.0.1013_test";//服务端：NOAH_GoorServer_Ver0.0.0.1012_test
-    public final static String VERSION_NOAH_GOOR = "NOAH_Goor_Ver0.0.0.1013_test";//agent端：NOAH_Goor_Ver0.0.0.1012_test
-
     //X86PathType
     public final static Integer X86_PATH_TYPE_STRICT_DIRECTION = 0; //0 表示终点保持原样工控路径
     public final static Integer X86_PATH_TYPE_NO_DIRECTION = 10;  //10 代表终点无朝向要求工控路径
