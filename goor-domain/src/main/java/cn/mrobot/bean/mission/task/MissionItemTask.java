@@ -52,7 +52,7 @@ public class MissionItemTask extends BaseBean {
      * 是否可忽略执行状态回执
      */
     @Transient
-    private boolean ignorable;
+    private boolean ignorable = false;
 
     public Long getSceneId() {
         return sceneId;

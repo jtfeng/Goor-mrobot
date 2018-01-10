@@ -1632,6 +1632,28 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     }
 
     /**
+     * 获取语音任务,是否可忽略
+     * @param mp
+     * @param fileName
+     * @return
+     */
+    private MissionTask getMp3VoiceTaskIgnorable(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            String fileName,
+            Boolean ignorable) {
+        MissionTask missionTask = getCommonMissionTask(order, parentName, "语音任务");
+
+        List<MissionItemTask> missionItemTasks = new ArrayList<>();
+        missionItemTasks.add(getMp3VoiceItemTaskIgnorable(order, mp, parentName, fileName, ignorable));
+
+        missionTask.setMissionItemTasks(missionItemTasks);
+
+        return missionTask;
+    }
+
+    /**
      * 获取语音ITEM任务
      * @param mp
      * @param fileName
@@ -1661,6 +1683,42 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }.getType()));
         itemTask.setState(MissionStateInit);
         itemTask.setFeatureValue(FeatureValue_mp3);
+
+        return itemTask;
+    }
+
+    /**
+     * 获取语音ITEM任务,是否可忽略
+     * @param mp
+     * @param fileName
+     * @return
+     */
+    private MissionItemTask getMp3VoiceItemTaskIgnorable(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            String fileName,
+            Boolean ignorable) {
+        MissionItemTask itemTask = getMp3VoiceItemTask(order, mp, parentName, fileName);
+        itemTask.setIgnorable(ignorable);
+
+        return itemTask;
+    }
+
+    /**
+     * 获取列表语音ITEM任务，是否可忽略
+     * @param mp
+     * @param fileNames
+     * @return
+     */
+    private MissionItemTask getListMp3VoiceItemTaskIgnorable(
+            Order order,
+            MapPoint mp,
+            String parentName,
+            List<String> fileNames,
+            Boolean ignorable) {
+        MissionItemTask itemTask = getListMp3VoiceItemTask(order, mp, parentName, fileNames);
+        itemTask.setIgnorable(ignorable);
 
         return itemTask;
     }
@@ -3266,6 +3324,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             roadPathLockAtts);
                 }
             }
+
+            //云端加在所有任务后，一个独立的语音任务：任务已完成。
+            missionListTask.getMissionTasks().add(getMp3VoiceTaskIgnorable(order, null, "最终结束语音-", MP3_TASK_OVER, false));
         }
     }
 
@@ -3760,6 +3821,23 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 break;
                         }
                     }
+
+                    //加入一个开门语音
+                    logger.info("+_!!!!!!!!!!!!!!!!!!!开门语音missionItemConcurrentable!!!!!!!!!!!!" + missionItemConcurrentable);
+                    //如果串行
+                    if (!missionItemConcurrentable){
+                        MissionTask mp3loadTask = getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_OPEN_DOOR,false);
+                        missionListTask.getMissionTasks().add(mp3loadTask);
+                    }
+                    //如果可并行，可忽略的
+                    else {
+                        //并行执行语音任务
+                        MissionItemTask temp = getMp3VoiceItemTaskIgnorable(order, mp, parentName, MP3_OPEN_DOOR,true);
+                        if (temp != null){
+                            doorTask.getMissionItemTasks().add(temp);
+                        }
+                    }
+
                     missionListTask.getMissionTasks().add(doorTask);
 
                     break;
@@ -4229,7 +4307,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("+_!!!!!!!!!!!!!!!!!!!missionItemConcurrentable!!!!!!!!!!!!" + missionItemConcurrentable);
         if (!missionItemConcurrentable){
-            MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
+            MissionTask mp3loadTask = getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_TAKE_CABINET,false);
             if (isSetOrderDetailMP){
                 mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }
@@ -4244,19 +4322,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         if (missionItemConcurrentable){
             //并行执行语音任务
-            MissionItemTask temp = getMp3VoiceItemTask(order, mp, parentName, MP3_TAKE_CABINET);
+            MissionItemTask temp = getMp3VoiceItemTaskIgnorable(order, mp, parentName, MP3_TAKE_CABINET,true);
             if (temp != null){
-                temp.setIgnorable(true);
                 finalUnloadTask.getMissionItemTasks().add(temp);
             }
         }
 
         missionListTask.getMissionTasks().add(finalUnloadTask);
 
-        //语音任务，感谢使用，我要回去充电了？
-        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
+        //语音任务，谢谢使用，祝您工作愉快。
+        MissionTask voiceTask = getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_APPRECIATION,false);
         missionListTask.getMissionTasks().add(voiceTask);
-
     }
 
 
@@ -4289,7 +4365,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionListTask.getMissionTasks().add(sigleNavTask);
 
         if (!missionItemConcurrentable){
-            MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_CABINET);
+            MissionTask mp3loadTask = getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_CABINET,false);
             if (isSetOrderDetailMP){
                 mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }
@@ -4306,9 +4382,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
             if (missionItemConcurrentable){
                 //并行执行语音任务
-                MissionItemTask temp = getMp3VoiceItemTask(order, mp, parentName, MP3_CABINET);
+                MissionItemTask temp = getMp3VoiceItemTaskIgnorable(order, mp, parentName, MP3_CABINET,true);
                 if (temp != null){
-                    temp.setIgnorable(true);
                     loadNoShelfTask.getMissionItemTasks().add(temp);
                 }
             }
@@ -4322,38 +4397,15 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
             if (missionItemConcurrentable){
                 //并行执行语音任务
-                MissionItemTask temp = getMp3VoiceItemTask(order, mp, parentName, MP3_CABINET);
+                MissionItemTask temp = getMp3VoiceItemTaskIgnorable(order, mp, parentName, MP3_CABINET,true);
                 if (temp != null){
-                    temp.setIgnorable(true);
                     loadTask.getMissionItemTasks().add(temp);
                 }
             }
         }
 
-        //装载完毕语音任务
-//        MissionTask mp3loadFinishTask = getMp3VoiceTask(order, mp, parentName, MP3_LOAD_FINISH);
-//        if (isSetOrderDetailMP){
-//            mp3loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-//        }
-//        missionListTask.getMissionTasks().add(mp3loadFinishTask);
-
-        //并行执行装载完毕语音任务。这是一个独立的并行语音任务。不与导航任务同时执行。
-        MissionTask loadFinishTask = getCommonMissionTask(order , parentName, "语音任务");
-        if (isSetOrderDetailMP){
-            loadFinishTask.setOrderDetailMission(mPointAtts.orderDetailMP);
-        }
-        MissionItemTask mp3loadFinishTask = getMp3VoiceItemTask(order, mp, parentName, MP3_LOAD_FINISH);
-        //独立的任务，必须要设置成不可忽略才能执行
-        mp3loadFinishTask.setIgnorable(false);
-        List<MissionItemTask> missionItemTasks = new ArrayList<>();
-        missionItemTasks.add(mp3loadFinishTask);
-        loadFinishTask.setMissionItemTasks(missionItemTasks);
-        missionListTask.getMissionTasks().add(loadFinishTask);
-
-        //语音任务，我要出发了？
-//        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
-//        missionListTask.getMissionTasks().add(voiceTask);
-
+        //收到任务，我要出发了。并行执行装载完毕语音任务。这是一个独立的并行语音任务。不与导航任务同时执行。独立的任务，必须要设置成不可忽略才能执行
+        missionListTask.getMissionTasks().add(getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_RECEIVE_TASK, false));
     }
 
     /**
@@ -4395,17 +4447,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        missionListTask.getMissionTasks().add(waitingTask);
 
         if (!missionItemConcurrentable){
-            MissionTask mp3loadTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_CABINET);
+            MissionTask mp3loadTask = getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_TAKE_CABINET,false);
             if (isSetOrderDetailMP){
                 mp3loadTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }
             missionListTask.getMissionTasks().add(mp3loadTask);
 
-            MissionTask mp3SignTask = getMp3VoiceTask(order, mp, parentName, MP3_TAKE_MEDICINE_SIGN);
+            /*MissionTask mp3SignTask = getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_TAKE_MEDICINE_SIGN,false);
             if (isSetOrderDetailMP){
                 mp3SignTask.setOrderDetailMission(mPointAtts.orderDetailMP);
             }
-            missionListTask.getMissionTasks().add(mp3SignTask);
+            missionListTask.getMissionTasks().add(mp3SignTask);*/
         }
 
         //卸货任务，取代等待任务
@@ -4418,10 +4470,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             //并行执行语音任务
             ArrayList<String> filenames = new ArrayList<>();
             filenames.add(MP3_TAKE_CABINET);
-            filenames.add(MP3_TAKE_MEDICINE_SIGN);
-            MissionItemTask temp = getListMp3VoiceItemTask(order, mp, parentName, filenames);
+//            filenames.add(MP3_TAKE_MEDICINE_SIGN);
+            MissionItemTask temp = getListMp3VoiceItemTaskIgnorable(order, mp, parentName, filenames, true);
             if (temp != null){
-                temp.setIgnorable(true);
                 unloadTask.getMissionItemTasks().add(temp);
             }
         }
@@ -4429,9 +4480,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         missionListTask.getMissionTasks().add(unloadTask);
 
-        //语音任务，感谢使用，我要出发了，再见？
-//        MissionTask voiceTask = getMp3VoiceTask(order, mp, parentName, MP3_DEFAULT);
-//        missionListTask.getMissionTasks().add(voiceTask);
+        //语音任务，谢谢使用，祝您工作愉快。
+        MissionTask voiceTask = getMp3VoiceTaskIgnorable(order, mp, parentName, MP3_APPRECIATION, false);
+        missionListTask.getMissionTasks().add(voiceTask);
     }
 
 
@@ -4624,11 +4675,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     //音频定义
     public static final String MP3_DEFAULT = "default.mp3";//默认语音
     public static final String MP3_TAKE_MEDICINE = "arrive_take_medicine.mp3";//请您取走药品
-    public static final String MP3_CABINET = "arrive_place_medicine_cabinet.mp3";//请您放置药柜
-    public static final String MP3_TAKE_CABINET = "arrive_take_medicine_cabinet.mp3";//请您取走药柜
+//    public static final String MP3_CABINET = "arrive_place_medicine_cabinet.mp3";//请您放置药柜
+    public static final String MP3_CABINET = "arrive_place_goods.mp3";//我已到达，请您放置物品
+//    public static final String MP3_TAKE_CABINET = "arrive_take_medicine_cabinet.mp3";//请您取走药柜
+    public static final String MP3_TAKE_CABINET = "arrive_take_away_goods.mp3";//我已送达，请您取走物品
     public static final String MP3_TAKE_MEDICINE_SIGN = "take_medicine_sign.mp3";//请确认取走药品后，完成签收
     public static final String MP3_CHARGE = "charge.mp3";//充电语音
     public static final String MP3_LOAD_FINISH = "load_finish.mp3";//装货完毕语音
+    public static final String MP3_RECEIVE_TASK = "receive_task_start.mp3";//收到任务，我要出发了
+    public static final String MP3_OPEN_DOOR = "open_door.mp3";//开门，请注意
+    public static final String MP3_APPRECIATION = "appreciation.mp3";//谢谢使用，祝您工作愉快
+    public static final String MP3_TASK_OVER = "task_over.mp3";//任务已完成
 
     //Mission State
     public static final String MissionStateFinished = "finished";//已经完成

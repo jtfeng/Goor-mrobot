@@ -45,6 +45,7 @@ public class MissionTask extends BaseBean {
     private List<MissionItemTask> missionItemTasks;
     /**
      * 是否是order detail对应的任务，1:是; 0:不是
+     * 现在存储的是对应orderDetailId
      */
     private String orderDetailMission;
 
