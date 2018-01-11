@@ -4,15 +4,19 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.erp.bindmac.StationMacPasswordXREF;
+import cn.mrobot.utils.AddressUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.service.StationService;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -21,6 +25,8 @@ import java.util.List;
  */
 @RestController
 public class StationMacPasswordXREFController {
+
+    private static final Logger logger = LoggerFactory.getLogger(StationMacPasswordXREFController.class);
 
     @Autowired
     private StationMacPasswordXREFService stationMacPasswordXREFService;
@@ -35,67 +41,69 @@ public class StationMacPasswordXREFController {
      * @return
      */
     @RequestMapping(value = "services/operation/mac/bind", method = RequestMethod.POST)
-    public AjaxResult save(@RequestBody StationMacPasswordXREF stationMacPasswordXREF) {
-        //如果绑定关系为无菌器械室，则查询出无菌器械室站点，关联信息，因为设置无菌器械室站点时没有站选择界面
-        if (StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM.getCode() == stationMacPasswordXREF.getType()){
+    public AjaxResult save(@RequestBody StationMacPasswordXREF stationMacPasswordXREF, HttpServletRequest request) {
+        //如果绑定关系为无菌器械室，则查询出无菌器械室站点，取出第一个进行关联，因为设置无菌器械室站点时没有站选择界面
+        if (StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM.getCode() == stationMacPasswordXREF.getType()) {
             List<Station> stationList = stationService.listStationsByStationTypeCode(StationType.ASEPTIC_APPARATUS_ROOM.getCaption());
-            if (null == stationList || stationList.size() <= 0){
+            if (null == stationList || stationList.size() <= 0) {
                 return AjaxResult.failed("系统未配置无菌器械室站点");
             }
             stationMacPasswordXREF.setStation(stationList.get(0));
         }
-        return saveOrUpdate(stationMacPasswordXREF);
+        return saveOrUpdate(stationMacPasswordXREF, request);
     }
 
-    /**
-     * 更新，根据mac更新
-     *
-     * @param stationMacPasswordXREF
-     * @return
-     */
-    @RequestMapping(value = "services/operation/mac/bind", method = RequestMethod.PUT)
-    public AjaxResult update(@RequestBody StationMacPasswordXREF stationMacPasswordXREF) {
-        return saveOrUpdate(stationMacPasswordXREF);
-    }
-
-    public AjaxResult saveOrUpdate(StationMacPasswordXREF operaXREF) {
-        if (StringUtil.isBlank(operaXREF.getMac()) ||
-                operaXREF.getStation().getId() == null ||
-                operaXREF.getType() == 0) {
-            return AjaxResult.failed("站Id，电脑MAC不能为空");
+    public AjaxResult saveOrUpdate(StationMacPasswordXREF operaXREF, HttpServletRequest request) {
+        if (operaXREF.getStation().getId() == null ||operaXREF.getType() == 0) {
+            return AjaxResult.failed("站Id不能为空");
         }
-        //如果是无菌器械室绑定，则需要移除原无菌器械室的绑定关系
-        if (operaXREF.getType() == StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM.getCode()) {
-            stationMacPasswordXREFService.deleteByType(StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM);
+        try {
+            String mac = getClientMAC(request);
+            if (StringUtil.isBlank(mac)) {
+                return AjaxResult.failed("未获取到客户端MAC不能为空");
+            }
+            operaXREF.setMac(mac);
+            //如果是除原无无菌器械室绑定，则需要移菌器械室的绑定关系
+            if (operaXREF.getType() == StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM.getCode()) {
+                stationMacPasswordXREFService.deleteByType(StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM);
+            }
+            StationMacPasswordXREF operaXREFDB = stationMacPasswordXREFService.findByMac(operaXREF.getMac());
+            operaXREF.init();
+            if (operaXREFDB != null) {
+                //更新该mac绑定的手术室
+                stationMacPasswordXREFService.updateByMac(operaXREF);
+            } else {
+                //新增mac和手术室的绑定关系
+                stationMacPasswordXREFService.saveStationMacPasswordXREF(operaXREF);
+            }
+            return AjaxResult.success(operaXREF, "绑定成功");
+        } catch (Exception e) {
+            logger.error("保存或更新绑定关系出错", e);
         }
-        StationMacPasswordXREF operaXREFDB = stationMacPasswordXREFService.findByMac(operaXREF.getMac());
-        operaXREF.init();
-        if (operaXREFDB != null) {
-            //更新该mac绑定的手术室
-            stationMacPasswordXREFService.updateByMac(operaXREF);
-        } else {
-            //新增mac和手术室的绑定关系
-            stationMacPasswordXREFService.saveStationMacPasswordXREF(operaXREF);
-        }
-        return AjaxResult.success(operaXREF, "绑定成功");
+        return AjaxResult.failed("操作失败");
     }
 
     /**
      * 根据MAC查询
      *
-     * @param mac
      * @return
      */
-    @RequestMapping(value = "services/operation/mac/bind/query", method = RequestMethod.GET)
-    public AjaxResult query(@RequestParam("mac") String mac) {
-        if (StringUtil.isBlank(mac)) {
-            return AjaxResult.failed("平板MAC不能为空");
+    @RequestMapping(value = "services/operation/mac/bind", method = RequestMethod.GET)
+    public AjaxResult query(HttpServletRequest request) {
+        try {
+            String mac = getClientMAC(request);
+            if (StringUtil.isBlank(mac)) {
+                return AjaxResult.failed("未获取到客户端MAC不能为空");
+            }
+            StationMacPasswordXREF stationMacPasswordXREF = stationMacPasswordXREFService.findByMac(mac);
+            if (null == stationMacPasswordXREF) {
+                return AjaxResult.failed("未查询到绑定信息");
+            }
+            return AjaxResult.success(stationMacPasswordXREF, "查询成功");
+        } catch (Exception e) {
+            logger.error("根据MAC查询错误", e);
         }
-        StationMacPasswordXREF stationMacPasswordXREF = stationMacPasswordXREFService.findByMac(mac);
-        if (null == stationMacPasswordXREF) {
-            return AjaxResult.failed("未查询到绑定信息");
-        }
-        return AjaxResult.success(stationMacPasswordXREF, "查询成功");
+        return AjaxResult.failed("操作失败");
     }
 
     /**
@@ -116,5 +124,10 @@ public class StationMacPasswordXREFController {
         List<StationMacPasswordXREF> stationMacPasswordXREFList = stationMacPasswordXREFService.list(whereRequest);
         PageInfo<StationMacPasswordXREF> page = new PageInfo<StationMacPasswordXREF>(stationMacPasswordXREFList);
         return AjaxResult.success(page, "查询成功");
+    }
+
+    private String getClientMAC(HttpServletRequest request) throws Exception {
+        String ip = AddressUtils.getIp(request);
+        return AddressUtils.getMac(ip);
     }
 }
