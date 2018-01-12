@@ -24,4 +24,6 @@ public interface StationMacPasswordXREFService extends BaseService<StationMacPas
     void updateByMac(StationMacPasswordXREF stationMacPasswordXREF);
 
     int deleteByType(StationMacPasswordXREF.Type type);
+
+    StationMacPasswordXREF findXREFById(Long id);
 }

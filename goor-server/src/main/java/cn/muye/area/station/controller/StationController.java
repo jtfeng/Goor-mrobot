@@ -34,10 +34,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import tk.mybatis.mapper.entity.Example;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -179,12 +176,27 @@ public class StationController {
                 return AjaxResult.failed("该类型站点不存在。caption=" + caption);
             }
             List<Station> stationList = stationService.listStationsByStationTypeCode(caption);
+//            sortStationList(stationList);
             return AjaxResult.success(stationList, "查询成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("查询列表失败");
         }
     }
+
+//    /**
+//     * 根据站name中的数字进行排序
+//     * @param stationList
+//     */
+//    private void sortStationList(List<Station> stationList) {
+//        Collections.sort(stationList, new Comparator<Station>() {
+//            @Override
+//            public int compare(Station o1, Station o2) {
+//                //取出站name中的数字
+//                return o1.getAppliance().getId().compareTo(o2.getAppliance().getId());
+//            }
+//        });
+//    }
 
     /**
      * 新增或修改站

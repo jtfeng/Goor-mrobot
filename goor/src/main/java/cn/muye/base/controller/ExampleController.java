@@ -48,7 +48,7 @@ public class ExampleController {
 
     @RequestMapping(value = "testFile", method = RequestMethod.POST)
     @ResponseBody
-    public AjaxResult testFile(){
+    public AjaxResult testFile() {
         return fixFilePathService.handleFixFilePath("haha");
     }
 
@@ -190,7 +190,7 @@ public class ExampleController {
         Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.AGENT_SUB);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, "verify_emplyee_number");
-        jsonObject.put(TopicConstants.DATA, "{\"missionItemId\": " + missionItemId +", \"empNo\": "+ empNo +"}");
+        jsonObject.put(TopicConstants.DATA, "{\"missionItemId\": " + missionItemId + ", \"empNo\": " + empNo + "}");
         jsonObject.put(TopicConstants.UUID, "fldslfjlsajflsdjfljdslkfjlkdsjfl");
         jsonObject.put("msg", "");
         jsonObject.put("error_code", "");
@@ -210,12 +210,12 @@ public class ExampleController {
      */
     @RequestMapping(value = "testAlert", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult testAlert(@RequestParam(value = "robotCode",required = false) String robotCode, @RequestParam("uuId") String uuId, @RequestParam("sendTime") Long sendTime, @RequestParam("alertCode") Integer alertCode, @RequestParam("msg") String msg, @RequestParam("missionItemId") Long missionItemId) {
+    public AjaxResult testAlert(@RequestParam(value = "robotCode", required = false) String robotCode, @RequestParam("uuId") String uuId, @RequestParam("sendTime") Long sendTime, @RequestParam("alertCode") Integer alertCode, @RequestParam("msg") String msg, @RequestParam("missionItemId") Long missionItemId) {
         //        //TODO 模拟应用发布查询云端站数据接口
         Topic echo = TopicHandleInfo.getTopic(ros, TopicConstants.X86_MISSION_ALERT);
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, "mission_alert");
-        jsonObject.put(TopicConstants.DATA, "   {\"alert_time\":"+ sendTime + ", \"alert_code\":"+ alertCode+ ", \"msg\":\""+ msg + "\", \"mission_item_id\":"+ missionItemId +"}" );
+        jsonObject.put(TopicConstants.DATA, "   {\"alert_time\":" + sendTime + ", \"alert_code\":" + alertCode + ", \"msg\":\"" + msg + "\", \"mission_item_id\":" + missionItemId + "}");
         jsonObject.put(TopicConstants.UUID, uuId);
         JSONObject messageObject = new JSONObject();
         messageObject.put(TopicConstants.DATA, JSON.toJSONString(jsonObject));
@@ -229,6 +229,7 @@ public class ExampleController {
 
     /**
      * 发送获取工控固定路径的topic
+     *
      * @return
      * @throws Exception
      */
@@ -329,7 +330,7 @@ public class ExampleController {
      */
     @RequestMapping(value = "testRobotOnline", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult testRobotOnline(@RequestParam("uuid") String uuid,@RequestParam("request") int request) throws Exception {
+    public AjaxResult testRobotOnline(@RequestParam("uuid") String uuid, @RequestParam("request") int request) throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ROBOT_ONLINE_QUERY);
         jsonObject.put(TopicConstants.UUID, uuid);
@@ -348,12 +349,13 @@ public class ExampleController {
      */
     @RequestMapping(value = "testElevatorNotice", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult testElevatorNotice(@RequestParam("elevatorId") int elevatorId,
+    public AjaxResult testElevatorNotice(@RequestParam("uuid") String uuid,
+                                         @RequestParam("elevatorId") int elevatorId,
                                          @RequestParam("callFloor") int callFloor,
                                          @RequestParam("targetFloor") int targetFloor) throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ELEVATOR_NOTICE);
-        jsonObject.put(TopicConstants.UUID, UUID.randomUUID().toString());
+        jsonObject.put(TopicConstants.UUID, uuid);
         JSONObject dataObject = new JSONObject();
         dataObject.put("callFloor", callFloor);
         dataObject.put("targetFloor", targetFloor);

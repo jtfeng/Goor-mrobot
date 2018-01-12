@@ -201,17 +201,21 @@ public class X86MissionStateResponseServiceImpl
                                         missionItemTask.setState(item.getState());
                                     }
                                     missionItemTaskService.updateSelective(missionItemTask);
-                                    //如果完成的是电梯任务，则查询上一条是不是电梯消息通知任务，如果是，将该消息置为已处理
-                                    if (Constant.ELEVATOR.equals(missionItemTask.getName()) && JsonMissionStateResponse.state_finished.equals(jsonMissionStateResponse.getState())){
-                                        logger.info("根据完成的是电梯任务，将前置的电梯消息通知改为已处理");
-                                        checkAndHandleElevatorNotice(missionItemTask);
-                                    }
+                                    validateIsElevatorTask(missionItemTask, item.getState());
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void validateIsElevatorTask(MissionItemTask missionItemTask, String state){
+        //如果完成的是电梯任务，则查询上一条是不是电梯消息通知任务，如果是，将该消息置为已处理
+        if (Constant.ELEVATOR.equals(missionItemTask.getName()) && JsonMissionStateResponse.state_finished.equals(state)){
+            logger.info("根据完成的是电梯任务，将前置的电梯消息通知改为已处理");
+            checkAndHandleElevatorNotice(missionItemTask);
         }
     }
 

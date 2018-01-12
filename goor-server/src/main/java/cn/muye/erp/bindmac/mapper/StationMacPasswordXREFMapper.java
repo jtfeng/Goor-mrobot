@@ -25,4 +25,6 @@ public interface StationMacPasswordXREFMapper extends MyMapper<StationMacPasswor
     List<StationMacPasswordXREF> listAll();
 
     List<StationMacPasswordXREF> findByType(int code);
+
+    StationMacPasswordXREF findXREFById(@Param("id") Long id);
 }

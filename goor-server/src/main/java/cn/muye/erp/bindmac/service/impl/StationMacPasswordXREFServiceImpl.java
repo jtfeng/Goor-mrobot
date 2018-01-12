@@ -71,4 +71,9 @@ public class StationMacPasswordXREFServiceImpl extends BaseServiceImpl<StationMa
         example.createCriteria().andCondition("TYPE=" + type.getCode() + "");
         return mapper.deleteByExample(example);
     }
+
+    @Override
+    public StationMacPasswordXREF findXREFById(Long id) {
+        return mapper.findXREFById(id);
+    }
 }

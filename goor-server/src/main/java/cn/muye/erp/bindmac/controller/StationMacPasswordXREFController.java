@@ -76,7 +76,8 @@ public class StationMacPasswordXREFController {
                 //新增mac和手术室的绑定关系
                 stationMacPasswordXREFService.saveStationMacPasswordXREF(operaXREF);
             }
-            return AjaxResult.success(operaXREF, "绑定成功");
+            StationMacPasswordXREF returnResult = stationMacPasswordXREFService.findXREFById(operaXREF.getId());
+            return AjaxResult.success(returnResult, "绑定成功");
         } catch (Exception e) {
             logger.error("保存或更新绑定关系出错", e);
         }
