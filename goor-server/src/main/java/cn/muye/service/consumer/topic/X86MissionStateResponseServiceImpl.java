@@ -1,6 +1,8 @@
 package cn.muye.service.consumer.topic;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.assets.elevator.ElevatorNotice;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.log.mission.JsonMissionStateResponse;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
@@ -8,6 +10,7 @@ import cn.mrobot.bean.mission.task.MissionTask;
 import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
+import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.mission.service.MissionItemTaskService;
@@ -50,6 +53,9 @@ public class X86MissionStateResponseServiceImpl
 
     @Autowired
     RobotService robotService;
+
+    @Autowired
+    private ElevatorNoticeService elevatorNoticeService;
 
     @Override
     public AjaxResult handleX86MissionStateResponse(MessageInfo messageInfo) {
@@ -195,12 +201,32 @@ public class X86MissionStateResponseServiceImpl
                                         missionItemTask.setState(item.getState());
                                     }
                                     missionItemTaskService.updateSelective(missionItemTask);
+                                    //如果完成的是电梯任务，则查询上一条是不是电梯消息通知任务，如果是，将该消息置为已处理
+                                    if (Constant.ELEVATOR.equals(missionItemTask.getName())){
+                                        checkAndHandleElevatorNotice(missionItemTask);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void checkAndHandleElevatorNotice(MissionItemTask missionItemTask) {
+        //根据MissionListId查询当前总任务列表
+        List<MissionItemTask> missionItemTaskList = missionItemTaskService.findByListId(missionItemTask.getMissionListId());
+        //获取电梯任务在list中的index
+        int missionItemTaskIndex = missionItemTaskList.indexOf(missionItemTask);
+        //获取电梯任务的上一个任务，判断是不是电梯语音任务，如果是，将该消息置为已处理
+
+        if (missionItemTaskIndex < 0){
+            return;
+        }
+        MissionItemTask elevatorNoticeMissionItemTask = missionItemTaskList.get(missionItemTaskIndex-1);
+        if (Constant.ELEVATOR_NOTICE.equals(elevatorNoticeMissionItemTask.getName())){
+            elevatorNoticeService.updateStateByMissionItemData(elevatorNoticeMissionItemTask.getData(), ElevatorNotice.State.RECEIVED.getCode());
         }
     }
 

@@ -1,8 +1,11 @@
 package cn.muye.assets.elevator.service;
 
 import cn.mrobot.bean.assets.elevator.ElevatorNotice;
+import cn.mrobot.bean.mission.task.JsonElevatorNotice;
 import cn.mrobot.bean.websocket.WSMessage;
 import cn.muye.base.service.BaseService;
+
+import java.util.List;
 
 /**
  *
@@ -17,4 +20,11 @@ public interface ElevatorNoticeService extends BaseService<ElevatorNotice> {
 
     void sendElevatorNoticeCache();
 
+    ElevatorNotice findByUUIDAndToStation(String uuid, Long toStationId);
+
+    void updateStateByMissionItemData(String data, int state);
+
+    ElevatorNotice selectByData(JsonElevatorNotice jsonElevatorNotice, int state);
+
+    List<ElevatorNotice> findByElevatorId(Long elevatorId, int state);
 }

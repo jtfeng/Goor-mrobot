@@ -3,8 +3,8 @@ package cn.mrobot.bean.mission.task;
 import cn.mrobot.bean.base.BaseBean;
 
 import javax.persistence.Table;
-import java.util.Date;
 import javax.persistence.Transient;
+import java.util.Date;
 
 /**
  * Created by abel on 17-7-8.
@@ -140,5 +140,22 @@ public class MissionItemTask extends BaseBean {
 
     public void setIgnorable(boolean ignorable) {
         this.ignorable = ignorable;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MissionItemTask missionItemTask = (MissionItemTask) o;
+
+        if (id== null) return false;
+        return id != null ? id.equals(missionItemTask.id) : missionItemTask.id == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

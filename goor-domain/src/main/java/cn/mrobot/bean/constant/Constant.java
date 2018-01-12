@@ -115,6 +115,8 @@ public class Constant {
     public final static String PATH = "path";//下单优先执行的导航类型-固定路径导航
     public final static String STATION = "station";//站点别名必须包含的字段
     public final static String ELEVATOR_WAIT = "elevator_wait";//电梯等待点别名必须包含的字段
+    public final static String ELEVATOR = "elevator";//电梯PAD消息通知
+    public final static String ELEVATOR_NOTICE = "elevatorNotice";//电梯PAD消息通知
     public final static String DOOR_WAIT = "door_wait";//门等待点别名必须包含的字段
     public final static String LOAD = "load";//装货点别名必须包含的字段
     public final static String CHARGE = "charge";//充电点别名必须包含的字段

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class ExampleController {
@@ -347,13 +348,12 @@ public class ExampleController {
      */
     @RequestMapping(value = "testElevatorNotice", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult testElevatorNotice(@RequestParam("uuid") String uuid,
-                                         @RequestParam("elevatorId") int elevatorId,
+    public AjaxResult testElevatorNotice(@RequestParam("elevatorId") int elevatorId,
                                          @RequestParam("callFloor") int callFloor,
                                          @RequestParam("targetFloor") int targetFloor) throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ELEVATOR_NOTICE);
-        jsonObject.put(TopicConstants.UUID, uuid);
+        jsonObject.put(TopicConstants.UUID, UUID.randomUUID().toString());
         JSONObject dataObject = new JSONObject();
         dataObject.put("callFloor", callFloor);
         dataObject.put("targetFloor", targetFloor);

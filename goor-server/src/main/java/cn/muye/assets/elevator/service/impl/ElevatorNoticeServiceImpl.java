@@ -4,14 +4,15 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.elevator.ElevatorNotice;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.mission.task.JsonElevatorNotice;
 import cn.mrobot.bean.websocket.WSMessage;
 import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.station.service.ElevatorstationElevatorXREFService;
 import cn.muye.area.station.service.StationService;
+import cn.muye.assets.elevator.mapper.ElevatorNoticeMapper;
 import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.base.cache.CacheInfoManager;
-import cn.muye.base.consumer.ConsumerCommon;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.base.websoket.WebSocketSendMessage;
 import cn.muye.service.consumer.topic.BaseMessageService;
@@ -20,13 +21,9 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
-import javax.websocket.Session;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Jelynn
@@ -47,6 +44,9 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
 
     @Autowired
     private WebSocketSendMessage webSocketSendMessage;
+
+    @Autowired
+    private ElevatorNoticeMapper elevatorNoticeMapper;
 
     @Override
     public void sendElevatorNoticeToX86(ElevatorNotice elevatorNotice, int code, String deviceId, String message) {
@@ -91,7 +91,13 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
             return;
         }
         for (Station station : stationList) {
-            elevatorNotice.setToStationId(station.getId());
+            Long toStationId = station.getId();
+            //消息保存之前先根据UUID和toStationId过滤，如果数据库已经有该UUID的消息,则不存库
+            ElevatorNotice elevatorNoticeDB = findByUUIDAndToStation(elevatorNotice.getUuid(), toStationId);
+            if (null != elevatorNoticeDB) {
+                return;
+            }
+            elevatorNotice.setToStationId(toStationId);
             save(elevatorNotice);
             checkAndSendElevatorNotice(elevatorNotice);
         }
@@ -100,6 +106,8 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
     private boolean checkAndSendElevatorNotice(ElevatorNotice elevatorNotice) {
         logger.info("消息未接收，重新向电梯pad发送websocket消息，elevatorNotice=" + JSON.toJSONString(elevatorNotice));
         boolean sendSuccess = false;  //pad端是否收到消息
+        //根据电梯ID查询未处理的消息通知，将除当前消息之外的全置为已处理，因为同一个电梯同一时间只能过一个机器人，
+        handleOtherNotices(elevatorNotice);
         //添加缓存
         Long elevatorNoticeId = elevatorNotice.getId();
         CacheInfoManager.setElevatorNoticeCache(elevatorNoticeId);
@@ -113,6 +121,16 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
             sendWebSocketSendMessage(elevatorNotice);
         }
         return sendSuccess;
+    }
+
+    private void handleOtherNotices(ElevatorNotice elevatorNotice) {
+        List<ElevatorNotice> elevatorNoticeList = findByElevatorId(elevatorNotice.getElevatorId(), ElevatorNotice.State.INIT.getCode());
+        for (ElevatorNotice elevatorNoticeDB : elevatorNoticeList){
+            if (!elevatorNoticeDB.getId().equals(elevatorNotice.getId())){
+                elevatorNoticeDB.setState(ElevatorNotice.State.RECEIVED.getCode());
+                elevatorNoticeMapper.updateByPrimaryKeySelective(elevatorNoticeDB);
+            }
+        }
     }
 
     private void sendWebSocketSendMessage(ElevatorNotice elevatorNotice) {
@@ -136,5 +154,45 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
                 }
             }
         }
+    }
+
+    @Override
+    public ElevatorNotice findByUUIDAndToStation(String uuid, Long toStationId) {
+        Example example = new Example(ElevatorNotice.class);
+        example.createCriteria().andCondition("UUID='" + uuid + "'")
+                .andCondition("TO_STATION_ID=" + toStationId);
+        List<ElevatorNotice> elevatorNoticeList = elevatorNoticeMapper.selectByExample(example);
+        return null != elevatorNoticeList && elevatorNoticeList.size() > 0 ? elevatorNoticeList.get(0) : null;
+    }
+
+    @Override
+    public void updateStateByMissionItemData(String data, int state) {
+        JsonElevatorNotice jsonElevatorNotice = JSON.parseObject(data, JsonElevatorNotice.class);
+        //查询出未处理的电梯消息通知
+        ElevatorNotice elevatorNotice = selectByData(jsonElevatorNotice, ElevatorNotice.State.INIT.getCode());
+        if (null != elevatorNotice) {
+            elevatorNotice.setState(ElevatorNotice.State.RECEIVED.getCode());
+            elevatorNoticeMapper.updateByPrimaryKeySelective(elevatorNotice);
+        }
+    }
+
+    @Override
+    public ElevatorNotice selectByData(JsonElevatorNotice jsonElevatorNotice, int state) {
+        Example example = new Example(ElevatorNotice.class);
+        example.createCriteria().andCondition("TARGET_FLOOR=" + jsonElevatorNotice.getTargetFloor())
+                .andCondition("ELEVATOR_ID=" + jsonElevatorNotice.getElevatorId())
+                .andCondition("CALL_FLOOR=" + jsonElevatorNotice.getCallFloor())
+                .andCondition("STATE=" + state);
+        List<ElevatorNotice> elevatorNoticeList = elevatorNoticeMapper.selectByExample(example);
+        return null != elevatorNoticeList && elevatorNoticeList.size() > 0 ? elevatorNoticeList.get(0) : null;
+    }
+
+    @Override
+    public List<ElevatorNotice> findByElevatorId(Long elevatorId, int state) {
+        Example example = new Example(ElevatorNotice.class);
+        example.createCriteria().andCondition("ELEVATOR_ID=" + elevatorId)
+                .andCondition("STATE=" + state);
+        List<ElevatorNotice> elevatorNoticeList = elevatorNoticeMapper.selectByExample(example);
+        return elevatorNoticeList;
     }
 }
