@@ -21,9 +21,12 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Jelynn
@@ -47,6 +50,8 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
 
     @Autowired
     private ElevatorNoticeMapper elevatorNoticeMapper;
+
+    private ReentrantLock lock = new ReentrantLock();
 
     @Override
     public void sendElevatorNoticeToX86(ElevatorNotice elevatorNotice, int code, String deviceId, String message) {
@@ -81,6 +86,7 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
                 JSON.toJSONString(messageObject));
     }
 
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED, rollbackFor = Exception.class)
     @Override
     public void sendElevatorNoticeToWebSocket(ElevatorNotice elevatorNotice) {
         logger.info("向电梯pad发送websocket消息，elevatorNotice=" + JSON.toJSONString(elevatorNotice));
@@ -93,12 +99,17 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         for (Station station : stationList) {
             Long toStationId = station.getId();
             //消息保存之前先根据UUID和toStationId过滤，如果数据库已经有该UUID的消息,则不存库
-            ElevatorNotice elevatorNoticeDB = findByUUIDAndToStation(elevatorNotice.getUuid(), toStationId);
-            if (null != elevatorNoticeDB) {
-                return;
+            try{
+                lock.lock();
+                ElevatorNotice elevatorNoticeDB = findByUUIDAndToStation(elevatorNotice.getUuid(), toStationId);
+                if (null != elevatorNoticeDB) {
+                    return;
+                }
+                elevatorNotice.setToStationId(toStationId);
+                save(elevatorNotice);
+            }finally {
+                lock.unlock();
             }
-            elevatorNotice.setToStationId(toStationId);
-            save(elevatorNotice);
             checkAndSendElevatorNotice(elevatorNotice);
         }
     }
@@ -129,6 +140,8 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
             if (!elevatorNoticeDB.getId().equals(elevatorNotice.getId())){
                 elevatorNoticeDB.setState(ElevatorNotice.State.RECEIVED.getCode());
                 elevatorNoticeMapper.updateByPrimaryKeySelective(elevatorNoticeDB);
+                //从缓存中移除该条数据
+                CacheInfoManager.removeElevatorNoticeCache(elevatorNoticeDB.getId());
             }
         }
     }
