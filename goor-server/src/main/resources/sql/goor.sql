@@ -132,22 +132,9 @@ ALTER TABLE A_STATION ADD ROBOT_ACCESS int(1) DEFAULT 0 COMMENT '机器人是否
 -- ----------------------------
 -- Records of A_STATION
 -- ----------------------------
--- INSERT INTO `A_STATION` VALUES ('1', '二楼202病房', '', '1', '101', '100', '2017-07-05 14:08:14');
--- INSERT INTO `A_STATION` VALUES ('2', '四楼牙科a', '', '3', '100', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('4', '三楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('5', '二楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('6', '一楼牙科', '', '1', '100', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('7', '四楼污物发送处', '', '1', '100', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('8', '三楼洁物发送处', '', '1', '100', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('9', '二楼核磁共振室', '', '3', '100', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('13', '一楼心电图室', '', '1', '102', '100', '2017-06-23 19:23:24');
--- INSERT INTO `A_STATION` VALUES ('14', '四楼401病房a', null, '1', '102', '100', '2017-06-30 15:41:51');
--- INSERT INTO `A_STATION` VALUES ('15', '三楼301病房a', null, '1', '101', '100', '2017-07-01 18:09:56');
--- INSERT INTO `A_STATION` VALUES ('16', '二楼201病房', null, '1', '101', '100', '2017-07-05 14:08:14');
--- INSERT INTO `A_STATION` VALUES ('17', 'ceshi1', '', '1', '100', '100', '2017-07-06 16:10:49');
--- INSERT INTO `A_STATION` VALUES ('18', 'ceshi2', 'ceshi2备注', '2', '100', '100', '2017-07-06 16:22:36');
--- INSERT INTO `A_STATION` VALUES ('19', 'ceshi3', '', '1', '100', '100', '2017-07-06 16:26:03');
--- INSERT INTO `A_STATION` VALUES ('20', 'ceshi4', 'ss', '1', '100', '100', '2017-07-06 16:30:36');
+INSERT INTO `A_STATION` VALUES ('1', '默认站', '管理员用', null, null, null, null, '0', '1', 'default');
+
+
 
 -- ----------------------------
 -- Table structure for A_STATION_MAP_POINT_XREF
@@ -336,63 +323,8 @@ CREATE TABLE `AC_USER` (
 -- ----------------------------
 -- Records of AC_USER
 -- ----------------------------
-INSERT INTO `AC_USER` VALUES ('53', 'ray', '123456', '', null, '100', '1', '2017-06-27 10:59:28');
-INSERT INTO `AC_USER` VALUES ('54', 'test', '123456', '\0', '1234', '101', '1', '2017-06-27 10:59:31');
-INSERT INTO `AC_USER` VALUES ('55', 'test1', '123456', '\0', null, '101', null, null);
-INSERT INTO `AC_USER` VALUES ('56', 'test2', '123456', '', null, '100', null, '2017-06-27 17:14:57');
-INSERT INTO `AC_USER` VALUES ('57', 'test3', '123456', '', null, '100', null, '2017-06-27 17:14:59');
-INSERT INTO `AC_USER` VALUES ('58', 'test4', '123456', '', null, '100', null, '2017-06-27 17:15:00');
-INSERT INTO `AC_USER` VALUES ('59', 'test5', '123456', '', null, '100', null, '2017-06-27 17:15:00');
-INSERT INTO `AC_USER` VALUES ('60', 'test6', '123456', '', null, '100', null, '2017-06-27 17:15:00');
-INSERT INTO `AC_USER` VALUES ('61', 'test7', '123456', '', null, '100', null, '2017-06-27 17:15:01');
-INSERT INTO `AC_USER` VALUES ('62', 'test8', '123456', '', null, '100', null, '2017-06-27 17:15:01');
-INSERT INTO `AC_USER` VALUES ('63', 'test9', '123456', '', null, '100', null, '2017-06-27 17:15:01');
-INSERT INTO `AC_USER` VALUES ('64', 'test10', '123456', '', null, '100', null, '2017-06-27 17:15:01');
-INSERT INTO `AC_USER` VALUES ('65', 'test11', '123456', '', null, '100', null, '2017-06-27 17:15:01');
-INSERT INTO `AC_USER` VALUES ('66', 'test12', '123456', '', null, '100', null, '2017-06-27 17:15:02');
-INSERT INTO `AC_USER` VALUES ('67', 'test13', '123456', '', null, '100', null, '2017-06-27 17:15:02');
-INSERT INTO `AC_USER` VALUES ('68', 'test14', '123456', '', null, '100', null, '2017-06-27 17:15:02');
-INSERT INTO `AC_USER` VALUES ('69', 'test15', '123456', '', null, '100', null, '2017-06-27 17:15:02');
-INSERT INTO `AC_USER` VALUES ('70', 'test16', '123456', '', null, '100', null, '2017-06-27 17:15:02');
-INSERT INTO `AC_USER` VALUES ('71', 'test17', '123456', '', null, '100', null, '2017-06-27 17:15:02');
-INSERT INTO `AC_USER` VALUES ('72', 'test18', '123456', '', null, '100', null, '2017-06-27 17:15:03');
-INSERT INTO `AC_USER` VALUES ('73', 'test19', '123456', '', null, '100', null, '2017-06-27 17:15:03');
-INSERT INTO `AC_USER` VALUES ('74', 'test20', '123456', '', null, '100', null, '2017-06-27 17:15:03');
-INSERT INTO `AC_USER` VALUES ('75', 'test21', '123456', '', null, '100', null, '2017-06-27 17:15:03');
-INSERT INTO `AC_USER` VALUES ('76', 'test22', '123456', '', null, '100', null, '2017-06-27 17:15:03');
-INSERT INTO `AC_USER` VALUES ('77', 'test23', '123456', '', null, '100', null, '2017-06-27 17:15:03');
-INSERT INTO `AC_USER` VALUES ('78', 'test24', '123456', '', null, '100', null, '2017-06-27 17:15:04');
-INSERT INTO `AC_USER` VALUES ('79', 'test25', '123456', '', null, '100', null, '2017-06-27 18:03:17');
-INSERT INTO `AC_USER` VALUES ('80', 'test26', '123456', '', null, '100', null, '2017-06-27 18:03:34');
-INSERT INTO `AC_USER` VALUES ('81', 'test30', '123456', '', '4321', '102', null, '2017-06-28 11:49:45');
-INSERT INTO `AC_USER` VALUES ('82', 'test39', '123456', '', null, '100', null, '2017-06-28 17:02:30');
-INSERT INTO `AC_USER` VALUES ('86', 'ray123', '123456', '\0', null, '100', null, '2017-06-29 14:41:34');
-INSERT INTO `AC_USER` VALUES ('87', 'ray1234', '123456', '', null, '100', null, '2017-06-29 14:42:56');
-INSERT INTO `AC_USER` VALUES ('88', 'ray12345', '123456', '', null, '100', null, '2017-06-29 14:43:42');
-INSERT INTO `AC_USER` VALUES ('90', 'ray12', '123456', '', null, '100', null, '2017-06-29 14:48:04');
-INSERT INTO `AC_USER` VALUES ('92', 'ray2', '123456', '', null, '100', null, '2017-06-29 14:55:04');
-INSERT INTO `AC_USER` VALUES ('93', 'ray3', '123456', '', null, '100', '1', '2017-06-29 15:03:01');
-INSERT INTO `AC_USER` VALUES ('94', 'bianxingjinggang', '123456', '', null, '100', '1', '2017-06-30 14:01:44');
-INSERT INTO `AC_USER` VALUES ('95', 'bianxingjinggang1', '123456', '\0', null, '100', '1', '2017-06-30 15:01:29');
-INSERT INTO `AC_USER` VALUES ('96', 'hero1', '123456', '', null, '100', '1', '2017-06-30 16:14:38');
-INSERT INTO `AC_USER` VALUES ('97', 'hero2', '123456', '', '2569', '100', '1', '2017-06-30 16:15:56');
-INSERT INTO `AC_USER` VALUES ('98', 'ray20170701', '123456', '', '9875', '100', '1', '2017-07-01 14:06:43');
-INSERT INTO `AC_USER` VALUES ('99', 'jack', '123456', '', '2598', '100', '1', '2017-07-01 16:20:33');
-INSERT INTO `AC_USER` VALUES ('100', 'iverson', '123456', '', null, '100', '1', '2017-07-01 16:24:49');
-INSERT INTO `AC_USER` VALUES ('101', 'iverson1', '123456', '', '6987', '100', '1', '2017-07-01 16:28:45');
-INSERT INTO `AC_USER` VALUES ('102', 'iverson4', '123456', '', null, '100', '1', '2017-07-03 21:07:26');
-INSERT INTO `AC_USER` VALUES ('103', 'iverson3', '123456', '', null, '100', '1', '2017-07-03 21:39:19');
-INSERT INTO `AC_USER` VALUES ('104', 'iverson9', '123456', '', null, '102', '1', '2017-07-04 15:28:08');
-INSERT INTO `AC_USER` VALUES ('105', 'cehi1', '123456', '', '1245', '101', '1', '2017-07-05 16:39:24');
-INSERT INTO `AC_USER` VALUES ('106', 'number', '123456', '', null, '100', '1', '2017-07-05 18:32:07');
-INSERT INTO `AC_USER` VALUES ('107', 'ceshi1', '123456', '', '1111', '100', '1', '2017-07-05 18:53:41');
-INSERT INTO `AC_USER` VALUES ('108', 'fsdf', 'sdfsfsd', '', '1212', '100', '1', '2017-07-05 20:43:58');
-INSERT INTO `AC_USER` VALUES ('109', 'ceshi2', '123456', '', '9998', '100', '1', '2017-07-05 22:05:30');
-INSERT INTO `AC_USER` VALUES ('110', 'ceshi3', '123456', '', '8787', '100', '1', '2017-07-05 22:09:57');
-INSERT INTO `AC_USER` VALUES ('111', 'bigman', '123456', '', '1234', '100', '1', '2017-07-06 19:59:20');
-INSERT INTO `AC_USER` VALUES ('112', 'fall', '123456', '', '5987', '100', '1', '2017-07-11 16:32:13');
-INSERT INTO `AC_USER` VALUES ('113', 'fallout3', '123456', '', null, '100', '1', '2017-07-11 16:46:40');
-INSERT INTO `AC_USER` VALUES ('114', 'fallout4', '123456', '', null, '100', '1', '2017-07-11 16:51:37');
+INSERT INTO `AC_USER` VALUES ('1', 'superadmin', '123456', '', null, '100', '1', '2017-11-09 00:00:00');
+INSERT INTO `AC_USER` VALUES ('2', 'hospitaladmin', '123456', '', null, '100', '1', '2017-11-09 00:00:00');
 
 -- ----------------------------
 -- Table structure for AC_USER_ROLE_XREF
@@ -412,30 +344,8 @@ CREATE TABLE `AC_USER_ROLE_XREF` (
 -- ----------------------------
 -- Records of AC_USER_ROLE_XREF
 -- ----------------------------
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('18', '93', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('19', '94', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('20', '95', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('21', '96', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('22', '97', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('23', '98', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('24', '99', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('25', '100', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('26', '101', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('27', '102', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('28', '103', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('29', '104', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('30', '53', '1');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('31', '81', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('32', '105', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('33', '106', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('34', '107', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('35', '108', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('36', '109', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('37', '110', '3');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('38', '111', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('39', '112', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('40', '113', '2');
-INSERT INTO `AC_USER_ROLE_XREF` VALUES ('41', '114', '2');
+INSERT INTO `AC_USER_ROLE_XREF` VALUES ('1', '1', '1');
+INSERT INTO `AC_USER_ROLE_XREF` VALUES ('2', '2', '2');
 
 -- ----------------------------
 -- Table structure for AC_USER_STATION_XREF
@@ -455,38 +365,12 @@ CREATE TABLE `AC_USER_STATION_XREF` (
 -- ----------------------------
 -- Records of AC_USER_STATION_XREF
 -- ----------------------------
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('4', '93', '2');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('25', '95', '9');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('26', '95', '13');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('27', '95', '14');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('28', '96', '9');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('29', '96', '13');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('30', '96', '14');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('31', '97', '9');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('32', '97', '13');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('33', '97', '14');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('34', '101', '7');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('35', '101', '8');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('36', '101', '9');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('45', '102', '9');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('46', '102', '13');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('47', '102', '14');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('53', '104', '14');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('54', '104', '13');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('70', '105', '15');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('71', '105', '16');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('74', '108', '8');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('75', '108', '5');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('76', '108', '6');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('78', '109', '5');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('79', '109', '7');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('80', '94', '8');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('81', '94', '4');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('82', '94', '7');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('83', '94', '9');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('92', '110', '6');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('93', '114', '2');
-INSERT INTO `AC_USER_STATION_XREF` VALUES ('94', '53', '2');
+INSERT INTO `AC_USER_STATION_XREF` VALUES ('1', '1', '1');
+INSERT INTO `AC_USER_STATION_XREF` VALUES ('2', '2', '1');
+
+
+
+
 
 -- ----------------------------
 -- Table structure for APP_CONFIG
@@ -852,6 +736,11 @@ CREATE TABLE `AS_SCENE` (
   `STATE` int(11) DEFAULT NULL COMMENT '0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='场景信息表';
+
+-- ----------------------------
+-- Records of AS_SCENE
+-- ----------------------------
+INSERT INTO `AS_SCENE` VALUES ('1', '默认场景', null, '0', null, null, '2017-11-09 00:00:00', '100');
 
 -- ----------------------------
 -- Table structure for AS_SHELF
