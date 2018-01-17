@@ -450,6 +450,7 @@ INSERT INTO `AS_GOODS_TYPE` VALUES ('2', '垃圾','1', '2017-07-07 11:47:05', nu
 INSERT INTO `AS_GOODS_TYPE` VALUES ('3', '被草','1', '2017-07-07 11:47:09', null, 0 ,'1', '100');
 INSERT INTO `AS_GOODS_TYPE` VALUES ('4', '医疗器械','1', '2017-07-07 11:47:12', null, 0 , '1', '100');
 INSERT INTO `AS_GOODS_TYPE` VALUES ('5', '餐饮','1', '2017-07-07 11:47:14', null, '1',0 , '100');
+INSERT INTO `AS_GOODS_TYPE` VALUES ('6', '标本','1', '2017-07-07 11:47:14', null, '1',0 , '100');
 
 -- ----------------------------
 -- Table structure for AS_RFIDBRACELET
