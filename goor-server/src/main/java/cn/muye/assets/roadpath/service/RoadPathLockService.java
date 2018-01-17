@@ -18,9 +18,34 @@ public interface RoadPathLockService extends BaseService<RoadPathLock> {
     @Deprecated
     boolean lockInner(Long id, String robotCode) throws Exception;
 
+    /**
+     * 给路径加锁
+     * @param id 锁ID
+     * @param robotCode
+     * @return
+     * @throws Exception
+     */
     boolean lock(Long id, String robotCode) throws Exception;
 
+    /**
+     * 给路径加方向锁
+     * @param id 锁ID
+     * @param robotCode
+     * @param direction 路径ID
+     * @return
+     * @throws Exception
+     */
     boolean lockInner(Long id, String robotCode, Long direction) throws Exception;
+
+    /**
+     * 给路径加方向锁
+     * @param id 锁ID
+     * @param robotCode
+     * @param direction 路径ID
+     * @return
+     * @throws Exception
+     */
+    boolean lockDirection(Long id, String robotCode, Long direction) throws Exception;
 
     /**
      *

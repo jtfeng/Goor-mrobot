@@ -54,10 +54,22 @@ public class X86RoadPathLockServiceImpl implements X86RoadPathLockService {
                         //判断和返回加锁
                         logger.info("2222222222  lock");
                         try {
-                            ret = roadPathLockService.lock(
+                            Long x86_path_id = jsonRoadPathLock.getX86_path_id();
+                            //TODO 原来的mission协议没有下发工控路径ID，路径锁方向无效
+                            if(x86_path_id == null) {
+                                ret = roadPathLockService.lock(
                                     jsonRoadPathLock.getRoadpath_id(),
                                     baseMessageService.getSenderId(messageInfo)
-                            );
+                                );
+                            }
+                            //新的mission协议增加下发工控路径ID，作为路径锁方向
+                            else {
+                                ret = roadPathLockService.lockDirection(
+                                        jsonRoadPathLock.getRoadpath_id(),
+                                        baseMessageService.getSenderId(messageInfo),
+                                        x86_path_id
+                                );
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                             logger.info("handleX86RoadPathLock error: " + e.getMessage());

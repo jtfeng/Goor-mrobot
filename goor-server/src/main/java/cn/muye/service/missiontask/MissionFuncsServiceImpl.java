@@ -2958,14 +2958,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             //如果有第一目标点，则搜索可用的路径
             else {
-                result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
+                /*result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
                 if(result == null) {
                     stringBuffer.append("规划路径,失败。原因：规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
                     LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
                     return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
                 }
                 //如果搜索到可用路径，则设置起点为prePoint
-                prePoint = result.getStartPoint();
+                prePoint = result.getStartPoint();*/
+
+                //TODO test
+                prePoint = startPathPoint;
             }
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
@@ -3630,6 +3633,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        json.setInterval_time(30);
         json.setInterval_time(5);
         json.setRoadpath_id(mPointAtts.roadpathId);
+        try {
+            Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
+            json.setX86_path_id(x86PathId);
+        } catch (NumberFormatException e) {
+            logger.error("解锁路径String转换Long出错");
+        }
         MissionTask roadpathUnlockTask = getRoadPathUnlockTask(
                 order,
                 mp,
@@ -3662,6 +3671,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        json.setInterval_time(30);
         json.setInterval_time(5);
         json.setRoadpath_id(mPointAtts.roadpathId);
+        try {
+            Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
+            json.setX86_path_id(x86PathId);
+        } catch (NumberFormatException e) {
+            logger.error("解锁路径String转换Long出错");
+        }
         MissionTask roadpathLockTask = getRoadPathLockTask(
                 order,
                 mp,
@@ -4740,7 +4755,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public Long currentMapId;
         public Long nextMapId;
         public String pathId;
-        public Long roadpathId;
+        public Long roadpathId; //逻辑锁ID
         public MapPoint chargePoint;
         public MapPoint chargePrePoint;
     }

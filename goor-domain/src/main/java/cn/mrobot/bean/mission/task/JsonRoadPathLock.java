@@ -8,11 +8,17 @@ import java.io.Serializable;
 public class JsonRoadPathLock implements Serializable {
     private static final long serialVersionUID = 3215650912460993916L;
 
+    //加锁还是解锁
     String action;
+    //路径锁的ID
     Long roadpath_id;
+    //加锁结果
     Integer result;
     private Long sendTime;
     private String uuid;
+
+    //工控路径ID
+    Long x86_path_id;
 
     public Long getSendTime() {
         return sendTime;
@@ -52,5 +58,13 @@ public class JsonRoadPathLock implements Serializable {
 
     public void setResult(Integer result) {
         this.result = result;
+    }
+
+    public Long getX86_path_id() {
+        return x86_path_id;
+    }
+
+    public void setX86_path_id(Long x86_path_id) {
+        this.x86_path_id = x86_path_id;
     }
 }

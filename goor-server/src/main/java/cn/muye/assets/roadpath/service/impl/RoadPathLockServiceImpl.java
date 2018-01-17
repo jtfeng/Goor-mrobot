@@ -42,6 +42,16 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         return result;
     }
 
+    @Override
+    public synchronized boolean lockDirection(Long id, String robotCode, Long direction) throws Exception {
+        log.info(" ***** ----- ----- ----- ----- 加锁开始 ----- ----- ----- ----- ***** ");
+        Preconditions.checkNotNull(id, "RoadPath 路径编号不允许为空！");
+        Preconditions.checkNotNull(robotCode, "robotCode 机器人编号不允许为空！");
+        boolean result = lockInner(id, robotCode, direction);
+        log.info(" ***** ----- ----- ----- ----- 加锁结束 ----- ----- ----- ----- ***** ");
+        return result;
+    }
+
     /**
      * 上锁
      * @param id
