@@ -119,7 +119,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private MissionWarningService missionWarningService;
 
     //下单机器人对应的充电点
-    private MapPoint chargePoint = null;
+    private Map<String, MapPoint> chargePointMap = new HashMap<>();
 
     /**
      * 根据订单数据创建任务列表
@@ -2914,12 +2914,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //查询充电点列表
         List<MapPoint> chongMPs = robotService
                 .getChargerMapPointByRobotCode(order.getRobot().getCode(), SearchConstants.FAKE_MERCHANT_STORE_ID);
-//        MapPoint chargePoint = null;
+        MapPoint chargePoint = null;
         if (chongMPs != null){
             for (MapPoint mp :
                     chongMPs) {
                 if (mp != null) {
                     chargePoint = mp;
+
                     break;
                 }
             }
@@ -2929,6 +2930,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if(robot == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "下单机器人参数错误。");
         }
+
+        //存入机器人关联的充电桩信息
+        chargePointMap.put(robot.getCode(), chargePoint);
 
         if(order.getScene() == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "失败！订单所属云端场景为空。");
@@ -4297,6 +4301,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
          * 根据订单设置，如果不需要货架、且有最终卸货点、
          * 且有充电桩(没充电桩就不需要再往下走了，就不用插入中间卸货任务了)，则需要插入一个中间卸货任务。
          */
+        MapPoint chargePoint = chargePointMap.get(order.getRobot().getCode());
         boolean isUnload = (order.getShelf() == null || !order.getOrderSetting().getNeedShelf())
                 && chargePoint != null;
         if(isUnload) {
