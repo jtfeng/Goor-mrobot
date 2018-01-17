@@ -118,6 +118,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Autowired
     private MissionWarningService missionWarningService;
 
+    //下单机器人对应的充电点
+    private MapPoint chargePoint = null;
+
     /**
      * 根据订单数据创建任务列表
      * @param order
@@ -2911,7 +2914,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //查询充电点列表
         List<MapPoint> chongMPs = robotService
                 .getChargerMapPointByRobotCode(order.getRobot().getCode(), SearchConstants.FAKE_MERCHANT_STORE_ID);
-        MapPoint chargePoint = null;
+//        MapPoint chargePoint = null;
         if (chongMPs != null){
             for (MapPoint mp :
                     chongMPs) {
@@ -2961,7 +2964,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 prePoint = result.getStartPoint();
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到点" + startPathPoint.getPointAlias() +"路径出错！");
         }
 
@@ -4290,11 +4293,25 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             isSetOrderDetailMP = true;
         }
 
-        //如果没有货架，就不需要再加入卸货架任务了
-        if (order.getShelf() == null){
+        /**
+         * 根据订单设置，如果不需要货架、且有最终卸货点、
+         * 且有充电桩(没充电桩就不需要再往下走了，就不用插入中间卸货任务了)，则需要插入一个中间卸货任务。
+         */
+        boolean isUnload = (order.getShelf() == null || !order.getOrderSetting().getNeedShelf())
+                && chargePoint != null;
+        if(isUnload) {
+            //插入中间送货任务(不需要货架)
+            initPathMissionTaskSongHuo(missionListTask, order, startMp, mp, mPointAtts);
+            return;
+        }
+        //如果没有货架,且没有充电点，就不需要再加入卸货架任务了
+        else if (order.getShelf() == null && chargePoint == null){
             return;
         }
 
+        /**
+         * 如果有货架，则进入有货架的流程
+         */
         //单点导航任务，回到下货点
 //        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
 //        missionListTask.getMissionTasks().add(sigleNavTask);
