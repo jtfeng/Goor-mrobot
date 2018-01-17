@@ -325,7 +325,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
 
             //if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
-            if(typeId != null){
+            if(typeId != null && robotDb.getTypeId() != null){
                 if(robotDb.getTypeId().equals(typeId)){
                     availableRobot = robotDb;
                 }else {
