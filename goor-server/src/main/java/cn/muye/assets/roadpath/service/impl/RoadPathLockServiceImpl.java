@@ -217,7 +217,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
 
     /**
      * 加入了锁方向，执行锁解锁操作
-     * @param id
+     * @param id 锁ID
      * @param robotCode
      * @return
      * @throws Exception
