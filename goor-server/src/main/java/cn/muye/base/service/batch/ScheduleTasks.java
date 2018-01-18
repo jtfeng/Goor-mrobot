@@ -2,7 +2,6 @@ package cn.muye.base.service.batch;
 
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.area.pose.service.CurrentPoseService;
-import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.base.export.service.ExportService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
@@ -54,9 +53,6 @@ public class ScheduleTasks {
 
     @Autowired
     private MissionWarningService missionWarningService;
-
-    @Autowired
-    private ElevatorNoticeService elevatorNoticeService;
 
     private final static Object lock = new Object();
 
@@ -111,10 +107,10 @@ public class ScheduleTasks {
     @Scheduled(cron = "0 */1 * * * ?")
     public void scanWaitOrders() {
         synchronized (lock){
-            logger.info("-----------开启订单等待队列扫描--------------------");
+            logger.info("开启订单等待队列扫描");
             try {
                 orderService.checkWaitOrders();
-                logger.info("---------订单队列扫描结束---------------");
+                logger.info("订单扫描结束");
             } catch (Exception e) {
                 logger.error("订单扫描出现异常", e);
             }
@@ -122,7 +118,7 @@ public class ScheduleTasks {
     }
 
     //每分钟执行一次， 订单任务mission超时扫描
-    @Scheduled(cron = "0 */2 * * * ?")
+    @Scheduled(cron = "0 */1 * * * ?")
     public void checkOrderMissionOverTime() {
         synchronized (lock2){
             logger.info("开启订单任务超时扫描");
@@ -234,15 +230,16 @@ public class ScheduleTasks {
         }
     }
 
-    /**
-     * 添加定时任务，没10秒检查一次有没有电梯pad消息缓存，有，取出消息进行推送
-     */
-    @Scheduled(cron = "*/10 * * * * ?")
-    public void sendElevatorNoticeCache() {
+
+    //每分钟执行一次
+    @Scheduled(cron = "00 */1 * * * ?")
+    public void schuleReleaseRoadpathLock() {
+        logger.info("开启ws 推送");
         try {
-            elevatorNoticeService.sendElevatorNoticeCache();
+            orderDetailService.finishedDetailTask(75L,1);
+            logger.info("ws 推送结束");
         } catch (Exception e) {
-            logger.error("Scheduled sendElevatorNoticeCache  error", e);
+            logger.error("ws 推送失败", e);
         }
     }
 }
