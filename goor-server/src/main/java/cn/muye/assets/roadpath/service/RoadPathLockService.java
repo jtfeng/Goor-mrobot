@@ -82,4 +82,6 @@ public interface RoadPathLockService extends BaseService<RoadPathLock> {
 
     boolean cloudReleaseRoadPathLock(String robotCode) throws Exception;
 
+    void schuleReleaseRoadpathLock() throws Exception;
+
 }

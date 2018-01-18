@@ -2,6 +2,7 @@ package cn.muye.base.service.batch;
 
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.area.pose.service.CurrentPoseService;
+import cn.muye.assets.roadpath.service.RoadPathLockService;
 import cn.muye.base.export.service.ExportService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
@@ -53,6 +54,9 @@ public class ScheduleTasks {
 
     @Autowired
     private MissionWarningService missionWarningService;
+
+    @Autowired
+    private RoadPathLockService roadPathLockService;
 
     private final static Object lock = new Object();
 
@@ -230,16 +234,17 @@ public class ScheduleTasks {
         }
     }
 
-
-    //每分钟执行一次
+    /**
+     * 定时任务，每个一分钟执行一次，取出数据库所有机器人，查看当前机器人状态，如果是空闲状态，则解锁该机器人所有的锁
+     * 非空闲，查看机器人在线状态，如果机器人不在线，则清除所有的锁
+     */
     @Scheduled(cron = "00 */1 * * * ?")
     public void schuleReleaseRoadpathLock() {
-        logger.info("开启ws 推送");
+        logger.info("定时任务-清除机器人锁");
         try {
-            orderDetailService.finishedDetailTask(75L,1);
-            logger.info("ws 推送结束");
+            roadPathLockService.schuleReleaseRoadpathLock();
         } catch (Exception e) {
-            logger.error("ws 推送失败", e);
+            logger.error("定时任务-清除机器人锁失败", e);
         }
     }
 }

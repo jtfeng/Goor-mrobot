@@ -1,10 +1,13 @@
 package cn.muye.assets.roadpath.service.impl;
 
 import cn.mrobot.bean.assets.roadpath.RoadPathLock;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathMapper;
 import cn.muye.assets.roadpath.service.RoadPathLockService;
+import cn.muye.assets.robot.mapper.RobotMapper;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -31,6 +34,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     private RoadPathMapper roadPathMapper;
     @Autowired
     private RoadPathLockMapper roadPathLockMapper;
+    @Autowired
+    private RobotMapper robotMapper;
 
     @Override
     public synchronized boolean lock(Long id, String robotCode) throws Exception {
@@ -54,6 +59,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
 
     /**
      * 上锁
+     *
      * @param id
      * @return
      * @throws Exception
@@ -70,7 +76,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                 //已上锁，不能重复上锁
                 if (robotCode.equals(roadPathLock.getRobotCode())) {
                     return true;
-                }else {
+                } else {
                     flag = false;
                 }
             } else {
@@ -81,7 +87,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                 updateSelective(roadPathLock);
                 flag = true;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return flag;
@@ -89,8 +95,10 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
 
 
     // ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+
     /**
      * 加入了锁方向进行加锁和释放锁操作
+     *
      * @param id
      * @param robotCode
      * @param direction
@@ -113,18 +121,18 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
             //路径中所有排队的机器人编号信息
             String robotCodes = roadPathLock.getRobotCodes();
             //路径锁绑定的方向信息，加锁的时候需要验证此方向
-            Long  pathDirection = roadPathLock.getDirection();
+            Long pathDirection = roadPathLock.getDirection();
             // +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++
             log.info("【当前状态】允许通过的最大机器人数量：" + passCount +
                     "、当前路径中排队的机器人数量：" + currentPasscount +
                     "、路径中所有排队的机器人编号信息：" + robotCodes +
-                    "、路径锁绑定的方向：" +  pathDirection);
+                    "、路径锁绑定的方向：" + pathDirection);
 
             if (robotCodes != null && robotCodes.contains(robotCode)) {
                 // 此时的锁成为可重入锁
                 log.info("编号为：" + robotCode + " 的机器人重复请求执行加锁操作，上一次已经成功获取锁，所以直接返回加锁成功。");
                 flag = true;
-            }else {
+            } else {
                 // 首先需要判断是不是 第一个机器人 进入执行加锁操作
                 if (pathDirection == null) {
                     log.info("该机器人首次对路径锁进行加锁");
@@ -165,7 +173,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     }
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return flag;
@@ -189,6 +197,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
 
     /**
      * 解锁
+     *
      * @param id
      * @return
      * @throws Exception
@@ -214,7 +223,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     flag = true;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return flag;
@@ -222,7 +231,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
 
     /**
      * 加入了锁方向，执行锁解锁操作
-     * @param id 锁ID
+     *
+     * @param id        锁ID
      * @param robotCode
      * @return
      * @throws Exception
@@ -233,21 +243,22 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         log.info("路径锁编号：" + id + "、机器人编号为：" + robotCode);
         boolean flag = false;
         try {
-            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey( id), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
+            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
             // +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++
             //允许通过的最大机器人数量
             Long passCount = roadPathLock.getPassCount();
             //当前路径中排队的机器人数量
-            Long currentPasscount = roadPathLock.getCurrentPasscount();
+            Long currentPasscountDB = roadPathLock.getCurrentPasscount();
+            Long currentPasscount = (null != currentPasscountDB) ? currentPasscountDB : 0;
             //路径中所有排队的机器人编号信息
             String robotCodes = roadPathLock.getRobotCodes();
             //路径锁绑定的方向信息，加锁的时候需要验证此方向
-            Long  pathDirection = roadPathLock.getDirection();
+            Long pathDirection = roadPathLock.getDirection();
             // +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++
             log.info("【当前状态】允许通过的最大机器人数量：" + passCount +
                     "、当前路径中排队的机器人数量：" + currentPasscount +
                     "、路径中所有排队的机器人编号信息：" + robotCodes +
-                    "、路径锁绑定的方向：" +  pathDirection);
+                    "、路径锁绑定的方向：" + pathDirection);
             List<String> containerRobots = Lists.newArrayList();
             if (robotCodes != null) {
                 Arrays.stream(robotCodes.split(",")).forEach(new Consumer<String>() {
@@ -262,14 +273,14 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                 log.info("发出解锁指令的机器人不在当前路径队列中，直接返回解锁成功的状态！");
                 //发出指令的机器人当前不在路径排队对象中，解锁失败
                 flag = true;
-            }else {
+            } else {
                 //执行解锁 （真实解锁 与 修改排队数量 - 两类操作）
                 if (currentPasscount != 1) {
                     log.info("满足解锁条件，但当前路径队列中机器人数量大于1，故此时的解锁只修改排队机器人数量，解锁成功");
                     //表示当前排队中有多个机器人，这时修改数量
                     containerRobots.remove(robotCode);
                     StringBuilder builder = new StringBuilder();
-                    containerRobots.stream().forEach( e -> builder.append(e).append(","));
+                    containerRobots.stream().forEach(e -> builder.append(e).append(","));
                     //最新的排队机器人信息
                     String currentStr = builder.toString().substring(0, builder.toString().length() - 1);
                     roadPathLock.setRobotCodes(currentStr);
@@ -277,7 +288,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     roadPathLock.setCurrentPasscount(currentPasscount - 1L);
                     updateSelective(roadPathLock);
                     flag = true;
-                }else {
+                } else {
                     log.info("满足解锁条件，并且当前发出解锁指令的机器人为路径队列中唯一的机器人，此时执行真真的解锁操作，将相关属性进行重置，解锁成功");
                     //真正的执行解锁操作
                     roadPathLock.setLockAction(RoadPathLock.LockAction.UNLOCK);
@@ -290,7 +301,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
                     flag = true;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
         return flag;
@@ -304,12 +315,13 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     @Override
     public List<RoadPathLock> listRoadPathLocks(WhereRequest whereRequest) throws Exception {
         List<RoadPathLock> roadPathLockList = listPageByStoreIdAndOrder(whereRequest.getPage(),
-                whereRequest.getPageSize(), RoadPathLock.class,"ID DESC");
+                whereRequest.getPageSize(), RoadPathLock.class, "ID DESC");
         return roadPathLockList;
     }
 
     /**
      * 云端主动释放(手动释放)指定机器人的路径锁
+     *
      * @param robotCode
      * @return
      * @throws Exception
@@ -322,10 +334,30 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         List<RoadPathLock> locks = this.roadPathLockMapper.selectByExample(example);
         // 表示最后的解锁结果
         boolean result = true;
-        for (RoadPathLock roadPathLock: locks) {
+        for (RoadPathLock roadPathLock : locks) {
             // 手动解锁机器人路径锁，调用同步方法完成
             result = result && unlock(roadPathLock.getId(), robotCode);
         }
         return result;
+    }
+
+    @Override
+    public void schuleReleaseRoadpathLock() throws Exception {
+        List<Robot> robotList = robotMapper.selectAll();
+        if (null == robotList || robotList.size() <= 0) {
+            return;
+        }
+        for (Robot robot : robotList) {
+            String robotCode = robot.getCode();
+            if (robot.getBusy() == null || !robot.getBusy()){
+                cloudReleaseRoadPathLock(robotCode);
+            }else if(robot.getBusy()){
+               // 非空闲，查看机器人在线状态，如果机器人不在线，则清除所有的锁
+                Boolean isOnline = CacheInfoManager.getRobotOnlineCache(robotCode);
+                if (isOnline== null || !isOnline){
+                    cloudReleaseRoadPathLock(robotCode);
+                }
+            }
+        }
     }
 }
