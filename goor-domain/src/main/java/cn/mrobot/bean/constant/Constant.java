@@ -32,6 +32,9 @@ public class Constant {
 
     public static final String REQUEST = "request";
 
+    //释放机器人锁的假ID，只要检测到是这个ID，就释放机器人所有的锁
+    public final static Long RELEASE_ROBOT_LOCK_ID = -10086L;
+
     //数据库数据删除状态
     public final static Integer NORMAL = 0; //正常值
     public final static Integer DELETE = 1;  //删除

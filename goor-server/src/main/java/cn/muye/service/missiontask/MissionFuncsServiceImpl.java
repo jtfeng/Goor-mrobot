@@ -2958,17 +2958,17 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
             //如果有第一目标点，则搜索可用的路径
             else {
-                /*result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
+                result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
                 if(result == null) {
                     stringBuffer.append("规划路径,失败。原因：规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
                     LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
                     return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
                 }
                 //如果搜索到可用路径，则设置起点为prePoint
-                prePoint = result.getStartPoint();*/
+                prePoint = result.getStartPoint();
 
                 //TODO test
-                prePoint = startPathPoint;
+//                prePoint = startPathPoint;
             }
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
@@ -3335,6 +3335,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }
             }
 
+            //云端在所有任务后，加一个释放该机器人所有路径锁和门锁的解锁任务
+            MPointAtts mPointAtts = new MPointAtts();
+            mPointAtts.roadpathId = Constant.RELEASE_ROBOT_LOCK_ID;
+            mPointAtts.pathId = Constant.RELEASE_ROBOT_LOCK_ID + "";
+            JsonMissionItemDataRoadPathUnlock json =
+                    getJsonMissionItemDataRoadPathUnlock(mPointAtts);
+            missionListTask.getMissionTasks().add(getRoadPathUnlockTask(order, null, "最终释放机器人锁任务-", json));
+
             //云端加在所有任务后，一个独立的语音任务：任务已完成。
             missionListTask.getMissionTasks().add(getMp3VoiceTaskIgnorable(order, null, "最终结束语音-", MP3_TASK_OVER, false));
         }
@@ -3629,6 +3637,24 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         String parentName = "工控固定路径逻辑路径解锁任务-";
 
         JsonMissionItemDataRoadPathUnlock json =
+                getJsonMissionItemDataRoadPathUnlock(mPointAtts);
+        MissionTask roadpathUnlockTask = getRoadPathUnlockTask(
+                order,
+                mp,
+                parentName,
+                json
+        );
+        missionListTask.getMissionTasks().add(roadpathUnlockTask);
+
+    }
+
+    /**
+     * 获取解锁任务ItemJson
+     * @param mPointAtts
+     * @return
+     */
+    private JsonMissionItemDataRoadPathUnlock getJsonMissionItemDataRoadPathUnlock(MPointAtts mPointAtts) {
+        JsonMissionItemDataRoadPathUnlock json =
                 new JsonMissionItemDataRoadPathUnlock();
 //        json.setInterval_time(30);
         json.setInterval_time(5);
@@ -3639,14 +3665,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         } catch (NumberFormatException e) {
             logger.error("解锁路径String转换Long出错");
         }
-        MissionTask roadpathUnlockTask = getRoadPathUnlockTask(
-                order,
-                mp,
-                parentName,
-                json
-        );
-        missionListTask.getMissionTasks().add(roadpathUnlockTask);
-
+        return json;
     }
 
     /**

@@ -1,6 +1,7 @@
 package cn.muye.service.consumer.topic;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.mission.task.JsonRoadPathLock;
 import cn.mrobot.utils.JsonUtils;
@@ -79,10 +80,24 @@ public class X86RoadPathLockServiceImpl implements X86RoadPathLockService {
                     case "unlock":
                         logger.info("3333333  unlock");
                         try {
-                            ret = roadPathLockService.unlock(
-                                    jsonRoadPathLock.getRoadpath_id(),
-                                    baseMessageService.getSenderId(messageInfo)
-                            );
+                            String robotCode = messageInfo.getSenderId();
+                            Long lockId = jsonRoadPathLock.getRoadpath_id();
+                            logger.info("锁ID为：" + lockId);
+                            //如果lockId是我们定义的释放机器人资源，则执行释放资源
+                            if(lockId != null && lockId.equals(Constant.RELEASE_ROBOT_LOCK_ID)) {
+                                logger.info("开始执行释放" + robotCode +"机器人占用的所有路径锁、门锁任务。");
+                                //执行释放机器人相关锁对象接口
+                                ret = roadPathLockService.cloudReleaseRoadPathLock(robotCode);
+                            }
+                            //执行正常的解锁任务
+                            else {
+                                logger.info("开始执行解锁单个路径锁任务。");
+                                ret = roadPathLockService.unlock(
+                                        lockId,
+                                        baseMessageService.getSenderId(messageInfo)
+                                );
+                            }
+
                         } catch (Exception e) {
                             e.printStackTrace();
                             logger.info("handleX86RoadPathLock error: " + e.getMessage());
