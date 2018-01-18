@@ -264,6 +264,8 @@ public class PathUtil {
      * 权值计算根据类型取路径起点，还是取投影点
      * @param startPointType
      * @param roadPathDetails
+     * @param roadPathService
+     * @param pointService
      * @return
      */
     public static RoadPathResult calNearestPathPointByRoadPathDetails(
@@ -272,15 +274,19 @@ public class PathUtil {
             List<RoadPathDetail> roadPathDetails,
             MapPoint robotPosition,
             MapPoint targetPosition,
-            RoadPathResultService roadPathResultService) throws Exception{
+            RoadPathResultService roadPathResultService,
+            RoadPathService roadPathService,
+            PointService pointService) throws Exception{
         RoadPathResult roadPathResult = new RoadPathResult();
         //默认权值设置到最大值
         roadPathResult.setTotalWeight(Long.MAX_VALUE);
 
+        String robotSceneName = robotPosition.getSceneName();
+        String robotMapName = robotPosition.getMapName();
         for(RoadPathDetail roadPathDetail : roadPathDetails) {
             //判断是同场景和同地图的路径才计算
-            if(!roadPathDetail.getSceneName().equals(robotPosition.getSceneName())
-                    || !roadPathDetail.getMapName().equals(robotPosition.getMapName())) {
+            if(!roadPathDetail.getSceneName().equals(robotSceneName)
+                    || !roadPathDetail.getMapName().equals(robotMapName)) {
                 continue;
             }
 
@@ -307,6 +313,43 @@ public class PathUtil {
                     + "到目标点" + targetPosition.getId() + "，点序列：" + resultTemp.getPointIds());
             //根据startPointType来对路径权值做补偿。
             resultTemp = compensateRoadPathResultByStartPointType(roadPathDetail, robotPosition, resultTemp, startPointType);
+
+            //再次判断机器人到生成的点序列的第一条工控路径距离在范围内
+            //当只有一个点的时候，直接计算机器人位置到这个点的距离
+            List<Long> resultTempIds = resultTemp.getPointIds();
+            Long resultStartId = resultTempIds.get(0);
+            if(resultTempIds.size() == 1) {
+                logger.info("规划路径只找到一个点，ID:" + resultStartId);
+                MapPoint start = pointService.findById(resultStartId);
+                if(start == null) {
+                    logger.info("规划路径的第一个起点对象不存在,ID:" + resultStartId);
+                    continue;
+                }
+                logger.info("规划路径的第一个起点存在，" + start.getPointAlias());
+                distance = calDistance(robotPosition, start);
+            }
+            //当有两个点的时候，计算到第一条路径的距离是否在合理的范围内
+            else if(resultTempIds.size() > 1) {
+                logger.info("规划路径找到一个以上的点，IDs:" + resultTempIds);
+                Long resultEndId = resultTemp.getPointIds().get(1);
+                List<RoadPathDetail> roadPathDetailListTemp = roadPathService.listRoadPathDetailByStartAndEndPointType(resultStartId,
+                        resultEndId, robotSceneName, robotMapName, Constant.PATH_TYPE_X86);
+                if(roadPathDetailListTemp == null || roadPathDetailListTemp.size() == 0) {
+                    logger.info("未找到从点" + resultStartId + "到点" + resultEndId + "的工控路径");
+                    continue;
+                }
+                RoadPathDetail firstDetail = roadPathDetailListTemp.get(0);
+                logger.info("找到从点" + resultStartId + "到点" + resultEndId + "的工控路径" + roadPathDetailListTemp.size() + "条，" +
+                        "第一条工控路径ID为" + firstDetail.getPathId());
+
+                distance = calDistanceByRoadPathDetail(firstDetail, robotPosition);
+            }
+
+            //计算机器人坐标离的路径距离在1.5米内的路径,单位mm
+            if(distance > Constant.PATH_NAVIGATION_SCALE) {
+                logger.info("第二次校验机器人位置到路径工控路径距离为" + distance + "，超过了搜索范围。");
+                continue;
+            }
 
             //取到目的地最优路径的结果集作为输出
             if(resultTemp != null && resultTemp.getTotalWeight() != null
