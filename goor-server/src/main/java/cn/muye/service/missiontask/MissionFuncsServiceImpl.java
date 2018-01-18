@@ -3844,6 +3844,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                                }
                                 //直接通过门对象关联的逻辑路径对象，判断是否加入逻辑路径锁
                                 mPointAtts.roadpathId = door.getPathLock();
+                                mPointAtts.pathId = door.getPathId();
                                 //添加路径锁或解锁
                                 addRoadPathLockOrUnlock(
                                         missionListTask,
