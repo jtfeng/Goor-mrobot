@@ -18,6 +18,7 @@ public class Graph {
     }
 
     public RoadPathResult getShortestPath(Long start, Long finish) {
+        System.out.println("dijkstra计算开始：起点" + start + "，终点" + finish);
         RoadPathResult roadPathResult = new RoadPathResult();
         Long totalWeight = 0L;
         roadPathResult.setTotalWeight(totalWeight);
@@ -25,6 +26,7 @@ public class Graph {
         roadPathResult.setEndPoint(new MapPoint(finish));
         //当起点和终点是同一个点的时候，直接返回这个点序列，权值为0
         if(start.equals(finish)) {
+            System.out.println("起点和终点是同一个点的时候，直接返回这个点序列，权值为0");
             List<Long> ids = new ArrayList<Long>();
             ids.add(start);
             roadPathResult.setPointIds(ids);
@@ -56,6 +58,7 @@ public class Graph {
                     smallest = previous.get(smallest.getId());
                 }
                 path.add(start);
+
                 Collections.reverse(path);
                 roadPathResult.setPointIds(path);
                 roadPathResult.setTotalWeight(totalWeight);

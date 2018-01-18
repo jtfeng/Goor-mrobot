@@ -273,6 +273,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         RoadPathResult result = getNearestPathResultByRosCurrentPose(roadPathMaps, startPointType,
                         rosCurrentPose, targetPoint, currentInfo.getMapInfo().getSceneName(), currentInfo.getMapInfo().getMapName());
 
+        LOGGER.info("###############查找离" + robotCode + "机器人坐标最近的路径完毕。" +
+                (result == null ? "未找到。" : "起点:" + result.getStartPoint() + "终点:" + result.getEndPoint() + "序列:" + result.getPointIds()));
         return result;
     }
 

@@ -302,6 +302,9 @@ public class PathUtil {
                 continue;
             }
 
+            logger.info("找到可用规划路径：从路径" + roadPathDetail.getPathId() + ","
+                    + roadPathDetail.getMapName() + "," + roadPathDetail.getSceneName()
+                    + "到目标点" + targetPosition.getId() + "，点序列：" + resultTemp.getPointIds());
             //根据startPointType来对路径权值做补偿。
             resultTemp = compensateRoadPathResultByStartPointType(roadPathDetail, robotPosition, resultTemp, startPointType);
 
