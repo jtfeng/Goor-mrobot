@@ -24,6 +24,8 @@ public class Constant {
     //工控固定路径导航可以开始的范围，单位mm
     public static final Long PATH_NAVIGATION_SCALE = 800L;
 
+    //机器人离线清除所有锁的时长
+    public static final Long ROBOT_OFFLINE_MINUTES = 10L;
     /**以哪个点来计算路径起点的常量
      * 以路径起点，还是以机器人所在位置在路径的投影
      */

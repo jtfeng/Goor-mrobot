@@ -2,6 +2,7 @@ package cn.muye.assets.roadpath.service.impl;
 
 import cn.mrobot.bean.assets.roadpath.RoadPathLock;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.mapper.RoadPathLockMapper;
 import cn.muye.assets.roadpath.mapper.RoadPathMapper;
@@ -20,6 +21,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -36,6 +38,9 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     private RoadPathLockMapper roadPathLockMapper;
     @Autowired
     private RobotMapper robotMapper;
+
+    //缓存机器人离线时长（单位：分钟）
+    private HashMap<String, Long> robotOffLineMinutes = new HashMap<>();
 
     @Override
     public synchronized boolean lock(Long id, String robotCode) throws Exception {
@@ -349,13 +354,28 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         }
         for (Robot robot : robotList) {
             String robotCode = robot.getCode();
-            if (robot.getBusy() == null || !robot.getBusy()){
+            Boolean isOnline = CacheInfoManager.getRobotOnlineCache(robotCode);
+            //如果机器人在线，清除机器人未在线时间
+            if (null != isOnline && isOnline && robotOffLineMinutes.containsKey(robotCode)) {
+                robotOffLineMinutes.remove(robotCode);
+            }
+            if (robot.getBusy() == null || !robot.getBusy()) {
                 cloudReleaseRoadPathLock(robotCode);
-            }else if(robot.getBusy()){
-               // 非空闲，查看机器人在线状态，如果机器人不在线，则清除所有的锁
-                Boolean isOnline = CacheInfoManager.getRobotOnlineCache(robotCode);
-                if (isOnline== null || !isOnline){
-                    cloudReleaseRoadPathLock(robotCode);
+            } else if (robot.getBusy()) {
+                // 非空闲，查看机器人在。线状态，如果机器人不在线，超过10分钟，则清除所有的锁
+                if (isOnline == null || !isOnline) {
+                    Long offlineMinutes = robotOffLineMinutes.get(robotCode);
+                    if (null == offlineMinutes) {
+                        offlineMinutes = 1L;
+                        robotOffLineMinutes.put(robotCode, offlineMinutes);
+                    } else if (offlineMinutes >= Constant.ROBOT_OFFLINE_MINUTES) {
+                        logger.info("机器人(" + robotCode + ")离线时间超过" + Constant.ROBOT_OFFLINE_MINUTES + "分钟，释放所有锁");
+                        cloudReleaseRoadPathLock(robotCode);
+                        robotOffLineMinutes.remove(robotCode);
+                    } else {
+                        offlineMinutes = offlineMinutes + 1;
+                        robotOffLineMinutes.put(robotCode, offlineMinutes);
+                    }
                 }
             }
         }
