@@ -26,7 +26,7 @@ import java.util.Date;
  */
 @Component
 @Configurable
-//@EnableScheduling
+//@EnableSchedulin
 public class ScheduleTasks {
 
     private Logger logger = Logger.getLogger(ScheduleTasks.class);
@@ -61,6 +61,8 @@ public class ScheduleTasks {
     private final static Object lock = new Object();
 
     private final static Object lock2 = new Object();
+
+    private final static Object lock3 = new Object();
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -131,6 +133,20 @@ public class ScheduleTasks {
                 logger.info("订单任务超时扫描结束");
             } catch (Exception e) {
                 logger.error("订单任务超时扫描出现异常", e);
+            }
+        }
+    }
+
+    //每分钟执行一次， 检测执行任务机器状态
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void checkRobotWarningState() {
+        synchronized (lock3){
+            logger.info("检测执行任务机器状态");
+            try {
+                missionWarningService.checkRobotWarningState();
+                logger.info("检测执行任务机器状态结束");
+            } catch (Exception e) {
+                logger.error("检测执行任务机器状态出现异常", e);
             }
         }
     }

@@ -29,6 +29,7 @@ public class OrderConstant {
     public static final Integer MESSAGE_BELL_RECEIVE = 0; //收货站提醒
     public static final Integer MESSAGE_BELL_SEND = 1; //发货站提醒
     public static final Integer MESSAGE_BELL_OVERTIME_WARNING = 2; //超时警报
+    public static final Integer MESSAGE_BELL_ROBOT_POSITION_WARNING = 3;   //机器人位置异常警报
 
     //消息推送状态
     public static final Integer MESSAGE_BELL_UNREAD = 0; //消息未读

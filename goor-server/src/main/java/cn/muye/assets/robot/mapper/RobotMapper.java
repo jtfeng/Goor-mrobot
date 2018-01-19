@@ -15,4 +15,6 @@ public interface RobotMapper extends MyMapper<Robot> {
     List<Robot> listRobot(Map map);
 
     Robot getRobotByCode(Map map);
+
+    Long getRobotSceneId(Long robotId);
 }

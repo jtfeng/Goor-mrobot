@@ -122,6 +122,9 @@
         select
         <include refid="orderColumn" />
         from OR_ORDER o
+        WHERE o.START_STATION_ID = #{stationId}
+        AND o.CREATE_TIME &gt;= #{beforeTime}
+        AND o.CREATE_TIME &lt;= #{currentTime}
         ORDER BY (
         CASE o.STATUS
         WHEN 2 THEN 1
