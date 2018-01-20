@@ -330,9 +330,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             scene.setState(1);
         }
         updateSelective(scene);
-
-        Object taskResult = updateMap(scene);
-        return taskResult;
+//      新增场景不同步地图，通过特定的地图同步按钮同步
+//        Object taskResult = updateMap(scene);
+        return scene;
     }
 
     @Override
@@ -391,8 +391,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
         //更新对应的场景信息
         updateSelective(scene);
-        Object taskResult = updateMap(scene);
-        return taskResult;
+//        场景更新，不同步地图，通过特定得到按钮同步地图
+//        Object taskResult = updateMap(scene);
+        return scene;
     }
 
     private Object updateMap(Scene scene) throws Exception {
