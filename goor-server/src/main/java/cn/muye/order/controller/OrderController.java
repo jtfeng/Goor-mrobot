@@ -27,6 +27,7 @@ import cn.muye.assets.scene.service.SceneService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.controller.BaseController;
+import cn.muye.mission.service.MissionWarningService;
 import cn.muye.order.bean.*;
 import cn.muye.order.service.*;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
@@ -89,6 +90,9 @@ public class OrderController extends BaseController {
     @Autowired
     X86MissionDispatchService x86MissionDispatchService;
 
+    @Autowired
+    private MissionWarningService missionWarningService;
+
     /**
      * test
      * @param
@@ -96,12 +100,11 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(value = "test", method = RequestMethod.GET)
     @ResponseBody
-    public AjaxResult test(@RequestParam("id")Long id){
+    public AjaxResult test(){
         try {
-            orderService.checkWaitOrders();
+            orderDetailService.finishedDetailTask(2095L, OrderConstant.ORDER_DETAIL_STATUS_GET);
             return AjaxResult.success();
         } catch (Exception e) {
-            e.printStackTrace();
             e.printStackTrace();
             return AjaxResult.failed();
         }

@@ -20,4 +20,9 @@ public interface MissionWarningService {
     void dailyUpdateWarningData();
 
     Long getWarningTime(Long startStationId, Long endStationId);
+
+    //定时检测机器人状态
+    void checkRobotWarningState();
+
+
 }

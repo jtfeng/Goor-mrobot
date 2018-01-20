@@ -49,6 +49,14 @@ public abstract class BaseCrudServiceImpl<T extends BaseBean>  extends BasePreIn
         return myMapper.selectByPrimaryKey(id);
     }
 
+    public T findByDomain(T t) {
+        return myMapper.selectOne(t);
+    }
+
+    public List<T> listByDomain(T t) {
+        return myMapper.select(t);
+    }
+
     public List<T> listAll() {
         return myMapper.selectAll();
     }

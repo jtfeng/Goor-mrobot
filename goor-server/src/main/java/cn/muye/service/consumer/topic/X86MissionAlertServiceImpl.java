@@ -63,7 +63,7 @@ public class X86MissionAlertServiceImpl implements X86MissionAlertService {
                 String message = jsonLogAlert.getMsg();
                 logAlert.setRobotCode(robotCode);
                 logAlert.setAlertCode(String.valueOf(jsonLogAlert.getAlert_code()));
-                logAlert.setAlertTime(new Date(jsonLogAlert.getAlert_time()));
+                logAlert.setAlertTime(new Date(jsonLogAlert.getAlert_time()*1000L));
                 logAlert.setDescription(message);
                 logAlert.setMissionItemId(missionItemId);
                 logAlertService.save(logAlert);

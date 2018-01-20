@@ -79,8 +79,12 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
             String receiveBody = "已送达站" + station.getName();
             String sendBody = "已送达站" + station.getName();
             //将推送信息加入数据库内
-            MessageBell receiveBell = new MessageBell(receiveBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_RECEIVE, sqlDetail.getStationId(), OrderConstant.MESSAGE_BELL_UNREAD);
-            messageBellService.save(receiveBell);
+            //接受收货信息只需 收获站  起始和卸货站 去除
+            if(sqlOrderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_MIDDLE){
+                MessageBell receiveBell = new MessageBell(receiveBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_RECEIVE, sqlDetail.getStationId(), OrderConstant.MESSAGE_BELL_UNREAD);
+                messageBellService.save(receiveBell);
+            }
+            //通知发货站 到站
             MessageBell sendBell = new MessageBell(sendBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_SEND, sqlOrder.getStartStation().getId(), OrderConstant.MESSAGE_BELL_UNREAD);
             messageBellService.save(sendBell);
         }else if(type == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
