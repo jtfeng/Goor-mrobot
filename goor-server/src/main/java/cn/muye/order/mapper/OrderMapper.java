@@ -21,7 +21,7 @@ public interface OrderMapper {
 
     void returnToWaitOrder(@Param("id") Long orderId, @Param("status")Integer status);
 
-    List<Order> listOrdersByStation(@Param("stationId")Long stationId);
+    List<Order> listOrdersByStation(@Param("stationId") Long stationId, @Param("beforeTime")Date beforeTime, @Param("currentTime")Date currentTime);
 
     Order findFirstWaitOrder(List<Long> stationList);
 

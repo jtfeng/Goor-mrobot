@@ -905,4 +905,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
         }
     }
+
+    @Override
+    public Long getRobotSceneId(Long robotId) {
+        return robotMapper.getRobotSceneId(robotId);
+    }
 }
