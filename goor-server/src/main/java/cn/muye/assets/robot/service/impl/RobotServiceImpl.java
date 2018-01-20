@@ -335,9 +335,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 }
             }else{
                 availableRobot = robotDb;
-                //如果找到了可用机器人，就返回结果
-                robotRoadPathResultReturn = robotRoadPathResult;
             }
+            //如果找到了可用机器人，就返回结果
+            robotRoadPathResultReturn = robotRoadPathResult;
             stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             break;
