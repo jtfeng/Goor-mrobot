@@ -253,6 +253,7 @@ public class PathUtil {
      */
     public static void clearPathCache(Long storeId,String sceneName) {
         //清空路径图、云端/工控路径、点的缓存
+        logger.info("#############清空场景" + sceneName + "的路径图、云端/工控路径、点的缓存");
         CacheInfoManager.removeRoadPathMapsCache(storeId, sceneName);
         CacheInfoManager.removeRoadPathDetailsCache(storeId, sceneName, Constant.PATH_TYPE_X86);
         CacheInfoManager.removeRoadPathDetailsCache(storeId, sceneName, Constant.PATH_TYPE_CLOUD);

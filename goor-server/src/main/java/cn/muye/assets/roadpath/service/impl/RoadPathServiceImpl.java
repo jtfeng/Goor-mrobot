@@ -90,6 +90,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 restrictedEndtime = String.valueOf(body.get("restrictedEndtime"));
             }
 
+            String sceneName = null;
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
             if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD) || pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
                 checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
@@ -116,6 +117,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 this.roadPathMapper.insert(roadPath);
                 packageRoadPathRelations(points, roadPath);
+                sceneName = roadPath.getSceneName();
             } else if (pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
                 checkArgument(points.size() == 2, "工控路径点组合只能两个点（开始点和结束点）");
                 Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
@@ -135,6 +137,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 }};
                 setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 this.roadPathMapper.insert(roadPath);
+                sceneName = roadPath.getSceneName();
             }
 
             //清空某场景、某门店下的路径相关的缓存
@@ -187,7 +190,6 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 int updateCount = this.roadPathMapper.updateByPrimaryKeySelective(roadPath);
                 log.info("当前更新的数据记录条数为 ：" + updateCount);
                 packageRoadPathRelations(points, roadPath);
-                return;
             } else if (pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
                 //如果是工控路径还得判断路径ID不为空
                 String pathId = String.valueOf(checkNotNull(body.get("pathId"), "路径 ID 编号不允许为空，请重新输入!"));
@@ -208,8 +210,9 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 log.info("当前更新的数据记录条数为 ：" + updateCount);
             }
 
+            RoadPath roadPathDB = findById(roadPath.getId());
             //清空某场景、某门店下的路径相关的缓存
-            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, roadPathDB.getSceneName());
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -441,7 +444,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         this.roadPathMapper.insert(roadPath);
         packageRoadPathRelations(roadPathPointIds, roadPath);
         //清空某场景、某门店下的路径相关的缓存
-        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, roadPath.getSceneName());
     }
 
     @Override
@@ -451,8 +454,10 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         criteria.andCondition("ID=" + roadPath.getId());
         this.roadPathMapper.updateByExampleSelective(roadPath,example);
         packageRoadPathRelations(roadPathPointIds, roadPath);
+
+        RoadPath roadPathDB = findById(roadPath.getId());
         //清空某场景、某门店下的路径相关的缓存
-        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, roadPathDB.getSceneName());
     }
 
     @Override
@@ -597,10 +602,15 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     @Override
     public int deleteById(Long id) {
         try {
+            RoadPath roadPath = findById(id);
+            if(roadPath == null) {
+                log.info("要删除的路径ID" + id + "不存在");
+                return 0;
+            }
             int deleteRowCount = super.deleteById(id);
             this.roadPathMapper.deleteRoadPathPointsByPathId(id);//删除与路径关联的 MapPoint 信息
             //清空某场景、某门店下的路径相关的缓存
-            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, roadPath.getSceneName());
             return deleteRowCount;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -746,4 +756,67 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     public List<String> findGongkongPathIds(Long sceneId) {
         return roadPathMapper.findGongkongPathIds(sceneId);
     }
+
+    /**
+     * 以下复写基础增删改方法加入取消缓存
+     * @param entity
+     * @return
+     */
+    @Override
+    public int update(RoadPath entity) {
+        String sceneName = entity.getSceneName();
+        if(StringUtil.isNullOrEmpty(sceneName)) {
+            log.info("场景名为空，不清空缓存");
+        }
+        else {
+            //清空某场景、某门店下的路径相关的缓存
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, entity.getSceneName());
+        }
+        return super.update(entity);
+    }
+
+    @Override
+    public int save(RoadPath entity) {
+        String sceneName = entity.getSceneName();
+        if(StringUtil.isNullOrEmpty(sceneName)) {
+            log.info("场景名为空，不清空缓存");
+        }
+        else {
+            //清空某场景、某门店下的路径相关的缓存
+            PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, entity.getSceneName());
+        }
+        return super.save(entity);
+    }
+
+    @Override
+    public int delete(RoadPath entity) {
+        RoadPath roadPathDB = findById(entity.getId());
+        if(roadPathDB == null) {
+            log.info("要删除的路径ID" + entity.getId() + "不存在");
+            return 0;
+        }
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, roadPathDB.getSceneName());
+        return super.delete(roadPathDB);
+    }
+
+    @Override
+    public void delete(List<RoadPath> entityList){
+        for(RoadPath entity : entityList){
+            delete(entity);
+        }
+    }
+
+    @Override
+    public int updateSelective(RoadPath entity) {
+        RoadPath roadPathDB = findById(entity.getId());
+        if(roadPathDB == null) {
+            log.info("要更新的路径ID" + entity.getId() + "不存在");
+            return 0;
+        }
+        //清空某场景、某门店下的路径相关的缓存
+        PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, roadPathDB.getSceneName());
+        return super.updateSelective(entity);
+    }
+
 }
