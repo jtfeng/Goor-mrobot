@@ -63,6 +63,7 @@ import java.util.UUID;
 public class ConsumerCommon {
     private static Logger logger = Logger.getLogger(ConsumerCommon.class);
 
+    private static final int MAGIC_NUM_THREE = 3;
 //    @Autowired
 //    private ReceiveMessageService receiveMessageService;
 
@@ -460,15 +461,18 @@ public class ConsumerCommon {
                 ret[i] = bytes[i] & 0xFF;
             }
 
-            ChargeInfo chargeInfo = new ChargeInfo();
-            chargeInfo.setPowerPercent(ret[0]);
-            String binStr = StringUtil.intToBit(ret[1], 8); //转成8位二进制数据
-            chargeInfo.setChargingStatus(Integer.parseInt(binStr.charAt(3) + ""));
-            chargeInfo.setDeviceId(messageInfo.getSenderId());
-            chargeInfo.setCreateTime(messageInfo.getSendTime());
-            chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            chargeInfo.setAutoCharging(ret[2]); //byte 2：系统状态ex： BIT0 = 0  自动回充口没有充电；BIT0 = 1 自动回冲口正在充电
-            saveAndCheckChargeInfo(messageInfo.getSenderId(), chargeInfo);
+            //屏蔽有些电源板上传数据数组长度为2
+            if(ret.length >= MAGIC_NUM_THREE){
+                ChargeInfo chargeInfo = new ChargeInfo();
+                chargeInfo.setPowerPercent(ret[0]);
+                String binStr = StringUtil.intToBit(ret[1], 8); //转成8位二进制数据
+                chargeInfo.setChargingStatus(Integer.parseInt(binStr.charAt(3) + ""));
+                chargeInfo.setDeviceId(messageInfo.getSenderId());
+                chargeInfo.setCreateTime(messageInfo.getSendTime());
+                chargeInfo.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                chargeInfo.setAutoCharging(ret[2]); //byte 2：系统状态ex： BIT0 = 0  自动回充口没有充电；BIT0 = 1 自动回冲口正在充电
+                saveAndCheckChargeInfo(messageInfo.getSenderId(), chargeInfo);
+            }
         } catch (Exception e) {
             logger.error("consumer directAppSubPower exception", e);
         }
