@@ -77,4 +77,18 @@ public class MissionItemTaskServiceImpl
         example.setOrderByClause("ID ASC");
         return myMapper.selectByExample(example);
     }
+
+    @Override
+    public MissionItemTask findExecutingItemTaskById(Long listId) {
+        if (listId == null){
+            return null;
+        }
+        Example example = new Example(MissionItemTask.class);
+        example.createCriteria()
+                .andCondition("MISSION_LIST_ID=", listId)
+                .andCondition("STATE=", MissionFuncsServiceImpl.MissionStateExecuting);
+        example.setOrderByClause("ID ASC");
+        List<MissionItemTask> missionItemTaskList = myMapper.selectByExample(example);
+        return missionItemTaskList.size() > 0 ? missionItemTaskList.get(0) : null;
+    }
 }

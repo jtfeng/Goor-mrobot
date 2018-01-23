@@ -1,11 +1,13 @@
 package cn.muye.mission.service.impl;
 
+import cn.mrobot.bean.alert.AlertTypeEnum;
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.LogType;
+import cn.mrobot.bean.log.alert.LogAlert;
 import cn.mrobot.bean.mission.MissionWarning;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
@@ -17,12 +19,15 @@ import cn.mrobot.bean.websocket.WSMessage;
 import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.FileUtils;
+import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.station.service.StationService;
+import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.log.alert.service.LogAlertService;
 import cn.muye.mission.bean.RobotPositionRecord;
 import cn.muye.mission.mapper.MissionWarningMapper;
 import cn.muye.mission.service.MissionItemTaskService;
@@ -75,6 +80,12 @@ public class MissionWarningServiceImpl implements MissionWarningService {
     private MessageBellService messageBellService;
     @Autowired
     private WebSocketSendMessage webSocketSendMessage;
+    @Autowired
+    private ElevatorNoticeService elevatorNoticeService;
+    @Autowired
+    private MapInfoService mapInfoService;
+    @Autowired
+    private LogAlertService logAlertService;
 
     @Override
     public boolean hasExistWarning(MissionWarning missionWarning) {
@@ -181,8 +192,26 @@ public class MissionWarningServiceImpl implements MissionWarningService {
         for (Robot robot : busyRobotList) {
             //加入忙碌机器人列表
             busyRobotCode.add(robot.getCode());
+            //坐标判定
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(robot.getCode());
             if (null != currentPoseInfo) {
+                //电梯等待点
+                boolean hasElevatorNotice = elevatorNoticeService.hasLastRobotElevatorNotice(robot.getCode());
+                if(hasElevatorNotice){
+                    continue;
+                }
+                //检测机器人的执行任务状态
+                MissionListTask missionListTask =  missionListTaskService.findLastByRobotCode(robot.getCode());
+                if(missionListTask != null){
+                    MissionItemTask executingMissionItem = missionItemTaskService.findExecutingItemTaskById(missionListTask.getId());
+                    //正在执行的item为装卸货的时候,跳出本次循环
+                    if(executingMissionItem!= null &&
+                            (executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_load)
+                                    ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
+                                    ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload))){
+                        continue;
+                    }
+                }
                 //获取到当前机器坐标
                 MapPoint currentPosition = parsePoseData(currentPoseInfo);
                 LinkedList<RobotPositionRecord> robotPositionRecordList = CacheInfoManager.getRobotPositionRecordsCache(robot.getCode());
@@ -222,7 +251,7 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                         }else {
                             message =  robot.getCode() + "已停滞超过5分钟";
                         }
-                        sendWebSocketSendMessage(message, robot.getId());
+                        sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_PATH_MOVE_OVERTIME.getCode()));
                     }
                 }
             } else {
@@ -233,14 +262,14 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                     int minsGap = DateTimeUtils.getTimeGap(new Date(), lastRobotPositionRecord.getRecordDate());
                     if(minsGap >= 5){
                         //提醒已离线 5分钟
-                        String message = "机器人" + robot.getCode() + "已离线";
+                        String message = robot.getCode() + "已离线超过5分钟";
                         LOGGER.info(message);
-                        sendWebSocketSendMessage(message, robot.getId());
+                        sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
                     }
                 }else {
-                    String message = "机器人" + robot.getCode() + "已离线";
+                    String message = robot.getCode() + "已离线";
                     LOGGER.info(message);
-                    sendWebSocketSendMessage(message, robot.getId());
+                    sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
                 }
             }
         }
@@ -266,6 +295,25 @@ public class MissionWarningServiceImpl implements MissionWarningService {
         webSocketSendMessage.sendWebSocketMessage(ws);
     }
 
+    //保存警告信息至数据库内
+    private void sendLogAlert(Robot robot, String message, String alertCode){
+        //保存前查询该机器人最近的一条报警日志
+        LogAlert sameAlert = logAlertService.findLastSameAlert(robot.getCode(), message, alertCode);
+        if(sameAlert != null){
+            int gap =DateTimeUtils.getTimeGap(new Date(), sameAlert.getAlertTime());
+            if(gap < 5){
+                return;
+            }
+        }
+        LogAlert logAlert = new LogAlert();
+        logAlert.setRobotCode(robot.getCode());
+        logAlert.setAlertTime(new Date());
+        logAlert.setAlertCode(alertCode);
+        logAlert.setDescription(message);
+        logAlertService.save(logAlert);
+        sendWebSocketSendMessage(message, robot.getId());
+    }
+
     /**
      * 获取机器人当前地图信息
      *
@@ -289,7 +337,7 @@ public class MissionWarningServiceImpl implements MissionWarningService {
             String sceneName = mapObject.getString(TopicConstants.SCENE_NAME);
             MapInfo mapInfo = CacheInfoManager.getMapOriginalCache(FileUtils.parseMapAndSceneName(mapName, sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID));
             if (mapInfo != null) {
-                return mapInfo;
+                return mapInfoService.getMapInfo(mapInfo.getId());
             }
         }
         return null;
