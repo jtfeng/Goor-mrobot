@@ -198,6 +198,8 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                 //电梯等待点
                 boolean hasElevatorNotice = elevatorNoticeService.hasLastRobotElevatorNotice(robot.getCode());
                 if(hasElevatorNotice){
+                    //清除坐标值，防止执行下个任务检测正好坐标无变化
+                    CacheInfoManager.removeRobotPositionRecordsCache(robot.getCode());
                     continue;
                 }
                 //检测机器人的执行任务状态
@@ -209,6 +211,8 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                             (executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_load)
                                     ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
                                     ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload))){
+                        //清除坐标值
+                        CacheInfoManager.removeRobotPositionRecordsCache(robot.getCode());
                         continue;
                     }
                 }
