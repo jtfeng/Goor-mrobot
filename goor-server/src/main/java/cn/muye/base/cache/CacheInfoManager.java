@@ -160,6 +160,10 @@ public class CacheInfoManager implements ApplicationContextAware {
         messageCache.put(info.getSenderId(), info);
     }
 
+    public static void removeMessageCache(String code) {
+        messageCache.remove(code);
+    }
+
     public static MessageInfo getMessageCache(String senderId) {
         return messageCache.get(senderId);
     }

@@ -9,6 +9,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.log.alert.LogAlert;
 import cn.mrobot.bean.mission.MissionWarning;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataTwoElevator;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.bean.mission.task.MissionTask;
@@ -20,6 +21,7 @@ import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.FileUtils;
 import cn.muye.area.map.service.MapInfoService;
+import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.assets.robot.service.RobotService;
@@ -86,6 +88,8 @@ public class MissionWarningServiceImpl implements MissionWarningService {
     private MapInfoService mapInfoService;
     @Autowired
     private LogAlertService logAlertService;
+    @Autowired
+    private PointService pointService;
 
     @Override
     public boolean hasExistWarning(MissionWarning missionWarning) {
@@ -196,28 +200,51 @@ public class MissionWarningServiceImpl implements MissionWarningService {
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(robot.getCode());
             if (null != currentPoseInfo) {
                 //电梯等待点
-                boolean hasElevatorNotice = elevatorNoticeService.hasLastRobotElevatorNotice(robot.getCode());
+                /*boolean hasElevatorNotice = elevatorNoticeService.hasLastRobotElevatorNotice(robot.getCode());
                 if(hasElevatorNotice){
                     //清除坐标值，防止执行下个任务检测正好坐标无变化
                     CacheInfoManager.removeRobotPositionRecordsCache(robot.getCode());
                     continue;
-                }
+                }*/
+                //获取到当前机器坐标
+                MapPoint currentPosition = parsePoseData(currentPoseInfo);
                 //检测机器人的执行任务状态
                 MissionListTask missionListTask =  missionListTaskService.findLastByRobotCode(robot.getCode());
                 if(missionListTask != null){
                     MissionItemTask executingMissionItem = missionItemTaskService.findExecutingItemTaskById(missionListTask.getId());
-                    //正在执行的item为装卸货的时候,跳出本次循环
-                    if(executingMissionItem!= null &&
-                            (executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_load)
-                                    ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
-                                    ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload))){
-                        //清除坐标值
-                        CacheInfoManager.removeRobotPositionRecordsCache(robot.getCode());
-                        continue;
+                    //正在执行的item为装卸货的时候,跳出本次循环，若为电梯任务 判定是否在等待点附近
+                    if(executingMissionItem!= null){
+                        if(executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_load)
+                                ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
+                                ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload)){
+                            //清除坐标值
+                            CacheInfoManager.removeRobotPositionRecordsCache(robot.getCode());
+                            continue;
+                        }else if(executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_elevator)){
+                            JsonMissionItemDataTwoElevator jsonMissionItemDataTwoElevator =
+                                    JSON.parseObject(executingMissionItem.getData(),JsonMissionItemDataTwoElevator.class);
+                            if(jsonMissionItemDataTwoElevator != null && jsonMissionItemDataTwoElevator.getElevators() != null
+                                    &&jsonMissionItemDataTwoElevator.getElevators().size() > 0){
+                                JsonMissionItemDataTwoElevator.ElevatorsEntity elevatorsEntity = jsonMissionItemDataTwoElevator.getElevators().get(0);
+                                MapPoint waitPoint = pointService.findById(elevatorsEntity.getWaitPointId());
+                                MapInfo currentMapInfo = getCurrentMapInfo(robot.getCode());
+                                if(currentMapInfo!= null
+                                        && waitPoint.getSceneName().equals(currentMapInfo.getSceneName())
+                                        && waitPoint.getMapName().equals(currentMapInfo.getMapName())){
+                                    //若在同一场景和地图下计算距离
+                                    long distance = PathUtil.calDistance(currentPosition, waitPoint);
+                                    LOGGER.info("机器人（" + robot.getCode() + "）当前位置离电梯等待点为" + distance + "mm");
+                                    //机器人当前位置与电梯等待点距离小于0.5m时，不产生报警 并清除坐标缓存
+                                    if(distance < 500){
+                                        CacheInfoManager.removeRobotPositionRecordsCache(robot.getCode());
+                                        continue;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-                //获取到当前机器坐标
-                MapPoint currentPosition = parsePoseData(currentPoseInfo);
+                //获取 机器人位置坐标缓存
                 LinkedList<RobotPositionRecord> robotPositionRecordList = CacheInfoManager.getRobotPositionRecordsCache(robot.getCode());
                 //存在位置往内部添加坐标记录
                 if(robotPositionRecordList == null){
