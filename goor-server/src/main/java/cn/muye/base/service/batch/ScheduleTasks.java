@@ -2,6 +2,7 @@ package cn.muye.base.service.batch;
 
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.area.pose.service.CurrentPoseService;
+import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.assets.roadpath.service.RoadPathLockService;
 import cn.muye.base.export.service.ExportService;
 import cn.muye.base.model.message.OffLineMessage;
@@ -57,6 +58,9 @@ public class ScheduleTasks {
 
     @Autowired
     private RoadPathLockService roadPathLockService;
+
+    @Autowired
+    private ElevatorNoticeService elevatorNoticeService;
 
     private final static Object lock = new Object();
 
@@ -247,6 +251,18 @@ public class ScheduleTasks {
             exportService.exportLogToFile();
         } catch (Exception e) {
             logger.error("Scheduled exportLogToFile LOG_CHARGE_INFO，LOG_INFO，LOG_MISSION", e);
+        }
+    }
+
+    /**
+     * 添加定时任务，每10秒检查一次有没有电梯pad消息缓存，有，取出消息进行推送
+     */
+    @Scheduled(cron = "*/10 * * * * ?")
+    public void sendElevatorNoticeCache() {
+        try {
+            elevatorNoticeService.sendElevatorNoticeCache();
+        } catch (Exception e) {
+            logger.error("Scheduled sendElevatorNoticeCache  error", e);
         }
     }
 
