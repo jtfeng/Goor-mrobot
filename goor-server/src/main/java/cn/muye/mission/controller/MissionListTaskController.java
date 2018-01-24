@@ -107,7 +107,7 @@ public class MissionListTaskController {
     @GetMapping("/list")
     @ApiOperation(
             value = "查询任务列表数据",
-            notes = "查询任务列表数据")
+            notes = "查询任务列表                                                                                                                                               数据")
     public AjaxResult getMissionListTaskList(WhereRequest whereRequest) {
         List<MissionListTask> list = missionListTaskService.tasksList(whereRequest);
         PageInfo<MissionListTask> pageList = new PageInfo<>(list);
