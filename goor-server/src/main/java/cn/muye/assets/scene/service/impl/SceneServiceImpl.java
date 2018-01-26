@@ -316,7 +316,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         commonInfo.setTopicName(TopicConstants.AGENT_PUB);
         commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
         commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>() {{
-            put("pub_name", TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE_CONFIRM);
+            put("pub_name", TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE);
             put("uuid", uuid);
             put("data", result ? "1" : "0");
         }}))));
