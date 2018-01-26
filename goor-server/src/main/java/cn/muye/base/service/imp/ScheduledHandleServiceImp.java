@@ -104,8 +104,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                     //如果大于15秒
                     if (sendTime == null || (currentTime - sendTime > Constant.CHECK_IF_OFFLINE_TIME)) {
                         CacheInfoManager.setRobotOnlineCache(code, false);
-                        //同时清除坐标缓存
-                        CacheInfoManager.removeMessageCache(code);
+                        //同时清除坐标缓存,暂去除
+                        //CacheInfoManager.removeMessageCache(code);
                     } else {
                         CacheInfoManager.setRobotOnlineCache(code, true);
                     }

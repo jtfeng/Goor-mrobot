@@ -196,6 +196,15 @@ public class MissionWarningServiceImpl implements MissionWarningService {
         for (Robot robot : busyRobotList) {
             //加入忙碌机器人列表
             busyRobotCode.add(robot.getCode());
+            //先判定是否在线
+            Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+            if (flag == null || flag == false) {
+                //机器人离线
+                String message = robot.getCode() + "已离线";
+                LOGGER.info(message);
+                sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
+                continue;
+            }
             //坐标判定
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(robot.getCode());
             if (null != currentPoseInfo) {
@@ -218,6 +227,7 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                                 ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_loadNoShelf)
                                 ||executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_unload)){
                             //清除坐标值
+                            LOGGER.info("机器人（" + robot.getCode() + "）当前处在装卸货任务中，清除坐标点");
                             CacheInfoManager.removeRobotPositionRecordsCache(robot.getCode());
                             continue;
                         }else if(executingMissionItem.getName().equals(MissionFuncsServiceImpl.MissionItemName_elevator)){
@@ -271,37 +281,27 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                                 totalDistance += PathUtil.calDistance(positionRecord, lastMapPoint);;
                             }
                         }
-                    }
-                    LOGGER.info("机器人（" + robot.getCode() + "）5分钟内位移距离为" + totalDistance + "mm");
-                    //判定totalDistance, 坐标变化总和小于1m
-                    if(totalDistance < 1000){
-                        MapInfo currentMapInfo = getCurrentMapInfo(robot.getCode());
-                        String message = "";
-                        if(currentMapInfo != null){
-                            message =  robot.getCode() + "在" + currentMapInfo.getLogicFloor() + "楼停滞超过5分钟";
-                        }else {
-                            message =  robot.getCode() + "已停滞超过5分钟";
+                        LOGGER.info("机器人（" + robot.getCode() + "）5分钟内位移距离为" + totalDistance + "mm");
+                        //判定totalDistance, 坐标变化总和小于1m
+                        if(totalDistance < 1000){
+                            MapInfo currentMapInfo = getCurrentMapInfo(robot.getCode());
+                            String message = "";
+                            if(currentMapInfo != null){
+                                message =  robot.getCode() + "在" + currentMapInfo.getLogicFloor() + "楼停滞超过5分钟";
+                            }else {
+                                message =  robot.getCode() + "已停滞超过5分钟";
+                            }
+                            sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_PATH_MOVE_OVERTIME.getCode()));
                         }
-                        sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_PATH_MOVE_OVERTIME.getCode()));
+                    }else {
+                        LOGGER.info("机器人（" + robot.getCode() + "）位置坐标数量为" + robotPositionRecordList.size());
                     }
                 }
             } else {
                 LOGGER.info("未获取到当前机器人（" + robot.getCode() + "）实时坐标");
-                LinkedList<RobotPositionRecord> robotPositionRecordList = CacheInfoManager.getRobotPositionRecordsCache(robot.getCode());
-                if(robotPositionRecordList != null){
-                    RobotPositionRecord lastRobotPositionRecord = robotPositionRecordList.getLast();
-                    int minsGap = DateTimeUtils.getTimeGap(new Date(), lastRobotPositionRecord.getRecordDate());
-                    if(minsGap >= 5){
-                        //提醒已离线 5分钟
-                        String message = robot.getCode() + "已离线超过5分钟";
-                        LOGGER.info(message);
-                        sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
-                    }
-                }else {
-                    String message = robot.getCode() + "已离线";
-                    LOGGER.info(message);
-                    sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
-                }
+                String message = robot.getCode() + "已离线";
+                LOGGER.info(message);
+                sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
             }
         }
         //除去非忙碌状态下机器人的map坐标点
