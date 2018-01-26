@@ -193,7 +193,13 @@ public class ConsumerCommon {
                     logger.info("   -| 机器人编号为：" + robotCode + "、发送的消息格式类型为：" + TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE);
                     logger.info("       -| 接收到的实际 JSON 字符串内容为：" + JSONObject.toJSONString(jsonObjectData));
                     // 机器人开机重新修改与指定机器人的绑定关系
-                    sceneService.updateGetRobotStartAssets(robotCode, JSONObject.parseObject(jsonObjectData.getString(TopicConstants.DATA)));
+                    try {
+                        sceneService.updateGetRobotStartAssets(robotCode, JSONObject.parseObject(jsonObjectData.getString(TopicConstants.DATA)));
+                        sceneService.replyUpdateCloudAssetsResult(uuid, robotCode, true);
+                    }catch (Exception e) {
+                        sceneService.replyUpdateCloudAssetsResult(uuid, robotCode, false);
+                        logger.error(e.getMessage(), e);
+                    }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.ELEVATOR_NOTICE)) {
                     // 电梯pad消息通知,websocket消息通知电梯pad,pad接收成功后通知mission
                     logger.info("电梯pad消息通知,jsonObjectData=" + jsonObjectData);

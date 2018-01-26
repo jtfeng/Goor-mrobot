@@ -226,7 +226,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
      * @param latestRobotAssets 最新反馈的资源绑定关系
      */
     @Override
-    public void updateGetRobotStartAssets(String robotCode, JSONObject latestRobotAssets) {
+    public void updateGetRobotStartAssets(String robotCode, JSONObject latestRobotAssets) throws Exception {
         // 传递的指定机器人的机器人编号
         Robot currentRobot = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (currentRobot == null) {return;}
@@ -307,6 +307,29 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         } catch (Exception e) {
             e.printStackTrace();
             LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, e.getMessage());
+        }
+    }
+
+    @Override
+    public void replyUpdateCloudAssetsResult(String uuid, String robotCode, Boolean result) {
+        CommonInfo commonInfo = new CommonInfo();
+        commonInfo.setTopicName(TopicConstants.AGENT_PUB);
+        commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
+        commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>() {{
+            put("pub_name", TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_UPDATE_CONFIRM);
+            put("uuid", uuid);
+            put("data", result ? "1" : "0");
+        }}))));
+        MessageInfo messageInfo = new MessageInfo();
+        messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
+        messageInfo.setReceiverId(robotCode);
+        messageInfo.setSenderId("goor-server");
+        messageInfo.setMessageType(MessageType.ROBOT_INFO);
+        messageInfo.setMessageText(JSON.toJSONString(commonInfo));
+        try {
+            messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
