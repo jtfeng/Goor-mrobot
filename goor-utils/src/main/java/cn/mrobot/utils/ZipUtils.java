@@ -64,7 +64,7 @@ public class ZipUtils {
             }
             zos.flush();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             LOGGER.error("文件压缩出错", e);
         }
     }
@@ -198,8 +198,9 @@ public class ZipUtils {
                 LOGGER.info("解压后保存的文件夹路径 entryFilePath= " + entryFilePath);
                 String parent = entryFile.getParent();
                 File parentFile = new File(parent);
-                if (!parentFile.exists())
+                if (!parentFile.exists()) {
                     parentFile.mkdirs();
+                }
 
                 entryFile.createNewFile();
                 //写入文件
@@ -238,7 +239,7 @@ public class ZipUtils {
 //        try {
 //            zip(zipPath, savePath, zipFileName);
 //        } catch (Exception e) {
-//            e.printStackTrace();
+//            log.error(e, e.getMessage());
 //        }
 
         String zipFilePath = "E:\\share\\map_server\\maps\\maps_2017-07-15_05-28-13.zip";
@@ -246,7 +247,7 @@ public class ZipUtils {
         try {
             unzip(zipFilePath, unzipFilePath, false);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 }

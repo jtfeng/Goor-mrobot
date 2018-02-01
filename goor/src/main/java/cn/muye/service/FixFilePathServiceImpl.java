@@ -26,10 +26,10 @@ public class FixFilePathServiceImpl implements FixFilePathService {
             logger.info(returnString);
             return AjaxResult.success(returnString,"读取文件成功");
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return AjaxResult.failed("未获取相应的文件");
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return AjaxResult.failed("IO流处理异常");
         }
 

@@ -6,6 +6,8 @@ import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequestMapping(value = "orderSetting")
 public class OrderSettingController extends BaseController{
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderSettingController.class);
     @Autowired
     private OrderSettingService orderSettingService;
     @Autowired
@@ -38,7 +41,7 @@ public class OrderSettingController extends BaseController{
             OrderSetting orderSetting = orderSettingService.getById(id);
             return AjaxResult.success(orderSetting);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("查询配置内部出错");
         }
     }
@@ -55,7 +58,7 @@ public class OrderSettingController extends BaseController{
             List<OrderSetting> orderSetting = orderSettingService.listAvailableOrderSettingByStationId(stationId);
             return AjaxResult.success(orderSetting);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("查询配置列表内部出错");
         }
     }
@@ -81,7 +84,7 @@ public class OrderSettingController extends BaseController{
             orderSettingService.saveOrderSetting(orderSetting);
             return AjaxResult.success(orderSetting, "添加配置成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("添加配置内部出错");
         }
     }
@@ -101,7 +104,7 @@ public class OrderSettingController extends BaseController{
             orderSettingService.updateOrderSetting(orderSetting);
             return AjaxResult.success(orderSetting, "修改配置成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("修改配置内部出错");
         }
     }
@@ -128,7 +131,7 @@ public class OrderSettingController extends BaseController{
             });
             return AjaxResult.success("修改默认配置成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("修改默认配置内部出错");
         }
     }
@@ -146,7 +149,7 @@ public class OrderSettingController extends BaseController{
             orderSettingService.deleteOrderSetting(id);
             return AjaxResult.success("删除配置成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("删除配置内部出错");
         }
     }

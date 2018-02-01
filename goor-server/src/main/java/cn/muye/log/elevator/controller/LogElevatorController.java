@@ -9,6 +9,8 @@ import cn.muye.log.elevator.service.LogElevatorService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,6 +31,7 @@ import java.util.Map;
         description = "电梯服务功能")
 public class LogElevatorController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogElevatorController.class);
     @Autowired
     LogElevatorService logElevatorService;
 
@@ -64,7 +67,7 @@ public class LogElevatorController {
                 throw new Exception("电梯日志新增失败");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
     }

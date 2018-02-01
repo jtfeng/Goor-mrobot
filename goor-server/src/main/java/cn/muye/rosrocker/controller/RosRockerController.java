@@ -11,6 +11,8 @@ import cn.muye.base.service.MessageSendHandleService;
 import com.alibaba.fastjson.JSON;
 import static com.google.common.base.Preconditions.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,7 @@ import java.util.UUID;
 @RequestMapping("rosRocker")
 public class RosRockerController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RosRockerController.class);
     private static final double COORDINATE_CONVERT_RATIO = 0.02;
     private static final double MAX_LINEAR_VELOCITY = 0.7;
     private static final double MAX_ANGULAR_VELOCITY = 0.8;
@@ -60,7 +63,7 @@ public class RosRockerController {
             Thread.sleep(500);
             return AjaxResult.success();
         }catch (Exception e){
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
     }

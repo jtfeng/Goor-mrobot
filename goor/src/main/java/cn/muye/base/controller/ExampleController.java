@@ -173,7 +173,7 @@ public class ExampleController {
             appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
             return AjaxResult.success();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return AjaxResult.failed();
         }
     }
@@ -247,7 +247,7 @@ public class ExampleController {
             appSubService.sendTopic(TopicConstants.APP_PUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
             return AjaxResult.success();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return AjaxResult.failed();
         }
     }

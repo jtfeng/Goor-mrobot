@@ -11,6 +11,8 @@ import cn.muye.mission.service.MissionWarningService;
 import cn.muye.util.PathUtil;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +29,7 @@ import java.util.List;
 @RequestMapping(value = "missionWarning")
 public class MissionWarningController extends BaseController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MissionWarningController.class);
     @Autowired
     private MissionWarningService missionWarningService;
 
@@ -37,7 +40,7 @@ public class MissionWarningController extends BaseController {
             missionWarningService.checkRobotWarningState();
             return AjaxResult.success("test成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("test失败");
         }
 
@@ -62,7 +65,7 @@ public class MissionWarningController extends BaseController {
             }
             return AjaxResult.success("test成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("test失败");
         }
 
@@ -74,7 +77,7 @@ public class MissionWarningController extends BaseController {
             LinkedList<RobotPositionRecord> list = CacheInfoManager.getRobotPositionRecordsCache(robotCode);
             return AjaxResult.success(list);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("test失败");
         }
 
@@ -100,7 +103,7 @@ public class MissionWarningController extends BaseController {
             }
             return AjaxResult.success(totalDistance);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("test失败");
         }
 
@@ -119,7 +122,7 @@ public class MissionWarningController extends BaseController {
             PageInfo<MissionWarning> pageInfo = new PageInfo<>(missionWarningList);
             return AjaxResult.success(pageInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("查询超时警报时间错误");
         }
 
@@ -140,7 +143,7 @@ public class MissionWarningController extends BaseController {
             missionWarningService.save(missionWarning);
             return AjaxResult.success("新增警报提示成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("新增警报提示失败");
         }
 
@@ -158,7 +161,7 @@ public class MissionWarningController extends BaseController {
             missionWarningService.update(missionWarning);
             return AjaxResult.success("修改警报提示成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("修改警报提示失败");
         }
 

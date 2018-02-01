@@ -169,7 +169,7 @@ public class RobotController {
             robotPasswordService.batchUpdateRobotPwdList(robot.getPasswords());
             return AjaxResult.success("修改密码成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("修改密码出错");
         }
     }

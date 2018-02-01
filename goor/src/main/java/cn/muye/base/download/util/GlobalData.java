@@ -1,5 +1,8 @@
 package cn.muye.base.download.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,7 +20,9 @@ public class GlobalData {
 //	public static void main(String[] args) {
 //
 //	}
-	
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalData.class);
+
 	private Properties properties;
 	private String filePath;
 	private GlobalData(String filePath){
@@ -34,9 +39,9 @@ public class GlobalData {
 			properties.load(is);
 			return properties;
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -53,7 +58,7 @@ public class GlobalData {
 			properties.store(oFile, "add counter!");
 			oFile.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 	
@@ -64,7 +69,7 @@ public class GlobalData {
 			try {
 				dir.mkdir();
 			} catch (SecurityException e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
 		return path;
@@ -76,7 +81,7 @@ public class GlobalData {
 			try {
 				dir.mkdir();
 			} catch (SecurityException e) {
-				e.printStackTrace();
+				LOGGER.error(e.getMessage(), e);
 			}
 		}
 		return path;

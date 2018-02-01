@@ -1,5 +1,8 @@
 package cn.muye.base.download.file;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -25,6 +28,7 @@ public class FileHelper {
 //	}
 	
 	public static String SYS_LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+	private static final Logger LOGGER = LoggerFactory.getLogger(FileHelper.class);
 
 
 	public static boolean updateFileName(String oldName, String newName){
@@ -57,8 +61,9 @@ public class FileHelper {
 		} else {
 			if (file.isFile()) {
 				return true;
-			}else
+			}else {
 				return false;
+			}
 		}
 
 	}
@@ -71,8 +76,9 @@ public class FileHelper {
 			} else {
 				if (file.isFile()) {
 					return deleteFile(fileName);
-				} else
+				} else {
 					return false;
+				}
 			}
 		}catch (Exception e){
 			return false;
@@ -124,7 +130,7 @@ public class FileHelper {
 					e1.printStackTrace();
 				}
 			}
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 		return res;
 	}
@@ -148,7 +154,7 @@ public class FileHelper {
 			reader.close();
 			gzi.close();
 		}catch(IOException e){
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}finally{
 			if(reader != null){
 				try {
@@ -195,7 +201,7 @@ public class FileHelper {
 			reader.close();
 			processer.cleanUp();
 		}catch(IOException e){
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}finally{
 			if(reader != null){
 				try {
@@ -230,7 +236,7 @@ public class FileHelper {
 			reader.close();
 			processer.cleanUp();
 		}catch(IOException e){
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}finally{
 			if(reader != null){
 				try {
@@ -282,7 +288,7 @@ public class FileHelper {
 					e1.printStackTrace();
 				}
 			}
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 	/**
@@ -307,7 +313,7 @@ public class FileHelper {
 					e1.printStackTrace();
 				}
 			}
-			e.printStackTrace();
+			LOGGER.error(e.getMessage(), e);
 		}
 	}
 

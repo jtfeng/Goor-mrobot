@@ -22,6 +22,8 @@ import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,7 +43,7 @@ import java.util.UUID;
 public class ResourceController extends BaseController {
 
     public static final Integer RESOURCE_TYPE_BASE = 1;
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceController.class);
 
     @Autowired
     private ResourceService resourceService;
@@ -103,7 +105,7 @@ public class ResourceController extends BaseController {
                 return AjaxResult.success(resource, "资源上传成功");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部出错");
         }
         return AjaxResult.failed("文件不能为空");
@@ -123,7 +125,7 @@ public class ResourceController extends BaseController {
             PageInfo<Resource> pageList = new PageInfo<>(resourceList);
             return AjaxResult.success(pageList, "资源查询成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部出错");
         }
 
@@ -167,7 +169,7 @@ public class ResourceController extends BaseController {
                 return ajaxResult;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部出错");
         }
 

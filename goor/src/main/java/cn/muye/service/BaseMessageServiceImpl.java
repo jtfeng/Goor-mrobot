@@ -154,7 +154,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
         try {
             msgSendAsyncTask.taskMsgSend(info);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 
     }

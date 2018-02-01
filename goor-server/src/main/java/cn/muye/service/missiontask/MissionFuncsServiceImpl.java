@@ -590,7 +590,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return;
         }
         prePoint = mp;
@@ -3180,7 +3180,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return;
         }
         prePoint = mp;
@@ -3839,7 +3839,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                                        );
 //                                    }
 //                                } catch (Exception e) {
-//                                    e.printStackTrace();
+//                                    log.error(e, e.getMessage());
 //                                    logger.info("Path Door find RoadPath Error: " + e.getMessage());
 //                                }
                                 //直接通过门对象关联的逻辑路径对象，判断是否加入逻辑路径锁
@@ -4088,7 +4088,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 }
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage(), e);
                         }
                         elevatorsEntities.get(count)
                                 .setDefault_elevator(ev.getDefaultElevator()?1:0);

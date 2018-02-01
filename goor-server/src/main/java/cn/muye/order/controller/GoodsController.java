@@ -8,6 +8,8 @@ import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.GoodsService;
 import com.github.pagehelper.PageInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ import java.util.List;
 @RequestMapping("goods")
 public class GoodsController extends BaseController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GoodsController.class);
     @Autowired
     private GoodsService goodsService;
     @Autowired
@@ -40,7 +43,7 @@ public class GoodsController extends BaseController {
             Goods goods = goodsService.findById(id);
             return AjaxResult.success(goods, "获取货物成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取货物出错");
         }
     }
@@ -57,7 +60,7 @@ public class GoodsController extends BaseController {
             goodsTypeList.forEach(goodsType -> goodsType.setGoodsList(goodsService.listGoodsByType(goodsType.getId())));
             return AjaxResult.success(goodsTypeList,"获取货物类型成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取货物类型出错");
         }
     }
@@ -73,7 +76,7 @@ public class GoodsController extends BaseController {
             List<GoodsType> goodsTypeList = goodsTypeService.listAll();
             return AjaxResult.success(goodsTypeList,"获取货物类型成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取货物类型出错");
         }
     }
@@ -89,7 +92,7 @@ public class GoodsController extends BaseController {
             List<Goods> goodsList = goodsService.listGoodsByType(type);
             return AjaxResult.success(goodsList,"获取货物成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取货物出错");
         }
     }
@@ -107,7 +110,7 @@ public class GoodsController extends BaseController {
             goodsTypeService.save(goodsType);
             return AjaxResult.success(goodsType, "保存货物类型成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("保存货物类型出错");
         }
     }
@@ -124,7 +127,7 @@ public class GoodsController extends BaseController {
             goodsTypeService.updateSelectiveByStoreId(goodsType);
             return AjaxResult.success(goodsType, "修改货物类型成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("修改货物类型出错");
         }
     }
@@ -145,7 +148,7 @@ public class GoodsController extends BaseController {
             goodsTypeService.updateSelectiveByStoreId(goodsType);
             return AjaxResult.success("删除货物类型成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("删除货物类型出错");
         }
     }
@@ -165,7 +168,7 @@ public class GoodsController extends BaseController {
             PageInfo<GoodsType> pageResult = new PageInfo<>(goodsTypes);
             return AjaxResult.success(pageResult, "分页查询货物类型成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("分页查询货物类型出错");
         }
     }
@@ -183,7 +186,7 @@ public class GoodsController extends BaseController {
             goodsService.save(goods);
             return AjaxResult.success(goods, "保存货物成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("保存货物出错");
         }
     }
@@ -200,7 +203,7 @@ public class GoodsController extends BaseController {
             goodsService.updateSelectiveByStoreId(goods);
             return AjaxResult.success(goods, "修改货物成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("修改货物出错");
         }
     }
@@ -218,7 +221,7 @@ public class GoodsController extends BaseController {
             goodsService.fakeDelete(id);
             return AjaxResult.success("删除货物成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("删除货物出错");
         }
     }
@@ -244,7 +247,7 @@ public class GoodsController extends BaseController {
             PageInfo<Goods> pageResult = new PageInfo<>(goodsList);
             return AjaxResult.success(pageResult, "分页查询货物类型成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("分页查询货物类型出错");
         }
     }

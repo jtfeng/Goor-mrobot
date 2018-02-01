@@ -1,11 +1,16 @@
 package cn.mrobot.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 
 /**
  * Created by enva on 2017/5/9.
  */
 public class Base64 {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Base64.class);
 
     public Base64() {
     }
@@ -29,7 +34,7 @@ public class Base64 {
         try {
             return new String(decode(data.toCharArray()));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return null;
         }
 
@@ -217,12 +222,15 @@ public class Base64 {
 
         } finally {
             try {
-                if (fis != null)
+                if (fis != null) {
                     fis.close();
-                if (is != null)
+                }
+                if (is != null) {
                     is.close();
-                if (baos != null)
+                }
+                if (baos != null) {
                     baos.close();
+                }
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -248,12 +256,15 @@ public class Base64 {
 
         } finally {
             try {
-                if (caw != null)
+                if (caw != null) {
                     caw.close();
-                if (in != null)
+                }
+                if (in != null) {
                     in.close();
-                if (fr != null)
+                }
+                if (fr != null) {
                     fr.close();
+                }
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -272,10 +283,12 @@ public class Base64 {
 
         } finally {
             try {
-                if (os != null)
+                if (os != null) {
                     os.close();
-                if (fos != null)
+                }
+                if (fos != null) {
                     fos.close();
+                }
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -292,12 +305,14 @@ public class Base64 {
 
         } finally {
             try {
-                if (os != null)
+                if (os != null) {
                     os.close();
-                if (fos != null)
+                }
+                if (fos != null) {
                     fos.close();
+                }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }

@@ -751,7 +751,7 @@ public class PathUtil {
         try {
             sortByRobotRoadPathResultList(robotRoadPathResultList);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e, e.getMessage());
         }
         System.out.println("排序后");
         displayRoadPathResultList(robotRoadPathResultList);

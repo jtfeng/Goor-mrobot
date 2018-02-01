@@ -305,7 +305,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
             LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, "机器人开机获取云端资源 - 结束");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, e.getMessage());
         }
     }

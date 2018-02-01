@@ -3,6 +3,8 @@ package cn.mrobot.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -14,6 +16,7 @@ import java.util.Collection;
 public class JsonUtils {
 
     private static Gson gson;
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtils.class);
 
     static {
         gson = new GsonBuilder()
@@ -28,10 +31,11 @@ public class JsonUtils {
     public static Object fromJson(String str, Type t){
         Object ret = null;
         try {
-            if (gson != null)
+            if (gson != null) {
                 ret = gson.fromJson(str, t);
+            }
         } catch (JsonSyntaxException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
         return ret;
     }
@@ -39,10 +43,11 @@ public class JsonUtils {
     public static String toJson(Object object, Type t){
         String ret = null;
         try {
-            if (gson != null)
+            if (gson != null) {
                 ret = gson.toJson(object, t);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
         return ret;
     }
