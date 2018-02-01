@@ -900,12 +900,15 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             if (robot != null) {
                 if (busy != null) {
                     robot.setBusy(busy);
+                    logger.info("机器人" + robotCode + "设置为"+ busy +"状态");
                 }
                 if (online != null) {
                     CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
+                    logger.info("机器人" + robotCode + "设置为" + online + "状态");
                 }
                 if (busy != null || online != null) {
                     super.updateSelective(robot);
+                    logger.info("机器人修改状态" + robot.toString());
                 }
             }
         }
