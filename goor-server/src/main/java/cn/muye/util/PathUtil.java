@@ -39,7 +39,7 @@ public class PathUtil {
      * @return
      */
     public static Long calDistance(MapPoint start, MapPoint end) {
-        Long result = 0L;
+        Long result = Long.MAX_VALUE;
         Double db = MathLineUtil.calPointToPointDistance(start.getX(), start.getY(), end.getX(), end.getY())
                  * 1000;//换算成mm
         result = MathLineUtil.doubleToLongRoundHalfUp(db);
@@ -63,7 +63,8 @@ public class PathUtil {
         MapPoint end = roadPathDetail.getEnd();
         logger.info("路径详细start = {},路径详细end = {}", start, end);
         if(start == null || end == null) {
-            logger.error("路径详细起点或终点有一个为空，无法计算距离");
+            logger.error("路径 {}, sceneName = {}, mapName = {}, start = {}, end = {} 详细起点或终点有一个为空，无法计算距离",
+                    roadPathDetail.getPathName(),roadPathDetail.getSceneName(),roadPathDetail.getMapName(), start, end);
             return result;
         }
         if(robotPosition == null) {
@@ -407,7 +408,8 @@ public class PathUtil {
             MapPoint end = roadPathDetail.getEnd();
             logger.info("路径详细start = {},路径详细end = {}", start, end);
             if(start == null || end == null) {
-                logger.error("路径详细起点或终点有一个为空，无法计算补偿");
+                logger.error("路径 {}, sceneName = {}, mapName = {}, start = {}, end = {} 详细起点或终点有一个为空，无法计算距离",
+                        roadPathDetail.getPathName(),roadPathDetail.getSceneName(),roadPathDetail.getMapName(), start, end);
                 return null;
             }
             if(robotPosition == null) {
