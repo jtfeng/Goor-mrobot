@@ -362,7 +362,7 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         } catch (final Exception e) {
             logger.error("Scheduled time synchronized exception", e);
         }
-        System.out.println("*********** x86 time synchronized request ***************");
+        logger.info("*********** x86 time synchronized request ***************");
     }
 
     @Override

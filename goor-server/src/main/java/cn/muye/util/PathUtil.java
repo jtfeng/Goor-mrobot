@@ -748,14 +748,14 @@ public class PathUtil {
             robotRoadPathResultList.add(new RobotRoadPathResult(robot, roadPathResult));
         }
 
-        System.out.println("排序前");
+        logger.info("排序前");
         displayRoadPathResultList(robotRoadPathResultList);
         try {
             sortByRobotRoadPathResultList(robotRoadPathResultList);
         } catch (Exception e) {
-            log.error(e, e.getMessage());
+            logger.error(e, e.getMessage());
         }
-        System.out.println("排序后");
+        logger.info("排序后");
         displayRoadPathResultList(robotRoadPathResultList);
 
     }*/
@@ -766,7 +766,7 @@ public class PathUtil {
      */
     public static void displayRoadPathResultList(List<RobotRoadPathResult> robotRoadPathResultList) {
         for(RobotRoadPathResult robotRoadPathResult : robotRoadPathResultList) {
-            System.out.println("robotName:" + robotRoadPathResult.getRobot().getName()
+            logger.info("robotName:" + robotRoadPathResult.getRobot().getName()
                     + ",weight:" + robotRoadPathResult.getRoadPathResult().getTotalWeight());
         }
     }

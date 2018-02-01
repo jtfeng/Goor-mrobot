@@ -100,7 +100,7 @@ public class ExcelUtil {
                 //工作表名称
                 String sheet_name = workbook.getSheetName(i);
                 int num = sheet.getLastRowNum();
-                System.out.println("工作表" + sheet_name + " 数据有" + num + "行");
+                log.info("工作表" + sheet_name + " 数据有" + num + "行");
                 for (int j = 1; j <= num; j++) {
                     Row row = sheet.getRow(j);
                     if (ifRowNullOrEmpty(row)) {
@@ -187,6 +187,6 @@ public class ExcelUtil {
     public static void main(String[] args) {
         File file = new File("D:\\test.xlsx");
         Map<String, List<Map<String, Object>>> result = getTableSheetData(file);
-        System.out.println("Map<String, List<Map<String, Object>>>Map<String, List<Map<String, Object>>>");
+        log.info("Map<String, List<Map<String, Object>>>Map<String, List<Map<String, Object>>>");
     }
 }

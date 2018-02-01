@@ -237,7 +237,7 @@ public class HttpClientUtil {
             }
             // 把文件转换成流对象FileBody
             File localFile = new File(localFilePath);
-            System.out.println(localFile.getName());
+            logger.info(localFile.getName());
             InputStream in = new FileInputStream(localFile);
             in.skip(jumpSize);
             InputStreamEntity inEntity = new InputStreamEntity(in, localFile.length(), null);
