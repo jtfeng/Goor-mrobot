@@ -374,7 +374,7 @@ public class UserController implements ApplicationContextAware{
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e, e.getMessage());
         }
         return null;
     }*/

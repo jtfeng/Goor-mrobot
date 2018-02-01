@@ -105,7 +105,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                                 );
                                 isPassed = mapInfoId.equals(mapInfo.getId()) && floor.equals(mapInfo.getFloor());
                             }catch (Exception e){
-                                e.printStackTrace();
+                                log.error(e.getMessage(), e);
                             }
                             return isPassed;
                         }

@@ -275,7 +275,7 @@ public class FilesController {
             result.setStatus(0);
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return new FileResult(1);
         }
     }

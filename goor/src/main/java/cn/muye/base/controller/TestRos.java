@@ -61,7 +61,7 @@ public class TestRos {
         try {
             Thread.sleep(3000L);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         logger.info("sssssssssssssss============"+CacheInfoManager.getUUIDHandledCache(aa)+"");
 //		ServiceResponse response = setService.callServiceAndWait(request);
@@ -97,12 +97,12 @@ public class TestRos {
             try {
                 Thread.sleep(3000L);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e, e.getMessage());
             }*/
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 
         return AjaxResult.success();

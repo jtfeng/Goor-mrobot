@@ -502,6 +502,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return myMapper.selectByExample(example);
     }
 
+    @Override
     public Robot getById(Long id) {
         return myMapper.selectByPrimaryKey(id);
     }
@@ -512,6 +513,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @param robot
      * @throws RuntimeException
      */
+    @Override
     public void saveRobotAndBindChargerMapPoint(Robot robot) throws RuntimeException {
         super.save(robot);
         Long robotNewId = robot.getId();
@@ -719,6 +721,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
     }
 
+    @Override
     public void deleteRobotById(Long id) {
         myMapper.deleteByPrimaryKey(id);
         robotPasswordService.delete(new RobotPassword(null, id));
@@ -731,6 +734,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         myMapper.deleteByExample(example);
     }
 
+    @Override
     public Robot getByName(String name) {
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition("NAME =", name);
@@ -742,6 +746,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
     }
 
+    @Override
     public Robot getByCode(String code, Long storeId) {
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition("CODE =", code);
@@ -837,7 +842,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     LOGGER.info(String.format("编号为 %s 的机器人下发新密码 %s 失败!", String.valueOf(robot.getCode()), password));
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
@@ -875,7 +880,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         try {
             messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
         return result;
 
@@ -895,12 +900,15 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             if (robot != null) {
                 if (busy != null) {
                     robot.setBusy(busy);
+                    logger.info("机器人" + robotCode + "设置为"+ busy +"状态");
                 }
                 if (online != null) {
                     CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
+                    logger.info("机器人" + robotCode + "设置为" + online + "状态");
                 }
                 if (busy != null || online != null) {
                     super.updateSelective(robot);
+                    logger.info("机器人修改状态" + robot.toString());
                 }
             }
         }

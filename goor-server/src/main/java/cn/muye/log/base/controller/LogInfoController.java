@@ -182,7 +182,7 @@ public class LogInfoController {
             returnMap.put(queryRobot.getCode(), robotLogWarningVOs);
             return AjaxResult.success(returnMap, "获取机器人警报信息成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部出错");
         }
     }

@@ -143,7 +143,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             //清空某场景、某门店下的路径相关的缓存
             PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw e;
         }
     }
@@ -214,7 +214,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             //清空某场景、某门店下的路径相关的缓存
             PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, roadPathDB.getSceneName());
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             throw e;
         }
     }

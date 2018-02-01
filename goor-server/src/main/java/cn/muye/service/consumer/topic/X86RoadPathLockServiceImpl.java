@@ -72,7 +72,7 @@ public class X86RoadPathLockServiceImpl implements X86RoadPathLockService {
                                 );
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage(), e);
                             logger.info("handleX86RoadPathLock error: " + e.getMessage());
                             return AjaxResult.failed();
                         }
@@ -99,7 +99,7 @@ public class X86RoadPathLockServiceImpl implements X86RoadPathLockService {
                             }
 
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage(), e);
                             logger.info("handleX86RoadPathLock error: " + e.getMessage());
                             return AjaxResult.failed();
                         }

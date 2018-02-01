@@ -71,7 +71,7 @@ public class RoadPathLockController {
             roadPathLockService.save(roadPathLock);
             return AjaxResult.success("新增成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed("内部出错");
         }
     }
@@ -87,7 +87,7 @@ public class RoadPathLockController {
             roadPathLockService.updateSelectiveByStoreId(roadPathLock);
             return AjaxResult.success("修改成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed("内部出错");
         }
     }
@@ -107,7 +107,7 @@ public class RoadPathLockController {
             roadPathLockService.save(roadPathLock);
             return AjaxResult.success(" 添加成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed("内部出错");
         }
     }
@@ -124,7 +124,7 @@ public class RoadPathLockController {
             PageInfo<RoadPathLock> pathLockPageInfo = new PageInfo<>(roadPathLockList);
             return AjaxResult.success(pathLockPageInfo, "查询成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed("内部出错");
         }
     }
@@ -144,7 +144,7 @@ public class RoadPathLockController {
             roadPathLockService.deleteById(id);
             return AjaxResult.success("删除成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed("内部出错");
         }
     }

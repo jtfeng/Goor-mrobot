@@ -81,6 +81,9 @@ public class OperationOrderController {
     private void checkOperationType(OperationOrder operationOrder) {
         List<OperationOrderApplianceXREF> operationOrderApplianceList = operationOrder.getApplianceList();
         OperationType operationType = operationTypeService.findOperationTypeById(operationOrder.getOperationType().getId());
+        if (operationType == null) {
+            return;
+        }
         List<OperationDefaultApplianceXREF> operationDefaultApplianceXREFList = operationType.getApplianceList();
         boolean isEquals = isEqualsApplianceList(operationOrderApplianceList, operationDefaultApplianceXREFList);
         if (!isEquals) {

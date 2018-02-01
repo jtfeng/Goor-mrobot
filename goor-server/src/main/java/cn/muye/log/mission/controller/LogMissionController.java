@@ -16,6 +16,8 @@ import com.google.gson.reflect.TypeToken;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +34,7 @@ import java.util.List;
         description = "任务日志功能")
 public class LogMissionController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogMissionController.class);
     @Autowired
     LogMissionService logMissionService;
 
@@ -105,7 +108,7 @@ public class LogMissionController {
             }
             return AjaxResult.success("任务日志新增成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
     }
@@ -143,7 +146,7 @@ public class LogMissionController {
             }
             return AjaxResult.success("成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
     }
@@ -172,7 +175,7 @@ public class LogMissionController {
             }
             return AjaxResult.failed("失败");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
     }
@@ -198,7 +201,7 @@ public class LogMissionController {
             }
             return AjaxResult.failed("失败");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
     }

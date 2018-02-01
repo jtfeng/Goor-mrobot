@@ -13,6 +13,8 @@ import cn.muye.base.controller.BaseController;
 import cn.muye.order.service.ApplyOrderService;
 import cn.muye.util.UserUtil;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "applyOrder")
 public class ApplyOrderController extends BaseController{
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplyOrderController.class);
     @Autowired
     private UserUtil userUtil;
     @Autowired
@@ -50,7 +53,7 @@ public class ApplyOrderController extends BaseController{
             applyOrderService.save(applyOrder);
             return AjaxResult.success("申请成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("申请出现异常");
         }
     }
@@ -71,7 +74,7 @@ public class ApplyOrderController extends BaseController{
                 return AjaxResult.success(stationList, "获取可申请用户站列表成功");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部错误");
         }
 
@@ -96,7 +99,7 @@ public class ApplyOrderController extends BaseController{
             });
             return AjaxResult.success(applyOrderList, "查看待接收的列表成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("查看待接收的列表出现异常");
         }
     }
@@ -122,7 +125,7 @@ public class ApplyOrderController extends BaseController{
             }
             return AjaxResult.success(order, "获取订单信息");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取订单信息出错");
         }
     }

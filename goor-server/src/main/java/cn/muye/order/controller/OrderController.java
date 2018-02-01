@@ -37,6 +37,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -54,6 +56,7 @@ import java.util.stream.Collectors;
 @RequestMapping("order")
 public class OrderController extends BaseController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderController.class);
     @Autowired
     private OrderService orderService;
     @Autowired
@@ -105,7 +108,7 @@ public class OrderController extends BaseController {
             orderDetailService.finishedDetailTask(2095L, OrderConstant.ORDER_DETAIL_STATUS_GET);
             return AjaxResult.success();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed();
         }
     }
@@ -125,7 +128,7 @@ public class OrderController extends BaseController {
             Order findOrder = orderService.getOrder(id);
             return AjaxResult.success(findOrder,"获取订单成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取订单失败");
         }
     }
@@ -221,7 +224,7 @@ public class OrderController extends BaseController {
             logger.info("订单申请结束");
             return ajaxResult;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             //若失败 机器人状态回滚
             if(arrangeRobot != null){
                 arrangeRobot.setBusy(Boolean.FALSE);
@@ -247,7 +250,7 @@ public class OrderController extends BaseController {
             List<Order> detailWaitOrders = waitOrders.stream().map(order -> orderService.getOrder(order.getId())).collect(Collectors.toList());
             return AjaxResult.success(detailWaitOrders, "获取等待订单成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取等待订单出错");
         }
     }
@@ -268,7 +271,7 @@ public class OrderController extends BaseController {
             PageInfo<Order> pageWaitOrders = new PageInfo<>(detailWaitOrders);
             return AjaxResult.success(pageWaitOrders, "获取所有订单成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取所有订单出错");
         }
     }
@@ -283,13 +286,13 @@ public class OrderController extends BaseController {
     public AjaxResult cancelWaitOrder(@RequestParam("id")Long id){
         try {
             Order sqlOrder = orderService.getOrder(id);
-            if(sqlOrder.getStatus()!= OrderConstant.ORDER_STATUS_WAIT){
+            if(!(OrderConstant.ORDER_STATUS_WAIT.equals(sqlOrder.getStatus()))){
                 return AjaxResult.failed("暂无法取消，订单并非处于等待阶段");
             }
             orderService.changeOrderStatus(id, OrderConstant.ORDER_STATUS_EXPIRE);
             return AjaxResult.success( "取消该订单成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("取消该订单出错");
         }
     }
@@ -321,7 +324,7 @@ public class OrderController extends BaseController {
             orderPageInfoVO.setStationList(stationList);
             return AjaxResult.success(orderPageInfoVO, "查询下单页面信息成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取下单页面的信息失败");
         }
 
@@ -351,7 +354,7 @@ public class OrderController extends BaseController {
             orderSettingPageInfoVO.setEndStations(endStations);
             return AjaxResult.success(orderSettingPageInfoVO, "查询订单设置页面信息成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("获取订单设置页面的信息失败");
         }
     }
@@ -375,14 +378,14 @@ public class OrderController extends BaseController {
                 try {
                     return generateOrderDetailNewVO(orderDetail);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error(e, e.getMessage());
                     return null;
                 }
             }).collect(Collectors.toList());
             PageInfo<OrderDetailNewVO> detailPageInfo = new PageInfo<>(orderDetailVOs);*/
             return AjaxResult.success(detailPageInfo, "查询任务列表进展成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("查询任务列表进展失败");
         }
 
@@ -678,7 +681,7 @@ public class OrderController extends BaseController {
             PageInfo<OrderLogVO> pageInfo = new PageInfo<>(orderLogVOList);
             return AjaxResult.success(pageInfo, "获取日志任务列表成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部出错");
         }
     }
