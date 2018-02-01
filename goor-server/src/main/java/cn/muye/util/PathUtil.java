@@ -54,15 +54,33 @@ public class PathUtil {
      * @return
      */
     public static Long calDistanceByRoadPathDetail(RoadPathDetail roadPathDetail, MapPoint robotPosition) {
-        Long result = 0L;
+        Long result = Long.MAX_VALUE;
+        if(roadPathDetail == null) {
+            logger.error("路径详细为空，无法计算距离");
+            return result;
+        }
         MapPoint start = roadPathDetail.getStart();
         MapPoint end = roadPathDetail.getEnd();
-        double x0 = robotPosition.getX();
-        double y0 = robotPosition.getY();
-        double x1 = start.getX();
-        double y1 = start.getY();
-        double x2 = end.getX();
-        double y2 = end.getY();
+        logger.info("路径详细start = {},路径详细end = {}", start, end);
+        if(start == null || end == null) {
+            logger.error("路径详细起点或终点有一个为空，无法计算距离");
+            return result;
+        }
+        if(robotPosition == null) {
+            logger.error("机器人坐标为空，无法计算距离");
+            return result;
+        }
+        Double x0 = robotPosition.getX();
+        Double y0 = robotPosition.getY();
+        Double x1 = start.getX();
+        Double y1 = start.getY();
+        Double x2 = end.getX();
+        Double y2 = end.getY();
+        logger.info("坐标x0 = {} , y0 = {}, x1 = {}, y1 = {}, x2 = {}, y2 = {}", x0, y0, x1, y1, x2, y2);
+        if(x0 == null || y0 == null || x1 == null || y1 == null || x2 == null || y2 == null) {
+            logger.error("坐标x0,y0,x1,y1,x2,y2中存在null值，无法计算距离");
+            return result;
+        }
         //以离机器人最近的路径起点计算机器人到线段的距离,换算成mm
         Double db = MathLineUtil.calPointToSegmentDistance(x0, y0, x1, y1, x2, y2) * 1000;
         result = MathLineUtil.doubleToLongRoundHalfUp(db);
@@ -387,12 +405,26 @@ public class PathUtil {
             Long weight = resultTemp.getTotalWeight();
             MapPoint start = roadPathDetail.getStart();
             MapPoint end = roadPathDetail.getEnd();
-            double x0 = robotPosition.getX();
-            double y0 = robotPosition.getY();
-            double x1 = start.getX();
-            double y1 = start.getY();
-            double x2 = end.getX();
-            double y2 = end.getY();
+            logger.info("路径详细start = {},路径详细end = {}", start, end);
+            if(start == null || end == null) {
+                logger.error("路径详细起点或终点有一个为空，无法计算补偿");
+                return null;
+            }
+            if(robotPosition == null) {
+                logger.error("机器人坐标为空，无法计算补偿");
+                return null;
+            }
+            Double x0 = robotPosition.getX();
+            Double y0 = robotPosition.getY();
+            Double x1 = start.getX();
+            Double y1 = start.getY();
+            Double x2 = end.getX();
+            Double y2 = end.getY();
+            logger.info("坐标x0 = {} , y0 = {}, x1 = {}, y1 = {}, x2 = {}, y2 = {}", x0, y0, x1, y1, x2, y2);
+            if(x0 == null || y0 == null || x1 == null || y1 == null || x2 == null || y2 == null) {
+                logger.error("坐标x0,y0,x1,y1,x2,y2中存在null值，无法计算补偿");
+                return null;
+            }
             TriangleResult triangleResult = calTriangleResult(x0 , y0, x1, y1, x2, y2);
 
             double r = triangleResult.getR();
