@@ -127,8 +127,9 @@ public class ScheduleTasks {
         }
     }
 
-    //每分钟执行一次， 订单任务mission超时扫描
-    @Scheduled(cron = "0 */1 * * * ?")
+    //每分钟执行一次， 订单任务mission超时扫描,
+    // 任务超时报警定时器暂时清除
+    //@Scheduled(cron = "0 */1 * * * ?")
     public void checkOrderMissionOverTime() {
         synchronized (lock2){
             logger.info("开启订单任务超时扫描");

@@ -1,7 +1,6 @@
 package cn.muye.order.service.impl;
 
 import cn.mrobot.bean.area.station.Station;
-import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.order.MessageBell;
 import cn.mrobot.bean.order.Order;
 import cn.mrobot.bean.order.OrderConstant;
@@ -102,11 +101,11 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
             order.setStatus(OrderConstant.ORDER_STATUS_DONE);
             order.setFinishDate(new Date());
             orderMapper.updateOrder(order);
-            //修改完订单状态后 再次修改机器人的状态
-            Robot robot = new Robot();
-            robot.setId(order.getRobot().getId());
-            robot.setBusy(Boolean.FALSE);
-            robotService.updateSelective(robot);
+            //修改完订单状态后 再次修改机器人的状态,不再检测修改机器人的忙碌状态，全由mission控制
+//            Robot robot = new Robot();
+//            robot.setId(order.getRobot().getId());
+//            robot.setBusy(Boolean.FALSE);
+//            robotService.updateSelective(robot);
         }
     }
 
