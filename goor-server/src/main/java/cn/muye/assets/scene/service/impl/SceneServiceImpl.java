@@ -7,6 +7,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
+import cn.mrobot.bean.area.station.StationStationXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotChargerMapPointXREF;
 import cn.mrobot.bean.assets.scene.Scene;
@@ -45,6 +46,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,9 +122,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 //	    ,...]
 
     @Override
-    public Map getRobotStartAssets(String robotCode) {
+    public Map getRobotStartAssets(String robotCode) throws Exception {
         // 存放查询结果
         Map<String, Object> baseData = new HashMap<String, Object>(2);
+        Robot robot = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (robot == null) {
+            //表明当前请求的机器人未在云端注册，反馈对应错误信息，抛出错误信息，设置 error_code
+            throw new Exception("机器人未注册!");
+        }
         // 存放全部场景的详细信息
         List<Map<String, Object>> sceneList = Lists.newArrayList();
         // 获取全部场景信息
@@ -145,7 +152,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
                 // 全部的出发点
             List<Long> originStationIds = Lists.newArrayList();
             log.info("全部的出发点为：" + originStationIds);
-            stationStationXREFMapper.selectAll().forEach( stationStationXREF -> originStationIds.add(stationStationXREF.getOriginStationId()));
+            stationStationXREFMapper.selectAll().forEach(stationStationXREF -> originStationIds.add(stationStationXREF.getOriginStationId()));
             stationMapper.selectByExample(stationExample).forEach(ele -> {
                 log.info("当前遍历的站 ID 编号为：" + ele.getId());
                 if (originStationIds.indexOf(ele.getId()) == -1) {
@@ -199,11 +206,12 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         JSONArray robotMapPointListDbJSONArray = new JSONArray();
         robotService.getChargerMapPointByRobotCode(robotCode,
                 SearchConstants.FAKE_MERCHANT_STORE_ID).forEach(eachP -> {
-            JSONObject j = new JSONObject();
-            // 别名名称用作客户端显示
-            j.put("id", eachP.getId());j.put("name", eachP.getPointAlias());
-            robotMapPointListDbJSONArray.add(j);
-        });
+                JSONObject j = new JSONObject();
+                // 别名名称用作客户端显示
+                j.put("id", eachP.getId());
+                j.put("name", eachP.getPointAlias());
+                robotMapPointListDbJSONArray.add(j);
+            });
         robotAssets.put("chargePoint", robotMapPointListDbJSONArray);
         List<Scene> list = sceneMapper.findSceneByRobotCode(robotCode);
         JSONObject currentSceneObject = new JSONObject();
@@ -279,21 +287,32 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Override
     public void replyGetRobotStartAssets(String uuid, String robotCode) {
         LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, "机器人开机获取云端资源 - 开始");
-        Map assetData = this.getRobotStartAssets(robotCode);
+        Map assetData = Maps.newHashMap();
+        try {
+            assetData = this.getRobotStartAssets(robotCode);
+        }catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
         log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
         log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
         log.info(JSONObject.toJSONString(assetData));
         log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
         log.info(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - > ");
         // 传回云端资源给开机管理请求的机器人    ||
+        final Map assetFinalData = assetData;
         CommonInfo commonInfo = new CommonInfo();
         commonInfo.setTopicName(TopicConstants.AGENT_PUB);
         commonInfo.setTopicType(TopicConstants.TOPIC_TYPE_STRING);
         commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(new HashMap<String, String>() {{
             put("pub_name", TopicConstants.PUB_SUB_NAME_CLOUD_ASSETS_QUERY);
             put("uuid", uuid);
-            put("data", JSONObject.toJSONString(assetData));
-            put("error_code", "0");
+            put("data", JSONObject.toJSONString(assetFinalData));
+            if (assetFinalData.size() == 0) {
+                // 未注册，未查询到任何数据
+                put("error_code", "1000");
+            }else {
+                put("error_code", "0");
+            }
         }}))));
         MessageInfo messageInfo = new MessageInfo();
         messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
