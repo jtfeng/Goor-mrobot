@@ -5,7 +5,9 @@ import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.bean.enums.X86PatternEnum;
 import cn.mrobot.dto.area.PathDTO;
+import cn.mrobot.utils.MathLineUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.service.MapInfoService;
@@ -19,6 +21,7 @@ import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.util.PathUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
@@ -154,7 +157,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             Long id = Long.parseLong(String.valueOf(checkNotNull(body.get("id"), "id编号不允许为空，请重新输入!")));
             log.info(String.format("id编号信息为：%s", id));
             String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
-            log.info(String.format("4路径名称：%s", pathName));
+            log.info(String.format("4路径名称：% s", pathName));
             String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
             log.info(String.format("路径拟合方式：%s", pattern));
             String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
@@ -542,9 +545,19 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setCreateTime(new Date());
             roadPath.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
 //            roadPath.setWeight(Constant.DEFAULT_ROAD_PATH_X86_WEIGHT);
-            //取两点间长度作为路径权值
-            roadPath.setWeight(PathUtil.calDistance(startPoint, endPoint));
-            roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);//默认有朝向要求
+            //直线取两点间长度作为路径权值
+//            roadPath.setWeight(PathUtil.calDistance(startPoint, endPoint));
+            //新的工控曲线协议带路线长度，如果没有该值，则根据曲线类型自己计算长度作为默认权值
+            Long length = pathDTO.getLength() == null ? getLengthByPathDTO(pathDTO, startPoint, endPoint)
+                    //如果有该值，说明是导航新协议，直接存储，长度单位从米转换成mm并四舍五入
+                    : MathLineUtil.doubleToLongRoundHalfUp(pathDTO.getLength() * 1000);
+            roadPath.setWeight(length);
+            roadPath.setPattern(pathDTO.getType() == null ? "" : (pathDTO.getType() + ""));
+            //默认有朝向要求
+            roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);
+            //新协议存储点集作为数据。直线可能只有起点和终点；贝塞尔曲线是4个控制点；自定义曲线可能是一系列点。
+            String data = (pathDTO.getPoints() == null || pathDTO.getPoints().size() == 0) ? null : JSON.toJSONString(pathDTO.getPoints());
+            roadPath.setData(data);
             //根据数据库查询结果判断是更新还是新增
             if (null != roadPathDB) {
                 roadPath.setId(roadPathDB.getId());
@@ -557,6 +570,38 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
         }
         //清空某场景、某门店下的路径相关的缓存
         PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
+    }
+
+    /**
+     * 根据曲线类型自己计算长度作为默认权值
+     * @param pathDTO
+     * @param startPoint
+     *@param endPoint @return
+     */
+    private Long getLengthByPathDTO(PathDTO pathDTO, MapPoint startPoint, MapPoint endPoint) {
+        Integer type = pathDTO.getType();
+        if(type == null) {
+            log.info("#####上传的工控路径type为null，可能是旧协议，默认作为直线长度计算");
+            return PathUtil.calDistance(startPoint, endPoint);
+        }
+        else if(type.equals(X86PatternEnum.LINE.getCaption())) {
+            log.info("####上传的工控路径type为{},{}", type, X86PatternEnum.LINE.getValue());
+            return PathUtil.calDistance(startPoint, endPoint);
+        }
+        else if(type.equals(X86PatternEnum.BEZIER.getCaption())) {
+            log.info("####上传的工控路径type为{},{}", type, X86PatternEnum.BEZIER.getValue());
+            //TODO 计算bezier曲线长度方法
+            return PathUtil.calDistance(startPoint, endPoint);
+        }
+        else if(type.equals(X86PatternEnum.CUSTOM.getCaption())) {
+            log.info("####上传的工控路径type为{},{}", type, X86PatternEnum.CUSTOM.getValue());
+            //TODO 计算自定义曲线长度方法
+            return PathUtil.calDistance(startPoint, endPoint);
+        }
+        else {
+            log.info("####上传的工控路径type为{}，未识别的类型，按照直线计算" , type);
+            return PathUtil.calDistance(startPoint, endPoint);
+        }
     }
 
     @Override

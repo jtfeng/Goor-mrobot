@@ -1,6 +1,9 @@
 package cn.mrobot.dto.area;
 
+import cn.mrobot.bean.area.point.MapPoint;
 import com.alibaba.fastjson.annotation.JSONField;
+
+import java.util.List;
 
 /**
  * Created by Jelynn on 2017/9/18.
@@ -54,6 +57,18 @@ public class PathDTO {
     //  "valid":1
     @JSONField(name = "valid")
     private int valid;
+
+    //曲线长度，单位米
+    @JSONField(name = "length")
+    private Double length;
+
+    //工控曲线类型
+    @JSONField(name = "type")
+    private Integer type;
+
+    //点序列
+    @JSONField(name = "points")
+    private List<MapPoint> points;
 
     public long getId() {
         return id;
@@ -149,5 +164,29 @@ public class PathDTO {
 
     public void setValid(int valid) {
         this.valid = valid;
+    }
+
+    public Double getLength() {
+        return length;
+    }
+
+    public void setLength(Double length) {
+        this.length = length;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public List<MapPoint> getPoints() {
+        return points;
+    }
+
+    public void setPoints(List<MapPoint> points) {
+        this.points = points;
     }
 }
