@@ -92,7 +92,7 @@ public class PointServiceImpl implements PointService {
     public void delete(MapPoint mapPoint) {
         //清空某场景、某门店下的路径相关的缓存
         PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, mapPoint.getSceneName());
-        pointMapper.delete(mapPoint);
+        pointMapper.deleteByPrimaryKey(mapPoint.getId());
     }
 
     @Override
