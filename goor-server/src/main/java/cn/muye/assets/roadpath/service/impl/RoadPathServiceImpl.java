@@ -157,7 +157,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             Long id = Long.parseLong(String.valueOf(checkNotNull(body.get("id"), "id编号不允许为空，请重新输入!")));
             log.info(String.format("id编号信息为：%s", id));
             String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
-            log.info(String.format("4路径名称：% s", pathName));
+            log.info(String.format("4路径名称：%s", pathName));
             String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
             log.info(String.format("路径拟合方式：%s", pattern));
             String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
@@ -495,6 +495,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     public void saveOrUpdateRoadPathByPathDTOList(List<PathDTO> pathDTOList, String sceneName , boolean isPointDuplicate) throws Exception{
         //如果没有值，就不更新操作
         if(pathDTOList == null || pathDTOList.size() == 0 || StringUtil.isNullOrEmpty(sceneName)) {
+            log.info("pathDTOList= {}为空或数组长度为0,sceneName = {}场景名为空" , pathDTOList,sceneName );
             return;
         }
 
