@@ -62,7 +62,7 @@ import java.util.Map;
  * Created by Ray.Fu on 2017/6/13.
  */
 @Controller
-public class UserController implements ApplicationContextAware{
+public class UserController implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
     private static Logger LOGGER = Logger.getLogger(UserController.class);
@@ -281,25 +281,38 @@ public class UserController implements ApplicationContextAware{
 
     private AjaxResult doCheckLogin(Map map) {
         UserDTO userDTO = (UserDTO) map.get("user");
+        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && map.get("stationList") == null) {
+            return AjaxResult.failed("用户未绑定站，请联系客服");
+        }
         List<StationDTO4User> stationList = (List<StationDTO4User>) map.get("stationList");
-        if (userDTO != null && stationList != null) {
+        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList.get(0).getActive() == Constant.DELETE) {
+            return AjaxResult.failed("用户未绑定站，请联系客服");
+        }
+//        if (userDTO != null && !userDTO.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption())) {
+//            //写入枚举
+//            map.put("enums", getAllEnums(userDTO));
+//            map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
+//            return AjaxResult.success(map, "登录成功");
+//        }
+        if (/*userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && */stationList != null) {
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
             for (StationDTO4User stationDTO4User : stationList) {
                 Integer stationTypeId = stationDTO4User.getStationTypeId();
-                if(stationTypeId == null) {
+                if (stationTypeId == null) {
                     LOGGER.info("##########用户绑定站:" + stationDTO4User.getName() + "的站类型为空");
                     continue;
                 }
-                if (stationTypeId.equals(StationType.ELEVATOR.getCaption()) ) {
+                if (stationTypeId.equals(StationType.ELEVATOR.getCaption())) {
                     // 用户绑定了电梯站
                     map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, 1);
                     break;
                 }
             }
             return AjaxResult.success(map, "登录成功");
-        } else if (userDTO != null && stationList == null) {
+        }
+        if (userDTO != null && userDTO.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList == null) {
             return AjaxResult.failed("账号异常，请联系客服");
         } else {
             return AjaxResult.failed("用户名或密码错误");
@@ -318,11 +331,11 @@ public class UserController implements ApplicationContextAware{
             map.put("enums", getAllEnums(userDTO));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
             OrderSetting defaultSetting = null;
-            if(stationList.size()> 0){
+            if (stationList.size() > 0) {
                 StationDTO4User firstStation = stationList.get(0);
                 defaultSetting = orderSettingService.getDefaultSetting(firstStation.getId());
             }
-            map.put("orderSetting",defaultSetting);
+            map.put("orderSetting", defaultSetting);
             for (StationDTO4User stationDTO4User : stationList) {
                 if (StationType.ELEVATOR.getCaption() == stationDTO4User.getStationTypeId()) {
                     // 用户绑定了电梯站
@@ -521,7 +534,7 @@ public class UserController implements ApplicationContextAware{
         map.put("moduleEnums", ModuleEnums.list());
         map.put("rfidBraceletType", RfidBraceletTypeEnum.list());
         map.put("stateField", StateFieldEnums.list());
-        map.put("stationPointType",MapPointType.list(Constant.STATION_MAP_POINT_TYPE_LIST));
+        map.put("stationPointType", MapPointType.list(Constant.STATION_MAP_POINT_TYPE_LIST));
         map.put("doorType", DoorType.list());
         map.put("employeeType", EmployeeTypeEnum.list());
         map.put("logLevel", LogLevel.list());
@@ -585,12 +598,12 @@ public class UserController implements ApplicationContextAware{
     public static List<Map> getApplianceDepartmentTypeList() {
         List<Map> resultList = new ArrayList<Map>();
         ApplianceDepartmentTypeService applianceDepartmentTypeService = applicationContext.getBean(ApplianceDepartmentTypeService.class);
-        List<ApplianceDepartmentType>  departmentTypeList = applianceDepartmentTypeService.listAll();
+        List<ApplianceDepartmentType> departmentTypeList = applianceDepartmentTypeService.listAll();
         for (ApplianceDepartmentType departmentType : departmentTypeList) {
-            Map result = new HashMap<String,Object>();
-            result.put("name",departmentType.getName());
-            result.put("value",departmentType.getCode());
-            resultList.add(result) ;
+            Map result = new HashMap<String, Object>();
+            result.put("name", departmentType.getName());
+            result.put("value", departmentType.getCode());
+            resultList.add(result);
         }
         return resultList;
     }
@@ -600,10 +613,10 @@ public class UserController implements ApplicationContextAware{
         AppliancePackageTypeService appliancePackageTypeService = applicationContext.getBean(AppliancePackageTypeService.class);
         List<AppliancePackageType> packageTypeList = appliancePackageTypeService.listAllPackageType();
         for (AppliancePackageType packageType : packageTypeList) {
-            Map result = new HashMap<String,Object>();
-            result.put("name",packageType.getName());
-            result.put("value",packageType.getId());
-            resultList.add(result) ;
+            Map result = new HashMap<String, Object>();
+            result.put("name", packageType.getName());
+            result.put("value", packageType.getId());
+            resultList.add(result);
         }
         return resultList;
     }
@@ -613,10 +626,10 @@ public class UserController implements ApplicationContextAware{
         OperationDepartmentTypeService operationDepartmentTypeService = applicationContext.getBean(OperationDepartmentTypeService.class);
         List<OperationDepartmentType> departmentTypeList = operationDepartmentTypeService.listAllType();
         for (OperationDepartmentType departmentType : departmentTypeList) {
-            Map result = new HashMap<String,Object>();
-            result.put("name",departmentType.getName());
-            result.put("value",departmentType.getId());
-            resultList.add(result) ;
+            Map result = new HashMap<String, Object>();
+            result.put("name", departmentType.getName());
+            result.put("value", departmentType.getId());
+            resultList.add(result);
         }
         return resultList;
     }
