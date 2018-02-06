@@ -19,6 +19,8 @@ public class StationDTO4User {
 
     private List<Robot> robotList;
 
+    private int active;
+
     public Integer getStationTypeId() {
         return stationTypeId;
     }
@@ -57,5 +59,13 @@ public class StationDTO4User {
 
     public void setRobotList(List<Robot> robotList) {
         this.robotList = robotList;
+    }
+
+    public int getActive() {
+        return active;
+    }
+
+    public void setActive(int active) {
+        this.active = active;
     }
 }
