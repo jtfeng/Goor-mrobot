@@ -242,10 +242,10 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                     List<StationRobotXREF> xrefList = stationRobotXREFService.getByStationId(ux.getStationId());
                     stationDb.setRobotList(xrefList.stream().map(obj -> robotService.findById(obj.getRobotId())).collect(Collectors.toList()));
                     //如果是超级管理员和医院管理员则直接添加
-    //                if (roleId == RoleTypeEnum.SUPER_ADMIN.getCaption()) {
-    //                    stationList.add(stationToDTO(stationDb));
-    //                }
-                    if(roleId != (long)RoleTypeEnum.SUPER_ADMIN.getCaption() && stationDb.getActive() == Constant.NORMAL) {
+                    if (roleId == (long)RoleTypeEnum.SUPER_ADMIN.getCaption() || roleId == (long)RoleTypeEnum.HOSPITAL_ADMIN.getCaption()) {
+                        stationList.add(stationToDTO(stationDb));
+                    }
+                    if(roleId == (long)RoleTypeEnum.STATION_ADMIN.getCaption() && stationDb.getActive() == Constant.NORMAL) {
                         stationList.add(stationToDTO(stationDb));
                     }
                 }

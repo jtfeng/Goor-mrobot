@@ -312,7 +312,7 @@ public class UserController implements ApplicationContextAware {
             }
             return AjaxResult.success(map, "登录成功");
         }
-        if (userDTO != null && userDTO.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption()) && stationList == null) {
+        if (userDTO != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList == null) {
             return AjaxResult.failed("账号异常，请联系客服");
         } else {
             return AjaxResult.failed("用户名或密码错误");
