@@ -167,7 +167,7 @@ public class FilesController {
                 } else {
                     temp.createNewFile();
                 }
-                System.out.println("跳过字节数为：" + needSkipBytes);
+                LOGGER.info("跳过字节数为：" + needSkipBytes);
                 //in.skip(needSkipBytes);
                 tempRandAccessFile = new RandomAccessFile(temp, "rw");
                 tempRandAccessFile.seek(needSkipBytes);
@@ -275,7 +275,7 @@ public class FilesController {
             result.setStatus(0);
             return result;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return new FileResult(1);
         }
     }

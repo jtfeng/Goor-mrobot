@@ -93,7 +93,7 @@ public class MissionListTaskController {
                     missionFuncsService.createMissionLists(order);
             return ret;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
     }

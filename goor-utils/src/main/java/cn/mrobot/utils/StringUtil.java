@@ -470,7 +470,7 @@ public class StringUtil extends StringUtils{
     }
 
     public static void main(String[] args) {
-        System.out.println(parseToBit("1b"));
+        LOGGER.info(parseToBit("1b"));
     }
 
     public static String intToBit(int value, int length) {
@@ -481,9 +481,12 @@ public class StringUtil extends StringUtils{
             int diff = length - binStrLength;
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = diff; i <= diff; i--) {
-                if (i > 0)
+                if (i > 0) {
                     stringBuilder.append("0");
-                else break;
+                }
+                else {
+                    break;
+                }
             }
             binStr = stringBuilder.toString() + binStr;
         }
@@ -495,6 +498,7 @@ public class StringUtil extends StringUtils{
             JSONObject jsonObject = JSONObject.parseObject(message);
             return true;
         } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
             return false;
         }
     }

@@ -70,5 +70,12 @@ public interface RobotService extends BaseService<Robot>{
 
     void setRobotBusyAndOnline(String robotCode, Boolean busy, Boolean online);
 
+    /**
+     * 通过robotId获取 场景id
+     * @param robotId
+     * @return
+     */
+    Long getRobotSceneId(Long robotId);
+
 
 }

@@ -1,5 +1,6 @@
-package cn.muye.base.service;
+package cn.muye.version.service;
 
+import cn.muye.version.bean.MyRos;
 import edu.wpi.rail.jrosbridge.JRosbridge;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.Service;
@@ -13,9 +14,23 @@ import javax.json.JsonObject;
 /**
  * Created by enva on 2017/12/8.
  */
-public class TestService extends Service {
+public class MyService extends Service {
 
-    public TestService(Ros ros, String name, String type) {
+    //TODO 如果RosConfig里面用MyRos，用以下构造函数
+    /*MyRos ros;
+
+    public MyService(Ros ros, String name, String type) {
+        super(ros, name, type);
+        this.ros = (MyRos) ros;
+    }
+
+    @Override
+    public MyRos getRos() {
+        return ros;
+    }*/
+
+    //如果RosConfig里面用Ros，用以下构造函数
+    public MyService(Ros ros, String name, String type) {
         super(ros, name, type);
     }
 

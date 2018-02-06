@@ -4,19 +4,18 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
-import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +38,18 @@ public class RobotController {
 
     @Autowired
     private RobotConfigService robotConfigService;
+
+    @RequestMapping(value = {"assets/robotOnlineStatus"}, method = RequestMethod.GET)
+    @ApiOperation(value = "查询机器人在线状态", httpMethod = "GET", notes = "查询机器人在线状态")
+    @ResponseBody
+    public AjaxResult robotList(WhereRequest whereRequest, @RequestParam(value = "robotSn") String robotSn) {
+        if (CacheInfoManager.getRobotOnlineCache(robotSn)) {
+            return AjaxResult.success("机器人在线");
+        } else {
+            return AjaxResult.success("机器人不在线");
+        }
+    }
+
 
     /**
      * 查询机器人列表
@@ -169,7 +180,7 @@ public class RobotController {
             robotPasswordService.batchUpdateRobotPwdList(robot.getPasswords());
             return AjaxResult.success("修改密码成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("修改密码出错");
         }
     }

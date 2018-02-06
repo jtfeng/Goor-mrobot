@@ -36,7 +36,7 @@ public class WebSocketInit implements ApplicationContextAware {
     public void onOpen(Session session) throws Exception {
         this.session = session;
         addOnlineCount();           //在线数加1
-        System.out.println("有新连接加入！当前在线人数为" + getOnlineCount());
+        log.info("有新连接加入！当前在线人数为" + getOnlineCount());
     }
 
     /**

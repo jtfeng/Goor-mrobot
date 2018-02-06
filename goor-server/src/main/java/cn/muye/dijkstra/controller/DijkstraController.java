@@ -376,7 +376,7 @@ public class DijkstraController {
             result = roadPathResultService.getShortestCloudRoadPathForMission(startPointId, endPointId,roadPathMaps,result);
             return AjaxResult.success(result);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
         }
     }
@@ -425,7 +425,7 @@ public class DijkstraController {
             return AjaxResult.success("更新成功");
         } catch (Exception e) {
             log.error(e.getMessage());
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
         }
     }
@@ -456,7 +456,7 @@ public class DijkstraController {
             }
            return missionFuncsService.sendRobotToStandByPoint(robot, stationIdList, sceneId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getMessage(), e);
             return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
         }
     }

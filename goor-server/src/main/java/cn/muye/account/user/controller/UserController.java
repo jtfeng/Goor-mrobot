@@ -287,7 +287,12 @@ public class UserController implements ApplicationContextAware{
             map.put("enums", getAllEnums(userDTO));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
             for (StationDTO4User stationDTO4User : stationList) {
-                if (StationType.ELEVATOR.getCaption() == stationDTO4User.getStationTypeId()) {
+                Integer stationTypeId = stationDTO4User.getStationTypeId();
+                if(stationTypeId == null) {
+                    LOGGER.info("##########用户绑定站:" + stationDTO4User.getName() + "的站类型为空");
+                    continue;
+                }
+                if (stationTypeId.equals(StationType.ELEVATOR.getCaption()) ) {
                     // 用户绑定了电梯站
                     map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, 1);
                     break;
@@ -369,7 +374,7 @@ public class UserController implements ApplicationContextAware{
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e, e.getMessage());
         }
         return null;
     }*/

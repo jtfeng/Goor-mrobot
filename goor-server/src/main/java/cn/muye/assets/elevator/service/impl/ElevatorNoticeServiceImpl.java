@@ -208,4 +208,12 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         List<ElevatorNotice> elevatorNoticeList = elevatorNoticeMapper.selectByExample(example);
         return elevatorNoticeList;
     }
+
+    @Override
+    public boolean hasLastRobotElevatorNotice(String code) {
+        Example example = new Example(ElevatorNotice.class);
+        example.createCriteria().andEqualTo("robotCode", code)
+                .andEqualTo("state", ElevatorNotice.State.INIT.getCode());
+        return elevatorNoticeMapper.selectCountByExample(example) != 0 ? true : false;
+    }
 }

@@ -3,8 +3,9 @@ package cn.muye.base.controller;
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.VersionConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.version.bean.MyRos;
 import cn.muye.base.service.ScheduledHandleService;
-import cn.muye.base.service.TestService;
+import cn.muye.version.service.MyService;
 import edu.wpi.rail.jrosbridge.Ros;
 import edu.wpi.rail.jrosbridge.callback.ServiceCallback;
 import edu.wpi.rail.jrosbridge.services.ServiceRequest;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class TestRos {
     private Logger logger = Logger.getLogger(TestRos.class);
+
     @Autowired
+//    private MyRos ros;//TODO 为防止复写的MyRos有问题，暂时先不使用。MyRos只是增加了service失败消息的处理。
     private Ros ros;
     @Autowired
     private ScheduledHandleService scheduledHandleService;
@@ -30,9 +33,9 @@ public class TestRos {
     @ResponseBody
     public AjaxResult testRos(@RequestParam("aa") String aa) {
         //前面是服务名，后面是服务类型
-        TestService setService = new TestService(this.ros, "/rosapi/set_param", "rosapi/SetParam");
-        TestService getService = new TestService(this.ros, "/rosapi/get_param", "rosapi/GetParam");
-        TestService deleteService = new TestService(this.ros, "/rosapi/delete_param", "rosapi/DeleteParam");
+        MyService setService = new MyService(this.ros, "/rosapi/set_param", "rosapi/SetParam");
+        MyService getService = new MyService(this.ros, "/rosapi/get_param", "rosapi/GetParam");
+        MyService deleteService = new MyService(this.ros, "/rosapi/delete_param", "rosapi/DeleteParam");
         //这里试了value只能用数字，不能有字母和特殊符号，很奇怪，直接通过rosparam命令是可以设置字符串的
         ServiceRequest request = new ServiceRequest("{\"name\": \"envaTest\", \"value\": \"30\"}");
         ServiceRequest request1 = new ServiceRequest("{\"name\": \"envaTest\"}");
@@ -58,7 +61,7 @@ public class TestRos {
         try {
             Thread.sleep(3000L);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         logger.info("sssssssssssssss============"+CacheInfoManager.getUUIDHandledCache(aa)+"");
 //		ServiceResponse response = setService.callServiceAndWait(request);
@@ -72,57 +75,34 @@ public class TestRos {
 //        log.info(response2.toString());
 
         try {
-//            scheduledHandleService.writeRosParamGoorVersion();
-            logger.info("################写入参数服务器agent版本的定时任务");
+            scheduledHandleService.writeRosParamGoorVersion();
+            /*logger.info("################写入参数服务器agent版本的定时任务");
 //            ros = applicationContext.getBean(Ros.class);
             if(ros == null) {
                 logger.info("还未连上ros");
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "还未连上ros");
             }
-//            TestService getService = new TestService(this.ros, "/rosapi/get_param", "rosapi/GetParam");
-//            TestService setService = new TestService(this.ros, "/rosapi/set_param", "rosapi/SetParam");
-//            TestService deleteService = new TestService(this.ros, "/rosapi/delete_param", "rosapi/DeleteParam");
-            ServiceRequest setRequest = new ServiceRequest("{\"name\": \"" + VersionConstants.VERSION_NOAH_GOOR_KEY + "\", \"value\": \"" + VersionConstants.VERSION_NOAH_GOOR + "\"}");
-            ServiceRequest getRequest = new ServiceRequest("{\"name\": \"" + VersionConstants.VERSION_NOAH_GOOR_KEY + "\"}");
-            final String[] versionNow = {null};
-            getService.callService(getRequest, new ServiceCallback() {
-                @Override
-                public void handleServiceResponse(ServiceResponse response) {
-                    versionNow[0] = response.toString();
-                    logger.info("getServicegetServicegetServicegetService当前agent版本参数为 ==========: " + versionNow[0]);
-                }
-            });
-
-            /*if(VersionConstants.VERSION_NOAH_GOOR.equals(versionNow[0])) {
-                logger.info("检测当前agent版本参数与agent实际版本一致。");
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "检测当前agent版本参数与agent实际版本一致。");
-            }
-
-            logger.info("检测当前agent版本参数与agent实际版本不一致，开始写入参数服务器。");
-
-            deleteService.callService(getRequest, new ServiceCallback() {
-                @Override
-                public void handleServiceResponse(ServiceResponse response) {
-                    logger.info("deleteServicedeleteServicedeleteService ==========: " + response.toString());
-                }
-            });*/
+//            MyService getService = new MyService(this.ros, "/rosapi/get_param", "rosapi/GetParam");
+//            MyService setService = new MyService(this.ros, "/rosapi/set_param", "rosapi/SetParam");
+//            MyService deleteService = new MyService(this.ros, "/rosapi/delete_param", "rosapi/DeleteParam");
+            logger.info(VersionConstants.getVersionNoahGoorJSON());
+            ServiceRequest setRequest = new ServiceRequest(VersionConstants.getVersionNoahGoorJSON());
             setService.callService(setRequest, new ServiceCallback() {
                 @Override
                 public void handleServiceResponse(ServiceResponse response) {
                     logger.info("setServicesetServicesetServicesetService ==========: " + response.toString());
-                    CacheInfoManager.setUUIDHandledCache("setRosParam");
                 }
             });
 
             try {
                 Thread.sleep(3000L);
             } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                log.error(e, e.getMessage());
+            }*/
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
 
         return AjaxResult.success();

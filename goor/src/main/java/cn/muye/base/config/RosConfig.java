@@ -2,6 +2,7 @@ package cn.muye.base.config;
 
 import cn.muye.base.bean.RosHandlerImp;
 import cn.muye.base.bean.TopicHandleInfo;
+import cn.muye.version.bean.MyRos;
 import edu.wpi.rail.jrosbridge.Ros;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +23,8 @@ public class RosConfig {
     @Bean
     public Ros ros() {
         Ros ros = new Ros(rosPath);
+        //TODO 为防止复写的MyRos有问题，暂时先不使用。MyRos只是增加了service失败消息的处理。
+//        MyRos ros = new MyRos(rosPath);
         ros.connect();
         ros.addRosHandler(new RosHandlerImp());
         try {

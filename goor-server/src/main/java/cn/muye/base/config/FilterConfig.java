@@ -20,6 +20,9 @@ public class FilterConfig {
     @Value("${security.oauth2.resource.user-info-uri}")
     private String authUserUri;
 
+    @Value("${url.excludeUri}")
+    private String excludeUri;
+
     /**
      * 配置认证错误过滤器
      * @return
@@ -33,11 +36,7 @@ public class FilterConfig {
         registration.setInitParameters(new HashMap<String, String>() {
             {
                 put("authUserUri", authUserUri);
-                put("excludedUrl", "/account/user/logOut," +
-                "/account/user/login/pad," +
-                        "/account/user/login," +
-                                "/goor/ws,"+
-                        "/services/,/check*");
+                put("excludedUrl", excludeUri);
             }
         });
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);

@@ -237,7 +237,7 @@ public class HttpClientUtil {
             }
             // 把文件转换成流对象FileBody
             File localFile = new File(localFilePath);
-            System.out.println(localFile.getName());
+            logger.info(localFile.getName());
             InputStream in = new FileInputStream(localFile);
             in.skip(jumpSize);
             InputStreamEntity inEntity = new InputStreamEntity(in, localFile.length(), null);
@@ -424,7 +424,7 @@ public class HttpClientUtil {
             context.init(null, new TrustManager[]{manager}, null);
             socketFactory = new SSLConnectionSocketFactory(context, NoopHostnameVerifier.INSTANCE);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -459,6 +459,7 @@ public class HttpClientUtil {
      */
     private static void setRetryHandler(HttpClientBuilder httpClientBuilder, final int retryTimes) {
         HttpRequestRetryHandler myRetryHandler = new HttpRequestRetryHandler() {
+            @Override
             public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
                 if (executionCount >= retryTimes) {
                     // Do not retry if over max retry count

@@ -55,7 +55,7 @@ public interface RoadPathResultService {
 
     /**
      * 根据机器人，查询机器人当前位置，返回从机器人当前位置到目的地的路径规划结果
-     * 以当前机器人位置最近的路径点投影算权值
+     * 以当前机器人位置最近的路径起点算权值
      * @param robotDb
      * @param targetPoint
      * @param roadPathMaps

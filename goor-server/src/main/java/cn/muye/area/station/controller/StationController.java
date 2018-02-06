@@ -382,7 +382,7 @@ public class StationController {
                 return AjaxResult.failed("获取机器人失败，未得到站id");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("系统内部查询异常");
         }
     }

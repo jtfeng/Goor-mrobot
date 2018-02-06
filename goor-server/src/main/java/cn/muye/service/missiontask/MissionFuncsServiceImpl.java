@@ -118,6 +118,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Autowired
     private MissionWarningService missionWarningService;
 
+    //下单机器人对应的充电点
+    private Map<String, MapPoint> chargePointMap = new HashMap<>();
+
     /**
      * 根据订单数据创建任务列表
      * @param order
@@ -587,7 +590,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return;
         }
         prePoint = mp;
@@ -2917,6 +2920,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                     chongMPs) {
                 if (mp != null) {
                     chargePoint = mp;
+
                     break;
                 }
             }
@@ -2926,6 +2930,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if(robot == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "下单机器人参数错误。");
         }
+
+        //存入机器人关联的充电桩信息
+        chargePointMap.put(robot.getCode(), chargePoint);
 
         if(order.getScene() == null) {
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "失败！订单所属云端场景为空。");
@@ -2959,9 +2966,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }
                 //如果搜索到可用路径，则设置起点为prePoint
                 prePoint = result.getStartPoint();
+
+                //TODO test
+//                prePoint = startPathPoint;
             }
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(),e);
             return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到点" + startPathPoint.getPointAlias() +"路径出错！");
         }
 
@@ -3170,7 +3180,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return;
         }
         prePoint = mp;
@@ -3324,6 +3334,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                             roadPathLockAtts);
                 }
             }
+
+            //云端在所有任务后，加一个释放该机器人所有路径锁和门锁的解锁任务
+            MPointAtts mPointAtts = new MPointAtts();
+            mPointAtts.roadpathId = Constant.RELEASE_ROBOT_LOCK_ID;
+            mPointAtts.pathId = Constant.RELEASE_ROBOT_LOCK_ID + "";
+            JsonMissionItemDataRoadPathUnlock json =
+                    getJsonMissionItemDataRoadPathUnlock(mPointAtts);
+            missionListTask.getMissionTasks().add(getRoadPathUnlockTask(order, null, "最终释放机器人锁任务-", json));
 
             //云端加在所有任务后，一个独立的语音任务：任务已完成。
             missionListTask.getMissionTasks().add(getMp3VoiceTaskIgnorable(order, null, "最终结束语音-", MP3_TASK_OVER, false));
@@ -3619,10 +3637,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         String parentName = "工控固定路径逻辑路径解锁任务-";
 
         JsonMissionItemDataRoadPathUnlock json =
-                new JsonMissionItemDataRoadPathUnlock();
-//        json.setInterval_time(30);
-        json.setInterval_time(5);
-        json.setRoadpath_id(mPointAtts.roadpathId);
+                getJsonMissionItemDataRoadPathUnlock(mPointAtts);
         MissionTask roadpathUnlockTask = getRoadPathUnlockTask(
                 order,
                 mp,
@@ -3631,6 +3646,26 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         );
         missionListTask.getMissionTasks().add(roadpathUnlockTask);
 
+    }
+
+    /**
+     * 获取解锁任务ItemJson
+     * @param mPointAtts
+     * @return
+     */
+    private JsonMissionItemDataRoadPathUnlock getJsonMissionItemDataRoadPathUnlock(MPointAtts mPointAtts) {
+        JsonMissionItemDataRoadPathUnlock json =
+                new JsonMissionItemDataRoadPathUnlock();
+//        json.setInterval_time(30);
+        json.setInterval_time(5);
+        json.setRoadpath_id(mPointAtts.roadpathId);
+        try {
+            Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
+            json.setX86_path_id(x86PathId);
+        } catch (NumberFormatException e) {
+            logger.error("解锁路径String转换Long出错");
+        }
+        return json;
     }
 
     /**
@@ -3655,6 +3690,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //        json.setInterval_time(30);
         json.setInterval_time(5);
         json.setRoadpath_id(mPointAtts.roadpathId);
+        try {
+            Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
+            json.setX86_path_id(x86PathId);
+        } catch (NumberFormatException e) {
+            logger.error("解锁路径String转换Long出错");
+        }
         MissionTask roadpathLockTask = getRoadPathLockTask(
                 order,
                 mp,
@@ -3798,11 +3839,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                                        );
 //                                    }
 //                                } catch (Exception e) {
-//                                    e.printStackTrace();
+//                                    log.error(e, e.getMessage());
 //                                    logger.info("Path Door find RoadPath Error: " + e.getMessage());
 //                                }
                                 //直接通过门对象关联的逻辑路径对象，判断是否加入逻辑路径锁
                                 mPointAtts.roadpathId = door.getPathLock();
+                                mPointAtts.pathId = door.getPathId();
                                 //添加路径锁或解锁
                                 addRoadPathLockOrUnlock(
                                         missionListTask,
@@ -4046,7 +4088,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 }
                             }
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage(), e);
                         }
                         elevatorsEntities.get(count)
                                 .setDefault_elevator(ev.getDefaultElevator()?1:0);
@@ -4290,11 +4332,26 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             isSetOrderDetailMP = true;
         }
 
-        //如果没有货架，就不需要再加入卸货架任务了
-        if (order.getShelf() == null){
+        /**
+         * 根据订单设置，如果不需要货架、且有最终卸货点、
+         * 且有充电桩(没充电桩就不需要再往下走了，就不用插入中间卸货任务了)，则需要插入一个中间卸货任务。
+         */
+        MapPoint chargePoint = chargePointMap.get(order.getRobot().getCode());
+        boolean isUnload = (order.getShelf() == null || !order.getOrderSetting().getNeedShelf())
+                && chargePoint != null;
+        if(isUnload) {
+            //插入中间送货任务(不需要货架)
+            initPathMissionTaskSongHuo(missionListTask, order, startMp, mp, mPointAtts);
+            return;
+        }
+        //如果没有货架,且没有充电点，就不需要再加入卸货架任务了
+        else if (order.getShelf() == null && chargePoint == null){
             return;
         }
 
+        /**
+         * 如果有货架，则进入有货架的流程
+         */
         //单点导航任务，回到下货点
 //        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
 //        missionListTask.getMissionTasks().add(sigleNavTask);
@@ -4718,7 +4775,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public Long currentMapId;
         public Long nextMapId;
         public String pathId;
-        public Long roadpathId;
+        public Long roadpathId; //逻辑锁ID
         public MapPoint chargePoint;
         public MapPoint chargePrePoint;
     }

@@ -23,6 +23,10 @@ public interface BaseCrudService<T extends BaseBean> {
 
     T findById(Long id);
 
+    T findByDomain(T t);
+
+    List<T> listByDomain(T t);
+
     List<T> listAll();
 
     List<T> listPage(int page, int pageSize);

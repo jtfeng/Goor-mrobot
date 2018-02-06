@@ -6,7 +6,6 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.dijkstra.RobotRoadPathResult;
@@ -449,7 +448,11 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     @Override
     public List<Order> listOrdersByStation(Long stationId, Integer page, Integer pageSize) {
         PageHelper.startPage(page, pageSize);
-        return orderMapper.listOrdersByStation(stationId);
+        //查询限制为24小时内的订单
+        Date currentTime = new Date();
+        long oneDayBefore = currentTime.getTime() - 24*60*60*1000;
+        Date beforeTime = new Date(oneDayBefore);
+        return orderMapper.listOrdersByStation(stationId, beforeTime, currentTime);
     }
 
     @Override

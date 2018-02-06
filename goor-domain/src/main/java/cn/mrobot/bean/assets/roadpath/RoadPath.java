@@ -11,7 +11,7 @@ public class RoadPath extends BaseBean{
 
     // 路径名称信息
     private String pathName;
-    // 拟合方式
+    // 拟合方式(0直线，1三阶贝塞尔曲线，2自定义曲线)
     private String pattern;
     // 路径绑定的数据
     private String data;
@@ -31,7 +31,7 @@ public class RoadPath extends BaseBean{
     private Integer pathType;
     //所关联的路径锁对象
     private Long pathLock;
-    //工控路径类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向要求工控路径）
+    //下发协议：工控路径终点类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向要求工控路径）
     private Integer x86PathType;
     //受管路径开始时间
     private String restrictedStarttime;

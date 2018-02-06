@@ -113,4 +113,11 @@
         </if>
     </select>
 
+
+    <select id="getRobotSceneId" resultType="Long">
+        SELECT SCENE_ID
+        FROM SCENES_ROBOTS_RELATIONS
+        WHERE ROBOT_ID = #{robotId}
+    </select>
+
 </mapper>

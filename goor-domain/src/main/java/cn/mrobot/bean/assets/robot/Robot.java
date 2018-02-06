@@ -42,7 +42,7 @@ public class Robot extends BaseBean {
     @JSONField(format = "yyyy-MM-dd")
     private Date updateTime; //修改时间
 
-    private Boolean busy         ; //状态(0-空闲， 1-占用)
+    private Boolean busy = Boolean.FALSE         ; //状态(0-空闲， 1-占用，默认为0)
 
     @Transient
     private Boolean online; //在线状态(放缓存中CacheInfoManager.robotOnlineCache)
@@ -261,5 +261,37 @@ public class Robot extends BaseBean {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "Robot{" +
+                "id=" + id +
+                ", uuid='" + uuid + '\'' +
+                ", storeId=" + storeId +
+                ", name='" + name + '\'' +
+                ", createdBy=" + createdBy +
+                ", code='" + code + '\'' +
+                ", typeId=" + typeId +
+                ", createTime=" + createTime +
+                ", description='" + description + '\'' +
+                ", status='" + status + '\'' +
+                ", emergencyStopState=" + emergencyStopState +
+                ", lowPowerState=" + lowPowerState +
+                ", lowBatteryThreshold=" + lowBatteryThreshold +
+                ", sufficientBatteryThreshold=" + sufficientBatteryThreshold +
+                ", boxActivated=" + boxActivated +
+                ", updateTime=" + updateTime +
+                ", busy=" + busy +
+                ", online=" + online +
+                ", sceneName='" + sceneName + '\'' +
+                ", sceneId=" + sceneId +
+                ", mapSyncResult=" + mapSyncResult +
+                ", password='" + password + '\'' +
+                ", passwords=" + passwords +
+                ", originChargerMapPointList=" + originChargerMapPointList +
+                ", chargerMapPointList=" + chargerMapPointList +
+                ", robotIdForElevator='" + robotIdForElevator + '\'' +
+                '}';
     }
 }

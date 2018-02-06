@@ -238,7 +238,12 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
      */
     private List<Station> collectElevators(List<Station> stationList) {
         for (Station station : stationList) {
-            if (StationType.ELEVATOR.getCaption() == station.getStationTypeId()) {
+            Integer stationTypeId = station.getStationTypeId();
+            if(stationTypeId == null) {
+                logger.info("##########用户绑定站:" + station.getName() + "的站类型为空");
+                continue;
+            }
+            if (stationTypeId.equals(StationType.ELEVATOR.getCaption()) ) {
                 // 表明这个站是电梯站，需要查询与其关联的电梯信息
                 station.setElevators(elevatorMapper.findByElevatorStationId(station.getId()));
             }

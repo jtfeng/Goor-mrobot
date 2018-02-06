@@ -46,7 +46,7 @@ public class ElevatorAsyncTask {
                 elevatorClientAsyncTask.taskElevatorTcpSerClient(client, request);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
         return new AsyncResult<>("taskElevatorTcpSer accomplished and exit!");
     }

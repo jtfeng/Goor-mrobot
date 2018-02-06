@@ -24,6 +24,8 @@ public class Constant {
     //工控固定路径导航可以开始的范围，单位mm
     public static final Long PATH_NAVIGATION_SCALE = 800L;
 
+    //机器人离线清除所有锁的时长
+    public static final Long ROBOT_OFFLINE_MINUTES = 10L;
     /**以哪个点来计算路径起点的常量
      * 以路径起点，还是以机器人所在位置在路径的投影
      */
@@ -31,6 +33,9 @@ public class Constant {
     public static final int CAL_ROAD_PATH_START_SHADOW = 2;
 
     public static final String REQUEST = "request";
+
+    //释放机器人锁的假ID，只要检测到是这个ID，就释放机器人所有的锁
+    public final static Long RELEASE_ROBOT_LOCK_ID = -10086L;
 
     //数据库数据删除状态
     public final static Integer NORMAL = 0; //正常值

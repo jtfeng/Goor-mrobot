@@ -1,5 +1,8 @@
 package cn.muye.base.download.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +13,7 @@ public class Tools {
 	public static UUID getRandomUUID(){
 		return java.util.UUID.randomUUID();
 	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(Tools.class);
 	/**
 	 * @param filename propertiy file path
 	 * @return 
@@ -21,7 +25,7 @@ public class Tools {
 			 properties.load(inputs);
 			 inputs.close();
 		 }catch(IOException e){
-			 e.printStackTrace();
+			 LOGGER.error(e.getMessage(), e);
 		 }
 		 return properties;
 	}

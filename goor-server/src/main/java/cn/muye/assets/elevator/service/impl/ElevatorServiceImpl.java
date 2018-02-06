@@ -64,13 +64,14 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Transactional
     @Override
     public List<Elevator> listElevators(WhereRequest whereRequest) throws Exception {
-        Map params = Maps.newHashMap();
+        Map<String, Long> params = Maps.newHashMap();
         JSONObject jsonObject = JSONObject.parseObject(whereRequest.getQueryObj());
         params.put("sceneId", Long.parseLong(String.valueOf(jsonObject.get("sceneId"))));
-//        List<Elevator> elevators = this.listPageByStoreIdAndOrder(whereRequest.getPage(),
-//                whereRequest.getPageSize(), Elevator.class,"ID DESC");
         PageHelper.startPage(whereRequest.getPage(), whereRequest.getPageSize());
-        return elevatorMapper.listElevatorsByScene(params);
+        List<Elevator> elevators =  elevatorMapper.listElevatorsByScene(params);
+        bindElevatorShaft(elevators);
+        bindElevatorPointCombination(elevators);
+        return elevators;
     }
 
     @Transactional
@@ -104,7 +105,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                                 );
                                 isPassed = mapInfoId.equals(mapInfo.getId()) && floor.equals(mapInfo.getFloor());
                             }catch (Exception e){
-                                e.printStackTrace();
+                                log.error(e.getMessage(), e);
                             }
                             return isPassed;
                         }

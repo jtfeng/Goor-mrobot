@@ -3,6 +3,7 @@ package cn.muye.base.service.batch;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.muye.area.pose.service.CurrentPoseService;
 import cn.muye.assets.elevator.service.ElevatorNoticeService;
+import cn.muye.assets.roadpath.service.RoadPathLockService;
 import cn.muye.base.export.service.ExportService;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
@@ -26,7 +27,7 @@ import java.util.Date;
  */
 @Component
 @Configurable
-//@EnableScheduling
+//@EnableSchedulin
 public class ScheduleTasks {
 
     private Logger logger = Logger.getLogger(ScheduleTasks.class);
@@ -56,11 +57,16 @@ public class ScheduleTasks {
     private MissionWarningService missionWarningService;
 
     @Autowired
+    private RoadPathLockService roadPathLockService;
+
+    @Autowired
     private ElevatorNoticeService elevatorNoticeService;
 
     private final static Object lock = new Object();
 
     private final static Object lock2 = new Object();
+
+    private final static Object lock3 = new Object();
 
     //每10s发送未成功的消息
 //    @Scheduled(cron = "*/5 * *  * * * ")
@@ -111,18 +117,19 @@ public class ScheduleTasks {
     @Scheduled(cron = "0 */1 * * * ?")
     public void scanWaitOrders() {
         synchronized (lock){
-            logger.info("-----------开启订单等待队列扫描--------------------");
+            logger.info("开启订单等待队列扫描");
             try {
                 orderService.checkWaitOrders();
-                logger.info("---------订单队列扫描结束---------------");
+                logger.info("订单扫描结束");
             } catch (Exception e) {
                 logger.error("订单扫描出现异常", e);
             }
         }
     }
 
-    //每分钟执行一次， 订单任务mission超时扫描
-    @Scheduled(cron = "0 */2 * * * ?")
+    //每分钟执行一次， 订单任务mission超时扫描,
+    // 任务超时报警定时器暂时清除
+    //@Scheduled(cron = "0 */1 * * * ?")
     public void checkOrderMissionOverTime() {
         synchronized (lock2){
             logger.info("开启订单任务超时扫描");
@@ -131,6 +138,20 @@ public class ScheduleTasks {
                 logger.info("订单任务超时扫描结束");
             } catch (Exception e) {
                 logger.error("订单任务超时扫描出现异常", e);
+            }
+        }
+    }
+
+    //每分钟执行一次， 检测执行任务机器状态
+    @Scheduled(cron = "0 */1 * * * ?")
+    public void checkRobotWarningState() {
+        synchronized (lock3){
+            logger.info("检测执行任务机器状态");
+            try {
+                missionWarningService.checkRobotWarningState();
+                logger.info("检测执行任务机器状态结束");
+            } catch (Exception e) {
+                logger.error("检测执行任务机器状态出现异常", e);
             }
         }
     }
@@ -235,7 +256,7 @@ public class ScheduleTasks {
     }
 
     /**
-     * 添加定时任务，没10秒检查一次有没有电梯pad消息缓存，有，取出消息进行推送
+     * 添加定时任务，每10秒检查一次有没有电梯pad消息缓存，有，取出消息进行推送
      */
     @Scheduled(cron = "*/10 * * * * ?")
     public void sendElevatorNoticeCache() {
@@ -243,6 +264,20 @@ public class ScheduleTasks {
             elevatorNoticeService.sendElevatorNoticeCache();
         } catch (Exception e) {
             logger.error("Scheduled sendElevatorNoticeCache  error", e);
+        }
+    }
+
+    /**
+     * 定时任务，每个一分钟执行一次，取出数据库所有机器人，查看当前机器人状态，如果是空闲状态，则解锁该机器人所有的锁
+     * 非空闲，查看机器人在线状态，如果机器人不在线，则清除所有的锁
+     */
+    @Scheduled(cron = "00 */1 * * * ?")
+    public void schuleReleaseRoadpathLock() {
+        logger.info("定时任务-清除机器人锁");
+        try {
+            roadPathLockService.schuleReleaseRoadpathLock();
+        } catch (Exception e) {
+            logger.error("定时任务-清除机器人锁失败", e);
         }
     }
 }

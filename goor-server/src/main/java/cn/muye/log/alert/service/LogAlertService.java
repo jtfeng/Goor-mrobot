@@ -8,4 +8,5 @@ import cn.muye.base.service.BaseService;
  */
 public interface LogAlertService extends BaseService<LogAlert> {
 
+    LogAlert findLastSameAlert(String robotCode, String message, String alertCode);
 }

@@ -49,9 +49,11 @@ public class LogAlertController {
            List<LogAlert> list = logAlertService.listPageByStoreIdAndOrder(page, pageSize, LogAlert.class, "ALERT_TIME DESC");
            list.forEach(logAlert -> {
                logAlert.setAlertName(AlertTypeEnum.getValue(logAlert.getAlertCode()));
-               MissionItemTask missionItemDb = missionItemTaskService.findById(logAlert.getMissionItemId());
-               if (missionItemDb != null) {
-                   logAlert.setMissionItemDescription(missionItemDb.getDescription());
+               if(logAlert.getMissionItemId()!= null){
+                   MissionItemTask missionItemDb = missionItemTaskService.findById(logAlert.getMissionItemId());
+                   if (missionItemDb != null) {
+                       logAlert.setMissionItemDescription(missionItemDb.getDescription());
+                   }
                }
            });
            PageInfo<LogAlert> pageInfo = new PageInfo<>(list);

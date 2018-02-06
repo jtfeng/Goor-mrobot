@@ -12,6 +12,8 @@ import cn.muye.order.bean.MessageBellVO;
 import cn.muye.order.service.ApplyOrderService;
 import cn.muye.order.service.MessageBellService;
 import cn.muye.util.UserUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,6 +31,7 @@ import java.util.List;
 @RequestMapping(value = "messageBell")
 public class MessageBellController extends BaseController{
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageBellController.class);
     @Autowired
     private MessageBellService messageBellService;
     @Autowired
@@ -76,7 +79,7 @@ public class MessageBellController extends BaseController{
             messageBellVO.setWaitApplyOrders(applyOrderList);
             return AjaxResult.success(messageBellVO, "读取信息列表成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("读取信息出错");
         }
     }
@@ -92,7 +95,7 @@ public class MessageBellController extends BaseController{
             messageBellService.updateByStationIdAndClearDate(stationId, clearDate);
             return AjaxResult.success("消息清除成功");
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed("清除信息出错");
         }
     }

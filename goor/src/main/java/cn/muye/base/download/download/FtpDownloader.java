@@ -82,9 +82,9 @@ public class FtpDownloader implements Runnable {
 				}
 			}
 		} catch (SocketException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		disconnect();
 		logger.error("Connect " + host + " failed!");
@@ -97,7 +97,7 @@ public class FtpDownloader implements Runnable {
 				ftpClient.logout();
 				ftpClient.disconnect();
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 			}
 		}
 	}
@@ -257,7 +257,7 @@ public class FtpDownloader implements Runnable {
 				__info.writeInfo(chp);
 				_isDone = true;
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.error(e.getMessage(), e);
 				logger.debug(__info.getPair().localName, e);
 			} finally {
 				try {

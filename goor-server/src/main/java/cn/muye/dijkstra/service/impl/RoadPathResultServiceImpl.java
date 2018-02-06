@@ -192,14 +192,18 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
             LOGGER.info("==============解析机器人坐标为空。");
             return null;
         }
+        Double positionX = position.getX();
+        Double positionY = position.getY();
+        LOGGER.info("//=================机器人位置,X= {}, Y= {}, sceneName = {}, mapName = {}",positionX, positionY, sceneName, mapName);
+
 
         //根据四元数换算欧拉角
         double th = PathUtil.calThByOrientation(orientation);
         LOGGER.info("================四元数w=" + orientation.getW() + ",换算的欧拉角(弧度)=" + th);
         //我们认为保留3位小数换算出来TH，作为比较条件，后面几位精度基本可以忽略了
         MapPoint rosPoint = PathUtil.findPathPointByXYTH(sceneName, mapName ,
-                MathLineUtil.floorDoubleByScale(position.getX(), Constant.XYZ_SCALE),
-                MathLineUtil.floorDoubleByScale(position.getY(), Constant.XYZ_SCALE),
+                MathLineUtil.floorDoubleByScale(positionX, Constant.XYZ_SCALE),
+                MathLineUtil.floorDoubleByScale(positionY, Constant.XYZ_SCALE),
                 MathLineUtil.floorDoubleByScale(th,Constant.TH_SCALE),
                 null, pointService );
 
@@ -217,8 +221,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         //如果没有匹配到，则需要寻找离机器人位置点最近的路径点
         else {
             rosPoint = new MapPoint();
-            rosPoint.setY(position.getY());
-            rosPoint.setX(position.getX());
+            rosPoint.setX(positionX);
+            rosPoint.setY(positionY);
             rosPoint.setTh(th);
             rosPoint.setSceneName(sceneName);
             rosPoint.setMapName(mapName);
@@ -232,7 +236,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
             }
 
             //先计算离机器人位置最近的路径，然后计算路径起点到目的地点最近的路径起点作为输出,权值计算根据类型取路径起点，还是取投影点
-            roadPathResult = PathUtil.calNearestPathPointByRoadPathDetails(roadPathMaps, startPointType, roadPathDetails, rosPoint, targetPoint, this);
+            roadPathResult = PathUtil.calNearestPathPointByRoadPathDetails(roadPathMaps, startPointType, roadPathDetails, rosPoint, targetPoint, this, roadPathService , pointService);
             LOGGER.info("//=================算法计算最近路径起点结束，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString() + roadPathResult == null ? "结果为空，未找到路径！"
                 : "总权值:" + roadPathResult.getTotalWeight() + ",点序列：" + roadPathResult.getPointIds());
             return roadPathResult;
@@ -273,6 +277,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         RoadPathResult result = getNearestPathResultByRosCurrentPose(roadPathMaps, startPointType,
                         rosCurrentPose, targetPoint, currentInfo.getMapInfo().getSceneName(), currentInfo.getMapInfo().getMapName());
 
+        LOGGER.info("###############查找离" + robotCode + "机器人坐标最近的路径完毕。" +
+                (result == null ? "未找到。" : "起点:" + result.getStartPoint() + "终点:" + result.getEndPoint() + "序列:" + result.getPointIds()));
         return result;
     }
 

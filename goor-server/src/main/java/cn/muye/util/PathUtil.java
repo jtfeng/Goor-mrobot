@@ -39,7 +39,7 @@ public class PathUtil {
      * @return
      */
     public static Long calDistance(MapPoint start, MapPoint end) {
-        Long result = 0L;
+        Long result = Long.MAX_VALUE;
         Double db = MathLineUtil.calPointToPointDistance(start.getX(), start.getY(), end.getX(), end.getY())
                  * 1000;//换算成mm
         result = MathLineUtil.doubleToLongRoundHalfUp(db);
@@ -54,15 +54,34 @@ public class PathUtil {
      * @return
      */
     public static Long calDistanceByRoadPathDetail(RoadPathDetail roadPathDetail, MapPoint robotPosition) {
-        Long result = 0L;
+        Long result = Long.MAX_VALUE;
+        if(roadPathDetail == null) {
+            logger.error("路径详细为空，无法计算距离");
+            return result;
+        }
         MapPoint start = roadPathDetail.getStart();
         MapPoint end = roadPathDetail.getEnd();
-        double x0 = robotPosition.getX();
-        double y0 = robotPosition.getY();
-        double x1 = start.getX();
-        double y1 = start.getY();
-        double x2 = end.getX();
-        double y2 = end.getY();
+        logger.info("路径详细start = {},路径详细end = {}", start, end);
+        if(start == null || end == null) {
+            logger.error("路径 {}, sceneName = {}, mapName = {}, start = {}, end = {} 详细起点或终点有一个为空，无法计算距离",
+                    roadPathDetail.getPathName(),roadPathDetail.getSceneName(),roadPathDetail.getMapName(), start, end);
+            return result;
+        }
+        if(robotPosition == null) {
+            logger.error("机器人坐标为空，无法计算距离");
+            return result;
+        }
+        Double x0 = robotPosition.getX();
+        Double y0 = robotPosition.getY();
+        Double x1 = start.getX();
+        Double y1 = start.getY();
+        Double x2 = end.getX();
+        Double y2 = end.getY();
+        logger.info("坐标x0 = {} , y0 = {}, x1 = {}, y1 = {}, x2 = {}, y2 = {}", x0, y0, x1, y1, x2, y2);
+        if(x0 == null || y0 == null || x1 == null || y1 == null || x2 == null || y2 == null) {
+            logger.error("坐标x0,y0,x1,y1,x2,y2中存在null值，无法计算距离");
+            return result;
+        }
         //以离机器人最近的路径起点计算机器人到线段的距离,换算成mm
         Double db = MathLineUtil.calPointToSegmentDistance(x0, y0, x1, y1, x2, y2) * 1000;
         result = MathLineUtil.doubleToLongRoundHalfUp(db);
@@ -253,6 +272,7 @@ public class PathUtil {
      */
     public static void clearPathCache(Long storeId,String sceneName) {
         //清空路径图、云端/工控路径、点的缓存
+        logger.info("#############清空场景" + sceneName + "的路径图、云端/工控路径、点的缓存");
         CacheInfoManager.removeRoadPathMapsCache(storeId, sceneName);
         CacheInfoManager.removeRoadPathDetailsCache(storeId, sceneName, Constant.PATH_TYPE_X86);
         CacheInfoManager.removeRoadPathDetailsCache(storeId, sceneName, Constant.PATH_TYPE_CLOUD);
@@ -264,6 +284,8 @@ public class PathUtil {
      * 权值计算根据类型取路径起点，还是取投影点
      * @param startPointType
      * @param roadPathDetails
+     * @param roadPathService
+     * @param pointService
      * @return
      */
     public static RoadPathResult calNearestPathPointByRoadPathDetails(
@@ -272,15 +294,19 @@ public class PathUtil {
             List<RoadPathDetail> roadPathDetails,
             MapPoint robotPosition,
             MapPoint targetPosition,
-            RoadPathResultService roadPathResultService) throws Exception{
+            RoadPathResultService roadPathResultService,
+            RoadPathService roadPathService,
+            PointService pointService) throws Exception{
         RoadPathResult roadPathResult = new RoadPathResult();
         //默认权值设置到最大值
         roadPathResult.setTotalWeight(Long.MAX_VALUE);
 
+        String robotSceneName = robotPosition.getSceneName();
+        String robotMapName = robotPosition.getMapName();
         for(RoadPathDetail roadPathDetail : roadPathDetails) {
             //判断是同场景和同地图的路径才计算
-            if(!roadPathDetail.getSceneName().equals(robotPosition.getSceneName())
-                    || !roadPathDetail.getMapName().equals(robotPosition.getMapName())) {
+            if(!roadPathDetail.getSceneName().equals(robotSceneName)
+                    || !roadPathDetail.getMapName().equals(robotMapName)) {
                 continue;
             }
 
@@ -302,8 +328,48 @@ public class PathUtil {
                 continue;
             }
 
+            logger.info("找到可用规划路径：从路径" + roadPathDetail.getPathId() + ","
+                    + roadPathDetail.getMapName() + "," + roadPathDetail.getSceneName()
+                    + "到目标点" + targetPosition.getId() + "，点序列：" + resultTemp.getPointIds());
             //根据startPointType来对路径权值做补偿。
             resultTemp = compensateRoadPathResultByStartPointType(roadPathDetail, robotPosition, resultTemp, startPointType);
+
+            //再次判断机器人到生成的点序列的第一条工控路径距离在范围内
+            //当只有一个点的时候，直接计算机器人位置到这个点的距离
+            List<Long> resultTempIds = resultTemp.getPointIds();
+            Long resultStartId = resultTempIds.get(0);
+            if(resultTempIds.size() == 1) {
+                logger.info("规划路径只找到一个点，ID:" + resultStartId);
+                MapPoint start = pointService.findById(resultStartId);
+                if(start == null) {
+                    logger.info("规划路径的第一个起点对象不存在,ID:" + resultStartId);
+                    continue;
+                }
+                logger.info("规划路径的第一个起点存在，" + start.getPointAlias());
+                distance = calDistance(robotPosition, start);
+            }
+            //当有两个点的时候，计算到第一条路径的距离是否在合理的范围内
+            else if(resultTempIds.size() > 1) {
+                logger.info("规划路径找到一个以上的点，IDs:" + resultTempIds);
+                Long resultEndId = resultTemp.getPointIds().get(1);
+                List<RoadPathDetail> roadPathDetailListTemp = roadPathService.listRoadPathDetailByStartAndEndPointType(resultStartId,
+                        resultEndId, robotSceneName, robotMapName, Constant.PATH_TYPE_X86);
+                if(roadPathDetailListTemp == null || roadPathDetailListTemp.size() == 0) {
+                    logger.info("未找到从点" + resultStartId + "到点" + resultEndId + "的工控路径");
+                    continue;
+                }
+                RoadPathDetail firstDetail = roadPathDetailListTemp.get(0);
+                logger.info("找到从点" + resultStartId + "到点" + resultEndId + "的工控路径" + roadPathDetailListTemp.size() + "条，" +
+                        "第一条工控路径ID为" + firstDetail.getPathId());
+
+                distance = calDistanceByRoadPathDetail(firstDetail, robotPosition);
+            }
+
+            //计算机器人坐标离的路径距离在1.5米内的路径,单位mm
+            if(distance > Constant.PATH_NAVIGATION_SCALE) {
+                logger.info("第二次校验机器人位置到路径工控路径距离为" + distance + "，超过了搜索范围。");
+                continue;
+            }
 
             //取到目的地最优路径的结果集作为输出
             if(resultTemp != null && resultTemp.getTotalWeight() != null
@@ -340,12 +406,27 @@ public class PathUtil {
             Long weight = resultTemp.getTotalWeight();
             MapPoint start = roadPathDetail.getStart();
             MapPoint end = roadPathDetail.getEnd();
-            double x0 = robotPosition.getX();
-            double y0 = robotPosition.getY();
-            double x1 = start.getX();
-            double y1 = start.getY();
-            double x2 = end.getX();
-            double y2 = end.getY();
+            logger.info("路径详细start = {},路径详细end = {}", start, end);
+            if(start == null || end == null) {
+                logger.error("路径 {}, sceneName = {}, mapName = {}, start = {}, end = {} 详细起点或终点有一个为空，无法计算距离",
+                        roadPathDetail.getPathName(),roadPathDetail.getSceneName(),roadPathDetail.getMapName(), start, end);
+                return null;
+            }
+            if(robotPosition == null) {
+                logger.error("机器人坐标为空，无法计算补偿");
+                return null;
+            }
+            Double x0 = robotPosition.getX();
+            Double y0 = robotPosition.getY();
+            Double x1 = start.getX();
+            Double y1 = start.getY();
+            Double x2 = end.getX();
+            Double y2 = end.getY();
+            logger.info("坐标x0 = {} , y0 = {}, x1 = {}, y1 = {}, x2 = {}, y2 = {}", x0, y0, x1, y1, x2, y2);
+            if(x0 == null || y0 == null || x1 == null || y1 == null || x2 == null || y2 == null) {
+                logger.error("坐标x0,y0,x1,y1,x2,y2中存在null值，无法计算补偿");
+                return null;
+            }
             TriangleResult triangleResult = calTriangleResult(x0 , y0, x1, y1, x2, y2);
 
             double r = triangleResult.getR();
@@ -667,14 +748,14 @@ public class PathUtil {
             robotRoadPathResultList.add(new RobotRoadPathResult(robot, roadPathResult));
         }
 
-        System.out.println("排序前");
+        logger.info("排序前");
         displayRoadPathResultList(robotRoadPathResultList);
         try {
             sortByRobotRoadPathResultList(robotRoadPathResultList);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(e, e.getMessage());
         }
-        System.out.println("排序后");
+        logger.info("排序后");
         displayRoadPathResultList(robotRoadPathResultList);
 
     }*/
@@ -685,7 +766,7 @@ public class PathUtil {
      */
     public static void displayRoadPathResultList(List<RobotRoadPathResult> robotRoadPathResultList) {
         for(RobotRoadPathResult robotRoadPathResult : robotRoadPathResultList) {
-            System.out.println("robotName:" + robotRoadPathResult.getRobot().getName()
+            logger.info("robotName:" + robotRoadPathResult.getRobot().getName()
                     + ",weight:" + robotRoadPathResult.getRoadPathResult().getTotalWeight());
         }
     }

@@ -114,7 +114,7 @@ public class Application {
             }
 		} catch (Exception e) {
 			file = new File("/tmp");
-			e.printStackTrace();
+			logger.error(e.getMessage(), e);
 		}
 		return file;
 	}

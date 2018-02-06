@@ -47,8 +47,9 @@ public class ElevatorClientAsyncTask {
                     //读取
                     inputStream.read(buf, 0, buf.length);
                     //打印客户端的消息
-                    if (TopicConstants.DEBUG)
-                    logger.info("Remote Address: " + client.getRemoteSocketAddress() + " ,taskElevatorTcpSerClient get message...:" + HexStringUtil.bytesToHexString(buf));
+                    if (TopicConstants.DEBUG) {
+                        logger.info("Remote Address: " + client.getRemoteSocketAddress() + " ,taskElevatorTcpSerClient get message...:" + HexStringUtil.bytesToHexString(buf));
+                    }
 
                     //处理消息，并发送通知
                     LogElevator logElevator = new LogElevator();
@@ -57,19 +58,21 @@ public class ElevatorClientAsyncTask {
                     if (!StringUtil.isEmpty(logElevator.getValue())){
                         logElevator.setValue(logElevator.getValue().toUpperCase());
                     }
-                    if (TopicConstants.DEBUG)
+                    if (TopicConstants.DEBUG) {
                         logger.info("VALUE is: " + logElevator.getValue());
+                    }
 
                     if (logElevatorService != null){
                         try {
                             logElevatorService.save(logElevator);
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            logger.error(e.getMessage(), e);
                             logger.info(e.getMessage());
                         }
                         if (logElevator.getId() != null){
-                            if (TopicConstants.DEBUG)
-                            logger.info("保存日志成功！");
+                            if (TopicConstants.DEBUG) {
+                                logger.info("保存日志成功！");
+                            }
                         }else{
                             logger.info("保存日志失败！");
                         }

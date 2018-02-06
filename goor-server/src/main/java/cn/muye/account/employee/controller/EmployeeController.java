@@ -38,7 +38,7 @@ public class EmployeeController {
             AjaxResult ajaxResult = employeeService.verifyEmplyeeNumber(code, missionItemId, subName);
             return ajaxResult;
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
         return null;
     }

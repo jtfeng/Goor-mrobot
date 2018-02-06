@@ -14,7 +14,7 @@ import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.bean.MessageInfo;
-import com.google.common.collect.Lists;
+import cn.muye.mission.bean.RobotPositionRecord;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
@@ -113,6 +113,11 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<Long,Boolean> elevatorNoticeCache = new ConcurrentHashMapCache<Long, Boolean>();
 
+    /**
+     * 机器人位置缓存
+     */
+    private static ConcurrentHashMapCache<String, LinkedList<RobotPositionRecord>> robotPositionRecordsCache = new ConcurrentHashMapCache<>();
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -134,6 +139,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         baseSystemCache.setMaxLifeTime(0);
         navigationCache.setMaxLifeTime(0);
         fixpathSceneNameCache.setMaxLifeTime(10 * 60 * 1000);
+        robotPositionRecordsCache.setMaxLifeTime(0);
         //用户登录状态
         userLoginStatusCache.setMaxLifeTime(0);
 
@@ -152,6 +158,10 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setMessageCache(MessageInfo info) {
         messageCache.put(info.getSenderId(), info);
+    }
+
+    public static void removeMessageCache(String code) {
+        messageCache.remove(code);
     }
 
     public static MessageInfo getMessageCache(String senderId) {
@@ -496,7 +506,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static List<RoadPathDetail> setRoadPathDetailsCache(Long storeId, String sceneName, Integer pathType, RoadPathService roadPathService) {
-        List<RoadPathDetail> roadPathDetails = roadPathService.listRoadPathDetailsBySceneNamePathType(sceneName,pathType, storeId);
+        List<RoadPathDetail> roadPathDetails = roadPathService.listRoadPathDetailsBySceneNamePathType(sceneName, pathType, storeId);
         roadPathDetailsCache.put(storeId + sceneName + pathType, roadPathDetails);
         return roadPathDetails;
     }
@@ -522,8 +532,8 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static List<MapPoint> setMapPointsCache(Long storeId, String sceneName, PointService pointService) {
-        List<MapPoint> mapPoints = pointService.listByMapSceneNameAndPointType(sceneName , null, storeId);
-        mapPointsCache.put(storeId + sceneName , mapPoints);
+        List<MapPoint> mapPoints = pointService.listByMapSceneNameAndPointType(sceneName, null, storeId);
+        mapPointsCache.put(storeId + sceneName, mapPoints);
         return mapPoints;
     }
 
@@ -562,5 +572,29 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void removeElevatorNoticeCache(Long elevatorNoticeId) {
         elevatorNoticeCache.remove(elevatorNoticeId);
+    }
+
+    public static void setRobotPositionRecordsCache(String robotId, LinkedList<RobotPositionRecord> robotPositionRecordList) {
+        robotPositionRecordsCache.put(robotId, robotPositionRecordList);
+    }
+
+    public static void removeRobotPositionRecordsCache(String robotId) {
+        robotPositionRecordsCache.remove(robotId);
+    }
+
+    public static LinkedList<RobotPositionRecord> getRobotPositionRecordsCache(String key) {
+        LinkedList<RobotPositionRecord> recordsLinkedList = robotPositionRecordsCache.get(key);
+        return recordsLinkedList;
+    }
+
+    public static void removeUnBusyRobotsCache(List<String> busyRobotCode){
+        Iterator iterator = robotPositionRecordsCache.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            String key = entry.getKey();
+            if (!busyRobotCode.contains(key)){
+                removeRobotPositionRecordsCache(key);
+            }
+        }
     }
 }
