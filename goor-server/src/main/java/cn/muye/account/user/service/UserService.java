@@ -11,13 +11,13 @@ import java.util.List;
  */
 public interface UserService extends BaseService<User> {
 
-    List<User> getUser(String userName, String password);
+    List<User> getUser(String userName, String password) throws Exception;
 
     void addUser(User user);
 
     void updateUser(User user);
 
-    List<User> list(WhereRequest whereRequest, User user);
+    List<User> list(WhereRequest whereRequest, User user) ;
 
     User getUserByDirectKey(Integer directKey, Long storeId);
 

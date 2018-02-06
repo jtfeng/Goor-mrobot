@@ -3,6 +3,7 @@ package cn.muye.account.user.service.impl;
 import cn.mrobot.bean.account.*;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
@@ -53,10 +54,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     @Autowired
     private RobotService robotService;
 
-    private static final int ACTIVATED = 1; //有效
-
     @Override
-    public List<User> getUser(String userName, String password) {
+    public List<User> getUser(String userName, String password) throws Exception {
         Example example = new Example(User.class);
         example.createCriteria().andCondition("USER_NAME =", userName)
                 .andCondition("PASSWORD =", password);
@@ -73,9 +72,8 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                     }
                 }
                 List<StationDTO4User> stationList = new ArrayList<>();
-                addToStationList(userStationXrefDbList, stationList);
+                addToStationList(userStationXrefDbList, stationList, u.getRoleId());
                 u.setStationList(stationList);
-
             }
         }
         return userList;
@@ -224,7 +222,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
                         u.setRoleName(roleDb.getCnName());
                     }
                 }
-                addToStationList(userStationXrefDbList, stationList);
+                addToStationList(userStationXrefDbList, stationList, u.getRoleId());
                 u.setStationList(stationList);
             }
         }
@@ -236,14 +234,24 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
      * @param userStationXrefDbList
      * @param stationList
      */
-    private void addToStationList(List<UserStationXref> userStationXrefDbList, List<StationDTO4User> stationList) {
-        if (userStationXrefDbList != null && userStationXrefDbList.size() > 0) {
-            for (UserStationXref ux : userStationXrefDbList) {
-                Station stationDb = stationService.findById(ux.getStationId());
-                List<StationRobotXREF> xrefList = stationRobotXREFService.getByStationId(ux.getStationId());
-                stationDb.setRobotList(xrefList.stream().map(obj -> robotService.findById(obj.getRobotId())).collect(Collectors.toList()));
-                stationList.add(stationToDTO(stationDb));
+    private void addToStationList(List<UserStationXref> userStationXrefDbList, List<StationDTO4User> stationList, long roleId) {
+        try {
+            if (userStationXrefDbList != null && userStationXrefDbList.size() > 0) {
+                for (UserStationXref ux : userStationXrefDbList) {
+                    Station stationDb = stationService.findById(ux.getStationId());
+                    List<StationRobotXREF> xrefList = stationRobotXREFService.getByStationId(ux.getStationId());
+                    stationDb.setRobotList(xrefList.stream().map(obj -> robotService.findById(obj.getRobotId())).collect(Collectors.toList()));
+                    //如果是超级管理员和医院管理员则直接添加
+                    if (roleId == (long)RoleTypeEnum.SUPER_ADMIN.getCaption() || roleId == (long)RoleTypeEnum.HOSPITAL_ADMIN.getCaption()) {
+                        stationList.add(stationToDTO(stationDb));
+                    }
+                    if(roleId == (long)RoleTypeEnum.STATION_ADMIN.getCaption() && stationDb.getActive() == Constant.NORMAL) {
+                        stationList.add(stationToDTO(stationDb));
+                    }
+                }
             }
+        } catch (Exception e) {
+            logger.error("addToStationList error {}", e);
         }
     }
 
@@ -258,6 +266,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
         stationDTO4User.setSceneId(station.getSceneId());
         stationDTO4User.setRobotList(station.getRobotList());
         stationDTO4User.setStationTypeId(station.getStationTypeId());
+        stationDTO4User.setActive(station.getActive());
         return stationDTO4User;
     }
 
