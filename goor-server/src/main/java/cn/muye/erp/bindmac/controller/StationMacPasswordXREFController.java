@@ -54,13 +54,16 @@ public class StationMacPasswordXREFController {
     }
 
     public AjaxResult saveOrUpdate(StationMacPasswordXREF operaXREF, HttpServletRequest request) {
-        if (operaXREF.getStation().getId() == null ||operaXREF.getType() == 0) {
+        if (operaXREF.getStation().getId() == null || operaXREF.getType() == 0) {
             return AjaxResult.failed("站Id不能为空");
         }
         try {
-            String mac = getClientMAC(request);
+            //注释掉，不能获取二级路由下的客户端的mac地址
+//            String mac = getClientMAC(request);
+            String mac = operaXREF.getMac();
+            logger.info("mac地址为：" + mac);
             if (StringUtil.isBlank(mac)) {
-                return AjaxResult.failed("未获取到客户端MAC不能为空");
+                return AjaxResult.failed("MAC不能为空");
             }
             operaXREF.setMac(mac);
             //如果是除原无无菌器械室绑定，则需要移菌器械室的绑定关系
@@ -90,11 +93,13 @@ public class StationMacPasswordXREFController {
      * @return
      */
     @RequestMapping(value = "services/operation/mac/bind", method = RequestMethod.GET)
-    public AjaxResult query(HttpServletRequest request) {
+    public AjaxResult query(@RequestParam("mac") String mac) {
         try {
-            String mac = getClientMAC(request);
+            //注释掉，不能获取二级路由下的客户端的mac地址
+//            String mac = getClientMAC(request);
+            logger.info("mac地址为：" + mac);
             if (StringUtil.isBlank(mac)) {
-                return AjaxResult.failed("未获取到客户端MAC不能为空");
+                return AjaxResult.failed("MAC不能为空");
             }
             StationMacPasswordXREF stationMacPasswordXREF = stationMacPasswordXREFService.findByMac(mac);
             if (null == stationMacPasswordXREF) {
@@ -128,7 +133,9 @@ public class StationMacPasswordXREFController {
     }
 
     private String getClientMAC(HttpServletRequest request) throws Exception {
+        logger.info("获取客户端mac地址");
         String ip = AddressUtils.getIp(request);
+        logger.info("获取客户端mac地址，客户端IP地址=" + ip);
         return AddressUtils.getMac(ip);
     }
 }
