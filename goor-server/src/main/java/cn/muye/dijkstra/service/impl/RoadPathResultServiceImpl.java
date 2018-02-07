@@ -226,19 +226,19 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
             rosPoint.setTh(th);
             rosPoint.setSceneName(sceneName);
             rosPoint.setMapName(mapName);
-            LOGGER.info("//=================未找到与机器人位置相匹配的路径点，开始算法计算最近路径起点，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString());
+            LOGGER.info("//=================未找到与机器人位置,场景：{},地图：{},x:{},y:{}相匹配的路径点，开始算法计算最近路径起点，时间：{}" ,sceneName,mapName,positionX,positionY, cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString());
             //从缓存的路径去计算距离，然后取起点作为规划路径的代替点。
             List<RoadPathDetail> roadPathDetails = CacheInfoManager.getRoadPathDetailsCache(SearchConstants.FAKE_MERCHANT_STORE_ID,
                     sceneName, Constant.PATH_TYPE_X86, roadPathService);
             if(roadPathDetails == null || roadPathDetails.size() == 0) {
-                LOGGER.info("==============未找到当前场景下的工控路径。");
+                LOGGER.info("==============未找到当前场景{}下的工控路径。",sceneName);
                 return null;
             }
 
             //先计算离机器人位置最近的路径，然后计算路径起点到目的地点最近的路径起点作为输出,权值计算根据类型取路径起点，还是取投影点
             roadPathResult = PathUtil.calNearestPathPointByRoadPathDetails(roadPathMaps, startPointType, roadPathDetails, rosPoint, targetPoint, this, roadPathService , pointService);
-            LOGGER.info("//=================算法计算最近路径起点结束，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString() + roadPathResult == null ? "结果为空，未找到路径！"
-                : "总权值:" + roadPathResult.getTotalWeight() + ",点序列：" + roadPathResult.getPointIds());
+            LOGGER.info("//=================算法计算最近路径起点结束，时间：" + cn.mrobot.utils.DateTimeUtils.getCurrentDateTimeString() + (roadPathResult == null ? "结果为空，未找到路径！"
+                : ("总权值:" + roadPathResult.getTotalWeight() + ",点序列：" + roadPathResult.getPointIds())));
             return roadPathResult;
         }
     }
