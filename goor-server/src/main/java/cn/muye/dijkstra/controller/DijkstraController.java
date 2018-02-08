@@ -8,11 +8,16 @@ import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
+import cn.mrobot.bean.base.PubData;
+import cn.mrobot.bean.base.PubX86HeartBeat;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
+import cn.mrobot.bean.message.data.PickUpPswdVerifyBean;
+import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.dto.area.PathDTO;
 import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.FileUtils;
+import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.point.service.impl.PointServiceImpl;
@@ -27,11 +32,13 @@ import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.service.consumer.topic.BaseMessageService;
 import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.reflect.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +50,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class DijkstraController {
@@ -459,5 +467,98 @@ public class DijkstraController {
             log.error(e.getMessage(), e);
             return AjaxResult.failed(AjaxResult.CODE_FAILED,e.getMessage());
         }
+    }
+
+    private final static int totalTestSend = 10000;
+    /**
+     * 测试并发向ros发消息，测试消息阻塞
+     * @return
+     */
+    @RequestMapping(value = "services/testSendRos", method= RequestMethod.GET)
+    @ResponseBody
+    public AjaxResult testSendRos() {
+        try {
+            Thread thread1 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testSendRunnable("Thread1:");
+                }
+            });
+
+            Thread thread2 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testSendRunnable("Thread2:");
+                }
+            });
+
+            Thread thread3 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testSendRunnable("Thread3:");
+                }
+            });
+
+            Thread thread4 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testSendRunnable("Thread4:");
+                }
+            });
+
+            Thread thread5 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testSendRunnable("Thread5:");
+                }
+            });
+
+            Thread thread6 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testSendRunnable("Thread6:");
+                }
+            });
+
+            Thread thread7 = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    testSendRunnable("Thread7:");
+                }
+            });
+            thread1.start();
+            thread2.start();
+            thread3.start();
+            thread4.start();
+            thread5.start();
+            thread6.start();
+            thread7.start();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+
+        return AjaxResult.success();
+    }
+
+    @Autowired
+    BaseMessageService baseMessageService;
+    private AjaxResult testSendHeartBeat(String message) {
+        SlamResponseBody slamResponseBody = new SlamResponseBody();
+        slamResponseBody.setSubName(TopicConstants.X86_ELEVATOR_LOCK);
+        slamResponseBody.setData("测试发送消息:" + message);
+        return baseMessageService.sendRobotMessage("cookyplus013", TopicConstants.X86_ELEVATOR_LOCK, slamResponseBody);
+    }
+
+    private void testSendRunnable(String message) {
+        int success = 0;
+        long startTime = System.currentTimeMillis();
+        for(int i = 0; i< totalTestSend; i++) {
+            AjaxResult result = testSendHeartBeat(message + i);
+            if(result != null && result.isSuccess()) {
+                success ++;
+            }
+        }
+        long endTime = System.currentTimeMillis();
+        log.error("{}开始时间:{},结束时间:{},总耗时:{}ms,总次数:{},成功次数:{}",message,new Date(startTime),new Date(endTime),endTime-startTime, totalTestSend ,success);
     }
 }

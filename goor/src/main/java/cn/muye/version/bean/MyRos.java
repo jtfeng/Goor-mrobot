@@ -72,6 +72,7 @@ public class MyRos extends Ros{
             }
         } catch (IOException | JsonParsingException | NullPointerException var10) {
             System.err.println("[WARN]: Invalid incoming rosbridge protocol: " + message);
+            logger.error("[WARN]: Invalid incoming rosbridge protocol: " + message);
         }
 
     }
@@ -137,6 +138,7 @@ public class MyRos extends Ros{
                 }
             } else {
                 System.err.println("[WARN]: Unrecognized op code: " + jsonObject.toString());
+                logger.error("[WARN]: Unrecognized op code: " + jsonObject.toString());
             }
         }
 
@@ -163,11 +165,13 @@ public class MyRos extends Ros{
     public boolean send(JsonObject jsonObject) {
         if(this.isConnected()) {
             try {
-                this.session.getBasicRemote().sendText(jsonObject.toString());
-//                this.session.getAsyncRemote().sendText(jsonObject.toString());
+//                this.session.getBasicRemote().sendText(jsonObject.toString());
+                this.session.getAsyncRemote().setSendTimeout(10000L);
+                this.session.getAsyncRemote().sendText(jsonObject.toString());
                 return true;
             } catch (Exception var3) {
                 System.err.println("[ERROR]: Could not send message: " + var3.getMessage());
+                logger.error("[ERROR]: Could not send message: " + var3.getMessage());
             }
         }
 

@@ -2,6 +2,7 @@ package cn.muye.publisher;
 
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.muye.base.bean.TopicHandleInfo;
+import cn.muye.version.bean.MyRos;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import edu.wpi.rail.jrosbridge.Ros;
@@ -62,7 +63,8 @@ public class AppSubService implements ApplicationContextAware {
     }
 
     private void getRos() {
-        ros = applicationContext.getBean(Ros.class);
+//        ros = applicationContext.getBean(Ros.class);
+        ros = applicationContext.getBean(MyRos.class);
     }
 
     @Override

@@ -21,10 +21,11 @@ public class RosConfig {
     private String rosPath;
 
     @Bean
-    public Ros ros() {
-        Ros ros = new Ros(rosPath);
+//    public Ros ros() {
+    public MyRos ros() {
+//        Ros ros = new Ros(rosPath);
         //TODO 为防止复写的MyRos有问题，暂时先不使用。MyRos只是增加了service失败消息的处理。
-//        MyRos ros = new MyRos(rosPath);
+        MyRos ros = new MyRos(rosPath);
         ros.connect();
         ros.addRosHandler(new RosHandlerImp());
         try {

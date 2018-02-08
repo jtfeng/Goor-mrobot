@@ -17,7 +17,7 @@ import javax.json.JsonObject;
 public class MyService extends Service {
 
     //TODO 如果RosConfig里面用MyRos，用以下构造函数
-    /*MyRos ros;
+    MyRos ros;
 
     public MyService(Ros ros, String name, String type) {
         super(ros, name, type);
@@ -27,12 +27,12 @@ public class MyService extends Service {
     @Override
     public MyRos getRos() {
         return ros;
-    }*/
+    }
 
     //如果RosConfig里面用Ros，用以下构造函数
-    public MyService(Ros ros, String name, String type) {
+    /*public MyService(Ros ros, String name, String type) {
         super(ros, name, type);
-    }
+    }*/
 
     @Override
     public void callService(ServiceRequest request, ServiceCallback cb) {

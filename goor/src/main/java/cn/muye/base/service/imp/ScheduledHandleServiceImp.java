@@ -23,6 +23,7 @@ import cn.muye.base.model.config.RobotInfoConfig;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.model.message.ReceiveMessage;
 import cn.muye.base.service.ScheduledHandleService;
+import cn.muye.version.bean.MyRos;
 import cn.muye.version.service.MyService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.service.mapper.message.ReceiveMessageService;
@@ -62,7 +63,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
 
     private RabbitTemplate rabbitTemplate;
 
-    private Ros ros;
+//    private Ros ros;
+    private MyRos ros;
 
     private String localRobotSN;
 
@@ -75,7 +77,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     }
 
     private void init() {
-        ros = applicationContext.getBean(Ros.class);
+//        ros = applicationContext.getBean(Ros.class);
+        ros = applicationContext.getBean(MyRos.class);
         rabbitTemplate = applicationContext.getBean(RabbitTemplate.class);
         localRobotSN = (String) applicationContext.getBean("localRobotSN");
         appSubService = applicationContext.getBean(AppSubService.class);
@@ -108,7 +111,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     public void rosHealthCheck() throws Exception {
 //        logger.info("-->> Scheduled rosHealthCheck start");
         try {
-            ros = applicationContext.getBean(Ros.class);
+//            ros = applicationContext.getBean(Ros.class);
+            ros = applicationContext.getBean(MyRos.class);
             if (null == ros) {
                 logger.error("-->> ros is not connect");
                 return;
@@ -140,7 +144,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     public void x86MissionRosHealthCheck() throws Exception {
         logger.info("-->> Scheduled x86MissionRosHealthCheck start");
         try {
-            ros = applicationContext.getBean(Ros.class);
+//            ros = applicationContext.getBean(Ros.class);
+            ros = applicationContext.getBean(MyRos.class);
             if (null == ros) {
                 logger.error("-->> ros is not connect");
                 return;
@@ -184,7 +189,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         try {
 //            logger.info("-->> Scheduled downloadResource start");
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
-            ros = applicationContext.getBean(Ros.class);
+//            ros = applicationContext.getBean(Ros.class);
+            ros = applicationContext.getBean(MyRos.class);
             List<ReceiveMessage> list = receiveMessageService.listByMessageStatus(new ReceiveMessage(MessageStatusType.FILE_NOT_DOWNLOADED.getIndex()));//从接收的库查询出需要下载的资源
             for (ReceiveMessage message : list) {
                 MessageInfo messageInfo = new MessageInfo(message);
@@ -226,7 +232,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     public void publishMessage() throws Exception {
         try {
 //            logger.info("-->> Scheduled publishMessage start");
-            ros = applicationContext.getBean(Ros.class);
+//            ros = applicationContext.getBean(Ros.class);
+            ros = applicationContext.getBean(MyRos.class);
             receiveMessageService = applicationContext.getBean(ReceiveMessageService.class);
             List<ReceiveMessage> list = receiveMessageService.listByMessageStatus(new ReceiveMessage(MessageStatusType.FILE_DOWNLOAD_COMPLETE.getIndex()));//TODO 从接收的库查询出需要发布的资源
             for (ReceiveMessage message : list) {
@@ -487,7 +494,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
     @Override
     public void writeRosParamGoorVersion() throws Exception {
         logger.info("################写入参数服务器agent版本的定时任务");
-        ros = applicationContext.getBean(Ros.class);
+//        ros = applicationContext.getBean(Ros.class);
+        ros = applicationContext.getBean(MyRos.class);
         if(ros == null) {
             logger.info("还未连上ros");
             return;
