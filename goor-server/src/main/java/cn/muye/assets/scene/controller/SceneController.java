@@ -4,7 +4,9 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
+import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.util.UserUtil;
@@ -15,7 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +33,9 @@ public class SceneController {
     private static final Logger log = LoggerFactory.getLogger(SceneController.class);
     @Autowired
     private SceneService sceneService;
+
+    @Autowired
+    private RobotService robotService;
 
     /**
      * 传入一个 session ID，将场景对应的信息存入到 session
@@ -76,8 +83,8 @@ public class SceneController {
         try {
             log.info("更新指定的场景信息");
             Object taskResult = sceneService.updateScene(scene);
-            if (taskResult instanceof AjaxResult){
-                return (AjaxResult)taskResult;
+            if (taskResult instanceof AjaxResult) {
+                return (AjaxResult) taskResult;
             }
             return AjaxResult.success(taskResult, "修改场景信息成功！");
         } catch (Exception e) {
@@ -118,6 +125,40 @@ public class SceneController {
         } catch (Exception e) {
             return AjaxResult.failed(e, "查询失败");
         }
+    }
+
+
+    /**
+     * 同步地图,将该场景绑定的地图下发到指定机器人
+     *
+     * @param sceneId
+     * @return
+     */
+    @RequestMapping(value = "/assets/scene/syncMap", method = RequestMethod.GET)
+    public AjaxResult syncMap(@RequestParam("sceneId") Long sceneId, @RequestParam("robotIds") String robotIds) {
+        try {
+            if (null == sceneId || StringUtil.isBlank(robotIds)) {
+                return AjaxResult.failed("场景ID和机器人ID列表不能为空");
+            }
+            List<Long> robotIdList = JSONArray.parseArray(robotIds, Long.class);
+            //查询场景
+            Scene scene = sceneService.getSceneById(sceneId);
+            //根据ID查询机器人列表
+            List<Robot> robotList = new ArrayList<>();
+            for (Long robotId : robotIdList) {
+                Robot robot = robotService.getById(robotId);
+                robotList.add(robot);
+            }
+            Object result = sceneService.updateMap(scene, robotList);
+            if (result instanceof AjaxResult) {
+                return (AjaxResult) result;
+            } else {
+                return AjaxResult.success(result, "操作成功");
+            }
+        } catch (Exception e) {
+            return AjaxResult.failed();
+        }
+
     }
 
     /**
@@ -180,9 +221,11 @@ public class SceneController {
         JSONObject test = new JSONObject();
         test.put("sceneId", 85);
         JSONArray stationIds = new JSONArray();
-        stationIds.add(37);stationIds.add(38);
+        stationIds.add(37);
+        stationIds.add(38);
         JSONArray chargerMapPointIds = new JSONArray();
-        chargerMapPointIds.add(1589);chargerMapPointIds.add(1590);
+        chargerMapPointIds.add(1589);
+        chargerMapPointIds.add(1590);
         test.put("stationIds", stationIds);
         test.put("chargerMapPointIds", chargerMapPointIds);
 

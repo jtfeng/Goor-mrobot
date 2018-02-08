@@ -2,6 +2,7 @@ package cn.muye.assets.robot.service.impl;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.*;
 import cn.mrobot.bean.base.CommonInfo;
@@ -20,15 +21,18 @@ import cn.mrobot.bean.state.enums.ModuleEnums;
 import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.area.station.service.StationRobotXREFService;
+import cn.muye.area.station.service.StationService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.assets.robot.service.RobotChargerMapPointXREFService;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
+import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
@@ -98,6 +102,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     @Autowired
     private MapInfoService mapInfoService;
+
+    @Autowired
+    private StationService stationService;
+
+    @Autowired
+    private SceneService sceneService;
 
     public static final Lock lock1 = new ReentrantLock();
 
@@ -206,8 +216,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (robotDb != null) {
                     //todo 紧急制动以后在做
                     AjaxResult ajaxResult = testSendRobotMessage(robotDb);
-                    if (ajaxResult != null && ajaxResult.isSuccess() && robotDb.getBusy() == false && !robotDb.isLowPowerState()) {
-                    //if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
+                    if (ajaxResult != null && ajaxResult.isSuccess() && !robotDb.getBusy() && !robotDb.isLowPowerState()) {
+                        //if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
                         if(typeId != null){
                             if(robotDb.getTypeId().equals(typeId)){
                                 availableRobot = robotDb;
@@ -358,7 +368,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public Map getCountAvailableRobotByStationId(Long stationId) {
+    public Map getCountAvailableRobotByStationId(Long stationId) throws Exception {
         List<StationRobotXREF> list = stationRobotXREFService.getByStationId(stationId);
         Map<String, Integer> availableRobotCountMap = Maps.newHashMap();
         int trailerCount = 0;
@@ -367,35 +377,85 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         int cookyCount = 0;
         int cookyPlusCount = 0;
         int carsonCount = 0;
-        if (list != null && list.size() > 0) {
-            for (StationRobotXREF xref : list) {
-                Long robotId = xref.getRobotId();
-                Robot robotDb = getById(robotId);
-                //todo 暂时先不考虑低电量和紧急制动状态
-                if (robotDb != null && robotDb.getBusy() == false && CacheInfoManager.getRobotOnlineCache(robotDb.getCode()) != null && CacheInfoManager.getRobotOnlineCache(robotDb.getCode()) == true) {
-                    if (robotDb.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
-                        trailerCount++;
-                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {
-                        cabinetCount++;
-                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.DRAWER.getCaption())) {
-                        drawerCount++;
-                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKY.getCaption())) {
-                        cookyCount++;
-                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKYPLUS.getCaption())) {
-                        cookyPlusCount++;
-                    } else if (robotDb.getTypeId().equals(RobotTypeEnum.CARSON.getCaption())) {
-                        carsonCount++;
-                    }
-                }
-            }
-            availableRobotCountMap.put(RobotTypeEnum.TRAILER.name(), trailerCount);
-            availableRobotCountMap.put(RobotTypeEnum.CABINET.name(), cabinetCount);
-            availableRobotCountMap.put(RobotTypeEnum.DRAWER.name(), drawerCount);
-            availableRobotCountMap.put(RobotTypeEnum.COOKY.name(), cookyCount);
-            availableRobotCountMap.put(RobotTypeEnum.COOKYPLUS.name(), cookyPlusCount);
-            availableRobotCountMap.put(RobotTypeEnum.CARSON.name(), carsonCount);
+        if (list == null || list.size() == 0) {
+            return availableRobotCountMap;
         }
+        for (StationRobotXREF xref : list) {
+            Robot robotDb = getById(xref.getRobotId());
+            //todo 暂时先不考虑低电量和紧急制动状态
+            String code = robotDb.getCode();
+            if (robotDb == null || !robotDb.getBusy()
+                    || CacheInfoManager.getRobotOnlineCache(code) == null
+                    || !CacheInfoManager.getRobotOnlineCache(code)) {
+                continue;
+            }
+            //从缓存里获取机器上上报的工控场景名
+            MessageInfo messageInfo = CacheInfoManager.getMessageCache(code);
+            //获取工控场景名
+            String sceneName = parseMapInfoData(messageInfo);
+            //获取站绑定的工控场景名
+            String stationSceneName = getStationSceneName(stationId);
+            if (StringUtil.isEmpty(sceneName) || StringUtil.isEmpty(stationSceneName)) {
+                continue;
+            }
+            if (!sceneName.equals(stationSceneName)) {
+                continue;
+            }
+            if (robotDb.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
+                trailerCount++;
+            } else if (robotDb.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {
+                cabinetCount++;
+            } else if (robotDb.getTypeId().equals(RobotTypeEnum.DRAWER.getCaption())) {
+                drawerCount++;
+            } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKY.getCaption())) {
+                cookyCount++;
+            } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKYPLUS.getCaption())) {
+                cookyPlusCount++;
+            } else if (robotDb.getTypeId().equals(RobotTypeEnum.CARSON.getCaption())) {
+                carsonCount++;
+            }
+        }
+        availableRobotCountMap.put(RobotTypeEnum.TRAILER.name(), trailerCount);
+        availableRobotCountMap.put(RobotTypeEnum.CABINET.name(), cabinetCount);
+        availableRobotCountMap.put(RobotTypeEnum.DRAWER.name(), drawerCount);
+        availableRobotCountMap.put(RobotTypeEnum.COOKY.name(), cookyCount);
+        availableRobotCountMap.put(RobotTypeEnum.COOKYPLUS.name(), cookyPlusCount);
+        availableRobotCountMap.put(RobotTypeEnum.CARSON.name(), carsonCount);
         return availableRobotCountMap;
+    }
+
+    /**
+     * 根据站ID查询工控场景名
+     *
+     * @param stationId
+     * @return
+     */
+    private String getStationSceneName(Long stationId) {
+        Station stationDb = stationService.findById(stationId);
+        if (stationDb == null) {
+            return null;
+        }
+        return sceneService.getRelatedMapNameBySceneId(stationDb.getSceneId());
+    }
+
+    /**
+     * 解析当前位置topic中MapInfo的工控场景名
+     *
+     * @param messageInfo
+     * @return
+     * @throws Exception
+     */
+    private String parseMapInfoData(MessageInfo messageInfo) throws Exception {
+        if (messageInfo == null) {
+            return null;
+        }
+        String deviceId = messageInfo.getSenderId();
+        CurrentInfo currentInfo = mapInfoService.getCurrentInfo(deviceId);
+        if (currentInfo != null && currentInfo.getMapInfo() != null) {
+            return currentInfo.getMapInfo().getSceneName();
+        } else {
+            return null;
+        }
     }
 
     @Override

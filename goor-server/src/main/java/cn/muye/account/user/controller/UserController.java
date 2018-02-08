@@ -279,22 +279,33 @@ public class UserController implements ApplicationContextAware {
         }
     }
 
+    /**
+     * PC端的检查登录
+     * @param map
+     * @return
+     */
     private AjaxResult doCheckLogin(Map map) {
         UserDTO userDTO = (UserDTO) map.get("user");
-        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && map.get("stationList") == null) {
-            return AjaxResult.failed("用户未绑定站，请联系客服");
-        }
         List<StationDTO4User> stationList = (List<StationDTO4User>) map.get("stationList");
-        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList.get(0).getActive() == Constant.DELETE) {
+        //如果拿到的user对象为空，则说明认证校验没有通过
+        if (userDTO == null) {
+            return AjaxResult.failed("用户名或密码错误");
+        }
+        //如果用户是站管理员，绑定的站list为空或者是未激活的站，则登录失败
+        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))
+                && (stationList == null || stationList.get(0).getActive() == Constant.DELETE)) {
             return AjaxResult.failed("用户未绑定站，请联系客服");
         }
-//        if (userDTO != null && !userDTO.getRoleId().equals(RoleTypeEnum.STATION_ADMIN.getCaption())) {
-//            //写入枚举
-//            map.put("enums", getAllEnums(userDTO));
-//            map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
-//            return AjaxResult.success(map, "登录成功");
-//        }
-        if (/*userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && */stationList != null) {
+        //如果用户不是站管理员，走到这说明已经认证通过了，则直接登录成功
+        if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+            //写入枚举
+            map.put("enums", getAllEnums(userDTO));
+            map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
+            return AjaxResult.success(map, "登录成功");
+        }
+        //如果用户是站管理员，站list不是空，绑定的站也是激活的，则登录成功
+        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null
+                && stationList.get(0).getActive() == Constant.NORMAL) {
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
@@ -311,22 +322,35 @@ public class UserController implements ApplicationContextAware {
                 }
             }
             return AjaxResult.success(map, "登录成功");
-        }
-        if (userDTO != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList == null) {
-            return AjaxResult.failed("账号异常，请联系客服");
         } else {
-            return AjaxResult.failed("用户名或密码错误");
+            return AjaxResult.failed("用户未绑定站，请联系客服");
         }
     }
 
+    /**
+     * PAD端的检查登录
+     * @param map
+     * @return
+     */
     private AjaxResult doCheckLoginPad(Map map) {
         UserDTO userDTO = (UserDTO) map.get("user");
         List<StationDTO4User> stationList = (List<StationDTO4User>) map.get("stationList");
-        if (userDTO != null && stationList != null) {
-            //如果不是站管理员就不让其登录
-            if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "不是站管理员不能登录");
-            }
+        //如果拿到的user对象为空，则说明认证校验没有通过
+        if (userDTO == null) {
+            return AjaxResult.failed("用户名或密码错误");
+        }
+        //如果不是站管理员就不让其登录
+        if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, "不是站管理员不能登录");
+        }
+        //如果用户是站管理员，绑定的站list为空或者是未激活的站，则登录失败
+        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))
+                && (stationList == null || stationList.get(0).getActive() == Constant.DELETE)) {
+            return AjaxResult.failed("用户未绑定站，请联系客服");
+        }
+        //如果用户是站管理员，站list不是空，绑定的站也是激活的，则登录成功
+        if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null
+                && stationList.get(0).getActive() == Constant.NORMAL) {
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
@@ -344,10 +368,8 @@ public class UserController implements ApplicationContextAware {
                 }
             }
             return AjaxResult.success(map, "登录成功");
-        } else if (userDTO != null && stationList == null) {
-            return AjaxResult.failed("账号异常，请联系客服");
         } else {
-            return AjaxResult.failed("用户名或密码错误");
+            return AjaxResult.failed("用户未绑定站，请联系客服");
         }
     }
 

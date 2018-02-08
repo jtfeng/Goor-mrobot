@@ -113,12 +113,13 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 }
             }
         }
-        List<Station> stationList = stationService.listAll();
+        List<Station> stationList = stationService.list(null, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
         if (stationList != null && stationList.size() > 0) {
             for (Station station : stationList) {
-                Map map = robotService.getCountAvailableRobotByStationId(station.getId());
-                WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName()).messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
                 try {
+                    Map map = robotService.getCountAvailableRobotByStationId(station.getId());
+                    WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName())
+                            .messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
                     webSocketSendMessage.sendWebSocketMessage(ws);
                 } catch (Exception e) {
                     logger.error("{}", e);

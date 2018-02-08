@@ -55,7 +55,7 @@ public interface RobotService extends BaseService<Robot>{
      * @param stationId
      * @return
      */
-    Map getCountAvailableRobotByStationId(Long stationId);
+    Map getCountAvailableRobotByStationId(Long stationId) throws Exception;
 
     List<MapPoint> bindChargerMapPoint(Long robotId, List<MapPoint> list);
 
