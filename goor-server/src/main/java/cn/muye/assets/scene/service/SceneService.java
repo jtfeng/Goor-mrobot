@@ -1,6 +1,7 @@
 package cn.muye.assets.scene.service;
 
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
@@ -24,6 +25,8 @@ public interface SceneService extends BaseService<Scene> {
     List<MapPoint> listMapPointIdBySceneId(Long sceneId, Long storeId, Integer cloudMapPointTypeId) throws Exception;
 
     Object updateScene(Scene scene) throws Exception;
+
+    Object updateMap(Scene scene, List<Robot> robots) throws Exception;
 
     int deleteSceneById(Long id) throws Exception;
 

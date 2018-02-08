@@ -448,7 +448,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
     }
 
-    private Object updateMap(Scene scene, List<Robot> robots) throws Exception {
+    @Override
+    public Object updateMap(Scene scene, List<Robot> robots) throws Exception {
         //自动下发地图
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
         log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
