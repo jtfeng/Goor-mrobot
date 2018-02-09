@@ -2,6 +2,7 @@ package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
@@ -118,6 +119,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             for (Station station : stationList) {
                 try {
                     Map map = robotService.getCountAvailableRobotByStationId(station.getId());
+                    logger.info("站ID: " + station.getId() + ",可用机器人数量: " + map.get(RobotTypeEnum.TRAILER.name())
+                            == null ? 0 : map.get(RobotTypeEnum.TRAILER.name()));
                     WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName())
                             .messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
                     webSocketSendMessage.sendWebSocketMessage(ws);

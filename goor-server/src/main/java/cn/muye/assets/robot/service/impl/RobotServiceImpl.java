@@ -384,7 +384,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             Robot robotDb = getById(xref.getRobotId());
             //todo 暂时先不考虑低电量和紧急制动状态
             String code = robotDb.getCode();
-            if (robotDb == null || !robotDb.getBusy()
+            if (robotDb == null || robotDb.getBusy()
                     || CacheInfoManager.getRobotOnlineCache(code) == null
                     || !CacheInfoManager.getRobotOnlineCache(code)) {
                 continue;
