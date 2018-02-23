@@ -196,11 +196,27 @@ public class OperationOrderController {
 //        pageNo = (pageNo == null || pageNo == 0) ? 1 : pageNo;
 //        pageSize = (pageSize == null || pageSize == 0) ? 10 : pageSize;
 //        PageHelper.startPage(pageNo, pageSize);
-        //用PageInfo对结果进行包装
+        //用PageInfo对结果进行包装`
         List<OperationOrder> operationTypeList = operationOrderService.listAllOperationOrder(whereRequest);
-//        PageInfo<OperationOrder> page = new PageInfo<OperationOrder>(operationTypeList);
-
+        //处理订单中的state和type枚举类，将类型改成中文类型以便显示
+        operationTypeList = handleEnums(operationTypeList);
+//      PageInfo<OperationOrder> page = new PageInfo<OperationOrder>(operationTypeList);
         return AjaxResult.success(operationTypeList, "查询成功");
+    }
+
+    private List<OperationOrder> handleEnums(List<OperationOrder> operationTypeList) {
+        for (int i = 0; i < operationTypeList.size(); i++) {
+            OperationOrder operationOrder = operationTypeList.get(i);
+            OperationOrder.Type type = OperationOrder.Type.getByCode(operationOrder.getType());
+            String typeCH = type != null ? type.getName() : "";
+            operationOrder.setTypeCH(typeCH);
+            OperationOrder.State state = OperationOrder.State.getByCode(operationOrder.getState());
+            String stateCH = state != null ? state.getName() : "";
+            operationOrder.setStateCH(stateCH);
+            //替换原数据
+            operationTypeList.set(i, operationOrder);
+        }
+        return operationTypeList;
     }
 
     private void saveOperationOrderApplianceXREF(OperationOrder operationOrder) {
@@ -220,6 +236,9 @@ public class OperationOrderController {
     private AjaxResult sendOrderToAsepticApparatusRoom(OperationOrder operationOrder) {
         List<StationMacPasswordXREF> list = stationMacPasswordXREFService.findByType(StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM);
         if (null == list || list.size() <= 0) {
+            //未设置无菌器械室平板，更新订单状态为 5：手术室下单失败
+            operationOrder.setState(OperationOrder.State.ORDER_FAIL.getCode());
+            operationOrderService.update(operationOrder);
             return AjaxResult.failed("未设置无菌器械室平板，请先设置");
         }
         StationMacPasswordXREF stationMacPasswordXREF = list.get(0);

@@ -32,7 +32,13 @@ public class OperationOrder extends BaseBean {
 
     private int state; // 1：待无菌器械包室受理；2：无菌器械包室取消；3：无菌器械包室受理完毕;4：手术室取消；
 
+    @Transient
+    private String stateCH;
+
     private int type; //手术室订单类型: 1:按手术类型申请  2:临时器械申请 3:按手术类型申请,但最终请求的手术包与默认的手术包不同
+
+    @Transient
+    private String typeCH;
 
     @Transient
     private OperationType operationType;
@@ -93,6 +99,22 @@ public class OperationOrder extends BaseBean {
         this.receiveTime = receiveTime;
     }
 
+    public String getStateCH() {
+        return stateCH;
+    }
+
+    public void setStateCH(String stateCH) {
+        this.stateCH = stateCH;
+    }
+
+    public String getTypeCH() {
+        return typeCH;
+    }
+
+    public void setTypeCH(String typeCH) {
+        this.typeCH = typeCH;
+    }
+
     public OperationOrder init() {
         this.setCreateTime(new Date());
         this.setStoreId(100L);
@@ -104,7 +126,8 @@ public class OperationOrder extends BaseBean {
         WAITING(1, "待无菌器械包室受理"),
         ASEPTIC_APPARATUS_ROOM_CANCEL(2, "无菌器械包室取消"),
         ASEPTIC_APPARATUS_ROOM_HANDLED(3, "无菌器械包室受理完毕"),
-        OPERATION_CANCEL(4, "手术室取消");
+        OPERATION_CANCEL(4, "手术室取消"),
+        ORDER_FAIL(5, "手术室下单失败");
 
         private int code;
         private String name;
@@ -129,12 +152,22 @@ public class OperationOrder extends BaseBean {
         public void setName(String name) {
             this.name = name;
         }
+
+        public static State getByCode(int code){
+            State[] states = State.values();
+            for (State state : states){
+                if (code == state.getCode()){
+                    return state;
+                }
+            }
+            return null;
+        }
     }
 
     public enum Type {
         OPERATION_TYPE_ORDER(1, "按手术类型申请"),
-        INTERIM_ORDER(2, "临时器械申请"),
-        OPERATION_TYPE_ORDER_WITHOUT_DEFAULT_APPLIANCE(3, "按手术类型申请,但最终请求的手术包与默认的手术包不同");
+        INTERIM_ORDER(2, "临时手术包申请"),
+        OPERATION_TYPE_ORDER_WITHOUT_DEFAULT_APPLIANCE(3, "按手术类型申请(非默认器械)");
 
         private int code;
         private String name;
@@ -158,6 +191,16 @@ public class OperationOrder extends BaseBean {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public static Type getByCode(int code){
+            Type[] types = Type.values();
+            for (Type type : types){
+                if (code == type.getCode()){
+                    return type;
+                }
+            }
+            return null;
         }
     }
 }

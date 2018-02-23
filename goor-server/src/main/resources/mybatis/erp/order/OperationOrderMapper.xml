@@ -100,10 +100,10 @@
                 AND appliance_id = #{applianceId}
             </if>
         </where>
-        ORDER BY CREATE_TIME DESC
+        ORDER BY CREATE_TIME ASC
     </select>
 
     <select id="listAllOperationOrder" resultMap="operationOrder">
-        SELECT * FROM ERP_OPERATION_ORDER ORDER BY CREATE_TIME DESC
+        SELECT * FROM ERP_OPERATION_ORDER ORDER BY CREATE_TIME ASC
     </select>
 </mapper>
