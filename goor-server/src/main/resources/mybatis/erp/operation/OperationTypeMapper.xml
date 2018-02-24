@@ -12,6 +12,7 @@
         <result property="searchName" column="SEARCH_NAME"/>
         <result property="deleteFlag" column="DELETE_FLAG"/>
         <result property="deleteTime" column="DELETE_TIME"/>
+        <result property="operationRoomNumber" column="OPERATION_ROOM_NUMBER"/>
         <association property="operationDepartmentType" column="OPERATION_DEPARTMENT_TYPE_ID"
                      javaType="cn.mrobot.bean.erp.operation.OperationDepartmentType"
                      select="cn.muye.erp.operation.mapper.OperationDepartmentTypeMapper.findDepartmentTypeById"/>
@@ -29,7 +30,8 @@
         SEARCH_NAME,
         OPERATION_DEPARTMENT_TYPE_ID,
         DELETE_FLAG,
-        DELETE_TIME
+        DELETE_TIME,
+        OPERATION_ROOM_NUMBER
     </sql>
 
     <sql id="o_Base_Column_List">
@@ -41,7 +43,8 @@
         o.SEARCH_NAME,
         o.OPERATION_DEPARTMENT_TYPE_ID,
         o.DELETE_FLAG,
-        o.DELETE_TIME
+        o.DELETE_TIME,
+        o.OPERATION_ROOM_NUMBER
     </sql>
     <insert id="saveOperationType" parameterType="cn.mrobot.bean.erp.operation.OperationType" useGeneratedKeys="true"
             keyProperty="id">
@@ -54,7 +57,8 @@
         SEARCH_NAME,
         OPERATION_DEPARTMENT_TYPE_ID,
         DELETE_FLAG,
-        DELETE_TIME
+        DELETE_TIME,
+        OPERATION_ROOM_NUMBER
         ) values (
         #{id},
         #{storeId},
@@ -64,7 +68,8 @@
         #{searchName},
         #{operationDepartmentType.id},
         #{deleteFlag},
-        #{deleteTime}
+        #{deleteTime},
+        #{operationRoomNumber}
         )
         <selectKey resultType="java.lang.Long" order="AFTER" keyProperty="id">
             SELECT LAST_INSERT_ID() AS ID
