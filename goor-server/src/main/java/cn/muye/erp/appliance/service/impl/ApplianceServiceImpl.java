@@ -13,6 +13,7 @@ import cn.muye.erp.appliance.mapper.ApplianceDepartmentTypeMapper;
 import cn.muye.erp.appliance.mapper.ApplianceMapper;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.appliance.service.ApplianceService;
+import cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -42,6 +43,9 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     private ApplianceDepartmentTypeMapper applianceDepartmentTypeMapper;
     @Autowired
     private AppliancePackageTypeService appliancePackageTypeService;
+
+    @Autowired
+    private OperationDefaultApplianceXREFMapper operationDefaultApplianceXREFMapper;
 
     private static final Logger logger = LoggerFactory.getLogger(ApplianceServiceImpl.class);
 
@@ -113,6 +117,9 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
 
     @Override
     public int removeById(Long id) {
+        //删除该额外器械与手术类型的关联关系
+        operationDefaultApplianceXREFMapper.deleteByApplianceId(id);
+        //将额外器械删除标志位置为已删除
         Appliance appliance = new Appliance();
         appliance.setId(id);
         appliance.setDeleteFlag(Constant.DELETE);

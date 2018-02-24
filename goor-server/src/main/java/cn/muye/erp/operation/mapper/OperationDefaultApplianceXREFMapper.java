@@ -17,4 +17,6 @@ public interface OperationDefaultApplianceXREFMapper {
     void save(OperationDefaultApplianceXREF operationDefaultApplianceXREF);
 
     void deleteByOperationId(@Param("operationTypeId") Long operationTypeId);
+
+    void deleteByApplianceId(@Param("applianceId") Long applianceId);
 }

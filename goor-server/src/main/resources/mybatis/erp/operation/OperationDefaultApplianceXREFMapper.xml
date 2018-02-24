@@ -37,4 +37,9 @@
     <delete id="deleteByOperationId" parameterType="java.lang.Long">
         DELETE FROM ERP_OPERATION_DEFAULT_APPLIANCE_XREF WHERE OPERATION_TYPE_ID=#{operationTypeId}
     </delete>
+
+    <delete id="deleteByApplianceId" parameterType="java.lang.Long">
+        DELETE FROM ERP_OPERATION_DEFAULT_APPLIANCE_XREF WHERE APPLIANCE_ID=#{applianceId}
+    </delete>
+
 </mapper>

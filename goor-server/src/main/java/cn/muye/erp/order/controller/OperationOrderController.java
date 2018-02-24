@@ -13,6 +13,7 @@ import cn.mrobot.bean.websocket.WSMessage;
 import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.erp.appliance.service.ApplianceService;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
 import cn.muye.erp.operation.service.OperationTypeService;
 import cn.muye.erp.order.service.OperationOrderApplianceXREFService;
@@ -47,6 +48,9 @@ public class OperationOrderController {
     @Autowired
     private WebSocketSendMessage webSocketSendMessage;
 
+    @Autowired
+    private ApplianceService applianceService;
+
     /**
      * 手术室下单，订单提交
      *
@@ -69,15 +73,43 @@ public class OperationOrderController {
         }
         operationOrder.init();
         operationOrderService.saveOrder(operationOrder);
+        //校验订单的额外器械列表和额外器是否可用
+        AjaxResult checkResult = checkApplianceList(operationOrder);
+        if (!checkResult.isSuccess()) {
+            return checkResult;
+        }
         //保存手术室订单和额外器械的关联关系
         saveOperationOrderApplianceXREF(operationOrder);
-
         //重新查询，带出额外器械信息
         OperationOrder operationOrderDB = operationOrderService.findOrderById(operationOrder.getId());
         //向无菌器械室发送消息
         return sendOrderToAsepticApparatusRoom(operationOrderDB);
     }
 
+    /**
+     * 检验订单中的器械是否都是可用
+     *
+     * @param operationOrder
+     * @return
+     */
+    private AjaxResult checkApplianceList(OperationOrder operationOrder) {
+        List<OperationOrderApplianceXREF> list = operationOrder.getApplianceList();
+        for (OperationOrderApplianceXREF xref : list) {
+            Appliance appliance = applianceService.findById(xref.getAppliance().getId());
+            if (appliance.getDeleteFlag() == 1) {
+                //更新订单状态为手术室下单失败
+                updateOperationOrderState(operationOrder, OperationOrder.State.ORDER_FAIL);
+                return AjaxResult.failed("下单失败， " + appliance.getName() + " 已经删除");
+            }
+        }
+        return AjaxResult.success();
+    }
+
+    /**
+     * 校验订单类型，确定订单是type 2 还是type 3
+     *
+     * @param operationOrder
+     */
     private void checkOperationType(OperationOrder operationOrder) {
         List<OperationOrderApplianceXREF> operationOrderApplianceList = operationOrder.getApplianceList();
         OperationType operationType = operationTypeService.findOperationTypeById(operationOrder.getOperationType().getId());
@@ -91,6 +123,13 @@ public class OperationOrderController {
         }
     }
 
+    /**
+     * 检验订单的器械列表是否和手术类型的默认器械列表一致
+     *
+     * @param operationOrderApplianceList
+     * @param operationDefaultApplianceXREFList
+     * @return
+     */
     private boolean isEqualsApplianceList(List<OperationOrderApplianceXREF> operationOrderApplianceList,
                                           List<OperationDefaultApplianceXREF> operationDefaultApplianceXREFList) {
         if (operationOrderApplianceList.size() != operationDefaultApplianceXREFList.size()) {
@@ -110,9 +149,22 @@ public class OperationOrderController {
         return true;
     }
 
+    /**
+     * 校验关联关系中的额外器械包是否一致
+     *
+     * @param operationOrderApplianceXREF
+     * @param operationDefaultApplianceXREF
+     * @return
+     */
     private boolean isEqualsApplianceXREF(OperationOrderApplianceXREF operationOrderApplianceXREF, OperationDefaultApplianceXREF operationDefaultApplianceXREF) {
         Appliance operationOrderAppliance = operationOrderApplianceXREF.getAppliance();
         Appliance operationDefaultAppliance = operationDefaultApplianceXREF.getAppliance();
+        if (operationOrderAppliance == null && operationDefaultAppliance == null) {
+            return true;
+        } else if ((operationOrderAppliance == null && operationDefaultAppliance != null) ||
+                (operationOrderAppliance != null && operationDefaultAppliance == null)) {
+            return false;
+        }
         return operationOrderAppliance.getId().equals(operationDefaultAppliance.getId()) &&
                 operationOrderApplianceXREF.getNumber() == operationDefaultApplianceXREF.getNumber();
     }
@@ -237,8 +289,7 @@ public class OperationOrderController {
         List<StationMacPasswordXREF> list = stationMacPasswordXREFService.findByType(StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM);
         if (null == list || list.size() <= 0) {
             //未设置无菌器械室平板，更新订单状态为 5：手术室下单失败
-            operationOrder.setState(OperationOrder.State.ORDER_FAIL.getCode());
-            operationOrderService.update(operationOrder);
+            updateOperationOrderState(operationOrder, OperationOrder.State.ORDER_FAIL);
             return AjaxResult.failed("未设置无菌器械室平板，请先设置");
         }
         StationMacPasswordXREF stationMacPasswordXREF = list.get(0);
@@ -246,6 +297,11 @@ public class OperationOrderController {
         //websocket将订单信息推送至无菌器械室
         sendWebSocketMessage(stationId, operationOrder);
         return AjaxResult.success(operationOrder, "下单成功");
+    }
+
+    private void updateOperationOrderState(OperationOrder operationOrder, OperationOrder.State state){
+        operationOrder.setState(state.getCode());
+        operationOrderService.update(operationOrder);
     }
 
     private void sendWebSocketMessage(Long stationId, OperationOrder operationOrder) {
