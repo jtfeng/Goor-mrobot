@@ -53,6 +53,7 @@ public class ApplianceController {
 
     private static String APPLIANCE_IMPORT_FILE_PATH = "appliance_import_file";
     private static String OPERATION_IMPORT_FILE_PATH = "operation_import_file";
+    private static String OPERATION_DEFAULT_APPLIANCE_IMPORT_FILE_PATH = "operation_default_appliance_import_file_path";
 
     @RequestMapping(value = "appliance", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody Appliance appliance) {
@@ -203,6 +204,29 @@ public class ApplianceController {
                 return validateResult;
             }
             boolean result = operationTypeService.importExcel(uploadFile);
+            return result ? AjaxResult.success("导入成功") : AjaxResult.failed("导入文件出错");
+        } catch (Exception e) {
+            LOGGER.info("导入文件出错", e);
+            return AjaxResult.failed("导入文件出错");
+        }
+    }
+
+    /**
+     * 手术类型及默认器械excel数据导入,因为文件上传代码一样，所以将次接口写到当前controller
+     *
+     * @param file
+     * @return
+     */
+    @RequestMapping(value = "operation/defaultAppliance/import", method = RequestMethod.POST)
+    public AjaxResult importOperationDefaultAppliance(@RequestParam("file") MultipartFile file) {
+        try {
+            File uploadFile = saveUploadFile(OPERATION_DEFAULT_APPLIANCE_IMPORT_FILE_PATH, file);
+            //校验文件格式
+            AjaxResult validateResult = validate(OperationTypeServiceImpl.OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE, uploadFile);
+            if (!validateResult.isSuccess()) {
+                return validateResult;
+            }
+            boolean result = operationTypeService.importOperationDefaultApplianceExcel(uploadFile);
             return result ? AjaxResult.success("导入成功") : AjaxResult.failed("导入文件出错");
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);

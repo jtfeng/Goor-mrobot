@@ -2158,6 +2158,8 @@ CREATE TABLE `ERP_OPERATION_TYPE` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `ERP_OPERATION_TYPE` ADD INDEX idx_operation_type_searchName ( `SEARCH_NAME` ) ;
+ALTER TABLE `ERP_OPERATION_TYPE` ADD COLUMN `OPERATION_ROOM_NUMBER` VARCHAR(50) DEFAULT null COMMENT '手术室编号';
+
 -- ----------------------------
 -- Table structure for ERP_STATION_MAC_PASSWORD_XREF
 -- ----------------------------

@@ -35,4 +35,6 @@ public interface OperationTypeService extends BaseCrudService<OperationType> {
     List<OperationType> listBySearchName(String searchName);
 
     List<OperationType> listByDepartmentTypeId(Long id);
+
+    boolean importOperationDefaultApplianceExcel(File uploadFile);
 }

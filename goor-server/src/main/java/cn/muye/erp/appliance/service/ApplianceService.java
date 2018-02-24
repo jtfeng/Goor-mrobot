@@ -13,6 +13,8 @@ import java.util.List;
  */
 public interface ApplianceService extends BaseService<Appliance> {
 
+    Appliance findOne(Appliance appliance);
+
     Appliance findApplianceById(Long id);
 
     boolean importExcel(File file);
@@ -39,4 +41,6 @@ public interface ApplianceService extends BaseService<Appliance> {
     int removeById(Long id);
 
     List<Appliance> listByPackageTypeId(Long packageTypeId);
+
+    Long getPackageTypeId(String packageTypeName);
 }

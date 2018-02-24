@@ -30,6 +30,8 @@ public class OperationType extends DeleteBase{
     @Transient
     private List<OperationDefaultApplianceXREF> applianceList;
 
+    private String operationRoomNumber;
+
     public String getName() {
         return name;
     }
@@ -60,6 +62,14 @@ public class OperationType extends DeleteBase{
 
     public void setApplianceList(List<OperationDefaultApplianceXREF> applianceList) {
         this.applianceList = applianceList;
+    }
+
+    public String getOperationRoomNumber() {
+        return operationRoomNumber;
+    }
+
+    public void setOperationRoomNumber(String operationRoomNumber) {
+        this.operationRoomNumber = operationRoomNumber;
     }
 
     public void init(){

@@ -66,6 +66,11 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     private ReentrantLock packageTypelock = new ReentrantLock();
 
     @Override
+    public Appliance findOne(Appliance appliance) {
+        return applianceMapper.selectOne(appliance);
+    }
+
+    @Override
     public Appliance findApplianceById(Long id) {
         return applianceMapper.findApplianceById(id);
     }
@@ -181,7 +186,8 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         save(appliance);
     }
 
-    private Long getPackageTypeId(String packageTypeName) {
+    @Override
+    public Long getPackageTypeId(String packageTypeName) {
         AppliancePackageType packageType = appliancePackageTypeService.findByName(packageTypeName);
         //如果包装类别不存在，则新增
         Long packageTypeId = null;
