@@ -132,6 +132,8 @@
           o.OPERATION_DEPARTMENT_TYPE_ID = d.ID
         AND
           d.ID=#{departmentTypeId}
+        AND
+          o.DELETE_FLAG=0
         ORDER BY CREATE_TIME DESC
     </select>
 
