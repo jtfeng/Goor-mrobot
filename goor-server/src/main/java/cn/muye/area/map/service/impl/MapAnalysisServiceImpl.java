@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.map.MapZip;
 import cn.mrobot.bean.area.map.SceneMapZipXREF;
 import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.ZipUtils;
@@ -246,6 +247,8 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
             mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
             IndustrialControlPointType type = IndustrialControlPointType.getType(mapPoint.getMapPointTypeId());
             mapPoint.setICPointType(type != null ? type.getCaption() : "");
+            //设置云端类型为未定义
+            mapPoint.setCloudMapPointTypeId(MapPointType.UNDEFINED.getCaption());
 
             //根据场景名，地图名，点名称去数据库查询是否有点，如果有则更新，没有则新增
             List<MapPoint> mapPointListDB = pointService.findByName(mapPoint.getPointName(), sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);

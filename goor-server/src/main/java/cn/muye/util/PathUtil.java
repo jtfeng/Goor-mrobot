@@ -1,6 +1,7 @@
 package cn.muye.util;
 
 import cn.mrobot.bean.area.map.MapInfo;
+import cn.mrobot.bean.area.point.IndustrialControlPointType;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
@@ -209,6 +210,9 @@ public class PathUtil {
         String pointAliasResult = "";
         String mapName = pathDTO.getStartMap();
         String pointName = "";
+        Double x = start ? pathDTO.getStartX() : pathDTO.getEndX();
+        Double y = start ? pathDTO.getStartY() : pathDTO.getEndY();
+        Double th = start ? pathDTO.getStartTh() : pathDTO.getEndTh();
         //根据路径交叉点是否需要重复建点，采用不同的命名规则
         if(isDuplicate) {
             pointName = Constant.PATH + pathDTO.getId() + ( start ? "start" : "end" );
@@ -224,8 +228,11 @@ public class PathUtil {
 
 
         //只查找未配置的云端类型点，其他用于特殊任务的复制点，不在查找之列
-        List<MapPoint> pointList = pointService.findByNameCloudType(pointName, sceneName, mapName,
-                storeId, MapPointType.UNDEFINED);
+//        List<MapPoint> pointList = pointService.findByNameCloudType(pointName, sceneName, mapName,
+//                storeId, MapPointType.UNDEFINED);
+        List<MapPoint> pointList = pointService.listBySceneMapXYTH(sceneName, mapName,
+                x,y,th,
+                MapPointType.UNDEFINED);
 
         if (null != pointList && pointList.size() > 0) {
             MapPoint mapPointDB = pointList.get(0);
@@ -247,9 +254,14 @@ public class PathUtil {
         mapPoint.setCreateTime(new Date());
         mapPoint.setPointName(pointNameResult);
         mapPoint.setPointAlias(pointAliasResult);
-        mapPoint.setX(start ? pathDTO.getStartX() : pathDTO.getEndX());
-        mapPoint.setY(start ? pathDTO.getStartY() : pathDTO.getEndY());
-        mapPoint.setTh(start ? pathDTO.getStartTh() : pathDTO.getEndTh());
+        mapPoint.setX(x);
+        mapPoint.setY(y);
+        mapPoint.setTh(th);
+        //云端类型设成未定义
+        mapPoint.setCloudMapPointTypeId(MapPointType.UNDEFINED.getCaption());
+        //工控类型设置成普通目标点
+        mapPoint.setMapPointTypeId(IndustrialControlPointType.GENERAL.getValue());
+        mapPoint.setICPointType(IndustrialControlPointType.GENERAL.getCaption());
         pointService.save(mapPoint);
         return mapPoint;
     }

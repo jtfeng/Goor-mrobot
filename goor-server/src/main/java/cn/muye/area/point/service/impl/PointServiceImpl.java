@@ -145,7 +145,7 @@ public class PointServiceImpl implements PointService {
                 .andCondition("MAP_NAME = '" + mapName + "'")
                 .andCondition("STORE_ID =" + storeId);
         if(mapPointType != null) {
-            criteria.andCondition("CLOUD_POINT_TYPE_ID = '" + mapPointType.getCaption() + "'");
+            criteria.andCondition("CLOUD_POINT_TYPE_ID = " + mapPointType.getCaption());
         }
         condition.setOrderByClause("POINT_NAME desc");
         return pointMapper.selectByExample(condition);
