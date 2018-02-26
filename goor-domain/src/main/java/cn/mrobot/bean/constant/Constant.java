@@ -206,4 +206,8 @@ public class Constant {
     public static final Integer USE_CALCULATE_ACTION_TIME = 10;
 
     public static final String IS_BIND_ELEVATOR_STATION_FLAG = "isBindElevatorStationFlag";
+
+    //语言
+    public static final String DEFAULT_LANG = "zh";
+    public static final String DEFAULT_COUNTRY = "CN";
 }
