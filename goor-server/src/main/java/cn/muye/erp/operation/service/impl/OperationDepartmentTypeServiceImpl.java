@@ -36,8 +36,8 @@ public class OperationDepartmentTypeServiceImpl extends BaseCrudServiceImpl<Oper
     @Override
     public List<OperationDepartmentType> listAllType() {
         Example example = new Example(OperationDepartmentType.class);
-        example.createCriteria().andCondition("DELETE_FLAG="+Constant.NORMAL);
-        example.setOrderByClause("CREATE_TIME desc");
+        example.createCriteria().andCondition("DELETE_FLAG=" + Constant.NORMAL);
+        example.setOrderByClause("CREATE_TIME desc, ID DESC");
         return operationDepartmentTypeMapper.selectByExample(example);
     }
 
