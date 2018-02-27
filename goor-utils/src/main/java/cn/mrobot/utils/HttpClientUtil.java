@@ -22,6 +22,7 @@ import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -212,6 +213,57 @@ public class HttpClientUtil {
                 try {
                     httpClient.close();
                 } catch (Exception e2) {
+                }
+            }
+        }
+    }
+
+    /**
+     * 执行普通文件上传
+     *
+     * @param httpClient      HttpClient客户端实例，传入null会自动创建一个
+     * @param remoteFileUrl   远程接收文件的地址
+     * @param localFileUrl    本地文件地址
+     * @param charset         请求编码，默认UTF-8
+     * @param params          携带参数
+     * @param closeHttpClient 执行请求结束后是否关闭HttpClient客户端实例
+     * @return
+     * @throws ClientProtocolException
+     * @throws IOException
+     */
+    public static String executeMultipartFileUpload(CloseableHttpClient httpClient, String localFileUrl, String remoteFileUrl,Map params, String charset, boolean closeHttpClient) throws ClientProtocolException, IOException {
+        CloseableHttpResponse httpResponse = null;
+        try {
+            if (httpClient == null) {
+                httpClient = createHttpClient();
+            }
+            HttpPost post = new HttpPost(remoteFileUrl);
+            // 设置参数
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(600000).setConnectTimeout(5000).build();
+            post.setConfig(requestConfig);
+            MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+            File localFile = new File(localFileUrl);
+            multipartEntityBuilder.addBinaryBody("file", localFile);
+            for (Object object : params.keySet()) {
+                multipartEntityBuilder.addTextBody(object.toString(), params.get(object).toString());
+            }
+            HttpEntity httpEntity = multipartEntityBuilder.build();
+            if (httpEntity != null) {
+                post.setEntity(httpEntity);
+            }
+            httpResponse = httpClient.execute(post);
+            return getResult(httpResponse, charset);
+        } finally {
+            if (httpResponse != null) {
+                try {
+                    httpResponse.close();
+                } catch (Exception e) {
+                }
+            }
+            if (closeHttpClient && httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (Exception e) {
                 }
             }
         }

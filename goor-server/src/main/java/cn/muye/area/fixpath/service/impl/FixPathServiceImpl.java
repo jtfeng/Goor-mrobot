@@ -1,24 +1,17 @@
 package cn.muye.area.fixpath.service.impl;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.area.map.MapInfo;
-import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.area.point.MapPointType;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.slam.SlamRequestBody;
 import cn.mrobot.dto.area.PathDTO;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.fixpath.service.FixPathService;
-import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
-import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.service.consumer.topic.BaseMessageService;
-import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -98,7 +91,7 @@ public class FixPathServiceImpl implements FixPathService {
             return  AjaxResult.failed("未获取到当前场景关联的地图场景名");
         }
 
-        SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.FIXPATH_QUERY);
+        SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.FIXPATH_FILE_QUERY);
         JSONObject dataObject = new JSONObject();
         dataObject.put(TopicConstants.SCENE_NAME, mapSceneName);
         slamRequestBody.setData(dataObject);

@@ -397,8 +397,9 @@ public class ConsumerCommon {
                         String sceneKey = sceneName + "_" + mapName;
                         CacheInfoManager.setSceneRobotListCache(sceneKey, messageInfo.getSenderId());
                     }
-                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.FIXPATH_QUERY)) {
-                    fixPathService.saveFixpathQuery(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
+                } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.FIXPATH_FILE_QUERY)) {
+                    //fixPathService.saveFixpathQuery(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
+                    //fixPathService.dealFixpathFileQuery(messageInfo.getSenderId(), messageInfo.getSendTime(), messageData);
                 }
             }
         } catch (Exception e) {
