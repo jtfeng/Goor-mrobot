@@ -232,4 +232,23 @@ public class SceneController {
 //        sceneService.updateGetRobotStartAssets(robotCode,test);
         return sceneService.getRobotStartAssets(robotCode);
     }
+
+    /**
+     * 更改场景的是否禁用的状态
+     * @param scene
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/assets/scene/updateActiveState")
+    public Object updateActiveState(@RequestBody Scene scene) throws Exception {
+        try {
+            Scene currentScene = sceneService.findById(scene.getId());
+            currentScene.setActive( currentScene.getActive() == 1 ? 0 : 1 );
+            sceneService.updateSelective(currentScene);
+            return AjaxResult.success(currentScene.getActive() == 1 ? "已启用" : "已禁用");
+        }catch (Exception e){
+            log.error(e.getMessage(), e);
+            return AjaxResult.failed(e.getMessage());
+        }
+    }
 }

@@ -21,6 +21,10 @@ public class Scene extends BaseBean{
      * state 0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新
      */
     private Integer state;
+    /**
+     * active 表示当前场景的状态：1 表示激活 ； 0 表示锁定
+     */
+    private Integer active;
 
     public Scene() {
     }
@@ -86,12 +90,21 @@ public class Scene extends BaseBean{
         this.mapInfoList = mapInfoList;
     }
 
+    public Integer getActive() {
+        return active;
+    }
+
+    public void setActive(Integer active) {
+        this.active = active;
+    }
+
     @Override
     public String toString() {
         return "Scene{" +
                 "name='" + name + '\'' +
                 ", intro='" + intro + '\'' +
                 ", state=" + state +
+                ", active=" + active +
                 ", mapSceneName='" + mapSceneName + '\'' +
                 ", robots=" + robots +
                 ", mapInfoList=" + mapInfoList +

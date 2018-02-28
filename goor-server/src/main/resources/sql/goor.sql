@@ -734,7 +734,8 @@ CREATE TABLE `AS_SCENE` (
   `STORE_ID` bigint(20) DEFAULT NULL,
   `CREATED_BY` bigint(20) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL,
-  `STATE` int(11) DEFAULT NULL COMMENT '0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新',
+  `STATE`  int(11) DEFAULT NULL COMMENT '0 代表正在上传、1 代表上传成功、2 代表上传失败、3 代表有更新',
+  `ACTIVE` int(11) default 1 COMMENT '场景激活状态(1标识激活，0标识禁用)',
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='场景信息表';
 

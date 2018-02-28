@@ -133,7 +133,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         // 存放全部场景的详细信息
         List<Map<String, Object>> sceneList = Lists.newArrayList();
         // 获取全部场景信息
-        List<Scene> scenes = sceneMapper.selectAll();
+        List<Scene> dbScenes = sceneMapper.selectAll();
+        List<Scene> scenes = Lists.newArrayList();
+        dbScenes.forEach( (scene -> {
+            if (scene.getActive() == 1) {
+                // 激活状态的场景信息
+                scenes.add(scene);
+            }
+        }));
         for (Scene scene : scenes) {
             // 遍历每一个场景，查询归属的子内容，定义一个容器存放对应的信息
             Map<String, Object> eachScene = new HashMap<String, Object>(5);
