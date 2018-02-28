@@ -34,6 +34,11 @@ public class Constant {
 
     public static final String REQUEST = "request";
 
+    /**
+    * language与前端定义的变量名
+    */
+    public static final String LANG_PARAM_NAME = "mlang";
+
     //释放机器人锁的假ID，只要检测到是这个ID，就释放机器人所有的锁
     public final static Long RELEASE_ROBOT_LOCK_ID = -10086L;
 
