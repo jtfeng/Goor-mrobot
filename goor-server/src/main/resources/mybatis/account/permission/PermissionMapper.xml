@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.account.permission.mapper.PermissionMapper">
+
+    <resultMap id="permissionResult" type="cn.mrobot.bean.account.Permission">
+        <result property="id" column="ID"/>
+        <result property="url" column="URL"/>
+        <result property="description" column="DESCRIPTION"/>
+        <result property="pattern" column="PATTERN"/>
+        <result property="createTime" column="CREATE_TIME"/>
+        <result property="createBy" column="CREATE_BY"/>
+        <result property="storeId" column="STORE_ID"/>
+    </resultMap>
+
+    <!--<select id="listByIds" resultMap="permissionResult" parameterType="java.util.List">-->
+        <!--SELECT * FROM AC_PERMISSION WHERE-->
+    <!--</select>-->
+
+</mapper>

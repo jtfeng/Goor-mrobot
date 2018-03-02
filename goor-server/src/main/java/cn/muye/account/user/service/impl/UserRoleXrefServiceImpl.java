@@ -1,6 +1,5 @@
 package cn.muye.account.user.service.impl;
 
-import cn.mrobot.bean.account.User;
 import cn.mrobot.bean.account.UserRoleXref;
 import cn.muye.account.user.mapper.UserRoleXrefMapper;
 import cn.muye.account.user.service.UserRoleXrefService;
@@ -8,7 +7,6 @@ import cn.muye.base.service.imp.BaseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 /**
@@ -16,7 +14,7 @@ import java.util.List;
  */
 @Service
 @Transactional
-public class UserRoleXrefServiceImpl implements UserRoleXrefService {
+public class UserRoleXrefServiceImpl extends BaseServiceImpl<UserRoleXref> implements UserRoleXrefService {
 
     @Autowired
     private UserRoleXrefMapper userRoleXrefMapper;
@@ -32,12 +30,8 @@ public class UserRoleXrefServiceImpl implements UserRoleXrefService {
     }
 
     @Override
-    public void save(UserRoleXref userRoleXref) {
-        userRoleXrefMapper.insert(userRoleXref);
+    public int save(UserRoleXref userRoleXref) {
+        return userRoleXrefMapper.insert(userRoleXref);
     }
 
-    @Override
-    public void update(UserRoleXref userRoleXref) {
-        userRoleXrefMapper.updateByPrimaryKeySelective(userRoleXref);
-    }
 }

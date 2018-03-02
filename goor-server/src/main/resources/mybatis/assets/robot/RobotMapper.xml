@@ -45,7 +45,6 @@
             ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
             robot.BOX_ACTIVATED,
             robot.ROBOT_ID_FOR_ELEVATOR,
-            robot.BUSY,
             scene.ID as SCENE_ID,
             scene.NAME as SCENE_NAME
         FROM
@@ -80,7 +79,6 @@
                 config.SUFFICIENT_BATTERY_THRESHOLD,
                 ifnull(robot.DESCRIPTION,'') as DESCRIPTION,
                 robot.BOX_ACTIVATED,
-                robot.BUSY,
                 robot.STORE_ID as storeId,
                 robot.ROBOT_ID_FOR_ELEVATOR,
                 pwd.BOX_NUM as boxNum,

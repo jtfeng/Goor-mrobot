@@ -11,7 +11,7 @@ import javax.persistence.Table;
  * Created by Ray.Fu on 2017/6/22.
  */
 @Table(name = "AC_USER_ROLE_XREF")
-public class UserRoleXref {
+public class UserRoleXref extends BaseBean {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

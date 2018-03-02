@@ -42,7 +42,8 @@ public class Robot extends BaseBean {
     @JSONField(format = "yyyy-MM-dd")
     private Date updateTime; //修改时间
 
-    private Boolean busy = Boolean.FALSE         ; //状态(0-空闲， 1-占用，默认为0)
+    @Transient
+    private Boolean busy; //状态(0-空闲， 1-占用，默认为0)
 
     @Transient
     private Boolean online; //在线状态(放缓存中CacheInfoManager.robotOnlineCache)

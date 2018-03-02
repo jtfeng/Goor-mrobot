@@ -12,6 +12,12 @@
         <result property="storeId" column="STORE_ID"/>
     </resultMap>
 
+    <resultMap id="permissionResult" type="cn.mrobot.bean.account.Permission">
+        <result property="id" column="ID"/>
+        <result property="url" column="URL"/>
+        <result property="description" column="DESCRIPTION"/>
+    </resultMap>
+
     <select id="list" resultMap="userResult" parameterType="java.util.Map">
         SELECT
             u.ID,
@@ -131,4 +137,21 @@
         </if>
     </select>
 
+    <select id="listAllPermission" parameterType="java.util.Map" resultMap="permissionResult">
+        SELECT
+          ac.URL,
+          ac.DESCRIPTION
+        FROM
+            AC_PERMISSION ac
+        WHERE
+            ID IN (
+            SELECT PERMISSION_ID FROM AC_ROLE_PERMISSION_XREF WHERE ROLE_ID IN
+            ( SELECT ROLE_ID FROM AC_USER_ROLE_XREF
+              <where>
+                <if test="userId != null">
+                    USER_ID = #{userId}
+                </if>
+              </where>)
+            );
+    </select>
 </mapper>

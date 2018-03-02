@@ -390,8 +390,8 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         info.setSendTime(new Date());
         info.setSenderId(localRobotSN);
         info.setMessageType(MessageType.ROBOT_AUTO_REGISTER);
-        logger.info(localRobotSN + "注册信息，发送成功");
         rabbitTemplate.convertAndSend(TopicConstants.DIRECT_COMMAND_ROBOT_INFO, info);
+        logger.info(localRobotSN + "注册信息，已发送");
     }
 
     @Override

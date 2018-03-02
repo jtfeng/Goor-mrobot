@@ -11,6 +11,7 @@ import cn.muye.base.bean.SearchConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,8 +31,8 @@ public class MapInfoController {
     private MapInfoService mapInfoService;
 
     @RequestMapping(value = "area/mapinfo", method = {RequestMethod.POST})
+//    @PreAuthorize("hasAuthority('area_mapinfo_u')")
     @ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult setMapAlias(@RequestBody MapInfo mapInfo) {
         try {
             Long id = mapInfo.getId();
@@ -55,8 +56,8 @@ public class MapInfoController {
     }
 
     @RequestMapping(value = "area/mapinfo", method = {RequestMethod.GET})
+//    @PreAuthorize("hasAuthority('area_mapinfo_r')")
     @ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult getMapInfo(WhereRequest whereRequest) {
         try {
             List<MapInfo> mapZipList = mapInfoService.getMapInfo(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
@@ -74,8 +75,8 @@ public class MapInfoController {
      * @throws Exception
      */
     @RequestMapping(value = "area/mapinfo/cascade", method = RequestMethod.GET)
+//    @PreAuthorize("hasAuthority('area_mapinfo_r')")
     @ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult cascadeMapPoint(@RequestParam("level") int level, @RequestParam(value = "sceneName", required = false) String sceneName) {
         try {
             List<CascadePoint> cascadeSceneMapNameList = mapInfoService.cascadeSceneMapName(level, sceneName);

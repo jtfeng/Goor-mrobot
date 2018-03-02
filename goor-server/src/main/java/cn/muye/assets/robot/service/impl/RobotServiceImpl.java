@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.*;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.Constant;
@@ -53,6 +54,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.util.StringUtils;
 import tk.mybatis.mapper.entity.Example;
 
 import java.util.*;
@@ -216,7 +218,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (robotDb != null) {
                     //todo 紧急制动以后在做
                     AjaxResult ajaxResult = testSendRobotMessage(robotDb);
-                    if (ajaxResult != null && ajaxResult.isSuccess() && !robotDb.getBusy() && !robotDb.isLowPowerState()) {
+                    Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
+                    if (ajaxResult != null && ajaxResult.isSuccess() && !busy && !robotDb.isLowPowerState()) {
                         //if (robotDb.getBusy() == false && robotDb.getTypeId().equals(typeId) && !robotDb.isLowPowerState()) {
                         if(typeId != null){
                             if(robotDb.getTypeId().equals(typeId)){
@@ -233,16 +236,17 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                         break;
                     } else {
-                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (ajaxResult != null && ajaxResult.isSuccess() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (busy ? "忙碌," : "空闲,") + (ajaxResult != null && ajaxResult.isSuccess() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                     }
                 }
             }
         }
-        if (availableRobot != null) {
-            availableRobot.setBusy(true);
-            super.updateSelective(availableRobot);
-        }
+//        if (availableRobot != null) {
+//            availableRobot.setBusy(true);
+//            super.updateSelective(availableRobot);
+//        }
+        CacheInfoManager.setRobotBusyCache(availableRobot.getCode(), true);
         return availableRobot;
     }
 
@@ -292,8 +296,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 continue;
             }
             //忙碌和低电量的机器人之间过滤
-            if(robotDb.getBusy() || robotDb.isLowPowerState() ) {
-                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+            Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
+            if(busy || robotDb.isLowPowerState() ) {
+                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (busy ? "忙碌," : "空闲,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -321,15 +326,15 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
         //对查找出的路径结果进行从小到大排序
         PathUtil.sortByRobotRoadPathResultList(robotRoadPathResultList);
-
         //遍历排序后的结果集，依次取第一个可用的机器人作为下单机器人
         for(RobotRoadPathResult robotRoadPathResult : robotRoadPathResultList) {
             Robot robotDb = robotRoadPathResult.getRobot();
 
             //todo 紧急制动以后在做
             AjaxResult ajaxResult = testSendRobotMessage(robotDb);
-            if(ajaxResult == null || !ajaxResult.isSuccess() || robotDb.getBusy() || robotDb.isLowPowerState() ) {
-                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (robotDb.getBusy() ? "忙碌," : "空闲,") + (ajaxResult != null && ajaxResult.isSuccess() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+            Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
+            if(ajaxResult == null || !ajaxResult.isSuccess() || busy || robotDb.isLowPowerState() ) {
+                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (busy ? "忙碌," : "空闲,") + (ajaxResult != null && ajaxResult.isSuccess() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -353,8 +358,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             break;
         }
         if (availableRobot != null) {
-            availableRobot.setBusy(true);
-            super.updateSelective(availableRobot);
+//            availableRobot.setBusy(true);
+//            super.updateSelective(availableRobot);
+            CacheInfoManager.setRobotBusyCache(availableRobot.getCode(), true);
             robotRoadPathResultReturn.setRobot(availableRobot);
         }
 
@@ -369,7 +375,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      */
     @Override
     public Map getCountAvailableRobotByStationId(Long stationId) throws Exception {
-        List<StationRobotXREF> list = stationRobotXREFService.getByStationId(stationId);
+        List<StationRobotXREF> xrefList = CacheInfoManager.getStationRobotIdXrefListCache(stationId);
+        if (xrefList == null) {
+            xrefList = stationRobotXREFService.getByStationId(stationId);
+            CacheInfoManager.setStationRobotIdXrefListCache(stationId, xrefList);
+        }
         Map<String, Integer> availableRobotCountMap = Maps.newHashMap();
         int trailerCount = 0;
         int cabinetCount = 0;
@@ -377,23 +387,33 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         int cookyCount = 0;
         int cookyPlusCount = 0;
         int carsonCount = 0;
-        if (list == null || list.size() == 0) {
+        if (xrefList == null || xrefList.size() == 0) {
             return availableRobotCountMap;
         }
-        for (StationRobotXREF xref : list) {
-            Robot robotDb = getById(xref.getRobotId());
+        for (StationRobotXREF xref : xrefList) {
+            Long robotId = xref.getRobotId();
+            Robot robot = CacheInfoManager.getRobotInfoCache(robotId);
+            if (robot == null) {
+                robot = getById(robotId);
+                CacheInfoManager.setRobotInfoCache(robotId, robot);
+                continue;
+            }
             //todo 暂时先不考虑低电量和紧急制动状态
-            String code = robotDb.getCode();
-            if (robotDb == null || robotDb.getBusy()
-                    || CacheInfoManager.getRobotOnlineCache(code) == null
-                    || !CacheInfoManager.getRobotOnlineCache(code)) {
+            String code = robot.getCode();
+            Boolean busy = CacheInfoManager.getRobotBusyCache(code);
+            if (busy == null) {
+                CacheInfoManager.setRobotBusyCache(code, Boolean.FALSE);
+            }
+            if (robot == null || busy || CacheInfoManager.getRobotOnlineCache(code) == null || !CacheInfoManager.getRobotOnlineCache(code)) {
                 continue;
             }
             //从缓存里获取机器上上报的工控场景名
             MessageInfo messageInfo = CacheInfoManager.getMessageCache(code);
             //获取工控场景名
+            //到缓存里通过messageInfo的deviceId调用MapInfoServiceIMpl的getCurrentMapInfo获取工控场景名
             String sceneName = parseMapInfoData(messageInfo);
             //获取站绑定的工控场景名
+            //走缓存去查询站绑定的工控场景
             String stationSceneName = getStationSceneName(stationId);
             if (StringUtil.isEmpty(sceneName) || StringUtil.isEmpty(stationSceneName)) {
                 continue;
@@ -401,17 +421,17 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             if (!sceneName.equals(stationSceneName)) {
                 continue;
             }
-            if (robotDb.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
+            if (robot.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
                 trailerCount++;
-            } else if (robotDb.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {
+            } else if (robot.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {
                 cabinetCount++;
-            } else if (robotDb.getTypeId().equals(RobotTypeEnum.DRAWER.getCaption())) {
+            } else if (robot.getTypeId().equals(RobotTypeEnum.DRAWER.getCaption())) {
                 drawerCount++;
-            } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKY.getCaption())) {
+            } else if (robot.getTypeId().equals(RobotTypeEnum.COOKY.getCaption())) {
                 cookyCount++;
-            } else if (robotDb.getTypeId().equals(RobotTypeEnum.COOKYPLUS.getCaption())) {
+            } else if (robot.getTypeId().equals(RobotTypeEnum.COOKYPLUS.getCaption())) {
                 cookyPlusCount++;
-            } else if (robotDb.getTypeId().equals(RobotTypeEnum.CARSON.getCaption())) {
+            } else if (robot.getTypeId().equals(RobotTypeEnum.CARSON.getCaption())) {
                 carsonCount++;
             }
         }
@@ -431,11 +451,21 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     private String getStationSceneName(Long stationId) {
-        Station stationDb = stationService.findById(stationId);
-        if (stationDb == null) {
-            return null;
+        Station station = CacheInfoManager.getStationInfoCache(stationId);
+        if (station == null) {
+            station = stationService.findById(stationId);
+            if (station == null) {
+                return null;
+            }
+            CacheInfoManager.setStationInfoCache(stationId, station);
         }
-        return sceneService.getRelatedMapNameBySceneId(stationDb.getSceneId());
+        Long sceneId = station.getSceneId();
+        String sceneName = CacheInfoManager.getSceneMapRelationCache(sceneId);
+        if (StringUtils.isEmpty(sceneName)) {
+            sceneName = sceneService.getRelatedMapNameBySceneId(sceneId);
+            CacheInfoManager.setSceneMapRelationCache(sceneId, sceneName);
+        }
+        return sceneName;
     }
 
     /**
@@ -534,13 +564,21 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robot.setSufficientBatteryThreshold(robotConfigDb != null ? robotConfigDb.getSufficientBatteryThreshold() : null);
             List<RobotPassword> robotPasswordList = robotPasswordService.listRobotPassword(robotId);
             robot.setPasswords(robotPasswordList);
-            Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
-            if (flag != null) {
-                robot.setOnline(flag);
-                LOGGER.info(robot.getCode() + (flag ? "在线" : "离线"));
+            Boolean onlineFlag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+            Boolean busyFlag = CacheInfoManager.getRobotBusyCache(robot.getCode());
+            if (onlineFlag != null) {
+                robot.setOnline(onlineFlag);
+                LOGGER.info(robot.getCode() + (onlineFlag ? "在线" : "离线"));
             } else {
                 robot.setOnline(false);
                 LOGGER.info(robot.getCode() + "离线");
+            }
+            if (busyFlag != null) {
+                robot.setBusy(busyFlag);
+                LOGGER.info(robot.getCode() + (busyFlag ? "忙碌" : "空闲"));
+            } else {
+                robot.setBusy(false);
+                LOGGER.info(robot.getCode() + "空闲");
             }
             List<RobotChargerMapPointXREF> xrefList = robotChargerMapPointXREFService.getByRobotId(robotId);
             List<MapPoint> mapPointList = Lists.newArrayList();
@@ -959,7 +997,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             Robot robot = robotDbList.get(0); // 根据机器人 code 编号查询对应的机器人对象
             if (robot != null) {
                 if (busy != null) {
-                    robot.setBusy(busy);
+//                    robot.setBusy(busy);
+                    CacheInfoManager.setRobotBusyCache(robotCode, busy);
                     logger.info("机器人" + robotCode + "设置为"+ busy +"状态");
                 }
                 if (online != null) {

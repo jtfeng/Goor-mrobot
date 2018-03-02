@@ -7,7 +7,6 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
-import cn.mrobot.bean.area.station.StationStationXREF;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotChargerMapPointXREF;
 import cn.mrobot.bean.assets.scene.Scene;
@@ -370,8 +369,11 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         boolean flag = bindSceneAndRobotRelations(scene, null);//绑定场景与机器人之间的对应关系
 
         this.deleteMapAndSceneRelations(scene.getId());
+        //更新缓存，删除数据库删掉的地图场景绑定关系
+        CacheInfoManager.removeSceneMapRelationCache(scene.getId());
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
-
+        //增加缓存
+        CacheInfoManager.setSceneMapRelationCache(scene.getId(), scene.getMapSceneName());
         if (flag) {
             // 实际有机器人需要进行地图下发操作
             scene.setState(0);
