@@ -8,9 +8,9 @@ import cn.muye.account.employee.service.EmployeeService;
 import com.github.pagehelper.PageInfo;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -45,6 +45,7 @@ public class EmployeeController {
 
 
     @RequestMapping(value = {"account/employee"}, method = RequestMethod.POST)
+//    @PreAuthorize("hasAuthority('account_employee_u')")
     @ResponseBody
     public AjaxResult addEmployee(@RequestBody Employee employee) {
         try{
@@ -76,6 +77,7 @@ public class EmployeeController {
     }
 
     @RequestMapping(value = {"account/employee"}, method = RequestMethod.GET)
+//    @PreAuthorize("hasAuthority('account_employee_r')")
     @ResponseBody
     public AjaxResult listEmployee(WhereRequest whereRequest) {
         List<Employee> listEmployee = employeeService.list(whereRequest);
@@ -84,6 +86,7 @@ public class EmployeeController {
     }
 
     @RequestMapping(value = {"account/employee"}, method = RequestMethod.PUT)
+//    @PreAuthorize("hasAuthority('account_employee_u')")
     @ResponseBody
     public AjaxResult updateEmployee(@RequestBody Employee employee) {
         try {
@@ -110,6 +113,7 @@ public class EmployeeController {
     }
 
     @RequestMapping(value = {"account/employee/{id}"}, method = RequestMethod.DELETE)
+//    @PreAuthorize("hasAuthority('account_employee_d')")
     @ResponseBody
     public AjaxResult deleteEmployee(@PathVariable Long id) {
         employeeService.deleteById(id);

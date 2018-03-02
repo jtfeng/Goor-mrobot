@@ -2,8 +2,11 @@ package cn.muye.base.cache;
 
 import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
+import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
+import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
@@ -75,6 +78,8 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     private static ConcurrentHashMapCache<String, Boolean> robotOnlineCache = new ConcurrentHashMapCache<>();//机器人是否在线缓存
 
+    private static ConcurrentHashMapCache<String, Boolean> robotBusyCache = new ConcurrentHashMapCache<>();//机器人是否在线缓存
+
     private static ConcurrentHashMapCache<String, String> robotMissionAlertStatusCache = new ConcurrentHashMapCache<>();//当前机器人任务状态缓存
 
     /**
@@ -118,6 +123,36 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<String, LinkedList<RobotPositionRecord>> robotPositionRecordsCache = new ConcurrentHashMapCache<>();
 
+    /**
+     * 机器人List缓存
+     */
+    private static ConcurrentHashMapCache<String, List<Robot>> robotListCache = new ConcurrentHashMapCache<>();
+
+    /**
+     * 机器人信息缓存
+     */
+    private static ConcurrentHashMapCache<Long, Robot> robotInfoCache = new ConcurrentHashMapCache<>();
+
+    /**
+     * 站List缓存
+     */
+    private static ConcurrentHashMapCache<String, List<Station>> stationListCache = new ConcurrentHashMapCache<>();
+
+    /**
+     * 站信息缓存
+     */
+    private static ConcurrentHashMapCache<Long, Station> stationInfoCache = new ConcurrentHashMapCache<>();
+
+    /**
+     * 站机器人关系缓存
+     */
+    private static ConcurrentHashMapCache<Long, List<StationRobotXREF>> stationRobotIdXrefListCache = new ConcurrentHashMapCache<>();
+
+    /**
+     * 场景Id与工控场景名缓存
+     */
+    private static ConcurrentHashMapCache<Long, String> sceneMapRelationCache = new ConcurrentHashMapCache<>();
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -140,6 +175,12 @@ public class CacheInfoManager implements ApplicationContextAware {
         navigationCache.setMaxLifeTime(0);
         fixpathSceneNameCache.setMaxLifeTime(10 * 60 * 1000);
         robotPositionRecordsCache.setMaxLifeTime(0);
+        robotListCache.setMaxLifeTime(0);
+        robotInfoCache.setMaxLifeTime(0);
+        stationListCache.setMaxLifeTime(0);
+        stationInfoCache.setMaxLifeTime(0);
+        stationRobotIdXrefListCache.setMaxLifeTime(0);
+        sceneMapRelationCache.setMaxLifeTime(0);
         //用户登录状态
         userLoginStatusCache.setMaxLifeTime(0);
 
@@ -150,6 +191,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         roadPathMapsCache.setMaxLifeTime(3 * 3600 * 1000);
         roadPathDetailsCache.setMaxLifeTime(3 * 3600 * 1000);
         mapPointsCache.setMaxLifeTime(3 * 3600 * 1000);
+
     }
 
     private CacheInfoManager() {
@@ -596,5 +638,69 @@ public class CacheInfoManager implements ApplicationContextAware {
                 removeRobotPositionRecordsCache(key);
             }
         }
+    }
+
+    public static Boolean getRobotBusyCache(String robotCode) {
+        return robotBusyCache.get(robotCode);
+    }
+
+    public static void setRobotBusyCache(String robotCode, Boolean busy) {
+        robotBusyCache.put(robotCode, busy);
+    }
+
+    public static List<Robot> getRobotListCache(String key) {
+        return robotListCache.get(key);
+    }
+
+    public static void setRobotListCache(String key, List<Robot> robotList) {
+        robotListCache.put(key, robotList);
+    }
+
+    public static Robot getRobotInfoCache(Long id) {
+        return robotInfoCache.get(id);
+    }
+
+    public static void setRobotInfoCache(Long id, Robot robotInfo) {
+        robotInfoCache.put(id, robotInfo);
+    }
+
+    public static List<Station> getStationListCache(String key) {
+        return stationListCache.get(key);
+    }
+
+    public static void setStationListCache(String key, List<Station> stationList) {
+        stationListCache.put(key, stationList);
+    }
+
+    public static Station getStationInfoCache(Long id) {
+        return stationInfoCache.get(id);
+    }
+
+    public static void setStationInfoCache(Long id, Station stationInfo) {
+        stationInfoCache.put(id, stationInfo);
+    }
+
+    public static List<StationRobotXREF> getStationRobotIdXrefListCache(Long stationId) {
+        return stationRobotIdXrefListCache.get(stationId);
+    }
+
+    public static void setStationRobotIdXrefListCache(Long stationId, List<StationRobotXREF> stationRobotIdXrefList) {
+        stationRobotIdXrefListCache.put(stationId, stationRobotIdXrefList);
+    }
+
+    public static void removeStationRobotIdXrefListCache(Long stationId) {
+        stationRobotIdXrefListCache.remove(stationId);
+    }
+
+    public static String getSceneMapRelationCache(Long sceneId) {
+        return sceneMapRelationCache.get(sceneId);
+    }
+
+    public static void setSceneMapRelationCache(Long sceneId, String mapSceneName) {
+        sceneMapRelationCache.put(sceneId, mapSceneName);
+    }
+
+    public static void removeSceneMapRelationCache(Long sceneId) {
+        sceneMapRelationCache.remove(sceneId);
     }
 }

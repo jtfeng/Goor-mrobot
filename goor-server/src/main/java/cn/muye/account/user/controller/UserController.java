@@ -26,6 +26,7 @@ import cn.mrobot.dto.area.station.StationDTO4User;
 import cn.mrobot.utils.HttpClientUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.account.role.service.RoleService;
 import cn.muye.account.user.service.UserRoleXrefService;
 import cn.muye.account.user.service.UserService;
 import cn.muye.account.user.service.impl.UserServiceImpl;
@@ -41,7 +42,9 @@ import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.apache.commons.net.util.Base64;
 import org.apache.log4j.Logger;
@@ -50,13 +53,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Ray.Fu on 2017/6/13.
@@ -74,13 +75,17 @@ public class UserController implements ApplicationContextAware {
     private StationService stationService;
 
     @Autowired
-    private UserRoleXrefService userRoleXrefService;
-
-    @Autowired
     private SceneService sceneService;
 
     @Autowired
     private OrderSettingService orderSettingService;
+
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private UserRoleXrefService userRoleXrefService;
+
     @Value("${authServer.host}")
     private String authServerHost;
 
@@ -107,6 +112,7 @@ public class UserController implements ApplicationContextAware {
      * @return
      */
     @RequestMapping(value = {"account/user"}, method = RequestMethod.POST)
+//    @PreAuthorize("hasAuthority('account_user_u')")
     @ApiOperation(value = "新增修改用户接口", httpMethod = "POST", notes = "新增修改用户接口")
     @ResponseBody
     public AjaxResult addOrUpdateUser(@RequestBody User user) {
@@ -187,6 +193,7 @@ public class UserController implements ApplicationContextAware {
      * @return
      */
     @RequestMapping(value = {"account/user"}, method = RequestMethod.GET)
+//    @PreAuthorize("hasAuthority('account_user_r')")
     @ApiOperation(value = "查询用户接口", httpMethod = "GET", notes = "查询用户接口")
     @ResponseBody
     public AjaxResult list(WhereRequest whereRequest) {
@@ -217,6 +224,7 @@ public class UserController implements ApplicationContextAware {
      * @return
      */
     @RequestMapping(value = {"account/user/{id}"}, method = RequestMethod.DELETE)
+//    @PreAuthorize("hasAuthority('account_user_d')")
     @ApiOperation(value = "删除用户接口", httpMethod = "DELETE", notes = "删除用户接口")
     @ResponseBody
     public AjaxResult delete(@PathVariable(value = "id") String id) {
@@ -281,6 +289,7 @@ public class UserController implements ApplicationContextAware {
 
     /**
      * PC端的检查登录
+     *
      * @param map
      * @return
      */
@@ -301,6 +310,8 @@ public class UserController implements ApplicationContextAware {
             //写入枚举
             map.put("enums", getAllEnums(userDTO));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
+            //登录成功，初始化权限
+//            initialUserPermission(userDTO.getId(), map);
             return AjaxResult.success(map, "登录成功");
         }
         //如果用户是站管理员，站list不是空，绑定的站也是激活的，则登录成功
@@ -321,6 +332,8 @@ public class UserController implements ApplicationContextAware {
                     break;
                 }
             }
+            //登录成功，初始化权限
+//            initialUserPermission(userDTO.getId(), map);
             return AjaxResult.success(map, "登录成功");
         } else {
             return AjaxResult.failed("用户未绑定站，请联系客服");
@@ -329,6 +342,7 @@ public class UserController implements ApplicationContextAware {
 
     /**
      * PAD端的检查登录
+     *
      * @param map
      * @return
      */
@@ -424,6 +438,37 @@ public class UserController implements ApplicationContextAware {
     public AjaxResult logOut() {
         CacheInfoManager.removeUserLoginStatusCache(userUtil.getCurrentUser().getUserName());
         return AjaxResult.success("注销成功");
+    }
+
+    /**
+     * 用户绑定角色接口
+     *
+     * @param roleIds
+     * @param userId
+     * @return
+     */
+    @RequestMapping(value = {"account/user/bindRole"}, method = RequestMethod.POST)
+//    @PreAuthorize("hasAuthority('account_user_u')")
+    @ApiOperation(value = "用户绑定角色接口", httpMethod = "POST", notes = "用户绑定角色接口")
+    @ResponseBody
+    public AjaxResult bindRole(@RequestParam(value = "roleIds") String roleIds, @RequestParam(value = "userId") Long userId) {
+        try {
+            //数据库查询相应角色是否存在
+            User userDb = userService.findById(userId);
+            if (userDb == null) {
+                return AjaxResult.failed("用户不存在");
+            }
+            List<Long> roleIdList = JSON.parseArray(roleIds, Long.class);
+            List<Role> roleList = roleService.listByIds(roleIdList);
+            Set<Long> roleIdSet = Sets.newHashSet();
+            roleList.forEach(role -> {
+                roleIdSet.add(role.getId());
+            });
+            userService.bindRole(roleIdSet, userId);
+        } catch (Exception e) {
+            return AjaxResult.failed("该角色有绑定关系，无法删除");
+        }
+        return AjaxResult.success("删除成功");
     }
 
 
@@ -660,4 +705,23 @@ public class UserController implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         UserController.applicationContext = applicationContext;
     }
+
+    /**
+     * 登录后初始化用户权限
+     *
+     * @return
+     */
+    private void initialUserPermission(Long userId, Map map) {
+        User userDb = userService.getById(userId);
+        if (userDb == null) {
+            return;
+        }
+        List<Permission> permissionList = userService.listAllPermission(userId);
+        List<String> permissionUrlList = Lists.newArrayList();
+        for (int i = 0; i < permissionList.size(); i++) {
+            permissionUrlList.add(permissionList.get(i).getUrl());
+        }
+        map.put("allPermission", permissionUrlList);
+    }
+
 }

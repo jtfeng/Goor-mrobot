@@ -189,10 +189,14 @@ public class MissionWarningServiceImpl implements MissionWarningService {
 
     @Override
     public void checkRobotWarningState() {
-        Robot queryRobot = new Robot();
-        queryRobot.setBusy(Boolean.TRUE);
-        List<Robot> busyRobotList = robotService.listByDomain(queryRobot);
+        List<Robot> robotList = robotService.listAll();
+        List<Robot> busyRobotList = Lists.newArrayList();
         List<String> busyRobotCode = Lists.newArrayList();
+        robotList.forEach(robot -> {
+                if (CacheInfoManager.getRobotBusyCache(robot.getCode())) {
+                    busyRobotList.add(robot);
+                }
+        });
         for (Robot robot : busyRobotList) {
             //加入忙碌机器人列表
             busyRobotCode.add(robot.getCode());

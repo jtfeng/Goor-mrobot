@@ -13,6 +13,7 @@ import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,8 +47,8 @@ public class PointController {
      * @return
      */
     @RequestMapping(value = "area/point", method = {RequestMethod.POST, RequestMethod.PUT})
+//    @PreAuthorize("hasAuthority('area_point_u')")
     @ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult saveOrUpdate(HttpServletRequest request, @RequestBody MapPoint mapPoint) {
         try {
 
@@ -82,8 +83,8 @@ public class PointController {
     }
 
     @RequestMapping(value = "area/point", method = RequestMethod.GET)
+//    @PreAuthorize("hasAuthority('area_point_r')")
     @ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult listMapPoint(WhereRequest whereRequest, HttpServletRequest request) {
         try {
             Integer pageNo = whereRequest.getPage();
@@ -110,8 +111,8 @@ public class PointController {
      * @return
      */
     @RequestMapping(value = "area/point/robot", method = RequestMethod.GET)
+//    @PreAuthorize("hasAuthority('area_point_r')")
     @ResponseBody
-//	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
     public AjaxResult listMapPointBySceneId(WhereRequest whereRequest, HttpServletRequest request) {
         try {
             Integer pageNo = whereRequest.getPage();

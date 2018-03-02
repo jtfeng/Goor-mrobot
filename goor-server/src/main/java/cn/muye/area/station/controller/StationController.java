@@ -21,10 +21,12 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.area.station.service.StationStationXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Lists;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
@@ -153,6 +155,17 @@ public class StationController {
             stationDB.setActive(Constant.DELETE);
 //            stationService.delete(stationDB);
             stationService.update(stationDB);
+            //更新站缓存
+            List<Station> stationList = CacheInfoManager.getStationListCache("stationList");
+            Long stationId = stationDB.getId();
+            for (Station station : stationList) {
+                if (station.getId().equals(stationId)) {
+                    stationList.remove(station);
+                }
+            }
+            CacheInfoManager.setStationListCache("stationList", stationList);
+            //把站机器人绑定关系去掉
+            CacheInfoManager.removeStationRobotIdXrefListCache(stationId);
             return AjaxResult.success("删除成功");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -306,7 +319,6 @@ public class StationController {
                         elevatorstationElevatorXREFMapper.insert(elevatorstationElevatorXREF);
                     }
                 }
-
                 return AjaxResult.success(toEntity(stationDb), "修改成功");
             } else if (station != null && id == null) {
                 //新增
@@ -349,11 +361,19 @@ public class StationController {
     @ResponseBody
     public AjaxResult bindRobots(@ApiParam(value = "站") @RequestBody Station station) {
         Long id = station.getId();
-        List<Robot> stationList = station.getRobotList();
 //        if (station != null && id != null && stationList != null && stationList.size() > 0) {
-            Station stationDb = stationService.findById(station.getId());
+            Station stationDb = stationService.findById(id);
             if (stationDb != null) {
                 stationService.bindRobots(station);
+                //更新缓存
+                List<StationRobotXREF> stationRobotXREFList = Lists.newArrayList();
+                for (Robot robot : station.getRobotList()) {
+                    StationRobotXREF stationRobotXREF = new StationRobotXREF();
+                    stationRobotXREF.setRobotId(robot.getId());
+                    stationRobotXREF.setStationId(station.getId());
+                    stationRobotXREFList.add(stationRobotXREF);
+                }
+                 CacheInfoManager.setStationRobotIdXrefListCache(id, stationRobotXREFList);
                 return AjaxResult.success(station, "绑定成功");
             } else {
                 return AjaxResult.failed(AjaxResult.CODE_FAILED, "不存在的站");

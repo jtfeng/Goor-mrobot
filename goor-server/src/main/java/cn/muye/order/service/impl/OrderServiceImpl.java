@@ -23,6 +23,7 @@ import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BasePreInject;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
@@ -270,8 +271,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
                 AjaxResult ajaxResult = generateMissionListPathNav(waitOrder.getId());
                 //AjaxResult ajaxResult = AjaxResult.success();
                 if(!ajaxResult.isSuccess()){
-                    availableRobot.setBusy(Boolean.FALSE);
-                    robotService.updateSelective(availableRobot);
+                    CacheInfoManager.setRobotBusyCache(availableRobot.getCode(), Boolean.FALSE);
                     logger.info("请求机器人失败");
                 }
                 logger.info("本次订单号为{}检测结束", waitOrder.getId());
@@ -307,8 +307,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
                     logger.info("请求机器人失败");
                 }else {
                     //请求成功，修改机器人为忙碌状态
-                    robot.setBusy(Boolean.TRUE);
-                    robotService.updateSelective(robot);
+                    CacheInfoManager.setRobotBusyCache(robot.getCode(), Boolean.TRUE);
                     logger.info("请求机器人成功");
                 }
             }else {

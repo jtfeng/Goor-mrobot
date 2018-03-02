@@ -26,6 +26,7 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.controller.BaseController;
 import cn.muye.mission.service.MissionWarningService;
 import cn.muye.order.bean.*;
@@ -215,8 +216,10 @@ public class OrderController extends BaseController {
             if(!ajaxResult.isSuccess()){
                 if(arrangeRobot != null){
                     logger.info("请求机器人{}失败，订单重新分配", arrangeRobot.getCode());
-                    arrangeRobot.setBusy(Boolean.FALSE);
-                    robotService.updateSelective(arrangeRobot);
+//                    arrangeRobot.setBusy(Boolean.FALSE);
+                    //分配忙碌状态
+                    CacheInfoManager.setRobotBusyCache(arrangeRobot.getCode(), Boolean.FALSE);
+//                    robotService.updateSelective(arrangeRobot);
                 }
             }else{
                 ajaxResult = AjaxResult.success("下单成功，分配到机器人编号为" + arrangeRobot.getCode());
@@ -227,8 +230,7 @@ public class OrderController extends BaseController {
             LOGGER.error(e.getMessage(), e);
             //若失败 机器人状态回滚
             if(arrangeRobot != null){
-                arrangeRobot.setBusy(Boolean.FALSE);
-                robotService.updateSelective(arrangeRobot);
+                CacheInfoManager.setRobotBusyCache(arrangeRobot.getCode(), Boolean.FALSE);
             }
             return AjaxResult.failed("提交订单出现异常，订单失败");
         }

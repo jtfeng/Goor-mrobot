@@ -158,11 +158,24 @@ public class MapInfoServiceImpl implements MapInfoService {
             CurrentInfo currentInfo = new CurrentInfo();
 
             //获取开机状态
-            Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            if (null == robot) {
+            List<Robot> robotList = CacheInfoManager.getRobotListCache("robotList");
+            if (robotList == null) {
+                robotList = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
+                CacheInfoManager.setRobotListCache("robotList", robotList);
+            }
+            boolean tempFlag = false;
+            String robotCode = null;
+            for (Robot robot : robotList) {
+                if(robot.getCode().equals(code)) {
+                    tempFlag = true;
+                    robotCode = code;
+                    break;
+                }
+            }
+            if (!tempFlag) {
                 return null;
             }
-            Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
+            Boolean flag = CacheInfoManager.getRobotOnlineCache(robotCode);
             if (flag == null) {
                 flag = false;
             }
@@ -228,8 +241,7 @@ public class MapInfoServiceImpl implements MapInfoService {
      */
     private TaskState getTaskState(String code) {
 //        LOGGER.info("获取任务状态 运输中/充电/待命. code=" + code);
-        Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
-        if (robot.getBusy()) {
+        if (CacheInfoManager.getRobotBusyCache(code)) {
             return TaskState.TRANSPORTING;
         }
         List<ChargeInfo> chargeInfoList = chargeInfoService.getByDeviceId(code);

@@ -50,6 +50,16 @@ public class RobotController {
         }
     }
 
+    @RequestMapping(value = {"assets/robotBusyStatus"}, method = RequestMethod.GET)
+    @ApiOperation(value = "查询机器人忙碌状态", httpMethod = "GET", notes = "查询机器人忙碌状态")
+    @ResponseBody
+    public AjaxResult robotBusyStatus(WhereRequest whereRequest, @RequestParam(value = "robotSn") String robotSn) {
+        if (CacheInfoManager.getRobotBusyCache(robotSn)) {
+            return AjaxResult.success("机器人忙碌");
+        } else {
+            return AjaxResult.success("机器人空闲");
+        }
+    }
 
     /**
      * 查询机器人列表

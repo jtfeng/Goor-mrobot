@@ -1,5 +1,6 @@
 package cn.muye.account.user.mapper;
 
+import cn.mrobot.bean.account.Permission;
 import cn.mrobot.bean.account.User;
 import cn.muye.util.MyMapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,4 +24,6 @@ public interface UserMapper extends MyMapper<User> {
     List<User> selectByHospitalAdmin(Map map);
 
     List<User> selectByStationAdmin(Map map);
+
+    List<Permission> listAllPermission(Map map);
 }

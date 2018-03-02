@@ -1,5 +1,7 @@
 package cn.mrobot.bean.account;
 
+import cn.mrobot.bean.base.BaseBean;
+
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -9,7 +11,7 @@ import javax.persistence.Table;
  * Created by Ray.Fu on 2017/6/22.
  */
 @Table(name = "AC_ROLE_PERMISSION_XREF")
-public class RolePermissionXref {
+public class RolePermissionXref extends BaseBean {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

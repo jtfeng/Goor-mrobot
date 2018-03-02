@@ -19,6 +19,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
+import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -160,6 +161,7 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
 
     /**
      * 保存用户站关联记录
+     *
      * @param stationList
      * @param userId
      */
@@ -292,28 +294,25 @@ public class UserServiceImpl extends BaseServiceImpl<User> implements UserServic
     }
 
     @Override
-    public User bindRole(String userId, String roleId) {
-        //删除原来的绑定
-        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(Long.valueOf(userId));
+    public void bindRole(Set<Long> roleSet, Long userId) {
+        UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userId);
         if (userRoleXrefDb != null) {
-            userRoleXrefDb.setRoleId(Long.valueOf(roleId));
-            userRoleXrefService.update(userRoleXrefDb);
-        } else {
+            //删除原来的绑定
+            userRoleXrefService.delete(userRoleXrefDb);
+        }
+        for (Long roleId : roleSet) {
             UserRoleXref userRoleXref = new UserRoleXref();
-            userRoleXref.setRoleId(Long.valueOf(roleId));
-            userRoleXref.setUserId(Long.valueOf(userId));
+            userRoleXref.setRoleId(roleId);
+            userRoleXref.setUserId(userId);
             userRoleXrefService.save(userRoleXref);
         }
-        Role roleDb = roleService.getById(Long.valueOf(roleId));
-        String roleName = null;
-        if (roleDb != null) {
-            roleName = roleDb.getCnName();
-        }
-        User userDb = userMapper.selectByPrimaryKey(Long.valueOf(userId));
-        if (userDb != null) {
-            userDb.setUserName(roleName);
-        }
-        return userDb;
+    }
+
+    @Override
+    public List<Permission> listAllPermission(Long userId) {
+        Map map = Maps.newHashMap();
+        map.put("userId", userId);
+        return userMapper.listAllPermission(map);
     }
 
 }

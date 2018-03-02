@@ -359,9 +359,10 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
             if (null != isOnline && isOnline && robotOffLineMinutes.containsKey(robotCode)) {
                 robotOffLineMinutes.remove(robotCode);
             }
-            if (robot.getBusy() == null || !robot.getBusy()) {
+            Boolean busy = CacheInfoManager.getRobotBusyCache(robotCode);
+            if (busy == null || !busy) {
                 cloudReleaseRoadPathLock(robotCode);
-            } else if (robot.getBusy()) {
+            } else if (busy) {
                 // 非空闲，查看机器人在。线状态，如果机器人不在线，超过10分钟，则清除所有的锁
                 if (isOnline == null || !isOnline) {
                     Long offlineMinutes = robotOffLineMinutes.get(robotCode);
