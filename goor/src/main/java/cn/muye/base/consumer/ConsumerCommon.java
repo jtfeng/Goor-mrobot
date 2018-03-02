@@ -249,7 +249,7 @@ public class ConsumerCommon {
                             /* 17.7.5 Add By Abel. 取货密码验证。根据机器人编号，密码和货柜编号*/
                                 return pickUpPswdVerifyService.handlePickUpPswdVerify(messageInfo);
                             case TopicConstants.FIXPATH_FILE_QUERY:
-                                return fixFilePathService.handleFixFilePath(data);
+                                //return fixFilePathService.handleFixFilePath(data);
                             default:
                                 break;
                         }

@@ -2,7 +2,6 @@ package cn.muye.base.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.base.CommonInfo;
-import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.constant.VersionConstants;
 import cn.muye.base.bean.TopicHandleInfo;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 public class ExampleController {
@@ -45,12 +43,6 @@ public class ExampleController {
 
     @Autowired
     private FixFilePathService fixFilePathService;
-
-    @RequestMapping(value = "testFile", method = RequestMethod.POST)
-    @ResponseBody
-    public AjaxResult testFile() {
-        return fixFilePathService.handleFixFilePath("haha");
-    }
 
     @RequestMapping(value = "test1", method = RequestMethod.POST)
     @ResponseBody
