@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  *         TODO should this class extend something else that ExceptionTranslationFilter?
  */
 @Service
-public class AuthValidationExceptionFilter implements Filter{
+public class AuthValidationExceptionFilter implements Filter {
 
     private String[] excludedPageArray;
     private String excludedPages;
@@ -41,8 +41,13 @@ public class AuthValidationExceptionFilter implements Filter{
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         boolean isExcludedPage = true;
         for (String page : excludedPageArray) { //判断是否在过滤url之外
+            //删除URL末尾的 /
+            if (page.endsWith("/")) {
+                page = page.substring(0, page.length() - 1);
+            }
             Pattern pattern = Pattern.compile(page);
-            Matcher matcher = pattern.matcher(((HttpServletRequest) req).getServletPath());
+            String servletPath = ((HttpServletRequest) req).getServletPath();
+            Matcher matcher = pattern.matcher(servletPath);
             boolean rs = matcher.find();
             if (rs) {
                 isExcludedPage = false;
@@ -55,7 +60,7 @@ public class AuthValidationExceptionFilter implements Filter{
             try {
                 String accessTokenFromReq = httpServletRequest.getHeader("Authorization");
 //                String accessTokenFromReq = httpServletRequest.getParameter("access_token");
-                String result = HttpClientUtil.executeGet(null, accessTokenFromReq, authUserUri , null, null, "UTF-8", true);
+                String result = HttpClientUtil.executeGet(null, accessTokenFromReq, authUserUri, null, null, "UTF-8", true);
                 JSONObject jsonObject = JSON.parseObject(result);
                 String principal = jsonObject.getString("principal");
                 LOGGER.info("result===>" + result);
@@ -68,7 +73,7 @@ public class AuthValidationExceptionFilter implements Filter{
                     String userName = JSON.parseObject(principal).getString("username");
                     LOGGER.info("userName===>" + userName);
                     if (CacheInfoManager.getUserLoginStatusCache(userName) != null) {
-                        LOGGER.info("CacheInfoManager.getUserLoginStatusCache(" + userName+")====>" + CacheInfoManager.getUserLoginStatusCache(userName));
+                        LOGGER.info("CacheInfoManager.getUserLoginStatusCache(" + userName + ")====>" + CacheInfoManager.getUserLoginStatusCache(userName));
                         chain.doFilter(req, res);
                     } else {
                         response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
