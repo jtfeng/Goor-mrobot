@@ -58,7 +58,9 @@ public class FixPathServiceImpl implements FixPathService {
         JSONObject jsonObject = JSON.parseObject(messageData);
         String sceneName = jsonObject.getString(TopicConstants.SCENE_NAME);
         //判断场景是否是云端下发的场景名，如果不是，对上传的fixpath数据不做入库处理
-        Boolean idCloudRequest = CacheInfoManager.getFixpathSceneNameCache(sceneName);
+        //Boolean idCloudRequest = CacheInfoManager.getFixpathSceneNameCache(sceneName);
+        //暂时除去场景名再次判定，临时方案
+        Boolean idCloudRequest = true;
         if (idCloudRequest != null && idCloudRequest){
             //携带sceneName 请求agent端文件
             String paths = jsonObject.getString(TopicConstants.PATHS);
@@ -96,7 +98,7 @@ public class FixPathServiceImpl implements FixPathService {
         dataObject.put(TopicConstants.SCENE_NAME, mapSceneName);
         slamRequestBody.setData(dataObject);
         AjaxResult ajaxResult = baseMessageService.sendRobotMessage(robotCode, TopicConstants.APP_PUB, JSON.toJSONString(slamRequestBody));
-        if (ajaxResult.isSuccess()){
+        if (ajaxResult != null && ajaxResult.isSuccess()){
             //缓存请求发送成功的场景名
             CacheInfoManager.setFixpathSceneNameCache(mapSceneName);
         }

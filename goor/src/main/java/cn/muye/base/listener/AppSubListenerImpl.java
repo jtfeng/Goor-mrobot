@@ -44,6 +44,7 @@ public class AppSubListenerImpl implements TopicCallback, ApplicationContextAwar
 				String subName = dataObject.getString(TopicConstants.SUB_NAME);
 				//工控 发送固定路径文件，agent端拦截处理上传文件至后台
 				if(TopicConstants.FIXPATH_FILE_QUERY.equals(subName)){
+					logger.info("开始处理固定路径文件topic");
 					JSONObject topicData = dataObject.getJSONObject(TopicConstants.DATA);
 					String sceneName = topicData.getString("scene_name");
 					FixFilePathService fixFilePathService = applicationContext.getBean(FixFilePathService.class);
