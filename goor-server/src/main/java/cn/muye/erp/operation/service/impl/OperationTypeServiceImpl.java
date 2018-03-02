@@ -109,9 +109,12 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
             String name = map.getString(SearchConstants.SEARCH_NAME);
             String searchName = map.getString(SearchConstants.SEARCH_SEARCH_NAME);
             Long operationDepartmentType = map.getLong("operationDepartmentType");
-            if (StringUtil.isNotBlank(searchName)) {
-                searchName = searchName.toUpperCase();
+            if (!searchName.matches("[a-zA-Z]+")){
+                name = searchName;
+                searchName = null;
             }
+            searchName = (null != searchName) ? searchName.toUpperCase() : null;
+            name = (name != null) ? name.trim() : null;
             return operationTypeMapper.listOperationTypeBy(name, searchName, operationDepartmentType);
         } else {
             return operationTypeMapper.listAllOperationType();

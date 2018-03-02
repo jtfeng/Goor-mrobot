@@ -87,16 +87,20 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     @Override
     public List<Appliance> lists(WhereRequest whereRequest) {
         Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
-        String queryObj = whereRequest.getQueryObj();
+         String queryObj = whereRequest.getQueryObj();
         if (StringUtil.isNotBlank(queryObj)) {
             JSONObject map = JSON.parseObject(queryObj);
             String name = map.getString(SearchConstants.SEARCH_NAME);
-            String searchName = map.getString(SearchConstants.SEARCH_SEARCH_NAME);
             String departmentType = map.getString(SearchConstants.SEARCH_DEPARTMENT_TYPE);
             String packageType = map.getString(SearchConstants.SEARCH_PACKAGE_TYPE);
-            if (StringUtil.isNotBlank(searchName)) {
-                searchName = searchName.toUpperCase();
+            //手术室下单系统exe中的搜索可以根据汉字或者拼音首字母进行搜索，前端将搜索条件传到searchName字段中的
+            //所以需要多searchName进行判断，如果条件非全英文。则将条件放置到name字段进行查询,searchName为空
+            String searchName = map.getString(SearchConstants.SEARCH_SEARCH_NAME);
+            if (!searchName.matches("[a-zA-Z]+")){
+                name = searchName;
+                searchName = null;
             }
+            searchName = (null != searchName) ? searchName.toUpperCase() : null;
             name = (name != null) ? name.trim() : null;
             return applianceMapper.listApplianceByCondition(name, searchName, departmentType, packageType, storeId);
         } else {
