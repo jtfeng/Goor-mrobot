@@ -18,6 +18,8 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
                 .antMatchers("/goor/ws").permitAll()
                 .antMatchers("/resources/static/**").permitAll()
                 .antMatchers("/services/**").permitAll()
+                .antMatchers("/operation/**").permitAll()
+                .antMatchers("/appliance/**").permitAll()
                 .antMatchers("/check**").permitAll()
                 .antMatchers("/druid/**").permitAll()
                 .antMatchers("/**").permitAll();

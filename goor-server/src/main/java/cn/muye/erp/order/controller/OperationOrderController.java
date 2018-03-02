@@ -1,6 +1,7 @@
 package cn.muye.erp.order.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.erp.ApplianceXREF;
 import cn.mrobot.bean.erp.appliance.Appliance;
 import cn.mrobot.bean.erp.bindmac.StationMacPasswordXREF;
@@ -12,6 +13,7 @@ import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.websocket.WSMessage;
 import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.websoket.WebSocketSendMessage;
 import cn.muye.erp.appliance.service.ApplianceService;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
@@ -21,10 +23,8 @@ import cn.muye.erp.order.service.OperationOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import javax.websocket.Session;
+import java.util.*;
 
 /**
  * @author Jelynn
@@ -59,11 +59,17 @@ public class OperationOrderController {
      */
     @RequestMapping(value = "services/operation/order", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody OperationOrder operationOrder) {
-        List<OperationOrderApplianceXREF> applianceList = operationOrder.getApplianceList();
-        if (null == applianceList || applianceList.isEmpty()) {
-            return AjaxResult.failed("器械列表不能为空");
+        //检测是否配置有无菌器械室
+        AjaxResult asepticApparatusRoomCheckResult = checkHasAsepticApparatusRoom();
+        if (!asepticApparatusRoomCheckResult.isSuccess()) {
+            return asepticApparatusRoomCheckResult;
         }
-
+        StationMacPasswordXREF asepticApparatusRoomXREF = (StationMacPasswordXREF) asepticApparatusRoomCheckResult.getData();
+        //添加无菌器械室在线监测,不在线提示“无菌器械包室系统离线，请联系管理员或稍后再试”
+        AjaxResult onlineCheckAsepticApparatusRoomResult = onlineCheckAsepticApparatusRoom(asepticApparatusRoomXREF);
+        if (!onlineCheckAsepticApparatusRoomResult.isSuccess()) {
+            return onlineCheckAsepticApparatusRoomResult;
+        }
         if (OperationOrder.Type.OPERATION_TYPE_ORDER.getCode() == operationOrder.getType()) {
             if (operationOrder.getOperationType().getId() == null) {
                 return AjaxResult.failed("按手术类型申请手术类型ID不能为空");
@@ -83,7 +89,25 @@ public class OperationOrderController {
         //重新查询，带出额外器械信息
         OperationOrder operationOrderDB = operationOrderService.findOrderById(operationOrder.getId());
         //向无菌器械室发送消息
-        return sendOrderToAsepticApparatusRoom(operationOrderDB);
+        return sendOrderToAsepticApparatusRoom(operationOrderDB, asepticApparatusRoomXREF);
+    }
+
+    /**
+     * 检测无菌器械室是否在线，无菌器械室登录后会通过websocket向后台发送注册信息，注册时将信息存放在cache中，
+     * 当页面关闭时会调用websocket的onclose方法移除cache
+     * 所以可以通过websocket的cache校验是否在线
+     *
+     * @param asepticApparatusRoomXREF
+     * @return
+     */
+    private AjaxResult onlineCheckAsepticApparatusRoom(StationMacPasswordXREF asepticApparatusRoomXREF) {
+        Station station = asepticApparatusRoomXREF.getStation();
+        Long stationId = station.getId();
+        Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(stationId + "");
+        if (null == sessionSet || sessionSet.size() <= 0) {
+            return AjaxResult.failed("无菌器械包室系统离线，请联系管理员或稍后再试");
+        }
+        return AjaxResult.success();
     }
 
     /**
@@ -98,8 +122,10 @@ public class OperationOrderController {
             Appliance appliance = applianceService.findById(xref.getAppliance().getId());
             if (appliance.getDeleteFlag() == 1) {
                 //更新订单状态为手术室下单失败
+                String msg = "下单失败， " + appliance.getName() + " 已经删除";
+                operationOrder.setComment(msg);
                 updateOperationOrderState(operationOrder, OperationOrder.State.ORDER_FAIL);
-                return AjaxResult.failed("下单失败， " + appliance.getName() + " 已经删除");
+                return AjaxResult.failed(msg);
             }
         }
         return AjaxResult.success();
@@ -285,21 +311,36 @@ public class OperationOrderController {
         }
     }
 
-    private AjaxResult sendOrderToAsepticApparatusRoom(OperationOrder operationOrder) {
+    /**
+     * 检测是否配置有无菌器械室
+     *
+     * @return
+     */
+    private AjaxResult checkHasAsepticApparatusRoom() {
+        StationMacPasswordXREF stationMacPasswordXREF = getAsepticApparatusRoomXREF();
+        return null == stationMacPasswordXREF ? AjaxResult.failed("未设置无菌器械室平板，请先设置") : AjaxResult.success(stationMacPasswordXREF);
+    }
+
+    private StationMacPasswordXREF getAsepticApparatusRoomXREF() {
         List<StationMacPasswordXREF> list = stationMacPasswordXREFService.findByType(StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM);
-        if (null == list || list.size() <= 0) {
-            //未设置无菌器械室平板，更新订单状态为 5：手术室下单失败
-            updateOperationOrderState(operationOrder, OperationOrder.State.ORDER_FAIL);
-            return AjaxResult.failed("未设置无菌器械室平板，请先设置");
-        }
-        StationMacPasswordXREF stationMacPasswordXREF = list.get(0);
-        Long stationId = stationMacPasswordXREF.getStation().getId();
+        return (null == list || list.size() <= 0) ? null : list.get(0);
+    }
+
+    /**
+     * 将订单发送至无菌器械室
+     *
+     * @param operationOrder
+     * @param asepticApparatusRoomXREF
+     * @return
+     */
+    private AjaxResult sendOrderToAsepticApparatusRoom(OperationOrder operationOrder, StationMacPasswordXREF asepticApparatusRoomXREF) {
+        Long stationId = asepticApparatusRoomXREF.getStation().getId();
         //websocket将订单信息推送至无菌器械室
         sendWebSocketMessage(stationId, operationOrder);
         return AjaxResult.success(operationOrder, "下单成功");
     }
 
-    private void updateOperationOrderState(OperationOrder operationOrder, OperationOrder.State state){
+    private void updateOperationOrderState(OperationOrder operationOrder, OperationOrder.State state) {
         operationOrder.setState(state.getCode());
         operationOrderService.update(operationOrder);
     }

@@ -72,8 +72,9 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
 
     @Override
     public List<OperationType> findByNameAndDepartmentType(String name, Long departmentTypeId) {
+        name = (name != null) ? name.trim() : null;
         Example example = new Example(OperationType.class);
-        example.createCriteria().andCondition("NAME='" + name.trim() + "'")
+        example.createCriteria().andCondition("NAME='" + name + "'")
                 .andCondition("DELETE_FLAG=" + Constant.NORMAL)
                 .andCondition("OPERATION_DEPARTMENT_TYPE_ID=" + departmentTypeId);
         return operationTypeMapper.selectByExample(example);

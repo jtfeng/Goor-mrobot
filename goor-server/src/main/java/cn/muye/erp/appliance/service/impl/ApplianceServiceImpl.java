@@ -97,7 +97,8 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
             if (StringUtil.isNotBlank(searchName)) {
                 searchName = searchName.toUpperCase();
             }
-            return applianceMapper.listApplianceByCondition(name.trim(), searchName, departmentType, packageType, storeId);
+            name = (name != null) ? name.trim() : null;
+            return applianceMapper.listApplianceByCondition(name, searchName, departmentType, packageType, storeId);
         } else {
             return applianceMapper.listAllAppliance(storeId);
         }

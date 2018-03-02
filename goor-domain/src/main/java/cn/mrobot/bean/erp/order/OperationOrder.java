@@ -43,6 +43,8 @@ public class OperationOrder extends BaseBean {
     @Transient
     private OperationType operationType;
 
+    private String comment; //备注
+
     public Station getStation() {
         return station;
     }
@@ -113,6 +115,14 @@ public class OperationOrder extends BaseBean {
 
     public void setTypeCH(String typeCH) {
         this.typeCH = typeCH;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public OperationOrder init() {
