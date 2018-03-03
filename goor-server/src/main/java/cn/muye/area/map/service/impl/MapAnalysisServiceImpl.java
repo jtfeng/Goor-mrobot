@@ -251,7 +251,10 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
             mapPoint.setCloudMapPointTypeId(MapPointType.UNDEFINED.getCaption());
 
             //根据场景名，地图名，点名称去数据库查询是否有点，如果有则更新，没有则新增
-            List<MapPoint> mapPointListDB = pointService.findByName(mapPoint.getPointName(), sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+//            List<MapPoint> mapPointListDB = pointService.findByName(mapPoint.getPointName(), sceneName, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
+            List<MapPoint> mapPointListDB = pointService.listBySceneMapXYTH(sceneName, mapName,
+                        mapPoint.getX(),mapPoint.getY(),mapPoint.getTh(),
+                        MapPointType.UNDEFINED);
             if (mapPointListDB != null && mapPointListDB.size() > 0) {
                     mapPoint.setId(mapPointListDB.get(0).getId());
                     pointService.update(mapPoint);

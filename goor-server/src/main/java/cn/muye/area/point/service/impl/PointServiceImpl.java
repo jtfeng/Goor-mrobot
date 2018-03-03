@@ -12,6 +12,7 @@ import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.mrobot.bean.slam.SlamResponseBody;
+import cn.mrobot.utils.MathLineUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.bean.Orientation;
@@ -226,9 +227,11 @@ public class PointServiceImpl implements PointService {
         if(null != cloudMapPointType) {
             criteria.andCondition("CLOUD_POINT_TYPE_ID =", cloudMapPointType.getCaption());
         }
-        criteria.andCondition("X like '%" + x + "%'");
-        criteria.andCondition("Y like '%" + y + "%'");
-        criteria.andCondition("TH like '%" + th + "%'");
+        criteria.andCondition("concat(X , '') like '%" +  MathLineUtil.cutDoubleByScale(x , 4) + "%'");
+        criteria.andCondition("concat(Y , '') like '%" +  MathLineUtil.cutDoubleByScale(y , 4) + "%'");
+        criteria.andCondition("concat(TH , '') like '%" +  MathLineUtil.cutDoubleByScale(th , 4) + "%'");
+//        criteria.andCondition("abs(Y -" + y + ") < 1e-5");
+//        criteria.andCondition("abs(TH -" + th + ") < 1e-5");
 //        criteria.andCondition("X =", x + "");
 //        criteria.andCondition("Y =", y + "");
 //        criteria.andCondition("TH =", th + "");

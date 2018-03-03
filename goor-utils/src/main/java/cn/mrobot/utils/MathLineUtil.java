@@ -114,6 +114,7 @@ public class MathLineUtil {
 
     /**
      * 根据小数位数截取double数，注意不是四舍五入
+     * 接近负无穷大的舍入模式。
      * @param x
      * @param scale
      * @return
@@ -124,12 +125,37 @@ public class MathLineUtil {
     }
 
     /**
+     * 根据小数位数截取double数，注意不是四舍五入
+     * 接近正无穷大的舍入模式。
+     * @param x
+     * @param scale
+     * @return
+     */
+    public static double ceilingDoubleByScale(double x, int scale) {
+        BigDecimal b =  new  BigDecimal(x);
+        return b.setScale(scale, BigDecimal.ROUND_CEILING).doubleValue();
+    }
+
+    /**
      * 把double转换成Long,四舍五入
      * @param x
      * @return
      */
     public static Long doubleToLongRoundHalfUp(double x) {
         return new BigDecimal(x + "").setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
+    }
+
+    /**
+     * 如果x >=0,则用向负无穷大的方向截取，如果x<0，则用向正无穷大的方向截取
+     * @param x
+     * @param scale
+     * @return
+     */
+    public static double cutDoubleByScale(double x, int scale) {
+        //如果x >=0,则用向负无穷大的方向截取，如果x<0，则用向正无穷大的方向截取
+        return x >= 0 ?MathLineUtil.floorDoubleByScale(x, scale)
+                :
+                MathLineUtil.ceilingDoubleByScale(x, scale);
     }
 
 }
