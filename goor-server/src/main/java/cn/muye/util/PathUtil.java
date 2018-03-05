@@ -86,7 +86,7 @@ public class PathUtil {
         //以离机器人最近的路径起点计算机器人到线段的距离,换算成mm
         Double db = MathLineUtil.calPointToSegmentDistance(x0, y0, x1, y1, x2, y2) * 1000;
         result = MathLineUtil.doubleToLongRoundHalfUp(db);
-        logger.info("=================计算机器人点({},{})到路径'NAME:{},mapName:{},sceneName:{}'的距离{}mm", x0,y0, roadPathDetail.getPathName(), roadPathDetail.getMapName(),roadPathDetail.getSceneName());
+        logger.info("=================计算机器人点({},{})到路径'NAME:{},mapName:{},sceneName:{}'的距离{}mm", x0,y0, roadPathDetail.getPathName(), roadPathDetail.getMapName(),roadPathDetail.getSceneName(),result);
         return result;
     }
 
