@@ -96,6 +96,7 @@ public class FixPathServiceImpl implements FixPathService {
         SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.FIXPATH_FILE_QUERY);
         JSONObject dataObject = new JSONObject();
         dataObject.put(TopicConstants.SCENE_NAME, mapSceneName);
+        logger.info("##############场景名：{}", mapSceneName);
         slamRequestBody.setData(dataObject);
         AjaxResult ajaxResult = baseMessageService.sendRobotMessage(robotCode, TopicConstants.APP_PUB, JSON.toJSONString(slamRequestBody));
         if (ajaxResult != null && ajaxResult.isSuccess()){
