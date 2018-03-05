@@ -297,7 +297,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
             //忙碌和低电量的机器人之间过滤
             Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
-            if(busy || robotDb.isLowPowerState() ) {
+            if(busy != null && busy || robotDb.isLowPowerState() ) {
                 stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (busy ? "忙碌," : "空闲,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
@@ -402,7 +402,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             String code = robot.getCode();
             Boolean busy = CacheInfoManager.getRobotBusyCache(code);
             if (busy == null) {
-                CacheInfoManager.setRobotBusyCache(code, Boolean.FALSE);
+                busy = Boolean.FALSE;
             }
             if (robot == null || busy || CacheInfoManager.getRobotOnlineCache(code) == null || !CacheInfoManager.getRobotOnlineCache(code)) {
                 continue;

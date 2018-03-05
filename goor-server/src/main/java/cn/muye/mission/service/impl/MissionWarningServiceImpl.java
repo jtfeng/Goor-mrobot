@@ -193,7 +193,8 @@ public class MissionWarningServiceImpl implements MissionWarningService {
         List<Robot> busyRobotList = Lists.newArrayList();
         List<String> busyRobotCode = Lists.newArrayList();
         robotList.forEach(robot -> {
-                if (CacheInfoManager.getRobotBusyCache(robot.getCode())) {
+                Boolean flag = CacheInfoManager.getRobotBusyCache(robot.getCode());
+                if (flag != null && flag == true) {
                     busyRobotList.add(robot);
                 }
         });

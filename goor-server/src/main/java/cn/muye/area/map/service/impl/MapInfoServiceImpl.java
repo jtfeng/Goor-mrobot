@@ -241,7 +241,8 @@ public class MapInfoServiceImpl implements MapInfoService {
      */
     private TaskState getTaskState(String code) {
 //        LOGGER.info("获取任务状态 运输中/充电/待命. code=" + code);
-        if (CacheInfoManager.getRobotBusyCache(code)) {
+        Boolean flag = CacheInfoManager.getRobotBusyCache(code);
+        if (flag != null && flag == true) {
             return TaskState.TRANSPORTING;
         }
         List<ChargeInfo> chargeInfoList = chargeInfoService.getByDeviceId(code);
