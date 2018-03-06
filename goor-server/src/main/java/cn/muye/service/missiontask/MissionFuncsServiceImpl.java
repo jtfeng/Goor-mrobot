@@ -3316,6 +3316,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         List<MissionTask> missionTasks = new ArrayList<>();
         missionListTask.setMissionTasks(missionTasks);
 
+        //云端加在所有任务前，一个独立的语音任务：任务已完成。
+        missionListTask.getMissionTasks().add(getMp3VoiceTaskIgnorable(order, null, "最开始语音-", MP3_TASK_START, false));
+
         //锁操作相关变量初始化
         RoadPathLockAtts roadPathLockAtts =
                 new RoadPathLockAtts();
@@ -4743,6 +4746,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     public static final String MP3_OPEN_DOOR = "open_door.mp3";//开门，请注意
     public static final String MP3_APPRECIATION = "appreciation.mp3";//谢谢使用，祝您工作愉快
     public static final String MP3_TASK_OVER = "task_over.mp3";//任务已完成
+    public static final String MP3_TASK_START = "task_start.mp3";//任务开始
 
     //Mission State
     public static final String MissionStateFinished = "finished";//已经完成
