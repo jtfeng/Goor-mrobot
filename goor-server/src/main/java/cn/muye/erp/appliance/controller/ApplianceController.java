@@ -2,12 +2,14 @@ package cn.muye.erp.appliance.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.erp.appliance.Appliance;
+import cn.mrobot.bean.erp.appliance.ApplianceDepartmentType;
 import cn.mrobot.bean.erp.appliance.AppliancePackageType;
 import cn.mrobot.utils.ExcelUtil;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.erp.appliance.service.ApplianceDepartmentTypeService;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.appliance.service.ApplianceService;
 import cn.muye.erp.appliance.service.impl.ApplianceServiceImpl;
@@ -41,6 +43,9 @@ public class ApplianceController {
 
     @Autowired
     private AppliancePackageTypeService appliancePackageTypeService;
+
+    @Autowired
+    private ApplianceDepartmentTypeService applianceDepartmentTypeService;
 
     @Autowired
     private OperationTypeService operationTypeService;
@@ -106,8 +111,12 @@ public class ApplianceController {
         String name = appliance.getName();
         applianceDB.setName(appliance.getName());
         applianceDB.setSearchName(StringUtil.getSearchName(name));
-        applianceDB.setDepartmentType(appliance.getDepartmentType());
-        applianceDB.setPackageType(appliance.getPackageType());
+        int departmentTypeCode = appliance.getDepartmentTypeCode();
+        applianceDB.setDepartmentTypeCode(departmentTypeCode);
+        applianceDB.setDepartmentType(applianceDepartmentTypeService.findByCode(departmentTypeCode));
+        Long packageTypeId = appliance.getPackageTypeId();
+        applianceDB.setPackageTypeId(packageTypeId);
+        applianceDB.setPackageType(appliancePackageTypeService.findTypeById(packageTypeId));
         applianceDB.setCreateTime(new Date());
         applianceService.updateSelective(applianceDB);
         return AjaxResult.success(applianceDB, "修改成功");

@@ -196,7 +196,30 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
             //如果是小数形式，取整
             number = Integer.parseInt(applianceNumber.split("\\.")[0]);
         }
+        //TODO 添加该器械是否已经是手术类型的默认器械校验，如果是，数量是否一致,不一致，更新数量
+        boolean isDefault = checkApplianceIsDefault(operationType, appliance,number);
+        if (isDefault){
+            return;
+        }
         saveOperationDefaultAppliance(operationType, appliance, number);
+    }
+
+    private boolean checkApplianceIsDefault(OperationType operationType, Appliance appliance, int number) {
+        List<OperationDefaultApplianceXREF> xrefList = operationDefaultApplianceXREFMapper.findByOperationId(operationType.getId());
+        if (null == xrefList || xrefList.isEmpty() || null == appliance){
+            return false;
+        }
+        for (OperationDefaultApplianceXREF xref : xrefList){
+            if (xref.getAppliance().getId().equals(appliance.getId())){
+                //如果数量不一致，更新默认器械数量
+                if (xref.getNumber() != number){
+                    xref.setNumber(number);
+                    operationDefaultApplianceXREFMapper.updateNumber(xref);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -211,6 +234,7 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
         List<OperationType> operationTypeList = findByNameAndDepartmentType(operationName, departmentType.getId());
         OperationType operationType;
         if (null != operationTypeList && operationTypeList.size() > 0){
+            //更新手术类型的手术间编号
             operationType = operationTypeList.get(0);
             operationType.setOperationRoomNumber(operationRoomNumber);
             operationTypeMapper.updateByPrimaryKeySelective(operationType);
