@@ -22,7 +22,7 @@ public class Constant {
     public static final int XYZ_SCALE = 3;
 
     //工控固定路径导航可以开始的范围，单位mm
-    public static final Long PATH_NAVIGATION_SCALE = 800L;
+    public static final Long PATH_NAVIGATION_SCALE = 1000L;
 
     //机器人离线清除所有锁的时长
     public static final Long ROBOT_OFFLINE_MINUTES = 10L;
