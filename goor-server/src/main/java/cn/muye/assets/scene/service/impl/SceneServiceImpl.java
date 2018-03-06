@@ -210,14 +210,17 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         robotAssets.put("station", robotJSONArray);
         // 当前机器人所绑定的 充电桩 信息
         JSONArray robotMapPointListDbJSONArray = new JSONArray();
-        robotService.getChargerMapPointByRobotCode(robotCode,
-                SearchConstants.FAKE_MERCHANT_STORE_ID).forEach(eachP -> {
+        List<MapPoint> chargerMapPointList = robotService.getChargerMapPointByRobotCode(robotCode,
+                SearchConstants.FAKE_MERCHANT_STORE_ID);
+        if (chargerMapPointList != null && chargerMapPointList.size() > 0) {
+            chargerMapPointList.forEach(eachP -> {
                 JSONObject j = new JSONObject();
                 // 别名名称用作客户端显示
                 j.put("id", eachP.getId());
                 j.put("name", eachP.getPointAlias());
                 robotMapPointListDbJSONArray.add(j);
             });
+        }
         robotAssets.put("chargePoint", robotMapPointListDbJSONArray);
         List<Scene> list = sceneMapper.findSceneByRobotCode(robotCode);
         JSONObject currentSceneObject = new JSONObject();

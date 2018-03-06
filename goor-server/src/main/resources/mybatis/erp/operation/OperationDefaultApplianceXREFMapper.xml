@@ -42,4 +42,14 @@
         DELETE FROM ERP_OPERATION_DEFAULT_APPLIANCE_XREF WHERE APPLIANCE_ID=#{applianceId}
     </delete>
 
+    <update id="updateNumber" parameterType="cn.mrobot.bean.erp.operation.OperationDefaultApplianceXREF">
+        UPDATE ERP_OPERATION_DEFAULT_APPLIANCE_XREF
+        <trim prefix="set" suffixOverrides=",">
+            <if test="number != null">
+                NUMBER = #{number},
+            </if>
+        </trim>
+        WHERE OPERATION_TYPE_ID = #{operationTypeId} AND APPLIANCE_ID=#{appliance.id}
+    </update>
+
 </mapper>

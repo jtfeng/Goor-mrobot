@@ -526,7 +526,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (xrefList != null && xrefList.size() > 0) {
                     for (RobotChargerMapPointXREF xref : xrefList) {
                         MapPoint point = pointService.findById(xref.getChargerMapPointId());
-                        mapPointList.add(point);
+                        if (point != null) {
+                            mapPointList.add(point);
+                        }
                     }
                 }
                 return mapPointList;
