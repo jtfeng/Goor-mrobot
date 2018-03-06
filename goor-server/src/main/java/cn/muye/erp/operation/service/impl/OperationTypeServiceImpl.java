@@ -196,7 +196,7 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
             //如果是小数形式，取整
             number = Integer.parseInt(applianceNumber.split("\\.")[0]);
         }
-        //TODO 添加该器械是否已经是手术类型的默认器械校验，如果是，数量是否一致,不一致，更新数量
+        //添加该器械是否已经是手术类型的默认器械校验，如果是，数量是否一致,不一致，更新数量
         boolean isDefault = checkApplianceIsDefault(operationType, appliance,number);
         if (isDefault){
             return;
