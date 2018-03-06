@@ -257,7 +257,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
      */
     private void updateElevatorFakePathAndCombination (Elevator elevator, List<Long> combinationIds) throws Exception {
         //todo 每次保存电梯，要根据电梯新四点对象删除图缓存，删除原假的电梯的对象路径。生成新电梯四点对象路径，并更新（重新生成）原云端路径缓存。
-        updateElevatorFakePath(elevator);
+//        updateElevatorFakePath(elevator);
 
         if (combinationIds.size() != 0) {
             //添加新的关系
