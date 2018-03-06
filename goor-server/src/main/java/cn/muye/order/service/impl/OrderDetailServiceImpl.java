@@ -55,7 +55,7 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     }
 
     @Override
-    public void finishedDetailTask(Long id, Integer type) {
+    public synchronized void finishedDetailTask(Long id, Integer type) {
         //先查看detail是否已经到达签收情况
         OrderDetail sqlOrderDetail = orderDetailMapper.selectByPrimaryKey(id);
         if(sqlOrderDetail != null){
