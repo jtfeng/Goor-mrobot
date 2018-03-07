@@ -340,6 +340,7 @@ public class PointServiceImpl implements PointService {
     public MapPoint findPathMapPointByStationIdAndCloudType(Long stationId, int cloudType) {
         //查找站点对应的装货点，作为规划路径的终点
         MapPoint stationPoint = findMapPointByStationIdAndCloudType(stationId, cloudType);
+        LOGGER.info("根据站ID：{},云端点类型：{},查找点结果：{}",stationId,cloudType,stationPoint);
         //查询所有与站点坐标相同的点，且名称中含path的点(因为这是我们设计的)
         return PathUtil.findPathPointByXYTH(stationPoint.getSceneName(),stationPoint.getMapName(),
                 stationPoint.getX(),stationPoint.getY(),stationPoint.getTh(),null, this);
