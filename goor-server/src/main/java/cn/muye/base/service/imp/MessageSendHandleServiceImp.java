@@ -10,6 +10,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
 
     @Autowired
     private OffLineMessageService offLineMessageService;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     public MessageSendHandleServiceImp() {
 

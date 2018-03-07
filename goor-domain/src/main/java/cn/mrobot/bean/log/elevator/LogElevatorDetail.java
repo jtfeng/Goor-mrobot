@@ -60,7 +60,7 @@ public class LogElevatorDetail extends LogElevator {
         setElevatorNumber(valueString.substring(10,12));
         setRobotNumber(valueString.substring(12,14));
     }
-    private static final Map<String, String> COMMAND_WORD_MAPPING = new HashMap<String, String>(){{
+    public static final Map<String, String> COMMAND_WORD_MAPPING = new HashMap<String, String>(){{
         put("00", "TestEleCmd {机器人发送}【测试状态切换】");
         put("01", "CallEleENQ {机器人发送}【呼梯问询】");
         put("02", "CallEleACK {呼梯发送}【呼梯应答】");
