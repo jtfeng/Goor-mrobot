@@ -11,6 +11,7 @@ import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import cn.muye.log.base.service.LogCollectService;
 import cn.muye.log.state.service.StateCollectorService;
@@ -40,6 +41,9 @@ public class LogCollectServiceImpl implements LogCollectService {
 
     @Autowired
     private StateCollectorService stateCollectorService;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public void startCollectLog() {
@@ -98,7 +102,7 @@ public class LogCollectServiceImpl implements LogCollectService {
         int powerPercent = chargeInfo.getPowerPercent();
         if (powerPercent <= lowBatteryThreshold) {
             StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append("电量阈值：").append(lowBatteryThreshold).append("%,当前电量：").append(powerPercent).append("%");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_DLYZ")).append(lowBatteryThreshold).append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_DQDL")).append(powerPercent).append("%");
             LogInfoUtils.warn(code, ModuleEnums.CHARGE, LogType.WARNING_LOWER_POWER, stringBuffer.toString());
         }
     }
@@ -143,19 +147,19 @@ public class LogCollectServiceImpl implements LogCollectService {
     private String getChargeMessage(ChargeInfo chargeInfo) {
         StringBuffer stringBuffer = new StringBuffer();
         int powerPercent = chargeInfo.getPowerPercent();
-        stringBuffer.append("当前电量:").append(powerPercent).append("%");
+        stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_DQDL1519972772201")).append(powerPercent).append("%");
 
         int chargingStatus = chargeInfo.getChargingStatus();
-        String chargingStatusStr = (chargingStatus == 0) ? "未充电" : "正在充电";
-        stringBuffer.append(",充电状态：").append(chargingStatusStr).append("");
+        String chargingStatusStr = (chargingStatus == 0) ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_WCD") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_ZZCD");
+        stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_CDZT")).append(chargingStatusStr).append("");
 
         int pluginStatus = chargeInfo.getPluginStatus();
-        String pluginStatusStr = (pluginStatus == 0) ? "未插入充电桩" : "插入充电桩";
-        stringBuffer.append(",充电桩状态：").append(pluginStatusStr);
+        String pluginStatusStr = (pluginStatus == 0) ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_WCRCDZ") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_CRCDZ");
+        stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_CDZZT")).append(pluginStatusStr);
 
         int autoCharging = chargeInfo.getAutoCharging();
-        String autoChargingStr = (autoCharging == 0) ? "未插入充电桩" : "插入充电桩";
-        stringBuffer.append(",自动回充状态：").append(autoChargingStr);
+        String autoChargingStr = (autoCharging == 0) ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_WCRCDZ") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_CRCDZ");
+        stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_service_impl_LogCollectServiceImpl_java_ZDHCZT")).append(autoChargingStr);
         return stringBuffer.toString();
     }
 

@@ -12,6 +12,7 @@ import cn.muye.area.map.bean.StateDetail;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.missiontask.MissionFuncsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +36,9 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private static final int MODULE_BASE_SYSTEM = 303;//底盘系统状态
     private static final int MODULE_BASE_MICROSWITCH_AND_ANTI_DROPPING = 304;//微动开关与防跌落状态
 
-    private static final String ON = "开机";
-    private static final String HAPPEN = "触发";
-    private static final String UNHAPPEN = "未触发";
+    private static final String ON = "goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_KJ";
+    private static final String HAPPEN = "goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_CF";
+    private static final String UNHAPPEN = "goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_WCF";
 
     private static final String UNHAPPEN_CODE_ONE = "00";
     private static final String UNHAPPEN_CODE_TWO = "0";
@@ -48,6 +49,9 @@ public class StateCollectorServiceImpl implements StateCollectorService {
 
     @Autowired
     private RobotService robotService;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public void handleStateCollector(StateCollectorResponse stateCollectorResponse) throws Exception {
@@ -307,7 +311,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         if(null == leftBaseDriver){
             return new ArrayList<>();
         }
-        List<StateDetail> leftBaseDriverList = getHappenState("左驱动", StateCollectorBaseDriver.class, leftBaseDriver);
+        List<StateDetail> leftBaseDriverList = getHappenState(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_ZQD"), StateCollectorBaseDriver.class, leftBaseDriver);
         if (toDatabase) {
             if (leftBaseDriver.isDatabaseFlag()) {
                 leftBaseDriver.setDatabaseFlag(false);
@@ -326,7 +330,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         if(null == rightBaseDriver){
             return new ArrayList<>();
         }
-        List<StateDetail> rightBaseDriverList = getHappenState("右驱动", StateCollectorBaseDriver.class, rightBaseDriver);
+        List<StateDetail> rightBaseDriverList = getHappenState(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_YQD"), StateCollectorBaseDriver.class, rightBaseDriver);
         if (toDatabase) {
             if (rightBaseDriver.isDatabaseFlag()) {
                 rightBaseDriver.setDatabaseFlag(false);
@@ -352,11 +356,11 @@ public class StateCollectorServiceImpl implements StateCollectorService {
             }
             int value = (int) field.get(stateCollector);
             if (value == 1 && (!field.getName().equals(StateFieldEnums.POWER_ON.getName()))) { //排除开机。开机为1
-                stateDetailList.add(parseStateDetail(chPrefix, field, value, HAPPEN));
+                stateDetailList.add(parseStateDetail(chPrefix, field, value, localeMessageSourceService.getMessage(HAPPEN)));
             } else if (value == 1 && field.getName().equals(StateFieldEnums.POWER_ON.getName())) {
-                stateDetailList.add(parseStateDetail(chPrefix, field, value, ON));
+                stateDetailList.add(parseStateDetail(chPrefix, field, value, localeMessageSourceService.getMessage(ON)));
             } else if (value == 0 && field.getName().equals(StateFieldEnums.SWITCH_EMERGENCY_STOP.getName())) {
-                stateDetailList.add(parseStateDetail(chPrefix, field, value, UNHAPPEN));
+                stateDetailList.add(parseStateDetail(chPrefix, field, value, localeMessageSourceService.getMessage(UNHAPPEN)));
             }
         }
         return stateDetailList;
@@ -386,7 +390,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         }
         int navigationTypeCode = navigation.getNavigationTypeCode();
         NavigationType type = NavigationType.getType(navigationTypeCode);
-        String navigationTypeCodeStr = (type != null) ? type.getName() : "未定义状态";
+        String navigationTypeCodeStr = (type != null) ? type.getName() : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_WDYZT");
         StateDetail stateDetail = new StateDetail();
         stateDetail.setName("navigation");
         stateDetail.setCHName(ModuleEnums.NAVIGATION.getModuleName());

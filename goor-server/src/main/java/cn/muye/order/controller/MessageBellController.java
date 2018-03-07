@@ -8,6 +8,7 @@ import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.service.StationService;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.order.bean.MessageBellVO;
 import cn.muye.order.service.ApplyOrderService;
 import cn.muye.order.service.MessageBellService;
@@ -40,6 +41,8 @@ public class MessageBellController extends BaseController{
     private StationService stationService;
     @Autowired
     private UserUtil userUtil;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 获取 未读消息内容 & 订单申请列表
@@ -77,10 +80,10 @@ public class MessageBellController extends BaseController{
                 applyOrder.setApplyStationName(station == null? "": station.getName());
             });
             messageBellVO.setWaitApplyOrders(applyOrderList);
-            return AjaxResult.success(messageBellVO, "读取信息列表成功");
+            return AjaxResult.success(messageBellVO, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_MessageBellController_java_DQXXLBCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("读取信息出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_MessageBellController_java_DQXXCC"));
         }
     }
 
@@ -93,10 +96,10 @@ public class MessageBellController extends BaseController{
         try {
             Long stationId = userUtil.getStationId();
             messageBellService.updateByStationIdAndClearDate(stationId, clearDate);
-            return AjaxResult.success("消息清除成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_MessageBellController_java_XXQCCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("清除信息出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_MessageBellController_java_QCXXCC"));
         }
     }
 }

@@ -6,6 +6,7 @@ import cn.mrobot.bean.order.Goods;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.order.service.GoodsService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -30,7 +31,8 @@ public class GoodsController extends BaseController {
     private GoodsService goodsService;
     @Autowired
     private GoodsTypeService goodsTypeService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     /**
      * 获取货物 id
      * @param id
@@ -41,10 +43,10 @@ public class GoodsController extends BaseController {
     public AjaxResult getGoods(@RequestParam("id") Long id){
         try {
             Goods goods = goodsService.findById(id);
-            return AjaxResult.success(goods, "获取货物成功");
+            return AjaxResult.success(goods, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取货物出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWCC"));
         }
     }
 
@@ -58,10 +60,10 @@ public class GoodsController extends BaseController {
         try {
             List<GoodsType> goodsTypeList = goodsTypeService.listAll();
             goodsTypeList.forEach(goodsType -> goodsType.setGoodsList(goodsService.listGoodsByType(goodsType.getId())));
-            return AjaxResult.success(goodsTypeList,"获取货物类型成功");
+            return AjaxResult.success(goodsTypeList,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWLXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取货物类型出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWLXCC"));
         }
     }
 
@@ -74,10 +76,10 @@ public class GoodsController extends BaseController {
     public AjaxResult listJustGoodsType(){
         try {
             List<GoodsType> goodsTypeList = goodsTypeService.listAll();
-            return AjaxResult.success(goodsTypeList,"获取货物类型成功");
+            return AjaxResult.success(goodsTypeList,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWLXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取货物类型出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWLXCC"));
         }
     }
 
@@ -90,10 +92,10 @@ public class GoodsController extends BaseController {
     public AjaxResult listGoodsByType(@RequestParam("type") Long type){
         try {
             List<Goods> goodsList = goodsService.listGoodsByType(type);
-            return AjaxResult.success(goodsList,"获取货物成功");
+            return AjaxResult.success(goodsList,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取货物出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_HQHWCC"));
         }
     }
 
@@ -108,10 +110,10 @@ public class GoodsController extends BaseController {
     public AjaxResult saveGoodsType(@RequestBody GoodsType goodsType){
         try {
             goodsTypeService.save(goodsType);
-            return AjaxResult.success(goodsType, "保存货物类型成功");
+            return AjaxResult.success(goodsType, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_BCHWLXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("保存货物类型出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_BCHWLXCC"));
         }
     }
 
@@ -125,10 +127,10 @@ public class GoodsController extends BaseController {
     public AjaxResult updateGoodsType(@RequestBody GoodsType goodsType){
         try {
             goodsTypeService.updateSelectiveByStoreId(goodsType);
-            return AjaxResult.success(goodsType, "修改货物类型成功");
+            return AjaxResult.success(goodsType, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_XGHWLXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("修改货物类型出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_XGHWLXCC"));
         }
     }
 
@@ -146,10 +148,10 @@ public class GoodsController extends BaseController {
             goodsType.setId(id);
             goodsType.setDeleteStatus(Boolean.TRUE);
             goodsTypeService.updateSelectiveByStoreId(goodsType);
-            return AjaxResult.success("删除货物类型成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_SCHWLXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("删除货物类型出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_SCHWLXCC"));
         }
     }
 
@@ -166,10 +168,10 @@ public class GoodsController extends BaseController {
             goodsType.setDeleteStatus(Boolean.FALSE);
             List<GoodsType> goodsTypes = goodsTypeService.listQueryPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),goodsType,"CREATE_TIME DESC");
             PageInfo<GoodsType> pageResult = new PageInfo<>(goodsTypes);
-            return AjaxResult.success(pageResult, "分页查询货物类型成功");
+            return AjaxResult.success(pageResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_FYCXHWLXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("分页查询货物类型出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_FYCXHWLXCC"));
         }
     }
 
@@ -184,10 +186,10 @@ public class GoodsController extends BaseController {
     public AjaxResult saveGoods(@RequestBody Goods goods){
         try {
             goodsService.save(goods);
-            return AjaxResult.success(goods, "保存货物成功");
+            return AjaxResult.success(goods, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_BCHWCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("保存货物出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_BCHWCC"));
         }
     }
 
@@ -201,10 +203,10 @@ public class GoodsController extends BaseController {
     public AjaxResult updateGoods(@RequestBody Goods goods){
         try {
             goodsService.updateSelectiveByStoreId(goods);
-            return AjaxResult.success(goods, "修改货物成功");
+            return AjaxResult.success(goods, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_XGHWCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("修改货物出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_XGHWCC"));
         }
     }
 
@@ -219,10 +221,10 @@ public class GoodsController extends BaseController {
     public AjaxResult deleteGoods(@RequestParam("id") Long id){
         try {
             goodsService.fakeDelete(id);
-            return AjaxResult.success("删除货物成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_SCHWCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("删除货物出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_SCHWCC"));
         }
     }
 
@@ -245,10 +247,10 @@ public class GoodsController extends BaseController {
                 goodsItem.setGoodsTypeName(goodsType.getName());
             });
             PageInfo<Goods> pageResult = new PageInfo<>(goodsList);
-            return AjaxResult.success(pageResult, "分页查询货物类型成功");
+            return AjaxResult.success(pageResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_FYCXHWLXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("分页查询货物类型出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_GoodsController_java_FYCXHWLXCC"));
         }
     }
 

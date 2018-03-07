@@ -20,6 +20,7 @@ import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
 import cn.muye.erp.operation.service.OperationTypeService;
 import cn.muye.erp.order.service.OperationOrderApplianceXREFService;
 import cn.muye.erp.order.service.OperationOrderService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +52,9 @@ public class OperationOrderController {
     @Autowired
     private ApplianceService applianceService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     /**
      * 手术室下单，订单提交
      *
@@ -72,7 +76,7 @@ public class OperationOrderController {
         }
         if (OperationOrder.Type.OPERATION_TYPE_ORDER.getCode() == operationOrder.getType()) {
             if (operationOrder.getOperationType().getId() == null) {
-                return AjaxResult.failed("按手术类型申请手术类型ID不能为空");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_ASSLXSQSSLXIDBNWK"));
             }
             //如果订单的type为1，则需要判断当前的器械列表是不是该手术类型的默认器械列表，如果不是，则将type置为3
             checkOperationType(operationOrder);
@@ -105,7 +109,7 @@ public class OperationOrderController {
         Long stationId = station.getId();
         Set<Session> sessionSet = CacheInfoManager.getWebSocketSessionCache(stationId + "");
         if (null == sessionSet || sessionSet.size() <= 0) {
-            return AjaxResult.failed("无菌器械包室系统离线，请联系管理员或稍后再试");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_WJQXBSXTLXQLXGLYHSHZS"));
         }
         return AjaxResult.success();
     }
@@ -122,7 +126,7 @@ public class OperationOrderController {
             Appliance appliance = applianceService.findById(xref.getAppliance().getId());
             if (appliance.getDeleteFlag() == 1) {
                 //更新订单状态为手术室下单失败
-                String msg = "下单失败， " + appliance.getName() + " 已经删除";
+                String msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_XDSB") + appliance.getName() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_YJSC");
                 operationOrder.setComment(msg);
                 updateOperationOrderState(operationOrder, OperationOrder.State.ORDER_FAIL);
                 return AjaxResult.failed(msg);
@@ -214,7 +218,7 @@ public class OperationOrderController {
     @RequestMapping(value = "services/operation/order/handle/{id}", method = RequestMethod.GET)
     public AjaxResult handle(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_IDBNWK"));
         }
         OperationOrder operationOrder = operationOrderService.findOrderById(id);
         operationOrder.setHandleTime(new Date());
@@ -225,7 +229,7 @@ public class OperationOrderController {
         sendWebSocketMessage(operationOrder.getStation().getId(), operationOrder);
         //对接调度系统，将订单发送给调度系统
 
-        return AjaxResult.success(operationOrder, "操作成功");
+        return AjaxResult.success(operationOrder, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_CZCG"));
     }
 
     /**
@@ -237,7 +241,7 @@ public class OperationOrderController {
     @RequestMapping(value = "services/operation/order/receive/{id}", method = RequestMethod.GET)
     public AjaxResult receiveData(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_IDBNWK"));
         }
         OperationOrder operationOrder = operationOrderService.findOrderById(id);
         operationOrder.setReceiveTime(new Date());
@@ -248,7 +252,7 @@ public class OperationOrderController {
         sendWebSocketMessage(operationOrder.getStation().getId(), operationOrder);
         //对接调度系统，将订单发送给调度系统
 
-        return AjaxResult.success(operationOrder, "操作成功");
+        return AjaxResult.success(operationOrder, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_CZCG"));
     }
 
     /**
@@ -260,10 +264,10 @@ public class OperationOrderController {
     @RequestMapping(value = "services/operation/order/{id}", method = RequestMethod.GET)
     public AjaxResult findById(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_IDBNWK"));
         }
         OperationOrder operationOrder = operationOrderService.findOrderById(id);
-        return AjaxResult.success(operationOrder, "绑定成功");
+        return AjaxResult.success(operationOrder, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_BDCG"));
     }
 
     @RequestMapping(value = "services/operation/order", method = RequestMethod.GET)
@@ -279,7 +283,7 @@ public class OperationOrderController {
         //处理订单中的state和type枚举类，将类型改成中文类型以便显示
         operationTypeList = handleEnums(operationTypeList);
 //      PageInfo<OperationOrder> page = new PageInfo<OperationOrder>(operationTypeList);
-        return AjaxResult.success(operationTypeList, "查询成功");
+        return AjaxResult.success(operationTypeList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_CXCG"));
     }
 
     private List<OperationOrder> handleEnums(List<OperationOrder> operationTypeList) {
@@ -318,7 +322,7 @@ public class OperationOrderController {
      */
     private AjaxResult checkHasAsepticApparatusRoom() {
         StationMacPasswordXREF stationMacPasswordXREF = getAsepticApparatusRoomXREF();
-        return null == stationMacPasswordXREF ? AjaxResult.failed("未设置无菌器械室平板，请先设置") : AjaxResult.success(stationMacPasswordXREF);
+        return null == stationMacPasswordXREF ? AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_WSZWJQXSPBQXSZ")) : AjaxResult.success(stationMacPasswordXREF);
     }
 
     private StationMacPasswordXREF getAsepticApparatusRoomXREF() {
@@ -337,7 +341,7 @@ public class OperationOrderController {
         Long stationId = asepticApparatusRoomXREF.getStation().getId();
         //websocket将订单信息推送至无菌器械室
         sendWebSocketMessage(stationId, operationOrder);
-        return AjaxResult.success(operationOrder, "下单成功");
+        return AjaxResult.success(operationOrder, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_XDCG"));
     }
 
     private void updateOperationOrderState(OperationOrder operationOrder, OperationOrder.State state) {

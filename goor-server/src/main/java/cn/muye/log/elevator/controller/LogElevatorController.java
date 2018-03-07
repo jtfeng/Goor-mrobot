@@ -5,6 +5,7 @@ import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.log.elevator.LogElevator;
 import cn.mrobot.bean.log.elevator.LogElevatorDetail;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.elevator.service.LogElevatorService;
 import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
@@ -34,6 +35,8 @@ public class LogElevatorController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogElevatorController.class);
     @Autowired
     LogElevatorService logElevatorService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @GetMapping("/show")
     @ApiOperation(
@@ -62,9 +65,9 @@ public class LogElevatorController {
             logElevator.setValue("test value");
             logElevatorService.save(logElevator);
             if (logElevator.getId() != null){
-                return AjaxResult.success("电梯日志新增成功");
+                return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_elevator_controller_LogElevatorController_java_DTRZXZCG"));
             }else{
-                throw new Exception("电梯日志新增失败");
+                throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_elevator_controller_LogElevatorController_java_DTRZXZSB"));
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -86,14 +89,33 @@ public class LogElevatorController {
             for (LogElevator logElevator:logElevators){
                 LogElevatorDetail detail = new LogElevatorDetail();
                 BeanUtils.copyProperties(logElevator, detail);
-                detail.parseMessage();
-                logElevators.set(i, detail);
+//                detail.parseMessage();
+                logElevators.set(i, parseMessage(detail));
                 i++;
             }
             PageInfo<LogElevator> pageList = new PageInfo<>(logElevators);
-            return AjaxResult.success(pageList, "查询电梯操作日志信息成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_elevator_controller_LogElevatorController_java_CXDTCZRZXXCG"));
         }catch (Exception e){
-            return AjaxResult.failed(e, "查询电梯操作日志信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_elevator_controller_LogElevatorController_java_CXDTCZRZXXSB"));
         }
+    }
+
+    private LogElevatorDetail parseMessage(LogElevatorDetail logElevatorDetail){
+        // AA 55 (   01      02     00     00      00    ) 02
+        //       (出发楼层、目标楼层、命令字、电梯编号、机器人编号)
+        String valueString = logElevatorDetail.getValue();
+        logElevatorDetail.setDepartureFloor(valueString.substring(4,6));
+        logElevatorDetail.setTargetFloor(valueString.substring(6,8));
+        String commandExp = localeMessageSourceService.getMessage(LogElevatorDetail.COMMAND_WORD_MAPPING.get(valueString.substring(8,10)));
+        String realExp = "";
+        if (commandExp != null){
+            realExp = commandExp;
+        }else {
+            realExp = valueString.substring(8,10);
+        }
+        logElevatorDetail.setCommandWord(realExp);
+        logElevatorDetail.setElevatorNumber(valueString.substring(10,12));
+        logElevatorDetail.setRobotNumber(valueString.substring(12,14));
+        return logElevatorDetail;
     }
 }

@@ -7,6 +7,7 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.service.RoadPathLockService;
 import cn.muye.assets.roadpath.service.RoadPathService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +30,8 @@ public class RoadPathLockController {
     private RoadPathLockService roadPathLockService;
     @Autowired
     private RoadPathService roadPathService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @GetMapping("/asset/roadpathlock")
     public AjaxResult testMethod(){
@@ -69,10 +72,10 @@ public class RoadPathLockController {
     public AjaxResult saveRoadPathLock(@RequestBody RoadPathLock roadPathLock){
         try {
             roadPathLockService.save(roadPathLock);
-            return AjaxResult.success("新增成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_XZCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_NBCC"));
         }
     }
 
@@ -85,10 +88,10 @@ public class RoadPathLockController {
     public AjaxResult updateRoadPathLock(@RequestBody RoadPathLock roadPathLock){
         try {
             roadPathLockService.updateSelectiveByStoreId(roadPathLock);
-            return AjaxResult.success("修改成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_XGCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_NBCC"));
         }
     }
 
@@ -105,10 +108,10 @@ public class RoadPathLockController {
             roadPathLock.setStoreId(100L);
             roadPathLock.setCreateTime(new Date());
             roadPathLockService.save(roadPathLock);
-            return AjaxResult.success(" 添加成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_TJCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_NBCC"));
         }
     }
 
@@ -122,10 +125,10 @@ public class RoadPathLockController {
         try {
             List<RoadPathLock> roadPathLockList = roadPathLockService.listQueryPageByStoreIdAndOrder(whereRequest.getPage(),whereRequest.getPageSize(),new RoadPathLock(),null);
             PageInfo<RoadPathLock> pathLockPageInfo = new PageInfo<>(roadPathLockList);
-            return AjaxResult.success(pathLockPageInfo, "查询成功");
+            return AjaxResult.success(pathLockPageInfo, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_CXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_NBCC"));
         }
     }
 
@@ -139,13 +142,13 @@ public class RoadPathLockController {
         try {
             Boolean bool = roadPathService.hasRelatedRoadPath(id);
             if(bool){
-                return AjaxResult.failed("存在相关联的路径，无法删除");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_CZXGLDLJWFSC"));
             }
             roadPathLockService.deleteById(id);
-            return AjaxResult.success("删除成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_SCCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_NBCC"));
         }
     }
 
@@ -166,9 +169,9 @@ public class RoadPathLockController {
         try {
             List<RoadPathLock> list = roadPathLockService.listRoadPathLocks(whereRequest);
             PageInfo<RoadPathLock> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "查询成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_CXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_CXSB"));
         }
     }
 
@@ -181,9 +184,9 @@ public class RoadPathLockController {
     public AjaxResult roadPathLockList() {
         try {
             List<RoadPathLock> list = roadPathLockService.listAll();
-            return AjaxResult.success(list, "查询成功");
+            return AjaxResult.success(list, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_CXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_CXSB"));
         }
     }
 
@@ -199,6 +202,6 @@ public class RoadPathLockController {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
-        return releaseResult ? AjaxResult.success("手动释放路径锁成功!") : AjaxResult.failed("手动释放路径锁失败!");
+        return releaseResult ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_SDSFLJSCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathLockController_java_SDSFLJSSB"));
     }
 }

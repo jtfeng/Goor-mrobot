@@ -21,6 +21,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
@@ -46,6 +47,8 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
     private PointService pointService;
     @Autowired
     private MapInfoService mapInfoService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 遍历result的点序列，两点间有云端路径的话，把云端路径点添加到两点间
@@ -258,7 +261,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
         CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotCode);
         String pose = currentInfo.getPose();
         if(pose == null || StringUtil.isNullOrEmpty(pose)) {
-            stringBuffer.append("下单获取可用机器：" + robotCode  + "不可用。未获取到机器人坐标！");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_XDHQKYJQ") + robotCode  + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_BKYWHQDJQRZB"));
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -268,7 +271,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
             rosCurrentPose = JSON.parseObject(pose,RosCurrentPose.class);
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
-            stringBuffer.append("下单获取可用机器：" + robotCode  + "不可用。获取到的机器人坐标格式解析错误！");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_XDHQKYJQ") + robotCode  + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_BKYHQDDJQRZBGSJXCW"));
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -278,7 +281,7 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
                         rosCurrentPose, targetPoint, currentInfo.getMapInfo().getSceneName(), currentInfo.getMapInfo().getMapName());
 
         LOGGER.info("###############查找离" + robotCode + "机器人坐标最近的路径完毕。" +
-                (result == null ? "未找到。" : "起点:" + result.getStartPoint() + "终点:" + result.getEndPoint() + "序列:" + result.getPointIds()));
+                (result == null ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_WZD1519972771027") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_QD") + result.getStartPoint() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_ZD1519972771027") + result.getEndPoint() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_XL") + result.getPointIds()));
         return result;
     }
 

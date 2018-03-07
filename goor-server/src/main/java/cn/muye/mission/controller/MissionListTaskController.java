@@ -17,6 +17,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.service.missiontask.MissionFuncsService;
@@ -56,6 +57,9 @@ public class MissionListTaskController {
 
     @Autowired
     private MessageSendHandleService messageSendHandleService;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @PostMapping("/createMissionListTask")
     @ApiOperation(
@@ -111,7 +115,7 @@ public class MissionListTaskController {
     public AjaxResult getMissionListTaskList(WhereRequest whereRequest) {
         List<MissionListTask> list = missionListTaskService.tasksList(whereRequest);
         PageInfo<MissionListTask> pageList = new PageInfo<>(list);
-        return AjaxResult.success(pageList, "查询成功");
+        return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_CXCG"));
     }
 
     //SNabc013_jelynn
@@ -119,9 +123,9 @@ public class MissionListTaskController {
     public Object controlState(@PathVariable("robotCode") String robotCode, @PathVariable("command") String command) {
         try {
 
-            checkArgument(!("".equals(robotCode.trim())), "机器人编号不能为空串!");
-            checkArgument(!("".equals(robotCode.trim())), "传入的指令不能为空串!");
-            checkArgument(ImmutableList.of("pause", "resume", "clear", "skipMissionList", "startNextMission").indexOf(command) != -1, "您传入的指令不正确，合法的指令包括：（ pause、resume、clear、skipMissionList、startNextMission ）");
+            checkArgument(!("".equals(robotCode.trim())), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_JQRBHBNWKC"));
+            checkArgument(!("".equals(robotCode.trim())), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_CRDZLBNWKC"));
+            checkArgument(ImmutableList.of("pause", "resume", "clear", "skipMissionList", "startNextMission").indexOf(command) != -1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_NCRDZLBZQHFDZLBKPAUSERESUMECLEARSKIPMISSIONLISTSTARTNEXTMISSION"));
 
             String uuid = UUID.randomUUID().toString().replace("-", "");
             CommonInfo commonInfo = new CommonInfo();
@@ -141,7 +145,7 @@ public class MissionListTaskController {
             info.setMessageText(JSON.toJSONString(commonInfo));
             AjaxResult result = messageSendHandleService.sendCommandMessage(true, true, robotCode, info);
             if (!result.isSuccess()) {
-                return AjaxResult.failed(String.format("%s 指令调用失败，请重试", command));
+                return AjaxResult.failed(String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_SZLDYSBQZS"), command));
             }
             for (int i = 0; i < 500; i++) {
                 Thread.sleep(1000);
@@ -152,10 +156,10 @@ public class MissionListTaskController {
                 }
             }
             if (info.isSuccess()) {
-                LogInfoUtils.info(robotCode, ModuleEnums.MISSION, LogType.INFO_USER_OPERATE, String.format("%s 指令调用成功!", command));
-                return AjaxResult.success(String.format("%s 指令调用成功!", command));
+                LogInfoUtils.info(robotCode, ModuleEnums.MISSION, LogType.INFO_USER_OPERATE, String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_SZLDYCG"), command));
+                return AjaxResult.success(String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_SZLDYCG"), command));
             } else {
-                return AjaxResult.failed(String.format("%s 指令调用失败，请重试", command));
+                return AjaxResult.failed(String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_SZLDYSBQZS"), command));
             }
 
         } catch (Exception e) {
@@ -174,7 +178,7 @@ public class MissionListTaskController {
             AjaxResult ajaxResult = sendMissionCommand(robotCode, missionTaskId);
             return ajaxResult;
         } else {
-            return AjaxResult.failed("不存在的任务ID");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_BCZDRWID"));
         }
 
     }
@@ -221,16 +225,16 @@ public class MissionListTaskController {
             long endTime = System.currentTimeMillis();
             LOGGER.info("end time" + (endTime - startTime));
             if (messageInfo.isSuccess()) {
-                return AjaxResult.success("指令发送成功");
+                return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_ZLFSCG"));
             } else {
-                return AjaxResult.failed("指令发送失败");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_ZLFSSB"));
             }
         } catch (
                 Exception e)
 
         {
             LOGGER.error("{}", e);
-            return AjaxResult.failed("指令发送失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionListTaskController_java_ZLFSSB"));
         } finally
 
         {

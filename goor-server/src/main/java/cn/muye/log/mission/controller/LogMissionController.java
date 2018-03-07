@@ -7,6 +7,7 @@ import cn.mrobot.utils.JsonUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.MessageInfo;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.mission.service.LogMissionService;
 import cn.muye.service.consumer.topic.BaseMessageService;
 import cn.muye.service.consumer.topic.X86ElevatorLockService;
@@ -37,7 +38,8 @@ public class LogMissionController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LogMissionController.class);
     @Autowired
     LogMissionService logMissionService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     //{"senderId":"SNtest","messageText":"","sendTime":"Aug 4, 2017 5:40:00 PM","success":true}
     //{"data":""}
@@ -62,14 +64,14 @@ public class LogMissionController {
             if (body.getMissionType() == null ||
                     body.getStoreId() == null ||
                     StringUtil.isEmpty(body.getRobotCode())){
-                throw new Exception("参数不合法，请设置任务日志类型和店铺id以及机器人编号。");
+                throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CSBHFQSZRWRZLXHDPIDYJJQRBH"));
             }
             switch (MissionLogType.valueOf(body.getMissionType())){
                 case MISSION_LIST:
                     if (body.getMissionListId() == null ||
                             body.getMissionListRepeatTimes() == null ||
                             StringUtil.isEmpty(body.getMissionEvent())){
-                        throw new Exception("参数不合法，请检查参数。");
+                        throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CSBHFQJCCS"));
                     }
                     break;
                 case MISSION:
@@ -78,7 +80,7 @@ public class LogMissionController {
                             body.getMissionId() == null ||
                             body.getMissionRepeatTimes() == null ||
                             StringUtil.isEmpty(body.getMissionEvent())){
-                        throw new Exception("参数不合法，请检查参数。");
+                        throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CSBHFQJCCS"));
                     }
                     break;
                 case MISSION_ITEM:
@@ -88,11 +90,11 @@ public class LogMissionController {
                             body.getMissionRepeatTimes() == null ||
                             body.getMissionItemId() == null ||
                             StringUtil.isEmpty(body.getMissionEvent())){
-                        throw new Exception("参数不合法，请检查参数。");
+                        throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CSBHFQJCCS"));
                     }
                     break;
                 default:
-                    throw new Exception("参数不合法，任务日志类型错误。");
+                    throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CSBHFRWRZLXCW"));
             }
             //设置其它的值
             if (body.getMissionDescription() == null){
@@ -104,9 +106,9 @@ public class LogMissionController {
             //保存记录
             int id = logMissionService.save(body);
             if (id <= 0){
-                throw new Exception("任务日志保存失败。");
+                throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_RWRZBCSB"));
             }
-            return AjaxResult.success("任务日志新增成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_RWRZXZCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
@@ -144,7 +146,7 @@ public class LogMissionController {
 //                }
                 x86MissionStateResponseService.handleX86MissionStateResponse(messageInfo);
             }
-            return AjaxResult.success("成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
@@ -173,7 +175,7 @@ public class LogMissionController {
             if (messageInfo != null){
                 return x86ElevatorLockService.handleX86ElevatorLock(messageInfo);
             }
-            return AjaxResult.failed("失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_SB"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
@@ -199,7 +201,7 @@ public class LogMissionController {
             if (messageInfo != null){
                 return x86ElevatorLockService.handleX86ElevatorLock(messageInfo);
             }
-            return AjaxResult.failed("失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_SB"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
@@ -221,9 +223,9 @@ public class LogMissionController {
             int pageSize = whereRequest.getPageSize();
             List<LogMission> list = logMissionService.listPageByStoreIdAndOrder(page, pageSize, LogMission.class, "CREATE_TIME DESC");
             PageInfo<LogMission> pageInfo = new PageInfo<LogMission>(list);
-            return AjaxResult.success(pageInfo, "查询成功");
+            return AjaxResult.success(pageInfo, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CXCG"));
         } else {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_mission_controller_LogMissionController_java_CSYW"));
         }
     }
 }

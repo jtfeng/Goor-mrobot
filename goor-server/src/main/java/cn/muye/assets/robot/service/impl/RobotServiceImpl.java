@@ -40,6 +40,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import cn.muye.util.PathUtil;
 import cn.muye.util.UserUtil;
@@ -116,6 +117,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Autowired
     private UserUtil userUtil;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     /**
      * 更新机器人
      *
@@ -158,7 +162,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             robot.setOnline(flag);
             syncRobotBatteryThresholdToRos(robot);
         }
-        return AjaxResult.success(robot, "修改成功");
+        return AjaxResult.success(robot, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XGCG"));
     }
 
     /**
@@ -225,18 +229,18 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                             if(robotDb.getTypeId().equals(typeId)){
                                 availableRobot = robotDb;
                             }else {
-                                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：机器人类型不匹配");
+                                stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYYJQRLXBPP"));
                                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                                 continue;
                             }
                         }else{
                             availableRobot = robotDb;
                         }
-                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
+                        stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KY"));
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                         break;
                     } else {
-                        stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (busy ? "忙碌," : "空闲,") + (ajaxResult != null && ajaxResult.isSuccess() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                        stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (ajaxResult != null && ajaxResult.isSuccess() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZX") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_LX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC")));
                         LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                     }
                 }
@@ -269,7 +273,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         /**根据订单设置，有没有装货站来判断选哪个点作为下单的第一个目的地点**/
         MapPoint pathStationPoint = PathUtil.getFirstPathStationPointByOrder(order, null , pointService);
         if(pathStationPoint == null) {
-            stringBuffer.append("下单获取可用机器,失败。原因：下单信息错误，没有装货站且没有要去的站，无效订单。");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYXDXXCWMYZHZQMYYQDZWXDD"));
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -280,7 +284,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
 
         if(roadPathMaps == null) {
-            stringBuffer.append("下单获取可用机器,失败。原因：未找到可供算法使用的图。");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYWZDKGSFSYDT"));
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -298,7 +302,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             //忙碌和低电量的机器人之间过滤
             Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
             if(busy != null && busy || robotDb.isLowPowerState() ) {
-                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (busy ? "忙碌," : "空闲,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC")));
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -308,7 +312,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
             //未找到路径则继续，只有一个点可能就是起点附近
             if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 0) {
-                stringBuffer.append("下单获取可用机器：" + robotDb.getCode()  + "不可用。未找到机器人所在位置匹配的可到达目的地的路径！");
+                stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode()  + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYWZDJQRSZWZPPDKDDMDDDLJ"));
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -319,7 +323,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
 
         if(robotRoadPathResultList == null || robotRoadPathResultList.size() == 0) {
-            stringBuffer.append("下单获取可用机器,失败。原因：未找到该站关联的可用机器人。");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYWZDGZGLDKYJQR"));
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -334,7 +338,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             AjaxResult ajaxResult = testSendRobotMessage(robotDb);
             Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
             if(ajaxResult == null || !ajaxResult.isSuccess() || busy || robotDb.isLowPowerState() ) {
-                stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：" + (busy ? "忙碌," : "空闲,") + (ajaxResult != null && ajaxResult.isSuccess() ? "在线," : "离线,") + (robotDb.isLowPowerState() ? "低电量" : "电量正常"));
+                stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (ajaxResult != null && ajaxResult.isSuccess() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZX") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_LX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC")));
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -344,7 +348,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if(robotDb.getTypeId().equals(typeId)){
                     availableRobot = robotDb;
                 }else {
-                    stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "不可用，原因：机器人类型不匹配");
+                    stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYYJQRLXBPP"));
                     LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                     continue;
                 }
@@ -353,7 +357,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
             //如果找到了可用机器人，就返回结果
             robotRoadPathResultReturn = robotRoadPathResult;
-            stringBuffer.append("下单获取可用机器：" + robotDb.getCode() + "可用");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KY"));
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             break;
         }
@@ -659,7 +663,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 lock1.unlock();
             }
         } else {
-            return AjaxResult.failed("其他线程正在注册，请稍后...");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_QTXCZZZCQSH"));
         }
         return null;
     }
@@ -695,7 +699,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     robotNew.setSufficientBatteryThreshold(Constant.ROBOT_SUFFICIENT_BATTERY_THRESHOLD_DEFAULT);
                 }
                 if (StringUtil.isNullOrEmpty(robotCode)) {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号不能为空");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_JQRBHBNWK"));
                 }
                 Robot robotDb = getByCode(robotCode, robotStoreId);
                 //如果表中没有该机器人记录，则写缓存，再写数据库
@@ -704,17 +708,17 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     saveRobotAndBindChargerMapPoint(robotNew);
                     //往ros上透传电量阈值,机器人注册同步往应用下发消息，不需要回执，发不成功，应用那边会有查询请求，再给其反馈机器人信息
                     syncRosRobotConfig(robotNew);
-                    return AjaxResult.success(robotNew, "注册成功");
+                    return AjaxResult.success(robotNew, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZCCG"));
                 } else {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "机器人编号重复,注册失败");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_JQRBHZFZCSB"));
                 }
             } else {
-                return AjaxResult.failed("注册失败");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZCSB"));
             }
         } catch (Exception e) {
             CacheInfoManager.setRobotAutoRegisterTimeCache(robotNew.getCode(), null);
             LOGGER.error("注册失败, 错误日志 >>>> {}", e);
-            return AjaxResult.failed("注册失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZCSB"));
         } finally {
         }
     }
@@ -740,7 +744,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     }.getType()));
             slamBody.setErrorCode("0");
             slamBody.setMsg("success");
-            slamBody.setMsg("测试机器人是否离线");
+            slamBody.setMsg(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_CSJQRSFLX"));
             commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
             MessageInfo messageInfo = new MessageInfo();
             messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
@@ -779,7 +783,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                         }.getType()));
                 slamBody.setErrorCode("0");
                 slamBody.setMsg("success");
-                slamBody.setMsg("机器人" + robotNew.getCode() + "注册成功");
+                slamBody.setMsg(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_JQR") + robotNew.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZCCG"));
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
                 MessageInfo messageInfo = new MessageInfo();
                 messageInfo.setUuId(UUID.randomUUID().toString().replace("-", ""));
@@ -873,7 +877,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         List<Robot> allRobots = this.robotMapper.selectAll();
         // 实例化一个线程池 ， 后台发送消息并且轮询监听数据回执情况（线程池的各项配置可以根据特定的机器配置来确定的 ， 可以优化）
         for (Robot robot : allRobots) {
-            checkNotNull(robot.getCode(), String.format("数据库编号为 %s 的机器人的机器人编号不存在，请检查解决后重试!",
+            checkNotNull(robot.getCode(), String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_SJKBHWSDJQRDJQRBHBCZQJCJJHZS"),
                     String.valueOf(robot.getId())));
         }
         for (Robot robot : allRobots) {
@@ -956,8 +960,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      */
     @Override
     public boolean checkPasswordIsValid(String uuid, String robotCode, String password) {
-        checkNotNull(robotCode, "验证机器人编号不允许为空，请重新输入!!");
-        checkNotNull(password, "验证密码不允许为空，请重新输入!");
+        checkNotNull(robotCode, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_YZJQRBHBYXWKQZXSR"));
+        checkNotNull(password, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_YZMMBYXWKQZXSR"));
         Example example = new Example(Robot.class);
         example.createCriteria().andCondition(" CODE = ", robotCode);
         Robot robot = this.robotMapper.selectByExample(example).get(0); // 根据机器人 code 编号查询对应的机器人对象
@@ -988,7 +992,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     @Override
     public void setRobotBusyAndOnline(String robotCode, Boolean busy, Boolean online) {
-        checkNotNull(robotCode, "机器人编号不允许为空!!");
+        checkNotNull(robotCode, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_JQRBHBYXWK"));
         if (StringUtil.isEmpty(robotCode)) {
             return;
         }

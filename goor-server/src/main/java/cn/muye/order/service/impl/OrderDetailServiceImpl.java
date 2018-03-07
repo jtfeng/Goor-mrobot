@@ -9,6 +9,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.service.StationService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.order.mapper.OrderDetailMapper;
 import cn.muye.order.mapper.OrderMapper;
 import cn.muye.order.service.MessageBellService;
@@ -41,6 +42,8 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     private StationService stationService;
     @Autowired
     private MessageBellService messageBellService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public List<OrderDetail> listOrderDetailByOrderId(Long orderId) {
@@ -69,14 +72,14 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
         }
         //状态需要修改的情况下
         OrderDetail orderDetail  = new OrderDetail(id);
-        if(type == OrderConstant.ORDER_DETAIL_STATUS_GET){
+        if(OrderConstant.ORDER_DETAIL_STATUS_GET.equals(type)){
             //已到达，通知推送
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_GET);
             OrderDetail sqlDetail = super.findById(id);
             Station station = stationService.findById(sqlDetail.getStationId());
             Order sqlOrder = orderService.getOrder(sqlDetail.getOrderId());
-            String receiveBody = "已送达站" + station.getName();
-            String sendBody = "已送达站" + station.getName();
+            String receiveBody = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderDetailServiceImpl_java_YSDZ") + station.getName();
+            String sendBody = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderDetailServiceImpl_java_YSDZ") + station.getName();
             //将推送信息加入数据库内
             //接受收货信息只需 收获站  起始和卸货站 去除
             if(sqlOrderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_MIDDLE){
@@ -86,7 +89,7 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
             //通知发货站 到站
             MessageBell sendBell = new MessageBell(sendBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_SEND, sqlOrder.getStartStation().getId(), OrderConstant.MESSAGE_BELL_UNREAD);
             messageBellService.save(sendBell);
-        }else if(type == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
+        }else if(OrderConstant.ORDER_DETAIL_STATUS_SIGN.equals(type)){
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_SIGN);
         }else {
             return;

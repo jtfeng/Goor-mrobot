@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.order.OrderSetting;
 import cn.muye.assets.goods.service.GoodsTypeService;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ public class OrderSettingController extends BaseController{
     private UserUtil userUtil;
     @Autowired
     private GoodsTypeService goodsTypeService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 通过id获取 订单配置
@@ -42,7 +45,7 @@ public class OrderSettingController extends BaseController{
             return AjaxResult.success(orderSetting);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("查询配置内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_CXPZNBCC"));
         }
     }
 
@@ -59,7 +62,7 @@ public class OrderSettingController extends BaseController{
             return AjaxResult.success(orderSetting);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("查询配置列表内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_CXPZLBNBCC"));
         }
     }
 
@@ -74,7 +77,7 @@ public class OrderSettingController extends BaseController{
         try {
             Long stationId = userUtil.getStationId();
             if(stationId == null){
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "session内无法获取站id");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_SESSIONNWFHQZID"));
             }
             boolean hasDefaultSetting = orderSettingService.hasDefaultSetting(stationId);
             if(!hasDefaultSetting){
@@ -82,10 +85,10 @@ public class OrderSettingController extends BaseController{
             }
             orderSetting.setStationId(stationId);
             orderSettingService.saveOrderSetting(orderSetting);
-            return AjaxResult.success(orderSetting, "添加配置成功");
+            return AjaxResult.success(orderSetting, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_TJPZCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("添加配置内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_TJPZNBCC"));
         }
     }
 
@@ -99,13 +102,13 @@ public class OrderSettingController extends BaseController{
     public AjaxResult updateOrderSetting(@RequestBody OrderSetting orderSetting){
         try {
             if(orderSetting.getId() == null){
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "修改订单必须带有id");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_XGDDBXDYID"));
             }
             orderSettingService.updateOrderSetting(orderSetting);
-            return AjaxResult.success(orderSetting, "修改配置成功");
+            return AjaxResult.success(orderSetting, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_XGPZCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("修改配置内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_XGPZNBCC"));
         }
     }
 
@@ -129,10 +132,10 @@ public class OrderSettingController extends BaseController{
                }
                 orderSettingService.updateOrderSetting(orderSetting);
             });
-            return AjaxResult.success("修改默认配置成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_XGMRPZCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("修改默认配置内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_XGMRPZNBCC"));
         }
     }
 
@@ -147,10 +150,10 @@ public class OrderSettingController extends BaseController{
     public AjaxResult deleteOrderSetting(@RequestParam("id") Long id){
         try {
             orderSettingService.deleteOrderSetting(id);
-            return AjaxResult.success("删除配置成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_SCPZCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("删除配置内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderSettingController_java_SCPZNBCC"));
         }
     }
 

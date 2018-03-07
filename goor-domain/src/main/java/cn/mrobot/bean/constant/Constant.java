@@ -182,8 +182,8 @@ public class Constant {
 
     public final static String ROBOT_AUTO_REGISTER_PREFIX = "robot_auto_register_";
 
-    public final static String START = "开始";//开始
-    public final static String STOP = "结束";//结束
+    public final static String START = "goor_domain_src_main_java_cn_mrobot_bean_constant_Constant_java_KS";//开始
+    public final static String STOP = "goor_domain_src_main_java_cn_mrobot_bean_constant_Constant_java_JS";//结束
 
     //Session 中存储的场景（Scene 场景常量标识）
     public static final String SCENE_SESSION_TAG_PC = "scene_session_information_pc";

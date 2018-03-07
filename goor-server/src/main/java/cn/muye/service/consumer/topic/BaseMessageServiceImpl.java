@@ -8,6 +8,7 @@ import cn.mrobot.bean.slam.SlamResponseBody;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.service.MessageSendHandleService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.log4j.Logger;
@@ -31,6 +32,8 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     @Autowired
     private MessageSendHandleService messageSendHandleService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     /**
      * 获取data
      * @param messageInfo
@@ -135,7 +138,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     @Override
     public AjaxResult sendRobotMessage(String robotCode, String topic, SlamResponseBody slamResponseBody) {
         if (slamResponseBody == null){
-            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_consumer_topic_BaseMessageServiceImpl_java_CC"));
         }
 
         JSONObject messageObject = new JSONObject();
@@ -162,7 +165,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
            return messageSendHandleService.sendCommandMessage(true, true, robotCode, info);
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
-            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_consumer_topic_BaseMessageServiceImpl_java_CC"));
         }
     }
 
@@ -179,7 +182,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     @Override
     public AjaxResult sendRobotMessage(String robotCode, String topic, String data) {
         if (data == null){
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"数据为空");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_consumer_topic_BaseMessageServiceImpl_java_SJWK"));
         }
 
         JSONObject messageObject = new JSONObject();
@@ -206,7 +209,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
             return messageSendHandleService.sendCommandMessage(true, true, robotCode, info);
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
-            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_consumer_topic_BaseMessageServiceImpl_java_CC"));
         }
     }
 
@@ -218,7 +221,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
     @Override
     public AjaxResult sendAllRobotMessage(String topic, String data) {
         if (data == null){
-            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_consumer_topic_BaseMessageServiceImpl_java_CC"));
         }
 
         JSONObject messageObject = new JSONObject();
@@ -242,7 +245,7 @@ public class BaseMessageServiceImpl implements BaseMessageService {
             return messageSendHandleService.sendCommandMessageAndAll(false, info);
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
-            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_consumer_topic_BaseMessageServiceImpl_java_CC"));
         }
     }
 

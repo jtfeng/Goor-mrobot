@@ -6,6 +6,7 @@ import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.rfidbracelet.mapper.RfidBraceletMapper;
 import cn.muye.assets.rfidbracelet.service.RfidBraceletService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +27,9 @@ public class RfidBraceletController {
     }
     @Autowired
     private RfidBraceletService rfidBraceletService;//操作数据的具体对象
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 返回所有可用的用户
@@ -54,15 +58,15 @@ public class RfidBraceletController {
             // TODO: 2017/7/3 判断传入的用户是否真正存在
             synchronized (RfidBraceletController.USER_DATA_SOURCES) {
                 if (USER_DATA_SOURCES.get(rfidBracelet.getBracblbtUsername()) == null) {
-                    return AjaxResult.failed("传入的用户不存在");
+                    return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_CRDYHBCZ"));
                 }
             }
             rfidBracelet.setCreateTime(new Date());
             rfidBracelet.setStoreId(100l);
             rfidBraceletService.save(rfidBracelet);
-            return AjaxResult.success(rfidBracelet, "新增手环信息成功!");
+            return AjaxResult.success(rfidBracelet, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_XZSHXXCG"));
         }catch (Exception e){
-            return AjaxResult.failed(e, "新增手环信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_XZSHXXSB"));
         }
     }
     /**
@@ -74,9 +78,9 @@ public class RfidBraceletController {
     public AjaxResult deleteRfidBracelet(@PathVariable("id") String id){
         try {
             rfidBraceletService.deleteById(Long.parseLong(id));
-            return AjaxResult.success(id,"删除手环信息成功！");
+            return AjaxResult.success(id,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_SCSHXXCG"));
         }catch (Exception e){
-            return AjaxResult.failed(e, "删除手环信息失败！");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_SCSHXXSB"));
         }
     }
     /**
@@ -89,14 +93,14 @@ public class RfidBraceletController {
             synchronized (RfidBraceletController.USER_DATA_SOURCES) {
                 // TODO: 2017/7/3 判断传入的用户是否真正存在
                 if (USER_DATA_SOURCES.get(rfidBracelet.getBracblbtUsername()) == null) {
-                    return AjaxResult.failed("传入的用户不存在");
+                    return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_CRDYHBCZ"));
                 }
             }
             rfidBracelet.setStoreId(100l);
             rfidBraceletService.update(rfidBracelet);
-            return AjaxResult.success(rfidBracelet,"修改手环信息成功！");
+            return AjaxResult.success(rfidBracelet,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_XGSHXXCG"));
         }catch (Exception e){
-            return AjaxResult.failed(e, "修改手环信息失败！");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_XGSHXXSB"));
         }
     }
     /**
@@ -109,10 +113,10 @@ public class RfidBraceletController {
         try {
             List<RfidBracelet> list = rfidBraceletService.listRfidBracelet(whereRequest);
             PageInfo<RfidBracelet> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "查询成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_CXCG"));
         }catch (Exception e){
             Example example = new Example(RfidBracelet.class);
-            return AjaxResult.failed(e,"查询失败");
+            return AjaxResult.failed(e,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_rfidbracelet_controller_RfidBraceletController_java_CXSB"));
         }
     }
 }

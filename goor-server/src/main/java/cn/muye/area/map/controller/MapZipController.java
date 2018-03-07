@@ -12,6 +12,7 @@ import cn.muye.area.map.service.MapZipService;
 import cn.muye.area.map.service.SceneMapZipXREFService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSONArray;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -55,6 +56,9 @@ public class MapZipController {
     @Autowired
     private SceneMapZipXREFService sceneMapZipXREFService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @RequestMapping(value = "area/mapzip", method = {RequestMethod.POST, RequestMethod.PUT})
     @ResponseBody
 //	@PreAuthorize("hasAuthority('mrc_missionnode_r')")
@@ -64,18 +68,18 @@ public class MapZipController {
             mapZipCondition.setFileName(mapZip.getFileName());
             List<MapZip> mapZipList = mapZipService.list(mapZipCondition);
             if (mapZipList.size() > 0 && mapZipList.get(0).getId() != mapZip.getId()) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "文件名重复");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_WJMZF"));
             }
             if (mapZip.getId() != null && mapZip.getId() > 0) {
                 mapZipService.update(mapZip);
-                return AjaxResult.success(mapZip, "修改成功");
+                return AjaxResult.success(mapZip, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XGCG"));
             } else {
                 mapZipService.save(mapZip);
-                return AjaxResult.success(mapZip, "保存成功");
+                return AjaxResult.success(mapZip, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_BCCG"));
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XTCW"));
         }
     }
 
@@ -94,10 +98,10 @@ public class MapZipController {
             PageHelper.startPage(pageNo, pageSize);
             List<MapZip> mapZipList = mapZipService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
             PageInfo<MapZip> page = new PageInfo<MapZip>(mapZipList);
-            return AjaxResult.success(page, "查询成功");
+            return AjaxResult.success(page, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_CXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XTCW"));
         }
     }
 
@@ -108,18 +112,18 @@ public class MapZipController {
     public AjaxResult deleteMapZip(@PathVariable Long id) {
         try {
             if (null == id) {
-                return AjaxResult.failed(2, "参数错误(id不能为空)");
+                return AjaxResult.failed(2, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_CSCWIDBNWK"));
             }
 
             MapZip mapZip = mapZipService.getMapZip(id);
             if (null == mapZip) {
-                return AjaxResult.failed("删除对象不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_SCDXBCZ"));
             }
             mapZipService.delete(mapZip);
-            return AjaxResult.success("删除成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_SCCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XTCW"));
         }
     }
 
@@ -137,7 +141,7 @@ public class MapZipController {
 
             MapZip mapZip = mapZipService.getMapZip(id);
             if (null == mapZip) {
-                return AjaxResult.failed("地图压缩包不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_DTYSBBCZ"));
             }
             List<Long> deviceIds = new ArrayList<>();
             if (!StringUtil.isNullOrEmpty(bindStr)) {
@@ -153,10 +157,10 @@ public class MapZipController {
             } else {
                 result = mapSyncService.syncMap(mapZip, robotList);
             }
-            return AjaxResult.success(result, "地图同步请求发送成功");
+            return AjaxResult.success(result, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_DTTBQQFSCG"));
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XTCW"));
         }
     }
 
@@ -181,10 +185,10 @@ public class MapZipController {
             if (saveFile.exists()) {
                 mapAnalysisService.analysisFile(saveFile, sceneNames, mapZip);
             }
-            return AjaxResult.success("地图压缩包解压成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_DTYSBJYCG"));
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XTCW"));
         }
     }
 
@@ -207,10 +211,10 @@ public class MapZipController {
                 robotList.add(robotService.getById(deviceIds.get(i)));
             }
             mapSyncService.sendMapSyncMessageNew(robotList, mapSceneName,sceneId);
-            return AjaxResult.success("地图同步成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_DTTBCG"));
         } catch (Exception e) {
             LOGGER.error("地图同步出错", e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XTCW"));
         }
     }
 }

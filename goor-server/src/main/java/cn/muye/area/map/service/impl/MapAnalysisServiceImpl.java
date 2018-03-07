@@ -17,6 +17,7 @@ import cn.muye.area.point.service.PointService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -62,6 +63,9 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
     @Autowired
     private SceneMapZipXREFService sceneMapZipXREFService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @Override
     public void analysis(JSONObject info) throws Exception {
         //保存地图上传信息
@@ -100,7 +104,7 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
         boolean result = ZipUtils.unzip(DOWNLOAD_HOME + mapZip.getFilePath(), saveFile.getAbsolutePath(), false);
         if (!result) {
             LOGGER.info("地图文件解压失败");
-            throw new RuntimeException("地图文件解压失败");
+            throw new RuntimeException(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapAnalysisServiceImpl_java_DTWJJYSB"));
         }
         LOGGER.info("地图文件解压成功，保存地址 path=" + saveFile.getAbsolutePath());
         return saveFile;

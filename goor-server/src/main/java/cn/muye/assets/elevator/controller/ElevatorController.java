@@ -16,6 +16,7 @@ import cn.muye.assets.elevator.service.*;
 import cn.muye.assets.scene.controller.SceneController;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
@@ -51,6 +52,8 @@ public class ElevatorController {
     private ElevatorModeMapper elevatorModeMapper;
     @Autowired
     private ElevatorNoticeService elevatorNoticeService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     private static final Logger log = LoggerFactory.getLogger(ElevatorController.class);
 
     /**
@@ -64,9 +67,9 @@ public class ElevatorController {
         try {
             List<ElevatorShaft> list = elevatorShaftService.listElevatorShafts(whereRequest);
             PageInfo<ElevatorShaft> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "查询电梯井信息成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTJXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询电梯井信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTJXXSB"));
         }
     }
 
@@ -79,9 +82,9 @@ public class ElevatorController {
     public AjaxResult listAllElevatorShaft() {
         try {
             List<ElevatorShaft> list = elevatorShaftService.listAll();
-            return AjaxResult.success(list, "查询全部电梯井信息成功");
+            return AjaxResult.success(list, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBDTJXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询全部电梯井信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBDTJXXSB"));
         }
     }
 
@@ -94,9 +97,9 @@ public class ElevatorController {
     public AjaxResult listAllElevator() {
         try {
             List<Elevator> list = elevatorService.listAll();
-            return AjaxResult.success(list, "查询全部电梯信息成功");
+            return AjaxResult.success(list, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBDTXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询全部电梯信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBDTXXSB"));
         }
     }
 
@@ -108,9 +111,9 @@ public class ElevatorController {
     public AjaxResult listElevatorByScene(@PathVariable("sceneId") Long sceneId){
         try {
             List<Elevator> list = elevatorService.listElevatorByScene(sceneId);
-            return AjaxResult.success(list, "查询电梯信息成功");
+            return AjaxResult.success(list, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTXXCG"));
         }catch (Exception e){
-            return AjaxResult.failed(e,     "查询电梯信息失败");
+            return AjaxResult.failed(e,     localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTXXSB"));
         }
     }
 
@@ -127,9 +130,9 @@ public class ElevatorController {
         try {
 //            List<MapPoint> mapPoints = this.mapPointMapper.selectAll();
             List<MapPoint> mapPoints = pointService.listByMapSceneNameAndPointType(sceneName, null, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            return AjaxResult.success(mapPoints, "查询全部地图点信息成功");
+            return AjaxResult.success(mapPoints, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBDTDXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询全部地图点信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBDTDXXSB"));
         }
     }
 
@@ -142,9 +145,9 @@ public class ElevatorController {
     public AjaxResult listAllElevatorPointCombinations() {
         try {
             List<ElevatorPointCombination> combinations = this.elevatorPointCombinationService.listAll();
-            return AjaxResult.success(combinations, "查询全部四点组合信息成功");
+            return AjaxResult.success(combinations, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBSDZHXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询全部四点组合信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXQBSDZHXXSB"));
         }
     }
 
@@ -159,9 +162,9 @@ public class ElevatorController {
         try {
             List<Elevator> list = elevatorService.listElevators(whereRequest);
             PageInfo<Elevator> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "查询电梯信息成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询电梯信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTXXSB"));
         }
     }
 
@@ -176,9 +179,9 @@ public class ElevatorController {
         try {
             List<ElevatorPointCombination> list = elevatorPointCombinationService.listElevatorPointCombinations(whereRequest);
             PageInfo<ElevatorPointCombination> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "查询组合点信息成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXZHDXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询组合点信息失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXZHDXXSB"));
         }
     }
 
@@ -190,10 +193,10 @@ public class ElevatorController {
     @RequestMapping(value = "/assets/elevatorPointCombination", method = RequestMethod.POST)
     public AjaxResult createElevatorPointCombination(@RequestBody ElevatorPointCombination combination) {
         try {
-            checkNotNull(combination.getWaitPoint(), "等待点编号不能为空!");
-            checkNotNull(combination.getGoPoint(), "进入点编号不能为空!");
-            checkNotNull(combination.getOutPoint(), "出去点编号不能为空!");
-            checkNotNull(combination.getInnerPoint(), "内部点编号不能为空!");
+            checkNotNull(combination.getWaitPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_DDDBHBNWK"));
+            checkNotNull(combination.getGoPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_JRDBHBNWK"));
+            checkNotNull(combination.getOutPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CQDBHBNWK"));
+            checkNotNull(combination.getInnerPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_NBDBHBNWK"));
             //判断是否四个点存在于一张地图上
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
@@ -206,10 +209,10 @@ public class ElevatorController {
                 combination.setSceneId(scene.getId());
             }
             elevatorPointCombinationService.save(combination);
-            return AjaxResult.success("保存四点组合信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_BCSDZHXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("保存四点组合信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_BCSDZHXXSB"));
         }
     }
 
@@ -244,10 +247,10 @@ public class ElevatorController {
     @RequestMapping(value = "/assets/elevatorPointCombination", method = RequestMethod.PUT)
     public AjaxResult updateElevatorPointCombination(@RequestBody ElevatorPointCombination combination) {
         try {
-            checkNotNull(combination.getWaitPoint(), "等待点编号不能为空!");
-            checkNotNull(combination.getGoPoint(), "进入点编号不能为空!");
-            checkNotNull(combination.getOutPoint(), "出去点编号不能为空!");
-            checkNotNull(combination.getInnerPoint(), "内部点编号不能为空!");
+            checkNotNull(combination.getWaitPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_DDDBHBNWK"));
+            checkNotNull(combination.getGoPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_JRDBHBNWK"));
+            checkNotNull(combination.getOutPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CQDBHBNWK"));
+            checkNotNull(combination.getInnerPoint(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_NBDBHBNWK"));
             //判断是否四个点存在于一张地图上
             elevatorPointCombinationService.checkCreateCondition(Lists.newArrayList(
                     combination.getWaitPoint(), combination.getGoPoint(), combination.getOutPoint(), combination.getInnerPoint()
@@ -256,7 +259,7 @@ public class ElevatorController {
             checkWaitPoint(combination);
 
             elevatorPointCombinationService.updateSelective(combination);
-            return AjaxResult.success("更新四点组合信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_GXSDZHXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
@@ -272,10 +275,10 @@ public class ElevatorController {
     public AjaxResult deleteElevatorPointCombination(@PathVariable("pointCombinationId") String pointCombinationId) {
         try {
             elevatorPointCombinationService.deleteById(Long.parseLong(pointCombinationId));
-            return AjaxResult.success("删除四点组合信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCSDZHXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("删除四点组合信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCSDZHXXSB"));
         }
     }
 
@@ -303,24 +306,24 @@ public class ElevatorController {
     public AjaxResult createElevator(@RequestBody Elevator elevator) {
         try {
             List<Long> combinationIds = Lists.newArrayList();
-            checkNotNull(elevator.getElevatorshaftId(), "电梯必须绑定电梯井，请重新选择!");
+            checkNotNull(elevator.getElevatorshaftId(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_DTBXBDDTJQZXXZ"));
             for (ElevatorPointCombination combination : elevator.getElevatorPointCombinations()) {
-                combinationIds.add(checkNotNull(combination.getId(), "ID编号必须存在，请重新检查!"));
+                combinationIds.add(checkNotNull(combination.getId(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_IDBHBXCZQZXJC")));
             }
             String ipElevatorId = elevator.getIpElevatorId();
             /*if (!StringUtil.isNullOrEmpty(ipElevatorId)) {
                 String regex = "^[10]{8}";
                 boolean flag = ipElevatorId.matches(regex);
                 if (!flag) {
-                    return AjaxResult.failed(AjaxResult.CODE_FAILED, "工控电梯ID必须为8位二进制");
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_GKDTIDBXW8WEJZ"));
                 }
             }*/
             //保存电梯信息以及电梯与点组合的对应关系
             elevatorService.createElevator(elevator, combinationIds);
-            return AjaxResult.success("保存电梯信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_BCDTXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("保存电梯信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_BCDTXXSB"));
         }
     }
 
@@ -334,16 +337,16 @@ public class ElevatorController {
     public AjaxResult updateElevator(@RequestBody Elevator elevator) {
         try {
             List<Long> combinationIds = Lists.newArrayList();
-            checkNotNull(elevator.getElevatorshaftId(), "电梯必须绑定电梯井，请重新选择!");
+            checkNotNull(elevator.getElevatorshaftId(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_DTBXBDDTJQZXXZ"));
             for (ElevatorPointCombination combination : elevator.getElevatorPointCombinations()) {
-                combinationIds.add(checkNotNull(combination.getId(), "ID编号必须存在，请重新检查!"));
+                combinationIds.add(checkNotNull(combination.getId(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_IDBHBXCZQZXJC")));
             }
             //更新电梯信息以及电梯与点组合的对应关系
             elevatorService.updateElevator(elevator, combinationIds);
-            return AjaxResult.success("更新电梯信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_GXDTXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("更新电梯信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_GXDTXXSB"));
         }
     }
 
@@ -356,10 +359,10 @@ public class ElevatorController {
     public AjaxResult deleteElevator(@PathVariable("elevatorId") String elevatorId) {
         try {
             elevatorService.deleteById(Long.parseLong(elevatorId));
-            return AjaxResult.success("删除电梯信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCDTXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("删除电梯信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCDTXXSB"));
         }
     }
 
@@ -387,10 +390,10 @@ public class ElevatorController {
     public AjaxResult createElevatorShaft(@RequestBody ElevatorShaft elevatorShaft) {
         try {
             elevatorShaftService.save(elevatorShaft);
-            return AjaxResult.success("创建新的电梯井成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CJXDDTJCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("创建新的电梯井失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CJXDDTJSB"));
         }
     }
 
@@ -404,10 +407,10 @@ public class ElevatorController {
     public AjaxResult updateElevatorShaft(@RequestBody ElevatorShaft elevatorShaft) {
         try {
             elevatorShaftService.updateSelective(elevatorShaft);
-            return AjaxResult.success("修改电梯井信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_XGDTJXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("修改电梯井信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_XGDTJXXSB"));
         }
     }
 
@@ -420,10 +423,10 @@ public class ElevatorController {
     public AjaxResult deleteElevatorShaft(@PathVariable("elevatorShaftId") String elevatorShaftId) {
         try {
             elevatorShaftService.deleteById(Long.parseLong(elevatorShaftId));
-            return AjaxResult.success("删除电梯井信息成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCDTJXXCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("删除电梯井信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCDTJXXSB"));
         }
     }
 
@@ -488,9 +491,9 @@ public class ElevatorController {
     @PostMapping(value = "/assets/createElevatorMode")
     public AjaxResult createElevatorMode(@RequestBody ElevatorMode elevatorMode) {
         if (elevatorModeService.save(elevatorMode) > 0) {
-            return AjaxResult.success("保存状态成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_BCZTCG"));
         } else {
-            return AjaxResult.failed("保存状态失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_BCZTSB"));
         }
     }
 
@@ -512,19 +515,19 @@ public class ElevatorController {
     @RequestMapping(value = "/status/elevatorMode", method = RequestMethod.POST)
     public AjaxResult elevatorMode(@RequestBody ElevatorMode elevatorMode) {
         try {
-            Preconditions.checkNotNull(elevatorMode.getStart(), "开始时间不允许为空！");
-            Preconditions.checkNotNull(elevatorMode.getEnd(), "结束时间不允许为空！");
-            Preconditions.checkArgument(elevatorMode.getState() != null && elevatorMode.getState() != -1, "请选择电梯模式！");
+            Preconditions.checkNotNull(elevatorMode.getStart(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_KSSJBYXWK"));
+            Preconditions.checkNotNull(elevatorMode.getEnd(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_JSSJBYXWK"));
+            Preconditions.checkArgument(elevatorMode.getState() != null && elevatorMode.getState() != -1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_QXZDTMS"));
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             format.parse("2017-01-01 " + elevatorMode.getStart());
             format.parse("2017-01-01 " + elevatorMode.getEnd());
             Preconditions.checkState(elevatorMode.getStart().compareTo(elevatorMode.getEnd()) < 0,
-                    "开始时间必须小于结束时间，请检查！");
+                    localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_KSSJBXXYJSSJQJC"));
             Long ck = this.elevatorModeMapper.checkLegalRangeDate(elevatorMode.getStart(), elevatorMode.getEnd(),
                     elevatorMode.getElevatorId());
-            Preconditions.checkState(ck == 0, "开始时间或结束时间已经在别的时间范围内，请重新选择！");
+            Preconditions.checkState(ck == 0, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_KSSJHJSSJYJZBDSJFWNQZXXZ"));
             this.elevatorModeMapper.insert(elevatorMode);
-            return AjaxResult.success("保存电梯模式成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_BCDTMSCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
@@ -540,10 +543,10 @@ public class ElevatorController {
     public AjaxResult deleteElevatorMode(@PathVariable("id") Long id) {
         try {
             this.elevatorModeService.deleteById(id);
-            return AjaxResult.success("删除电梯模式成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCDTMSCG"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("删除电梯模式失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_SCDTMSSB"));
         }
     }
 
@@ -559,7 +562,7 @@ public class ElevatorController {
             return AjaxResult.success(modeEnum);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("查询电梯模式失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTMSSB"));
         }
     }
 
@@ -572,9 +575,9 @@ public class ElevatorController {
     public AjaxResult elevatorModeList(@PathVariable("elevatorId") Long elevatorId) {
         try {
             List<ElevatorMode> list = elevatorModeService.listElevatorModesByElevatorId(elevatorId);
-            return AjaxResult.success(list, "查询成功");
+            return AjaxResult.success(list, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXSB"));
         }
     }
 
@@ -591,9 +594,9 @@ public class ElevatorController {
             elevatorNotice.setState(ElevatorNotice.State.RECEIVED.getCode());
             elevatorNoticeService.updateSelective(elevatorNotice);
             CacheInfoManager.removeElevatorNoticeCache(id);
-            return AjaxResult.success("操作成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "操作失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZSB"));
         }
     }
 

@@ -29,6 +29,7 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.alert.service.LogAlertService;
 import cn.muye.mission.bean.RobotPositionRecord;
 import cn.muye.mission.mapper.MissionWarningMapper;
@@ -90,6 +91,8 @@ public class MissionWarningServiceImpl implements MissionWarningService {
     private LogAlertService logAlertService;
     @Autowired
     private PointService pointService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public boolean hasExistWarning(MissionWarning missionWarning) {
@@ -205,7 +208,7 @@ public class MissionWarningServiceImpl implements MissionWarningService {
             Boolean flag = CacheInfoManager.getRobotOnlineCache(robot.getCode());
             if (flag == null || flag == false) {
                 //机器人离线
-                String message = robot.getCode() + "已离线";
+                String message = robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_service_impl_MissionWarningServiceImpl_java_YLX");
                 LOGGER.info(message);
                 sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
                 continue;
@@ -292,9 +295,9 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                             MapInfo currentMapInfo = getCurrentMapInfo(robot.getCode());
                             String message = "";
                             if(currentMapInfo != null){
-                                message =  robot.getCode() + "在" + currentMapInfo.getLogicFloor() + "楼停滞超过5分钟";
+                                message =  robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_service_impl_MissionWarningServiceImpl_java_Z") + currentMapInfo.getLogicFloor() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_service_impl_MissionWarningServiceImpl_java_LTZCG5FZ");
                             }else {
-                                message =  robot.getCode() + "已停滞超过5分钟";
+                                message =  robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_service_impl_MissionWarningServiceImpl_java_YTZCG5FZ");
                             }
                             sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_PATH_MOVE_OVERTIME.getCode()));
                         }
@@ -304,7 +307,7 @@ public class MissionWarningServiceImpl implements MissionWarningService {
                 }
             } else {
                 LOGGER.info("未获取到当前机器人（" + robot.getCode() + "）实时坐标");
-                String message = robot.getCode() + "已离线";
+                String message = robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_service_impl_MissionWarningServiceImpl_java_YLX");
                 LOGGER.info(message);
                 sendLogAlert(robot, message, String.valueOf(AlertTypeEnum.ALERT_ROBOT_OFFLINE_OVERTIME.getCode()));
             }

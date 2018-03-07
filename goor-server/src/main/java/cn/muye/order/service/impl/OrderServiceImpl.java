@@ -25,6 +25,7 @@ import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BasePreInject;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.mission.service.MissionTaskService;
@@ -88,6 +89,8 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     private ApplyOrderService applyOrderService;
     @Autowired
     private SceneService sceneService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public void saveWaitOrder(Order order) {
@@ -201,9 +204,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             //修改该order属性,重新回到等待状态
             orderMapper.returnToWaitOrder(orderId, OrderConstant.ORDER_STATUS_WAIT);
             //订单失败，进入队列模式，前端返回提示变化
-            ajaxResult = AjaxResult.failed("订单已接收，等待机器分配");
+            ajaxResult = AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_DDYJSDDJQFP"));
         }else {
-            ajaxResult = AjaxResult.success("订单已接收，开始执行任务");
+            ajaxResult = AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_DDYJSKSZXRW"));
         }
         /*if(!ajaxResult.isSuccess()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -224,9 +227,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             //修改该order属性,重新回到等待状态
             orderMapper.returnToWaitOrder(orderId, OrderConstant.ORDER_STATUS_WAIT);
             //订单失败，进入队列模式，前端返回提示变化
-            ajaxResult = AjaxResult.failed("订单已接收，等待机器分配");
+            ajaxResult = AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_DDYJSDDJQFP"));
         }else {
-            ajaxResult = AjaxResult.success("订单已接收，开始执行任务");
+            ajaxResult = AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_DDYJSKSZXRW"));
         }
         /*if(!ajaxResult.isSuccess()){
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
@@ -408,7 +411,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
                                     if(nowStation!=null){
                                         nowStationName = nowStation.getName();
                                     }
-                                    String message = "运送从" +lastStationName+"站至"+ nowStationName+"站已超时"+ overTimeMins + "分钟";
+                                    String message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_YSC") +lastStationName+localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_ZZ")+ nowStationName+localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_ZYCS")+ overTimeMins + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderServiceImpl_java_FZ");
                                     logger.info("超时内容为："+ message);
                                     if(messageBell== null){
                                         //新增

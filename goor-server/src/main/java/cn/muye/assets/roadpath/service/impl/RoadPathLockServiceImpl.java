@@ -10,6 +10,7 @@ import cn.muye.assets.roadpath.service.RoadPathLockService;
 import cn.muye.assets.robot.mapper.RobotMapper;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -38,6 +39,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     private RoadPathLockMapper roadPathLockMapper;
     @Autowired
     private RobotMapper robotMapper;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     //缓存机器人离线时长（单位：分钟）
     private HashMap<String, Long> robotOffLineMinutes = new HashMap<>();
@@ -45,8 +48,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     @Override
     public synchronized boolean lock(Long id, String robotCode) throws Exception {
         log.info(" ***** ----- ----- ----- ----- 加锁开始 ----- ----- ----- ----- ***** ");
-        Preconditions.checkNotNull(id, "RoadPath 路径编号不允许为空！");
-        Preconditions.checkNotNull(robotCode, "robotCode 机器人编号不允许为空！");
+        Preconditions.checkNotNull(id, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_ROADPATHLJBHBYXWK"));
+        Preconditions.checkNotNull(robotCode, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_ROBOTCODEJQRBHBYXWK"));
         boolean result = lockInner(id, robotCode, id);
         log.info(" ***** ----- ----- ----- ----- 加锁结束 ----- ----- ----- ----- ***** ");
         return result;
@@ -55,8 +58,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     @Override
     public synchronized boolean lockDirection(Long id, String robotCode, Long direction) throws Exception {
         log.info(" ***** ----- ----- ----- ----- 加锁开始 ----- ----- ----- ----- ***** ");
-        Preconditions.checkNotNull(id, "RoadPath 路径编号不允许为空！");
-        Preconditions.checkNotNull(robotCode, "robotCode 机器人编号不允许为空！");
+        Preconditions.checkNotNull(id, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_ROADPATHLJBHBYXWK"));
+        Preconditions.checkNotNull(robotCode, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_ROBOTCODEJQRBHBYXWK"));
         boolean result = lockInner(id, robotCode, direction);
         log.info(" ***** ----- ----- ----- ----- 加锁结束 ----- ----- ----- ----- ***** ");
         return result;
@@ -75,7 +78,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         boolean flag = false;
         try {
             RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id),
-                    String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
+                    String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_BCZBHWSDLJSDX"), String.valueOf(id)));
             Integer lock = roadPathLock.getLockState();
             if (lock != null && lock == 1) {
                 //已上锁，不能重复上锁
@@ -116,8 +119,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         log.info("路径锁编号：" + id + "、机器人编号为：" + robotCode + "、加锁方向为(按照定义即为路径编号)：" + direction);
         boolean flag = false;
         try {
-            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
-            Preconditions.checkNotNull(direction, "方向信息不允许为空!");
+            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id), String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_BCZBHWSDLJSDX"), String.valueOf(id)));
+            Preconditions.checkNotNull(direction, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_FXXXBYXWK"));
             // +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++
             //允许通过的最大机器人数量
             Long passCount = roadPathLock.getPassCount();
@@ -193,8 +196,8 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
     @Override
     public synchronized boolean unlock(Long id, String robotCode) throws Exception {
         log.info(" ***** ----- ----- ----- ----- 解锁开始 ----- ----- ----- ----- ***** ");
-        Preconditions.checkNotNull(id, "RoadPath 路径编号不允许为空！");
-        Preconditions.checkNotNull(robotCode, "robotCode 机器人编号不允许为空！");
+        Preconditions.checkNotNull(id, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_ROADPATHLJBHBYXWK"));
+        Preconditions.checkNotNull(robotCode, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_ROBOTCODEJQRBHBYXWK"));
         boolean result = unlockInnerNewVersion(id, robotCode);
         log.info(" ***** ----- ----- ----- ----- 解锁结束 ----- ----- ----- ----- ***** ");
         return result;
@@ -213,7 +216,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         boolean flag = false;
         try {
             RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id),
-                    String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
+                    String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_BCZBHWSDLJSDX"), String.valueOf(id)));
             if (robotCode.equals(roadPathLock.getRobotCode())) {
                 Integer lock = roadPathLock.getLockState();
                 if (lock == null || lock == 0) {
@@ -248,7 +251,7 @@ public class RoadPathLockServiceImpl extends BaseServiceImpl<RoadPathLock> imple
         log.info("路径锁编号：" + id + "、机器人编号为：" + robotCode);
         boolean flag = false;
         try {
-            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id), String.format("不存在编号为 %s 的逻辑锁对象!", String.valueOf(id)));
+            RoadPathLock roadPathLock = Preconditions.checkNotNull(roadPathLockMapper.selectByPrimaryKey(id), String.format(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathLockServiceImpl_java_BCZBHWSDLJSDX"), String.valueOf(id)));
             // +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++ +++++
             //允许通过的最大机器人数量
             Long passCount = roadPathLock.getPassCount();

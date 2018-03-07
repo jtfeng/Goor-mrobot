@@ -10,6 +10,7 @@ import cn.mrobot.bean.order.OrderDetail;
 import cn.muye.area.station.service.StationService;
 import cn.muye.area.station.service.StationStationXREFService;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.order.service.ApplyOrderService;
 import cn.muye.util.UserUtil;
 import com.google.common.collect.Lists;
@@ -38,6 +39,8 @@ public class ApplyOrderController extends BaseController{
     private StationStationXREFService stationStationXREFService;
     @Autowired
     private StationService stationService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 新增一个申请送货请求
@@ -51,10 +54,10 @@ public class ApplyOrderController extends BaseController{
             applyOrder.setApplyStationId(userUtil.getStationId());
             applyOrder.setStatus(OrderConstant.APPLY_ORDER_STATUS_WAITING);
             applyOrderService.save(applyOrder);
-            return AjaxResult.success("申请成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_SQCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("申请出现异常");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_SQCXYC"));
         }
     }
 
@@ -67,15 +70,15 @@ public class ApplyOrderController extends BaseController{
         try {
             Long stationId = userUtil.getStationId();
             if(stationId == null){
-                return AjaxResult.failed("未获取到用户站");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_WHQDYHZ"));
             }else {
                 List<StationStationXREF> stationStationXREFs = stationStationXREFService.listByDestinationStationId(stationId);
                 List<Station> stationList = stationStationXREFs.stream().map(stationStationXREF -> stationService.findById(stationStationXREF.getOriginStationId())).collect(Collectors.toList());
-                return AjaxResult.success(stationList, "获取可申请用户站列表成功");
+                return AjaxResult.success(stationList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_HQKSQYHZLBCG"));
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_XTNBCW"));
         }
 
     }
@@ -97,10 +100,10 @@ public class ApplyOrderController extends BaseController{
                 Station station = stationService.findById(applyOrder.getApplyStationId());
                 applyOrder.setApplyStationName(station == null? "": station.getName());
             });
-            return AjaxResult.success(applyOrderList, "查看待接收的列表成功");
+            return AjaxResult.success(applyOrderList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_CKDJSDLBCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("查看待接收的列表出现异常");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_CKDJSDLBCXYC"));
         }
     }
 
@@ -123,10 +126,10 @@ public class ApplyOrderController extends BaseController{
                 order.setDetailList(orderDetailList);
                 order.setApplyOrderId(applyId);
             }
-            return AjaxResult.success(order, "获取订单信息");
+            return AjaxResult.success(order, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_HQDDXX"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取订单信息出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_ApplyOrderController_java_HQDDXXCC"));
         }
     }
 }

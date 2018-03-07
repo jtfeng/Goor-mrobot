@@ -8,6 +8,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -38,6 +39,8 @@ public class PointController {
     private static Logger LOGGER = LoggerFactory.getLogger(PointController.class);
     @Autowired
     private PointService pointService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 修改。目前只能修改别名和添加云端导航点类型
@@ -54,13 +57,13 @@ public class PointController {
 
             List<MapPoint> pointListDB = pointService.findByName(mapPoint.getPointName(), mapPoint.getSceneName(), mapPoint.getMapName(), SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (pointListDB.size() > 0 && !pointListDB.get(0).getId().equals(mapPoint.getId())) {
-                return AjaxResult.failed("已存在相同名称的导航点");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_YCZXTMCDDHD"));
             }
 
             if (mapPoint.getId() != null) {
                 MapPoint mapPointDB = pointService.findById(mapPoint.getId());
                 if (null == mapPointDB) {
-                    return AjaxResult.failed(1, "导航目标点不存在");
+                    return AjaxResult.failed(1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_DHMBDBCZ"));
                 }
                 mapPointDB.setX(mapPoint.getX());
                 mapPointDB.setY(mapPoint.getY());
@@ -78,7 +81,7 @@ public class PointController {
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed(1, "系统错误");
+            return AjaxResult.failed(1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_XTCW"));
         }
     }
 
@@ -138,13 +141,13 @@ public class PointController {
         try {
             MapPoint pointDB = pointService.findById(id);
             if (pointDB == null) {
-                return AjaxResult.failed("删除对象不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_SCDXBCZ"));
             }
             pointService.delete(pointDB);
-            return AjaxResult.success("删除成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_SCCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_XTCW"));
         }
     }
 
@@ -167,7 +170,7 @@ public class PointController {
             return AjaxResult.success(cascadeMapPointList);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_XTCW"));
         }
     }
 
@@ -215,7 +218,7 @@ public class PointController {
             return AjaxResult.success();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_point_controller_PointController_java_XTCW"));
         }
     }
 }

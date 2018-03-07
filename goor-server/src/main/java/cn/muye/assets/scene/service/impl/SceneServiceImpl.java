@@ -37,6 +37,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.util.SessionUtil;
@@ -101,6 +102,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     private MissionFuncsService missionFuncsService;
     @Autowired
     private PointService pointService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     //保存添加场景与机器人之间的关系时候，需要加锁，以免事务未提交读取到脏数据
     private ReentrantLock lock = new ReentrantLock();
 
@@ -127,7 +130,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         Robot robot = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (robot == null) {
             //表明当前请求的机器人未在云端注册，反馈对应错误信息，抛出错误信息，设置 error_code
-            throw new Exception("机器人未注册!");
+            throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_JQRWZC"));
         }
         // 存放全部场景的详细信息
         List<Map<String, Object>> sceneList = Lists.newArrayList();
@@ -295,7 +298,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Override
     public void replyGetRobotStartAssets(String uuid, String robotCode) {
-        LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, "机器人开机获取云端资源 - 开始");
+        LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_JQRKJHQYDZYKS"));
         Map assetData = Maps.newHashMap();
         try {
             assetData = this.getRobotStartAssets(robotCode);
@@ -331,7 +334,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         messageInfo.setMessageText(JSON.toJSONString(commonInfo));
         try {
             messageSendHandleService.sendCommandMessage(true, false, robotCode, messageInfo);
-            LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, "机器人开机获取云端资源 - 结束");
+            LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_JQRKJHQYDZYJS"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             LogInfoUtils.info(robotCode, ModuleEnums.BOOT, LogType.BOOT_GET_ASSETS, e.getMessage());
@@ -391,8 +394,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Override
     public Scene storeSceneInfoToSession(String source, String sceneId, String token) throws Exception {
-        Preconditions.checkArgument(sceneId != null && !"".equals(sceneId.trim()), "请传入合法的 sceneId 值");
-        Preconditions.checkArgument(token != null && !"".equals(token.trim()), "请传入合法的 token 值");
+        Preconditions.checkArgument(sceneId != null && !"".equals(sceneId.trim()), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_QCRHFDSCENEIDZ"));
+        Preconditions.checkArgument(token != null && !"".equals(token.trim()), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_QCRHFDTOKENZ"));
         log.info("传入的场景 ID 编号为 ：" + sceneId);
         Scene scene = getSceneById(Long.parseLong(sceneId));
         if (source.equals(Constant.RECORD_SCENE_SOURCE_PAD)) {
@@ -456,7 +459,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             return updateMap(scene, robots);
         }else {
             updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
-            return AjaxResult.failed("场景无绑定机器人");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_CJWBDJQR"));
         }
     }
 
@@ -470,14 +473,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             return mapSyncService.sendMapSyncMessageNew(robots, scene.getMapSceneName(), scene.getId());
         }else {
             updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
-            return AjaxResult.failed("未找到该场景关联的地图场景或场景无绑定机器人");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_WZDGCJGLDDTCJHCJWBDJQR"));
         }
     }
 
     @Override
     public Scene getSceneById(Long id) throws Exception {
         Scene scene = sceneMapper.selectByPrimaryKey(id);
-        Preconditions.checkNotNull(scene, "传入指定编号的场景信息不存在，请检查!");
+        Preconditions.checkNotNull(scene, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_CRZDBHDCJXXBCZQJC"));
         List<Robot> list = this.sceneMapper.findRobotBySceneId(id);
         foreachList(list);
         scene.setRobots(list);
@@ -567,9 +570,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Override
     public Object sendSyncMapMessageToSpecialRobots(Map<String, Object> params) throws Exception {
-        Long sceneId = Long.valueOf(String.valueOf(Preconditions.checkNotNull(params.get("sceneId"), "场景 ID 不允许为空!")));
-        List<Long> robotIds = (List<Long>) Preconditions.checkNotNull(params.get("robotIds"), "传入的机器人 ID 编号信息数组不能为空");
-        Preconditions.checkArgument(robotIds.size() != 0, "传入的机器人编号数组信息不可以为空");
+        Long sceneId = Long.valueOf(String.valueOf(Preconditions.checkNotNull(params.get("sceneId"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_CJIDBYXWK"))));
+        List<Long> robotIds = (List<Long>) Preconditions.checkNotNull(params.get("robotIds"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_CRDJQRIDBHXXSZBNWK"));
+        Preconditions.checkArgument(robotIds.size() != 0, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_CRDJQRBHSZXXBKYWK"));
         Scene scene = this.sceneMapper.selectByPrimaryKey(sceneId);
         List<Robot> robots = this.sceneMapper.findRobotBySceneIdAndRobotIds(params);
         foreachList(robots);
@@ -594,7 +597,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return sceneMapper.checkRobot(robotId);
     }
 
-    private static final String MAP_INFO_ERROR_MESSAGE = "指定的地图场景不存在或者已经被绑定到云端场景，请重新选择!";
+    private static final String MAP_INFO_ERROR_MESSAGE = "goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_ZDDDTCJBCZHZYJBBDDYDCJQZXXZ";
 
     @Override
     public void bindSceneAndMapRelations(Scene scene) throws Exception {
@@ -607,14 +610,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
                 //保证场景名城合法且没有绑定云端场景
                 this.insertSceneAndMapRelations(scene.getId(), mapSceneName);
             } else {
-                throw new Exception(MAP_INFO_ERROR_MESSAGE);
+                throw new Exception(localeMessageSourceService.getMessage(MAP_INFO_ERROR_MESSAGE));
             }
         } catch (Exception e) {
             throw e;
         }
     }
 
-    private static final String ROBOT_ERROR_MESSAGE = "传入的机器人信息不存在或者机器人已经被绑定到云端场景，请重新选择!";
+    private static final String ROBOT_ERROR_MESSAGE = "goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_CRDJQRXXBCZHZJQRYJBBDDYDCJQZXXZ";
 
     @Override
     public boolean bindSceneAndRobotRelations(Scene scene,  List<Long> distinctIDS) throws Exception {
@@ -668,7 +671,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             } else {
                 //事务执行异常，整体事务需要进行回滚操作
                 log.info(" ~ ~ ~ ~ 当前操作没有实际事务，系统异常，回滚事务 ~ ~ ~ ~ ");
-                throw new Exception("当前操作没有实际事务，系统异常，回滚事务");
+                throw new Exception(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_DQCZMYSJSWXTYCHGSW"));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -695,7 +698,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
 
     @Override
     public void updateSceneState(int state, Long sceneId) throws Exception {
-        Preconditions.checkArgument(sceneId != null, "更改场景状态为上传成功时,场景ID编号缺失,请检查代码!");
+        Preconditions.checkArgument(sceneId != null, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_GGCJZTWSCCGSCJIDBHQSQJCDM"));
         Scene scene = sceneMapper.selectByPrimaryKey(sceneId);
         scene.setState(state);
         sceneMapper.updateByPrimaryKeySelective(scene);

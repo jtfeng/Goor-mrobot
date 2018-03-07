@@ -11,6 +11,7 @@ import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.MessageSendHandleService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.service.consumer.topic.BaseMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -48,6 +49,8 @@ public class FixPathServiceImpl implements FixPathService {
     @Autowired
     private BaseMessageService baseMessageService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     @Override
     public void saveFixpathQuery(String senderId, Date sendTime, String messageData) throws Exception {
 
@@ -87,10 +90,10 @@ public class FixPathServiceImpl implements FixPathService {
         String mapSceneName = sceneService.getRelatedMapNameBySceneId(sceneId);
         Boolean online = CacheInfoManager.getRobotOnlineCache(robotCode);
         if (null == online || !online){
-            return AjaxResult.failed("机器人"+robotCode+"不在线");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_fixpath_service_impl_FixPathServiceImpl_java_JQR")+robotCode+localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_fixpath_service_impl_FixPathServiceImpl_java_BZX"));
         }
         if (StringUtil.isNullOrEmpty(mapSceneName)){
-            return  AjaxResult.failed("未获取到当前场景关联的地图场景名");
+            return  AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_fixpath_service_impl_FixPathServiceImpl_java_WHQDDQCJGLDDTCJM"));
         }
 
         SlamRequestBody slamRequestBody = new SlamRequestBody(TopicConstants.FIXPATH_FILE_QUERY);

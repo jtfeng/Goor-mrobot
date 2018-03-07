@@ -11,6 +11,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
@@ -44,6 +45,9 @@ public class RabbitMQExampleController {
 
     @Autowired
     private MessageSendHandleService messageSendHandleService;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
 //    @Autowired
 //    private SimpMessagingTemplate messagingTemplate;
@@ -88,7 +92,7 @@ public class RabbitMQExampleController {
             }
         } catch (Exception e) {
             log.error("发送错误", e);
-            return AjaxResult.failed("系统内部错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_RabbitMQExampleController_java_XTNBCW"));
         }
     }
 

@@ -11,6 +11,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.door.service.DoorService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.SessionUtil;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -32,7 +33,8 @@ public class DoorController {
     private PointService pointService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DoorController.class);
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     /**
      * 分页查询门
      *
@@ -46,7 +48,7 @@ public class DoorController {
             //从session取当前切换的场景
             Scene scene = SessionUtil.getScene();
             if(scene == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_QXQHDMCJ"));
             }
             //TODO 从session取切换门店的ID，现在先写死
             List<Door> doorList = doorService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID,scene.getId());
@@ -55,7 +57,7 @@ public class DoorController {
             return AjaxResult.success(pageList);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部查询出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_XTNBCXCC"));
         }
     }
 
@@ -73,20 +75,20 @@ public class DoorController {
             //从session取当前切换的场景
             Scene scene = SessionUtil.getScene();
             if(scene == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_QXQHDMCJ"));
             }
             //TODO 从session取切换门店的ID，现在先写死
             Door doorDB = doorService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID,scene.getId());
             if (doorDB == null) {
-                return AjaxResult.failed("删除对象不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_SCDXBCZ"));
             }
             doorDB.setActive(Constant.DELETE);
 //            stationService.delete(stationDB);
             doorService.update(doorDB);
-            return AjaxResult.success("删除成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_SCCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("被使用，无法删除");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_BSYWFSC"));
         }
     }
 
@@ -104,13 +106,13 @@ public class DoorController {
             //从session取当前切换的场景
             Scene scene = SessionUtil.getScene();
             if(scene == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_QXQHDMCJ"));
             }
             Long sceneId = scene.getId();
 
             String name = door.getName();
             if (StringUtil.isNullOrEmpty(name)) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "门名称不能为空");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_MMCBNWK"));
             }
             //TODO 从session取切换门店的ID，现在先写死
             Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
@@ -123,12 +125,12 @@ public class DoorController {
                     && (size > 1
                     || (size == 1 && id == null)
                     || (size == 1 && id != null && !doorDbList.get(0).getId().equals(id)))) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "门名称重复");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_MMCZF"));
             }
 
             //校验点都是数据库里的点
             if (!isPointExist(door)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "点参数错误");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_DCSCW"));
             }
 
             checkWaitPoint(door);
@@ -137,7 +139,7 @@ public class DoorController {
 
                 Door doorDb = doorService.findById(id, storeId,sceneId);
                 if (doorDb == null) {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要修改的对象不存在");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_YXGDDXBCZ"));
                 }
                 doorDb.setName(door.getName());
                 doorDb.setInfo(door.getInfo());
@@ -150,7 +152,7 @@ public class DoorController {
                 doorDb.setPathId(door.getPathId());
 
                 doorService.update(doorDb);
-                return AjaxResult.success(doorDb, "修改成功");
+                return AjaxResult.success(doorDb, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_XGCG"));
             } else if (door != null && id == null) { //新增
                 door.setActive(Constant.NORMAL);
                 door.setSceneId(scene.getId());
@@ -164,13 +166,13 @@ public class DoorController {
                 door.setCreatedBy(SearchConstants.FAKE_MERCHANT_STORE_ID);
 
                 doorService.save(door);
-                return AjaxResult.success(door, "新增成功");
+                return AjaxResult.success(door, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_XZCG"));
             } else {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_CSYW"));
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_door_controller_DoorController_java_CC"));
         }
     }
 

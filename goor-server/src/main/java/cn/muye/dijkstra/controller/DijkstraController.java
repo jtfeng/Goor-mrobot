@@ -32,6 +32,7 @@ import cn.mrobot.bean.dijkstra.RoadPathMaps;
 import cn.mrobot.bean.dijkstra.RoadPathResult;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.service.consumer.topic.BaseMessageService;
 import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.util.PathUtil;
@@ -72,6 +73,8 @@ public class DijkstraController {
     private SceneService sceneService;
     @Autowired
     private RoadPathResultService roadPathResultService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     /**
      * 读取工控路径文件并入库，相同坐标点重复加
      * @return
@@ -193,12 +196,12 @@ public class DijkstraController {
             String sceneName = scene.getMapSceneName();
             log.info(placeholder + "sceneName、" + sceneName);
             if(StringUtil.isNullOrEmpty(sceneName)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneName + "云端场景未绑定有效的工控场景");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_YDCJWBDYXDGKCJ"));
             }
             List<Elevator> elevatorList = elevatorService.listBySceneName(sceneName);
             log.info(placeholder + "elevatorList、" + elevatorList);
             if(elevatorList == null || elevatorList.size() == 0) {
-                return AjaxResult.success(sceneName + "云端场景未设置电梯");
+                return AjaxResult.success(sceneName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_YDCJWSZDT"));
             }
 
             /*
@@ -212,11 +215,11 @@ public class DijkstraController {
             //清空某场景、某门店下的路径相关的缓存
             PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName);
 
-            return AjaxResult.success("执行完毕，若同一部电梯关联的四点对象少于两个，则不会生成");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_ZXWBRTYBDTGLDSDDXSYLGZBHSC"));
         } catch (Exception e) {
             log.error("出错:{}", e);
             log.error("出错:{}",e.getMessage());
-            return AjaxResult.failed(AjaxResult.CODE_FAILED,"出错");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_CC"));
         }
     }
 
@@ -237,7 +240,7 @@ public class DijkstraController {
             Scene scene = sceneService.getSceneById(sceneId);
             String sceneName = scene.getMapSceneName();
             if(StringUtil.isNullOrEmpty(sceneName)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_YDCJWBDYXDGKCJ"));
             }
 
             //创建电梯间路径
@@ -250,7 +253,7 @@ public class DijkstraController {
             RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
 
             if(roadPathMaps == null) {
-                return AjaxResult.failed("未找到该云端场景下的工控路径");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_WZDGYDCJXDGKLJ"));
             }
 
             //TODO test
@@ -260,7 +263,7 @@ public class DijkstraController {
             List<Station> stationList = stationService.listStationsBySceneAndMapPointType(sceneId,null);
 
             if(stationList == null) {
-                return AjaxResult.failed("未找到该云端场景下的站点");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_WZDGYDCJXDZD"));
             }
             for(Station startStation : stationList) {
                 List<MapPoint> mapPoints = startStation.getMapPoints();
@@ -344,7 +347,7 @@ public class DijkstraController {
                 }
 
             }
-            return AjaxResult.success("操作成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_CZCG"));
 
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage());
@@ -378,7 +381,7 @@ public class DijkstraController {
             RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, startPoint.getSceneName(), roadPathService);
 
             if(roadPathMaps == null) {
-                return AjaxResult.failed("未找到该云端场景下的工控路径");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_WZDGYDCJXDGKLJ"));
             }
             RoadPathResult result = null;
             result = roadPathResultService.getShortestCloudRoadPathForMission(startPointId, endPointId,roadPathMaps,result);
@@ -400,13 +403,13 @@ public class DijkstraController {
             Scene scene = sceneService.getSceneById(sceneId);
             String sceneName = scene.getMapSceneName();
             if(StringUtil.isNullOrEmpty(sceneName)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_YDCJWBDYXDGKCJ"));
             }
 
             List<RoadPath> x86RoadPaths = roadPathService.listRoadPathsBySceneNamePathType(sceneName,
                     Constant.PATH_TYPE_X86, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if(x86RoadPaths == null || x86RoadPaths.size() <= 0) {
-                return AjaxResult.failed("该场景无工控路径");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_GCJWGKLJ"));
             }
 
             for(RoadPath roadPath : x86RoadPaths) {
@@ -419,7 +422,7 @@ public class DijkstraController {
                 MapPoint endPoint = pointService.findById(roadPath.getEndPoint());
                 if(startPoint == null || endPoint == null) {
                     log.error(roadPath.getPathName() + "路径关联的"+ (startPoint == null ?"起点对象," : ",")
-                            +(endPoint == null ? "终点对象" : "") + "不存在");
+                            +(endPoint == null ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_ZDDX") : "") + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_BCZ"));
                     continue;
                 }
                 //取两点间长度作为路径权值
@@ -430,7 +433,7 @@ public class DijkstraController {
             //清除路径缓存
             PathUtil.clearPathCache(SearchConstants.FAKE_MERCHANT_STORE_ID , sceneName);
 
-            return AjaxResult.success("更新成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_GXCG"));
         } catch (Exception e) {
             log.error(e.getMessage());
             log.error(e.getMessage(), e);
@@ -545,7 +548,7 @@ public class DijkstraController {
     private AjaxResult testSendHeartBeat(String message) {
         SlamResponseBody slamResponseBody = new SlamResponseBody();
         slamResponseBody.setSubName(TopicConstants.X86_ELEVATOR_LOCK);
-        slamResponseBody.setData("测试发送消息:" + message);
+        slamResponseBody.setData(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_controller_DijkstraController_java_CSFSXX") + message);
         return baseMessageService.sendRobotMessage("cookyplus013", TopicConstants.X86_ELEVATOR_LOCK, slamResponseBody);
     }
 

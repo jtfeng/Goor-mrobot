@@ -6,6 +6,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.SessionUtil;
 import com.github.pagehelper.PageInfo;
 import org.apache.log4j.Logger;
@@ -26,6 +27,8 @@ public class ShelfController {
 
     @Autowired
     private ShelfService shelfService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @RequestMapping(value = "assets/shelf", method = RequestMethod.GET)
     @ResponseBody
@@ -39,7 +42,7 @@ public class ShelfController {
             LOGGER.error("ShelfController-list方法报错,{}", e);
         } finally {
         }
-        return AjaxResult.success(pageList, "查询成功");
+        return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_CXCG"));
     }
 
     @RequestMapping(value = "assets/shelf", method = RequestMethod.POST)
@@ -47,18 +50,18 @@ public class ShelfController {
     public AjaxResult addOrUpdateShelf(@RequestBody Shelf shelf) {
         try {
             if (StringUtil.isNullOrEmpty(shelf.getCode()) || StringUtil.isNullOrEmpty(shelf.getRfid()) || StringUtil.isNullOrEmpty(shelf.getName()) || StringUtil.isNullOrEmpty(shelf.getType())) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "货架名称或RFID或编号或类型不能为空");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_HJMCHRFIDHBHHLXBNWK"));
             }
             //判断是否有重复的名称
             Shelf shelfDbByName = shelfService.getByName(shelf.getName());
             if (shelfDbByName != null && !shelfDbByName.getId().equals(shelf.getId())) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "货架名称重复");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_HJMCZF"));
             }
             Long id = shelf.getId();
             //判断是否有重复的编号
             Shelf shelfDbByCode = shelfService.getByCode(shelf.getCode());
             if (shelfDbByCode != null && !shelfDbByCode.getId().equals(id)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "货架编号重复");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_HJBHZF"));
             }
             shelf.setSceneId(SessionUtil.getScene().getId());
             if (id == null) {
@@ -66,7 +69,7 @@ public class ShelfController {
                 shelf.setCreateTime(new Date());
                 shelf.setCreatedBy(1L);
                 shelfService.save(shelf);
-                return AjaxResult.success(shelf, "新增成功");
+                return AjaxResult.success(shelf, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_XZCG"));
             } else {
                 Shelf shelfDb = shelfService.getById(id);
                 shelfDb.setGoodTypes(shelf.getGoodTypes());
@@ -76,7 +79,7 @@ public class ShelfController {
                 shelfDb.setType(shelf.getType());
                 shelfDb.setDescription(shelf.getDescription());
                 shelfService.updateByStoreId(shelfDb);
-                return AjaxResult.success(shelfDb, "修改成功");
+                return AjaxResult.success(shelfDb, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_XGCG"));
             }
         } catch (Exception e) {
             LOGGER.error("ShelfController-addOrUpdateShelf方法报错,{}", e);
@@ -89,10 +92,10 @@ public class ShelfController {
     @ResponseBody
     public AjaxResult delete(@PathVariable String id) {
         if (id == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_CSYW"));
         }
         shelfService.deleteById(Long.valueOf(id));
-        return AjaxResult.success("删除成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_shelf_controller_ShelfController_java_SCCG"));
     }
 
 }

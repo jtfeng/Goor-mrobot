@@ -39,6 +39,7 @@ import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.charge.service.ChargeInfoService;
 import cn.muye.log.state.service.StateCollectorService;
 import cn.muye.service.consumer.topic.PickUpPswdVerifyService;
@@ -111,6 +112,9 @@ public class ConsumerCommon {
 
     @Autowired
     private ElevatorNoticeService elevatorNoticeService;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     /**
      * 透传ros发布的topic：agent_pub
      *
@@ -259,7 +263,7 @@ public class ConsumerCommon {
         } catch (Exception e) {
             logger.error("发送错误", e);
             try {
-                slamBody.setMsg("查询错误");
+                slamBody.setMsg(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_CXCW"));
                 slamBody.setErrorCode("1");
                 slamBody.setData("");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
@@ -305,7 +309,7 @@ public class ConsumerCommon {
         } catch (Exception e) {
             logger.error("发送错误", e);
             try {
-                slamBody.setMsg("查询错误");
+                slamBody.setMsg(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_CXCW"));
                 slamBody.setErrorCode("1");
                 slamBody.setData("");
                 commonInfo.setPublishMessage(JSON.toJSONString(new PubData(JSON.toJSONString(slamBody))));
@@ -684,7 +688,7 @@ public class ConsumerCommon {
             robotService.updateSelective(saveRobot);
             //向websocket推送低电量警告
             //判断是否接收到前端停止发送的请求
-            String body = "机器人" + code + "当前电量：" + powerPercent + ",电量阈值:" + lowBatteryThreshold;
+            String body = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_JQR") + code + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_DQDL") + powerPercent + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_DLYZ") + lowBatteryThreshold;
             WSMessage ws = new WSMessage.Builder().
                     title(LogType.WARNING_LOWER_POWER.getValue())
                     .messageType(WSMessageType.WARNING)

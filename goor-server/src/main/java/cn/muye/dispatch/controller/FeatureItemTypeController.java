@@ -5,6 +5,7 @@ import cn.mrobot.bean.mission.FeatureItemType;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.dispatch.service.FeatureItemService;
 import cn.muye.dispatch.service.FeatureItemTypeService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,8 @@ public class FeatureItemTypeController {
 	private FeatureItemTypeService featureItemTypeService;
 	@Autowired
 	private FeatureItemService featureItemService;
+	@Autowired
+	private LocaleMessageSourceService localeMessageSourceService;
 
 	@RequestMapping(value = "dispatch/feature/itemtype", method = RequestMethod.POST)
 	@ResponseBody
@@ -39,20 +42,20 @@ public class FeatureItemTypeController {
 	public AjaxResult saveFeatureItemType(@RequestBody FeatureItemType featureItemType, HttpServletRequest request) throws Exception {
 		try {
 			if (featureItemType.getName() == null) {
-				return AjaxResult.failed("功能类型名称不能为空");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemTypeController_java_GNLXMCBNWK"));
 			}
 			if (featureItemType.getValue() == null) {
-				return AjaxResult.failed("功能类型值不能为空");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemTypeController_java_GNLXZBNWK"));
 			}
 			if (featureItemType.getFeatureItemId() != null) {
 				if(featureItemService.get(featureItemType.getFeatureItemId()) == null){
-					return AjaxResult.failed("功能不存在");
+					return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemTypeController_java_GNBCZ"));
 				}
 			}
 
 			List<FeatureItemType> featureItemTypeList = featureItemTypeService.validate(featureItemType.getName(), featureItemType.getValue());
 			if(featureItemTypeList.size() >= 1){
-				return AjaxResult.failed("功能类型名称或者值已经存在");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemTypeController_java_GNLXMCHZZYJCZ"));
 			}
 
 			featureItemTypeService.save(featureItemType);
