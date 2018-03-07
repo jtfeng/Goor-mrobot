@@ -337,7 +337,8 @@
                         <option>-keepnames interface **</option>
                         <option>-adaptclassstrings</option>
                         <!-- 不混淆model包中的所有类以及类的属性及方法，实体包，混淆了会导致ORM框架及前端无法识别-->
-                        <option>-keep class cn.muye.**.bean.*</option>
+                        <option>-keep class cn.muye.**.bean.* { *;}</option>
+                        <option>-keep class cn.muye.base.model.message.* { *; }</option>
                         <option>-keep class cn.muye.**.service.** </option>
                         <option>-keep class cn.muye.**.mapper.*</option>
                         <option>-keep class cn.muye.Application</option>
