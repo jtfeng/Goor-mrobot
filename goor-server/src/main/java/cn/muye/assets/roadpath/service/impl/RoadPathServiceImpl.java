@@ -20,6 +20,7 @@ import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.mapper.SceneMapper;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -55,6 +56,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     private SceneMapper sceneMapper;
     @Autowired
     private RoadPathLockMapper roadPathLockMapper;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     private String sceneName = null;
     private String mapName = null;
 
@@ -70,22 +73,22 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
         // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
         try {
-            String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
+            String pathName = String.valueOf(checkNotNull(body.get("pathName"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJMCBYXWKQZXSR")));
             log.info(String.format("路径名称：%s", pathName));
 
-            String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
+            String pattern = String.valueOf(checkNotNull(body.get("pattern"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJNHFSXXBYXWKQZXSR")));
             log.info(String.format("路径拟合方式：%s", pattern));
 
-            String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
+            String data = String.valueOf(checkNotNull(body.get("data"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJXGSJBYXWKQZXSR")));
             log.info(String.format("路径相关数据：%s", data));
 
-            Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
+            Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJQZSJBYXWKQZXSR"))));
             log.info(String.format("路径权值数据为：%s", weight));
 
-            String pathType = String.valueOf(checkNotNull(body.get("pathType"), "路径类型不能为空"));
+            String pathType = String.valueOf(checkNotNull(body.get("pathType"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJLXBNWK")));
             Integer pathTypeInt = Integer.parseInt(pathType);
-            checkNotNull(pathTypeInt, "路径类型不能为空");
-            List points = (List) checkNotNull(body.get("points"), "点组合不允许为空，请重新选择!");
+            checkNotNull(pathTypeInt, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJLXBNWK"));
+            List points = (List) checkNotNull(body.get("points"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_DZHBYXWKQZXXZ"));
 
             String restrictedStarttime = "", restrictedEndtime = "";
             if (pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
@@ -96,7 +99,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             String sceneName = null;
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
             if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD) || pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
-                checkArgument(points.size() >= 2, "点组合至少需要两个点（开始点和结束点）");
+                checkArgument(points.size() >= 2, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_DZHZSXYLGDKSDHJSD"));
                 Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
                 RoadPath roadPath = new RoadPath() {{
                     setData(data);
@@ -122,10 +125,10 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 packageRoadPathRelations(points, roadPath);
                 sceneName = roadPath.getSceneName();
             } else if (pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
-                checkArgument(points.size() == 2, "工控路径点组合只能两个点（开始点和结束点）");
+                checkArgument(points.size() == 2, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_GKLJDZHZNLGDKSDHJSD"));
                 Long startPointId = Long.parseLong(String.valueOf(points.get(0)));
                 //如果是工控路径还得校验工控路径不为空
-                String pathId = String.valueOf(checkNotNull(body.get("pathId"), "工控路径ID不能为空"));
+                String pathId = String.valueOf(checkNotNull(body.get("pathId"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_GKLJIDBNWK")));
                 RoadPath roadPath = new RoadPath() {{
                     setData(data);
                     setPattern(pattern);
@@ -154,19 +157,19 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
     @Override
     public void updateRoadPath(Map<String, Object> body) throws Exception {
         try {
-            Long id = Long.parseLong(String.valueOf(checkNotNull(body.get("id"), "id编号不允许为空，请重新输入!")));
+            Long id = Long.parseLong(String.valueOf(checkNotNull(body.get("id"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_IDBHBYXWKQZXSR"))));
             log.info(String.format("id编号信息为：%s", id));
-            String pathName = String.valueOf(checkNotNull(body.get("pathName"), "路径名称不允许为空，请重新输入!"));
+            String pathName = String.valueOf(checkNotNull(body.get("pathName"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJMCBYXWKQZXSR")));
             log.info(String.format("4路径名称：%s", pathName));
-            String pattern = String.valueOf(checkNotNull(body.get("pattern"), "路径拟合方式信息不允许为空，请重新输入!"));
+            String pattern = String.valueOf(checkNotNull(body.get("pattern"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJNHFSXXBYXWKQZXSR")));
             log.info(String.format("路径拟合方式：%s", pattern));
-            String data = String.valueOf(checkNotNull(body.get("data"), "路径相关数据不允许为空，请重新输入!"));
+            String data = String.valueOf(checkNotNull(body.get("data"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJXGSJBYXWKQZXSR")));
             log.info(String.format("路径相关数据：%s", data));
-            Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), "路径权值数据不允许为空，请重新输入!")));
+            Long weight = Long.parseLong(String.valueOf(checkNotNull(body.get("weight"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJQZSJBYXWKQZXSR"))));
             log.info(String.format("路径权值数据为：%s", weight));
-            String pathType = String.valueOf(checkNotNull(body.get("pathType"), "路径类型不能为空"));
+            String pathType = String.valueOf(checkNotNull(body.get("pathType"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJLXBNWK")));
             Integer pathTypeInt = Integer.parseInt(pathType);
-            checkNotNull(pathTypeInt, "路径类型不能为空");
+            checkNotNull(pathTypeInt, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJLXBNWK"));
 
             RoadPath roadPath = new RoadPath();
             roadPath.setId(id);
@@ -182,8 +185,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
 
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
             if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
-                List points = (List) checkNotNull(body.get("points"), "云端路径点组合不允许为空，请重新选择!");
-                checkArgument(points.size() >= 2, "云端路径点组合至少需要两个点（开始点和结束点）");
+                List points = (List) checkNotNull(body.get("points"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_YDLJDZHBYXWKQZXXZ"));
+                checkArgument(points.size() >= 2, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_YDLJDZHZSXYLGDKSDHJSD"));
                 roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
                 roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(points.size() - 1)))); // 设置（结束点）
 
@@ -195,13 +198,13 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 packageRoadPathRelations(points, roadPath);
             } else if (pathTypeInt.equals(Constant.PATH_TYPE_X86)) {
                 //如果是工控路径还得判断路径ID不为空
-                String pathId = String.valueOf(checkNotNull(body.get("pathId"), "路径 ID 编号不允许为空，请重新输入!"));
+                String pathId = String.valueOf(checkNotNull(body.get("pathId"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJIDBHBYXWKQZXSR")));
                 log.info(String.format("路径编号信息为：%s", pathId));
                 roadPath.setPathId(pathId);
 
                 List points = (List) body.get("points");
                 if (points != null && points.size() > 0) {
-                    checkArgument(points.size() == 2, "工控路径点组合至少只能有两个点（开始点和结束点）");
+                    checkArgument(points.size() == 2, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_GKLJDZHZSZNYLGDKSDHJSD"));
                     roadPath.setStartPoint(Long.parseLong(String.valueOf(points.get(0))));               // 设置（开始点）
                     roadPath.setEndPoint(Long.parseLong(String.valueOf(points.get(1)))); // 设置（结束点）
 

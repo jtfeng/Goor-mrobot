@@ -5,6 +5,7 @@ import cn.mrobot.bean.alert.AlertTypeEnum;
 import cn.mrobot.bean.log.alert.LogAlert;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.alert.service.LogAlertService;
 import cn.muye.mission.service.MissionItemTaskService;
 import com.github.pagehelper.PageInfo;
@@ -33,6 +34,9 @@ public class LogAlertController {
     @Autowired
     private MissionItemTaskService missionItemTaskService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     /**
      * 查看报警日志
      * @param whereRequest
@@ -48,7 +52,7 @@ public class LogAlertController {
            int pageSize = whereRequest.getPageSize();
            List<LogAlert> list = logAlertService.listPageByStoreIdAndOrder(page, pageSize, LogAlert.class, "ALERT_TIME DESC");
            list.forEach(logAlert -> {
-               logAlert.setAlertName(AlertTypeEnum.getValue(logAlert.getAlertCode()));
+               logAlert.setAlertName(localeMessageSourceService.getMessage(AlertTypeEnum.getValue(logAlert.getAlertCode())));
                if(logAlert.getMissionItemId()!= null){
                    MissionItemTask missionItemDb = missionItemTaskService.findById(logAlert.getMissionItemId());
                    if (missionItemDb != null) {
@@ -57,9 +61,9 @@ public class LogAlertController {
                }
            });
            PageInfo<LogAlert> pageInfo = new PageInfo<>(list);
-           return AjaxResult.success(pageInfo, "查询成功");
+           return AjaxResult.success(pageInfo, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_alert_controller_LogAlertController_java_CXCG"));
        } else {
-           return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+           return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_alert_controller_LogAlertController_java_CSYW"));
        }
     }
 }

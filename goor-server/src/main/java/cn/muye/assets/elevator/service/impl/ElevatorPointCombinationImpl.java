@@ -15,6 +15,7 @@ import cn.muye.assets.elevator.service.ElevatorPointCombinationService;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageHelper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -43,6 +44,8 @@ public class ElevatorPointCombinationImpl extends BaseServiceImpl<ElevatorPointC
     private ElevatorPointCombinationMapper elevatorPointCombinationMapper;
     @Autowired
     private ElevatorService elevatorService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public boolean checkCreateCondition(List<Long> mappointIds) throws Exception {
@@ -53,7 +56,7 @@ public class ElevatorPointCombinationImpl extends BaseServiceImpl<ElevatorPointC
             MapPoint point = mapPointMapper.selectByPrimaryKey(id);
             strings.add(point.getStoreId() + ":" + point.getMapName());
         }
-        checkArgument(strings.size() == 1, "四个点不属于同一张地图，请重新选择!");
+        checkArgument(strings.size() == 1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorPointCombinationImpl_java_SGDBSYTYZDTQZXXZ"));
         return true;
     }
 

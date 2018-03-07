@@ -8,6 +8,7 @@ import cn.mrobot.dto.rosrocker.RosRockerDTO;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.service.MessageSendHandleService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import static com.google.common.base.Preconditions.*;
 
@@ -36,6 +37,8 @@ public class RosRockerController {
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private MessageSendHandleService messageSendHandleService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @RequestMapping(value = "/sendMsg", method = RequestMethod.POST)
     public Object sendMessageToRos(@RequestBody Map<String, Object> map){
@@ -43,9 +46,9 @@ public class RosRockerController {
             //{"linear":{"y":0.0,"x":-0.288421816682403,"z":0.0},"angular":{"y":0.0,"x":0.0,"z":1.7556886488741245E-7}}
             //robot id ： SNabc0012
 
-            Object robotId = checkNotNull(map.get("robotId"), "机器人编号信息不能为空，请检查!");
-            Object X = checkNotNull(map.get("X"), "X 偏移量不能为空，请检查!");
-            Object Y = checkNotNull(map.get("Y"), "Y 偏移量不能为空，请检查!");
+            Object robotId = checkNotNull(map.get("robotId"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_rosrocker_controller_RosRockerController_java_JQRBHXXBNWKQJC"));
+            Object X = checkNotNull(map.get("X"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_rosrocker_controller_RosRockerController_java_XPYLBNWKQJC"));
+            Object Y = checkNotNull(map.get("Y"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_rosrocker_controller_RosRockerController_java_YPYLBNWKQJC"));
 
             // TODO: 02/08/2017 坐标需要经过一个算法转换
             double originalX = Double.parseDouble(String.valueOf(X)), originalY = Double.parseDouble(String.valueOf(Y));

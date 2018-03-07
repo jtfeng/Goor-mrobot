@@ -4,10 +4,12 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.HttpClientUtil;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.*;
@@ -37,6 +39,9 @@ public class AuthValidationExceptionFilter implements Filter {
 
     protected static final Log LOGGER = LogFactory.getLog(AuthValidationExceptionFilter.class);
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         boolean isExcludedPage = true;
@@ -65,7 +70,7 @@ public class AuthValidationExceptionFilter implements Filter {
                 String principal = jsonObject.getString("principal");
                 if (StringUtil.isNullOrEmpty(principal)) {
                     response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
-                    response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
+                    response.sendError(Constant.ERROR_CODE_NOT_LOGGED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_filter_AuthValidationExceptionFilter_java_NMYDLQDL"));
                 } else {
                     String userName = JSON.parseObject(principal).getString("username");
                     LOGGER.info("userName===>" + userName);
@@ -74,7 +79,7 @@ public class AuthValidationExceptionFilter implements Filter {
                         chain.doFilter(req, res);
                     } else {
                         response.setStatus(Constant.ERROR_CODE_NOT_LOGGED);
-                        response.sendError(Constant.ERROR_CODE_NOT_LOGGED, "您没有登录，请登录");
+                        response.sendError(Constant.ERROR_CODE_NOT_LOGGED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_filter_AuthValidationExceptionFilter_java_NMYDLQDL"));
                     }
                 }
             } catch (Exception e) {

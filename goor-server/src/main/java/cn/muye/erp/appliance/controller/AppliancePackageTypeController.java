@@ -8,6 +8,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.appliance.service.ApplianceService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -33,18 +34,21 @@ public class AppliancePackageTypeController {
     @Autowired
     private ApplianceService applianceService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @RequestMapping(value = "appliance/packageType", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody AppliancePackageType appliancePackageType) {
         String name = appliancePackageType.getName();
         AppliancePackageType appliancePackageTypeDB = appliancePackageTypeService.findByName(name);
         if (appliancePackageTypeDB != null) {
-            return AjaxResult.failed("(" + name + ")该包装类型已经存在，请勿重复添加！");
+            return AjaxResult.failed("(" + name + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_GBZLXYJCZQWZFTJ"));
         }
         appliancePackageType.setDeleteFlag(Constant.NORMAL);
         appliancePackageType.setCreateTime(new Date());
         appliancePackageType.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
         appliancePackageTypeService.save(appliancePackageType);
-        return AjaxResult.success(appliancePackageType, "添加成功");
+        return AjaxResult.success(appliancePackageType, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_TJCG"));
     }
 
     @RequestMapping(value = "appliance/packageType", method = RequestMethod.PUT)
@@ -52,27 +56,27 @@ public class AppliancePackageTypeController {
         String name = appliancePackageType.getName();
         Long id = appliancePackageType.getId();
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_IDBNWK"));
         }
         AppliancePackageType appliancePackageTypeDB = appliancePackageTypeService.findTypeById(id);
         if (appliancePackageTypeDB == null) {
-            return AjaxResult.failed("(" + name + ")该包装类型不存在");
+            return AjaxResult.failed("(" + name + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_GBZLXBCZ"));
         }
         AppliancePackageType packageType = appliancePackageTypeService.findByName(name);
         if (null != packageType && !id.equals(packageType.getId())) {
-            return AjaxResult.failed("(" + name + ")该名称的包装类型存在");
+            return AjaxResult.failed("(" + name + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_GMCDBZLXCZ"));
         }
         appliancePackageTypeService.updateSelective(appliancePackageType);
-        return AjaxResult.success(appliancePackageType, "修改成功");
+        return AjaxResult.success(appliancePackageType, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_XGCG"));
     }
 
     @RequestMapping(value = "appliance/packageType/{id}", method = RequestMethod.GET)
     public AjaxResult findById(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("查询ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_CXIDBNWK"));
         }
         AppliancePackageType appliancePackageType = appliancePackageTypeService.findTypeById(id);
-        return AjaxResult.success(appliancePackageType, "查询成功");
+        return AjaxResult.success(appliancePackageType, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_CXCG"));
     }
 
     @RequestMapping(value = "appliance/packageType/{id}", method = RequestMethod.DELETE)
@@ -82,10 +86,10 @@ public class AppliancePackageTypeController {
         List<Appliance> applianceList = applianceService.listByPackageTypeId(id);
         AppliancePackageType appliancePackageType = appliancePackageTypeService.findTypeById(id);
         if (null != applianceList && applianceList.size() > 0) {
-            return AjaxResult.failed("包装类型(" + appliancePackageType.getName() + ")已关联到器械，无法删除");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_BZLX") + appliancePackageType.getName() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_YGLDQXWFSC"));
         }
         appliancePackageTypeService.removeById(id);
-        return AjaxResult.success("删除成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_SCCG"));
     }
 
     @RequestMapping(value = "appliance/packageType", method = RequestMethod.GET)
@@ -100,7 +104,7 @@ public class AppliancePackageTypeController {
         List<AppliancePackageType> appliancePackageTypeList = appliancePackageTypeService.listAllPackageType(whereRequest);
         PageInfo<AppliancePackageType> page = new PageInfo<AppliancePackageType>(appliancePackageTypeList);
 
-        return AjaxResult.success(page, "查询成功");
+        return AjaxResult.success(page, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_AppliancePackageTypeController_java_CXCG"));
     }
 
 }

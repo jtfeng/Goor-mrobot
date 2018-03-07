@@ -10,6 +10,7 @@ import cn.muye.assets.robot.service.RobotPasswordService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageInfo;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -35,18 +36,19 @@ public class RobotController {
     private RobotService robotService;
     @Autowired
     private RobotPasswordService robotPasswordService;
-
     @Autowired
     private RobotConfigService robotConfigService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @RequestMapping(value = {"assets/robotOnlineStatus"}, method = RequestMethod.GET)
     @ApiOperation(value = "查询机器人在线状态", httpMethod = "GET", notes = "查询机器人在线状态")
     @ResponseBody
     public AjaxResult robotList(WhereRequest whereRequest, @RequestParam(value = "robotSn") String robotSn) {
         if (CacheInfoManager.getRobotOnlineCache(robotSn)) {
-            return AjaxResult.success("机器人在线");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_JQRZX"));
         } else {
-            return AjaxResult.success("机器人不在线");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_JQRBZX"));
         }
     }
 
@@ -73,7 +75,7 @@ public class RobotController {
     public AjaxResult robotList(WhereRequest whereRequest) {
         List<Robot> list = robotService.listRobot(whereRequest);
         PageInfo<Robot> pageList = new PageInfo<>(list);
-        return AjaxResult.success(pageList, "查询成功");
+        return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_CXCG"));
     }
 
     /**
@@ -96,24 +98,24 @@ public class RobotController {
             String regex = "^[10]{8}";
             boolean flag = robotIdForElevator.matches(regex);
             if (!flag) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "电梯编号必须为8位二进制");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_DTBHBXW8WEJZ"));
             }
         }*/
         List list = robot.getOriginChargerMapPointList();
         //TODO 将来要能绑定多个充电桩，现在只能绑定一个20171104
         if(list != null && list.size() > 1) {
-            return AjaxResult.failed(AjaxResult.CODE_FAILED,"只能绑定一个充电桩");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_ZNBDYGCDZ"));
         }
 
         //判断是否有重复的名称
         Robot robotDbByName = robotService.getByName(robotName);
         if (robotDbByName != null && !robotDbByName.getId().equals(robotId)) {
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人名称重复");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_JQRMCZF"));
         }
         //判断是否有重复的编号
         Robot robotDbByCode = robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID);
         if (robotDbByCode != null && !robotDbByCode.getId().equals(robotId)) {
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "机器人编号重复");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_JQRBHZF"));
         }
         AjaxResult ajaxResult;
         if (robotId != null) { //修改
@@ -148,16 +150,16 @@ public class RobotController {
                     ajaxResult = robotService.updateRobotAndBindChargerMapPoint(robotDb, lowBatteryThresholdDb, sufficientBatteryThresholdDb, lowRobotBatteryThreshold, sufficientBatteryThreshold, robotCodeDb);
                 } catch (Exception e) {
                     LOGGER.error("{}", e);
-                    return AjaxResult.failed("修改同步失败，回滚操作");
+                    return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_XGTBSBHGCZ"));
                 } finally {
                 }
             } else if (robotDb != null && robotCode != null && !robotCode.equals(robotCodeDb)) {
-                return AjaxResult.failed(robot, "不能修改机器人的编号");
+                return AjaxResult.failed(robot, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_BNXGJQRDBH"));
             } else {
-                return AjaxResult.failed("不存在的机器人");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_BCZDJQR"));
             }
         } else {
-            return AjaxResult.failed("不允许新增机器人");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_BYXXZJQR"));
         }
         return ajaxResult;
     }
@@ -168,9 +170,9 @@ public class RobotController {
     public AjaxResult deleteRobot(@ApiParam(value = "机器人") @PathVariable String id) {
         if (id != null) {
             robotService.deleteRobotById(Long.valueOf(id));
-            return AjaxResult.success("删除成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_SCCG"));
         } else {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误，查询失败");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_CSYWCXSB"));
         }
     }
 
@@ -184,14 +186,14 @@ public class RobotController {
                 String regex = "^\\d{4}$";
                 boolean flag = password.matches(regex);
                 if (!flag) {
-                    return AjaxResult.failed("密码必须为4位数字");
+                    return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_MMBXW4WSZ"));
                 }
             }
             robotPasswordService.batchUpdateRobotPwdList(robot.getPasswords());
-            return AjaxResult.success("修改密码成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_XGMMCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("修改密码出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_XGMMCC"));
         }
     }
 

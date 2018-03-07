@@ -14,6 +14,7 @@ import cn.muye.erp.appliance.mapper.ApplianceMapper;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.appliance.service.ApplianceService;
 import cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -47,11 +48,23 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     @Autowired
     private OperationDefaultApplianceXREFMapper operationDefaultApplianceXREFMapper;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     private static final Logger logger = LoggerFactory.getLogger(ApplianceServiceImpl.class);
 
     private static Logger LOGGER = LoggerFactory.getLogger(ApplianceServiceImpl.class);
 
-    public static final String[] EXCEL_TITLE = {"类型", "类别", "包装类型"};
+    public static final String[] EXCEL_TITLE = {"goor_server_src_main_java_cn_muye_erp_appliance_service_impl_ApplianceServiceImpl_java_LX", "goor_server_src_main_java_cn_muye_erp_appliance_service_impl_ApplianceServiceImpl_java_LB", "goor_server_src_main_java_cn_muye_erp_appliance_service_impl_ApplianceServiceImpl_java_BZLX"};
+
+    public static String[] getExcelTileProperties(LocaleMessageSourceService localeMessageSourceService) {
+        String[] props = new String[EXCEL_TITLE.length];
+        for(int i = 0; i < EXCEL_TITLE.length; i++) {
+            props[i] = localeMessageSourceService.getMessage(EXCEL_TITLE[i]);
+        }
+        return props;
+    }
+
     @Autowired
     private ApplianceMapper applianceMapper;
 
@@ -169,12 +182,12 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     }
 
     private void createAndSave(Map<String, Object> map) {
-        String chName = map.get(EXCEL_TITLE[0]).toString();
+        String chName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[0])).toString();
         logger.info("器械名称 = " + chName);
-        String departmentTypeName = map.get(EXCEL_TITLE[1]).toString();
+        String departmentTypeName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[1])).toString();
         logger.info("类别 = " + departmentTypeName);
         int departmentTypeCode = getDepartmentTypeCode(departmentTypeName.trim());
-        String packageTypeName = map.get(EXCEL_TITLE[2]).toString();
+        String packageTypeName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[2])).toString();
         logger.info("包装类型 = " + packageTypeName);
         Long packageTypeId = getPackageTypeId(packageTypeName.trim());
         //重复数据校验

@@ -37,6 +37,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.erp.appliance.service.ApplianceDepartmentTypeService;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.operation.service.OperationDepartmentTypeService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.order.service.OrderSettingService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSON;
@@ -86,6 +87,9 @@ public class UserController implements ApplicationContextAware {
     @Autowired
     private UserRoleXrefService userRoleXrefService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @Value("${authServer.host}")
     private String authServerHost;
 
@@ -123,42 +127,42 @@ public class UserController implements ApplicationContextAware {
         Integer directLoginKey = user.getDirectLoginKey();
         try {
             if (user == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_CSYW"));
             }
             if (userId == null && StringUtil.isNullOrEmpty(userName)) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码不能为空");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHMHMMBNWK"));
             }
             if (roleId == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "角色不能为空");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_JSBNWK"));
             }
             if (user.getRoleId() != null && !user.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && user.getStationList() != null && user.getStationList().size() > 0) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不是站管理员角色，不能绑定站");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_BSZGLYJSBNBDZ"));
             }
             if (roleId != null && roleId.equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && (stationList == null || (stationList != null && (stationList.size() > 1 || stationList.size() == 0)))) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站不能为空或者不能绑定多个站");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_ZBNWKHZBNBDDGZ"));
             }
             if (roleId != null && roleId.equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能新增超级管理员");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_BNXZCJGLY"));
             }
             if (directLoginKey != null && directLoginKey > 9999 && directLoginKey < 1000) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "快捷密码必须是4位数");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_KJMMBXS4WS"));
             }
             User userDb = userService.getByUserName(userName);
             if (userDb != null && userDb.getUserName().equals(userName) && !userDb.getId().equals(user.getId())) {
-                return AjaxResult.failed("用户名重复");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHMZF"));
             }
             //todo StoreId暂时用100去代替，以后用session里获取
             if (directLoginKey != null) {
                 User userDbByDirectKey = userService.getUserByDirectKey(directLoginKey, SearchConstants.FAKE_MERCHANT_STORE_ID);
                 if (userDbByDirectKey != null) {
                     if (directLoginKey != null && userDbByDirectKey.getDirectLoginKey().equals(directLoginKey) && !userDbByDirectKey.getId().equals(userId)) {
-                        return AjaxResult.failed("4位快捷码重复");
+                        return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_4WKJMZF"));
                     }
                 }
             }
             if (userId == null) {
                 userService.addUser(user);
-                return AjaxResult.success(entityToDto(user, SOURCE_TYPE_OTHER), "新增成功");
+                return AjaxResult.success(entityToDto(user, SOURCE_TYPE_OTHER), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_XZCG"));
             } else {
                 User userDbById = userService.getById(userId);
                 if (userDbById != null) {
@@ -174,14 +178,14 @@ public class UserController implements ApplicationContextAware {
                         userDbById.setDirectLoginKey(user.getDirectLoginKey());
                     }
                     userService.updateUser(userDbById);
-                    return AjaxResult.success(entityToDto(userDbById, SOURCE_TYPE_OTHER), "修改成功");
+                    return AjaxResult.success(entityToDto(userDbById, SOURCE_TYPE_OTHER), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_XGCG"));
                 } else {
-                    return AjaxResult.failed("不存在该用户");
+                    return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_BCZGYH"));
                 }
             }
         } catch (Exception e) {
             LOGGER.error("database error", e);
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "站点ID不存在");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_ZDIDBCZ"));
         } finally {
         }
     }
@@ -199,7 +203,7 @@ public class UserController implements ApplicationContextAware {
     public AjaxResult list(WhereRequest whereRequest) {
         User userDb = userUtil.getCurrentUser();
         if (userDb == null) {
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "当前用户不存在");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_DQYHBCZ"));
         }
         UserRoleXref userRoleXrefDb = userRoleXrefService.getByUserId(userDb.getId());
         if (userRoleXrefDb != null) {
@@ -214,7 +218,7 @@ public class UserController implements ApplicationContextAware {
         }
         PageInfo<UserDTO> userPageInfo = new PageInfo(list);
         userPageInfo.setList(dtoList);
-        return AjaxResult.success(userPageInfo, "查询成功");
+        return AjaxResult.success(userPageInfo, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_CXCG"));
     }
 
     /**
@@ -229,7 +233,7 @@ public class UserController implements ApplicationContextAware {
     @ResponseBody
     public AjaxResult delete(@PathVariable(value = "id") String id) {
         userService.fakeDeleteById(Long.valueOf(id));
-        return AjaxResult.success("删除成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_SCCG"));
     }
 
 
@@ -252,7 +256,7 @@ public class UserController implements ApplicationContextAware {
     @ResponseBody
     public AjaxResult login(@RequestBody User userParam) {
         if (StringUtil.isNullOrEmpty(userParam.getUserName()) || StringUtil.isNullOrEmpty(userParam.getPassword())) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "用户名或密码为空");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHMHMMWK"));
         }
         Map map = doLogin(userParam.getUserName(), userParam.getPassword(), Constant.RECORD_SCENE_SOURCE_PC);
         return doCheckLogin(map);
@@ -270,7 +274,7 @@ public class UserController implements ApplicationContextAware {
     public AjaxResult directKeyLogin(@RequestBody User userParam) {
         try {
             if (userParam.getDirectLoginKey() == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_CSCW"));
             }
             Integer directLoginKey = userParam.getDirectLoginKey();
             //todo StoreId暂时用100去代替，以后用session里获取
@@ -279,10 +283,10 @@ public class UserController implements ApplicationContextAware {
                 Map map = doLogin(userDb.getUserName(), userDb.getPassword(), Constant.RECORD_SCENE_SOURCE_PAD);
                 return doCheckLoginPad(map);
             } else {
-                return AjaxResult.failed("用户不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHBCZ"));
             }
         } catch (NumberFormatException e) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_CSCW"));
         } finally {
         }
     }
@@ -298,12 +302,12 @@ public class UserController implements ApplicationContextAware {
         List<StationDTO4User> stationList = (List<StationDTO4User>) map.get("stationList");
         //如果拿到的user对象为空，则说明认证校验没有通过
         if (userDTO == null) {
-            return AjaxResult.failed("用户名或密码错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHMHMMCW"));
         }
         //如果用户是站管理员，绑定的站list为空或者是未激活的站，则登录失败
         if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))
                 && (stationList == null || stationList.get(0).getActive() == Constant.DELETE)) {
-            return AjaxResult.failed("用户未绑定站，请联系客服");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHWBDZQLXKF"));
         }
         //如果用户不是站管理员，走到这说明已经认证通过了，则直接登录成功
         if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
@@ -312,7 +316,7 @@ public class UserController implements ApplicationContextAware {
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
             //登录成功，初始化权限
 //            initialUserPermission(userDTO.getId(), map);
-            return AjaxResult.success(map, "登录成功");
+            return AjaxResult.success(map, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_DLCG"));
         }
         //如果用户是站管理员，站list不是空，绑定的站也是激活的，则登录成功
         if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null
@@ -334,9 +338,9 @@ public class UserController implements ApplicationContextAware {
             }
             //登录成功，初始化权限
 //            initialUserPermission(userDTO.getId(), map);
-            return AjaxResult.success(map, "登录成功");
+            return AjaxResult.success(map, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_DLCG"));
         } else {
-            return AjaxResult.failed("用户未绑定站，请联系客服");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHWBDZQLXKF"));
         }
     }
 
@@ -351,16 +355,16 @@ public class UserController implements ApplicationContextAware {
         List<StationDTO4User> stationList = (List<StationDTO4User>) map.get("stationList");
         //如果拿到的user对象为空，则说明认证校验没有通过
         if (userDTO == null) {
-            return AjaxResult.failed("用户名或密码错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHMHMMCW"));
         }
         //如果不是站管理员就不让其登录
         if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "不是站管理员不能登录");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_BSZGLYBNDL"));
         }
         //如果用户是站管理员，绑定的站list为空或者是未激活的站，则登录失败
         if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))
                 && (stationList == null || stationList.get(0).getActive() == Constant.DELETE)) {
-            return AjaxResult.failed("用户未绑定站，请联系客服");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHWBDZQLXKF"));
         }
         //如果用户是站管理员，站list不是空，绑定的站也是激活的，则登录成功
         if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null
@@ -381,9 +385,9 @@ public class UserController implements ApplicationContextAware {
                     break;
                 }
             }
-            return AjaxResult.success(map, "登录成功");
+            return AjaxResult.success(map, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_DLCG"));
         } else {
-            return AjaxResult.failed("用户未绑定站，请联系客服");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHWBDZQLXKF"));
         }
     }
 
@@ -398,7 +402,7 @@ public class UserController implements ApplicationContextAware {
     public AjaxResult getAllEnum() {
         Map map = Maps.newHashMap();
         map.put("enums", getAllEnums(null));
-        return AjaxResult.success(map, "常量查询成功");
+        return AjaxResult.success(map, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_CLCXCG"));
     }
 
     /**
@@ -437,7 +441,7 @@ public class UserController implements ApplicationContextAware {
     @ResponseBody
     public AjaxResult logOut() {
         CacheInfoManager.removeUserLoginStatusCache(userUtil.getCurrentUser().getUserName());
-        return AjaxResult.success("注销成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_ZXCG"));
     }
 
     /**
@@ -466,9 +470,9 @@ public class UserController implements ApplicationContextAware {
             });
             userService.bindRole(roleIdSet, userId);
         } catch (Exception e) {
-            return AjaxResult.failed("该角色有绑定关系，无法删除");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_GJSYBDGXWFSC"));
         }
-        return AjaxResult.success("删除成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_SCCG"));
     }
 
 

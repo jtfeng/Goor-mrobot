@@ -20,6 +20,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.area.point.service.PointService;
 import cn.muye.dispatch.service.*;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.service.missiontask.MissionFuncsService;
 import cn.muye.util.SessionUtil;
 import com.alibaba.fastjson.JSON;
@@ -63,6 +64,8 @@ public class MissionController {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+	@Autowired
+	private LocaleMessageSourceService localeMessageSourceService;
 
 	private int TWO_MINUTES_MILLISECOND = 120000;
 
@@ -78,13 +81,13 @@ public class MissionController {
 			String missionItemName = missionItem.getName();
 			MissionItem missionItemDB = missionItemService.findByName(missionItemName,storeId);
 			if (missionItemDB != null && !missionItemDB.getId().equals(missionItem.getId())) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务节点！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_YCZXTMCDRWJD"));
 			}
 
 			//从session取当前切换的场景
 			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_QXQHDMCJ"));
 			}
 			missionItem.setSceneId(scene.getId());
 
@@ -93,17 +96,17 @@ public class MissionController {
 			if (missionItem.getId() != null) {
 				missionItem.setUpdateTime(new Date());
 				missionItemService.update(missionItem);
-				msg = "修改成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XGCG");
 			} else {
 				missionItem.setStoreId(storeId);
 				missionItem.setCreateTime(new Date());
 				missionItemService.save(missionItem);
-				msg = "新增成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XZCG");
 			}
 			return AjaxResult.success(missionItem,msg);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 	}
 
@@ -114,19 +117,19 @@ public class MissionController {
 		AjaxResult resp;
 		try {
 			if (id == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCW"));
 			}
 			//TODO 从session取当前切换的门店ID
 			MissionItem missionItemDB = missionItemService.get(id,SearchConstants.FAKE_MERCHANT_STORE_ID);
 			if (missionItemDB == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_YSCDDXBCZ"));
 			}
 
 			missionItemService.delete(missionItemDB);
-			return AjaxResult.success("删除成功");
+			return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_SCCG"));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "可能在其他地方被使用");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_KNZQTDFBSY"));
 		}
 	}
 
@@ -178,13 +181,13 @@ public class MissionController {
 			String missionName = mission.getName();
 			Mission missionDB = missionService.findByName(missionName,storeId);
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_YCZXTMCDRWC"));
 			}
 
 			//从session取当前切换的场景
 			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_QXQHDMCJ"));
 			}
 			mission.setSceneId(scene.getId());
 
@@ -192,7 +195,7 @@ public class MissionController {
 			if (mission.getId() != null) {
 				mission.setUpdateTime(new Date());
 				missionService.update(mission);
-				msg = "修改成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XGCG");
 			} else {
 				mission.setStoreId(storeId);
 				//从session取当前切换的sceneId
@@ -200,12 +203,12 @@ public class MissionController {
 
 				mission.setCreateTime(new Date());
 				missionService.save(mission);
-				msg = "新增成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XZCG");
 			}
 			resp = AjaxResult.success(mission,msg);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 		return resp;
 	}
@@ -228,20 +231,20 @@ public class MissionController {
 			String missionName = mission.getName();
 			Mission missionDB = missionService.findByName(missionName,storeId);
 			if (missionDB != null && !missionDB.getId().equals(mission.getId())) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务串！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_YCZXTMCDRWC"));
 			}
 
 			//从session取当前切换的场景
 			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_QXQHDMCJ"));
 			}
 			mission.setSceneId(scene.getId());
 
 			//校验点是否存在
 			Set<MissionItem> missionItemSet = mission.getMissionItemSet();
 			if(missionItemSet == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能创建空任务！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_BNCJKRW"));
 			}
 			for(MissionItem missionItem : missionItemSet) {
 				//跟点相关的指令，需要校验点是否存在
@@ -251,27 +254,27 @@ public class MissionController {
 						Long pointId = JSON.parseObject(data).getLong(Constant.ID);
 						MapPoint mapPoint = pointService.findById(pointId);
 						if(mapPoint == null) {
-							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWDBCZ"));
 						}
 						missionItem.setData(JSON.toJSONString(mapPoint));
 					}
 					catch (Exception e) {
-						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWSJGSBZQ"));
 					}
 				}
 			}
 			String msg = "";
 			if (mission.getId() != null) {
-				msg = "修改成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XGCG");
 			} else {
-				msg = "新增成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XZCG");
 			}
 
 			missionService.updateFull(mission,missionDB,storeId);
 			resp = AjaxResult.success(mission,msg);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 		return resp;
 	}
@@ -290,7 +293,7 @@ public class MissionController {
 
 			Mission missionDB = missionService.get(missionId,storeId);
 			if (missionDB == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "任务串不存在！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_RWCBCZ"));
 			}
 
 			List<Long> bindList = JSON.parseArray(bindString, Long.class);
@@ -298,10 +301,10 @@ public class MissionController {
 
 			missionService.update(missionDB, bindList,storeId);
 //			missionService.update(missionDB, missionItems);
-			resp = AjaxResult.success("成功");
+			resp = AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CG"));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 		return resp;
 	}
@@ -316,14 +319,14 @@ public class MissionController {
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			Mission missionDB = missionService.get(id,storeId);
 			if (missionDB == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_YSCDDXBCZ"));
 			}
 
 			missionService.delete(missionDB,storeId);
-			return AjaxResult.success("删除成功");
+			return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_SCCG"));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "可能在其他地方被使用");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_KNZQTDFBSY"));
 		}
 	}
 
@@ -374,7 +377,7 @@ public class MissionController {
 			//从session取当前切换的场景
 			Scene scene = SessionUtil.getScene();
 			if(scene == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_QXQHDMCJ"));
 			}
 			Long sceneId = scene.getId();
 			missionList.setSceneId(sceneId);
@@ -384,25 +387,25 @@ public class MissionController {
 			String missionListName = missionList.getName();
 			MissionList missionListDB = missionListService.findByName(missionListName,storeId,sceneId);
 			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "当前场景下已存在相同名称的任务串！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_DQCJXYCZXTMCDRWC"));
 			}
 
 			String msg = "";
 			if (missionList.getId() != null) {
 				missionList.setUpdateTime(new Date());
 				missionListService.update(missionList);
-				msg = "修改成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XGCG");
 			} else {
 				missionList.setStoreId(storeId);
 				missionList.setCreateTime(new Date());
 				missionListService.save(missionList);
-				msg = "新建成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XJCG");
 			}
 			return AjaxResult.success(msg);
 
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 	}
 
@@ -415,14 +418,14 @@ public class MissionController {
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			MissionList missionListDB = missionListService.get(id,storeId);
 			if (missionListDB == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要删除的对象不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_YSCDDXBCZ"));
 			}
 
 			missionListService.delete(missionListDB,storeId);
-			return AjaxResult.success("删除成功");
+			return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_SCCG"));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "可能在其他地方被使用");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_KNZQTDFBSY"));
 		}
 	}
 
@@ -483,7 +486,7 @@ public class MissionController {
 			return AjaxResult.success(missionListList);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 	}
 
@@ -554,7 +557,7 @@ public class MissionController {
 			return AjaxResult.success(result);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 	}
 
@@ -570,7 +573,7 @@ public class MissionController {
 			Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 			MissionList missionListDB = missionListService.get(missionListId,storeId);
 			if (missionListDB == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "总任务不存在！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_ZRWBCZ"));
 			}
 
 			List<Long> bindList = JSON.parseArray(bindString, Long.class);
@@ -578,10 +581,10 @@ public class MissionController {
 			missionListDB.setUpdateTime(new Date());
 			missionListService.update(missionListDB, bindList,storeId);
 //			missionListService.update(missionListDB, missions);
-			return AjaxResult.success("成功");
+			return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CG"));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 	}
 
@@ -601,11 +604,11 @@ public class MissionController {
 			//从session取当前切换的场景
 			/*Scene scene = SessionUtil.getScene();
 			if(scene == null || userSceneId == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_QXQHDMCJ"));
 			}
 			Long sceneId = scene.getId();
 			if(!userSceneId.equals(sceneId)) {
-				return AjaxResult.success(JSON.toJSONString(scene), "当前场景已被其他人切换，现帮你自动切换场景！");
+				return AjaxResult.success(JSON.toJSONString(scene), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_DQCJYBQTRQHXBNZDQHCJ"));
 			}*/
 			Long sceneId = userSceneId;
 			missionList.setSceneId(sceneId);
@@ -621,7 +624,7 @@ public class MissionController {
 			if(missionListType == null
 					|| (!missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)
 					&& !missionListType.equals(Constant.MISSION_LIST_TYPE_CHARGE))){
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务类型不正确");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWRWLXBZQ"));
 			}
 
 			MissionList missionListDB = null;
@@ -630,7 +633,7 @@ public class MissionController {
 			String missionListName = missionList.getName();
 			missionListDB = missionListService.findByName(missionListName,storeId,sceneId);
 			if (missionListDB != null && !missionListDB.getId().equals(missionList.getId())) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "已存在相同名称的任务列表！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_YCZXTMCDRWLB"));
 			}
 
 			//取第一个Mission做导航、语音、充电任务参数校验---------------------------------------
@@ -640,7 +643,7 @@ public class MissionController {
 			//校验点是否存在
 			Set<MissionItem> missionItemSet = mission.getMissionItemSet();
 			if(missionItemSet == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "不能创建空任务！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_BNCJKRW"));
 			}
 			for(MissionItem missionItem : missionItemSet) {
 				missionItem.setSceneId(sceneId);
@@ -652,7 +655,7 @@ public class MissionController {
 						Long pointId = JSON.parseObject(data).getLong(Constant.ID);
 						MapPoint mapPoint = pointService.findById(pointId);
 						if(mapPoint == null) {
-							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWDBCZ"));
 						}
 						missionItem.setData(JSON.toJSONString(mapPoint));
 						//任务所属地图名称
@@ -660,7 +663,7 @@ public class MissionController {
 					}
 					catch (Exception e) {
 						LOGGER.error(e.getMessage(),e);
-						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWSJGSBZQ"));
 					}
 				}
 				//按时间长度充电任务，点数据校验
@@ -670,7 +673,7 @@ public class MissionController {
 						JSONObject mapPointTemp =(JSONObject) jsonObject.get(Constant.ORDER_TIME_CHARGE_POINT);
 						MapPoint mapPoint = pointService.findById(Long.parseLong(mapPointTemp.get(Constant.ID).toString()));
 						if(mapPoint == null) {
-							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，点不存在！");
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWDBCZ"));
 						}
 						jsonObject.put(Constant.ORDER_TIME_CHARGE_POINT,mapPoint);
 						missionItem.setData(JSON.toJSONString(jsonObject));
@@ -679,7 +682,7 @@ public class MissionController {
 					}
 					catch (Exception e) {
 						LOGGER.error(e.getMessage(),e);
-						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，数据格式不正确！");
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWSJGSBZQ"));
 					}
 				}
 			}
@@ -688,7 +691,7 @@ public class MissionController {
 			if(missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)) {
 				//TODO 美亚调度写死两个Mission，第一个是导航和语音的mission，第二个是到目标点后等待任务和语音任务（可以没有等待任务）
 				if(missionList.getMissionList() == null || missionList.getMissionList().size() > 2) {
-					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，只能一个导航和一个等待任务！");
+					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_SJGSCWZNYGDHHYGDDRW"));
 				}
 
 				//取第二个mission做等待任务业务参数校验，如果第二个任务存在，再判断
@@ -699,7 +702,7 @@ public class MissionController {
 					Set<MissionItem> missionWaitItemSet = missionWait.getMissionItemSet();
 					if(missionWaitItemSet == null
 							|| missionWaitItemSet.size() > 2) {
-						return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数错误，等待任务数据格式不正确！");
+						return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWDDRWSJGSBZQ"));
 					}
 
 					//对missionItem设置场景ID
@@ -712,12 +715,12 @@ public class MissionController {
 			else if(missionListType.equals(Constant.MISSION_LIST_TYPE_CHARGE)) {
 				//TODO 美亚调度充电写死一个Mission
 				if(missionList.getMissionList() == null || missionList.getMissionList().size() != 1) {
-					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，充电任务只能有一个！");
+					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_SJGSCWCDRWZNYYG"));
 				}
 				Mission chargeMission = missionList.getMissionList().get(0);
 				Set<MissionItem> chargeMissionItems = chargeMission.getMissionItemSet();
 				if(chargeMissionItems == null || chargeMissionItems.size() > 2) {
-					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "数据格式错误，充电任务只能有一个充电点和语音！");
+					return  AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_SJGSCWCDRWZNYYGCDDHYY"));
 				}
 
 				//设置场景Id
@@ -729,16 +732,16 @@ public class MissionController {
 
 			String msg = "";
 			if (missionList.getId() != null) {
-				msg = "修改成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XGCG");
 			} else {
-				msg = "新增成功";
+				msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XZCG");
 			}
 			missionListService.updateFull(missionList,missionListDB,storeId);
 
 			resp = AjaxResult.success(missionList,msg);
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
-			return AjaxResult.failed(AjaxResult.CODE_FAILED, "出错");
+			return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 		return resp;
 	}
@@ -763,7 +766,7 @@ public class MissionController {
 
 			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
 			if(robotCodesArray == null || robotCodesArray.length == 0) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"机器人不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_JQRBCZ"));
 			}
 
 			//TODO 从session取当前切换门店的ID
@@ -781,13 +784,13 @@ public class MissionController {
 //			missionList.setRepeatCount(1);
 			missionList.setPriority(0);
 			missionList.setMissionList(new ArrayList<Mission>());
-			missionList.setName("测试" + currentDateTimeString);
+			missionList.setName(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CS") + currentDateTimeString);
 			List<Mission> missions = new ArrayList<>();
 			//missionList的重复次数根据最后一个任务来
 			for( Long id : missionListIds ) {
 				MissionList missionListTemp = missionListService.get(id,storeId);
 				if(missionListTemp == null) {
-					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"ID为"+ id +"的任务不存在");
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_IDW")+ id +localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_DRWBCZ"));
 				}
 				//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
 				List<Mission> missionsTemp = missionListTemp.getMissionList();
@@ -804,7 +807,7 @@ public class MissionController {
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
-			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"出错");
+			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 		return resp;
 	}
@@ -849,34 +852,34 @@ public class MissionController {
 			//从session取当前切换的场景
 			/*Scene scene = SessionUtil.getScene();
 			if(scene == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_QXQHDMCJ"));
 			}
 			Long sceneId = scene.getId();
 			if(!userSceneId.equals(sceneId)) {
-				return AjaxResult.success(JSON.toJSONString(scene), "当前场景已被其他人切换，现帮你自动切换场景！");
+				return AjaxResult.success(JSON.toJSONString(scene), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_DQCJYBQTRQHXBNZDQHCJ"));
 			}*/
 			Long sceneId = userSceneId;
 			missionList.setSceneId(sceneId);
 
 			if(robotIds == null || robotIds.length <= 0) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCW"));
 			}
 
 			String[] robotCodesArray = getRobotCodesArrayByIdList(robotIds);
 			if(robotCodesArray == null || robotCodesArray.length == 0) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"机器人不存在");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_JQRBCZ"));
 			}
 			//TODO 暂时限定只能发送到1台机器人
 			if(robotCodesArray == null
 					|| robotCodesArray.length != 1) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到机器人或选择的机器人多于1台");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWWZDJQRHXZDJQRDY1T"));
 			}
 
 			//TODO 下发机器人的任务如果和
 			CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotCodesArray[0]);
 			if (null == currentInfo){
 				LOGGER.error("未获取到当前位置信息");
-				return AjaxResult.failed("未获取到当前位置信息");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_WHQDDQWZXX"));
 			}
 			String targetMapName = currentInfo.getMapInfo().getMapName();
 
@@ -894,7 +897,7 @@ public class MissionController {
 					|| missionList.getStopTime() == null
 					|| missionList.getRepeatCount() == null
 					|| missionList.getIntervalTime() == null) {
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,开始时间、结束时间、重复次数、间隔时间、场景不能为空！");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWKSSJJSSJZFCSJGSJCJBNWK"));
 			}
 
 			//校验任务类型是否正确
@@ -902,7 +905,7 @@ public class MissionController {
 			if(missionListType == null
 					|| (!missionListType.equals(Constant.MISSION_LIST_TYPE_PATROL)
 							&& !missionListType.equals(Constant.MISSION_LIST_TYPE_CHARGE))){
-				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务类型不正确");
+				return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWRWLXBZQ"));
 			}
 
 			List<MissionList> missionLists = new ArrayList<MissionList>();
@@ -923,13 +926,13 @@ public class MissionController {
 					MissionList missionListTemp = missionListService.get(id,storeId);
 					//校验missionList是否存在
 					if(missionListTemp == null) {
-						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到任务");
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWWZDRW"));
 					}
 
 					//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
 					List<Mission> missionsTemp = missionListTemp.getMissionList();
 					if(missionsTemp == null) {
-						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务内容异常");
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWRWNRYC"));
 					}
 
 					//TODO 校验missionItemTemps里面的任务是不是都是机器人所在地图的
@@ -945,23 +948,23 @@ public class MissionController {
 									//带时长充电任务校验地图
 									JsonMissionItemDataTimeCharge timeCharge = JSON.parseObject(missionItem.getData(),JsonMissionItemDataTimeCharge.class);
 									if(timeCharge == null || timeCharge.getPoint() == null) {
-										return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"点参数错误");
+										return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_DCSCW"));
 									}
 									if(!timeCharge.getPoint().getMap_name().equals(targetMapName)) {
-										return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"下发的充电任务与机器人当前所在地图不一致，无法执行");
+										return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XFDCDRWYJQRDQSZDTBYZWFZX"));
 									}
 								}
 								else if(featureItemId.equals(Constant.ORDER_LASER_NAVIGATION)) {
 									//巡逻任务校验点是否是当前
 									MapPoint mapPoint = JSON.parseObject(missionItem.getData(),MapPoint.class);
 									if(!mapPoint.getMapName().equals(targetMapName)) {
-										return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"下发的充电任务与机器人当前所在地图不一致，无法执行");
+										return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XFDCDRWYJQRDQSZDTBYZWFZX"));
 									}
 								}
 
 							} catch (Exception e) {
 								LOGGER.error("任务数据错误"+e.getMessage(),e);
-								return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"任务数据错误");
+								return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_RWSJCW"));
 							}
 						}
 					}
@@ -981,7 +984,7 @@ public class MissionController {
 				//离开充电桩任务列表
 				MissionList leaveCharge = new MissionList();
 
-				goToCharge.setName(name + Constant.START + currentDateTimeString);
+				goToCharge.setName(name + localeMessageSourceService.getMessage(Constant.START) + currentDateTimeString);
 				goToCharge.setStartTime(missionList.getStartTime());
 				goToCharge.setStopTime(missionList.getStopTime());
 				goToCharge.setRepeatCount(missionList.getRepeatCount());
@@ -990,7 +993,7 @@ public class MissionController {
 				goToCharge.setMissionListType(missionListType);
 				goToCharge.setMissionList(new ArrayList<Mission>());
 
-				leaveCharge.setName(name + Constant.STOP + currentDateTimeString);
+				leaveCharge.setName(name + localeMessageSourceService.getMessage(Constant.STOP) + currentDateTimeString);
 				leaveCharge.setStartTime(missionList.getStopTime());
 				leaveCharge.setStopTime(missionList.getStopTime() + Constant.LEAVE_CHARGER_DELAY_TIME );
 				leaveCharge.setRepeatCount(missionList.getRepeatCount());
@@ -1003,20 +1006,20 @@ public class MissionController {
 				//通过总任务ID列表得到总任务
 				List<Mission> missions = goToCharge.getMissionList();
 				if(missionListIds.length != 1) {
-					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,数量不正确,只能选择一个充电点");
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWSLBZQZNXZYGCDD"));
 				}
 				Long id = missionListIds[0];
 				MissionList missionListTemp = missionListService.get(id,storeId);
 				//校验missionList是否存在
 				if(missionListTemp == null) {
-					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,未找到任务");
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWWZDRW"));
 				}
 
 				//对missionList做一些处理，主要是拼接上面missionListTemp里面的任务到一个任务列表
 				List<Mission> missionsTemp = missionListTemp.getMissionList();
 				//充电任务列表只能有一个任务：充电任务
 				if(missionsTemp == null && missionsTemp.size() != 1) {
-					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务内容异常");
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWRWNRYC"));
 				}
 				missions.addAll(missionsTemp);
 
@@ -1024,18 +1027,18 @@ public class MissionController {
 				Set<MissionItem> missionItemTemps = missionTemp.getMissionItemSet();
 				//校验missionItemTemps只能有一个充电任务
 				if(missionItemTemps == null || missionItemTemps.size() == 0) {
-					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误,任务单元内容异常");
+					return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CSCWRWDYNRYC"));
 				}
 				//TODO 校验missionItemTemps里面的任务是不是都是机器人所在地图的
 				for(MissionItem missionItem : missionItemTemps) {
 					try {
 						MapPoint mapPoint = (MapPoint) JSON.parse(missionItem.getData());
 						if(!mapPoint.getMapName().equals(targetMapName)) {
-							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"下发的充电任务与机器人当前所在地图不一致，无法执行");
+							return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_XFDCDRWYJQRDQSZDTBYZWFZX"));
 						}
 					} catch (Exception e) {
 						LOGGER.error("充电任务数据错误"+e.getMessage(),e);
-						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"充电任务数据错误");
+						return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CDRWSJCW"));
 					}
 				}
 
@@ -1083,7 +1086,7 @@ public class MissionController {
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(),e);
-			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"出错");
+			resp = AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CC"));
 		}
 		return resp;
 	}
@@ -1159,7 +1162,7 @@ public class MissionController {
 		if (currentMap != null) {
 			Long sendTimeMilSeconds = currentMap.getSendTime().getTime();
 			if (new Date().getTime() - sendTimeMilSeconds > TWO_MINUTES_MILLISECOND) {
-				return AjaxResult.failed("机器人已经离线太久，无法调度");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_JQRYJLXTJWFDD"));
 			} else {
 				JSONObject jsonObject = JSON.parseObject(currentMap.getMessageText());
 				String data = jsonObject.getString(TopicConstants.DATA);
@@ -1173,10 +1176,10 @@ public class MissionController {
 				//TODO 从session取当前切换门店的ID
 				Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
 				List<Mission> missionList = missionService.list(whereRequest,storeId);
-				return AjaxResult.success(missionList, "查询成功");
+				return AjaxResult.success(missionList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_CXCG"));
 			}
 		} else {
-			return AjaxResult.failed("机器人已经离线太久，无法调度");
+			return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_MissionController_java_JQRYJLXTJWFDD"));
 		}
 	}
 

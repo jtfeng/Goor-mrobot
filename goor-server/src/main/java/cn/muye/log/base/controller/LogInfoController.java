@@ -11,6 +11,7 @@ import cn.mrobot.utils.DateTimeUtils;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.bean.RobotLogWarningDetail;
 import cn.muye.log.base.bean.RobotLogWarningVO;
 import cn.muye.log.base.service.LogInfoService;
@@ -65,7 +66,10 @@ public class LogInfoController {
     @Autowired
     private RobotService robotService;
 
-    private static final String LOG_FILE_PREFIX = "日志导出_";
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
+    private static final String LOG_FILE_PREFIX = "goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_RZDC_";
     //CSV文件分隔符
     private static final String NEW_LINE_SEPARATOR = "\n";
 
@@ -85,7 +89,7 @@ public class LogInfoController {
             return AjaxResult.success(page);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed(1, "日志查询错误");
+            return AjaxResult.failed(1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_RZCXCW"));
         }
     }
 
@@ -104,11 +108,11 @@ public class LogInfoController {
             if (!fileDir.exists()){
                 fileDir.mkdirs();
             }
-            String logFileName = LOG_FILE_PREFIX + DateTimeUtils.getNormalNameDateTime() + Constant.LOG_FILE_SUFFIX;
+            String logFileName = localeMessageSourceService.getMessage(LOG_FILE_PREFIX) + DateTimeUtils.getNormalNameDateTime() + Constant.LOG_FILE_SUFFIX;
             File lgFile = new File(fileDir, logFileName);
 
             // 创建CSV写对象
-            String[] FILE_HEADER ={"门店ID", "设备编号", "日志等级", "日志类型", "模块", "场景名", "地图名", "具体信息", "创建时间", "警告错误处理人", "警告错误处理时间"};
+            String[] FILE_HEADER ={localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_MDID"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_SBBH"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_RZDJ"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_RZLX"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_MK"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_CJM"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_DTM"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_JTXX"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_CJSJ"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_JGCWCLR"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_JGCWCLSJ")};
             CSVFormat format = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR).withFirstRecordAsHeader();
 
             // 这是写入CSV的代码
@@ -137,10 +141,10 @@ public class LogInfoController {
 
             String logFileHttpPath = DOWNLOAD_HTTP + File.separator + fileOppositePath + File.separator + logFileName;
             logFileHttpPath = logFileHttpPath.replaceAll("\\\\", "/");
-            return AjaxResult.success(logFileHttpPath, "导出成功");
+            return AjaxResult.success(logFileHttpPath, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_DCCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed(1, "日志导出错误");
+            return AjaxResult.failed(1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_RZDCCW"));
         } finally {
             try {
                 if (null != printer) {
@@ -180,10 +184,10 @@ public class LogInfoController {
             }
             Map<String, Object> returnMap = Maps.newLinkedHashMap();
             returnMap.put(queryRobot.getCode(), robotLogWarningVOs);
-            return AjaxResult.success(returnMap, "获取机器人警报信息成功");
+            return AjaxResult.success(returnMap, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_HQJQRJBXXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_base_controller_LogInfoController_java_XTNBCC"));
         }
     }
 

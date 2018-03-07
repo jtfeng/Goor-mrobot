@@ -6,6 +6,7 @@ import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.station.service.StationService;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,8 @@ public class ErpSystemSettingController {
 
     @Autowired
     private StationMacPasswordXREFService stationMacPasswordXREFService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 设置不对诺亚开放的手术室
@@ -43,7 +45,7 @@ public class ErpSystemSettingController {
     @RequestMapping(name = "services/operation/setting/notAccessOperation", method = RequestMethod.GET)
     public AjaxResult setNotAccessOperation(@RequestParam("operations") String operations) {
         if (StringUtil.isBlank(operations)) {
-            return AjaxResult.failed("参数不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_setting_controller_ErpSystemSettingController_java_CSBNWK"));
         }
         LOGGER.info("设置不对诺亚开放的手术室 = " + operations);
         List<Long> stationIdList = JSONArray.parseArray(operations, Long.class);
@@ -66,7 +68,7 @@ public class ErpSystemSettingController {
             station.setRobotAccess(Station.RobotAccess.ACCESS.getCode());
             stationService.updateSelective(station);
         }
-        return AjaxResult.success("操作成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_setting_controller_ErpSystemSettingController_java_CZCG"));
     }
 
     private void removeRelationsByStationId(Long stationId) {

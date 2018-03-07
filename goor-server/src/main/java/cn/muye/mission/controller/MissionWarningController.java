@@ -6,6 +6,7 @@ import cn.mrobot.bean.mission.MissionWarning;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.mission.bean.RobotPositionRecord;
 import cn.muye.mission.service.MissionWarningService;
 import cn.muye.util.PathUtil;
@@ -32,16 +33,17 @@ public class MissionWarningController extends BaseController {
     private static final Logger LOGGER = LoggerFactory.getLogger(MissionWarningController.class);
     @Autowired
     private MissionWarningService missionWarningService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @RequestMapping(value = "test", method = RequestMethod.POST)
     private AjaxResult test(){
         try {
             missionWarningService.checkRobotWarningState();
-            return AjaxResult.success("test成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_TESTCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("test失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_TESTSB"));
         }
 
     }
@@ -63,10 +65,10 @@ public class MissionWarningController extends BaseController {
                 }
                 robotPositionRecordList.addLast(new RobotPositionRecord(mapPoint));
             }
-            return AjaxResult.success("test成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_TESTCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("test失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_TESTSB"));
         }
 
     }
@@ -78,7 +80,7 @@ public class MissionWarningController extends BaseController {
             return AjaxResult.success(list);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("test失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_TESTSB"));
         }
 
     }
@@ -104,7 +106,7 @@ public class MissionWarningController extends BaseController {
             return AjaxResult.success(totalDistance);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("test失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_TESTSB"));
         }
 
     }
@@ -123,7 +125,7 @@ public class MissionWarningController extends BaseController {
             return AjaxResult.success(pageInfo);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("查询超时警报时间错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_CXCSJBSJCW"));
         }
 
     }
@@ -138,13 +140,13 @@ public class MissionWarningController extends BaseController {
         try {
             boolean hasExist = missionWarningService.hasExistWarning(missionWarning);
             if (hasExist){
-                return AjaxResult.failed("该起始点到结束点的记录已存在，无法添加");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_GQSDDJSDDJLYCZWFTJ"));
             }
             missionWarningService.save(missionWarning);
-            return AjaxResult.success("新增警报提示成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_XZJBTSCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("新增警报提示失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_XZJBTSSB"));
         }
 
     }
@@ -159,10 +161,10 @@ public class MissionWarningController extends BaseController {
     private AjaxResult updateMissionWarning(@RequestBody MissionWarning missionWarning){
         try {
             missionWarningService.update(missionWarning);
-            return AjaxResult.success("修改警报提示成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_XGJBTSCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("修改警报提示失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_mission_controller_MissionWarningController_java_XGJBTSSB"));
         }
 
     }

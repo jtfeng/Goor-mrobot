@@ -15,6 +15,7 @@ import cn.muye.erp.appliance.service.ApplianceService;
 import cn.muye.erp.appliance.service.impl.ApplianceServiceImpl;
 import cn.muye.erp.operation.service.OperationTypeService;
 import cn.muye.erp.operation.service.impl.OperationTypeServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -50,6 +51,9 @@ public class ApplianceController {
     @Autowired
     private OperationTypeService operationTypeService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
 
@@ -63,17 +67,17 @@ public class ApplianceController {
     @RequestMapping(value = "appliance", method = RequestMethod.POST)
     public AjaxResult save(@RequestBody Appliance appliance) {
         if (null == appliance) {
-            return AjaxResult.failed("保存对象不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_BCDXBNWK"));
         }
         if (StringUtil.isBlank(appliance.getName()) ||
                 appliance.getDepartmentTypeCode() == 0 ||
                 appliance.getPackageTypeId() == null) {
-            return AjaxResult.failed("保存对象关键属性不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_BCDXGJSXBNWK"));
         }
         //校验包装类别
         AppliancePackageType appliancePackageType = appliancePackageTypeService.findTypeById(appliance.getPackageTypeId());
         if (null == appliancePackageType) {
-            return AjaxResult.failed("包装类别不存在或已删除，请预添加");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_BZLBBCZHYSCQYTJ"));
         }
         AjaxResult validateResult = validateAppliance(appliance);
         if (!validateResult.isSuccess()) {
@@ -87,19 +91,19 @@ public class ApplianceController {
         }
         appliance.setSearchName(appliance.getSearchName().toUpperCase());
         applianceService.save(appliance);
-        return AjaxResult.success(appliance, "添加成功");
+        return AjaxResult.success(appliance, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_TJCG"));
     }
 
     @RequestMapping(value = "appliance", method = RequestMethod.PUT)
     public AjaxResult update(@RequestBody Appliance appliance) {
         if (null == appliance) {
-            return AjaxResult.failed("修改对象不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGDXBNWK"));
         }
         if (StringUtil.isBlank(appliance.getName())) {
-            return AjaxResult.failed("修改对象名称不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGDXMCBNWK"));
         }
         if (null == appliance.getId()) {
-            return AjaxResult.failed("修改对象ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGDXIDBNWK"));
         }
 
         AjaxResult validateResult = validateAppliance(appliance);
@@ -119,7 +123,7 @@ public class ApplianceController {
         applianceDB.setPackageType(appliancePackageTypeService.findTypeById(packageTypeId));
         applianceDB.setCreateTime(new Date());
         applianceService.updateSelective(applianceDB);
-        return AjaxResult.success(applianceDB, "修改成功");
+        return AjaxResult.success(applianceDB, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGCG"));
     }
 
     private AjaxResult validateAppliance(Appliance appliance) {
@@ -127,7 +131,7 @@ public class ApplianceController {
         List<Appliance> applianceList = applianceService.findByNameAndCode(appliance.getName(),
                 appliance.getDepartmentTypeCode());
         if (null != applianceList && applianceList.size() > 0 && !applianceList.get(0).getId().equals(appliance.getId())) {
-            return AjaxResult.failed("修改失败，同名称，类别，包装类型数据已经存在");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGSBTMCLBBZLXSJYJCZ"));
         }
         return AjaxResult.success();
     }
@@ -135,19 +139,19 @@ public class ApplianceController {
     @RequestMapping(value = "appliance/{id}", method = RequestMethod.GET)
     public AjaxResult get(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_IDBNWK"));
         }
         Appliance applianceDB = applianceService.findApplianceById(id);
-        return AjaxResult.success(applianceDB, "查询成功");
+        return AjaxResult.success(applianceDB, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_CXCG"));
     }
 
     @RequestMapping(value = "appliance/{id}", method = RequestMethod.DELETE)
     public AjaxResult delete(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_IDBNWK"));
         }
         applianceService.removeById(id);
-        return AjaxResult.success("删除成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_SCCG"));
     }
 
     /**
@@ -158,11 +162,11 @@ public class ApplianceController {
     @RequestMapping(value = "services/appliance/searchName", method = RequestMethod.GET)
     public AjaxResult list(@RequestParam("searchName") String searchName) {
         if (StringUtil.isBlank(searchName)) {
-            return AjaxResult.failed("器械查询名称不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_QXCXMCBNWK"));
         }
         searchName = searchName.toUpperCase();
         List<Appliance> applianceList = applianceService.listBySearchName(searchName);
-        return AjaxResult.success(applianceList, "查询成功");
+        return AjaxResult.success(applianceList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_CXCG"));
     }
 
     @RequestMapping(value = "appliance", method = RequestMethod.GET)
@@ -177,7 +181,7 @@ public class ApplianceController {
         List<Appliance> applianceList = applianceService.lists(whereRequest);
         PageInfo<Appliance> page = new PageInfo<Appliance>(applianceList);
 
-        return AjaxResult.success(page, "查询成功");
+        return AjaxResult.success(page, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_CXCG"));
     }
 
     @RequestMapping(value = "appliance/import", method = RequestMethod.POST)
@@ -185,15 +189,15 @@ public class ApplianceController {
         try {
             File uploadFile = saveUploadFile(APPLIANCE_IMPORT_FILE_PATH, file);
             //校验文件格式
-            AjaxResult validateResult = validate(ApplianceServiceImpl.EXCEL_TITLE, uploadFile);
+            AjaxResult validateResult = validate(ApplianceServiceImpl.getExcelTileProperties(localeMessageSourceService), uploadFile);
             if (!validateResult.isSuccess()) {
                 return validateResult;
             }
             boolean result = applianceService.importExcel(uploadFile);
-            return result ? AjaxResult.success("导入成功") : AjaxResult.failed("导入文件出错");
+            return result ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);
-            return AjaxResult.failed("导入文件出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         }
     }
 
@@ -213,10 +217,10 @@ public class ApplianceController {
                 return validateResult;
             }
             boolean result = operationTypeService.importExcel(uploadFile);
-            return result ? AjaxResult.success("导入成功") : AjaxResult.failed("导入文件出错");
+            return result ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);
-            return AjaxResult.failed("导入文件出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         }
     }
 
@@ -236,10 +240,10 @@ public class ApplianceController {
                 return validateResult;
             }
             boolean result = operationTypeService.importOperationDefaultApplianceExcel(uploadFile);
-            return result ? AjaxResult.success("导入成功") : AjaxResult.failed("导入文件出错");
+            return result ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);
-            return AjaxResult.failed("导入文件出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         }
     }
 
@@ -271,17 +275,17 @@ public class ApplianceController {
      */
     private AjaxResult validate(String[] titles, File uploadFile) {
         if (null == uploadFile) {
-            return AjaxResult.failed("上传文件为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_SCWJWK"));
         }
         boolean isExcelFile = ExcelUtil.isExcelFile(uploadFile.getName());
         if (!isExcelFile) {
-            return AjaxResult.failed("导入失败，请上传excel文件");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRSBQSCEXCELWJ"));
         }
         //校验excel表头
         List<String> headerList = ExcelUtil.getTableSheetDeader(uploadFile);
         boolean validateResult = validateHeader(titles, headerList);
         if (!validateResult) {
-            return AjaxResult.failed("导入失败，数据模板不匹配，请参照模板上传数据");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRSBSJMBBPPQCZMBSCSJ"));
         }
         return AjaxResult.success();
     }
@@ -293,9 +297,9 @@ public class ApplianceController {
      */
     @RequestMapping(value = "appliance/import/templateDownload", method = RequestMethod.GET)
     public AjaxResult templateDownload() {
-        String url = DOWNLOAD_HTTP + "/100/templates/器械明细-导入数据模板.xlsx";
+        String url = DOWNLOAD_HTTP + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_100TEMPLATESQXMXDRSJMBXLSX");
         LOGGER.info("额外器械数据的导入模板下载地址= " + url);
-        return AjaxResult.success(url, "操作成功");
+        return AjaxResult.success(url, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_CZCG"));
     }
 
     private static boolean validateHeader(String[] titles, List<String> headerList) {

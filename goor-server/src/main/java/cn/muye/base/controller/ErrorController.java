@@ -2,6 +2,7 @@ package cn.muye.base.controller;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.constant.Constant;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import java.util.Map;
 public class ErrorController extends BasicErrorController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorController.class);
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Autowired
     public ErrorController(ServerProperties serverProperties) {
@@ -39,19 +42,19 @@ public class ErrorController extends BasicErrorController {
         LOGGER.error(body.toString());
         int errorCode = (int) body.get("status");
         if (errorCode == Constant.ERROR_CODE_NOT_LOGGED) {
-            map.put("message", "用户未登录");
+            map.put("message", localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_ErrorController_java_YHWDL"));
             map.put("code", Constant.ERROR_CODE_NOT_LOGGED);
             map.put("data", "");
             map.put("success", false);
             return new ResponseEntity<>(map, HttpStatus.OK);
         } else if (errorCode == Constant.ERROR_CODE_NOT_AUTHORIZED) {
-            map.put("message", "用户无权限");
+            map.put("message", localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_ErrorController_java_YHWQX"));
             map.put("code", Constant.ERROR_CODE_NOT_AUTHORIZED);
             map.put("data", "");
             map.put("success", false);
             return new ResponseEntity<>(map, HttpStatus.OK);
         } else {
-            map.put("message", "系统内部错误");
+            map.put("message", localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_ErrorController_java_XTNBCW"));
             map.put("code", AjaxResult.CODE_SYSTEM_ERROR);
             map.put("data", "");
             map.put("success", false);

@@ -6,6 +6,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.assets.robot.service.RobotService;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.charge.service.ChargeInfoService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
@@ -42,7 +43,8 @@ public class ChargeInfoController implements ApplicationContextAware {
     private ChargeInfoService chargeInfoService;
     @Autowired
     private RobotService robotService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     /**
      * 实时获取电量信息
      *
@@ -53,22 +55,22 @@ public class ChargeInfoController implements ApplicationContextAware {
     public AjaxResult ChargeStatus(@RequestParam("code") String code) {
         try {
             if (StringUtil.isNullOrEmpty(code)) {
-                return AjaxResult.failed("设备编号不能为空");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_charge_controller_ChargeInfoController_java_SBBHBNWK"));
             }
 
             Robot robot = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
             if (null == robot) {
-                return AjaxResult.failed("机器人编号（" + code + "）不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_charge_controller_ChargeInfoController_java_JQRBH") + code + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_charge_controller_ChargeInfoController_java_BCZ"));
             }
             List<ChargeInfo> chargeInfoList = chargeInfoService.getByDeviceId(code);
             if (chargeInfoList.size() <= 0) {
-                return AjaxResult.failed("无当前机器人（" + code + "）信息");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_charge_controller_ChargeInfoController_java_WDQJQR") + code + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_charge_controller_ChargeInfoController_java_XX"));
             }
 
             return AjaxResult.success(toEntity(new HashMap(),chargeInfoList.get(0)));
         } catch (Exception e) {
             LOGGER.error("获取信息出错", e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_charge_controller_ChargeInfoController_java_XTCW"));
         }
     }
 

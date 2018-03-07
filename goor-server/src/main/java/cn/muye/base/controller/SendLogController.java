@@ -9,6 +9,7 @@ import cn.muye.base.bean.MessageView;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,8 @@ import java.util.stream.Collectors;
 public class SendLogController {
     @Autowired
     private OffLineMessageService offLineMessageService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     private boolean messageSave(MessageInfo messageInfo) throws Exception {
         if (messageInfo == null
@@ -48,10 +51,10 @@ public class SendLogController {
             List<OffLineMessage> offLineMessageList = offLineMessageService.pageList(whereRequest.getPage(),whereRequest.getPageSize());
             List<MessageView> messageViewList = offLineMessageList.stream().map(offLineMessage -> new MessageView(offLineMessage)).collect(Collectors.toList());
             PageInfo<MessageView> pageList = new PageInfo<>(messageViewList);
-            return AjaxResult.success(pageList,"发送日志查询成功");
+            return AjaxResult.success(pageList,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_SendLogController_java_FSRZCXCG"));
         } catch (Exception e) {
             log.error("查询发送日志出现错误", e);
-            return AjaxResult.failed("系统内部错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_SendLogController_java_XTNBCW"));
         }
     }
 

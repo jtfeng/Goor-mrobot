@@ -9,6 +9,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -37,6 +38,9 @@ public class SceneController {
     @Autowired
     private RobotService robotService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     /**
      * 传入一个 session ID，将场景对应的信息存入到 session
      *
@@ -48,7 +52,7 @@ public class SceneController {
     public AjaxResult storeSceneInfoToSession(@PathVariable("sceneId") String sceneId, HttpServletRequest request) {
         try {
             Scene scene = this.sceneService.storeSceneInfoToSession(Constant.RECORD_SCENE_SOURCE_PC, sceneId, UserUtil.getUserTokenValue());
-            return AjaxResult.success(scene, "保存场景信息到用户会话中成功!");
+            return AjaxResult.success(scene, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_BCCJXXDYHHHZCG"));
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage());
         }
@@ -65,9 +69,9 @@ public class SceneController {
         // TODO: 21/07/2017 创建新场景
         try {
             Object taskResult = sceneService.saveScene(scene);
-            return AjaxResult.success(taskResult, "新增场景信息成功!");
+            return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e.getMessage(), "新增场景信息失败");
+            return AjaxResult.failed(e.getMessage(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXSB"));
         }
     }
 
@@ -86,9 +90,9 @@ public class SceneController {
             if (taskResult instanceof AjaxResult) {
                 return (AjaxResult) taskResult;
             }
-            return AjaxResult.success(taskResult, "修改场景信息成功！");
+            return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XGCJXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e.getMessage(), "修改场景信息失败！");
+            return AjaxResult.failed(e.getMessage(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XGCJXXSB"));
         }
     }
 
@@ -103,9 +107,9 @@ public class SceneController {
         // TODO: 21/07/2017 根据传入的场景 ID 编号，删除对应的场景与绑定的机器人和地图信息
         try {
             sceneService.deleteSceneById(Long.parseLong(id));
-            return AjaxResult.success(id, "删除场景信息成功！");
+            return AjaxResult.success(id, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_SCCJXXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "删除场景信息失败！");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_SCCJXXSB"));
         }
     }
 
@@ -121,9 +125,9 @@ public class SceneController {
         try {
             List<Scene> list = sceneService.listScenes(whereRequest);
             PageInfo<Scene> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "查询成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e, "查询失败");
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CXSB"));
         }
     }
 
@@ -138,7 +142,7 @@ public class SceneController {
     public AjaxResult syncMap(@RequestParam("sceneId") Long sceneId, @RequestParam("robotIds") String robotIds) {
         try {
             if (null == sceneId || StringUtil.isBlank(robotIds)) {
-                return AjaxResult.failed("场景ID和机器人ID列表不能为空");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CJIDHJQRIDLBBNWK"));
             }
             List<Long> robotIdList = JSONArray.parseArray(robotIds, Long.class);
             //查询场景
@@ -153,7 +157,7 @@ public class SceneController {
             if (result instanceof AjaxResult) {
                 return (AjaxResult) result;
             } else {
-                return AjaxResult.success(result, "操作成功");
+                return AjaxResult.success(result, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CZCG"));
             }
         } catch (Exception e) {
             return AjaxResult.failed();
@@ -171,7 +175,7 @@ public class SceneController {
     public AjaxResult sendSyncMapMessageToRobots(@PathVariable("sceneId") String sceneId) {
         try {
             Object taskResult = sceneService.sendSyncMapMessageToRobots(Long.parseLong(sceneId));
-            return AjaxResult.success(taskResult, "操作成功");
+            return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CZCG"));
         } catch (Exception e) {
             return AjaxResult.failed();
         }
@@ -190,7 +194,7 @@ public class SceneController {
             //robotIds
             log.info(String.format("接收到的参数为：%s", body.toString()));
             Object taskResult = sceneService.sendSyncMapMessageToSpecialRobots(body);
-            return AjaxResult.success(taskResult, "操作成功");
+            return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CZCG"));
         } catch (Exception e) {
             return AjaxResult.failed();
         }
@@ -245,7 +249,7 @@ public class SceneController {
             Scene currentScene = sceneService.findById(scene.getId());
             currentScene.setActive( currentScene.getActive() == 1 ? 0 : 1 );
             sceneService.updateSelective(currentScene);
-            return AjaxResult.success(currentScene.getActive() == 1 ? "已启用" : "已禁用");
+            return AjaxResult.success(currentScene.getActive() == 1 ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YQY") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YJY"));
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());

@@ -10,6 +10,7 @@ import cn.mrobot.utils.ajax.AjaxResponse;
 import cn.muye.area.map.service.MapAnalysisService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.FileUploadService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -52,6 +53,8 @@ public class FilesController {
 
     @Autowired
     private MapAnalysisService mapAnalysisService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     private static final String RESOURCE_TYPE_DIR = "default";
     private static final String RESOURCE_TYPE_FILE = "file";
@@ -73,10 +76,10 @@ public class FilesController {
         try {
             String type = request.getParameter("type");
             if (type == null) {
-                return AjaxResponse.failed(-1, "参数错误");
+                return AjaxResponse.failed(-1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_FilesController_java_CSCW"));
             }
             if (StringUtil.isNullOrEmpty(deviceId)) {
-                return AjaxResponse.failed(-2, "设备编号不能为空");
+                return AjaxResponse.failed(-2, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_FilesController_java_SBBHBNWK"));
             }
             File dest = FileUtils.getFile(DOWNLOAD_HOME + File.separator + deviceId + File.separator + path);
             if (type.equals(RESOURCE_TYPE_DIR)) {
@@ -95,7 +98,7 @@ public class FilesController {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             resp = AjaxResponse.failed(-1);
-            resp.setErrorString("出错");
+            resp.setErrorString(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_FilesController_java_CC"));
         }
         return resp;
     }
@@ -116,7 +119,7 @@ public class FilesController {
         AjaxResponse resp = AjaxResponse.success();
 
         if (StringUtil.isNullOrEmpty(deviceId)) {
-            return AjaxResponse.failed(-2, "设备编号不能为空");
+            return AjaxResponse.failed(-2, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_FilesController_java_SBBHBNWK"));
         }
 
         File dest = FileUtils.getFile(DOWNLOAD_HOME, deviceId, File.separator + path);
@@ -199,7 +202,7 @@ public class FilesController {
             return AjaxResponse.success();
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResponse.failed(-1, "文件上传失败");
+            return AjaxResponse.failed(-1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_FilesController_java_WJSCSB"));
         } finally {
             try {
                 in.close();
@@ -287,7 +290,7 @@ public class FilesController {
                 mapAnalysisService.analysis(info);
             } catch (Exception e) {
 //                mapAnalysisService.callBack();
-                throw new MapAnalysisException("地图解析失败，数据回滚");
+                throw new MapAnalysisException(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_controller_FilesController_java_DTJXSBSJHG"));
             }
 
         }

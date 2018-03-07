@@ -43,6 +43,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
 import cn.muye.dispatch.service.FeatureItemService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
@@ -118,6 +119,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Autowired
     private MissionWarningService missionWarningService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     //下单机器人对应的充电点
     private Map<String, MapPoint> chargePointMap = new HashMap<>();
 
@@ -170,7 +174,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if(ajaxResult == null || !ajaxResult.isSuccess()){
             logger.info("##############  createMissionLists failed ，发送客户端goor失败#################");
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return ajaxResult == null ? AjaxResult.failed("客户端无法连接，订单失败") : ajaxResult;
+            return ajaxResult == null ? AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KHDWFLJDDSB")) : ajaxResult;
         }else {
             logger.info("robot code is: " + order.getRobot().getCode() +
                     " , ####### tesk is: " + getGoorMissionMsg(listTasks));
@@ -193,7 +197,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                                            List<MissionList> missionLists) throws Exception{
         if(missionLists == null || missionLists.size() <= 0
                 || robotCode == null ) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"参数错误");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_CSCW"));
         }
 
         List<MissionListTask> listTasks = new ArrayList<>();
@@ -213,14 +217,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 getGoorMissionMsg(listTasks)
         );
         //TODO 加延时判断，ajaxResult为空也是报错
-        ajaxResult = (ajaxResult == null ? AjaxResult.failed(AjaxResult.CODE_FAILED,"消息发送失败") : ajaxResult);
+        ajaxResult = (ajaxResult == null ? AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XXFSSB")) : ajaxResult);
         if(ajaxResult.getCode() != AjaxResult.CODE_SUCCESS) {
             //发送失败回滚数据库
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ajaxResult;
         }
         else {
-            return AjaxResult.success("消息发送成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XXFSCG"));
         }
     }
 
@@ -727,7 +731,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             missionListTask.setSceneId(order.getScene().getId());
         }
         missionListTask.setIntervalTime(0L);
-        missionListTask.setDescription("下单自动任务列表"+System.currentTimeMillis());
+        missionListTask.setDescription(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XDZDRWLB")+System.currentTimeMillis());
         missionListTask.setMissionListType(MissionListType_normal);
         missionListTask.setName(missionListTask.getDescription());
         missionListTask.setOrderId(order.getId());
@@ -857,7 +861,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initMissionTaskDoor ");
 
-        String parentName = "门任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_MRW");
 
         //单点路径导航任务，当前路径导航到门任务等待点
         MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
@@ -959,7 +963,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initMissionTaskElevator ");
 
-        String parentName = "电梯任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTRW");
 
         Long elevatorid = null;
         //电梯任务，发送进入电梯到第几层
@@ -1093,7 +1097,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initMissionTaskChongDian ");
 
-        String parentName = "充电任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_CDRW");
 
         //单点路径导航任务，当前路径导航到充电点
         MissionTask sigleNavTask = getSigleNavTask(order, mp, parentName);
@@ -1124,7 +1128,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initMissionTaskXiaHuo ");
 
-        String parentName = "卸货任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XHRW");
 
         boolean isSetOrderDetailMP = false;
         if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
@@ -1181,7 +1185,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initMissionTaskQuHuo ");
 
-        String parentName = "取货任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_QHRW");
 
         boolean isSetOrderDetailMP = false;
         if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
@@ -1250,7 +1254,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initMissionTaskSongHuo ");
 
-        String parentName = "中间送货站点任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZJSHZDRW");
 
         boolean isSetOrderDetailMP = false;
         if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
@@ -1313,7 +1317,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "测试任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_CSRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getTestItemTask(order, mp, parentName));
@@ -1337,7 +1341,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "测试Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_CSITEM"));
         itemTask.setName(MissionItemName_test);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataFake fake = new JsonMissionItemDataFake();
@@ -1370,7 +1374,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "单点导航任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DDDHRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getSigleNavItemTask(order, mp, parentName));
@@ -1393,7 +1397,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "单点导航Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DDDHITEM"));
         itemTask.setName(MissionItemName_nav);
         //这里就是单点导航的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataLaserNavigation data =
@@ -1424,7 +1428,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint startMp,
             MapPoint endMp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "优先固定路径导航任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_YXGDLJDHRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getPathNavItemTask(order, startMp, endMp, parentName));
@@ -1468,7 +1472,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         && roadPaths.get(0).getPathId() != null) {
                     //TODO 如果有多条需要根据条件过滤掉取一条，比如权值最高等
                     RoadPath roadPath = roadPaths.get(0);
-                    itemTask.setDescription(parentName + "固定路径导航Item");
+                    itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GDLJDHITEM"));
                     itemTask.setName(MissionItemName_path_nav);
                     //这里就是固定路径导航的数据格式存储地方,根据mp和数据格式定义来创建
                     JsonMissionItemDataPathNavigation data =
@@ -1486,7 +1490,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
 
             //如果没查找到路径则用单点导航任务
-            itemTask.setDescription(parentName + "单点导航Item");
+            itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DDDHITEM"));
             itemTask.setName(MissionItemName_nav);
             //这里就是单点导航的数据格式存储地方,根据mp和数据格式定义来创建
             JsonMissionItemDataLaserNavigation data =
@@ -1520,7 +1524,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             MPointAtts mPointAtts) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "进入固定路径导航任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_JRGDLJDHRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getStaticPathItemTask(order, mp, parentName, mPointAtts));
@@ -1545,7 +1549,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "进入固定路径导航Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_JRGDLJDHITEM"));
         itemTask.setName(MissionItemName_path_nav);
         //这里就是固定路径导航的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataPathNavigation data =
@@ -1581,7 +1585,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "等待任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DDRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getWaitingItemTask(order, mp, parentName));
@@ -1604,7 +1608,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "等待Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DDITEM"));
         itemTask.setName(MissionItemName_waiting);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(NULL_JSON_OBJ);
@@ -1624,7 +1628,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String fileName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "语音任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_YYRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getMp3VoiceItemTask(order, mp, parentName, fileName));
@@ -1646,7 +1650,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             String parentName,
             String fileName,
             Boolean ignorable) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "语音任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_YYRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getMp3VoiceItemTaskIgnorable(order, mp, parentName, fileName, ignorable));
@@ -1671,7 +1675,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "语音Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_YYITEM"));
         itemTask.setName(MissionItemName_mp3);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataMp3 json =
@@ -1741,7 +1745,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "列表语音Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LBYYITEM"));
         itemTask.setName(MissionItemName_mp3);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataMp3 json =
@@ -1766,7 +1770,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "进入充电任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_JRCDRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getGotoChargeItemTask(order, mp, parentName));
@@ -1789,7 +1793,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "进入充电Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_JRCDITEM"));
         itemTask.setName(MissionItemName_gotocharge);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataGotocharge json =
@@ -1816,7 +1820,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             Order order,
             MapPoint mp,
             String parentName) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "离开充电任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LKCDRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getLeaveChargeItemTask(order, mp, parentName));
@@ -1839,7 +1843,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "离开充电Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LKCDITEM"));
         itemTask.setName(MissionItemName_leavecharge);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(NULL_JSON_OBJ);
@@ -1859,7 +1863,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "装货任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZHRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getLoadItemTask(order, mp, parentName, orderDetailMP));
@@ -1883,7 +1887,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "装货Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZHITEM"));
         itemTask.setName(MissionItemName_load);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
 //        JsonMissionItemDataLoad json =
@@ -1934,7 +1938,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "无货架装货任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_WHJZHRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getLoadNoShelfItemTask(order, mp, parentName, orderDetailMP));
@@ -1958,7 +1962,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "无货架装货Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_WHJZHITEM"));
         itemTask.setName(MissionItemName_loadNoShelf);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         OrderDetail currentOrderDetail = null;
@@ -2007,7 +2011,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "卸货任务" );
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XHRW1519972774052") );
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getUnloadItemTask(order, mp, parentName, orderDetailMP));
@@ -2032,7 +2036,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "卸货Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XHITEM"));
         itemTask.setName(MissionItemName_unload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         JsonMissionItemDataUnload json =
@@ -2078,7 +2082,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             String orderDetailMP) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName,  "终点卸货任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName,  localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZDXHRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getFinalUnloadItemTask(order, mp, parentName, orderDetailMP));
@@ -2102,7 +2106,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "终点卸货Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZDXHITEM"));
         itemTask.setName(MissionItemName_finalUnload);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         OrderDetail currentOrderDetail = null;
@@ -2140,7 +2144,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataElevator json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTRW1519972774080"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getElevatorItemTask(order, mp, parentName, json));
@@ -2164,7 +2168,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "电梯Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTITEM"));
         itemTask.setName(MissionItemName_elevator);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         List<String> employee_num_list = employeeService.listAvailableEmployees(null,Constant.EMPLOYEE_TYPE_ELEVATOR_ADMIN);
@@ -2187,7 +2191,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataTwoElevator json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "双电梯任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_SDTRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getTwoElevatorItemTask(order, mp, parentName, json));
@@ -2211,7 +2215,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "双电梯Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_SDTITEM"));
         itemTask.setName(MissionItemName_elevator);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         List<String> employee_num_list = employeeService.listAvailableEmployees(null,Constant.EMPLOYEE_TYPE_ELEVATOR_ADMIN);
@@ -2234,7 +2238,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonElevatorNotice json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯通知任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTTZRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getElevatorNoticeItemTask(order, mp, parentName, json));
@@ -2259,7 +2263,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "电梯通知Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTTZITEM"));
         itemTask.setName(MissionItemName_elevator_notice);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
@@ -2281,7 +2285,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataElevatorUnlock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯解锁任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTJSRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getElevatorUnlockItemTask(order, mp, parentName, json));
@@ -2305,7 +2309,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "电梯解锁Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTJSITEM"));
         itemTask.setName(MissionItemName_elevator_unlock);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
@@ -2326,7 +2330,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataElevatorLock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "电梯加锁任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTJSRW1519972774135"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getElevatorLockItemTask(order, mp, parentName, json));
@@ -2350,7 +2354,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "电梯加锁Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DTJSITEM1519972774141"));
         itemTask.setName(MissionItemName_elevator_lock);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
@@ -2371,7 +2375,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataDoor json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "门任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_MRW1519972774148"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getDoorItemTask(order, mp, parentName, json));
@@ -2395,7 +2399,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "门Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_MITEM"));
         itemTask.setName(MissionItemName_door);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
@@ -2416,7 +2420,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataDoor json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "laneDoor任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LANEDOORRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getLaneDoorItemTask(order, mp, parentName, json));
@@ -2461,7 +2465,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataDoor json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "pathDoor任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_PATHDOORRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getPathDoorItemTask(order, mp, parentName, json));
@@ -2508,7 +2512,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataRoadPathUnlock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName, "路径解锁任务");
+        MissionTask missionTask = getCommonMissionTask(order, parentName, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LJJSRW"));
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getRoadPathUnlockItemTask(order, mp, parentName, json));
@@ -2532,7 +2536,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "路径解锁Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LJJSITEM"));
         itemTask.setName(MissionItemName_roadpath_unlock);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
@@ -2553,7 +2557,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             MapPoint mp,
             String parentName,
             JsonMissionItemDataRoadPathLock json) {
-        MissionTask missionTask = getCommonMissionTask(order, parentName,"路径加锁任务"  );
+        MissionTask missionTask = getCommonMissionTask(order, parentName,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LJJSRW1519972774195")  );
 
         List<MissionItemTask> missionItemTasks = new ArrayList<>();
         missionItemTasks.add(getRoadPathLockItemTask(order, mp, parentName, json));
@@ -2577,7 +2581,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if (order.getScene() != null) {
             itemTask.setSceneId(order.getScene().getId());
         }
-        itemTask.setDescription(parentName + "路径加锁Item");
+        itemTask.setDescription(parentName + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LJJSITEM1519972774201"));
         itemTask.setName(MissionItemName_roadpath_lock);
         //这里就是任务的数据格式存储地方,根据mp和数据格式定义来创建
         itemTask.setData(JsonUtils.toJson(json,
@@ -2868,7 +2872,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         initPathMissionListTask(missionListTask, order, mapPoints, mpAttrs);
 
         if(missionListTask.getMissionTasks().size() <= 0) {
-            return AjaxResult.failed("生成的任务序列为空，不需要机器人");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_SCDRWXLWKBXYJQR"));
         }
 
         //任务列表实例化完成，将数据存储到数据库
@@ -2887,7 +2891,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         if(ajaxResult == null || !ajaxResult.isSuccess()){
             logger.info("##############  createPathMissionLists failed ，发送客户端goor失败#################");
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return ajaxResult == null ? AjaxResult.failed("客户端无法连接，订单失败") : ajaxResult;
+            return ajaxResult == null ? AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KHDWFLJDDSB")) : ajaxResult;
         }else {
             logger.info("robot code is: " + order.getRobot().getCode() +
                     " , ####### tesk is: " + getGoorMissionMsg(listTasks));
@@ -2928,23 +2932,23 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         Robot robot = order.getRobot();
         if(robot == null) {
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "下单机器人参数错误。");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XDJQRCSCW"));
         }
 
         //存入机器人关联的充电桩信息
         chargePointMap.put(robot.getCode(), chargePoint);
 
         if(order.getScene() == null) {
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "失败！订单所属云端场景为空。");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_SBDDSSYDCJWK"));
         }
         String sceneName = order.getScene().getMapSceneName();
         //路径列表缓存机制，这样在动态调度里面可以从缓存读出图
         RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
 
         if(roadPathMaps == null) {
-            stringBuffer.append("规划路径失败。原因：未找到可供算法使用的图。");
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GHLJSBYYWZDKGSFSYDT"));
             LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "未找到规划图。");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_WZDGHT"));
         }
 
         //prePoint从机器人位置取
@@ -2960,9 +2964,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             else {
                 result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,startPathPoint, roadPathMaps);
                 if(result == null) {
-                    stringBuffer.append("规划路径,失败。原因：规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
+                    stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GHLJSBYYGHC") + robot.getName() + "(" + robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_SZWZDZHDLJSB"));
                     LogInfoUtils.info("server", ModuleEnums.MISSION, LogType.INFO_PATH_PLANNING, stringBuffer.toString());
-                    return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到装货点路径失败！");
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GHC") + robot.getName() + "(" + robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_SZWZDZHDLJSB"));
                 }
                 //如果搜索到可用路径，则设置起点为prePoint
                 prePoint = result.getStartPoint();
@@ -2972,7 +2976,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
         } catch (Exception e) {
             logger.error(e.getMessage(),e);
-            return AjaxResult.failed(AjaxResult.CODE_FAILED, "规划从" + robot.getName() + "(" + robot.getCode() + ")所在位置到点" + startPathPoint.getPointAlias() +"路径出错！");
+            return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GHC") + robot.getName() + "(" + robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_SZWZDD") + startPathPoint.getPointAlias() +localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_LJCC"));
         }
 
         //判断中间站点，如果有中间站点，添加中间站点的地图点，如果中间点跨楼层，则要在两个任务中间插入电梯任务
@@ -3299,7 +3303,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             missionListTask.setSceneId(order.getScene().getId());
         }
         missionListTask.setIntervalTime(0L);
-        missionListTask.setDescription("下单自动任务列表"+System.currentTimeMillis());
+        missionListTask.setDescription(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_XDZDRWLB")+System.currentTimeMillis());
         missionListTask.setMissionListType(MissionListType_normal);
         missionListTask.setName(missionListTask.getDescription());
         missionListTask.setOrderId(order.getId());
@@ -3344,10 +3348,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             mPointAtts.pathId = Constant.RELEASE_ROBOT_LOCK_ID + "";
             JsonMissionItemDataRoadPathUnlock json =
                     getJsonMissionItemDataRoadPathUnlock(mPointAtts);
-            missionListTask.getMissionTasks().add(getRoadPathUnlockTask(order, null, "最终释放机器人锁任务-", json));
+            missionListTask.getMissionTasks().add(getRoadPathUnlockTask(order, null, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZZSFJQRSRW"), json));
 
             //云端加在所有任务后，一个独立的语音任务：任务已完成。
-            missionListTask.getMissionTasks().add(getMp3VoiceTaskIgnorable(order, null, "最终结束语音-", MP3_TASK_OVER, false));
+            missionListTask.getMissionTasks().add(getMp3VoiceTaskIgnorable(order, null, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZZJSYY"), MP3_TASK_OVER, false));
         }
     }
 
@@ -3637,7 +3641,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskRoadPathUnlock ");
 
-        String parentName = "工控固定路径逻辑路径解锁任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GKGDLJLJLJJSRW");
 
         JsonMissionItemDataRoadPathUnlock json =
                 getJsonMissionItemDataRoadPathUnlock(mPointAtts);
@@ -3686,7 +3690,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskRoadPathLock ");
 
-        String parentName = "工控固定路径逻辑路径加锁任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GKGDLJLJLJJSRW1519972774429");
 
         JsonMissionItemDataRoadPathLock json =
                 new JsonMissionItemDataRoadPathLock();
@@ -3724,7 +3728,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskStaticPath ");
 
-        String parentName = "工控固定路径导航任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GKGDLJDHRW");
 
         //单点路径导航任务，当前路径导航到充电点
         MissionTask staticNavTask = getStaticPathTask(order, mp, parentName, mPointAtts);
@@ -3749,7 +3753,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskDoor ");
 
-        String parentName = "固定路径门任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GDLJMRW");
 
         //单点路径导航任务，当前路径导航到门任务等待点
 //        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
@@ -3909,7 +3913,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskElevator ");
 
-        String parentName = "固定路径电梯任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GDLJDTRW");
 
         Long elevatorid = null;
         //电梯任务，发送进入电梯到第几层
@@ -4032,7 +4036,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskTwoElevator ");
 
-        String parentName = "固定路径双电梯任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GDLJSDTRW");
 
         boolean isNotTwo = false;//取到的不是两个电梯数据的情况
         Long elevatorid = null;
@@ -4295,7 +4299,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskChongDian ");
 
-        String parentName = "充电任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_CDRW");
 
         //单点路径导航任务，当前路径导航到充电点
 //        MissionTask sigleNavTask = getPathNavTask(order, startMp, mp, parentName);
@@ -4327,7 +4331,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskXiaHuo ");
 
-        String parentName = "固定路径卸货任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GDLJXHRW");
 
         boolean isSetOrderDetailMP = false;
         if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
@@ -4412,7 +4416,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskQuHuo ");
 
-        String parentName = "取货任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_QHRW");
 
         boolean isSetOrderDetailMP = false;
         if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
@@ -4485,7 +4489,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         logger.info("### initPathMissionTaskSongHuo ");
 
-        String parentName = "固定路径中间送货站点任务-";
+        String parentName = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_GDLJZJSHZDRW");
 
         boolean isSetOrderDetailMP = false;
         if (!StringUtil.isNullOrEmpty(mPointAtts.orderDetailMP) &&
@@ -4559,12 +4563,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         try {
             String message = "";
             if(robot == null) {
-                message = "开机管理：机器人对象参数错误：空对象";
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KJGLJQRDXCSCWKDX");
                 return printAndLogPathPlanFailMessage(message);
             }
             Scene scene = sceneService.findById(sceneId);
             if(scene == null) {
-                message = "开机管理：" + sceneId + "云端场景不存在";
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KJGL") + sceneId + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_YDCJBCZ");
                 return printAndLogPathPlanFailMessage(message);
             }
             String sceneName = scene.getMapSceneName();
@@ -4584,7 +4588,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             orderSetting.setNeedAutoCharge(false);
             orderSetting.setNeedSign(false);
             orderSetting.setStoreId(robot.getStoreId());
-            orderSetting.setNickName("开机管理自动到待命点任务假设置" + System.currentTimeMillis());
+            orderSetting.setNickName(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KJGLZDDDMDRWJSZ") + System.currentTimeMillis());
 
             //创建假订单---------------------------------
             Order order = new Order();
@@ -4599,7 +4603,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             if(firstTarget == null) {
                 logger.info("获取到的机器人待命点为空，第一阶段：取站列表第一个可用的装货点或卸货点");
                 if(stationIdList == null || stationIdList.size() <= 0) {
-                    message = "机器人管理的站列表为空，且没有关联待命点，机器人原地待命";
+                    message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_JQRGLDZLBWKQMYGLDMDJQRYDDM");
                     return printAndLogPathPlanFailMessage(message);
                 }
                 for(Long stationId : stationIdList) {
@@ -4618,7 +4622,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             }
 
             if(firstTarget == null) {
-                message = "开机管理：最终也未找到可用的机器人待命点，原地待命";
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KJGLZZYWZDKYDJQRDMDYDDM");
                 return printAndLogPathPlanFailMessage(message);
             }
 
@@ -4626,14 +4630,14 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
 
             if(roadPathMaps == null) {
-                message = "开机管理：规划路径失败。原因：未找到可供算法使用的图。";
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KJGLGHLJSBYYWZDKGSFSYDT");
                 return printAndLogPathPlanFailMessage(message);
             }
 
             RoadPathResult result = roadPathResultService.getNearestPathResultStartPathPointByRobotCode(robot,firstTarget, roadPathMaps);
 
             if(result == null) {
-                message = "开机管理：规划路径失败。原因：未找到" + robot.getCode() + "到点" + firstTarget.getPointAlias() + "可用路径。";
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KJGLGHLJSBYYWZD") + robot.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_DD") + firstTarget.getPointAlias() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_KYLJ");
                 return printAndLogPathPlanFailMessage(message);
             }
             prePoint = result.getStartPoint();

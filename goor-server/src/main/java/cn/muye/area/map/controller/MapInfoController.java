@@ -8,6 +8,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.map.bean.CurrentInfo;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class MapInfoController {
 
     @Autowired
     private MapInfoService mapInfoService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @RequestMapping(value = "area/mapinfo", method = {RequestMethod.POST})
 //    @PreAuthorize("hasAuthority('area_mapinfo_u')")
@@ -37,21 +40,21 @@ public class MapInfoController {
         try {
             Long id = mapInfo.getId();
             if (null == id) {
-                return AjaxResult.failed("地图的主键ID不能为空");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_DTDZJIDBNWK"));
             }
             MapInfo mapInfoDB = mapInfoService.getMapInfo(id);
             if (null == mapInfoDB) {
-                return AjaxResult.failed("地图数据不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_DTSJBCZ"));
             }
             mapInfoDB.setMapAlias(mapInfo.getMapAlias());
             mapInfoDB.setPngDesigned(mapInfo.getPngDesigned());
             mapInfoDB.setFloor(mapInfo.getFloor());
             mapInfoDB.setLogicFloor(mapInfo.getLogicFloor());
             mapInfoService.update(mapInfoDB);
-            return AjaxResult.success(mapInfoDB, "修改成功");
+            return AjaxResult.success(mapInfoDB, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_XGCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_XTCW"));
         }
     }
 
@@ -61,10 +64,10 @@ public class MapInfoController {
     public AjaxResult getMapInfo(WhereRequest whereRequest) {
         try {
             List<MapInfo> mapZipList = mapInfoService.getMapInfo(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            return AjaxResult.success(mapZipList, "查询成功");
+            return AjaxResult.success(mapZipList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_CXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_XTCW"));
         }
     }
 
@@ -87,7 +90,7 @@ public class MapInfoController {
             return AjaxResult.success(cascadeSceneMapNameList);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统错误");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_XTCW"));
         }
     }
 
@@ -98,12 +101,12 @@ public class MapInfoController {
            CurrentInfo currentInfo = mapInfoService.getCurrentInfo(code);
            if (null == currentInfo){
                LOGGER.error("未获取到当前状态信息");
-               return AjaxResult.failed("未获取到当前状态信息");
+               return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_WHQDDQZTXX"));
            }
-            return AjaxResult.success(currentInfo, "获取成功");
+            return AjaxResult.success(currentInfo, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_HQCG"));
         } catch (Exception e) {
             LOGGER.error("getCurrentInfo exception", e);
-            return AjaxResult.failed("获取机器人状态信息出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapInfoController_java_HQJQRZTXXCC"));
         }
     }
 }

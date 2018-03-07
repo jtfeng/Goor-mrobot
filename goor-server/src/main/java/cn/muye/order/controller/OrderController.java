@@ -28,6 +28,7 @@ import cn.muye.assets.shelf.service.ShelfService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.mission.service.MissionWarningService;
 import cn.muye.order.bean.*;
 import cn.muye.order.service.*;
@@ -90,7 +91,8 @@ public class OrderController extends BaseController {
     private RoadPathService roadPathService;
     @Autowired
     private MapInfoService mapInfoService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     @Autowired
     X86MissionDispatchService x86MissionDispatchService;
 
@@ -127,10 +129,10 @@ public class OrderController extends BaseController {
     public AjaxResult getOrder(@RequestParam("id") Long id){
         try {
             Order findOrder = orderService.getOrder(id);
-            return AjaxResult.success(findOrder,"获取订单成功");
+            return AjaxResult.success(findOrder,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQDDCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取订单失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQDDSB"));
         }
     }
 
@@ -177,7 +179,7 @@ public class OrderController extends BaseController {
             //货架判定
             if(setting.getNeedShelf()){
                 if(order.getShelf()== null || order.getShelf().getId() == null){
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "默认配置必须传入货架编号");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_MRPZBXCRHJBH"));
                 }else {
                     //todo 货架是否被占用？
                 }
@@ -199,7 +201,7 @@ public class OrderController extends BaseController {
                 logger.info("本次请求未获取到可用机器人");
                 order.setStatus(OrderConstant.ORDER_STATUS_WAIT);
                 orderService.saveWaitOrder(order);
-                return AjaxResult.success("订单已接收，等待机器分配");
+                return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DDYJSDDJQFP"));
             }
             //存在机器人，订单直接下单
             logger.info("获取到机器人，机器人编号为{}", arrangeRobot.getCode());
@@ -222,7 +224,7 @@ public class OrderController extends BaseController {
 //                    robotService.updateSelective(arrangeRobot);
                 }
             }else{
-                ajaxResult = AjaxResult.success("下单成功，分配到机器人编号为" + arrangeRobot.getCode());
+                ajaxResult = AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_XDCGFPDJQRBHW") + arrangeRobot.getCode());
             }
             logger.info("订单申请结束");
             return ajaxResult;
@@ -232,7 +234,7 @@ public class OrderController extends BaseController {
             if(arrangeRobot != null){
                 CacheInfoManager.setRobotBusyCache(arrangeRobot.getCode(), Boolean.FALSE);
             }
-            return AjaxResult.failed("提交订单出现异常，订单失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_TJDDCXYCDDSB"));
         }
 
     }
@@ -250,10 +252,10 @@ public class OrderController extends BaseController {
             Long stationId = userUtil.getStationId();
             List<Order> waitOrders = orderService.listOrdersByStationAndStatus(stationId, status);
             List<Order> detailWaitOrders = waitOrders.stream().map(order -> orderService.getOrder(order.getId())).collect(Collectors.toList());
-            return AjaxResult.success(detailWaitOrders, "获取等待订单成功");
+            return AjaxResult.success(detailWaitOrders, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQDDDDCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取等待订单出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQDDDDCC"));
         }
     }
 
@@ -271,10 +273,10 @@ public class OrderController extends BaseController {
             List<Order> waitOrders = orderService.listOrdersByStation(stationId, whereRequest.getPage(), whereRequest.getPageSize());
             List<Order> detailWaitOrders = waitOrders.stream().map(order -> orderService.getOrder(order.getId())).collect(Collectors.toList());
             PageInfo<Order> pageWaitOrders = new PageInfo<>(detailWaitOrders);
-            return AjaxResult.success(pageWaitOrders, "获取所有订单成功");
+            return AjaxResult.success(pageWaitOrders, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQSYDDCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取所有订单出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQSYDDCC"));
         }
     }
 
@@ -289,13 +291,13 @@ public class OrderController extends BaseController {
         try {
             Order sqlOrder = orderService.getOrder(id);
             if(!(OrderConstant.ORDER_STATUS_WAIT.equals(sqlOrder.getStatus()))){
-                return AjaxResult.failed("暂无法取消，订单并非处于等待阶段");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_ZWFQXDDBFCYDDJD"));
             }
             orderService.changeOrderStatus(id, OrderConstant.ORDER_STATUS_EXPIRE);
-            return AjaxResult.success( "取消该订单成功");
+            return AjaxResult.success( localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_QXGDDCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("取消该订单出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_QXGDDCC"));
         }
     }
 
@@ -312,7 +314,7 @@ public class OrderController extends BaseController {
         try {
             Station station = stationService.findById(userUtil.getStationId());
             if(station == null){
-                return AjaxResult.failed("未获取到用户的关联站点");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_WHQDYHDGLZD"));
             }
             List<Goods> goodsList = Lists.newArrayList();
             if(type != null){
@@ -324,10 +326,10 @@ public class OrderController extends BaseController {
             orderPageInfoVO.setGoodsList(goodsList);
             orderPageInfoVO.setShelfList(shelfList);
             orderPageInfoVO.setStationList(stationList);
-            return AjaxResult.success(orderPageInfoVO, "查询下单页面信息成功");
+            return AjaxResult.success(orderPageInfoVO, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_CXXDYMXXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取下单页面的信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQXDYMDXXSB"));
         }
 
     }
@@ -344,7 +346,7 @@ public class OrderController extends BaseController {
         try {
             Station station = stationService.findById(userUtil.getStationId());
             if(station == null){
-                return AjaxResult.failed("未获取到用户的关联站点");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_WHQDYHDGLZD"));
             }
             String mapSceneName = sceneService.getRelatedMapNameBySceneId(station.getSceneId());
             List<GoodsType> goodsTypes = goodsTypeService.listAllByStoreId(GoodsType.class);
@@ -354,10 +356,10 @@ public class OrderController extends BaseController {
             orderSettingPageInfoVO.setGoodsTypes(goodsTypes);
             orderSettingPageInfoVO.setStartStations(startStations);
             orderSettingPageInfoVO.setEndStations(endStations);
-            return AjaxResult.success(orderSettingPageInfoVO, "查询订单设置页面信息成功");
+            return AjaxResult.success(orderSettingPageInfoVO, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_CXDDSZYMXXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("获取订单设置页面的信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQDDSZYMDXXSB"));
         }
     }
 
@@ -385,10 +387,10 @@ public class OrderController extends BaseController {
                 }
             }).collect(Collectors.toList());
             PageInfo<OrderDetailNewVO> detailPageInfo = new PageInfo<>(orderDetailVOs);*/
-            return AjaxResult.success(detailPageInfo, "查询任务列表进展成功");
+            return AjaxResult.success(detailPageInfo, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_CXRWLBJZCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("查询任务列表进展失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_CXRWLBJZSB"));
         }
 
     }
@@ -464,29 +466,29 @@ public class OrderController extends BaseController {
                 //无运输状态的点，取最后一个点
                 orderTransferVO = detailList.get(detailList.size()-1);
                 if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
-                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCYJDD") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
-                    transferInfo.append("当前已签收,站点为" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQYQSZDW") + orderTransferVO.getStationName());
                 }
             }else if(index == 0){
                 //起始即为未运输，取第一个点
                 orderTransferVO = detailList.get(0);
                 if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
-                    transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCZZQW") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
-                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCYJDD") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
-                    transferInfo.append("当前已签收,站点为" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQYQSZDW") + orderTransferVO.getStationName());
                 }
             }else{
                 //取上一个点进行判断
                 orderTransferVO = detailList.get(index - 1);
                 if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
-                    transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCZZQW") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
-                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCYJDD") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
-                    transferInfo.append("当前小车正在前往" + detailList.get(index).getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCZZQW") + detailList.get(index).getStationName());
                 }
             }
             mapPathInfoVO.setMapPathInfoDetail(mapPathInfoDetailVO);
@@ -592,29 +594,29 @@ public class OrderController extends BaseController {
                 //无运输状态的点，取最后一个点
                 orderTransferVO = transferVOs.get(transferVOs.size()-1);
                 if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
-                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCYJDD") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
-                    transferInfo.append("当前已签收,站点为" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQYQSZDW") + orderTransferVO.getStationName());
                 }
             }else if(index == 0){
                 //起始即为未运输，取第一个点
                 orderTransferVO = transferVOs.get(0);
                 if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
-                    transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCZZQW") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
-                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCYJDD") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
-                    transferInfo.append("当前已签收,站点为" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQYQSZDW") + orderTransferVO.getStationName());
                 }
             }else{
                 //取上一个点进行判断
                 orderTransferVO = transferVOs.get(index - 1);
                 if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_TRANSFER){
-                    transferInfo.append("当前小车正在前往" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCZZQW") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_GET){
-                    transferInfo.append("当前小车已经到达" + orderTransferVO.getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCYJDD") + orderTransferVO.getStationName());
                 }else if(orderTransferVO.getStatus() == OrderConstant.ORDER_DETAIL_STATUS_SIGN){
-                    transferInfo.append("当前小车正在前往" + transferVOs.get(index).getStationName());
+                    transferInfo.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DQXCZZQW") + transferVOs.get(index).getStationName());
                 }
             }
             orderDetailVO.setTransferInfo(transferInfo.toString());
@@ -681,10 +683,10 @@ public class OrderController extends BaseController {
             }
             List<OrderLogVO> orderLogVOList = orderList.stream().map(order -> generateOrderLogVO(order)).collect(Collectors.toList());
             PageInfo<OrderLogVO> pageInfo = new PageInfo<>(orderLogVOList);
-            return AjaxResult.success(pageInfo, "获取日志任务列表成功");
+            return AjaxResult.success(pageInfo, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_HQRZRWLBCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_XTNBCC"));
         }
     }
 
@@ -697,9 +699,9 @@ public class OrderController extends BaseController {
         Integer status = order.getStatus();
         StringBuffer sb = new StringBuffer();
         if(status == OrderConstant.ORDER_STATUS_EXPIRE){
-            sb.append("本次送货请求已被中断");
+            sb.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_BCSHQQYBZD"));
         }else {
-            sb.append("去往");
+            sb.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_QW"));
             List<OrderDetail> orderDetailList = order.getDetailList();
             List<OrderLogDetailVO> orderLogDetailVOList = orderDetailList.stream().map(orderDetail -> {
                 OrderLogDetailVO orderLogDetailVO = new OrderLogDetailVO();
@@ -710,17 +712,17 @@ public class OrderController extends BaseController {
                 orderLogDetailVO.setGoodsInfoList(goodsInfoVOList);
                 orderLogDetailVO.setLocation(orderDetail.getStationName());
                 if (orderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_START) {
-                    orderLogDetailVO.setEventDetail("起始装货");
+                    orderLogDetailVO.setEventDetail(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_QSZH"));
                 } else if (orderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_MIDDLE) {
-                    orderLogDetailVO.setEventDetail("签收货物");
+                    orderLogDetailVO.setEventDetail(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_QSHW"));
                     sb.append(orderDetail.getStationName() + ",");
                 } else if (orderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_END) {
-                    orderLogDetailVO.setEventDetail("终点卸货");
+                    orderLogDetailVO.setEventDetail(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_ZDXH"));
                 }
                 return orderLogDetailVO;
             }).collect(Collectors.toList());
             sb.deleteCharAt(sb.length()-1);
-            sb.append("的货物已送达");
+            sb.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_controller_OrderController_java_DHWYSD"));
             orderLogVO.setOrderLogDetailVOList(orderLogDetailVOList);
         }
         orderLogVO.setEvent(sb.toString());

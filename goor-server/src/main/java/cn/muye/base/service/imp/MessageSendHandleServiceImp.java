@@ -10,6 +10,7 @@ import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.model.message.OffLineMessage;
 import cn.muye.base.service.MessageSendHandleService;
 import cn.muye.base.service.mapper.message.OffLineMessageService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
 
     @Autowired
     private OffLineMessageService offLineMessageService;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     public MessageSendHandleServiceImp() {
 
@@ -102,7 +106,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         if(StringUtils.isEmpty(routingKey)){
             log.debug("开始批量发送消息");
             rabbitTemplate.convertAndSend(exchange, "", messageInfo);
-            return AjaxResult.success("已发送，等待机器人回复");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_service_imp_MessageSendHandleServiceImp_java_YFSDDJQRHF"));
         }
         if (x86Response) {
             log.info("开始发送带回执消息");
@@ -110,7 +114,7 @@ public class MessageSendHandleServiceImp implements MessageSendHandleService {
         } else {
             log.info("开始发送无回执消息");
             rabbitTemplate.convertAndSend(exchange, routingKey, messageInfo);
-            return AjaxResult.success("已发送，等待机器人回复");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_service_imp_MessageSendHandleServiceImp_java_YFSDDJQRHF"));
         }
     }
 

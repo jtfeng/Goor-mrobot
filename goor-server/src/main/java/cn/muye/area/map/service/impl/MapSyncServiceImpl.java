@@ -22,6 +22,7 @@ import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import com.alibaba.fastjson.JSON;
 import org.apache.commons.io.FileUtils;
@@ -61,6 +62,9 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
     @Autowired
     private RobotMapZipXREFService robotMapZipXREFService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
 
@@ -97,14 +101,14 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
             if (!mapZipfile.exists()){
                 LOGGER.error("发送地图更新信息失败，未找到压缩包，"+ mapZipfile.getAbsolutePath());
                 updateSceneState(Constant.UPLOAD_FAIL, sceneId);
-                return AjaxResult.failed("发送地图更新信息失败，未找到压缩包，"+ mapZipfile.getAbsolutePath());
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_FSDTGXXXSBWZDYSB")+ mapZipfile.getAbsolutePath());
             }
             checkUploadRobot = true;
             return mapSync(mapZip, robotList, sceneId);
         }catch (Exception e) {
             LOGGER.error("发送地图更新信息失败", e);
             updateSceneState(Constant.UPLOAD_FAIL, sceneId);
-            return AjaxResult.failed("发送地图更新信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_FSDTGXXXSB"));
         }
     }
 
@@ -124,12 +128,12 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
                 mapSceneNameDirFile.listFiles().length <= 0){
             LOGGER.error("发送地图更新信息失败，该地图场景文件夹不存在 " + mapSceneName);
             updateSceneState(Constant.UPLOAD_FAIL, sceneId);
-            return AjaxResult.failed("发送地图更新信息失败，该地图场景文件夹不存在 "+ mapSceneName);
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_FSDTGXXXSBGDTCJWJJBCZ")+ mapSceneName);
         }
         try {
             zipFile = zipMapFile(mapSceneNameDir, mapSceneName);
             if (null == zipFile){
-                return AjaxResult.failed("压缩地图出错");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_YSDTCC"));
             }
             MapZip mapZip = saveMapZip(zipFile, mapSceneName);
             checkUploadRobot = false;
@@ -137,7 +141,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         }catch (Exception e){
             LOGGER.error("地图同步失败 " + mapSceneName);
             updateSceneState(Constant.UPLOAD_FAIL, sceneId);
-            return AjaxResult.failed("地图同步失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_DTTBSB"));
         }
     }
 
@@ -159,7 +163,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         MessageInfo messageInfo = getMessageInfo(mapZip);
         Map<String, AjaxResult> resultMap = new HashMap<>();
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("压缩包名称：").append(mapZip.getFileName()).append(",");
+        stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_YSBMC")).append(mapZip.getFileName()).append(",");
         int successCount = 0;
         for (int i = 0; i < robotList.size(); i++) {
             Robot robot = robotList.get(i);
@@ -167,7 +171,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
             //如果需要同步的机器为地图上传机器，则跳过
             if (checkUploadRobot && checkRobotIsMapUploadDevice(robot, mapZip)) {
                 successCount ++;
-                stringBuffer.append(code).append(":").append("地图上传机器人").append(",");
+                stringBuffer.append(code).append(":").append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_DTSCJQR")).append(",");
                 LOGGER.info("需同步的机器人code为上传地图的机器人code，不进行同步，code=" + code);
                 continue;
             }
@@ -257,7 +261,7 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         Boolean isOnline = CacheInfoManager.getRobotOnlineCache(robotCode);
         if (isOnline == null || !isOnline) {
             LOGGER.info("机器人 +" + robotCode + "不在线，未同步地图");
-            return AjaxResult.failed("机器人 +" + robotCode + "不在线，未同步地图");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_JQR") + robotCode + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_BZXWTBDT"));
         }
         String backResultClientRoutingKey = RabbitMqBean.getRoutingKey(robotCode, true, MessageType.EXECUTOR_MAP.name());
         AjaxResult ajaxClientResult = (AjaxResult) rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultClientRoutingKey, messageInfo);
@@ -289,13 +293,13 @@ public class MapSyncServiceImpl implements MapSyncService, ApplicationContextAwa
         if (null != ajaxClientResult && ajaxClientResult.getCode() == AjaxResult.CODE_SUCCESS) {
             resultMap.put(robotCode, ajaxClientResult);
             saveOrUpdateMapZipXREF(mapZipId, true, robotId);
-            stringBuffer.append(robotCode).append(":").append("同步成功").append(",");
+            stringBuffer.append(robotCode).append(":").append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_TBCG")).append(",");
             LOGGER.info("机器人" + robotCode + "同步成功");
             return true;
         } else {
-            resultMap.put(robotCode, AjaxResult.failed("未获取到返回结果"));
+            resultMap.put(robotCode, AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_WHQDFHJG")));
             saveOrUpdateMapZipXREF(mapZipId, false, robotId);
-            stringBuffer.append(robotCode).append(":").append("未获取到返回结果").append(",");
+            stringBuffer.append(robotCode).append(":").append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_service_impl_MapSyncServiceImpl_java_WHQDFHJG")).append(",");
             LOGGER.info("机器人" + robotCode + "同步失败或未获取到返回结果");
             return false;
         }

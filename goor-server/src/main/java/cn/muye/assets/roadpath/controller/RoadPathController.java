@@ -9,6 +9,7 @@ import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageInfo;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -28,6 +29,8 @@ public class RoadPathController {
     private RoadPathService roadPathService;
     @Autowired
     private SceneService sceneService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 创建
@@ -44,7 +47,7 @@ public class RoadPathController {
         // Long cloudSceneId
         try {
             roadPathService.createRoadPath(body);
-            return AjaxResult.success("路径添加成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_LJTJCG"));
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }
@@ -91,10 +94,10 @@ public class RoadPathController {
             Scene scene = sceneService.getSceneById(sceneId);
             String sceneName = scene.getMapSceneName();
             if(StringUtil.isNullOrEmpty(sceneName)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_YDCJWBDYXDGKCJ"));
             }
             this.roadPathService.deleteBySceneName(sceneName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            return AjaxResult.success("操作成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_CZCG"));
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }
@@ -113,10 +116,10 @@ public class RoadPathController {
             Scene scene = sceneService.getSceneById(sceneId);
             String sceneName = scene.getMapSceneName();
             if(StringUtil.isNullOrEmpty(sceneName)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + "云端场景未绑定有效的工控场景");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,sceneId + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_YDCJWBDYXDGKCJ"));
             }
             this.roadPathService.deleteBySceneMapNameType(sceneName, pathType, mapName, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            return AjaxResult.success("操作成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_CZCG"));
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
         }
@@ -132,9 +135,9 @@ public class RoadPathController {
         try {
             List<RoadPath> list = roadPathService.listRoadPaths(whereRequest , SearchConstants.FAKE_MERCHANT_STORE_ID);
             PageInfo<RoadPath> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "查询成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_CXCG"));
         } catch (Exception e) {
-            return AjaxResult.failed(e,         "查询失败");
+            return AjaxResult.failed(e,         localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_CXSB"));
         }
     }
 
@@ -173,9 +176,9 @@ public class RoadPathController {
             }
             roadPathService.update(roadPath);
             if (lockId != 0L) {
-                return AjaxResult.success("路径绑定逻辑锁对象成功");
+                return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_LJBDLJSDXCG"));
             }else {
-                return AjaxResult.success("解除路径锁对象成功");
+                return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_JCLJSDXCG"));
             }
         }catch (Exception e){
             return AjaxResult.failed(e.getMessage());
@@ -196,7 +199,7 @@ public class RoadPathController {
             return AjaxResult.success(ids);
         }catch (Exception e) {
             log.error(e.getMessage(), e);
-            return AjaxResult.failed("查询所有工控 id 信息失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_controller_RoadPathController_java_CXSYGKIDXXSB"));
         }
     }
 

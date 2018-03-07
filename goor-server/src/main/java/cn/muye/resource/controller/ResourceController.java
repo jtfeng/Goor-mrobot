@@ -15,6 +15,7 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.bean.RabbitMqBean;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.resource.bean.ResourceToAgentBean;
 import cn.muye.resource.service.ResourceService;
 import cn.muye.resource.service.VoiceFileService;
@@ -53,6 +54,8 @@ public class ResourceController extends BaseController {
     private RabbitTemplate rabbitTemplate;
     @Autowired
     private RobotService robotService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     /**
      * 保存一个resource (上传)
@@ -102,13 +105,13 @@ public class ResourceController extends BaseController {
                 resource.setPath(path.toString());
                 //resource.setContent();
                 resourceService.save(resource);
-                return AjaxResult.success(resource, "资源上传成功");
+                return AjaxResult.success(resource, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_ZYSCCG"));
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_XTNBCC"));
         }
-        return AjaxResult.failed("文件不能为空");
+        return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_WJBNWK"));
     }
 
     /**
@@ -123,10 +126,10 @@ public class ResourceController extends BaseController {
         try {
             List<Resource> resourceList = resourceService.listByType(RESOURCE_TYPE_BASE, whereRequest.getPage(), whereRequest.getPageSize());
             PageInfo<Resource> pageList = new PageInfo<>(resourceList);
-            return AjaxResult.success(pageList, "资源查询成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_ZYCXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_XTNBCC"));
         }
 
     }
@@ -159,7 +162,7 @@ public class ResourceController extends BaseController {
             AjaxResult ajaxResult = (AjaxResult)rabbitTemplate.convertSendAndReceive(TopicConstants.TOPIC_EXCHANGE, backResultResourceRoutingKey, info);
             if(ajaxResult == null){
                 logger.info("资源推送连接客户端失败");
-                return AjaxResult.failed("资源推送连接客户端失败");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_ZYTSLJKHDSB"));
             }else {
                 if(ajaxResult.isSuccess()){
                     logger.info("资源推送成功");
@@ -170,7 +173,7 @@ public class ResourceController extends BaseController {
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_XTNBCC"));
         }
 
     }
@@ -185,10 +188,10 @@ public class ResourceController extends BaseController {
         try {
             List<VoiceFile> list = voiceFileService.listVoiceFiles(whereRequest.getPage(), whereRequest.getPageSize());
             PageInfo<VoiceFile> pageList = new PageInfo<>(list);
-            return AjaxResult.success(pageList, "语音文件查询成功");
+            return AjaxResult.success(pageList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_YYWJCXCG"));
         } catch (Exception e) {
             logger.error("{}", e);
-            return AjaxResult.failed("系统内部出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_resource_controller_ResourceController_java_XTNBCC"));
         }
     }
 

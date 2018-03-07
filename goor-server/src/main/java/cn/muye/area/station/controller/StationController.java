@@ -23,6 +23,7 @@ import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.SessionUtil;
 import cn.muye.util.UserUtil;
 import com.github.pagehelper.PageInfo;
@@ -67,6 +68,8 @@ public class StationController {
     private RobotService robotService;
     @Autowired
     private ElevatorstationElevatorXREFMapper elevatorstationElevatorXREFMapper;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Autowired
     private StationMacPasswordXREFService stationMacPasswordXREFService;
@@ -84,7 +87,7 @@ public class StationController {
             //从session取当前切换的场景
             Scene scene = SessionUtil.getScene();
             if (scene == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_QXQHDMCJ"));
             }
             //TODO 从session取切换门店的ID，现在先写死
             List<Station> stationList = stationService.list(whereRequest, SearchConstants.FAKE_MERCHANT_STORE_ID, scene.getId());
@@ -98,7 +101,7 @@ public class StationController {
             return AjaxResult.success(pageList);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部查询出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_XTNBCXCC"));
         }
     }
 
@@ -113,22 +116,22 @@ public class StationController {
     @ResponseBody
     public AjaxResult getStation(@ApiParam(value = "站ID") @PathVariable Long id) {
         if (id == null) {
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_CXSB"));
         }
         Station station = null;
         try {
             //从session取当前切换的场景
             Scene scene = SessionUtil.getScene();
             if (scene == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_QXQHDMCJ"));
             }
             //TODO 从session取切换门店的ID，现在先写死
             station = stationService.findById(Long.valueOf(id), SearchConstants.FAKE_MERCHANT_STORE_ID, scene.getId());
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "查询失败");
+            return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_CXSB"));
         }
-        return AjaxResult.success(toEntity(station), "查询成功");
+        return AjaxResult.success(toEntity(station), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_CXCG"));
     }
 
     /**
@@ -145,12 +148,12 @@ public class StationController {
             //从session取当前切换的场景
             Scene scene = SessionUtil.getScene();
             if (scene == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_QXQHDMCJ"));
             }
             //TODO 从session取切换门店的ID，现在先写死
             Station stationDB = stationService.findById(id, SearchConstants.FAKE_MERCHANT_STORE_ID, scene.getId());
             if (stationDB == null) {
-                return AjaxResult.failed("删除对象不存在");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_SCDXBCZ"));
             }
             stationDB.setActive(Constant.DELETE);
 //            stationService.delete(stationDB);
@@ -166,10 +169,10 @@ public class StationController {
             CacheInfoManager.setStationListCache("stationList", stationList);
             //把站机器人绑定关系去掉
             CacheInfoManager.removeStationRobotIdXrefListCache(stationId);
-            return AjaxResult.success("删除成功");
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_SCCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("被使用，无法删除");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_BSYWFSC"));
         }
     }
 
@@ -186,14 +189,14 @@ public class StationController {
         try {
             StationType stationType = StationType.getType(caption);
             if (null == stationService){
-                return AjaxResult.failed("该类型站点不存在。caption=" + caption);
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_GLXZDBCZCAPTION") + caption);
             }
             List<Station> stationList = stationService.listStationsByStationTypeCode(caption);
 //            sortStationList(stationList);
-            return AjaxResult.success(stationList, "查询成功");
+            return AjaxResult.success(stationList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_CXCG"));
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("查询列表失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_CXLBSB"));
         }
     }
 
@@ -225,17 +228,17 @@ public class StationController {
             //从session取当前切换的场景
             Scene scene = SessionUtil.getScene();
             if (scene == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "请先切换到某场景！");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_QXQHDMCJ"));
             }
             Long sceneId = scene.getId();
 
             Integer stationTypeId = station.getStationTypeId();
             if (stationTypeId == null || stationTypeId <= 0 || StationType.getType(stationTypeId) == null) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站类型有误");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_ZLXYW"));
             }
             String name = station.getName();
             if (StringUtil.isNullOrEmpty(name)) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "站名称不能为空");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_ZMCBNWK"));
             }
             //TODO 从session取切换门店的ID，现在先写死
             Long storeId = SearchConstants.FAKE_MERCHANT_STORE_ID;
@@ -248,12 +251,12 @@ public class StationController {
                     && (size > 1
                     || (size == 1 && id == null)
                     || (size == 1 && id != null && !stationDbList.get(0).getId().equals(id)))) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "站名称重复");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_ZMCZF"));
             }
 
             //校验点都是数据库里的点
             if (!isTypePointExist(station)) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "点参数错误");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_DCSCW"));
             }
 
             //根据站点传入的typePoints的Key去判断，如果已经是对应类型的点，则修改，如果不是对应类型的点则复制点插入数据库
@@ -296,7 +299,7 @@ public class StationController {
                 //修改
                 Station stationDb = stationService.findById(id, storeId, sceneId);
                 if (stationDb == null) {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "要修改的对象不存在");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_YXGDDXBCZ"));
                 }
                 stationDb.setName(station.getName());
                 stationDb.setStationTypeId(station.getStationTypeId());
@@ -319,7 +322,7 @@ public class StationController {
                         elevatorstationElevatorXREFMapper.insert(elevatorstationElevatorXREF);
                     }
                 }
-                return AjaxResult.success(toEntity(stationDb), "修改成功");
+                return AjaxResult.success(toEntity(stationDb), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_XGCG"));
             } else if (station != null && id == null) {
                 //新增
                 station.setActive(Constant.NORMAL);
@@ -341,13 +344,13 @@ public class StationController {
                     }
                 }
 
-                return AjaxResult.success(toEntity(station), "新增成功");
+                return AjaxResult.success(toEntity(station), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_XZCG"));
             } else {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "参数有误");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_CSYW"));
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("出错");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_CC"));
         }
     }
 
@@ -374,9 +377,9 @@ public class StationController {
                     stationRobotXREFList.add(stationRobotXREF);
                 }
                  CacheInfoManager.setStationRobotIdXrefListCache(id, stationRobotXREFList);
-                return AjaxResult.success(station, "绑定成功");
+                return AjaxResult.success(station, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_BDCG"));
             } else {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED, "不存在的站");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_BCZDZ"));
             }
 
 //        } else {
@@ -397,13 +400,13 @@ public class StationController {
             if(stationId!= null){
                 List<StationRobotXREF> stationRobotXREFList = stationRobotXREFService.getByStationId(stationId);
                 List<Robot> robotList = stationRobotXREFList.stream().map(stationRobotXREF -> robotService.getById(stationRobotXREF.getRobotId())).collect(Collectors.toList());
-                return AjaxResult.success(robotList, "获取站绑定机器人成功");
+                return AjaxResult.success(robotList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_HQZBDJQRCG"));
             }else{
-                return AjaxResult.failed("获取机器人失败，未得到站id");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_HQJQRSBWDDZID"));
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            return AjaxResult.failed("系统内部查询异常");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_XTNBCXYC"));
         }
     }
 
@@ -542,12 +545,12 @@ public class StationController {
         if (station.getId() != null && accessArriveStationIdList != null/* && accessArriveStationIdList.size() > 0*/) {
             List<Long> stationIdList = accessArriveStationIdList.stream().map(station1 -> station1.getId()).collect(Collectors.toList());
             if (stationIdList.contains(station.getId())) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,"可到达的站不能绑定自己");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_KDDDZBNBDZJ"));
             }
 //            stationStationXREFService.save(station.getId(), stationIdList);
             stationStationXREFService.saveByStationList(station.getId(), accessArriveStationIdList);
         }
-        return AjaxResult.success(station,"绑定成功");
+        return AjaxResult.success(station,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_BDCG"));
     }
 
     //测试用的不要提交

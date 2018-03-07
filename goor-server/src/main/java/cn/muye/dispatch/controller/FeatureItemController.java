@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.mission.FeatureItem;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.dispatch.service.FeatureItemService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -34,6 +35,8 @@ public class FeatureItemController {
 
 	@Autowired
 	private FeatureItemService featureItemService;
+	@Autowired
+	private LocaleMessageSourceService localeMessageSourceService;
 
 	/**
 	 * 获取featureItem所有列表
@@ -71,18 +74,18 @@ public class FeatureItemController {
 	public AjaxResult saveFeatureItem(@RequestBody FeatureItem featureItem, HttpServletRequest request) throws Exception {
 		try {
 			if (featureItem.getName() == null) {
-				return AjaxResult.failed("功能名不能为空");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemController_java_GNMBNWK"));
 			}
 			if (featureItem.getValue() == null) {
-				return AjaxResult.failed("功能值不能为空");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemController_java_GNZBNWK"));
 			}
 			List<FeatureItem> featureItemList = featureItemService.validate(featureItem.getName(), featureItem.getValue());
 			if(featureItemList.size() >= 1){
-				return AjaxResult.failed("功能名称或者值已经存在");
+				return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemController_java_GNMCHZZYJCZ"));
 			}
 
 			featureItemService.save(featureItem);
-			return AjaxResult.success(featureItem,"新增成功");
+			return AjaxResult.success(featureItem,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dispatch_controller_FeatureItemController_java_XZCG"));
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 			return AjaxResult.failed();

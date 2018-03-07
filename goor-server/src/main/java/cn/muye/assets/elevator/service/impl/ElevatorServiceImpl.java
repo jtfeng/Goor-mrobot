@@ -19,6 +19,7 @@ import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
@@ -55,6 +56,8 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     private RoadPathService roadPathService;
     @Autowired
     private PointService pointService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public List<Elevator> listElevatorByScene(Long id) {
@@ -150,7 +153,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Override
     public MapInfo findByMapNameAndStoreId(String mapName, Long storeId, String sceneName) throws Exception {
         List<MapInfo> mapInfos = this.elevatorMapper.findByMapNameAndStoreId(mapName, storeId, sceneName);
-        checkArgument(mapInfos != null && mapInfos.size() == 1, "同一门店下不能有重名地图，请检查!");
+        checkArgument(mapInfos != null && mapInfos.size() == 1, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_TYMDXBNYZMDTQJC"));
         return mapInfos.get(0);
     }
 
@@ -202,7 +205,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
     @Transactional(rollbackFor = Exception.class)
     @Override
     public boolean updateElevatorLockStateWithRobotCodeInner(Long elevatorId, Elevator.ELEVATOR_ACTION action, String robotCode) {
-        checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
+        checkArgument(robotCode != null && !"".equals(robotCode.trim()), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_JQRBHROBOTCODEBYXWK"));
         boolean flag = false;
         try {
             Elevator elevator = super.findById(elevatorId);
@@ -407,7 +410,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
             tempCombination = elevatorPointCombinationService.findById(tempCombination.getId());
 
             if(tempCombination == null) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,"四点对象不存在，参数错误！");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_SDDXBCZCSCW"));
             }
             elevatorPointCombinations.add(tempCombination);
         }
@@ -419,7 +422,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
             MapPoint startCombinePoint = startCombination.getwPoint();
             log.info(placeholder + "startCombinePoint、" + startCombinePoint.toString());
             if(startCombinePoint == null || startCombinePoint.getId() == null) {
-                return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点为空，生成错误！");
+                return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_DTGLDSDJH")+ startCombination.getName() +localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_DDDWKSCCW"));
             }
             for(ElevatorPointCombination endCombination : elevatorPointCombinations) {
                 log.info(placeholder + "endCombination、" + endCombination.toString());
@@ -429,7 +432,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                 }
                 MapPoint endCombinePoint = endCombination.getoPoint();
                 if(endCombinePoint == null || endCombinePoint.getId() == null) {
-                    return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'出去点为空，生成错误！");
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_DTGLDSDJH")+ startCombination.getName() +localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_CQDWKSCCW"));
                 }
                 log.info(placeholder + "endCombinePoint、" + endCombinePoint.toString());
 
@@ -438,7 +441,7 @@ public class ElevatorServiceImpl extends BaseServiceImpl<Elevator> implements El
                         startCombinePoint.getMapName(),startCombinePoint.getX(),startCombinePoint.getY(),startCombinePoint.getTh(),null, pointService);
                 if(startPathPoint == null) {
                     log.info(placeholder + "startPathPoint is null");
-                    return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + "电梯关联的四点集合'"+ startCombination.getName() +"'等待点相关联的path路径点为空，生成错误！");
+                    return AjaxResult.failed(AjaxResult.CODE_FAILED,elevator.getName() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_DTGLDSDJH")+ startCombination.getName() +localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorServiceImpl_java_DDDXGLDPATHLJDWKSCCW"));
                 }
 
                 log.info(placeholder + "startPathPoint、" + startPathPoint.toString());

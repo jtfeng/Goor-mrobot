@@ -15,6 +15,7 @@ import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.service.consumer.topic.BaseMessageService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -50,6 +51,8 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
 
     @Autowired
     private ElevatorNoticeMapper elevatorNoticeMapper;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     private ReentrantLock lock = new ReentrantLock();
 
@@ -63,9 +66,9 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
                 //如果未成功，需要根据deviceId查询出站，提示未成功原因
                 if (StringUtil.isNotBlank(deviceId)) {
                     Station station = stationService.findById(Long.parseLong(deviceId));
-                    msg = "电梯站(" + station.getName() + ")未登录";
+                    msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorNoticeServiceImpl_java_DTZ") + station.getName() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorNoticeServiceImpl_java_WDL");
                 } else {
-                    msg = "未知原因";
+                    msg = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorNoticeServiceImpl_java_WZYY");
                 }
             }
         }

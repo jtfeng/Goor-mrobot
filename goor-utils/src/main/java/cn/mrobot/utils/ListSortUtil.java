@@ -17,10 +17,11 @@ public class ListSortUtil<T> {
      * @param sortField 排序字段(实体类属性名) 
      * @param sortMode 排序方式（asc or  desc） 
      */  
-    @SuppressWarnings({ "unchecked", "rawtypes" })  
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void sort(List<T> targetList, final String sortField, final String sortMode) {
-      
+
         Collections.sort(targetList, new Comparator() {
+            @Override
             public int compare(Object obj1, Object obj2) {   
                 int retVal = 0;  
                 try {  
@@ -43,4 +44,4 @@ public class ListSortUtil<T> {
         });  
     }  
       
-}  
+}

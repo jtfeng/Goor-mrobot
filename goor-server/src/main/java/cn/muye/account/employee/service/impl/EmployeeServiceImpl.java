@@ -23,6 +23,7 @@ import cn.muye.area.station.service.StationService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseServiceImpl;
 import cn.muye.dispatch.service.FeatureItemService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.base.LogInfoUtils;
 import cn.muye.mission.service.MissionItemTaskService;
 import cn.muye.mission.service.MissionListTaskService;
@@ -66,6 +67,8 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
     private OrderService orderService;
     @Autowired
     private UserUtil userUtil;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     private static Logger LOGGER = Logger.getLogger(EmployeeServiceImpl.class);
 
@@ -176,16 +179,16 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             employee.setCode(code);
             List<Employee> list = employeeMapper.select(employee);
             if(list == null || list.size() == 0) {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的电梯员工");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_XYSBBCZDDTYG"));
             }
             List<String> codeList = Lists.newArrayList();
             list.forEach(oneEmployee -> {
                 codeList.add(oneEmployee.getCode());
             });
             if (codeList.contains(code)) {
-                return AjaxResult.success("校验成功");
+                return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_XYCG"));
             } else {
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的电梯员工");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_XYSBBCZDDTYG"));
             }
         }
         //校验普通员工
@@ -197,7 +200,7 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             List<Employee> list = employeeMapper.select(employee);
             if(list == null || list.size() == 0) {
                 LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " not found");
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的普通员工");
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_XYSBBCZDPTYG"));
             }
 
             // 用于开机管理的特殊校验，此时没有实际意义的 missionid，传入"-1"表示此种类型，不需要区分站
@@ -207,9 +210,9 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
                     codeList.add(oneEmployee.getCode());
                 });
                 if (codeList.contains(code)) {
-                    return AjaxResult.success("校验成功");
+                    return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_XYCG"));
                 } else {
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "校验失败，不存在的普通员工");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_XYSBBCZDPTYG"));
                 }
             }
             //用于任务员工的在线校验，需要根据员工关联站、任务类型去过滤
@@ -219,14 +222,14 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
                 map.put("missionItemId", missionItemId);
                 List<Employee> employeeListDb = employeeMapper.selectEmployeeNumberByMissionItemId(map);
                 if (employeeListDb != null && employeeListDb.size() > 0) {
-                    return AjaxResult.success("校验成功");
+                    return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_XYCG"));
                 } else {
                     LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : employee " + code + " 没有权限");
-                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "没有权限");
+                    return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_MYQX"));
                 }
             } else {
                 LOGGER.info("##EmployeeServiceImpl verifyEmplyeeNumber : missionItemTaskListDb " + missionItemId + " not found or wrong missionItemTaskType");
-                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, "非指定的校验普通员工任务，只支持" + Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER);
+                return AjaxResult.failed(AjaxResult.CODE_PARAM_ERROR, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_FZDDXYPTYGRWZZC") + Constant.MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER);
             }
         }
         return null;
@@ -255,10 +258,10 @@ public class EmployeeServiceImpl extends BaseServiceImpl<Employee> implements Em
             message = getShelfName(missionItemTaskDb.getMissionListId());
         }
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("工号 " + code)
+        stringBuilder.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_GH") + code)
                 .append(" " + featureItemName)
                 .append(" " + message);
-        LogInfoUtils.info("工号" + code, ModuleEnums.MISSION, LogType.INFO_EXECUTE_TASK, stringBuilder.toString());
+        LogInfoUtils.info(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_employee_service_impl_EmployeeServiceImpl_java_GH1519972766987") + code, ModuleEnums.MISSION, LogType.INFO_EXECUTE_TASK, stringBuilder.toString());
     }
 
     private String getGoodsInfo(String data) {

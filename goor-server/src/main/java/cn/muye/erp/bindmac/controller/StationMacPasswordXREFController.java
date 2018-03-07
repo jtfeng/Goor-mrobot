@@ -9,6 +9,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.service.StationService;
 import cn.muye.erp.bindmac.service.StationMacPasswordXREFService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class StationMacPasswordXREFController {
     @Autowired
     private StationService stationService;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     /**
      * 保存
      *
@@ -46,7 +50,7 @@ public class StationMacPasswordXREFController {
         if (StationMacPasswordXREF.Type.ASEPTIC_APPARATUS_ROOM.getCode() == stationMacPasswordXREF.getType()) {
             List<Station> stationList = stationService.listStationsByStationTypeCode(StationType.ASEPTIC_APPARATUS_ROOM.getCaption());
             if (null == stationList || stationList.size() <= 0) {
-                return AjaxResult.failed("系统未配置无菌器械室站点");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_XTWPZWJQXSZD"));
             }
             stationMacPasswordXREF.setStation(stationList.get(0));
         }
@@ -55,7 +59,7 @@ public class StationMacPasswordXREFController {
 
     public AjaxResult saveOrUpdate(StationMacPasswordXREF operaXREF, HttpServletRequest request) {
         if (operaXREF.getStation().getId() == null || operaXREF.getType() == 0) {
-            return AjaxResult.failed("站Id不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_ZIDBNWK"));
         }
         try {
             //注释掉，不能获取二级路由下的客户端的mac地址
@@ -63,7 +67,7 @@ public class StationMacPasswordXREFController {
             String mac = operaXREF.getMac();
             logger.info("mac地址为：" + mac);
             if (StringUtil.isBlank(mac)) {
-                return AjaxResult.failed("MAC不能为空");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_MACBNWK"));
             }
             operaXREF.setMac(mac);
             //如果是除原无无菌器械室绑定，则需要移菌器械室的绑定关系
@@ -80,11 +84,11 @@ public class StationMacPasswordXREFController {
                 stationMacPasswordXREFService.saveStationMacPasswordXREF(operaXREF);
             }
             StationMacPasswordXREF returnResult = stationMacPasswordXREFService.findXREFById(operaXREF.getId());
-            return AjaxResult.success(returnResult, "绑定成功");
+            return AjaxResult.success(returnResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_BDCG"));
         } catch (Exception e) {
             logger.error("保存或更新绑定关系出错", e);
         }
-        return AjaxResult.failed("操作失败");
+        return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_CZSB"));
     }
 
     /**
@@ -99,17 +103,17 @@ public class StationMacPasswordXREFController {
 //            String mac = getClientMAC(request);
             logger.info("mac地址为：" + mac);
             if (StringUtil.isBlank(mac)) {
-                return AjaxResult.failed("MAC不能为空");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_MACBNWK"));
             }
             StationMacPasswordXREF stationMacPasswordXREF = stationMacPasswordXREFService.findByMac(mac);
             if (null == stationMacPasswordXREF) {
-                return AjaxResult.failed("未查询到绑定信息");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_WCXDBDXX"));
             }
-            return AjaxResult.success(stationMacPasswordXREF, "查询成功");
+            return AjaxResult.success(stationMacPasswordXREF, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_CXCG"));
         } catch (Exception e) {
             logger.error("根据MAC查询错误", e);
         }
-        return AjaxResult.failed("操作失败");
+        return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_CZSB"));
     }
 
     /**
@@ -129,7 +133,7 @@ public class StationMacPasswordXREFController {
         PageHelper.startPage(pageNo, pageSize);
         List<StationMacPasswordXREF> stationMacPasswordXREFList = stationMacPasswordXREFService.list(whereRequest);
         PageInfo<StationMacPasswordXREF> page = new PageInfo<StationMacPasswordXREF>(stationMacPasswordXREFList);
-        return AjaxResult.success(page, "查询成功");
+        return AjaxResult.success(page, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_bindmac_controller_StationMacPasswordXREFController_java_CXCG"));
     }
 
     private String getClientMAC(HttpServletRequest request) throws Exception {

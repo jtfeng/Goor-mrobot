@@ -8,6 +8,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper;
 import cn.muye.erp.operation.service.OperationTypeService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.slf4j.Logger;
@@ -33,6 +34,9 @@ public class OperationTypeController {
     @Autowired
     private OperationDefaultApplianceXREFMapper operationDefaultApplianceXREFMapper;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     @Value("${goor.push.dirs}")
     private String DOWNLOAD_HOME;
 
@@ -53,7 +57,7 @@ public class OperationTypeController {
         Long operationTypeId = operationType.getId();
         //保存手术类型的默认器械
         saveOperationDefaultApplianceXREF(operationTypeId, operationType.getApplianceList());
-        return AjaxResult.success(operationType,"添加成功");
+        return AjaxResult.success(operationType,localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_TJCG"));
     }
 
     @RequestMapping(value = "operation/type", method = RequestMethod.PUT)
@@ -68,18 +72,18 @@ public class OperationTypeController {
         //更新手术类型的默认器械
         List<OperationDefaultApplianceXREF> applianceXREFList = operationType.getApplianceList();
         updateOperationDefaultApplianceXREF(operationType.getId(), applianceXREFList);
-        return AjaxResult.success(operationType, "修改成功");
+        return AjaxResult.success(operationType, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_XGCG"));
     }
 
     public AjaxResult validateOperationType(OperationType operationType){
         String name = operationType.getName();
         OperationDepartmentType departmentType = operationType.getOperationDepartmentType();
         if (StringUtil.isBlank(name) || null == departmentType) {
-            return AjaxResult.failed("手术名称或者手术科室不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_SSMCHZSSKSBNWK"));
         }
         List<OperationType> operationTypeList = operationTypeService.findByNameAndDepartmentType(name, departmentType.getId());
         if (null != operationTypeList && operationTypeList.size() > 0 && !operationTypeList.get(0).getId().equals(operationType.getId())) {
-            return AjaxResult.failed("(" + name + ")手术类型名称已经存在");
+            return AjaxResult.failed("(" + name + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_SSLXMCYJCZ"));
         }
         return AjaxResult.success();
     }
@@ -87,19 +91,19 @@ public class OperationTypeController {
     @RequestMapping(value = "operation/type/{id}", method = RequestMethod.GET)
     public AjaxResult findById(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_IDBNWK"));
         }
         OperationType operationType = operationTypeService.findOperationTypeById(id);
-        return AjaxResult.success(operationType, "查询成功");
+        return AjaxResult.success(operationType, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_CXCG"));
     }
 
     @RequestMapping(value = "operation/type/{id}", method = RequestMethod.DELETE)
     public AjaxResult delete(@PathVariable Long id) {
         if (null == id) {
-            return AjaxResult.failed("ID不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_IDBNWK"));
         }
         operationTypeService.removeById(id);
-        return AjaxResult.success("删除成功");
+        return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_SCCG"));
     }
 
     @RequestMapping(value = "operation/type", method = RequestMethod.GET)
@@ -114,7 +118,7 @@ public class OperationTypeController {
         List<OperationType> operationTypeList = operationTypeService.listAllOperationType(whereRequest);
         PageInfo<OperationType> page = new PageInfo<OperationType>(operationTypeList);
 
-        return AjaxResult.success(page, "查询成功");
+        return AjaxResult.success(page, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_CXCG"));
     }
 
     /**
@@ -124,9 +128,9 @@ public class OperationTypeController {
      */
     @RequestMapping(value = "operation/type/import/templateDownload", method = RequestMethod.GET)
     public AjaxResult templateDownload() {
-        String url = DOWNLOAD_HTTP + "/100/templates/手术名称-导入数据模板.xlsx";
+        String url = DOWNLOAD_HTTP + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_100TEMPLATESSSMCDRSJMBXLSX");
         LOGGER.info("额外器械数据的导入模板下载地址= " + url);
-        return AjaxResult.success(url, "操作成功");
+        return AjaxResult.success(url, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_CZCG"));
     }
 
     /**
@@ -137,11 +141,11 @@ public class OperationTypeController {
     @RequestMapping(value = "services/operation/type/searchName", method = RequestMethod.GET)
     public AjaxResult listBySearchName(@RequestParam("searchName") String searchName) {
         if (StringUtil.isBlank(searchName)) {
-            return AjaxResult.failed("器械查询名称不能为空");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_QXCXMCBNWK"));
         }
         searchName = searchName.toUpperCase();
         List<OperationType> operationTypeList = operationTypeService.listBySearchName(searchName);
-        return AjaxResult.success(operationTypeList, "查询成功");
+        return AjaxResult.success(operationTypeList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_CXCG"));
     }
 
     private void updateOperationDefaultApplianceXREF(Long operationTypeId, List<OperationDefaultApplianceXREF> applianceList) {

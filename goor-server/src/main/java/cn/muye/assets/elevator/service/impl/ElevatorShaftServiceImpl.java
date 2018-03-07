@@ -8,6 +8,7 @@ import cn.muye.assets.elevator.mapper.ElevatorShaftMapper;
 import cn.muye.assets.elevator.service.ElevatorService;
 import cn.muye.assets.elevator.service.ElevatorShaftService;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.google.common.collect.Lists;
 import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
@@ -37,6 +38,8 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
     private ElevatorShaftMapper elevatorShaftMapper;
     @Autowired
     private ElevatorService elevatorService;
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Transactional
     @Override
@@ -128,7 +131,7 @@ public class ElevatorShaftServiceImpl extends BaseServiceImpl<ElevatorShaft> imp
     @Transactional
     @Override
     public boolean updateElevatorShaftLockStateWithRobotCodeInner(Long elevatorShaftId, ElevatorShaft.ELEVATORSHAFT_ACTION action, String robotCode) {
-        checkArgument(robotCode != null && !"".equals(robotCode.trim()), "机器人编号 robotCode 不允许为空!");
+        checkArgument(robotCode != null && !"".equals(robotCode.trim()), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_service_impl_ElevatorShaftServiceImpl_java_JQRBHROBOTCODEBYXWK"));
         boolean flag = false;
         try {
             ElevatorShaft elevatorShaft = super.findById(elevatorShaftId);

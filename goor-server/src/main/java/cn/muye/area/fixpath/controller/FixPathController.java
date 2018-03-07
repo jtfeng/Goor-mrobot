@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.muye.area.fixpath.service.FixPathService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.controller.BaseController;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -28,7 +29,8 @@ public class FixPathController extends BaseController{
 
     @Autowired
     private FixPathService fixPathService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
     @RequestMapping(value = "area/fixpath", method = RequestMethod.GET)
     public AjaxResult sendFixPathQuery(@RequestParam("sceneId") Long sceneId,
                                        @RequestParam("robotCode") String robotCode) {
@@ -37,7 +39,7 @@ public class FixPathController extends BaseController{
             return ajaxResult;
         } catch (Exception e) {
             logger.error(" 获取工控固定路径出错", e);
-            return AjaxResult.failed("请求失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_fixpath_controller_FixPathController_java_QQSB"));
         }
     }
 
@@ -55,7 +57,7 @@ public class FixPathController extends BaseController{
             String fileName = file.getOriginalFilename();
             if(!fileName.endsWith(".txt")){
                 logger.info("上传文件名为{},非txt文档", fileName);
-                return AjaxResult.failed("上传文件非txt文档");
+                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_fixpath_controller_FixPathController_java_SCWJFTXTWD"));
             }
             //转存至后台服务器内
             File dest = FileUtils.getFile(DOWNLOAD_HOME + File.separator + SearchConstants.FAKE_MERCHANT_STORE_ID + File.separator + "pathFile");
@@ -73,7 +75,7 @@ public class FixPathController extends BaseController{
             return AjaxResult.success();
         } catch (Exception e) {
             logger.error("读取path文件出错", e);
-            return AjaxResult.failed("请求失败");
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_fixpath_controller_FixPathController_java_QQSB"));
         }
     }
 }
