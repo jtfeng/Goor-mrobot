@@ -5,8 +5,8 @@ package cn.mrobot.bean.assets.elevator;
  */
 public enum ElevatorModeEnum {
 
-    FULL_AUTOMATIC(1, "全自动"),
-    HALF_AUTOMATIC(0, "半自动");
+    FULL_AUTOMATIC(1, "goor_domain_src_main_java_cn_mrobot_bean_assets_elevator_ElevatorModeEnum_java_QZD"),
+    HALF_AUTOMATIC(0, "goor_domain_src_main_java_cn_mrobot_bean_assets_elevator_ElevatorModeEnum_java_BZD");
     private int modelCode;
     private String mode;
 

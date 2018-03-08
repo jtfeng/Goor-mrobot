@@ -5,16 +5,16 @@ package cn.mrobot.bean.notification;
  */
 public enum NotificationType {
 
-	RESOURCE("source", "资源信息"),
-	APK("apk", "应用"),
-	MODULE("module", "模块"),
-	THEME("theme", "主题"),
+	RESOURCE("source", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_ZYXX"),
+	APK("apk", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_YY"),
+	MODULE("module", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_MK"),
+	THEME("theme", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_ZT"),
 	AGENT("agent", "agent"),
-	AGENT_PATCH("agent_patch", "agent补丁包"),
-	SELF_DESIGN_PAD("self_design_pad", "自研平板"),
-	MRC_CONTROL("mrc_control", "多机协同"),
-	METRICS_FREQUENCY("metrics_frequency", "系统指标收集频率"),
-	RECEIPT_MODULE("receipt_module", "打印小票模板");
+	AGENT_PATCH("agent_patch", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_AGENTBDB"),
+	SELF_DESIGN_PAD("self_design_pad", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_ZYPB"),
+	MRC_CONTROL("mrc_control", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_DJXT"),
+	METRICS_FREQUENCY("metrics_frequency", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_XTZBSJPL"),
+	RECEIPT_MODULE("receipt_module", "goor_domain_src_main_java_cn_mrobot_bean_notification_NotificationType_java_DYXPMB");
 
 	private String value;
 

@@ -10,39 +10,39 @@ import java.util.Map;
  */
 public enum  IndustrialControlPointType {
 
-    INITIAL(0, "初始点"),//工控 0初始点
-    CHARGER_STAND_BY(1, "充电点"),//工控 1充电点;
-    GENERAL(2, "普通目标点"); //工控 1充电点
+    INITIAL(0, "goor_domain_src_main_java_cn_mrobot_bean_area_point_IndustrialControlPointType_java_CSD"),//工控 0初始点
+    CHARGER_STAND_BY(1, "goor_domain_src_main_java_cn_mrobot_bean_area_point_IndustrialControlPointType_java_CDD"),//工控 1充电点;
+    GENERAL(2, "goor_domain_src_main_java_cn_mrobot_bean_area_point_IndustrialControlPointType_java_PTMBD"); //工控 1充电点
 
 
-    private int value;
+    private String value;
 
-    private String caption;
+    private int caption;
 
-    private IndustrialControlPointType(int value, String caption) {
+    private IndustrialControlPointType(int caption, String value) {
         this.value = value;
         this.caption = caption;
     }
 
-    public int getValue() {
+    public String getValue() {
         return value;
     }
 
-    public void setValue(int value) {
+    public void setValue(String value) {
         this.value = value;
     }
 
-    public String getCaption() {
+    public int getCaption() {
         return caption;
     }
 
-    public void setCaption(String caption) {
+    public void setCaption(int caption) {
         this.caption = caption;
     }
 
-    public static IndustrialControlPointType getType(int value) {
+    public static IndustrialControlPointType getType(int caption) {
         for (IndustrialControlPointType c : IndustrialControlPointType.values()) {
-            if (c.getValue() == value) {
+            if (c.getCaption() == caption) {
                 return c;
             }
         }

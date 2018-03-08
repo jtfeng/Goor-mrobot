@@ -14,6 +14,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.websoket.WebSocketSendMessage;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.log.alert.service.LogAlertService;
 import cn.muye.mission.service.MissionListTaskService;
 import cn.muye.order.service.OrderService;
@@ -47,6 +48,9 @@ public class X86MissionAlertServiceImpl implements X86MissionAlertService {
 
     @Autowired
     private WebSocketSendMessage webSocketSendMessage;
+
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     @Override
     public AjaxResult handleX86MissionAlert(MessageInfo messageInfo) {
@@ -84,7 +88,7 @@ public class X86MissionAlertServiceImpl implements X86MissionAlertService {
         if (StringUtil.isNullOrEmpty(robotCode))
             return;
         WSMessage wsMessage = new WSMessage.Builder().
-                title(LogType.WARNING_TIMEOUT.getValue())
+                title(localeMessageSourceService.getMessage(LogType.WARNING_TIMEOUT.getValue()))
                 .messageType(WSMessageType.WARNING)
                 .body(message)
                 .deviceId(robotCode)
@@ -108,7 +112,7 @@ public class X86MissionAlertServiceImpl implements X86MissionAlertService {
         if (stationId == null)
             return;
         WSMessage wsMessage = new WSMessage.Builder().
-                title(LogType.WARNING_TIMEOUT.getValue())
+                title(localeMessageSourceService.getMessage(LogType.WARNING_TIMEOUT.getValue()))
                 .messageType(WSMessageType.WARNING)
                 .body(message)
                 .deviceId(Long.toString(stationId))

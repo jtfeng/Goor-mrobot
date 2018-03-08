@@ -5,13 +5,13 @@ package cn.mrobot.bean.mission;
  */
 public enum MissionState {
 
-    STATE_INIT("init", "待执行"),
-    STATE_WAITING("waiting", "等待中"),
-    STATE_FINISHED("finished", "已经完成"),
-    STATE_EXECUTING("executing", "正在执行"),
-    STATE_PAUSED("paused", "暂停中"),
-    STATE_CANCELED("canceled", "被取消"),
-    STATE_FAILED("failed", "失败");
+    STATE_INIT("init", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionState_java_DZX"),
+    STATE_WAITING("waiting", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionState_java_DDZ"),
+    STATE_FINISHED("finished", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionState_java_YJWC"),
+    STATE_EXECUTING("executing", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionState_java_ZZZX"),
+    STATE_PAUSED("paused", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionState_java_ZTZ"),
+    STATE_CANCELED("canceled", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionState_java_BQX"),
+    STATE_FAILED("failed", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionState_java_SB");
 
     private String code;
 

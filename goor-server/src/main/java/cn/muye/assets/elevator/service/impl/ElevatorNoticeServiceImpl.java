@@ -151,7 +151,7 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
 
     private void sendWebSocketSendMessage(ElevatorNotice elevatorNotice) {
         WSMessage ws = new WSMessage.Builder().
-                title(LogType.ELEVATOR_NOTICE.getValue())
+                title(localeMessageSourceService.getMessage(LogType.ELEVATOR_NOTICE.getValue()))
                 .messageType(WSMessageType.NOTIFICATION)
                 .body(elevatorNotice)
                 .deviceId(elevatorNotice.getToStationId() + "")

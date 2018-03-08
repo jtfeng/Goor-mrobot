@@ -12,9 +12,9 @@ import java.util.Map;
  */
 public enum X86PatternEnum {
 
-    LINE(0, "直线"),
-    BEZIER(1, "三阶贝塞尔曲线"),
-    CUSTOM(2, "自定义曲线");
+    LINE(0, "goor_domain_src_main_java_cn_mrobot_bean_enums_X86PatternEnum_java_ZX"),
+    BEZIER(1, "goor_domain_src_main_java_cn_mrobot_bean_enums_X86PatternEnum_java_SJBSEQX"),
+    CUSTOM(2, "goor_domain_src_main_java_cn_mrobot_bean_enums_X86PatternEnum_java_ZDYQX");
 
     private String value;
 

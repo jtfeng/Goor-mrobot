@@ -22,27 +22,27 @@ public enum MapPointType {
 	 * 可继续细分目标点类
 	 * 型
 	 *******/
-	UNDEFINED(0, "未配置云端类型", 0, 0.1,0), //
+	UNDEFINED(0, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_WPZYDLX", 0, 0.1,0), //
 
-	PARK(1, "停车位", 2, 0.1,0), //工控 2普通目标点
-	CHARGER_STAND_BY(2, "充电桩原点", 1, 0.1,0),//工控 1充电点
-	CHARGER(3, "充电桩", 2, 0.1,0),//工控 2普通目标点
-	ELEVATOR(4, "乘电梯点", 2, 0.1,0),//工控 2普通目标点
-	ELEVATOR_WAIT(5, "等电梯点", 2, 0.1,0),//工控 2普通目标点
-	DOOR(6, "自动门", 2, 0.1,6.28),//工控 2普通目标点
-	CROSS(7, "路口", 2, 0.1,6.28),//工控 2普通目标点
-	CORNER(8, "拐角", 2, 0.1,6.28),//工控 2普通目标点
-	TRANSITION(9, "过渡点", 2, 0.1,6.28),//工控 2普通目标点
-	UNLOAD(10, "卸货点", 2, 0.1,0),//工控 2普通目标点
-	LOAD(11, "装货点", 2, 0.1,0),//工控 2普通目标点
-	INITIAL(12, "初始点", 0, 0.1,0),//工控 0初始点
-	ELEVATOR_START(13, "开始电梯任务点", 2, 0.1,0),//工控 2普通目标点
-	ELEVATOR_INNER(14, "电梯内部点", 2, 0.1,0),//工控 2普通目标点
-	ELEVATOR_END(15, "电梯任务结束点", 2, 0.1,0),//工控 2普通目标点
-	DOOR_WAIT(16, "门任务等待点", 2, 0.1,0),//工控 2普通目标点
-	DOOR_START(17, "门任务开始点", 2, 0.1,0),//工控 2普通目标点
-	DOOR_END(18, "门任务结束点", 2, 0.1,0),//工控 2普通目标点
-	FINAL_UNLOAD(19, "货架回收点", 2, 0.1,0),//工控 2普通目标点
+	PARK(1, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_TCW", 2, 0.1,0), //工控 2普通目标点
+	CHARGER_STAND_BY(2, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_CDZYD", 1, 0.1,0),//工控 1充电点
+	CHARGER(3, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_CDZ", 2, 0.1,0),//工控 2普通目标点
+	ELEVATOR(4, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_CDTD", 2, 0.1,0),//工控 2普通目标点
+	ELEVATOR_WAIT(5, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_DDTD", 2, 0.1,0),//工控 2普通目标点
+	DOOR(6, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_ZDM", 2, 0.1,6.28),//工控 2普通目标点
+	CROSS(7, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_LK", 2, 0.1,6.28),//工控 2普通目标点
+	CORNER(8, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_GJ", 2, 0.1,6.28),//工控 2普通目标点
+	TRANSITION(9, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_GDD", 2, 0.1,6.28),//工控 2普通目标点
+	UNLOAD(10, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_XHD", 2, 0.1,0),//工控 2普通目标点
+	LOAD(11, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_ZHD", 2, 0.1,0),//工控 2普通目标点
+	INITIAL(12, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_CSD", 0, 0.1,0),//工控 0初始点
+	ELEVATOR_START(13, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_KSDTRWD", 2, 0.1,0),//工控 2普通目标点
+	ELEVATOR_INNER(14, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_DTNBD", 2, 0.1,0),//工控 2普通目标点
+	ELEVATOR_END(15, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_DTRWJSD", 2, 0.1,0),//工控 2普通目标点
+	DOOR_WAIT(16, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_MRWDDD", 2, 0.1,0),//工控 2普通目标点
+	DOOR_START(17, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_MRWKSD", 2, 0.1,0),//工控 2普通目标点
+	DOOR_END(18, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_MRWJSD", 2, 0.1,0),//工控 2普通目标点
+	FINAL_UNLOAD(19, "goor_domain_src_main_java_cn_mrobot_bean_area_point_MapPointType_java_HJHSD", 2, 0.1,0),//工控 2普通目标点
 
 	;
 

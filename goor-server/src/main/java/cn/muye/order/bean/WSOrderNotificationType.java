@@ -5,8 +5,8 @@ package cn.muye.order.bean;
  */
 public enum WSOrderNotificationType {
 
-    SEND_STATION("SEND_STATION", "发货站提醒"),
-    RECEIVE_STATION("RECEIVE_STATION", "取货站提醒");
+    SEND_STATION("SEND_STATION", "goor_server_src_main_java_cn_muye_order_bean_WSOrderNotificationType_java_FHZTX"),
+    RECEIVE_STATION("RECEIVE_STATION", "goor_server_src_main_java_cn_muye_order_bean_WSOrderNotificationType_java_QHZTX");
 
     private String name;
     private String value;

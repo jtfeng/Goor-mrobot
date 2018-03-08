@@ -250,7 +250,7 @@ public class MapAnalysisServiceImpl implements MapAnalysisService {
             mapPoint.setPointAlias(valueMap.get("alias").toString());
             mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
             IndustrialControlPointType type = IndustrialControlPointType.getType(mapPoint.getMapPointTypeId());
-            mapPoint.setICPointType(type != null ? type.getCaption() : "");
+            mapPoint.setICPointType(type != null ? localeMessageSourceService.getMessage(type.getValue()) : "");
             //设置云端类型为未定义
             mapPoint.setCloudMapPointTypeId(MapPointType.UNDEFINED.getCaption());
 

@@ -133,11 +133,11 @@ public class OperationOrder extends BaseBean {
     }
 
     public enum State {
-        WAITING(1, "待无菌器械包室受理"),
-        ASEPTIC_APPARATUS_ROOM_CANCEL(2, "无菌器械包室取消"),
-        ASEPTIC_APPARATUS_ROOM_HANDLED(3, "无菌器械包室受理完毕"),
-        OPERATION_CANCEL(4, "手术室取消"),
-        ORDER_FAIL(5, "手术室下单失败");
+        WAITING(1, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_DWJQXBSSL"),
+        ASEPTIC_APPARATUS_ROOM_CANCEL(2, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_WJQXBSQX"),
+        ASEPTIC_APPARATUS_ROOM_HANDLED(3, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_WJQXBSSLWB"),
+        OPERATION_CANCEL(4, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_SSSQX"),
+        ORDER_FAIL(5, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_SSSXDSB");
 
         private int code;
         private String name;
@@ -175,9 +175,9 @@ public class OperationOrder extends BaseBean {
     }
 
     public enum Type {
-        OPERATION_TYPE_ORDER(1, "按手术类型申请"),
-        INTERIM_ORDER(2, "临时手术包申请"),
-        OPERATION_TYPE_ORDER_WITHOUT_DEFAULT_APPLIANCE(3, "按手术类型申请(非默认器械)");
+        OPERATION_TYPE_ORDER(1, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_ASSLXSQ"),
+        INTERIM_ORDER(2, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_LSSSBSQ"),
+        OPERATION_TYPE_ORDER_WITHOUT_DEFAULT_APPLIANCE(3, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_ASSLXSQFMRQX");
 
         private int code;
         private String name;

@@ -125,11 +125,11 @@ public class LogInfoController {
                 logInfoRecord.add(String.valueOf(logInfo.getStoreId()));
                 logInfoRecord.add(logInfo.getDeviceId());
                 LogLevel logLevel = LogLevel.getLogLevel(logInfo.getLogLevel());
-                logInfoRecord.add(logLevel == null ? "" : logLevel.getValue());
+                logInfoRecord.add(logLevel == null ? "" : localeMessageSourceService.getMessage(logLevel.getValue()));
                 LogType logType = LogType.getLogType(logInfo.getLogType());
-                logInfoRecord.add(logType == null ? "" : logType.getValue());
+                logInfoRecord.add(logType == null ? "" : localeMessageSourceService.getMessage(logType.getValue()));
                 ModuleEnums moduleEnums = ModuleEnums.getModuleEnums(logInfo.getModule());
-                logInfoRecord.add(moduleEnums == null ? "" : moduleEnums.getModuleName());
+                logInfoRecord.add(moduleEnums == null ? "" : localeMessageSourceService.getMessage(moduleEnums.getModuleName()));
                 logInfoRecord.add(logInfo.getSceneName());
                 logInfoRecord.add(logInfo.getMapName());
                 logInfoRecord.add(logInfo.getMessage());
@@ -196,7 +196,7 @@ public class LogInfoController {
         List<RobotLogWarningDetail> robotLogWarningDetailList = logInfoList.stream().map(logInfo -> {
             RobotLogWarningDetail robotLogWarningDetail = new RobotLogWarningDetail();
             robotLogWarningDetail.setDateTime(logInfo.getCreateTime());
-            robotLogWarningDetail.setType(LogType.getLogType(logInfo.getLogType()).getValue());
+            robotLogWarningDetail.setType(localeMessageSourceService.getMessage(LogType.getLogType(logInfo.getLogType()).getValue()));
             return robotLogWarningDetail;
         }).collect(Collectors.toList());
         robotLogWarningVO.setWarningTime(logInfoList.size());

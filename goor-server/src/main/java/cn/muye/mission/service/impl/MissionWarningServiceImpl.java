@@ -326,7 +326,7 @@ public class MissionWarningServiceImpl implements MissionWarningService {
     private void sendWebSocketSendMessage(String message, Long robotId) {
         Long sceneId = robotService.getRobotSceneId(robotId);
         WSMessage ws = new WSMessage.Builder().
-                title(LogType.WARNING_TIMEOUT.getValue())
+                title(localeMessageSourceService.getMessage(LogType.WARNING_TIMEOUT.getValue()))
                 .messageType(WSMessageType.WARNING)
                 .body(message)
                 .deviceId(sceneId + "")

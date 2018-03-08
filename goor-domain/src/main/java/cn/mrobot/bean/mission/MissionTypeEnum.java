@@ -12,8 +12,8 @@ import java.util.Map;
  */
 public enum MissionTypeEnum {
 
-    DISPATCH_MISSION(1, "调度任务"),
-    CHARGER_MISSION(2, "充电任务");
+    DISPATCH_MISSION(1, "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionTypeEnum_java_DDRW"),
+    CHARGER_MISSION(2, "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionTypeEnum_java_CDRW");
 
     private String value;
 

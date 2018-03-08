@@ -31,6 +31,19 @@ public class LocaleMessageSourceServiceImpl implements LocaleMessageSourceServic
     }
 
     @Override
+    public String[] getMessage(String[] codes) {
+        if(codes == null) {
+            return null;
+        }
+        int length = codes.length;
+        String[] result = new String[length];
+        for(int i = 0; i < length ; i++) {
+            result[i] = this.getMessage(codes[i]);
+        }
+        return result;
+    }
+
+    @Override
     public String getMessage(String code,String defaultMessage){
         return this.getMessage(code, null,defaultMessage);
     }

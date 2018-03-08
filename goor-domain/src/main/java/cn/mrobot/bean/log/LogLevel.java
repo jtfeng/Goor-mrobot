@@ -16,9 +16,9 @@ import java.util.Map;
  */
 public enum LogLevel {
 
-    INFO("INFO", "普通日志"),
-    WARNING("WARNING", "警告"),
-    ERROR("ERROR", "错误");
+    INFO("INFO", "goor_domain_src_main_java_cn_mrobot_bean_log_LogLevel_java_PTRZ"),
+    WARNING("WARNING", "goor_domain_src_main_java_cn_mrobot_bean_log_LogLevel_java_JG"),
+    ERROR("ERROR", "goor_domain_src_main_java_cn_mrobot_bean_log_LogLevel_java_CW");
 
     private String name;
     private String value;

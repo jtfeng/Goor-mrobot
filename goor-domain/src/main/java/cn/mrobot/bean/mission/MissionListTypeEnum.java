@@ -13,10 +13,10 @@ import java.util.Map;
  */
 public enum MissionListTypeEnum {
 
-	NORMAL("normal", "普通任务","normal"),
-	PLAN("plan", "计划任务","plan"),
-	PATROL("patrol", "巡逻任务","plan"),
-	CHARGE("charge", "充电任务","plan");
+	NORMAL("normal", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionListTypeEnum_java_PTRW","normal"),
+	PLAN("plan", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionListTypeEnum_java_JHRW","plan"),
+	PATROL("patrol", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionListTypeEnum_java_XLRW","plan"),
+	CHARGE("charge", "goor_domain_src_main_java_cn_mrobot_bean_mission_MissionListTypeEnum_java_CDRW","plan");
 
 	private String caption;
 

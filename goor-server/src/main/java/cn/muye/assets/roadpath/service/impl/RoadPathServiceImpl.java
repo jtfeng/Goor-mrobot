@@ -526,12 +526,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             MapPoint startPoint = null;
             MapPoint endPoint = null;
             if(isPointDuplicate) {
-                startPoint = PathUtil.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, true,pointService, storeId);
-                endPoint = PathUtil.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, false,pointService, storeId);
+                startPoint = PathUtil.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, true,pointService, storeId,localeMessageSourceService);
+                endPoint = PathUtil.findOrSaveMapPointByPathDuplicate(sceneName, pathDTO, false,pointService, storeId,localeMessageSourceService);
             }
             else {
-                startPoint = PathUtil.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, true,pointService, storeId);
-                endPoint = PathUtil.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, false,pointService, storeId);
+                startPoint = PathUtil.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, true,pointService, storeId,localeMessageSourceService);
+                endPoint = PathUtil.findOrSaveMapPointByPathNoDuplicate(sceneName, pathDTO, false,pointService, storeId,localeMessageSourceService);
             }
 
             //封装RoadPath对象，保存数据库
@@ -589,16 +589,16 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             return PathUtil.calDistance(startPoint, endPoint);
         }
         else if(type.equals(X86PatternEnum.LINE.getCaption())) {
-            log.info("####上传的工控路径type为{},{}", type, X86PatternEnum.LINE.getValue());
+            log.info("####上传的工控路径type为{},{}", type, localeMessageSourceService.getMessage(X86PatternEnum.LINE.getValue()));
             return PathUtil.calDistance(startPoint, endPoint);
         }
         else if(type.equals(X86PatternEnum.BEZIER.getCaption())) {
-            log.info("####上传的工控路径type为{},{}", type, X86PatternEnum.BEZIER.getValue());
+            log.info("####上传的工控路径type为{},{}", type, localeMessageSourceService.getMessage(X86PatternEnum.BEZIER.getValue()));
             //TODO 计算bezier曲线长度方法
             return PathUtil.calDistance(startPoint, endPoint);
         }
         else if(type.equals(X86PatternEnum.CUSTOM.getCaption())) {
-            log.info("####上传的工控路径type为{},{}", type, X86PatternEnum.CUSTOM.getValue());
+            log.info("####上传的工控路径type为{},{}", type, localeMessageSourceService.getMessage(X86PatternEnum.CUSTOM.getValue()));
             //TODO 计算自定义曲线长度方法
             return PathUtil.calDistance(startPoint, endPoint);
         }

@@ -136,7 +136,7 @@ public class LogCollectServiceImpl implements LogCollectService {
         StringBuffer stringBuffer = new StringBuffer();
         if (null != stateDetails && stateDetails.size() > 0) {
             StateDetail stateDetail = stateDetails.get(0);
-            stringBuffer.append(ModuleEnums.NAVIGATION.getModuleName()).append(":").append(stateDetail.getCHValue()).append(",");
+            stringBuffer.append(localeMessageSourceService.getMessage(ModuleEnums.NAVIGATION.getModuleName())).append(":").append(stateDetail.getCHValue()).append(",");
         }
         String navigationState = stringBuffer.toString();
         if (StringUtil.isNullOrEmpty(navigationState))

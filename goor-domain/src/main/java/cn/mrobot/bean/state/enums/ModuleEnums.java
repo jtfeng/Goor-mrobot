@@ -10,13 +10,13 @@ import java.util.Map;
  */
 public enum ModuleEnums {
 
-    NAVIGATION(100, "自动导航"),
-    CHARGE(200, "电池"),
-    BASE(300, "底盘"),
-    MISSION(400, "调度任务"),
-    SCENE(500, "场景"),
-    PAD_INFO(600,"护士站提醒"),
-    BOOT(700,"开机管理");
+    NAVIGATION(100, "goor_domain_src_main_java_cn_mrobot_bean_state_enums_ModuleEnums_java_ZDDH"),
+    CHARGE(200, "goor_domain_src_main_java_cn_mrobot_bean_state_enums_ModuleEnums_java_DC"),
+    BASE(300, "goor_domain_src_main_java_cn_mrobot_bean_state_enums_ModuleEnums_java_DP"),
+    MISSION(400, "goor_domain_src_main_java_cn_mrobot_bean_state_enums_ModuleEnums_java_DDRW"),
+    SCENE(500, "goor_domain_src_main_java_cn_mrobot_bean_state_enums_ModuleEnums_java_CJ"),
+    PAD_INFO(600,"goor_domain_src_main_java_cn_mrobot_bean_state_enums_ModuleEnums_java_HSZTX"),
+    BOOT(700,"goor_domain_src_main_java_cn_mrobot_bean_state_enums_ModuleEnums_java_KJGL");
 
     private int moduleId;
 

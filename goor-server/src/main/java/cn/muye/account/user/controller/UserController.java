@@ -312,7 +312,7 @@ public class UserController implements ApplicationContextAware {
         //如果用户不是站管理员，走到这说明已经认证通过了，则直接登录成功
         if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
             //写入枚举
-            map.put("enums", getAllEnums(userDTO));
+            map.put("enums", getAllEnums(userDTO,localeMessageSourceService));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
             //登录成功，初始化权限
 //            initialUserPermission(userDTO.getId(), map);
@@ -322,7 +322,7 @@ public class UserController implements ApplicationContextAware {
         if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null
                 && stationList.get(0).getActive() == Constant.NORMAL) {
             //写入枚举
-            map.put("enums", getAllEnums(userDTO));
+            map.put("enums", getAllEnums(userDTO,localeMessageSourceService));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
             for (StationDTO4User stationDTO4User : stationList) {
                 Integer stationTypeId = stationDTO4User.getStationTypeId();
@@ -370,7 +370,7 @@ public class UserController implements ApplicationContextAware {
         if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption())) && stationList != null
                 && stationList.get(0).getActive() == Constant.NORMAL) {
             //写入枚举
-            map.put("enums", getAllEnums(userDTO));
+            map.put("enums", getAllEnums(userDTO,localeMessageSourceService));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
             OrderSetting defaultSetting = null;
             if (stationList.size() > 0) {
@@ -401,7 +401,7 @@ public class UserController implements ApplicationContextAware {
     @ResponseBody
     public AjaxResult getAllEnum() {
         Map map = Maps.newHashMap();
-        map.put("enums", getAllEnums(null));
+        map.put("enums", getAllEnums(null,localeMessageSourceService));
         return AjaxResult.success(map, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_CLCXCG"));
     }
 
@@ -593,7 +593,7 @@ public class UserController implements ApplicationContextAware {
      *
      * @return
      */
-    public final static Map getAllEnums(UserDTO userDTO) {
+    public final static Map getAllEnums(UserDTO userDTO,LocaleMessageSourceService localeMessageSourceService) {
         Map map = new HashMap();
         map.put("ICPointType", IndustrialControlPointType.list());
         map.put("mapPointType", MapPointType.list());
@@ -619,13 +619,13 @@ public class UserController implements ApplicationContextAware {
             if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()))) {
                 Role role0 = new Role();
                 role0.setId(Long.valueOf(RoleTypeEnum.SUPER_ADMIN.getCaption()));
-                role0.setCnName(RoleTypeEnum.SUPER_ADMIN.getValue());
+                role0.setCnName(localeMessageSourceService.getMessage(RoleTypeEnum.SUPER_ADMIN.getValue()));
                 Role role1 = new Role();
                 role1.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
-                role1.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
+                role1.setCnName(localeMessageSourceService.getMessage(RoleTypeEnum.HOSPITAL_ADMIN.getValue()));
                 Role role2 = new Role();
                 role2.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
-                role2.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+                role2.setCnName(localeMessageSourceService.getMessage(RoleTypeEnum.STATION_ADMIN.getValue()));
                 listNew.add(entityToDTO(role0));
                 listNew.add(entityToDTO(role1));
                 listNew.add(entityToDTO(role2));
@@ -633,17 +633,17 @@ public class UserController implements ApplicationContextAware {
             } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()))) {
                 Role role = new Role();
                 role.setId(Long.valueOf(RoleTypeEnum.HOSPITAL_ADMIN.getCaption()));
-                role.setCnName(RoleTypeEnum.HOSPITAL_ADMIN.getValue());
+                role.setCnName(localeMessageSourceService.getMessage(RoleTypeEnum.HOSPITAL_ADMIN.getValue()));
                 Role role1 = new Role();
                 role1.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
-                role1.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+                role1.setCnName(localeMessageSourceService.getMessage(RoleTypeEnum.STATION_ADMIN.getValue()));
                 listNew.add(entityToDTO(role));
                 listNew.add(entityToDTO(role1));
                 map.put("roleCreateLimit", listNew);
             } else if (userDTO.getRoleId() != null && userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
                 Role role1 = new Role();
                 role1.setId(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()));
-                role1.setCnName(RoleTypeEnum.STATION_ADMIN.getValue());
+                role1.setCnName(localeMessageSourceService.getMessage(RoleTypeEnum.STATION_ADMIN.getValue()));
                 listNew.add(entityToDTO(role1));
                 map.put("roleCreateLimit", listNew);
             } else {

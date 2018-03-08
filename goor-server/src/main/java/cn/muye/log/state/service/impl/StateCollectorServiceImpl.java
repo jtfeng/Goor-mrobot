@@ -369,7 +369,7 @@ public class StateCollectorServiceImpl implements StateCollectorService {
     private StateDetail parseStateDetail(String chPrefix, Field field, int value, String chValue) {
         StateDetail stateDetail = new StateDetail();
         stateDetail.setName(field.getName());
-        stateDetail.setCHName(chPrefix + StateFieldEnums.getCHFieldName(field.getName()));
+        stateDetail.setCHName(chPrefix + localeMessageSourceService.getMessage(StateFieldEnums.getCHFieldName(field.getName())));
         stateDetail.setValue(value);
         stateDetail.setCHValue(chValue);
         return stateDetail;
@@ -390,10 +390,10 @@ public class StateCollectorServiceImpl implements StateCollectorService {
         }
         int navigationTypeCode = navigation.getNavigationTypeCode();
         NavigationType type = NavigationType.getType(navigationTypeCode);
-        String navigationTypeCodeStr = (type != null) ? type.getName() : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_WDYZT");
+        String navigationTypeCodeStr = (type != null) ? localeMessageSourceService.getMessage(type.getName()) : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_log_state_service_impl_StateCollectorServiceImpl_java_WDYZT");
         StateDetail stateDetail = new StateDetail();
         stateDetail.setName("navigation");
-        stateDetail.setCHName(ModuleEnums.NAVIGATION.getModuleName());
+        stateDetail.setCHName(localeMessageSourceService.getMessage(ModuleEnums.NAVIGATION.getModuleName()));
         stateDetail.setValue(navigationTypeCode);
         stateDetail.setCHValue(navigationTypeCodeStr);
         list.add(stateDetail);
@@ -419,10 +419,10 @@ public class StateCollectorServiceImpl implements StateCollectorService {
             stateDetail.setCHName(missionTask.getName());
             String state = missionTask.getState();
             if (StringUtil.isNullOrEmpty(state)) {
-                stateDetail.setCHValue(MissionState.STATE_INIT.getName());
+                stateDetail.setCHValue(localeMessageSourceService.getMessage(MissionState.STATE_INIT.getName()));
             } else {
                 MissionState missionState = MissionState.getMissionState(state);
-                String chValue = missionState != null ? missionState.getName() : MissionState.STATE_INIT.getName();
+                String chValue = missionState != null ? localeMessageSourceService.getMessage(missionState.getName()) : localeMessageSourceService.getMessage(MissionState.STATE_INIT.getName());
                 stateDetail.setCHValue(chValue);
             }
             stateDetailList.add(stateDetail);

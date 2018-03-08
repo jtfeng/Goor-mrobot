@@ -5,9 +5,9 @@ package cn.mrobot.bean.state.enums;
  */
 public enum  NavigationType {
 
-    NAV_READY(0,"导航准备"), //导航准备
-    NAV_MOVING(1,"导航中"),
-    NAV_PAUSE(2,"导航暂停");
+    NAV_READY(0,"goor_domain_src_main_java_cn_mrobot_bean_state_enums_NavigationType_java_DHZB"), //导航准备
+    NAV_MOVING(1,"goor_domain_src_main_java_cn_mrobot_bean_state_enums_NavigationType_java_DHZ"),
+    NAV_PAUSE(2,"goor_domain_src_main_java_cn_mrobot_bean_state_enums_NavigationType_java_DHZT");
 
     private int code;
 

@@ -290,10 +290,10 @@ public class OperationOrderController {
         for (int i = 0; i < operationTypeList.size(); i++) {
             OperationOrder operationOrder = operationTypeList.get(i);
             OperationOrder.Type type = OperationOrder.Type.getByCode(operationOrder.getType());
-            String typeCH = type != null ? type.getName() : "";
+            String typeCH = type != null ? localeMessageSourceService.getMessage(type.getName()) : "";
             operationOrder.setTypeCH(typeCH);
             OperationOrder.State state = OperationOrder.State.getByCode(operationOrder.getState());
-            String stateCH = state != null ? state.getName() : "";
+            String stateCH = state != null ? localeMessageSourceService.getMessage(state.getName()) : "";
             operationOrder.setStateCH(stateCH);
             //替换原数据
             operationTypeList.set(i, operationOrder);

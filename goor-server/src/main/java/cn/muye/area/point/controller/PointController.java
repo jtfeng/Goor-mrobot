@@ -193,7 +193,7 @@ public class PointController {
             mapPoint.setCreateTime(new Date());
             mapPoint.setMapPointTypeId(2);
             mapPoint.setStoreId(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            mapPoint.setICPointType(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getCaption());
+            mapPoint.setICPointType(localeMessageSourceService.getMessage(IndustrialControlPointType.getType(mapPoint.getMapPointTypeId()).getValue()));
 
             double x = 1.15461245;
             int num = 10;

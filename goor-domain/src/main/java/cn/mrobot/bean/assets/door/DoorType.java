@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public enum DoorType {
 
-	PATH_DOOR("pathDoor", "固定路径门");
+	PATH_DOOR("pathDoor", "goor_domain_src_main_java_cn_mrobot_bean_assets_door_DoorType_java_GDLJM");
 
 	private String value;
 

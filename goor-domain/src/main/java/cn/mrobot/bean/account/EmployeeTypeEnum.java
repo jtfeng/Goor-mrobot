@@ -13,8 +13,8 @@ import java.util.Map;
  */
 public enum EmployeeTypeEnum {
 
-	NORMAL(0, "普通员工"),
-	ELEVATOR(1, "电梯员工");
+	NORMAL(0, "goor_domain_src_main_java_cn_mrobot_bean_account_EmployeeTypeEnum_java_PTYG"),
+	ELEVATOR(1, "goor_domain_src_main_java_cn_mrobot_bean_account_EmployeeTypeEnum_java_DTYG");
 
 	private String value;
 

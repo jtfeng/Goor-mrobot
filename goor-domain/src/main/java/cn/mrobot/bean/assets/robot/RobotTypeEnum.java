@@ -12,12 +12,12 @@ import java.util.Map;
  */
 public enum RobotTypeEnum {
 
-    TRAILER(1, "拖车式"),
-    CABINET(2, "柜式"),
-    DRAWER(3, "抽屉式"),
-    COOKY(4, "Cooky"),
-    COOKYPLUS(5, "CookyPlus"),
-    CARSON(6, "Carson");
+    TRAILER(1, "goor_domain_src_main_java_cn_mrobot_bean_assets_robot_RobotTypeEnum_java_TCS"),
+    CABINET(2, "goor_domain_src_main_java_cn_mrobot_bean_assets_robot_RobotTypeEnum_java_JS"),
+    DRAWER(3, "goor_domain_src_main_java_cn_mrobot_bean_assets_robot_RobotTypeEnum_java_CTS"),
+    COOKY(4, "goor_domain_src_main_java_cn_mrobot_bean_assets_robot_RobotTypeEnum_java_COOKY"),
+    COOKYPLUS(5, "goor_domain_src_main_java_cn_mrobot_bean_assets_robot_RobotTypeEnum_java_COOKYPLUS"),
+    CARSON(6, "goor_domain_src_main_java_cn_mrobot_bean_assets_robot_RobotTypeEnum_java_CARSON");
 
     private String value;
 

@@ -21,6 +21,7 @@ import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.dijkstra.service.RoadPathResultService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,8 +174,8 @@ public class PathUtil {
      * @param storeId
      * @return 导航目标点
      */
-    public static MapPoint findOrSaveMapPointByPathNoDuplicate(String sceneName, PathDTO pathDTO, boolean start, PointService pointService, Long storeId) {
-        return findOrSaveMapPointByPath(sceneName, pathDTO, start, pointService, false, storeId);
+    public static MapPoint findOrSaveMapPointByPathNoDuplicate(String sceneName, PathDTO pathDTO, boolean start, PointService pointService, Long storeId, LocaleMessageSourceService localeMessageSourceService) {
+        return findOrSaveMapPointByPath(sceneName, pathDTO, start, pointService, false, storeId, localeMessageSourceService);
     }
 
     /**
@@ -186,8 +187,8 @@ public class PathUtil {
      * @param storeId
      * @return 导航目标点
      */
-    public static MapPoint findOrSaveMapPointByPathDuplicate(String sceneName, PathDTO pathDTO, boolean start, PointService pointService, Long storeId) {
-        return findOrSaveMapPointByPath(sceneName, pathDTO, start, pointService, true, storeId);
+    public static MapPoint findOrSaveMapPointByPathDuplicate(String sceneName, PathDTO pathDTO, boolean start, PointService pointService, Long storeId,LocaleMessageSourceService localeMessageSourceService) {
+        return findOrSaveMapPointByPath(sceneName, pathDTO, start, pointService, true, storeId, localeMessageSourceService);
     }
 
     /**
@@ -205,7 +206,8 @@ public class PathUtil {
                                                     boolean start,
                                                     PointService pointService,
                                                     boolean isDuplicate,
-                                                    Long storeId) {
+                                                    Long storeId,
+                                                    LocaleMessageSourceService localeMessageSourceService) {
         String pointNameResult = "";
         String pointAliasResult = "";
         String mapName = pathDTO.getStartMap();
@@ -260,8 +262,8 @@ public class PathUtil {
         //云端类型设成未定义
         mapPoint.setCloudMapPointTypeId(MapPointType.UNDEFINED.getCaption());
         //工控类型设置成普通目标点
-        mapPoint.setMapPointTypeId(IndustrialControlPointType.GENERAL.getValue());
-        mapPoint.setICPointType(IndustrialControlPointType.GENERAL.getCaption());
+        mapPoint.setMapPointTypeId(IndustrialControlPointType.GENERAL.getCaption());
+        mapPoint.setICPointType(localeMessageSourceService.getMessage(IndustrialControlPointType.GENERAL.getValue()));
         pointService.save(mapPoint);
         return mapPoint;
     }

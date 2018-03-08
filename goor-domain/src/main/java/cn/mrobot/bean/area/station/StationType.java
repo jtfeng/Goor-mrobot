@@ -13,12 +13,12 @@ import java.util.Map;
  */
 public enum StationType {
 
-	CENTER(1, "中心站点"),
-	NORMAL(2, "一般站点"),
-	CHARGE(3, "充电站点"),
-	OPERATION(4, "手术室站点"),
-	ASEPTIC_APPARATUS_ROOM(5, "无菌器械室站点"),
-	ELEVATOR(6, "电梯站点");
+	CENTER(1, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_ZXZD"),
+	NORMAL(2, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_YBZD"),
+	CHARGE(3, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_CDZD"),
+	OPERATION(4, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_SSSZD"),
+	ASEPTIC_APPARATUS_ROOM(5, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_WJQXSZD"),
+	ELEVATOR(6, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_DTZD");
 
 	private String value;
 

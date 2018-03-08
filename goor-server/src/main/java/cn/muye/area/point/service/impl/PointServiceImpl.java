@@ -25,6 +25,7 @@ import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.assets.scene.service.SceneService;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.PathUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -63,7 +64,8 @@ public class PointServiceImpl implements PointService {
     private StationMapPointXREFService stationMapPointXREFService;
     @Autowired
     private RoadPathService roadPathService;
-
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
 
     private static final int LEVEL_ONE = 1;
     private static final int LEVEL_TWO = 2;
@@ -405,7 +407,7 @@ public class PointServiceImpl implements PointService {
             int mapPointTypeId = pointTypeIdList.get(j);
             CascadeMapPointType cascadeMapPointType = new CascadeMapPointType();
             cascadeMapPointType.setValue(mapPointTypeId);
-            cascadeMapPointType.setLabel(MapPointType.getValue(mapPointTypeId));
+            cascadeMapPointType.setLabel(localeMessageSourceService.getMessage(MapPointType.getValue(mapPointTypeId)));
             if (LEVEL_THREE != level) {
                 cascadeMapPointType.setChildren(getMapPoint(sceneName, mapName, mapPointTypeId));
             }

@@ -911,7 +911,7 @@ public class MissionController {
 			List<MissionList> missionLists = new ArrayList<MissionList>();
 			//如果任务没有名称，则我们根据类型自定义名称
 			if(name == null || "".equals(name)) {
-				name = MissionListTypeEnum.getValue(missionListType);
+				name = localeMessageSourceService.getMessage(MissionListTypeEnum.getValue(missionListType));
 			}
 			String currentDateTimeString = DateTimeUtils.getCurrentDateTimeString();
 			/**

@@ -12,9 +12,9 @@ import java.util.Map;
  */
 public enum RoleTypeEnum {
 
-    SUPER_ADMIN(1, "超级管理员"),
-    HOSPITAL_ADMIN(2, "医院管理员"),
-    STATION_ADMIN(3, "站管理员");
+    SUPER_ADMIN(1, "goor_domain_src_main_java_cn_mrobot_bean_account_RoleTypeEnum_java_CJGLY"),
+    HOSPITAL_ADMIN(2, "goor_domain_src_main_java_cn_mrobot_bean_account_RoleTypeEnum_java_YYGLY"),
+    STATION_ADMIN(3, "goor_domain_src_main_java_cn_mrobot_bean_account_RoleTypeEnum_java_ZGLY");
 
     private String value;
 

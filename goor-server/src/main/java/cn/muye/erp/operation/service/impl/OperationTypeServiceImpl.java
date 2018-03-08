@@ -15,6 +15,7 @@ import cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper;
 import cn.muye.erp.operation.mapper.OperationTypeMapper;
 import cn.muye.erp.operation.service.OperationDepartmentTypeService;
 import cn.muye.erp.operation.service.OperationTypeService;
+import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.slf4j.Logger;
@@ -49,6 +50,9 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
     @Autowired
     private OperationDefaultApplianceXREFMapper operationDefaultApplianceXREFMapper;
 
+    @Autowired
+    private LocaleMessageSourceService localeMessageSourceService;
+
     private Map<String, OperationDepartmentType> operationDepartmentTypeMap = new HashMap<>();
     private ReentrantLock operationDepartmentTypeLock = new ReentrantLock();
 
@@ -64,8 +68,8 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
     }
 
     //EXCEL 导入文件头
-    public static final String[] EXCEL_TITLE = {"手术名称", "手术科室"};
-    public static final String[] OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE = {"手术室编号", "手术名称", "手术科室", "器械名称", "器械包装","数量"};
+    public static final String[] EXCEL_TITLE = {"goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_SSMC", "goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_SSKS"};
+    public static final String[] OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE = {"goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_SSSBH", "goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_SSMC", "goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_SSKS", "goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_QXMC", "goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_QXBZ","goor_server_src_main_java_cn_muye_erp_operation_service_impl_OperationTypeServiceImpl_java_SL"};
 
     private static final String EXCEL_DATE_OPERATION_TYPE = "OperationType";
     private static final String EXCEL_DATE_OPERATION_DEFAULT_APPLIANCE = "OperationDefaultAppliance";
@@ -178,13 +182,13 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
     }
 
     private void createAndSaveOperationDefaultAppliance(Map<String, Object> map) {
-        String operationRoomNumber = map.get(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[0]).toString();
-        String operationName = map.get(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[1]).toString();
-        String operationDepartment = map.get(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[2]).toString();
+        String operationRoomNumber = map.get(localeMessageSourceService.getMessage(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[0])).toString();
+        String operationName = map.get(localeMessageSourceService.getMessage(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[1])).toString();
+        String operationDepartment = map.get(localeMessageSourceService.getMessage(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[2])).toString();
         logger.info("手术室编号 = " + operationRoomNumber + "手术名称 = " + operationName + "手术科室 = " + operationDepartment);
-        String applianceName = map.get(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[3]).toString();
-        String appliancePackageType = map.get(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[4]).toString();
-        String applianceNumber = map.get(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[5]).toString();
+        String applianceName = map.get(localeMessageSourceService.getMessage(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[3])).toString();
+        String appliancePackageType = map.get(localeMessageSourceService.getMessage(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[4])).toString();
+        String applianceNumber = map.get(localeMessageSourceService.getMessage(OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE[5])).toString();
         logger.info("器械名称 = " + applianceName + "器械包装 = " + appliancePackageType+ "数量 = " + applianceNumber);
         if (StringUtil.isBlank(operationName) || StringUtil.isBlank(applianceName)) {
             return;
@@ -303,9 +307,9 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
     }
 
     private void createAndSaveOperationType(Map<String, Object> map) {
-        String operationName = map.get(EXCEL_TITLE[0]).toString();
+        String operationName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[0])).toString();
         logger.info("手术名称 = " + operationName);
-        String operationDepartmentTypeName = map.get(EXCEL_TITLE[1]).toString();
+        String operationDepartmentTypeName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[1])).toString();
         logger.info("手术科室 = " + operationDepartmentTypeName);
         OperationDepartmentType operationDepartmentType = getOperationDepartmentType(operationDepartmentTypeName);
         //校验重复数据

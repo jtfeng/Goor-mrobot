@@ -690,7 +690,7 @@ public class ConsumerCommon {
             //判断是否接收到前端停止发送的请求
             String body = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_JQR") + code + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_DQDL") + powerPercent + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_base_consumer_ConsumerCommon_java_DLYZ") + lowBatteryThreshold;
             WSMessage ws = new WSMessage.Builder().
-                    title(LogType.WARNING_LOWER_POWER.getValue())
+                    title(localeMessageSourceService.getMessage(LogType.WARNING_LOWER_POWER.getValue()))
                     .messageType(WSMessageType.WARNING)
                     .body(body)
                     .deviceId(code)

@@ -212,7 +212,7 @@ public class ApplianceController {
         try {
             File uploadFile = saveUploadFile(OPERATION_IMPORT_FILE_PATH, file);
             //校验文件格式
-            AjaxResult validateResult = validate(OperationTypeServiceImpl.EXCEL_TITLE, uploadFile);
+            AjaxResult validateResult = validate(localeMessageSourceService.getMessage(OperationTypeServiceImpl.EXCEL_TITLE), uploadFile);
             if (!validateResult.isSuccess()) {
                 return validateResult;
             }
@@ -235,7 +235,7 @@ public class ApplianceController {
         try {
             File uploadFile = saveUploadFile(OPERATION_DEFAULT_APPLIANCE_IMPORT_FILE_PATH, file);
             //校验文件格式
-            AjaxResult validateResult = validate(OperationTypeServiceImpl.OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE, uploadFile);
+            AjaxResult validateResult = validate(localeMessageSourceService.getMessage(OperationTypeServiceImpl.OPERATION_DEFAULT_APPLIANCE_EXCEL_TITLE), uploadFile);
             if (!validateResult.isSuccess()) {
                 return validateResult;
             }

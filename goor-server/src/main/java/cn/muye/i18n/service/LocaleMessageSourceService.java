@@ -14,6 +14,13 @@ public interface LocaleMessageSourceService {
      */
     String getMessage(String code);
 
+    /**
+     * 批量获取国际化列表
+     * @param codes
+     * @return
+     */
+    String[] getMessage(String[] codes);
+
     String getMessage(String code,String defaultMessage);
 
     String getMessage(String code,String defaultMessage,Locale locale);
