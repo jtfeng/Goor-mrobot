@@ -9,7 +9,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.*;
@@ -27,7 +30,9 @@ import java.util.regex.Pattern;
  *         TODO should this class extend something else that ExceptionTranslationFilter?
  */
 @Service
-public class AuthValidationExceptionFilter implements Filter {
+public class AuthValidationExceptionFilter implements Filter , ApplicationContextAware {
+
+    public static ApplicationContext applicationContext;
 
     private String[] excludedPageArray;
     private String excludedPages;
@@ -39,11 +44,11 @@ public class AuthValidationExceptionFilter implements Filter {
 
     protected static final Log LOGGER = LogFactory.getLog(AuthValidationExceptionFilter.class);
 
-    @Autowired
-    private LocaleMessageSourceService localeMessageSourceService;
+
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+        LocaleMessageSourceService localeMessageSourceService = applicationContext.getBean(LocaleMessageSourceService.class);
         boolean isExcludedPage = true;
         for (String page : excludedPageArray) { //判断是否在过滤url之外
             //删除URL末尾的 /
@@ -102,6 +107,7 @@ public class AuthValidationExceptionFilter implements Filter {
     /**
      * 初始化函数，获取需要排除在外的url
      */
+    @Override
     public void init(FilterConfig fConfig) throws ServletException {
         excludedPages = fConfig.getInitParameter("excludedUrl");
         authUserUri = fConfig.getInitParameter("authUserUri");
@@ -111,4 +117,8 @@ public class AuthValidationExceptionFilter implements Filter {
         return;
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        AuthValidationExceptionFilter.applicationContext = applicationContext;
+    }
 }
