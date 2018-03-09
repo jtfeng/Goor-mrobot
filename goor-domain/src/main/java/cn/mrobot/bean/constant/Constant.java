@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class Constant {
 
+    //CSV文件带中文的字符集,GB2312不支持繁体，所以用GBK
+    public static final String CSV_CHARSET_CHINESE = "GBK";
+
     //是地图同步状态
     public static final int UPLOAD_SUCCESS = 1;
     public static final int UPLOAD_FAIL = 2;

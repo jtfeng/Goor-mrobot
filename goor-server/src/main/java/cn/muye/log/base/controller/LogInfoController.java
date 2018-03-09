@@ -116,7 +116,7 @@ public class LogInfoController {
             CSVFormat format = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR).withFirstRecordAsHeader();
 
             // 这是写入CSV的代码
-            out = new OutputStreamWriter(new FileOutputStream(lgFile), "GB2312");
+            out = new OutputStreamWriter(new FileOutputStream(lgFile), Constant.CSV_CHARSET_CHINESE);
             printer = new CSVPrinter(out, format);
             //写入列头数据
             printer.printRecord(FILE_HEADER);

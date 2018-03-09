@@ -156,7 +156,7 @@ public class ExportServiceImpl implements ExportService {
         OutputStreamWriter out = null;
         CSVPrinter printer = null;
         try {
-            out = new OutputStreamWriter(new FileOutputStream(lgFile), "GB2312");
+            out = new OutputStreamWriter(new FileOutputStream(lgFile), Constant.CSV_CHARSET_CHINESE);
             printer = new CSVPrinter(out, format);
             //写入列头数据
             printer.printRecord(headers);
