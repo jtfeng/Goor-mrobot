@@ -1,5 +1,7 @@
 package cn.mrobot.bean.assets.elevator;
 
+import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.base.BaseBean;
 import cn.mrobot.bean.erp.order.OperationOrder;
 
@@ -26,6 +28,10 @@ public class ElevatorNotice extends BaseBean {
     private String robotCode;
 
     private Long toStationId;
+
+    private String fromStationName; //发货站名称
+
+    private String goodsTypeName; //物品类型名称
 
     public Integer getCallFloor() {
         return callFloor;
@@ -81,6 +87,22 @@ public class ElevatorNotice extends BaseBean {
 
     public void setToStationId(Long toStationId) {
         this.toStationId = toStationId;
+    }
+
+    public String getFromStationName() {
+        return fromStationName;
+    }
+
+    public void setFromStationName(String fromStationName) {
+        this.fromStationName = fromStationName;
+    }
+
+    public String getGoodsTypeName() {
+        return goodsTypeName;
+    }
+
+    public void setGoodsTypeName(String goodsTypeName) {
+        this.goodsTypeName = goodsTypeName;
     }
 
     public ElevatorNotice init() {

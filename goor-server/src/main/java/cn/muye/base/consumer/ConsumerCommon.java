@@ -228,6 +228,8 @@ public class ConsumerCommon {
         elevatorNotice.setCallFloor(jsonElevatorNotice.getCallFloor());
         elevatorNotice.setElevatorId(jsonElevatorNotice.getElevatorId());
         elevatorNotice.setTargetFloor(jsonElevatorNotice.getTargetFloor());
+        elevatorNotice.setFromStationName(jsonElevatorNotice.getFromStationName());
+        elevatorNotice.setGoodsTypeName(jsonElevatorNotice.getGoodsTypeName());
         elevatorNotice.setUuid(uuid);
         return elevatorNotice;
     }

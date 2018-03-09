@@ -21,7 +21,11 @@ import cn.muye.erp.operation.service.OperationTypeService;
 import cn.muye.erp.order.service.OperationOrderApplianceXREFService;
 import cn.muye.erp.order.service.OperationOrderService;
 import cn.muye.i18n.service.LocaleMessageSourceService;
+import com.google.common.collect.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import javax.websocket.Session;
@@ -33,6 +37,8 @@ import java.util.*;
  */
 @RestController
 public class OperationOrderController {
+
+    private static Logger logger = LoggerFactory.getLogger(OperationOrderController.class);
 
     @Autowired
     private OperationOrderService operationOrderService;
@@ -55,6 +61,8 @@ public class OperationOrderController {
     @Autowired
     private LocaleMessageSourceService localeMessageSourceService;
 
+    //缓存手术室下单的订单编号，用做重发机制检测
+    private List<Long> operationOrderIds = Lists.newArrayList();
     /**
      * 手术室下单，订单提交
      *
@@ -92,6 +100,8 @@ public class OperationOrderController {
         saveOperationOrderApplianceXREF(operationOrder);
         //重新查询，带出额外器械信息
         OperationOrder operationOrderDB = operationOrderService.findOrderById(operationOrder.getId());
+        //缓存手术室下单的订单编号，用做重发机制检测
+        operationOrderIds.add(operationOrderDB.getId());
         //向无菌器械室发送消息
         return sendOrderToAsepticApparatusRoom(operationOrderDB, asepticApparatusRoomXREF);
     }
@@ -243,6 +253,8 @@ public class OperationOrderController {
         if (null == id) {
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_IDBNWK"));
         }
+        //移除缓存手术室下单的订单编号
+        operationOrderIds.remove(id);
         OperationOrder operationOrder = operationOrderService.findOrderById(id);
         operationOrder.setReceiveTime(new Date());
         operationOrder.setState(OperationOrder.State.WAITING.getCode());
@@ -357,4 +369,23 @@ public class OperationOrderController {
                 .module(LogType.INFO_ORDER.getName()).build();
         webSocketSendMessage.sendWebSocketMessage(ws);
     }
+
+
+    /**
+     * 添加定时任务，每10秒检查一次有没有手术室订单消息，有，则发送给无菌器械室
+     */
+    @Scheduled(cron = "*/10 * * * * ?")
+    public void sendOperationOrderCache() {
+        try {
+            if (operationOrderIds.size() != 0){
+                for (Long operationOrderId : operationOrderIds){
+                    OperationOrder operationOrder = operationOrderService.findOrderById(operationOrderId);
+                    sendWebSocketMessage(operationOrder.getStation().getId(), operationOrder);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Scheduled sendOperationOrderCache  error", e);
+        }
+    }
+
 }

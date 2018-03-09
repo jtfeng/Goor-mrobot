@@ -199,6 +199,9 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static void setMessageCache(MessageInfo info) {
+        if (null == info || null == info.getSenderId()) {
+            return;
+        }
         messageCache.put(info.getSenderId(), info);
     }
 
@@ -313,11 +316,11 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setWebSocketClientReceiveModule(Session session, String userId, String module) {
         Map<String, Set<String>> userModuleXREFs = webSocketClientReceiveModuleCache.get(session);
-        if (null == userModuleXREFs){
+        if (null == userModuleXREFs) {
             userModuleXREFs = Maps.newHashMap();
         }
         Set<String> modules = userModuleXREFs.get(userId);
-        if (null == modules){
+        if (null == modules) {
             modules = Sets.newHashSet();
         }
         modules.add(module);
@@ -333,7 +336,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         return modules != null && modules.contains(module);
     }
 
-    public static void  removeWebSocketClientReceiveModule(Session session, String userId, String module) {
+    public static void removeWebSocketClientReceiveModule(Session session, String userId, String module) {
         if (null == session)
             return;
         Map<String, Set<String>> userModuleXREFs = webSocketClientReceiveModuleCache.get(session);
@@ -426,7 +429,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static CopyOnWriteArraySet<String> getSceneRobotListCache(String sceneMapName) {
-       return sceneRobotListCache.get(sceneMapName);
+        return sceneRobotListCache.get(sceneMapName);
     }
 
     public static Map<String, CopyOnWriteArraySet<String>> getSceneRobotListCache() {
@@ -501,6 +504,7 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     /**
      * RoadPathMaps 获取、设置、删除
+     *
      * @param storeId
      * @param sceneName
      * @param roadPathService
@@ -509,16 +513,16 @@ public class CacheInfoManager implements ApplicationContextAware {
     public static RoadPathMaps getRoadPathMapsCache(Long storeId, String sceneName, RoadPathService roadPathService) {
         RoadPathMaps roadPathMaps = roadPathMapsCache.get(storeId + sceneName);
         //如果缓存中没有，则先写入一遍，再返回
-        if(roadPathMaps == null) {
+        if (roadPathMaps == null) {
             roadPathMaps = setRoadPathMapsCache(storeId, sceneName, roadPathService);
         }
         return roadPathMaps;
     }
 
     public static RoadPathMaps setRoadPathMapsCache(Long storeId, String sceneName, RoadPathService roadPathService) {
-        List<RoadPath> roadPathList = roadPathService.listRoadPathsBySceneNamePathTypeOrderByStart(sceneName,null, storeId);
+        List<RoadPath> roadPathList = roadPathService.listRoadPathsBySceneNamePathTypeOrderByStart(sceneName, null, storeId);
         RoadPathMaps roadPathMaps = null;
-        if(roadPathList != null && roadPathList.size() > 0) {
+        if (roadPathList != null && roadPathList.size() > 0) {
             roadPathMaps = new RoadPathMaps();
             roadPathMaps.init(roadPathList);
         }
@@ -532,6 +536,7 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     /**
      * List<RoadPathDetail> 获取、设置、删除
+     *
      * @param storeId
      * @param sceneName
      * @param pathType
@@ -541,7 +546,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     public static List<RoadPathDetail> getRoadPathDetailsCache(Long storeId, String sceneName, Integer pathType, RoadPathService roadPathService) {
         List<RoadPathDetail> roadPathDetails = roadPathDetailsCache.get(storeId + sceneName + pathType);
         //如果缓存中没有，则先写入一遍，再返回
-        if(roadPathDetails == null) {
+        if (roadPathDetails == null) {
             roadPathDetails = setRoadPathDetailsCache(storeId, sceneName, pathType, roadPathService);
         }
         return roadPathDetails;
@@ -559,15 +564,16 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     /**
      * List<MapPoint> 获取、设置、删除
+     *
      * @param storeId
      * @param sceneName
      * @param pointService
      * @return
      */
     public static List<MapPoint> getMapPointsCache(Long storeId, String sceneName, PointService pointService) {
-        List<MapPoint> mapPoints =mapPointsCache.get(storeId + sceneName);
+        List<MapPoint> mapPoints = mapPointsCache.get(storeId + sceneName);
         //如果缓存中没有，则先写入一遍，再返回
-        if(mapPoints == null) {
+        if (mapPoints == null) {
             mapPoints = setMapPointsCache(storeId, sceneName, pointService);
         }
         return mapPoints;
@@ -601,7 +607,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         while (iterator.hasNext()) {
             Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             Long key = entry.getKey();
-            if (null != key){
+            if (null != key) {
                 elevatorNoticeIdList.add(key);
             }
         }
@@ -629,12 +635,12 @@ public class CacheInfoManager implements ApplicationContextAware {
         return recordsLinkedList;
     }
 
-    public static void removeUnBusyRobotsCache(List<String> busyRobotCode){
+    public static void removeUnBusyRobotsCache(List<String> busyRobotCode) {
         Iterator iterator = robotPositionRecordsCache.iterator();
         while (iterator.hasNext()) {
             Map.Entry<String, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<String, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             String key = entry.getKey();
-            if (!busyRobotCode.contains(key)){
+            if (!busyRobotCode.contains(key)) {
                 removeRobotPositionRecordsCache(key);
             }
         }

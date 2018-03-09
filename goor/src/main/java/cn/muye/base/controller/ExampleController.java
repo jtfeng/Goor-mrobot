@@ -344,7 +344,9 @@ public class ExampleController {
     public AjaxResult testElevatorNotice(@RequestParam("uuid") String uuid,
                                          @RequestParam("elevatorId") int elevatorId,
                                          @RequestParam("callFloor") int callFloor,
-                                         @RequestParam("targetFloor") int targetFloor) throws Exception {
+                                         @RequestParam("targetFloor") int targetFloor,
+                                         @RequestParam("fromStationName") String fromStationName,
+                                         @RequestParam("goodsTypeName") String goodsTypeName) throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ELEVATOR_NOTICE);
         jsonObject.put(TopicConstants.UUID, uuid);
@@ -352,6 +354,8 @@ public class ExampleController {
         dataObject.put("callFloor", callFloor);
         dataObject.put("targetFloor", targetFloor);
         dataObject.put("elevatorId", elevatorId);
+        dataObject.put("fromStationName", fromStationName);
+        dataObject.put("goodsTypeName", goodsTypeName);
         jsonObject.put(TopicConstants.DATA, JSON.toJSONString(dataObject));
         appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
         return AjaxResult.success();
