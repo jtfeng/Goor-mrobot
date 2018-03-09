@@ -101,7 +101,7 @@
     <select id="listAllOperationType" resultMap="operationType">
         SELECT
         <include refid="Base_Column_List"/>
-        FROM ERP_OPERATION_TYPE WHERE DELETE_FLAG = 0
+        FROM ERP_OPERATION_TYPE WHERE DELETE_FLAG = 0 ORDER BY CREATE_TIME DESC
     </select>
 
     <select id="listOperationTypeBy" resultMap="operationType">

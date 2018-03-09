@@ -9,6 +9,7 @@ import cn.mrobot.bean.assets.door.Door;
 import cn.mrobot.bean.assets.elevator.Elevator;
 import cn.mrobot.bean.assets.elevator.ElevatorModeEnum;
 import cn.mrobot.bean.assets.elevator.ElevatorPointCombination;
+import cn.mrobot.bean.assets.good.GoodsType;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.robot.Robot;
@@ -4090,6 +4091,13 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     MapInfo currentMapInfo = mapInfoService.getMapInfo(mPointAtts.currentMapId);
                                     jsonElevatorNotice.setCallFloor(currentMapInfo.getLogicFloor());
                                     jsonElevatorNotice.setElevatorId(ev.getId());
+                                    //电梯消息通知添加发货站和物品类型
+                                    Station startStation = stationService.findById(order.getStartStation().getId());
+                                    jsonElevatorNotice.setFromStationName(startStation.getName());
+                                    GoodsType goodsType = order.getOrderSetting().getGoodsType();
+                                    if ( null != goodsType){
+                                        jsonElevatorNotice.setGoodsTypeName(goodsType.getName());
+                                    }
                                     MissionTask elevatorNoticeTask = getElevatorNoticeTask(order,mp, parentName, jsonElevatorNotice);
                                     missionListTask.getMissionTasks().add(elevatorNoticeTask);
                                 }
