@@ -14,9 +14,9 @@ import java.util.Map;
 public enum StateFieldEnums {
 
     //底盘系统
-    RES("res","RES"),
+    RES("res","goor_domain_src_main_java_cn_mrobot_bean_state_enums_StateFieldEnums_java_RES"),
     POWER_ON("powerOn","goor_domain_src_main_java_cn_mrobot_bean_state_enums_StateFieldEnums_java_DPKGJ"),
-    NORMAL("normal","normal"),
+    NORMAL("normal","goor_domain_src_main_java_cn_mrobot_bean_state_enums_StateFieldEnums_java_NORMAL"),
     IO_EMERGENCY_STOP("IOEmergencyStop","goor_domain_src_main_java_cn_mrobot_bean_state_enums_StateFieldEnums_java_IOJT"),
     SWITCH_EMERGENCY_STOP("switchEmergencyStop","goor_domain_src_main_java_cn_mrobot_bean_state_enums_StateFieldEnums_java_KGJT"),
     UNDER_VOLTAGE_EMERGENCY_STOP("underVoltageEmergencyStop","goor_domain_src_main_java_cn_mrobot_bean_state_enums_StateFieldEnums_java_QYTJ"),

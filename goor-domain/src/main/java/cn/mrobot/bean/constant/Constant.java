@@ -155,6 +155,13 @@ public class Constant {
             MapPointType.FINAL_UNLOAD
     );
 
+    public final static MapPointType[] STATION_MAP_POINT_TYPE_ARRAY = {
+            MapPointType.CHARGER,
+            MapPointType.LOAD,
+            MapPointType.UNLOAD,
+            MapPointType.FINAL_UNLOAD
+    };
+
     //MissionItemTask列表用于取货校验员工工号
     public final static List<String> MISSION_ITEM_TASK_NOT_CONCERN_STATION_NAMES_FOR_EMP_NUMBER = Arrays.asList(
             "load",
