@@ -368,6 +368,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
     @Override
     public Object saveScene(Scene scene) throws Exception {
         scene.setStoreId(STORE_ID);//设置默认 store ID
+        scene.setActive(Integer.valueOf(1));//新增场景默认启用
         scene.setCreateTime(new Date());//设置当前时间为创建时间
         this.save(scene);//数据库中插入这条场景记录
 
