@@ -277,102 +277,7 @@
 
 
     <build>
-        <finalName>${artifactId}</finalName>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
-                <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-
-            <!-- ProGuard混淆插件-->
-            <plugin>
-                <groupId>com.github.wvengen</groupId>
-                <artifactId>proguard-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>proguard</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <proguardVersion>5.3.3</proguardVersion>
-                    <injar>${project.build.finalName}.jar</injar>
-                    <outjar>${project.build.finalName}.jar</outjar>
-                    <!-- 是否混淆-->
-                    <obfuscate>true</obfuscate>
-                    <options>
-                        <!-- JDK目标版本1.7-->
-                        <option>-target 1.8</option>
-                        <!-- 不做收缩（删除注释、未被引用代码）-->
-                        <option>-dontshrink</option>
-                        <!-- 不做优化（变更代码实现逻辑）-->
-                        <option>-dontoptimize</option>
-                        <!-- 不路过非公用类文件及成员-->
-                        <option>-dontskipnonpubliclibraryclasses</option>
-                        <option>-dontskipnonpubliclibraryclassmembers</option>
-                        <!-- 优化时允许访问并修改有修饰符的类和类的成员 -->
-                        <option>-allowaccessmodification</option>
-                        <!-- 确定统一的混淆类的成员名称来增加混淆-->
-                        <option>-useuniqueclassmembernames</option>
-                        <!-- 不混淆所有包名，本人测试混淆后WEB项目问题实在太多，毕竟Spring配置中有大量固定写法的包名-->
-                        <option>-keeppackagenames</option>
-                        <!-- 不混淆所有特殊的类-->
-                        <option>-keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,LocalVariable*Table,*Annotation*,Synthetic,EnclosingMethod</option>
-                        <!-- 不混淆所有的set/get方法，毕竟项目中使用的部分第三方框架（例如Shiro）会用到大量的set/get映射-->
-                        <option>-keepclassmembers public class * {void set*(***);*** get*();}</option>
-                        <option>-keepclassmembers class * {
-                            @org.springframework.beans.factory.annotation.Autowired *;
-                            @org.springframework.beans.factory.annotation.Value *;
-                            }
-                        </option>
-                        <option>-keep interface * extends * { *; }</option>
-                        <option>-keepnames interface **</option>
-                        <option>-adaptclassstrings</option>
-                        <!-- 不混淆model包中的所有类以及类的属性及方法，实体包，混淆了会导致ORM框架及前端无法识别-->
-                        <option>-keep class cn.muye.**.bean.* { *;}</option>
-                        <option>-keep class cn.muye.base.model.message.* { *; }</option>
-                        <option>-keep class cn.muye.**.service.** </option>
-                        <option>-keep class cn.muye.**.mapper.*</option>
-                        <option>-keep class cn.muye.Application</option>
-                        <option>-keep class cn.muye.ApplicationStartup</option>
-                        <option>-keep class cn.muye.service.tcpser.elevator.* { *; }</option>
-                        <option>-keep class cn.muye.base.config.RabbitMQConfig { *;}</option>
-                        <option>-keep class cn.muye.consumer.mission.MissionConsumer {*;} </option>
-                        <!-- 以下因为大部分是Spring管理的Bean，不对包类的类名进行混淆，但对类中的属性和方法混淆-->
-                        <option>-keep public class cn.muye.**.controller.** </option>
-                        <option>-keep public class cn.muye.base.** </option>
-                        <option>-keep public class cn.muye.service.consumer.topic.*</option>
-                        <option>-keep public class cn.muye.service.missiontask.*</option>
-                        <option>-keep public class cn.muye.util.** </option>
-                        <option>-keep public class cn.muye.log.base.LogInfoUtils </option>
-                    </options>
-                    <!-- 添加依赖，这里你可以按你的需要修改，这里测试只需要一个JRE的Runtime包就行了 -->
-                    <libs>
-                        <!-- Include main JAVA library required.-->
-                        <lib>${java.home}/lib/rt.jar</lib>
-                        <!-- Include crypto JAVA library if necessary.-->
-                        <lib>${java.home}/lib/jce.jar</lib>
-                    </libs>
-                    <!-- 加载文件的过滤器，就是你的工程目录了-->
-                    <!--<inFilter>cn/muye/**</inFilter>-->
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>net.sf.proguard</groupId>
-                        <artifactId>proguard-base</artifactId>
-                        <version>5.3.3</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -388,16 +293,17 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.1</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
         </plugins>
-
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-        </resources>
     </build>
 
     <repositories>

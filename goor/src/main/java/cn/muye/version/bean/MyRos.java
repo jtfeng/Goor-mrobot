@@ -166,8 +166,9 @@ public class MyRos extends Ros{
         if(this.isConnected()) {
             try {
 //                this.session.getBasicRemote().sendText(jsonObject.toString());
-                this.session.getAsyncRemote().setSendTimeout(10000L);
-                this.session.getAsyncRemote().sendText(jsonObject.toString());
+                RemoteEndpoint.Async async = this.session.getAsyncRemote();
+                async.setSendTimeout(10000L);
+                async.sendText(jsonObject.toString());
                 return true;
             } catch (Exception var3) {
                 System.err.println("[ERROR]: Could not send message: " + var3.getMessage());

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import javax.websocket.RemoteEndpoint;
 import javax.websocket.Session;
 import java.io.IOException;
 import java.util.Iterator;
@@ -55,13 +56,15 @@ public class WebSocketSendMessage {
         }
     }
 
-
     private void sendMessage(Session session, String message) {
         try {
-            session.getBasicRemote().sendText(message);
-        } catch (IOException e) {
+            RemoteEndpoint.Async async = session.getAsyncRemote();
+            async.setSendTimeout(10000L);
+            async.sendText(message);
+        } catch (Exception e) {
             log.error("websocket 发送消息出错", e);
         }
+
     }
 
     /**
