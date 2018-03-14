@@ -8,7 +8,7 @@ import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
-import cn.muye.base.bean.SearchConstants;
+import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -69,6 +69,16 @@ public class SceneController {
         // TODO: 21/07/2017 创建新场景
         try {
             Object taskResult = sceneService.saveScene(scene);
+            //创建完成后添加缓存
+            List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
+            if (sceneList == null) {
+                sceneList = sceneService.listScenes(new WhereRequest());
+                CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
+            }
+            if (sceneList == null || sceneList.size() == 0) {
+                return AjaxResult.failed("后台没有场景数据，请添加场景数据");
+            }
+            sceneList.add((Scene)taskResult);
             return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXCG"));
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXSB"));
@@ -89,6 +99,20 @@ public class SceneController {
             Object taskResult = sceneService.updateScene(scene);
             if (taskResult instanceof AjaxResult) {
                 return (AjaxResult) taskResult;
+            }
+            //更新成功后改绑定的机器人
+            List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
+            if (sceneList == null) {
+                sceneList = sceneService.listScenes(new WhereRequest());
+                CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
+            }
+            if (sceneList == null || sceneList.size() == 0) {
+                return AjaxResult.failed("后台没有场景数据，请添加场景数据");
+            }
+            for (Scene sceneObj : sceneList) {
+                if (sceneObj.getId().equals(scene.getId())) {
+                    sceneObj.setRobots(((Scene)taskResult).getRobots());
+                }
             }
             return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XGCJXXCG"));
         } catch (Exception e) {
@@ -249,10 +273,34 @@ public class SceneController {
             Scene currentScene = sceneService.findById(scene.getId());
             currentScene.setActive( currentScene.getActive() == 1 ? 0 : 1 );
             sceneService.updateSelective(currentScene);
+            //修改场景的缓存，设置active为0
+            List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
+            if (sceneList == null) {
+                sceneList = sceneService.listScenes(new WhereRequest());
+                CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
+            }
+            if (sceneList == null || sceneList.size() == 0) {
+                return AjaxResult.failed("后台没有场景数据，请添加场景数据");
+            }
+            for (Scene sceneObj : sceneList) {
+                if (sceneObj.getId().equals(scene.getId())) {
+                    sceneObj.setActive(Constant.SCENE_NOT_ACTIVATED);
+                }
+            }
             return AjaxResult.success(currentScene.getActive() == 1 ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YQY") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YJY"));
         }catch (Exception e){
             log.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }
+    }
+
+    /**
+     * 检查所有场景的缓存
+     * @return
+     * @throws Exception
+     */
+    @GetMapping("/assets/scene/checkSceneListCache")
+    public AjaxResult checkSceneListCache() throws Exception {
+        return AjaxResult.success(CacheInfoManager.getSceneListCache(Constant.SCENE_LIST));
     }
 }

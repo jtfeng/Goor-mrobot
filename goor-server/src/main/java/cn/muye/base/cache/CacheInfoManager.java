@@ -7,6 +7,7 @@ import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.robot.Robot;
+import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
@@ -153,6 +154,11 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<Long, String> sceneMapRelationCache = new ConcurrentHashMapCache<>();
 
+    /**
+     * 所有场景缓存
+     */
+    private static ConcurrentHashMapCache<String, List<Scene>> sceneListCache = new ConcurrentHashMapCache<>(); //所有的场景信息放缓存
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -164,6 +170,7 @@ public class CacheInfoManager implements ApplicationContextAware {
 
         robotChargeInfoCache.setMaxLifeTime(0);
         sceneRobotListCache.setMaxLifeTime(0);
+        sceneListCache.setMaxLifeTime(0);
         persistMissionState.setMaxLifeTime(0);
 
         //状态机缓存  存储端判断如果状态有改变则存入
@@ -708,5 +715,13 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void removeSceneMapRelationCache(Long sceneId) {
         sceneMapRelationCache.remove(sceneId);
+    }
+
+    public static List<Scene> getSceneListCache(String key) {
+        return sceneListCache.get(key);
+    }
+
+    public static void setSceneListCache(String key, List<Scene> sceneList) {
+        sceneListCache.put(key, sceneList);
     }
 }
