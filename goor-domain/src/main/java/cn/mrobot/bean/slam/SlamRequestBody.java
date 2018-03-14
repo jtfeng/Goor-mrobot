@@ -19,6 +19,9 @@ public class SlamRequestBody<T> {
     @JSONField(name = "uuid")
     private String uuid;
 
+    @JSONField(name = "publisher")
+    private String publisher;
+
     public SlamRequestBody(String pubName) {
         this.pubName = pubName;
     }
@@ -47,10 +50,19 @@ public class SlamRequestBody<T> {
         this.uuid = uuid;
     }
 
+    public String getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(String publisher) {
+        this.publisher = publisher;
+    }
+
     @Override
     public String toString() {
         return "SlamRequestBody{" +
                 "pubName='" + pubName + '\'' +
+                "publisher='" + publisher + '\'' +
                 ", data=" + data +
                 '}';
     }

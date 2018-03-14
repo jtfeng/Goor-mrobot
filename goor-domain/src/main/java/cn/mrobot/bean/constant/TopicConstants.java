@@ -208,7 +208,9 @@ public class TopicConstants {
 	public static final String FANOUT_CLIENT_EXCHANGE = "fanoutClientExchange";
 	public static final String TOPIC_EXCHANGE = "topicExchange1";
 
+	public static final String CLOUD_PUBLISHER = "cloud";
+	public static final String PUBLISHER = "publisher";
 	//pub to ros message
-	public static final String GET_CURRENT_MAP_PUB_MESSAGE = JSON.toJSONString(new PubData(JSON.toJSONString(new PubBean(TopicConstants.MAP_CURRENT_GET))));
+	public static final String GET_CURRENT_MAP_PUB_MESSAGE = JSON.toJSONString(new PubData(JSON.toJSONString(new PubBean(TopicConstants.MAP_CURRENT_GET, CLOUD_PUBLISHER))));
 
 }
