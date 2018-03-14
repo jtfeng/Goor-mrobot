@@ -231,4 +231,6 @@ public class Constant {
     public static final String ROBOT_LIST = "robotList";
     public final static Integer SCENE_ACTIVATED = 1;  //场景启用
     public final static Integer SCENE_NOT_ACTIVATED = 0;  //场景禁用
+    //存放所有站的缓存的KEY
+    public static final String STATION_LIST = "stationList";
 }

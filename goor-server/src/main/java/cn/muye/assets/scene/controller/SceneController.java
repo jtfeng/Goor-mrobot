@@ -71,11 +71,11 @@ public class SceneController {
             Object taskResult = sceneService.saveScene(scene);
             //创建完成后添加缓存
             List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-            if (sceneList == null) {
+            if (sceneList == null || sceneList.isEmpty()) {
                 sceneList = sceneService.listScenes(new WhereRequest());
                 CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
             }
-            if (sceneList == null || sceneList.size() == 0) {
+            if (sceneList == null || sceneList.isEmpty()) {
                 return AjaxResult.failed("后台没有场景数据，请添加场景数据");
             }
             sceneList.add((Scene)taskResult);

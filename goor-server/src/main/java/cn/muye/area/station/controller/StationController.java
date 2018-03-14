@@ -159,14 +159,16 @@ public class StationController {
 //            stationService.delete(stationDB);
             stationService.update(stationDB);
             //更新站缓存
-            List<Station> stationList = CacheInfoManager.getStationListCache("stationList");
+            List<Station> stationList = CacheInfoManager.getStationListCache(Constant.STATION_LIST);
             Long stationId = stationDB.getId();
-            for (Station station : stationList) {
-                if (station.getId().equals(stationId)) {
-                    stationList.remove(station);
+            if (stationList != null && stationList.size() > 0) {
+                for (Station station : stationList) {
+                    if (station.getId().equals(stationId)) {
+                        stationList.remove(station);
+                    }
                 }
             }
-            CacheInfoManager.setStationListCache("stationList", stationList);
+            CacheInfoManager.setStationListCache(Constant.STATION_LIST, stationList);
             //把站机器人绑定关系去掉
             CacheInfoManager.removeStationRobotIdXrefListCache(stationId);
             return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_station_controller_StationController_java_SCCG"));

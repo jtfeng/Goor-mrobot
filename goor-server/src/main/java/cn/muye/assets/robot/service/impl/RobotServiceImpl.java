@@ -420,7 +420,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public Map getCountAvailableRobotByStationId(Long stationId) throws Exception {
         List<StationRobotXREF> xrefList = CacheInfoManager.getStationRobotIdXrefListCache(stationId);
-        if (xrefList == null) {
+        if (xrefList == null || xrefList.isEmpty()) {
             xrefList = stationRobotXREFService.getByStationId(stationId);
             CacheInfoManager.setStationRobotIdXrefListCache(stationId, xrefList);
         }
