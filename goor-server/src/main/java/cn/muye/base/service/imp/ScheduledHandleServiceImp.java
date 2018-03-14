@@ -94,11 +94,11 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         stationService = applicationContext.getBean(StationService.class);
         webSocketSendMessage = applicationContext.getBean(WebSocketSendMessage.class);
         //拿sendTime跟内存里的同步时间
-        Long currentTime = new Date().getTime();
+        Long currentTime = System.currentTimeMillis();
 
         //查询所有机器人存放机器人信息到缓存
         List<Robot> list = CacheInfoManager.getRobotListCache("robotList");
-        if (list == null) {
+        if (list == null || list.isEmpty()) {
             list = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
             CacheInfoManager.setRobotListCache("robotList", list);
         }
