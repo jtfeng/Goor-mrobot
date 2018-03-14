@@ -133,7 +133,7 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         }
         Example example = new Example(Appliance.class);
         example.createCriteria().andCondition("DEPARTMENT_TYPE_CODE=" + departmentTypeCode)
-                .andCondition("NAME='" + name.trim() + "'")
+                .andCondition("NAME='" + name + "'")
                 .andCondition("DELETE_FLAG=" + Constant.NORMAL);
         return applianceMapper.selectByExample(example);
     }
@@ -186,10 +186,10 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
         logger.info("器械名称 = " + chName);
         String departmentTypeName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[1])).toString();
         logger.info("类别 = " + departmentTypeName);
-        int departmentTypeCode = getDepartmentTypeCode(departmentTypeName.trim());
+        int departmentTypeCode = getDepartmentTypeCode(departmentTypeName);
         String packageTypeName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[2])).toString();
         logger.info("包装类型 = " + packageTypeName);
-        Long packageTypeId = getPackageTypeId(packageTypeName.trim());
+        Long packageTypeId = getPackageTypeId(packageTypeName);
         //重复数据校验
         List<Appliance> applianceList = findByNameAndCode(chName, departmentTypeCode);
         if (null != applianceList && applianceList.size() > 0) {
