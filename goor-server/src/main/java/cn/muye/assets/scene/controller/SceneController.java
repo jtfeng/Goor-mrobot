@@ -155,46 +155,13 @@ public class SceneController {
         }
     }
 
-
     /**
-     * 同步地图,将该场景绑定的地图下发到指定机器人
+     * 同步地图与机器人之间的信息(该接口不使用，推荐使用sendSyncMapMessageToSpecialRobots)
      *
      * @param sceneId
      * @return
      */
-    @RequestMapping(value = "/assets/scene/syncMap", method = RequestMethod.GET)
-    public AjaxResult syncMap(@RequestParam("sceneId") Long sceneId, @RequestParam("robotIds") String robotIds) {
-        try {
-            if (null == sceneId || StringUtil.isBlank(robotIds)) {
-                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CJIDHJQRIDLBBNWK"));
-            }
-            List<Long> robotIdList = JSONArray.parseArray(robotIds, Long.class);
-            //查询场景
-            Scene scene = sceneService.getSceneById(sceneId);
-            //根据ID查询机器人列表
-            List<Robot> robotList = new ArrayList<>();
-            for (Long robotId : robotIdList) {
-                Robot robot = robotService.getById(robotId);
-                robotList.add(robot);
-            }
-            Object result = sceneService.updateMap(scene, robotList);
-            if (result instanceof AjaxResult) {
-                return (AjaxResult) result;
-            } else {
-                return AjaxResult.success(result, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_CZCG"));
-            }
-        } catch (Exception e) {
-            return AjaxResult.failed();
-        }
-
-    }
-
-    /**
-     * 同步地图与机器人之间的信息
-     *
-     * @param sceneId
-     * @return
-     */
+    @Deprecated
     @RequestMapping(value = "/assets/scene/sync/{sceneId}", method = RequestMethod.GET)
     public AjaxResult sendSyncMapMessageToRobots(@PathVariable("sceneId") String sceneId) {
         try {
@@ -208,6 +175,7 @@ public class SceneController {
 
     /**
      * 同步地图与机器人之间的信息
+     * 同步地图,将该场景绑定的地图下发到指定机器人
      *
      * @return
      */
@@ -222,7 +190,6 @@ public class SceneController {
         } catch (Exception e) {
             return AjaxResult.failed();
         }
-
     }
 
     @RequestMapping(value = "/assets/scene/checkSceneIsNeedToBeUpdated", method = RequestMethod.GET)
@@ -263,6 +230,7 @@ public class SceneController {
 
     /**
      * 更改场景的是否禁用的状态
+     *
      * @param scene
      * @return
      * @throws Exception
@@ -271,7 +239,7 @@ public class SceneController {
     public Object updateActiveState(@RequestBody Scene scene) throws Exception {
         try {
             Scene currentScene = sceneService.findById(scene.getId());
-            currentScene.setActive( currentScene.getActive() == 1 ? 0 : 1 );
+            currentScene.setActive(currentScene.getActive() == 1 ? 0 : 1);
             sceneService.updateSelective(currentScene);
             //修改场景的缓存，设置active为0
             List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
@@ -288,7 +256,7 @@ public class SceneController {
                 }
             }
             return AjaxResult.success(currentScene.getActive() == 1 ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YQY") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YJY"));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
             return AjaxResult.failed(e.getMessage());
         }

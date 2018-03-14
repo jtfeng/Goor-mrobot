@@ -381,15 +381,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         bindSceneAndMapRelations(scene);//绑定场景与地图信息之间的对应关系
         //增加缓存
         CacheInfoManager.setSceneMapRelationCache(scene.getId(), scene.getMapSceneName());
-        if (flag) {
-            // 实际有机器人需要进行地图下发操作
-            scene.setState(0);
-        } else {
-            scene.setState(1);
-        }
+        scene.setState(0);//状态直接置为未同步
         updateSelective(scene);
-//      新增场景不同步地图，通过特定的地图同步按钮同步
-//        Object taskResult = updateMap(scene);
         return scene;
     }
 
@@ -441,16 +434,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         this.deleteRobotAndSceneRelations(sceneId);
         //更新场景与机器人之间的绑定关系
         boolean flag = bindSceneAndRobotRelations(scene, distinctIDS);
-        if (flag) {
-            // 实际有机器人需要进行地图下发操作
-            scene.setState(0);
-        } else {
-            scene.setState(1);
-        }
         //更新对应的场景信息
         updateSelective(scene);
-//        场景更新，不同步地图，通过特定得到按钮同步地图
-//        Object taskResult = updateMap(scene);
         return scene;
     }
 
@@ -464,15 +449,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
     }
 
-    @Override
-    public Object updateMap(Scene scene, List<Robot> robots) throws Exception {
+    private Object updateMap(Scene scene, List<Robot> robots) throws Exception {
         //自动下发地图
         List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneName(scene.getMapSceneName(), scene.getStoreId());
         log.info("更新场景信息，mapInfos.size()=" + mapInfos.size() + ", robots.size()=" + robots.size());
         if (mapInfos.size() != 0 && robots.size() != 0) {
             log.info("场景同步地图");
             return mapSyncService.sendMapSyncMessageNew(robots, scene.getMapSceneName(), scene.getId());
-        }else {
+        } else {
             updateSceneState(Constant.UPLOAD_FAIL, scene.getId());
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_service_impl_SceneServiceImpl_java_WZDGCJGLDDTCJHCJWBDJQR"));
         }
@@ -520,8 +504,8 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             List<Robot> robotList = Lists.newArrayList();
             for (int i = 0; i < robotListDB.size(); i++) {
                 Robot robot = robotListDB.get(i);
-                List<RobotMapZipXREF> robotMapZipXREFList = robotMapZipXREFService.findByRobotId(robot.getId());
-                boolean result = (robotMapZipXREFList == null || robotMapZipXREFList.size() <= 0) ? true : robotMapZipXREFList.get(0).isSuccess();
+                List<RobotMapZipXREF> robotMapZipXREFList = robotMapZipXREFService.findByRobotId(robot.getId(), scene.getId());
+;                boolean result = (robotMapZipXREFList == null || robotMapZipXREFList.size() <= 0) ? false : robotMapZipXREFList.get(0).isSuccess();
                 robot.setMapSyncResult(result);
                 robotList.add(robot);
             }

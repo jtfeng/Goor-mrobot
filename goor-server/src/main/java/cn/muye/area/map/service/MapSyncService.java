@@ -11,28 +11,6 @@ import java.util.List;
  */
 public interface MapSyncService {
 
-    Object syncMap(MapZip mapZip, long storeId);
-
-    Object syncMap(MapZip mapZip, List<Robot> robotList);
-
-    /**
-     * 同步地图
-     *
-     * @param robotList
-     * @param mapZip
-     * @return
-     */
-    Object sendMapSyncMessage(List<Robot> robotList, MapZip mapZip);
-
-    /**
-     * 同步地图
-     *
-     * @param robotList
-     * @param mapZip
-     * @return
-     */
-    Object sendMapSyncMessage(List<Robot> robotList, MapZip mapZip, Long sceneId);
-
     /**
      * 同步地图,robotList所有机器人进行同步，不区分地图上传机器人
      * 接口根据mapSceneName，对该场景下的地图进行压缩，同步
