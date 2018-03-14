@@ -225,4 +225,10 @@ public class Constant {
     //语言
     public static final String DEFAULT_LANG = "zh";
     public static final String DEFAULT_COUNTRY = "CN";
+    //存放所有场景的缓存的KEY
+    public static final String SCENE_LIST = "sceneList";
+    //存放所有机器人的缓存的KEY
+    public static final String ROBOT_LIST = "robotList";
+    public final static Integer SCENE_ACTIVATED = 1;  //场景启用
+    public final static Integer SCENE_NOT_ACTIVATED = 0;  //场景禁用
 }

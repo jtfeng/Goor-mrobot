@@ -5,6 +5,7 @@ import cn.mrobot.bean.area.point.cascade.CascadeMapPoint;
 import cn.mrobot.bean.area.point.cascade.CascadePoint;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.charge.ChargeInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
@@ -158,10 +159,10 @@ public class MapInfoServiceImpl implements MapInfoService {
             CurrentInfo currentInfo = new CurrentInfo();
 
             //获取开机状态
-            List<Robot> robotList = CacheInfoManager.getRobotListCache("robotList");
+            List<Robot> robotList = CacheInfoManager.getRobotListCache(Constant.ROBOT_LIST);
             if (robotList == null) {
                 robotList = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                CacheInfoManager.setRobotListCache("robotList", robotList);
+                CacheInfoManager.setRobotListCache(Constant.ROBOT_LIST, robotList);
             }
             boolean tempFlag = false;
             String robotCode = null;
@@ -175,11 +176,11 @@ public class MapInfoServiceImpl implements MapInfoService {
             if (!tempFlag) {
                 return null;
             }
-            Boolean flag = CacheInfoManager.getRobotOnlineCache(robotCode);
-            if (flag == null) {
-                flag = false;
+            Boolean online = CacheInfoManager.getRobotOnlineCache(robotCode);
+            if (online == null) {
+                online = false;
             }
-            currentInfo.setOnline(flag);
+            currentInfo.setOnline(online);
 
             MessageInfo currentPoseInfo = CacheInfoManager.getMessageCache(code);
             if (null != currentPoseInfo) {
