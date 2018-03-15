@@ -128,43 +128,6 @@ public class MapZipController {
     }
 
     /**
-     * 地图同步
-     *
-     * @param id
-     * @param bindStr
-     * @return
-     */
-    @RequestMapping(value = "area/mapZip/sync", method = RequestMethod.GET)
-    @ResponseBody
-    public AjaxResult syncMap(@RequestParam("id") Long id, @RequestParam(value = "deviceIds", required = false) String bindStr) {
-        try {
-
-            MapZip mapZip = mapZipService.getMapZip(id);
-            if (null == mapZip) {
-                return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_DTYSBBCZ"));
-            }
-            List<Long> deviceIds = new ArrayList<>();
-            if (!StringUtil.isNullOrEmpty(bindStr)) {
-                deviceIds = JSONArray.parseArray(bindStr, Long.class);
-            }
-            List<Robot> robotList = new ArrayList<>();
-            for (int i = 0; i < deviceIds.size(); i++) {
-                robotList.add(robotService.getById(deviceIds.get(i)));
-            }
-            Object result;
-            if (robotList.size() <= 0 || robotList.isEmpty()) {
-                result = mapSyncService.syncMap(mapZip, SearchConstants.FAKE_MERCHANT_STORE_ID);
-            } else {
-                result = mapSyncService.syncMap(mapZip, robotList);
-            }
-            return AjaxResult.success(result, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_DTTBQQFSCG"));
-        } catch (Exception e) {
-            LOGGER.error("地图同步出错", e);
-            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_area_map_controller_MapZipController_java_XTCW"));
-        }
-    }
-
-    /**
      * 解压地图压缩包（仅做还原数据）
      *
      * @param id

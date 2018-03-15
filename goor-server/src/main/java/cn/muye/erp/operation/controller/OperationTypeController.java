@@ -67,7 +67,6 @@ public class OperationTypeController {
             return validateResult;
         }
 
-        operationType.setSearchName(StringUtil.getSearchName(operationType.getName()));
         operationTypeService.updateOperationType(operationType);
         //更新手术类型的默认器械
         List<OperationDefaultApplianceXREF> applianceXREFList = operationType.getApplianceList();

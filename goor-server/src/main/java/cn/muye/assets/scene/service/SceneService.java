@@ -26,8 +26,6 @@ public interface SceneService extends BaseService<Scene> {
 
     Object updateScene(Scene scene) throws Exception;
 
-    Object updateMap(Scene scene, List<Robot> robots) throws Exception;
-
     int deleteSceneById(Long id) throws Exception;
 
     List<Scene> listScenes(WhereRequest whereRequest) throws Exception;
@@ -36,6 +34,7 @@ public interface SceneService extends BaseService<Scene> {
 
     int insertSceneAndRobotRelations(Long sceneId, List<Long> robotIds) throws Exception;
 
+    @Deprecated
     Object sendSyncMapMessageToRobots(Long sceneId) throws Exception;
 
     Object sendSyncMapMessageToSpecialRobots(Map<String, Object> params) throws Exception;

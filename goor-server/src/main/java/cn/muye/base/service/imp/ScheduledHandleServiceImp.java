@@ -2,7 +2,6 @@ package cn.muye.base.service.imp;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.TopicConstants;
 import cn.mrobot.bean.enums.MessageType;
@@ -95,13 +94,13 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         stationService = applicationContext.getBean(StationService.class);
         webSocketSendMessage = applicationContext.getBean(WebSocketSendMessage.class);
         //拿sendTime跟内存里的同步时间
-        Long currentTime = new Date().getTime();
+        Long currentTime = System.currentTimeMillis();
 
         //查询所有机器人存放机器人信息到缓存
-        List<Robot> list = CacheInfoManager.getRobotListCache("robotList");
-        if (list == null) {
+        List<Robot> list = CacheInfoManager.getRobotListCache(Constant.ROBOT_LIST);
+        if (list == null || list.isEmpty()) {
             list = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
-            CacheInfoManager.setRobotListCache("robotList", list);
+            CacheInfoManager.setRobotListCache(Constant.ROBOT_LIST, list);
         }
         if (list != null && list.size() > 0) {
             for (Robot robot : list) {
@@ -119,20 +118,16 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 }
             }
         }
-        List<Station> stationList = CacheInfoManager.getStationListCache("stationList");
-        if (stationList == null) {
+        List<Station> stationList = CacheInfoManager.getStationListCache(Constant.STATION_LIST);
+        if (stationList == null || stationList.isEmpty()) {
             stationList = stationService.list(null, SearchConstants.FAKE_MERCHANT_STORE_ID, null);
-            CacheInfoManager.setStationListCache("stationList", stationList);
+            CacheInfoManager.setStationListCache(Constant.STATION_LIST, stationList);
         }
         //查询所有站信息存放到缓存，在相应的站删除的逻辑处修改缓存
         if (stationList != null && stationList.size() > 0) {
             for (Station station : stationList) {
                 try {
                     Map map = robotService.getCountAvailableRobotByStationId(station.getId());
-                    //打印太频繁
-//                    logger.info("站ID: " + station.getId() + ",可用机器人数量: " + map.get(RobotTypeEnum.TRAILER.name())
-//                            == null ? 0 : map.get(RobotTypeEnum.TRAILER.name()));
-
                     WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName())
                             .messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
                     webSocketSendMessage.sendWebSocketMessage(ws);

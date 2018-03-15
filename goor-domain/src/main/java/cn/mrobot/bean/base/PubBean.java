@@ -18,4 +18,5 @@ public class PubBean implements Serializable {
 
     private String pub_name;
 
+    private String publisher;
 }

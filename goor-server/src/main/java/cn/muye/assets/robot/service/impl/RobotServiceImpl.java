@@ -294,19 +294,27 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         for(StationRobotXREF xref : list) {
             Long robotId = xref.getRobotId();
             Robot robotDb = getById(robotId);
-
+            String code = robotDb.getCode();
             //如果关联数据库机器人不存在
             if(robotDb == null) {
                 continue;
             }
+            //校验机器人场景绑定关系
+            if (checkSceneNameEquality(robotDb, code, orderStationId)) {
+                continue;
+            }
             //忙碌和低电量的机器人之间过滤
             Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
-            if(busy != null && busy || robotDb.isLowPowerState() ) {
+            if(busy != null && busy || robotDb.isLowPowerState()) {
                 stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC")));
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
-
+            //如果不在线continue
+            Boolean online = CacheInfoManager.getRobotOnlineCache(robotDb.getCode());
+            if (!online) {
+                continue;
+            }
             //以机器人在路径上的投影点与路径的关系为计算远近条件，做权值的补偿，以满足同一路径附近如果有多个机器人也能正确排序
             RoadPathResult result = roadPathResultService.getNearestPathResultStartShadowPointByRobotCode(robotDb, pathStationPoint, roadPathMaps);
 
@@ -372,6 +380,38 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     }
 
     /**
+     * 检查机器人上传工控场景名和云端绑定站的工控场景名是否一致，而且该场景名也绑定了此机器人
+     * @param robot
+     * @param robotCode
+     * @param orderStationId
+     * @return
+     * @throws Exception
+     */
+    private boolean checkSceneNameEquality(Robot robot, String robotCode, Long orderStationId) throws Exception {
+        //从缓存里获取机器上上报的工控场景名
+        MessageInfo messageInfo = CacheInfoManager.getMessageCache(robotCode);
+        //获取工控场景名
+        //到缓存里通过messageInfo的deviceId调用MapInfoServiceIMpl的getCurrentMapInfo获取工控场景名
+        String sceneName = parseMapInfoData(messageInfo);
+        //获取站绑定的工控场景名
+        //走缓存去查询站绑定的工控场景
+        String stationSceneName = getStationSceneName(orderStationId);
+        if (StringUtil.isEmpty(sceneName) || StringUtil.isEmpty(stationSceneName)) {
+            return false;
+        }
+        if (!sceneName.equals(stationSceneName)) {
+            return false;
+        }
+        //设置机器人有无绑定场景的标识位，默认为false
+        boolean robotSceneBind = checkRobotBoundedByScene(robot, sceneName);
+        //如果无绑定则略过
+        if (!robotSceneBind) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 根据站查询可调用的机器人数量
      *
      * @param stationId
@@ -380,7 +420,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public Map getCountAvailableRobotByStationId(Long stationId) throws Exception {
         List<StationRobotXREF> xrefList = CacheInfoManager.getStationRobotIdXrefListCache(stationId);
-        if (xrefList == null) {
+        if (xrefList == null || xrefList.isEmpty()) {
             xrefList = stationRobotXREFService.getByStationId(stationId);
             CacheInfoManager.setStationRobotIdXrefListCache(stationId, xrefList);
         }
@@ -400,7 +440,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             if (robot == null) {
                 robot = getById(robotId);
                 CacheInfoManager.setRobotInfoCache(robotId, robot);
-                continue;
             }
             //todo 暂时先不考虑低电量和紧急制动状态
             String code = robot.getCode();
@@ -408,21 +447,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             if (busy == null) {
                 busy = Boolean.FALSE;
             }
-            if (robot == null || busy || CacheInfoManager.getRobotOnlineCache(code) == null || !CacheInfoManager.getRobotOnlineCache(code)) {
+            if (robot == null || busy || !CacheInfoManager.getRobotOnlineCache(code)) {
                 continue;
             }
-            //从缓存里获取机器上上报的工控场景名
-            MessageInfo messageInfo = CacheInfoManager.getMessageCache(code);
-            //获取工控场景名
-            //到缓存里通过messageInfo的deviceId调用MapInfoServiceIMpl的getCurrentMapInfo获取工控场景名
-            String sceneName = parseMapInfoData(messageInfo);
-            //获取站绑定的工控场景名
-            //走缓存去查询站绑定的工控场景
-            String stationSceneName = getStationSceneName(stationId);
-            if (StringUtil.isEmpty(sceneName) || StringUtil.isEmpty(stationSceneName)) {
-                continue;
-            }
-            if (!sceneName.equals(stationSceneName)) {
+            //检查机器人上传工控场景名和云端绑定站的工控场景名是否一致，而且该场景名也绑定了此机器人
+            if (checkSceneNameEquality(robot, code, stationId)) {
                 continue;
             }
             if (robot.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
@@ -1011,10 +1040,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
                     logger.info("机器人" + robotCode + "设置为" + online + "状态");
                 }
-                if (busy != null || online != null) {
-                    super.updateSelective(robot);
-                    logger.info("机器人修改状态" + robot.toString());
-                }
+                //从缓存获取不需更新数据库
+//                if (busy != null || online != null) {
+//                    super.updateSelective(robot);
+//                    logger.info("机器人修改状态" + robot.toString());
+//                }
             }
         }
     }
@@ -1022,5 +1052,35 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
     @Override
     public Long getRobotSceneId(Long robotId) {
         return robotMapper.getRobotSceneId(robotId);
+    }
+
+    /**
+     * 判断机器人是否在场景中被绑定
+     * @param robot
+     * @param sceneName
+     * @return
+     * @throws Exception
+     */
+    private boolean checkRobotBoundedByScene(Robot robot, String sceneName) throws Exception {
+        boolean robotSceneBind = false;
+        //判断机器人有无绑定场景
+        List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
+        if (sceneList == null) {
+            //数据库里查询所有的场景
+            sceneList = sceneService.listScenes(new WhereRequest());
+            CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
+        }
+        //遍历sceneList
+        if (sceneList != null && sceneList.size() > 0) {
+            for (Scene scene : sceneList) {
+                List<Robot> sceneRobotList = scene.getRobots();
+                if (scene.getActive() == Constant.SCENE_ACTIVATED && scene.getMapSceneName().equals(sceneName)
+                        && sceneRobotList != null && sceneRobotList.contains(robot)) {
+                    robotSceneBind = true;
+                    break;
+                }
+            }
+        }
+        return robotSceneBind;
     }
 }

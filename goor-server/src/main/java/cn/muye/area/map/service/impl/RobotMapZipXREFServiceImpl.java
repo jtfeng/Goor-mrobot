@@ -3,10 +3,12 @@ package cn.muye.area.map.service.impl;
 import cn.mrobot.bean.area.map.RobotMapZipXREF;
 import cn.muye.area.map.mapper.RobotMapZipXREFMapper;
 import cn.muye.area.map.service.RobotMapZipXREFService;
+import cn.muye.base.service.BaseCrudService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,34 +21,23 @@ public class RobotMapZipXREFServiceImpl implements RobotMapZipXREFService {
     private RobotMapZipXREFMapper robotMapZipXREFMapper;
 
     @Override
-    public void saveOrUpdate(RobotMapZipXREF robotMapZipXREF) {
-        if (null == robotMapZipXREF)
+    public void save(RobotMapZipXREF robotMapZipXREF) {
+        if (null == robotMapZipXREF) {
             return;
-        Long robotId = robotMapZipXREF.getRobotId();
-        List<RobotMapZipXREF> robotMapZipXREFList = findByRobotId(robotId);
-        if (robotMapZipXREFList.size() <= 0) {
-            robotMapZipXREFMapper.insert(robotMapZipXREF);
-        } else {
-            RobotMapZipXREF robotMapZipXREFDB = robotMapZipXREFList.get(0);
-            //将上一次的压缩ID改为历史
-            robotMapZipXREF.setLastMapZipId(robotMapZipXREFDB.getNewMapZipId());
-            updateByRobotId(robotMapZipXREF);
         }
+        robotMapZipXREFMapper.insert(robotMapZipXREF);
     }
 
     @Override
-    public void updateByRobotId(RobotMapZipXREF robotMapZipXREF) {
+    public List<RobotMapZipXREF> findByRobotId(Long robotId, Long sceneId) {
         Example example = new Example(RobotMapZipXREF.class);
         Example.Criteria criteria = example.createCriteria();
-        criteria.andEqualTo("ROBOT_ID=" + robotMapZipXREF.getRobotId());
-        robotMapZipXREFMapper.updateByExampleSelective(robotMapZipXREF, example);
-    }
-
-    @Override
-    public List<RobotMapZipXREF> findByRobotId(Long robotId) {
-        Example example = new Example(RobotMapZipXREF.class);
-        Example.Criteria criteria = example.createCriteria();
-        criteria.andCondition("ROBOT_ID = " + robotId);
+        criteria.andCondition("ROBOT_ID = " + robotId).andCondition("SCENE_ID=" + sceneId).andCondition("DELETE_FLAG = 0");
         return robotMapZipXREFMapper.selectByExample(example);
+    }
+
+    @Override
+    public void removeBySceneId(Long sceneId) {
+        robotMapZipXREFMapper.removeBySceneId(sceneId, 1, new Date());
     }
 }

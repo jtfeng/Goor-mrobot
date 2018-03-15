@@ -231,6 +231,7 @@ public class ExampleController {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put(TopicConstants.PUB_NAME, "fixpath_query");
+            jsonObject.put(TopicConstants.PUBLISHER, TopicConstants.CLOUD_PUBLISHER);
 
             JSONObject dataObject = new JSONObject();
             dataObject.put(TopicConstants.SCENE_NAME, "scene2");

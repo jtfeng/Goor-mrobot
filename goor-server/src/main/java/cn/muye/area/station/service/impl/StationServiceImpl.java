@@ -293,9 +293,13 @@ public class StationServiceImpl extends BaseServiceImpl<Station> implements Stat
         List<StationStationXREF> xrefList = stationStationXREFService.list(stationId);
         List<Long> stationIdList = xrefList.stream().map(xref -> xref.getDestinationStationId()).collect(Collectors.toList());
         Example example = new Example(Station.class);
-        example.createCriteria().andCondition("ID in", stationIdList)
-                .andCondition("SCENE_ID =", sceneId)
-                .andCondition("ACTIVE =", Constant.NORMAL);
+        Example.Criteria criteria = example.createCriteria();
+        if (stationIdList.size() != 0) {
+            // 站集合不为空的时候
+            criteria.andCondition("ID in", stationIdList);
+        }
+        criteria.andCondition("SCENE_ID =", sceneId);
+        criteria.andCondition("ACTIVE =", Constant.NORMAL);
         return stationMapper.selectByExample(example);
     }
 

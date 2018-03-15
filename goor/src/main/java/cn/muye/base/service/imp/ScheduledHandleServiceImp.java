@@ -285,7 +285,9 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
                 if (null == echo) {
                     echo = new Topic(ros, commonInfo.getTopicName(), commonInfo.getTopicType());
                 }
-                Message toSend = new Message(commonInfo.getPublishMessage());
+                //添加publisher字段区分是谁发的topic 20180314
+                String publishMessage = setPublisher(commonInfo.getPublishMessage());
+                Message toSend = new Message(publishMessage);
                 echo.publish(toSend);
 //                logger.info("-->> publishMessage commonInfo to ros success");
                 return AjaxResult.success(MessageStatusType.PUBLISH_ROS_MESSAGE.getName());
@@ -541,5 +543,17 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
             }
         });
 
+    }
+
+    public String setPublisher(String publishMessage) {
+        JSONObject object = JSON.parseObject(publishMessage);
+        String dataString = object.getString(TopicConstants.DATA);
+        if (StringUtil.isBlank(dataString)) {
+            JSONObject dataObject = JSON.parseObject(dataString);
+            if (StringUtil.isBlank(dataObject.getString(TopicConstants.PUBLISHER))){
+                object.put(TopicConstants.PUBLISHER, TopicConstants.CLOUD_PUBLISHER);
+            }
+        }
+        return JSON.toJSONString(object);
     }
 }

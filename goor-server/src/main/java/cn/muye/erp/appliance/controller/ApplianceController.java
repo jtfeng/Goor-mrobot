@@ -111,19 +111,13 @@ public class ApplianceController {
             return validateResult;
         }
 
-        Appliance applianceDB = applianceService.findApplianceById(appliance.getId());
-        String name = appliance.getName();
-        applianceDB.setName(appliance.getName());
-        applianceDB.setSearchName(StringUtil.getSearchName(name));
         int departmentTypeCode = appliance.getDepartmentTypeCode();
-        applianceDB.setDepartmentTypeCode(departmentTypeCode);
-        applianceDB.setDepartmentType(applianceDepartmentTypeService.findByCode(departmentTypeCode));
+        appliance.setDepartmentType(applianceDepartmentTypeService.findByCode(departmentTypeCode));
         Long packageTypeId = appliance.getPackageTypeId();
-        applianceDB.setPackageTypeId(packageTypeId);
-        applianceDB.setPackageType(appliancePackageTypeService.findTypeById(packageTypeId));
-        applianceDB.setCreateTime(new Date());
-        applianceService.updateSelective(applianceDB);
-        return AjaxResult.success(applianceDB, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGCG"));
+        appliance.setPackageType(appliancePackageTypeService.findTypeById(packageTypeId));
+        appliance.setCreateTime(new Date());
+        applianceService.updateSelective(appliance);
+        return AjaxResult.success(appliance, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGCG"));
     }
 
     private AjaxResult validateAppliance(Appliance appliance) {

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.area.map.mapper.RobotMapZipXREFMapper">
+
+    <resultMap id="robotMapZipXREF" type="cn.mrobot.bean.area.map.RobotMapZipXREF">
+        <result property="robotId" column="ROBOT_ID"/>
+        <result property="mapZipId" column="MAP_ZIP_ID"/>
+        <result property="sceneId" column="SCENE_ID"/>
+        <result property="updateTime" column="UPDATE_TIME" />
+        <result property="success" column="SUCCESS"/>
+        <result property="deleteFlag" column="DELETE_FLAG"/>
+        <result property="deleteTime" column="DELETE_TIME" />
+    </resultMap>
+
+    <update id="removeBySceneId">
+        UPDATE ROBOT_MAPZIP_XREF
+        SET
+        <if test="deleteFlag != null">
+            DELETE_FLAG = #{deleteFlag},
+        </if>
+        <if test="deleteTime != null">
+            DELETE_TIME = #{deleteTime}
+        </if>
+        WHERE
+        SCENE_ID = #{sceneId}
+    </update>
+
+</mapper>

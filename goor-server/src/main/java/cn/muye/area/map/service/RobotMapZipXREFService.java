@@ -9,9 +9,13 @@ import java.util.List;
  */
 public interface RobotMapZipXREFService {
 
-    void saveOrUpdate(RobotMapZipXREF robotMapZipXREF);
+    void save(RobotMapZipXREF robotMapZipXREF);
 
-    void updateByRobotId(RobotMapZipXREF robotMapZipXREF);
+    List<RobotMapZipXREF> findByRobotId(Long robotId, Long sceneId);
 
-    List<RobotMapZipXREF> findByRobotId(Long robotId);
+    /**
+     * 根据场景ID将该ID以前的数据置为已删除
+     * @param sceneId
+     */
+    void removeBySceneId(Long sceneId);
 }
