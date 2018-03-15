@@ -18,7 +18,8 @@ public enum StationType {
 	CHARGE(3, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_CDZD"),
 	OPERATION(4, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_SSSZD"),
 	ASEPTIC_APPARATUS_ROOM(5, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_WJQXSZD"),
-	ELEVATOR(6, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_DTZD");
+	ELEVATOR(6, "goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_DTZD"),
+	MULTI_RECEIVER(7,"goor_domain_src_main_java_cn_mrobot_bean_area_station_StationType_java_DSHZD");
 
 	private String value;
 
@@ -28,7 +29,7 @@ public enum StationType {
 		return value;
 	}
 
-	public int getCaption() {
+		public int getCaption() {
 		return caption;
 	}
 
