@@ -259,6 +259,12 @@ public class RoadPathResultServiceImpl implements RoadPathResultService {
 
         //获取机器人坐标
         CurrentInfo currentInfo = mapInfoService.getCurrentInfo(robotCode);
+        if(currentInfo == null) {
+            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_XDHQKYJQ") + robotCode  + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_BKYWHQDJQRZB"));
+            LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            return null;
+        }
+
         String pose = currentInfo.getPose();
         if(pose == null || StringUtil.isNullOrEmpty(pose)) {
             stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_XDHQKYJQ") + robotCode  + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_dijkstra_service_impl_RoadPathResultServiceImpl_java_BKYWHQDJQRZB"));
