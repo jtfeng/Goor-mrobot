@@ -1,6 +1,9 @@
 package cn.muye.util;
 
 
+import cn.mrobot.bean.area.station.Station;
+import cn.mrobot.bean.area.station.StationType;
+import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
 import cn.muye.i18n.service.LocaleMessageSourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,23 +95,7 @@ public class EnumUtil {
         try {
             beanInfo = Introspector.getBeanInfo(clazz);
             PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
-            for (int i = 0; i < propertyDescriptors.length; i++) {
-                PropertyDescriptor descriptor = propertyDescriptors[i];
-                String propertyName = descriptor.getName();
-//                if (!propertyName.equals("class")) {
-                if (!exceptPropNames.contains(propertyName)) {
-                    Method readMethod = descriptor.getReadMethod();
-                    Object result = null;
-                    result = readMethod.invoke(bean, new Object[0]);
-                    if (null != propertyName) {
-                        propertyName = propertyName.toString();
-                    }
-                    if (null != result) {
-                        result = result.toString();
-                    }
-                    returnMap.put(propertyName, result);
-                }
-            }
+            getPropertiesMapNoExcept(propertyDescriptors, returnMap, bean);
         } catch (IntrospectionException e) {
             LOGGER.error(e.getMessage(), e);
             System.out.println("分析类属性失败");
@@ -126,6 +113,127 @@ public class EnumUtil {
     }
 
     /**
+     * 将一个 JavaBean 对象转化为一个 Map
+     *
+     * @param bean 要转化的JavaBean 枚举类对象
+     * @return 转化出来的 Map 对象
+     * @throws IntrospectionException    如果分析类属性失败
+     * @throws IllegalAccessException    如果实例化 JavaBean 失败
+     * @throws InvocationTargetException 如果调用属性的 setter 方法失败
+     */
+    @SuppressWarnings("rawtypes")
+    public static Map toEnumMap(Object bean) {
+        Class<? extends Object> clazz = bean.getClass();
+        Map<Object, Object> returnMap = new HashMap<Object, Object>();
+        BeanInfo beanInfo = null;
+        try {
+            String name = bean.toString();
+            //插入枚举类的名字
+            returnMap.put(NAME,name);
+            System.out.println(name);
+            beanInfo = Introspector.getBeanInfo(clazz);
+            PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
+            getPropertiesMapWithExcept(propertyDescriptors, returnMap, bean, exceptPropNames );
+        } catch (IntrospectionException e) {
+            LOGGER.error(e.getMessage(), e);
+            System.out.println("分析类属性失败");
+        } catch (IllegalAccessException e) {
+            LOGGER.error(e.getMessage(), e);
+            System.out.println("实例化 JavaBean 失败");
+        } catch (IllegalArgumentException e) {
+            LOGGER.error(e.getMessage(), e);
+            System.out.println("映射错误");
+        } catch (InvocationTargetException e) {
+            LOGGER.error(e.getMessage(), e);
+            System.out.println("调用属性的 setter 方法失败");
+        }
+        return returnMap;
+    }
+
+    /**
+     * 获取bean的属性map，不过滤
+     * @param propertyDescriptors
+     * @param returnMap
+     * @param bean
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public static Map getPropertiesMapNoExcept(PropertyDescriptor[] propertyDescriptors, Map returnMap, Object bean) throws IllegalAccessException,InvocationTargetException{
+        return getPropertiesMap(propertyDescriptors, returnMap, bean, false, null);
+    }
+
+    /**
+     * 获取bean的属性map，带过滤exceptPropNames
+     * @param propertyDescriptors
+     * @param returnMap
+     * @param bean
+     * @param exceptPropNames
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public static Map getPropertiesMapWithExcept(PropertyDescriptor[] propertyDescriptors, Map returnMap, Object bean, List<String> exceptPropNames) throws IllegalAccessException,InvocationTargetException{
+        return getPropertiesMap(propertyDescriptors, returnMap, bean, true, exceptPropNames);
+    }
+
+    /**
+     * 获取bean的属性map，可选择是否需要排除掉exceptPropNames里面排除的字段
+     * @param propertyDescriptors
+     * @param returnMap
+     * @param bean
+     * @param isExceptProps 是否需要排除字段
+     * @param exceptPropNames 排除字段的名字列表
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public static Map getPropertiesMap(PropertyDescriptor[] propertyDescriptors, Map returnMap, Object bean, boolean isExceptProps, List<String> exceptPropNames)
+                                                        throws IllegalAccessException,InvocationTargetException{
+        for (int i = 0; i < propertyDescriptors.length; i++) {
+            PropertyDescriptor descriptor = propertyDescriptors[i];
+            String propertyName = descriptor.getName();
+            if(isExceptProps) {
+                //如果非class属性，且还需排除字段
+                if (!exceptPropNames.contains(propertyName) && !propertyName.equals("class")) {
+                    getPropertyMap(descriptor, bean, returnMap);
+                }
+            }
+            else {
+                //非class属性，否则会映射错误
+                if (!propertyName.equals("class")) {
+                    getPropertyMap(descriptor, bean, returnMap);
+                }
+            }
+        }
+        return returnMap;
+    }
+
+    /**
+     * 获取bean的单个属性map
+     * @param descriptor
+     * @param bean
+     * @param returnMap
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    public static Map getPropertyMap(PropertyDescriptor descriptor, Object bean, Map returnMap) throws IllegalAccessException,InvocationTargetException{
+        Method readMethod = descriptor.getReadMethod();
+        String propertyName = descriptor.getName();
+        Object result = null;
+        result = readMethod.invoke(bean, new Object[0]);
+        if (null != propertyName) {
+            propertyName = propertyName.toString();
+        }
+        if (null != result) {
+            result = result.toString();
+        }
+        returnMap.put(propertyName, result);
+        return returnMap;
+    }
+
+    /**
      * 将一个 JavaBean 对象转化为一个 Map,其中如果字段名是需要国际化的，则进行国际化转换
      *
      * @param bean 要转化的JavaBean 对象
@@ -135,7 +243,7 @@ public class EnumUtil {
      * @throws InvocationTargetException 如果调用属性的 setter 方法失败
      */
     @SuppressWarnings("rawtypes")
-    public static Map toMapInternationalization(Object bean,String prop,LocaleMessageSourceService localeMessageSourceService) {
+    public static Map toEnumMapInternationalization(Object bean, String prop, LocaleMessageSourceService localeMessageSourceService) {
         Class<? extends Object> clazz = bean.getClass();
         Map<Object, Object> returnMap = new HashMap<Object, Object>();
         BeanInfo beanInfo = null;
@@ -159,7 +267,7 @@ public class EnumUtil {
                         continue;
                     }
                     propertyName = propertyName.toString();
-                    LOGGER.info("字段名为",propertyName);
+                    LOGGER.info("字段名为{}",propertyName);
                     if (null == result) {
                         LOGGER.info("字段{}值为空{}",propertyName,result);
                         continue;
@@ -193,6 +301,7 @@ public class EnumUtil {
 
 
     //枚举类取字段的列表:前面是字段名，后面是需要国际化该字段的类名的列表
+    //如需添加，一定要增加需要国际化的字段名，和字段对应的类名。如果不需要国际化的枚举类，可以直接使用list方法。
     public static final String NAME = "name";
     public static final String VALUE = "value";
     public static final String MODULE_NAME = "moduleName";
@@ -255,13 +364,13 @@ public class EnumUtil {
             if(null != enumNames && enumNames.contains(classSimpleName)) {
                 LOGGER.info("{}类属于{}字段需要国际化的类",classSimpleName,propName);
                 for (Object o : enumList) {
-                    result.add(toMapInternationalization(o, propName, localeMessageSourceService));
+                    result.add(toEnumMapInternationalization(o, propName, localeMessageSourceService));
                 }
             }
             else {
                 LOGGER.info("{}类属于不需要国际化的类",classSimpleName);
                 for (Object o : enumList) {
-                    result.add(toMap(o));
+                    result.add(toEnumMap(o));
                 }
             }
 
@@ -271,8 +380,8 @@ public class EnumUtil {
             return null;
         }
     }
-/*
-    public static void main(String[] args) {
+
+    /*public static void main(String[] args) {
         Map<Object, Object> map = new TreeMap<Object, Object>();
         map.put("fsf", 1);
         map.put("sss", "1");
@@ -338,5 +447,6 @@ public class EnumUtil {
             }
         };
         System.out.println(enumListInternationalization(VALUE, StationType.class, StationType.values(), localeMessageSourceService));
+        System.out.println(enumListInternationalization(null, RfidBraceletTypeEnum.class, RfidBraceletTypeEnum.values(), localeMessageSourceService));
     }*/
 }
