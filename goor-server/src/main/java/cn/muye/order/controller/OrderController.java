@@ -29,7 +29,6 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.controller.BaseController;
 import cn.muye.i18n.service.LocaleMessageSourceService;
-import cn.muye.mission.service.MissionWarningService;
 import cn.muye.order.bean.*;
 import cn.muye.order.service.*;
 import cn.muye.service.consumer.topic.X86MissionDispatchService;
@@ -96,8 +95,6 @@ public class OrderController extends BaseController {
     @Autowired
     X86MissionDispatchService x86MissionDispatchService;
 
-    @Autowired
-    private MissionWarningService missionWarningService;
 
     /**
      * test
@@ -108,8 +105,7 @@ public class OrderController extends BaseController {
     @ResponseBody
     public AjaxResult test(){
         try {
-            orderDetailService.finishedDetailTask(2095L, OrderConstant.ORDER_DETAIL_STATUS_GET);
-            return AjaxResult.success();
+            return AjaxResult.success("ok,test");
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return AjaxResult.failed();
@@ -195,7 +191,7 @@ public class OrderController extends BaseController {
             RobotRoadPathResult robotRoadPathResult = robotService.getNearestAvailableRobotByOrder(robotTypeId, order);
             order.setRobotRoadPathResult(robotRoadPathResult);
             arrangeRobot = robotRoadPathResult == null ? null : robotRoadPathResult.getRobot();
-//            arrangeRobot = robotService.findById(323L);
+//            arrangeRobot = robotService.findById(412L);
             if(arrangeRobot == null){
                 //暂无可用机器人，反馈成功
                 logger.info("本次请求未获取到可用机器人");

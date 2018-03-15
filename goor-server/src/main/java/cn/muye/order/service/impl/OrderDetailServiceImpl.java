@@ -58,7 +58,7 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     }
 
     @Override
-    public synchronized void finishedDetailTask(Long id, Integer type) {
+    public void finishedDetailTask(Long id, Integer type) {
         //先查看detail是否已经到达签收情况
         OrderDetail sqlOrderDetail = orderDetailMapper.selectByPrimaryKey(id);
         if(sqlOrderDetail != null){
@@ -75,20 +75,6 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
         if(OrderConstant.ORDER_DETAIL_STATUS_GET.equals(type)){
             //已到达，通知推送
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_GET);
-            OrderDetail sqlDetail = super.findById(id);
-            Station station = stationService.findById(sqlDetail.getStationId());
-            Order sqlOrder = orderService.getOrder(sqlDetail.getOrderId());
-            String receiveBody = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderDetailServiceImpl_java_YSDZ") + station.getName();
-            String sendBody = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderDetailServiceImpl_java_YSDZ") + station.getName();
-            //将推送信息加入数据库内
-            //接受收货信息只需 收获站  起始和卸货站 去除
-            if(sqlOrderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_MIDDLE){
-                MessageBell receiveBell = new MessageBell(receiveBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_RECEIVE, sqlDetail.getStationId(), OrderConstant.MESSAGE_BELL_UNREAD);
-                messageBellService.save(receiveBell);
-            }
-            //通知发货站 到站
-            MessageBell sendBell = new MessageBell(sendBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_SEND, sqlOrder.getStartStation().getId(), OrderConstant.MESSAGE_BELL_UNREAD);
-            messageBellService.save(sendBell);
         }else if(OrderConstant.ORDER_DETAIL_STATUS_SIGN.equals(type)){
             orderDetail.setStatus(OrderConstant.ORDER_DETAIL_STATUS_SIGN);
         }else {
@@ -110,6 +96,24 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
 //            robot.setBusy(Boolean.FALSE);
 //            robotService.updateSelective(robot);
         }
+    }
+
+    @Override
+    public void arrivedDetailTask(Long id) {
+        OrderDetail sqlOrderDetail = orderDetailMapper.selectByPrimaryKey(id);
+        Station station = stationService.findById(sqlOrderDetail.getStationId());
+        Order sqlOrder = orderService.getOrder(sqlOrderDetail.getOrderId());
+        String receiveBody = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderDetailServiceImpl_java_YSDZ") + station.getName();
+        String sendBody = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_order_service_impl_OrderDetailServiceImpl_java_YSDZ") + station.getName();
+        //将推送信息加入数据库内
+        //接受收货信息只需 收获站  起始和卸货站 去除
+        if(sqlOrderDetail.getPlace() == OrderConstant.ORDER_DETAIL_PLACE_MIDDLE){
+            MessageBell receiveBell = new MessageBell(receiveBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_RECEIVE, sqlOrderDetail.getStationId(), OrderConstant.MESSAGE_BELL_UNREAD);
+            messageBellService.save(receiveBell);
+        }
+        //通知发货站 到站
+        MessageBell sendBell = new MessageBell(sendBody, sqlOrder.getRobot().getCode(),OrderConstant.MESSAGE_BELL_SEND, sqlOrder.getStartStation().getId(), OrderConstant.MESSAGE_BELL_UNREAD);
+        messageBellService.save(sendBell);
     }
 
     @Override

@@ -3006,7 +3006,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         }*/
 
                         //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
-                        addPathRoadPathPoint(startPoint, mapPoints, mpAttrs);
+                        addPathRoadPathPoint(startPoint, mapPoints, mpAttrs, od.getId());
 
                         mapPoints.add(startPoint);
                         //设置属性
@@ -3035,7 +3035,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         }
 
                         //判断添加电梯点
-                        addPathRoadPathPoint(endPoint, mapPoints, mpAttrs);
+                        addPathRoadPathPoint(endPoint, mapPoints, mpAttrs, od.getId());
                         //addElevatorPoint(order.getOrderSetting().getEndPoint(), mapPoints, mpAttrs);
                         //中间点添加完毕，添加卸货点
                         mapPoints.add(endPoint);
@@ -3083,7 +3083,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         MapPoint songhuoPoint = pointService.findMapPointByStationIdAndCloudType(od.getStationId(), MapPointType.UNLOAD.getCaption());
                         if(songhuoPoint != null){
                             //首先判断当前点和前一个点的关系，判断是否需要加入电梯任务
-                            addPathRoadPathPoint(songhuoPoint, mapPoints, mpAttrs);
+                            addPathRoadPathPoint(songhuoPoint, mapPoints, mpAttrs, od.getId());
 //                                addElevatorPoint(mp, mapPoints, mpAttrs);
                             //判断当前点的属性，根据属性加入相应的任务
                             //加入该点，并标记这个点状态是orderDetail点
@@ -3104,7 +3104,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         //取第一个有效的点设置进去
         if (chargePoint != null){
             //如果充电点和上一个点不在同一个楼层，则要添加相应的电梯任务。添加去充电点任务。
-            addPathRoadPathPoint(chargePoint, mapPoints, mpAttrs);
+            addPathRoadPathPoint(chargePoint, mapPoints, mpAttrs, null);
             logger.info("###### path to chongdian is ok ");
 
             //根据设置是否需要充电任务决定是否插入自动回充任务
@@ -3131,7 +3131,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private void addPathRoadPathPoint(
             MapPoint mp,
             List<MapPoint> mapPoints,
-            HashMap<MapPoint, MPointAtts> mpAttrs) {
+            HashMap<MapPoint, MPointAtts> mpAttrs,
+            Long orderDetailId) {
         logger.info("###### addPathRoadPathPoint start ");
         //查询两个点之间是否有路径
         if (prePoint == null || mp == null){
@@ -3168,7 +3169,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                         logger.info("###### addPathRoadPathPoint door is ok ");
                                         break;
                                     case ELEVATOR_WAIT:
-                                        addPathElevatorPoint(mp, point, mapPoints, mpAttrs);
+                                        addPathElevatorPoint(mp, point, mapPoints, mpAttrs, orderDetailId);
                                         break;
                                     default:
                                         if (prePoint != null){
@@ -3250,7 +3251,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     private void addPathElevatorPoint(MapPoint finalTargetMp,
                                       MapPoint currentMp,
                                       List<MapPoint> mapPoints,
-                                      HashMap<MapPoint, MPointAtts> mpAttrs) {
+                                      HashMap<MapPoint, MPointAtts> mpAttrs,
+                                      Long orderDetailId) {
         if (prePoint == null || finalTargetMp == null){
             return;
         }
@@ -3277,6 +3279,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             atts.nextFloor = mpfloor.currentFloor;
             atts.nextMapId = mpfloor.currentMapId;
             atts.logicFloor = mpfloor.logicFloor;
+            atts.orderDetailMP = String.valueOf(orderDetailId);
             mpAttrs.put(temp, atts);
             logger.info("###### addPathElevatorPoint is ok ");
         }
@@ -4041,6 +4044,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         boolean isNotTwo = false;//取到的不是两个电梯数据的情况
         Long elevatorid = null;
+        Long preElevatorId = null;
         //电梯任务，发送进入电梯到第几层
         JsonMissionItemDataTwoElevator jsonMissionItemDataTwoElevator =
                 new JsonMissionItemDataTwoElevator();
@@ -4076,6 +4080,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         if (count >= 2){
                             break;
                         }
+                        preElevatorId = ev.getId();
                         try {
                             ElevatorModeEnum elevatorModeEnum =
                                     elevatorService
@@ -4091,6 +4096,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                     MapInfo currentMapInfo = mapInfoService.getMapInfo(mPointAtts.currentMapId);
                                     jsonElevatorNotice.setCallFloor(currentMapInfo.getLogicFloor());
                                     jsonElevatorNotice.setElevatorId(ev.getId());
+                                    jsonElevatorNotice.setType(OrderConstant.ELEVATOR_NOTICE_CALL_ELEVATOR);
                                     //电梯消息通知添加发货站和物品类型
                                     Station startStation = stationService.findById(order.getStartStation().getId());
                                     jsonElevatorNotice.setFromStationName(startStation.getName());
@@ -4276,6 +4282,29 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                 parentName,
                 jsonMissionItemDataTwoElevator);
         missionListTask.getMissionTasks().add(elevatorTask);
+
+        //加入到站提醒
+        String orderDetailId = mPointAtts.orderDetailMP;
+        if(!StringUtil.isNullOrEmpty(orderDetailId)){
+            //订单细节id
+            JsonElevatorNotice jsonElevatorNotice = new JsonElevatorNotice();
+            jsonElevatorNotice.setTargetFloor(mPointAtts.logicFloor);
+            MapInfo currentMapInfo = mapInfoService.getMapInfo(mPointAtts.currentMapId);
+            jsonElevatorNotice.setCallFloor(currentMapInfo.getLogicFloor());
+            jsonElevatorNotice.setElevatorId(preElevatorId);
+            jsonElevatorNotice.setType(OrderConstant.ELEVATOR_NOTICE_ARRIVE_NOTICE);
+            //电梯消息通知添加发货站和物品类型
+            Station startStation = stationService.findById(order.getStartStation().getId());
+            jsonElevatorNotice.setFromStationName(startStation.getName());
+            GoodsType goodsType = order.getOrderSetting().getGoodsType();
+            if ( null != goodsType){
+                jsonElevatorNotice.setGoodsTypeName(goodsType.getName());
+            }
+            jsonElevatorNotice.setOrderDetailId(Long.parseLong(orderDetailId));
+            MissionTask elevatorNoticeTask = getElevatorNoticeTask(order,mp, parentName, jsonElevatorNotice);
+            missionListTask.getMissionTasks().add(elevatorNoticeTask);
+        }
+
 
         //加入check电梯状态解锁任务
 //        JsonMissionItemDataElevatorUnlock unlock =
@@ -4656,7 +4685,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             HashMap<MapPoint, MPointAtts> mpAttrs = new HashMap<>();
 
             //根据prePoint和firstTarget点生成点序列
-            addPathRoadPathPoint(firstTarget, mapPoints, mpAttrs);
+            addPathRoadPathPoint(firstTarget, mapPoints, mpAttrs, null);
 
             //生成任务并下发
             return generateAndSendMissionList(order, mapPoints, mpAttrs);

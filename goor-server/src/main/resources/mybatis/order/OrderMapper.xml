@@ -174,5 +174,31 @@
         ORDER BY o.create_time DESC
     </select>
 
+    <select id="listOrdersByStationAndDate" resultType="cn.mrobot.bean.order.Order">
+        select o.*
+        from OR_ORDER o
+        <where>
+            o.status IN (0, 1)
+            <if test="stationId != null" >
+                AND o.start_station_id = #{stationId}
+            </if>
+            <if test="startDate != null" >
+                AND o.create_time &gt;= #{startDate}
+            </if>
+            <if test="endDate != null" >
+                AND o.create_time &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY o.create_time DESC
+    </select>
+
+
+    <update id="changeWaitOrdersToWasteOneHourAgo">
+        update OR_ORDER SET
+        status = 3
+        where status = 2
+        AND create_time &lt;= #{oneHourAgo}
+    </update>
+
 
 </mapper>

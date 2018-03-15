@@ -15,6 +15,9 @@ public interface OrderDetailService extends BaseService<OrderDetail> {
     //到站完成任务时需调用此service type为区分到达和签收
     void finishedDetailTask(Long id, Integer type);
 
+    //到站通知
+    void arrivedDetailTask(Long id);
+
     //护士站分页显示
     List<OrderDetail> listStationTasks(Long stationId, WhereRequest whereRequest);
 

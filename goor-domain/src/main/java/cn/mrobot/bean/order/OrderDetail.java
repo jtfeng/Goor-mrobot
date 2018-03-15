@@ -24,6 +24,11 @@ public class OrderDetail extends BaseBean{
 
     private Date finishDate; // 配送到确认时间
 
+    //private Integer orderIndex;  //为排序使用的顺序送货
+
+    /*@Transient
+    private Integer logicFloor;  //站送去的逻辑楼层*/
+
     @Transient
     private String stationName;  //站名
 
@@ -92,4 +97,20 @@ public class OrderDetail extends BaseBean{
     public void setStationName(String stationName) {
         this.stationName = stationName;
     }
+
+    /*public Integer getLogicFloor() {
+        return logicFloor;
+    }
+
+    public void setLogicFloor(Integer logicFloor) {
+        this.logicFloor = logicFloor;
+    }*/
+
+    /*public Integer getOrderIndex() {
+        return orderIndex;
+    }
+
+    public void setOrderIndex(Integer orderIndex) {
+        this.orderIndex = orderIndex;
+    }*/
 }

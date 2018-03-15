@@ -40,6 +40,10 @@ public class OrderConstant {
     public static final Integer APPLY_ORDER_STATUS_ACCEPT = 1;
     public static final Integer APPLY_ORDER_STATUS_REJECT = 2;
 
+    //电梯通知
+    public static final Integer ELEVATOR_NOTICE_CALL_ELEVATOR = 1;   //呼梯
+    public static final Integer ELEVATOR_NOTICE_ARRIVE_NOTICE = 2;   //到站提醒（电梯任务完成后）
+
     public static final Integer MESSAGE_DEFAULT_MAX_NUM = 99; //读取消息上限条数
 
 }

@@ -57,6 +57,8 @@ public class X86MissionStateResponseServiceImpl
     @Autowired
     private ElevatorNoticeService elevatorNoticeService;
 
+    private static Long orderDetailId = null;
+
     @Override
     public AjaxResult handleX86MissionStateResponse(MessageInfo messageInfo) {
         logger.info(JsonUtils.toJson(
@@ -182,6 +184,25 @@ public class X86MissionStateResponseServiceImpl
                                             logger.info("### set finishedDetailTask " + id);
                                             orderDetailService.finishedDetailTask(id, OrderConstant.ORDER_DETAIL_STATUS_GET);
                                             break;
+                                        }
+                                    }
+                                }
+                            } else if(MissionFuncsServiceImpl.MissionStateExecuting.equalsIgnoreCase(en.getState())){
+                                // 在执行中就开始推送消息至数据库内
+                                if (id != null){
+                                    //设置order detail的单子状态为完成
+                                    logger.info("### set arrivedDetailTask " + id);
+                                    synchronized (this){
+                                        logger.info("当前orderDetailId为" + orderDetailId);
+                                        if(orderDetailId == null){
+                                            orderDetailService.arrivedDetailTask(id);
+                                            orderDetailId = id;
+                                        } else {
+                                            //若orderDetailId不相同,相同则不推送
+                                            if(!id.equals(orderDetailId)){
+                                                orderDetailService.arrivedDetailTask(id);
+                                                orderDetailId = id;
+                                            }
                                         }
                                     }
                                 }

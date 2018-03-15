@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.order.Order;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +32,9 @@ public interface OrderService {
 
     void changeOrderStatus(Long id, Integer status);
 
+    //检测等待订单一小时前的
+    void checkWaitOrdersOneHourAgo();
+
     List<Order> listOrdersByStationAndStatus(Long stationId, Integer orderStatus);
 
     List<Order> listOrdersByStation(Long stationId, Integer page, Integer pageSize);
@@ -38,4 +42,6 @@ public interface OrderService {
     List<Order> listPageOrderLogsByRobotId(Long robotId, Integer page, Integer pageSize);
 
     List<Order> listPageOrderLogsByStationId(Long stationId, Integer page, Integer pageSize);
+
+    List<Order> listOrdersByStationAndDate(Long stationId, Date startDate, Date endDate);
 }

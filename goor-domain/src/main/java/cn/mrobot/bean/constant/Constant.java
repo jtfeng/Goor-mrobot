@@ -93,6 +93,7 @@ public class Constant {
 
     public final static String EXPORT_DIR_NAME = "export"; //导出文件夹路径
     public final static String LOG_DIR_NAME= "log"; //日志文件夹路径
+    public final static String ORDER_DATA= "order"; //订单统计
     public static final String LOG_FILE_SUFFIX = ".csv";
     public static final String ZIP_FILE_SUFFIX = ".zip";
 

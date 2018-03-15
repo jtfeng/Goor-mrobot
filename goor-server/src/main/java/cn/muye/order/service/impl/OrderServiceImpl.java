@@ -176,6 +176,7 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
             }
             Station startStation = stationService.findById(getOrder.getStartStation().getId());
             if(startStation !=null){
+                getOrder.setStartStation(startStation);
                 getOrder.setResscene(startStation.getResscene());
             }
             if(getOrder.getScene() != null) {
@@ -190,6 +191,12 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         Order changeOrder = new Order(id);
         changeOrder.setStatus(status);
         orderMapper.updateOrder(changeOrder);
+    }
+
+    @Override
+    public synchronized void checkWaitOrdersOneHourAgo() {
+        Long oneHourAgoTime = System.currentTimeMillis() - 1000*60*60;
+        orderMapper.changeWaitOrdersToWasteOneHourAgo(new Date(oneHourAgoTime));
     }
 
     /**
@@ -335,12 +342,12 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         if(missionListTask!= null){
             List<MissionItemTask> missionItemList = missionItemTaskService.findByListIdAndItemNameEqualToUnlock(missionListTask.getId());
             missionItemList.forEach(missionItemTask -> {
-                if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_elevator_unlock)){
+                if (missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_elevator_unlock)) {
                     missionItemTask.getData();
 
-                }else if(missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_roadpath_unlock)){
+                } else if (missionItemTask.getName().equals(MissionFuncsServiceImpl.MissionItemName_roadpath_unlock)) {
 
-                }else {
+                } else {
 
                 }
             });
@@ -443,7 +450,9 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
     public List<Order> listOrdersByStationAndStatus(Long stationId, Integer orderStatus) {
         Order order = new Order();
         order.setStatus(orderStatus);
-        order.setStartStation(new Station(stationId));
+        if(stationId != null){
+            order.setStartStation(new Station(stationId));
+        }
         return orderMapper.listByDomain(order);
     }
 
@@ -473,6 +482,11 @@ public class OrderServiceImpl extends BasePreInject<Order> implements OrderServi
         PageHelper.startPage(page, pageSize);
         List<Order> sqlOrders = orderMapper.listDoneOrdersByRobotIdListDateDesc(robotIdList);
         return sqlOrders.stream().map(order -> getOrder(order.getId())).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Order> listOrdersByStationAndDate(Long stationId, Date startDate, Date endDate) {
+        return orderMapper.listOrdersByStationAndDate(stationId, startDate, endDate);
     }
 
     //通过missionId 获取对应站id

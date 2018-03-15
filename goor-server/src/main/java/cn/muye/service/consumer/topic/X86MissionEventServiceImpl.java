@@ -2,8 +2,10 @@ package cn.muye.service.consumer.topic;
 
 import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.charge.ChargeInfo;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.log.mission.JsonLogMission;
 import cn.mrobot.bean.log.mission.LogMission;
+import cn.mrobot.bean.mission.task.JsonMissionItemDataRoadPathUnlock;
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.mrobot.bean.mission.task.MissionListTask;
 import cn.mrobot.utils.JsonUtils;
@@ -110,6 +112,31 @@ public class X86MissionEventServiceImpl implements X86MissionEventService {
                                 missionItemTask.setFinishDate(new Date(jsonLogMission.getTime() * 1000L));
                                 missionItemTaskService.updateSelective(missionItemTask);
                             }
+                        }else if (itemName.equals(MissionFuncsServiceImpl.MissionItemName_roadpath_unlock)){
+                            MissionItemTask missionItemTask = missionItemTaskService.findById(jsonLogMission.getMission_item_id());
+                            if(missionItemTask != null){
+                                logger.info("机器解锁任务为" + missionItemTask.getData());
+                                JsonMissionItemDataRoadPathUnlock jsonMissionItemDataRoadPathUnlock= JSONObject.parseObject(missionItemTask.getData(), JsonMissionItemDataRoadPathUnlock.class);
+                                if(jsonMissionItemDataRoadPathUnlock != null && jsonMissionItemDataRoadPathUnlock.getRoadpath_id() == Constant.RELEASE_ROBOT_LOCK_ID){
+                                    if(jsonLogMission.getEvent().equals(LogMission.event_start_success)){
+                                        logger.info("最后机器解锁任务开始");
+                                        MissionItemTask queryMissionItemTask = new MissionItemTask();
+                                        missionItemTask.setId(jsonLogMission.getMission_item_id());
+                                        missionItemTask.setStartDate(new Date(jsonLogMission.getTime() * 1000L));
+                                        missionItemTaskService.updateSelective(queryMissionItemTask);
+                                        logger.info("最后机器解锁任务开始---已记录时间");
+                                    }else if(jsonLogMission.getEvent().equals(LogMission.event_finish)) {
+                                        logger.info("最后机器解锁任务结束");
+                                        MissionItemTask queryMissionItemTask = new MissionItemTask();
+                                        missionItemTask.setId(jsonLogMission.getMission_item_id());
+                                        missionItemTask.setFinishDate(new Date(jsonLogMission.getTime() * 1000L));
+                                        missionItemTaskService.updateSelective(queryMissionItemTask);
+                                        logger.info("最后机器解锁任务结束---已记录时间");
+                                    }
+
+                                }
+                            }
+
                         }
                         break;
                     default:

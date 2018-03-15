@@ -30,4 +30,10 @@ public interface OrderMapper {
     List<Order> listDoneOrdersByRobotIdDateDesc(@Param("robotId")Long robotId);
 
     List<Order> listDoneOrdersByRobotIdListDateDesc(List<Long> robotIdList);
+
+    List<Order> listOrdersByStationAndDate(@Param("stationId")Long stationId,
+                                            @Param("startDate")Date startDate,
+                                            @Param("endDate")Date endDate);
+
+    void changeWaitOrdersToWasteOneHourAgo(@Param("oneHourAgo")Date oneHourAgo);
 }

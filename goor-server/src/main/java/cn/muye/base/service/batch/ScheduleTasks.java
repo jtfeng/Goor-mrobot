@@ -280,4 +280,17 @@ public class ScheduleTasks {
             logger.error("定时任务-清除机器人锁失败", e);
         }
     }
+
+    /**
+     * 定时清除过期等待订单，每小时执行一次
+     */
+    @Scheduled(cron = "0 0 */1 * * ?")
+    public void checkWaitOrdersOneHourAgo() {
+        logger.info("清除过期的等待订单，超时1小时");
+        try {
+            orderService.checkWaitOrdersOneHourAgo();
+        } catch (Exception e) {
+            logger.error("清除过期的等待订单出现异常", e);
+        }
+    }
 }
