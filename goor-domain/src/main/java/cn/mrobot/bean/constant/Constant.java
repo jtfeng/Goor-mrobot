@@ -222,6 +222,8 @@ public class Constant {
     public static final Integer USE_CALCULATE_ACTION_TIME = 10;
 
     public static final String IS_BIND_ELEVATOR_STATION_FLAG = "isBindElevatorStationFlag";
+    public static final Integer IS_ELEVATOR_STATION = 1;
+    public static final Integer IS_MULTI_RECEIVING_STATION = 2;
 
     //语言
     public static final String DEFAULT_LANG = "zh";

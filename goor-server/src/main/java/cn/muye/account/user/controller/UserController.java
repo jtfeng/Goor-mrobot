@@ -325,23 +325,37 @@ public class UserController implements ApplicationContextAware {
             //写入枚举
             map.put("enums", getAllEnums(userDTO,localeMessageSourceService));
             map.put(VersionConstants.VERSION_NOAH_GOOR_SERVER_KEY, VersionConstants.VERSION_NOAH_GOOR_SERVER);
-            for (StationDTO4User stationDTO4User : stationList) {
-                Integer stationTypeId = stationDTO4User.getStationTypeId();
-                if (stationTypeId == null) {
-                    LOGGER.info("##########用户绑定站:" + stationDTO4User.getName() + "的站类型为空");
-                    continue;
-                }
-                if (stationTypeId.equals(StationType.ELEVATOR.getCaption())) {
-                    // 用户绑定了电梯站
-                    map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, 1);
-                    break;
-                }
-            }
+            isStationTypeSpecial(stationList, map);
             //登录成功，初始化权限
 //            initialUserPermission(userDTO.getId(), map);
             return AjaxResult.success(map, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_DLCG"));
         } else {
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHWBDZQLXKF"));
+        }
+    }
+
+    /**
+     * 查找列表中是不是有特殊的站，如果是，则写入特殊站类型返回前端
+     * @param stationList
+     * @param map
+     */
+    private void isStationTypeSpecial(List<StationDTO4User> stationList,Map map) {
+        for (StationDTO4User stationDTO4User : stationList) {
+            Integer stationTypeId = stationDTO4User.getStationTypeId();
+            if (stationTypeId == null) {
+                LOGGER.info("##########用户绑定站:" + stationDTO4User.getName() + "的站类型为空");
+                continue;
+            }
+            if (stationTypeId.equals(StationType.ELEVATOR.getCaption())) {
+                // 用户绑定了电梯站
+                map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, Constant.IS_ELEVATOR_STATION);
+                break;
+            }
+            else if(stationTypeId.equals(StationType.MULTI_RECEIVER.getCaption())) {
+                // 用户绑定了多收货站
+                map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, Constant.IS_MULTI_RECEIVING_STATION);
+                break;
+            }
         }
     }
 
@@ -379,13 +393,7 @@ public class UserController implements ApplicationContextAware {
                 defaultSetting = orderSettingService.getDefaultSetting(firstStation.getId());
             }
             map.put("orderSetting", defaultSetting);
-            for (StationDTO4User stationDTO4User : stationList) {
-                if (StationType.ELEVATOR.getCaption() == stationDTO4User.getStationTypeId()) {
-                    // 用户绑定了电梯站
-                    map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, 1);
-                    break;
-                }
-            }
+            isStationTypeSpecial(stationList, map);
             return AjaxResult.success(map, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_DLCG"));
         } else {
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHWBDZQLXKF"));
