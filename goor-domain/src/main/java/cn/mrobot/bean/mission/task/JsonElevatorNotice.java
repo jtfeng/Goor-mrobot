@@ -1,8 +1,5 @@
 package cn.mrobot.bean.mission.task;
 
-import cn.mrobot.bean.area.station.Station;
-import cn.mrobot.bean.assets.good.GoodsType;
-
 /**
  * Created by Selim on 2018/1/5.
  * 半自动 电梯消息通知
@@ -14,6 +11,10 @@ public class JsonElevatorNotice {
     private Integer targetFloor;   //到达目标楼层
 
     private Long elevatorId;     //使用电梯的id
+
+    private Long orderDetailId;   //订单细节id
+
+    private Integer type;    //1 为呼梯通知  2 为到站通知
 
     private String fromStationName; //发货站名称
 
@@ -57,5 +58,21 @@ public class JsonElevatorNotice {
 
     public void setGoodsTypeName(String goodsTypeName) {
         this.goodsTypeName = goodsTypeName;
+    }
+
+    public Long getOrderDetailId() {
+        return orderDetailId;
+    }
+
+    public void setOrderDetailId(Long orderDetailId) {
+        this.orderDetailId = orderDetailId;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 }
