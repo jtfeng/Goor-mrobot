@@ -340,6 +340,7 @@ public class UserController implements ApplicationContextAware {
      * @param map
      */
     private void isStationTypeSpecial(List<StationDTO4User> stationList,Map map) {
+        //TODO 目前一个用户绑定一个站
         for (StationDTO4User stationDTO4User : stationList) {
             Integer stationTypeId = stationDTO4User.getStationTypeId();
             if (stationTypeId == null) {
@@ -354,6 +355,11 @@ public class UserController implements ApplicationContextAware {
             else if(stationTypeId.equals(StationType.MULTI_RECEIVER.getCaption())) {
                 // 用户绑定了多收货站
                 map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, Constant.IS_MULTI_RECEIVING_STATION);
+                break;
+            }
+            else {
+                // 用户绑定了订单站(下单，收货)
+                map.put(Constant.IS_BIND_ELEVATOR_STATION_FLAG, Constant.IS_ORDER_STATION);
                 break;
             }
         }
