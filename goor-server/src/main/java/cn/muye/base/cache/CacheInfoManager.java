@@ -134,9 +134,14 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<String, List<Robot>> robotListCache = new ConcurrentHashMapCache<>();
 
     /**
-     * 机器人信息缓存
+     * 机器人信息缓存(ID做key)
      */
-    private static ConcurrentHashMapCache<Long, Robot> robotInfoCache = new ConcurrentHashMapCache<>();
+    private static ConcurrentHashMapCache<Long, Robot> robotInfoCacheById = new ConcurrentHashMapCache<>();
+
+    /**
+     * 机器人信息缓存(CODE做key)
+     */
+    private static ConcurrentHashMapCache<String, Robot> robotInfoCacheByCode = new ConcurrentHashMapCache<>();
 
     /**
      * 站List缓存
@@ -193,7 +198,8 @@ public class CacheInfoManager implements ApplicationContextAware {
         fixpathSceneNameCache.setMaxLifeTime(10 * 60 * 1000);
         robotPositionRecordsCache.setMaxLifeTime(0);
         robotListCache.setMaxLifeTime(0);
-        robotInfoCache.setMaxLifeTime(0);
+        robotInfoCacheById.setMaxLifeTime(0);
+        robotInfoCacheByCode.setMaxLifeTime(0);
         stationListCache.setMaxLifeTime(0);
         stationInfoCache.setMaxLifeTime(0);
         stationRobotIdXrefListCache.setMaxLifeTime(0);
@@ -680,12 +686,12 @@ public class CacheInfoManager implements ApplicationContextAware {
         robotListCache.put(key, robotList);
     }
 
-    public static Robot getRobotInfoCache(Long id) {
-        return robotInfoCache.get(id);
+    public static Robot getRobotInfoCacheById(Long id) {
+        return robotInfoCacheById.get(id);
     }
 
-    public static void setRobotInfoCache(Long id, Robot robotInfo) {
-        robotInfoCache.put(id, robotInfo);
+    public static void setRobotInfoCacheById(Long id, Robot robot) {
+        robotInfoCacheById.put(id, robot);
     }
 
     public static List<Station> getStationListCache(String key) {
@@ -786,5 +792,13 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void removeArrivalStationNoticeCacheByStationId(Long toStationId) {
         arrivalStationNoticeCache.remove(toStationId);
+    }
+
+    public static Robot getRobotInfoCacheByCode(String code) {
+        return robotInfoCacheByCode.get(code);
+    }
+
+    public static void setRobotInfoCacheByCode(String code, Robot robot) {
+        robotInfoCacheByCode.put(code, robot);
     }
 }

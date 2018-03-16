@@ -452,13 +452,22 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         for (StationRobotXREF xref : xrefList) {
             Long robotId = xref.getRobotId();
-            Robot robot = CacheInfoManager.getRobotInfoCache(robotId);
+            Robot robot = CacheInfoManager.getRobotInfoCacheById(robotId);
+            String code = null;
             if (robot == null) {
                 robot = getById(robotId);
-                CacheInfoManager.setRobotInfoCache(robotId, robot);
+                //如果是空就continue，否则放缓存，再放置个code的缓存
+                if (robot == null) {
+                    continue;
+                }
+                code = robot.getCode();
+                CacheInfoManager.setRobotInfoCacheById(robotId, robot);
+                Robot robotCache = CacheInfoManager.getRobotInfoCacheByCode(code);
+                if (robotCache == null) {
+                    CacheInfoManager.setRobotInfoCacheByCode(code, robot);
+                }
             }
             //todo 暂时先不考虑低电量和紧急制动状态
-            String code = robot.getCode();
             Boolean busy = CacheInfoManager.getRobotBusyCache(code);
             if (busy == null) {
                 busy = Boolean.FALSE;
@@ -467,7 +476,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 continue;
             }
             //检查机器人上传工控场景名和云端绑定站的工控场景名是否一致，而且该场景名也绑定了此机器人
-            if (checkSceneNameEquality(robot, code, stationId)) {
+            if (!checkSceneNameEquality(robot, code, stationId)) {
                 continue;
             }
             if (robot.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
