@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.order.mapper.GoodsInfoMapper">
+
+    <resultMap id="goodsInfoResult" type="cn.mrobot.bean.order.GoodsInfo">
+        <id property="id" column="ID" />
+        <result property="num" column="NUM" />
+        <result property="goods.name" column="NAME" />
+        <result property="goods.unit" column="UNIT" />
+    </resultMap>
+
+    <sql id = "orderDetailJoin">
+        LEFT JOIN OR_GOODS og ON ogi.GOODS_ID = og.ID
+    </sql>
+
+    <select id="listGoodsInfoByDetailId" resultMap="goodsInfoResult">
+        select
+        ogi.ID,
+        ogi.NUM,
+        og.NAME,
+        og.UNIT
+        from OR_GOODS_INFO ogi
+        <include refid="orderDetailJoin" />
+        WHERE ogi.ORDER_DETAIL_ID = #{orderDetailId}
+    </select>
+</mapper>

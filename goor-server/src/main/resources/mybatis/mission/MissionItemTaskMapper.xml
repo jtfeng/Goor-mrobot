@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.mission.mapper.MissionItemTaskMapper">
+
+
+    <select id="listByOrderDetailId" resultType="cn.mrobot.bean.mission.task.MissionItemTask">
+        select
+          tmi.NAME AS name,
+          tmi.START_DATE AS startDate,
+          tmi.FINISH_DATE AS finishDate
+        from TASK_MISSION_ITEM tmi
+        LEFT JOIN TASK_MISSION tm ON tmi.MISSION_ID = tm.ID
+        where tm.ORDER_DETAIL_MISSION =  #{orderDetailId}
+    </select>
+
+
+</mapper>
