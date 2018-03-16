@@ -3279,7 +3279,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
             atts.nextFloor = mpfloor.currentFloor;
             atts.nextMapId = mpfloor.currentMapId;
             atts.logicFloor = mpfloor.logicFloor;
-            atts.orderDetailMP = String.valueOf(orderDetailId);
+            if(orderDetailId != null){
+                atts.orderDetailMP = String.valueOf(orderDetailId);
+            }
             mpAttrs.put(temp, atts);
             logger.info("###### addPathElevatorPoint is ok ");
         }
