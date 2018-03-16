@@ -98,15 +98,16 @@ public class ElevatorController {
 
     /**
      * 根据场景查询对应的电梯信息(供前端使用)
+     *
      * @return
      */
     @RequestMapping(value = "listElevatorByScene/{sceneId}", method = RequestMethod.GET)
-    public AjaxResult listElevatorByScene(@PathVariable("sceneId") Long sceneId){
+    public AjaxResult listElevatorByScene(@PathVariable("sceneId") Long sceneId) {
         try {
             List<Elevator> list = elevatorService.listElevatorByScene(sceneId);
             return AjaxResult.success(list, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTXXCG"));
-        }catch (Exception e){
-            return AjaxResult.failed(e,     localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTXXSB"));
+        } catch (Exception e) {
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CXDTXXSB"));
         }
     }
 
@@ -600,8 +601,8 @@ public class ElevatorController {
      */
     @GetMapping("/elevatorNotice")
     public AjaxResult listElevatorNotice(@RequestParam("stationId") Long stationId,
-                                         @RequestParam(value = "state",required = false) Integer state,
-                                         @RequestParam(value = "type", required = false) Integer type ) {
+                                         @RequestParam(value = "state", required = false) Integer state,
+                                         @RequestParam(value = "type", required = false) Integer type) {
         try {
             List<ElevatorNotice> elevatorNoticeList = elevatorNoticeService.listElevatorNotice(stationId, state, type);
             return AjaxResult.success(elevatorNoticeList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZCG"));
@@ -611,11 +612,12 @@ public class ElevatorController {
     }
 
     /**
+     * TODO 测试，正式版本删除
      * websocket收到电梯pad消息通知反馈
      *
      * @return
      */
-    @GetMapping("/elevatorNotice/{orderDetailId}")
+    @GetMapping("/services/elevatorNotice/{orderDetailId}")
     public AjaxResult removeElevatorNotice(@PathVariable("orderDetailId") Long orderDetailId) {
         try {
             CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);

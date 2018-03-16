@@ -783,8 +783,4 @@ public class CacheInfoManager implements ApplicationContextAware {
         }
         return noticeMap;
     }
-
-    public static void removeArrivalStationNoticeCacheByStationId(Long toStationId) {
-        arrivalStationNoticeCache.remove(toStationId);
-    }
 }
