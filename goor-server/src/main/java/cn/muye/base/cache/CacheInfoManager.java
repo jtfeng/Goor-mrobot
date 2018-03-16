@@ -4,6 +4,7 @@ import cn.mrobot.bean.area.map.MapInfo;
 import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
+import cn.mrobot.bean.assets.elevator.ElevatorNotice;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.robot.Robot;
@@ -19,6 +20,7 @@ import cn.muye.area.point.service.PointService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.mission.bean.RobotPositionRecord;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
@@ -111,13 +113,13 @@ public class CacheInfoManager implements ApplicationContextAware {
      * 固定路径获取的uuid缓存
      * //key: UUID
      */
-    private static ConcurrentHashMapCache<String,Boolean> fixpathSceneNameCache = new ConcurrentHashMapCache<String, Boolean>();
+    private static ConcurrentHashMapCache<String, Boolean> fixpathSceneNameCache = new ConcurrentHashMapCache<String, Boolean>();
 
     /**
      * 电梯pad消息通知缓存
      * //key: elevatorNoticeId
      */
-    private static ConcurrentHashMapCache<Long,Boolean> elevatorNoticeCache = new ConcurrentHashMapCache<Long, Boolean>();
+    private static ConcurrentHashMapCache<Long, Boolean> elevatorNoticeCache = new ConcurrentHashMapCache<Long, Boolean>();
 
     /**
      * 机器人位置缓存
@@ -159,6 +161,12 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<String, List<Scene>> sceneListCache = new ConcurrentHashMapCache<>(); //所有的场景信息放缓存
 
+    /**
+     * 到站信息发送缓存
+     */
+    private static ConcurrentHashMapCache<Long, List<ElevatorNotice>> arrivalStationNoticeCache = new ConcurrentHashMapCache<>();
+    private static final String ARRIVAL_STATION_NOTICE_LOCK = "lock";
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -172,6 +180,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         sceneRobotListCache.setMaxLifeTime(0);
         sceneListCache.setMaxLifeTime(0);
         persistMissionState.setMaxLifeTime(0);
+        arrivalStationNoticeCache.setMaxLifeTime(0);
 
         //状态机缓存  存储端判断如果状态有改变则存入
         autoChargeCache.setMaxLifeTime(0);
@@ -223,6 +232,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     public static void removeMapOriginalCache(String key) {
         mapOriginalCache.remove(key);
     }
+
     public static void setUUIDCache(String uuId, MessageInfo messageInfo) {
         UUIDCache.put(uuId, messageInfo);
     }
@@ -723,5 +733,57 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setSceneListCache(String key, List<Scene> sceneList) {
         sceneListCache.put(key, sceneList);
+    }
+
+    public static List<ElevatorNotice> getArrivalStationNoticeCache(Long stationId) {
+        return arrivalStationNoticeCache.get(stationId);
+    }
+
+    public static void setArrivalStationNoticeCache(Long stationId, ElevatorNotice elevatorNotice) {
+        synchronized (ARRIVAL_STATION_NOTICE_LOCK) {
+            List<ElevatorNotice> elevatorNoticeList = arrivalStationNoticeCache.get(stationId);
+            if (null == elevatorNoticeList) {
+                elevatorNoticeList = Lists.newArrayList();
+            }
+            if (!elevatorNoticeList.contains(elevatorNotice)) {
+                elevatorNoticeList.add(elevatorNotice);
+            }
+            arrivalStationNoticeCache.put(stationId, elevatorNoticeList);
+        }
+    }
+
+    public static void removeArrivalStationNoticeCacheByOrderDetailId(Long orderDetailId) {
+        synchronized (ARRIVAL_STATION_NOTICE_LOCK) {
+            Iterator iterator = arrivalStationNoticeCache.iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+                Long key = entry.getKey();
+                ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
+                List<ElevatorNotice> elevatorNotices = (List<ElevatorNotice>) valueEntry.getValue();
+                for (ElevatorNotice elevatorNotice : elevatorNotices) {
+                    if (orderDetailId.equals(elevatorNotice.getOrderDetailId())) {
+                        elevatorNotices.remove(elevatorNotice);
+                        arrivalStationNoticeCache.put(key, elevatorNotices);
+                    }
+                }
+            }
+        }
+    }
+
+    public static Map<Long, List<ElevatorNotice>> getAllArrivalStationNoticeCache() {
+        Iterator iterator = arrivalStationNoticeCache.iterator();
+        Map<Long, List<ElevatorNotice>> noticeMap = new HashMap<>();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            Long key = entry.getKey();
+            ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
+            List<ElevatorNotice> elevatorNotices = (List<ElevatorNotice>) valueEntry.getValue();
+            noticeMap.put(key, elevatorNotices);
+        }
+        return noticeMap;
+    }
+
+    public static void removeArrivalStationNoticeCacheByStationId(Long toStationId) {
+        arrivalStationNoticeCache.remove(toStationId);
     }
 }
