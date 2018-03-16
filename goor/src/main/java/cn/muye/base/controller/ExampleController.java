@@ -340,14 +340,16 @@ public class ExampleController {
      *
      * @return
      */
-    @RequestMapping(value = "testElevatorNotice", method = RequestMethod.GET)
+    @RequestMapping(value = "testCommonNotice", method = RequestMethod.GET)
     @ResponseBody
     public AjaxResult testElevatorNotice(@RequestParam("uuid") String uuid,
                                          @RequestParam("elevatorId") int elevatorId,
                                          @RequestParam("callFloor") int callFloor,
                                          @RequestParam("targetFloor") int targetFloor,
                                          @RequestParam("fromStationName") String fromStationName,
-                                         @RequestParam("goodsTypeName") String goodsTypeName) throws Exception {
+                                         @RequestParam("goodsTypeName") String goodsTypeName,
+                                         @RequestParam("type") int type,
+                                         @RequestParam("orderDetailId") Long orderDetailId) throws Exception {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(TopicConstants.SUB_NAME, TopicConstants.ELEVATOR_NOTICE);
         jsonObject.put(TopicConstants.UUID, uuid);
@@ -357,6 +359,8 @@ public class ExampleController {
         dataObject.put("elevatorId", elevatorId);
         dataObject.put("fromStationName", fromStationName);
         dataObject.put("goodsTypeName", goodsTypeName);
+        dataObject.put("type", type);
+        dataObject.put("orderDetailId", orderDetailId);
         jsonObject.put(TopicConstants.DATA, JSON.toJSONString(dataObject));
         appSubService.sendTopic(TopicConstants.AGENT_SUB, TopicConstants.TOPIC_TYPE_STRING, jsonObject);
         return AjaxResult.success();

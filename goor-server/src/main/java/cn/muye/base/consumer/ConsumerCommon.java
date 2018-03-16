@@ -205,17 +205,23 @@ public class ConsumerCommon {
                         logger.error(e.getMessage(), e);
                     }
                 } else if (!StringUtils.isEmpty(messageName) && messageName.equals(TopicConstants.ELEVATOR_NOTICE)) {
-                    // 电梯pad消息通知,websocket消息通知电梯pad,pad接收成功后通知mission
-                    logger.info("电梯pad消息通知,jsonObjectData=" + jsonObjectData);
-                    ElevatorNotice elevatorNotice = parseToElevatorNotice(robotCode, jsonObjectData);
-                    //收到消息后立即反馈给mission
-                    elevatorNoticeService.sendElevatorNoticeToX86(elevatorNotice, TopicConstants.ERROR_CODE_SUCCESS, null, null);
-                    elevatorNoticeService.sendElevatorNoticeToWebSocket(elevatorNotice);
+                    logger.info("消息通知,jsonObjectData=" + jsonObjectData);
+                    //处理消息通知
+                    handleCommonNotice(robotCode, jsonObjectData);
                 }
             }
         } catch (Exception e) {
             logger.error("consumer directAgentSub exception", e);
         }
+    }
+
+    private void handleCommonNotice(String robotCode, JSONObject jsonObjectData) {
+        //消息转换
+        ElevatorNotice elevatorNotice = parseToElevatorNotice(robotCode, jsonObjectData);
+        //收到消息后立即反馈给mission
+        elevatorNoticeService.sendElevatorNoticeToX86(elevatorNotice, TopicConstants.ERROR_CODE_SUCCESS, null, null);
+        //消息推送给Websocket
+        elevatorNoticeService.sendElevatorNoticeToWebSocket(elevatorNotice);
     }
 
     private ElevatorNotice parseToElevatorNotice(String robotCode, JSONObject jsonObjectData) {
@@ -231,6 +237,8 @@ public class ConsumerCommon {
         elevatorNotice.setFromStationName(jsonElevatorNotice.getFromStationName());
         elevatorNotice.setGoodsTypeName(jsonElevatorNotice.getGoodsTypeName());
         elevatorNotice.setUuid(uuid);
+        elevatorNotice.setType(jsonElevatorNotice.getType());
+        elevatorNotice.setOrderDetailId(jsonElevatorNotice.getOrderDetailId());
         return elevatorNotice;
     }
 

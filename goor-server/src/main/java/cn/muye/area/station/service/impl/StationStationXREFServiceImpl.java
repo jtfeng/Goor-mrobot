@@ -2,6 +2,7 @@ package cn.muye.area.station.service.impl;
 
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationStationXREF;
+import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.constant.Constant;
 import cn.muye.area.station.mapper.StationStationXREFMapper;
 import cn.muye.area.station.service.StationStationXREFService;
@@ -47,6 +48,11 @@ public class StationStationXREFServiceImpl implements StationStationXREFService 
             xref.setOrderIndex(station.getOrderIndex() == null ? Constant.INDEX_ZERO : station.getOrderIndex());
             stationStationXREFMapper.insert(xref);
         });
+    }
+
+    @Override
+    public List<Station> getReceiveNoticeStationList(Long currentArrivalStationId) {
+        return stationStationXREFMapper.getReceiveNoticeStationList(currentArrivalStationId, StationType.MULTI_RECEIVER.getCaption());
     }
 
     @Override

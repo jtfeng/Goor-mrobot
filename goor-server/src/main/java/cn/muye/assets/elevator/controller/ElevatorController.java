@@ -6,14 +6,11 @@ import cn.mrobot.bean.area.point.MapPointType;
 import cn.mrobot.bean.assets.elevator.*;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.bean.constant.TopicConstants;
-import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.point.service.PointService;
 import cn.muye.assets.elevator.mapper.ElevatorModeMapper;
 import cn.muye.assets.elevator.mapper.MapPointMapper;
 import cn.muye.assets.elevator.service.*;
-import cn.muye.assets.scene.controller.SceneController;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.i18n.service.LocaleMessageSourceService;
@@ -27,13 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -600,4 +593,35 @@ public class ElevatorController {
         }
     }
 
+    /**
+     * websocket收到电梯pad消息通知反馈
+     *
+     * @return
+     */
+    @GetMapping("/elevatorNotice")
+    public AjaxResult listElevatorNotice(@RequestParam("stationId") Long stationId,
+                                         @RequestParam(value = "state",required = false) Integer state,
+                                         @RequestParam(value = "type", required = false) Integer type ) {
+        try {
+            List<ElevatorNotice> elevatorNoticeList = elevatorNoticeService.listElevatorNotice(stationId, state, type);
+            return AjaxResult.success(elevatorNoticeList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZCG"));
+        } catch (Exception e) {
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZSB"));
+        }
+    }
+
+    /**
+     * websocket收到电梯pad消息通知反馈
+     *
+     * @return
+     */
+    @GetMapping("/elevatorNotice/{orderDetailId}")
+    public AjaxResult removeElevatorNotice(@PathVariable("orderDetailId") Long orderDetailId) {
+        try {
+            CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);
+            return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZCG"));
+        } catch (Exception e) {
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZSB"));
+        }
+    }
 }

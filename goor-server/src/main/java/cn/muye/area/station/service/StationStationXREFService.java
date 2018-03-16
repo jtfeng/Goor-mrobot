@@ -21,4 +21,11 @@ public interface StationStationXREFService {
      * @param accessArriveStationIdList
      */
     void saveByStationList(Long id, List<Station> accessArriveStationIdList);
+
+    /**
+     * 根据当前到达站获取接收信息站的list
+     * @param currentArrivalStationId
+     * @return
+     */
+    List<Station> getReceiveNoticeStationList(Long currentArrivalStationId);
 }

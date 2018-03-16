@@ -28,4 +28,10 @@ public interface ElevatorNoticeService extends BaseService<ElevatorNotice> {
     List<ElevatorNotice> findByElevatorId(Long elevatorId, int state);
 
     boolean hasLastRobotElevatorNotice(String code);
+
+    void sendArrivalStationNoticeCache();
+
+    void updateState(Long id, ElevatorNotice.State state);
+
+    List<ElevatorNotice> listElevatorNotice(Long stationId, Integer state, Integer type);
 }
