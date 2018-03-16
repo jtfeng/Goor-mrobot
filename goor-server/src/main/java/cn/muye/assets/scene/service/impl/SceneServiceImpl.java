@@ -115,6 +115,36 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         return sceneMapper.selectAll();
     }
 
+
+    @Override
+    public List<Scene> listByActive() throws Exception {
+        Example example = new Example(Scene.class);
+        example.createCriteria().andCondition("STORE_ID =", SearchConstants.FAKE_MERCHANT_STORE_ID)
+                .andCondition("ACTIVE =", Constant.SCENE_ACTIVATED);
+        List<Scene> scenes = sceneMapper.selectByExample(example);
+
+        for (Scene scene : scenes) {
+            List<Robot> robotListDB = this.sceneMapper.findRobotBySceneId(scene.getId());
+            List<Robot> robotList = Lists.newArrayList();
+            for (int i = 0; i < robotListDB.size(); i++) {
+                Robot robot = robotListDB.get(i);
+                List<RobotMapZipXREF> robotMapZipXREFList = robotMapZipXREFService.findByRobotId(robot.getId(), scene.getId());
+                boolean result = (robotMapZipXREFList == null || robotMapZipXREFList.size() <= 0) ? false : robotMapZipXREFList.get(0).isSuccess();
+                robot.setMapSyncResult(result);
+                robotList.add(robot);
+            }
+
+            scene.setRobots(robotList);//设置绑定的机器人信息
+            List<MapInfo> mapInfos = this.sceneMapper.findMapBySceneId(scene.getId(), scene.getStoreId());
+            if (mapInfos != null && mapInfos.size() != 0) {
+                scene.setMapSceneName(mapInfos.get(0).getSceneName());//设置绑定的场景名城
+            }
+        }
+
+        return scenes;
+    }
+
+
 //    "scene”:[{
 //    id:’',
 //    name:’',
@@ -505,7 +535,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             for (int i = 0; i < robotListDB.size(); i++) {
                 Robot robot = robotListDB.get(i);
                 List<RobotMapZipXREF> robotMapZipXREFList = robotMapZipXREFService.findByRobotId(robot.getId(), scene.getId());
-;                boolean result = (robotMapZipXREFList == null || robotMapZipXREFList.size() <= 0) ? false : robotMapZipXREFList.get(0).isSuccess();
+                boolean result = (robotMapZipXREFList == null || robotMapZipXREFList.size() <= 0) ? false : robotMapZipXREFList.get(0).isSuccess();
                 robot.setMapSyncResult(result);
                 robotList.add(robot);
             }

@@ -18,6 +18,11 @@ public interface SceneService extends BaseService<Scene> {
 
     List<Scene> list() throws Exception;
 
+    /**
+     * 查询所有开启状态的场景
+     */
+    List<Scene> listByActive() throws Exception;
+
     Object saveScene(Scene scene) throws Exception;
 
     Scene getSceneById(Long id) throws Exception;
