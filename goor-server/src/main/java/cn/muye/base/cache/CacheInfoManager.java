@@ -17,6 +17,7 @@ import cn.mrobot.utils.FileUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.muye.area.map.service.MapInfoService;
 import cn.muye.area.point.service.PointService;
+import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.assets.roadpath.service.RoadPathService;
 import cn.muye.base.bean.MessageInfo;
 import cn.muye.mission.bean.RobotPositionRecord;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.Session;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Component
@@ -164,8 +166,7 @@ public class CacheInfoManager implements ApplicationContextAware {
     /**
      * 到站信息发送缓存
      */
-    private static ConcurrentHashMapCache<Long, List<ElevatorNotice>> arrivalStationNoticeCache = new ConcurrentHashMapCache<>();
-    private static final String ARRIVAL_STATION_NOTICE_LOCK = "lock";
+    private static ConcurrentHashMapCache<Long, CopyOnWriteArrayList<ElevatorNotice>> arrivalStationNoticeCache = new ConcurrentHashMapCache<>();
 
     static {
 
@@ -740,31 +741,31 @@ public class CacheInfoManager implements ApplicationContextAware {
     }
 
     public static void setArrivalStationNoticeCache(Long stationId, ElevatorNotice elevatorNotice) {
-        synchronized (ARRIVAL_STATION_NOTICE_LOCK) {
-            List<ElevatorNotice> elevatorNoticeList = arrivalStationNoticeCache.get(stationId);
-            if (null == elevatorNoticeList) {
-                elevatorNoticeList = Lists.newArrayList();
-            }
-            if (!elevatorNoticeList.contains(elevatorNotice)) {
-                elevatorNoticeList.add(elevatorNotice);
-            }
-            arrivalStationNoticeCache.put(stationId, elevatorNoticeList);
+        CopyOnWriteArrayList<ElevatorNotice> elevatorNoticeList = arrivalStationNoticeCache.get(stationId);
+        if (null == elevatorNoticeList) {
+            elevatorNoticeList = new CopyOnWriteArrayList(Lists.newArrayList());
         }
+        if (!elevatorNoticeList.contains(elevatorNotice)) {
+            elevatorNoticeList.add(elevatorNotice);
+        }
+        arrivalStationNoticeCache.put(stationId, elevatorNoticeList);
     }
 
     public static void removeArrivalStationNoticeCacheByOrderDetailId(Long orderDetailId) {
-        synchronized (ARRIVAL_STATION_NOTICE_LOCK) {
-            Iterator iterator = arrivalStationNoticeCache.iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
-                Long key = entry.getKey();
-                ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
-                List<ElevatorNotice> elevatorNotices = (List<ElevatorNotice>) valueEntry.getValue();
-                for (ElevatorNotice elevatorNotice : elevatorNotices) {
-                    if (orderDetailId.equals(elevatorNotice.getOrderDetailId())) {
-                        elevatorNotices.remove(elevatorNotice);
-                        arrivalStationNoticeCache.put(key, elevatorNotices);
-                    }
+        Iterator iterator = arrivalStationNoticeCache.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
+            Long key = entry.getKey();
+            ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
+            CopyOnWriteArrayList<ElevatorNotice> elevatorNotices = (CopyOnWriteArrayList<ElevatorNotice>) valueEntry.getValue();
+            for (ElevatorNotice elevatorNotice : elevatorNotices) {
+                if (orderDetailId.equals(elevatorNotice.getOrderDetailId())) {
+                    //并且修改elevatorNotice的状态
+                    ElevatorNoticeService elevatorNoticeService = applicationContext.getBean(ElevatorNoticeService.class);
+                    elevatorNoticeService.updateState(elevatorNotice.getId(), ElevatorNotice.State.RECEIVED);
+                    //从列表中移除
+                    elevatorNotices.remove(elevatorNotice);
+                    arrivalStationNoticeCache.put(key, elevatorNotices);
                 }
             }
         }
@@ -777,7 +778,7 @@ public class CacheInfoManager implements ApplicationContextAware {
             Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
             Long key = entry.getKey();
             ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
-            List<ElevatorNotice> elevatorNotices = (List<ElevatorNotice>) valueEntry.getValue();
+            CopyOnWriteArrayList<ElevatorNotice> elevatorNotices = (CopyOnWriteArrayList<ElevatorNotice>) valueEntry.getValue();
             noticeMap.put(key, elevatorNotices);
         }
         return noticeMap;

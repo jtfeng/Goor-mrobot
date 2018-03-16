@@ -262,6 +262,7 @@ public class ScheduleTasks {
     public void sendElevatorNoticeCache() {
         try {
             elevatorNoticeService.sendElevatorNoticeCache();
+            elevatorNoticeService.sendArrivalStationNoticeCache();
         } catch (Exception e) {
             logger.error("Scheduled sendElevatorNoticeCache  error", e);
         }

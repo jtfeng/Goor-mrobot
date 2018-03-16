@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.area.station.mapper.StationStationXREFMapper">
+
+    <resultMap id="stationXREF" type="cn.mrobot.bean.area.station.StationStationXREF">
+        <result property="originStationId" column="ORIGIN_STATION_ID"/>
+        <result property="destinationStationId" column="DESTINATION_STATION_ID"/>
+        <result property="orderIndex" column="ORDER_INDEX"/>
+    </resultMap>
+
+    <resultMap id="station" type="cn.mrobot.bean.area.station.Station">
+        <result property="id" column="ID"/>
+        <result property="name" column="NAME"/>
+        <result property="stationTypeId" column="STATION_TYPE_ID"/>
+        <result property="description" column="DESCRIPTION"/>
+    </resultMap>
+
+    <select id="getReceiveNoticeStationList" resultMap="station" >
+        SELECT s.*
+        FROM A_STATION_STATION_XREF e
+        LEFT JOIN A_STATION s ON s.ID = e.ORIGIN_STATION_ID
+        WHERE e.DESTINATION_STATION_ID = #{currentArrivalStationId} AND s.STATION_TYPE_ID = #{type}
+    </select>
+</mapper>

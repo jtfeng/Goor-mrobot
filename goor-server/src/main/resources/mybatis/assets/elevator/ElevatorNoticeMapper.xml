@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.muye.assets.elevator.mapper.ElevatorNoticeMapper">
+
+    <!-- 电梯映射关系 -->
+    <resultMap id="elevatorNoticeMap" type="cn.mrobot.bean.assets.elevator.ElevatorNotice">
+        <result property="id" column="ID"/>
+        <result property="storeId" column="STORE_ID"/>
+        <result property="createdBy" column="CREATED_BY"/>
+        <result property="createTime" column="CREATE_TIME"/>
+
+        <result column="callFloor" property="CALL_FLOOR" />
+        <result column="targetFloor" property="TARGET_FLOOR" />
+        <result column="elevatorId" property="ELEVATOR_ID" />
+        <result column="uuid" property="UUID"/>
+        <result column="state" property="STATE" />
+        <result column="type" property="TYPE"/>
+        <result column="robotCode" property="ROBOT_CODE"/>
+        <result column="toStationId" property="TO_STATION_ID"/>
+        <result column="fromStationName" property="FROM_STATION_NAME"/>
+        <result column="goodsTypeName" property="GOODS_TYPE_NAME" />
+        <result column="data" property="DATA"/>
+        <result column="orderDetailId" property="ORDER_DETAIL_ID" />
+    </resultMap>
+
+    <!-- 更新电梯锁状态 -->
+    <update id="updateState">
+        UPDATE AS_ELEVATOR_NOTICE e SET e.STATE = #{state} WHERE e.ID = #{id}
+    </update>
+
+</mapper>
