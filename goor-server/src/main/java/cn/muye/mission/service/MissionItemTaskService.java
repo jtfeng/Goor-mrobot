@@ -18,4 +18,8 @@ public interface MissionItemTaskService extends BaseService<MissionItemTask> {
     List<MissionItemTask> findByListIdAndItemNameEqualToUnlock(Long id);
 
     MissionItemTask findExecutingItemTaskById(Long id);
+
+    List<MissionItemTask> listByOrderDetailId(Long orderDetailId);
+
+    List<MissionItemTask> findByListIdAndItemNameOrderByIdDesc(Long listId, String itemName);
 }

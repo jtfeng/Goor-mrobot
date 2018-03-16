@@ -159,24 +159,15 @@ public class MapInfoServiceImpl implements MapInfoService {
             CurrentInfo currentInfo = new CurrentInfo();
 
             //获取开机状态
-            List<Robot> robotList = CacheInfoManager.getRobotListCache(Constant.ROBOT_LIST);
-            if (robotList == null) {
-                robotList = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
-                CacheInfoManager.setRobotListCache(Constant.ROBOT_LIST, robotList);
-            }
-            boolean tempFlag = false;
-            String robotCode = null;
-            for (Robot robot : robotList) {
-                if(robot.getCode().equals(code)) {
-                    tempFlag = true;
-                    robotCode = code;
-                    break;
+            Robot robotCache = CacheInfoManager.getRobotInfoCacheByCode(code);
+            if (robotCache == null) {
+                Robot robotDb = robotService.getByCode(code, SearchConstants.FAKE_MERCHANT_STORE_ID);
+                if (robotDb == null) {
+                    return null;
                 }
+                CacheInfoManager.setRobotInfoCacheByCode(code, robotDb);
             }
-            if (!tempFlag) {
-                return null;
-            }
-            Boolean online = CacheInfoManager.getRobotOnlineCache(robotCode);
+            Boolean online = CacheInfoManager.getRobotOnlineCache(code);
             if (online == null) {
                 online = false;
             }
@@ -194,7 +185,7 @@ public class MapInfoServiceImpl implements MapInfoService {
             if (null == mapInfo) {
                 currentInfo.setPose("");  //没有地图不显示坐标
             }
-            currentInfo.setMapInfo(getCurrentMapInfo(code));
+            currentInfo.setMapInfo(mapInfo);
 
             //获取当前电量信息
             ChargeInfo chargeInfo = CacheInfoManager.getRobotChargeInfoCache(code);

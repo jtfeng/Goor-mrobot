@@ -270,10 +270,13 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             return null;
         }
 
+        String message = "";
         /**根据订单设置，有没有装货站来判断选哪个点作为下单的第一个目的地点**/
         MapPoint pathStationPoint = PathUtil.getFirstPathStationPointByOrder(order, null , pointService);
         if(pathStationPoint == null) {
-            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYXDXXCWMYZHZQMYYQDZWXDD"));
+            message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYXDXXCWMYZHZQMYYQDZWXDD");
+            LOGGER.info(message);
+            stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -284,7 +287,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         RoadPathMaps roadPathMaps = CacheInfoManager.getRoadPathMapsCache(SearchConstants.FAKE_MERCHANT_STORE_ID, sceneName, roadPathService);
 
         if(roadPathMaps == null) {
-            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYWZDKGSFSYDT"));
+            message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYWZDKGSFSYDT");
+            LOGGER.info(message);
+            stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -306,7 +311,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             //忙碌和低电量的机器人之间过滤
             Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
             if(busy != null && busy || robotDb.isLowPowerState()) {
-                stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC")));
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC"));
+                LOGGER.info(message);
+                stringBuffer.append(message);
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -320,7 +327,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
             //未找到路径则继续，只有一个点可能就是起点附近
             if(result == null || result.getPointIds() == null || result.getPointIds().size() <= 0) {
-                stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode()  + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYWZDJQRSZWZPPDKDDMDDDLJ"));
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode()  + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYWZDJQRSZWZPPDKDDMDDDLJ");
+                LOGGER.info(message);
+                stringBuffer.append(message);
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -331,7 +340,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
 
         if(robotRoadPathResultList == null || robotRoadPathResultList.size() == 0) {
-            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYWZDGZGLDKYJQR"));
+            message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQSBYYWZDGZGLDKYJQR");
+            LOGGER.info(message);
+            stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             return null;
         }
@@ -346,7 +357,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             AjaxResult ajaxResult = testSendRobotMessage(robotDb);
             Boolean busy = CacheInfoManager.getRobotBusyCache(robotDb.getCode());
             if(ajaxResult == null || !ajaxResult.isSuccess() || busy || robotDb.isLowPowerState() ) {
-                stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (ajaxResult != null && ajaxResult.isSuccess() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZX") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_LX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC")));
+                message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYY") + (busy ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ML") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KX")) + (ajaxResult != null && ajaxResult.isSuccess() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_ZX") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_LX")) + (robotDb.isLowPowerState() ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DDL") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_DLZC"));
+                LOGGER.info(message);
+                stringBuffer.append(message);
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                 continue;
             }
@@ -356,7 +369,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if(robotDb.getTypeId().equals(typeId)){
                     availableRobot = robotDb;
                 }else {
-                    stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYYJQRLXBPP"));
+                    message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYYJQRLXBPP");
+                    stringBuffer.append(message);
                     LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
                     continue;
                 }
@@ -365,7 +379,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
             //如果找到了可用机器人，就返回结果
             robotRoadPathResultReturn = robotRoadPathResult;
-            stringBuffer.append(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KY"));
+            message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_KY");
+            LOGGER.info(message);
+            stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
             break;
         }
@@ -436,13 +452,22 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         for (StationRobotXREF xref : xrefList) {
             Long robotId = xref.getRobotId();
-            Robot robot = CacheInfoManager.getRobotInfoCache(robotId);
+            Robot robot = CacheInfoManager.getRobotInfoCacheById(robotId);
+            String code = null;
             if (robot == null) {
                 robot = getById(robotId);
-                CacheInfoManager.setRobotInfoCache(robotId, robot);
+                //如果是空就continue，否则放缓存，再放置个code的缓存
+                if (robot == null) {
+                    continue;
+                }
+                code = robot.getCode();
+                CacheInfoManager.setRobotInfoCacheById(robotId, robot);
+                Robot robotCache = CacheInfoManager.getRobotInfoCacheByCode(code);
+                if (robotCache == null) {
+                    CacheInfoManager.setRobotInfoCacheByCode(code, robot);
+                }
             }
             //todo 暂时先不考虑低电量和紧急制动状态
-            String code = robot.getCode();
             Boolean busy = CacheInfoManager.getRobotBusyCache(code);
             if (busy == null) {
                 busy = Boolean.FALSE;
@@ -451,7 +476,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 continue;
             }
             //检查机器人上传工控场景名和云端绑定站的工控场景名是否一致，而且该场景名也绑定了此机器人
-            if (checkSceneNameEquality(robot, code, stationId)) {
+            if (!checkSceneNameEquality(robot, code, stationId)) {
                 continue;
             }
             if (robot.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {

@@ -2,8 +2,10 @@ package cn.muye.mission.service;
 
 import cn.mrobot.bean.mission.task.MissionItemTask;
 import cn.muye.base.service.imp.BaseServiceImpl;
+import cn.muye.mission.mapper.MissionItemTaskMapper;
 import cn.muye.service.missiontask.MissionFuncsServiceImpl;
 import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
@@ -18,6 +20,10 @@ import java.util.List;
 public class MissionItemTaskServiceImpl
         extends BaseServiceImpl<MissionItemTask>
         implements MissionItemTaskService {
+
+    @Autowired
+    private MissionItemTaskMapper missionItemTaskMapper;
+
     @Override
     public List<MissionItemTask> findByListIdAndMissionId(Long listId, Long missionId) {
         if (listId == null ||
@@ -90,5 +96,24 @@ public class MissionItemTaskServiceImpl
         example.setOrderByClause("ID ASC");
         List<MissionItemTask> missionItemTaskList = myMapper.selectByExample(example);
         return missionItemTaskList.size() > 0 ? missionItemTaskList.get(0) : null;
+    }
+
+    @Override
+    public List<MissionItemTask> listByOrderDetailId(Long orderDetailId) {
+        return missionItemTaskMapper.listByOrderDetailId(orderDetailId);
+    }
+
+    @Override
+    public List<MissionItemTask> findByListIdAndItemNameOrderByIdDesc(Long listId, String itemName) {
+        if (listId == null){
+            return null;
+        }
+        Example example = new Example(MissionItemTask.class);
+        example.createCriteria()
+                .andCondition("MISSION_LIST_ID=", listId)
+                .andCondition("NAME=",itemName);
+        example.setOrderByClause("ID DESC");
+        return myMapper.selectByExample(example);
+
     }
 }
