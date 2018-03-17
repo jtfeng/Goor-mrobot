@@ -267,6 +267,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
         //站未绑定机器人直接返回
         if(list == null || list.size() == 0) {
+            logger.info("该站 "+orderStationId+" 未绑定机器人");
             return null;
         }
 
@@ -307,7 +308,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 continue;
             }
             //校验机器人场景绑定关系
-            if (checkSceneNameEquality(robotDb, code, orderStationId)) {
+            if (!checkSceneNameEquality(robotDb, code, orderStationId)) {
                 continue;
             }
             //忙碌和低电量的机器人之间过滤
