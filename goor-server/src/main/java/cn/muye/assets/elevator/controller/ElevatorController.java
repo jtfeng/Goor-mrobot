@@ -615,7 +615,7 @@ public class ElevatorController {
      *
      * @return
      */
-    @GetMapping("/elevatorNotice/{orderDetailId}")
+    @GetMapping("/test/elevatorNotice/{orderDetailId}")
     public AjaxResult removeElevatorNotice(@PathVariable("orderDetailId") Long orderDetailId) {
         try {
             CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);
