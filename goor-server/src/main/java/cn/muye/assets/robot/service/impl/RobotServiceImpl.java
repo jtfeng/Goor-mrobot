@@ -309,6 +309,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
             //校验机器人场景绑定关系
             if (!checkSceneNameEquality(robotDb, code, orderStationId)) {
+                logger.info("机器人" + code + " 上传工控场景名和云端绑定站的工控场景名不一致");
                 continue;
             }
             //忙碌和低电量的机器人之间过滤

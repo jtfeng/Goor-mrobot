@@ -68,7 +68,11 @@ public class FixPathController extends BaseController{
             if(!dest.exists()){
                 dest.createNewFile();
             }
-            file.transferTo(dest);
+
+            FileUtils.copyInputStreamToFile(file.getInputStream(), dest);
+
+
+            //file.transferTo(dest);
             //数据库存储
             String pathString = IOUtils.toString(file.getInputStream());
             fixPathService.saveFixpathQuery(sendId, new Date(), pathString);
