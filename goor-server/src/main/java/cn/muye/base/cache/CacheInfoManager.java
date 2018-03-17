@@ -166,12 +166,17 @@ public class CacheInfoManager implements ApplicationContextAware {
     /**
      * 所有场景缓存
      */
-    private static ConcurrentHashMapCache<String, List<Scene>> sceneListCache = new ConcurrentHashMapCache<>(); //所有的场景信息放缓存
+    private static ConcurrentHashMapCache<String, List<Scene>> sceneListCache = new ConcurrentHashMapCache<>();
 
     /**
      * 到站信息发送缓存
      */
     private static ConcurrentHashMapCache<Long, CopyOnWriteArrayList<ElevatorNotice>> arrivalStationNoticeCache = new ConcurrentHashMapCache<>();
+
+    /**
+     * 所有场景ID为key，机器人List为value的缓存，场景绑定机器人列表的缓存
+     */
+    private static ConcurrentHashMapCache<Long, List<Robot>> sceneBindRobotListCache = new ConcurrentHashMapCache<>();
 
     static {
 
@@ -187,6 +192,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         sceneListCache.setMaxLifeTime(0);
         persistMissionState.setMaxLifeTime(0);
         arrivalStationNoticeCache.setMaxLifeTime(0);
+        sceneBindRobotListCache.setMaxLifeTime(0);
 
         //状态机缓存  存储端判断如果状态有改变则存入
         autoChargeCache.setMaxLifeTime(0);
@@ -214,7 +220,6 @@ public class CacheInfoManager implements ApplicationContextAware {
         roadPathMapsCache.setMaxLifeTime(3 * 3600 * 1000);
         roadPathDetailsCache.setMaxLifeTime(3 * 3600 * 1000);
         mapPointsCache.setMaxLifeTime(3 * 3600 * 1000);
-
     }
 
     private CacheInfoManager() {
@@ -800,5 +805,17 @@ public class CacheInfoManager implements ApplicationContextAware {
 
     public static void setRobotInfoCacheByCode(String code, Robot robot) {
         robotInfoCacheByCode.put(code, robot);
+    }
+
+    public static List<Robot> getSceneBindRobotListCache(Long id) {
+        return sceneBindRobotListCache.get(id);
+    }
+
+    public static void setSceneBindRobotListCache(Long id, List<Robot> robotList) {
+        sceneBindRobotListCache.put(id, robotList);
+    }
+
+    public static void removeSceneBindRobotListCache(Long id) {
+        sceneBindRobotListCache.remove(id);
     }
 }

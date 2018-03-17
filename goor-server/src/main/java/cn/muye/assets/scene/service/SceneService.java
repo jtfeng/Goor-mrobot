@@ -1,13 +1,11 @@
 package cn.muye.assets.scene.service;
 
 import cn.mrobot.bean.area.point.MapPoint;
-import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.service.BaseService;
 import com.alibaba.fastjson.JSONObject;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +19,7 @@ public interface SceneService extends BaseService<Scene> {
     /**
      * 查询所有开启状态的场景
      */
-    List<Scene> listByActive() throws Exception;
+    List<Scene> listAllByNoPage() throws Exception;
 
     Object saveScene(Scene scene) throws Exception;
 
@@ -85,4 +83,10 @@ public interface SceneService extends BaseService<Scene> {
      * @param robotCode
      */
     void replyUpdateCloudAssetsResult(String uuid, String robotCode, Boolean result);
+
+    /**
+     * 组装场景的机器人列表属性
+     * @param currentScene
+     */
+    void sceneAssembleRobotList(Scene currentScene);
 }

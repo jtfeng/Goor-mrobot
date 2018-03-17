@@ -101,6 +101,12 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         if (list == null || list.isEmpty()) {
             list = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
             CacheInfoManager.setRobotListCache(Constant.ROBOT_LIST, list);
+            if (list != null && list.size() > 0) {
+                list.forEach(robot -> {
+                    //新增机器人ID-机器人对象的缓存
+                    CacheInfoManager.setRobotInfoCacheById(robot.getId(), robot);
+                });
+            }
         }
         if (list != null && list.size() > 0) {
             for (Robot robot : list) {

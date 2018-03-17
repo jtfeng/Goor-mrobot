@@ -1,10 +1,8 @@
 package cn.muye.assets.scene.controller;
 
 import cn.mrobot.bean.AjaxResult;
-import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.constant.Constant;
-import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
@@ -20,7 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -72,11 +69,9 @@ public class SceneController {
             //创建完成后添加缓存
             List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
             if (sceneList == null || sceneList.isEmpty()) {
-                sceneList = sceneService.listScenes(new WhereRequest());
+                sceneList = sceneService.listAllByNoPage();
                 CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-            }
-            if (sceneList == null || sceneList.isEmpty()) {
-                return AjaxResult.failed("后台没有场景数据，请添加场景数据");
+                return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXCG"));
             }
             sceneList.add((Scene)taskResult);
             return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXCG"));
@@ -102,12 +97,10 @@ public class SceneController {
             }
             //更新成功后改绑定的机器人
             List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-            if (sceneList == null) {
-                sceneList = sceneService.listScenes(new WhereRequest());
+            if (sceneList == null && sceneList.isEmpty()) {
+                sceneList = sceneService.listAllByNoPage();
                 CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-            }
-            if (sceneList == null || sceneList.size() == 0) {
-                return AjaxResult.failed("后台没有场景数据，请添加场景数据");
+                return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XGCJXXCG"));
             }
             for (Scene sceneObj : sceneList) {
                 if (sceneObj.getId().equals(scene.getId())) {
@@ -236,23 +229,31 @@ public class SceneController {
      * @throws Exception
      */
     @PostMapping("/assets/scene/updateActiveState")
-    public Object updateActiveState(@RequestBody Scene scene) throws Exception {
+    public Object updateActiveState(@RequestBody Scene scene) {
         try {
             Scene currentScene = sceneService.findById(scene.getId());
             currentScene.setActive(currentScene.getActive() == 1 ? 0 : 1);
             sceneService.updateSelective(currentScene);
-            //修改场景的缓存，设置active为0
+            //组装绑定机器人
+            sceneService.sceneAssembleRobotList(currentScene);
             List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-            if (sceneList == null) {
-                sceneList = sceneService.listScenes(new WhereRequest());
+            if (sceneList == null || sceneList.isEmpty()) {
+                sceneList = sceneService.listAllByNoPage();
                 CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
+                return AjaxResult.success(currentScene.getActive() == 1 ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YQY") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YJY"));
             }
-            if (sceneList == null || sceneList.size() == 0) {
-                return AjaxResult.failed("后台没有场景数据，请添加场景数据");
-            }
-            for (Scene sceneObj : sceneList) {
-                if (sceneObj.getId().equals(scene.getId())) {
-                    sceneObj.setActive(Constant.SCENE_NOT_ACTIVATED);
+            //初始化缓存list不存在该场景的缓存
+            for (int i = 0; i < sceneList.size(); i++) {
+                Scene s = sceneList.get(i);
+                if (s.getId().equals(currentScene.getId())) {
+                    //如果该场景缓存里的状态为启用，同时从数据库里拿出来的状态又是禁用的，此时需要把缓存移除
+                    if (s.getActive().equals(Constant.SCENE_ACTIVATED) &&
+                            currentScene.getActive().equals(Constant.SCENE_NOT_ACTIVATED)) {
+                        s.setActive(Constant.SCENE_NOT_ACTIVATED);
+                    } else if (s.getActive().equals(Constant.SCENE_NOT_ACTIVATED) &&
+                            currentScene.getActive().equals(Constant.SCENE_ACTIVATED)) {
+                        s.setActive(Constant.SCENE_ACTIVATED);
+                    }
                 }
             }
             return AjaxResult.success(currentScene.getActive() == 1 ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YQY") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YJY"));
