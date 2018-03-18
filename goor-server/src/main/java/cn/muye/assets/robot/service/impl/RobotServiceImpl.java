@@ -1115,7 +1115,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
         if (sceneList == null) {
             //数据库里查询所有的场景
-            sceneList = sceneService.listByActive();
+            sceneList = sceneService.listAllByNoPage();
             CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
         }
         //遍历sceneList
