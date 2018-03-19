@@ -101,6 +101,12 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         if (list == null || list.isEmpty()) {
             list = robotService.listRobot(SearchConstants.FAKE_MERCHANT_STORE_ID);
             CacheInfoManager.setRobotListCache(Constant.ROBOT_LIST, list);
+            if (list != null && list.size() > 0) {
+                list.forEach(robot -> {
+                    //新增机器人ID-机器人对象的缓存
+                    CacheInfoManager.setRobotInfoCacheById(robot.getId(), robot);
+                });
+            }
         }
         if (list != null && list.size() > 0) {
             for (Robot robot : list) {
@@ -126,14 +132,15 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         //查询所有站信息存放到缓存，在相应的站删除的逻辑处修改缓存
         if (stationList != null && stationList.size() > 0) {
             for (Station station : stationList) {
-                try {
+                try{
                     Map map = robotService.getCountAvailableRobotByStationId(station.getId());
                     WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName())
                             .messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
                     webSocketSendMessage.sendWebSocketMessage(ws);
-                } catch (Exception e) {
-                    logger.error("{}", e);
+                } catch (Exception e){
+                    logger.error("查询可用机器人异常",e);
                 }
+
             }
         }
     }

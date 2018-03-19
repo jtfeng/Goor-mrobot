@@ -101,9 +101,9 @@ public class Constant {
 
     public static final String AUTHORIZE_PASSWORD = "web_secret";
 
-    public static final int ERROR_CODE_NOT_AUTHORIZED = 40001; //未授权
+    public static final int ERROR_CODE_NOT_AUTHORIZED = 905; //未授权
 
-    public static final int ERROR_CODE_NOT_LOGGED = 40002; //未登录
+    public static final int ERROR_CODE_NOT_LOGGED = 904; //未登录
 
     public static final long MANUAL_ORDER_ID = -10086; //手动调度的订单号
     public static final long POWER_ON_ORDER_ID = -10087; //开机管理的订单号

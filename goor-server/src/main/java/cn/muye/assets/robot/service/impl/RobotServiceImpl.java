@@ -267,6 +267,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
         //站未绑定机器人直接返回
         if(list == null || list.size() == 0) {
+            logger.info("该站 "+orderStationId+" 未绑定机器人");
             return null;
         }
 
@@ -278,6 +279,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             LOGGER.info(message);
             stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            stringBuffer.setLength(0);
             return null;
         }
         //查找与站点同属性的路径点，作为查询路径的终点
@@ -291,6 +293,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             LOGGER.info(message);
             stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            stringBuffer.setLength(0);
             return null;
         }
 
@@ -305,7 +308,8 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 continue;
             }
             //校验机器人场景绑定关系
-            if (checkSceneNameEquality(robotDb, code, orderStationId)) {
+            if (!checkSceneNameEquality(robotDb, code, orderStationId)) {
+                logger.info("机器人" + code + " 上传工控场景名和云端绑定站的工控场景名不一致");
                 continue;
             }
             //忙碌和低电量的机器人之间过滤
@@ -315,6 +319,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 LOGGER.info(message);
                 stringBuffer.append(message);
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                stringBuffer.setLength(0);
                 continue;
             }
             //如果不在线continue
@@ -331,6 +336,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 LOGGER.info(message);
                 stringBuffer.append(message);
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                stringBuffer.setLength(0);
                 continue;
             }
             RobotRoadPathResult robotRoadPathResult = new RobotRoadPathResult();
@@ -344,6 +350,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             LOGGER.info(message);
             stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            stringBuffer.setLength(0);
             return null;
         }
 
@@ -361,6 +368,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 LOGGER.info(message);
                 stringBuffer.append(message);
                 LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                stringBuffer.setLength(0);
                 continue;
             }
 
@@ -372,6 +380,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                     message = localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_XDHQKYJQ") + robotDb.getCode() + localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_service_impl_RobotServiceImpl_java_BKYYYJQRLXBPP");
                     stringBuffer.append(message);
                     LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+                    stringBuffer.setLength(0);
                     continue;
                 }
             }else{
@@ -383,6 +392,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             LOGGER.info(message);
             stringBuffer.append(message);
             LogInfoUtils.info("server", ModuleEnums.SCENE, LogType.INFO_USER_OPERATE, stringBuffer.toString());
+            stringBuffer.setLength(0);
             break;
         }
         if (availableRobot != null) {
@@ -413,15 +423,18 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         //走缓存去查询站绑定的工控场景
         String stationSceneName = getStationSceneName(orderStationId);
         if (StringUtil.isEmpty(sceneName) || StringUtil.isEmpty(stationSceneName)) {
+            logger.error("上传工控场景名" + sceneName + ",和云端绑定站的工控场景名" + stationSceneName + " 为空");
             return false;
         }
         if (!sceneName.equals(stationSceneName)) {
+            logger.error("上传工控场景名" + sceneName + " 和云端绑定站的工控场景名"+stationSceneName+"不一致");
             return false;
         }
         //设置机器人有无绑定场景的标识位，默认为false
         boolean robotSceneBind = checkRobotBoundedByScene(robot, sceneName);
         //如果无绑定则略过
         if (!robotSceneBind) {
+            logger.error("机器人 "+robot+" 与场景 " + sceneName + " 无绑定关系");
             return false;
         }
         return true;
@@ -434,7 +447,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
      * @return
      */
     @Override
-    public Map getCountAvailableRobotByStationId(Long stationId) throws Exception {
+    public Map getCountAvailableRobotByStationId(Long stationId) {
         List<StationRobotXREF> xrefList = CacheInfoManager.getStationRobotIdXrefListCache(stationId);
         if (xrefList == null || xrefList.isEmpty()) {
             xrefList = stationRobotXREFService.getByStationId(stationId);
@@ -453,7 +466,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         for (StationRobotXREF xref : xrefList) {
             Long robotId = xref.getRobotId();
             Robot robot = CacheInfoManager.getRobotInfoCacheById(robotId);
-            String code = null;
+            String code;
             if (robot == null) {
                 robot = getById(robotId);
                 //如果是空就continue，否则放缓存，再放置个code的缓存
@@ -466,19 +479,27 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (robotCache == null) {
                     CacheInfoManager.setRobotInfoCacheByCode(code, robot);
                 }
+            } else{
+                code = robot.getCode();
             }
             //todo 暂时先不考虑低电量和紧急制动状态
             Boolean busy = CacheInfoManager.getRobotBusyCache(code);
             if (busy == null) {
                 busy = Boolean.FALSE;
             }
-            if (robot == null || busy || !CacheInfoManager.getRobotOnlineCache(code)) {
+            if (busy || !CacheInfoManager.getRobotOnlineCache(code)) {
                 continue;
             }
             //检查机器人上传工控场景名和云端绑定站的工控场景名是否一致，而且该场景名也绑定了此机器人
-            if (!checkSceneNameEquality(robot, code, stationId)) {
-                continue;
+            try{
+                if (!checkSceneNameEquality(robot, code, stationId)) {
+                    logger.info("机器人"+ code+" 上传工控场景名和云端绑定站的工控场景名不一致");
+                    continue;
+                }
+            } catch (Exception e){
+                logger.error("检查机器人上传工控场景名和云端绑定站的工控场景名是否一致异常，站："+ stationId +",机器人编号："+code, e.toString());
             }
+
             if (robot.getTypeId().equals(RobotTypeEnum.TRAILER.getCaption())) {
                 trailerCount++;
             } else if (robot.getTypeId().equals(RobotTypeEnum.CABINET.getCaption())) {
@@ -521,7 +542,9 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         String sceneName = CacheInfoManager.getSceneMapRelationCache(sceneId);
         if (StringUtils.isEmpty(sceneName)) {
             sceneName = sceneService.getRelatedMapNameBySceneId(sceneId);
-            CacheInfoManager.setSceneMapRelationCache(sceneId, sceneName);
+            if(!StringUtil.isEmpty(sceneName)){
+                CacheInfoManager.setSceneMapRelationCache(sceneId, sceneName);
+            }
         }
         return sceneName;
     }
@@ -1092,17 +1115,22 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
         if (sceneList == null) {
             //数据库里查询所有的场景
-            sceneList = sceneService.listScenes(new WhereRequest());
+            sceneList = sceneService.listAllByNoPage();
             CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
         }
         //遍历sceneList
         if (sceneList != null && sceneList.size() > 0) {
             for (Scene scene : sceneList) {
-                List<Robot> sceneRobotList = scene.getRobots();
-                if (scene.getActive() == Constant.SCENE_ACTIVATED && scene.getMapSceneName().equals(sceneName)
-                        && sceneRobotList != null && sceneRobotList.contains(robot)) {
-                    robotSceneBind = true;
-                    break;
+                if(scene.getMapSceneName()!=null && scene.getMapSceneName().equals(sceneName)){
+                    List<Robot> sceneRobotList = scene.getRobots();
+                    if (sceneRobotList != null) {
+                        for(Robot r : sceneRobotList){
+                            if(robot.getId().equals(r.getId())){
+                                robotSceneBind = true;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         }
