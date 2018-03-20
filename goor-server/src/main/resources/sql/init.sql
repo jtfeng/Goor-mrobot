@@ -117,7 +117,7 @@ CREATE TABLE `A_STATION` (
 -- ----------------------------
 -- Records of A_STATION
 -- ----------------------------
-INSERT INTO `A_STATION` VALUES ('1', '默认站', '管理员用', null, null, null, null, '0', '1', 'default',0);
+INSERT INTO `A_STATION` VALUES ('1', '默认站', '管理员用', null, null, null, null, '100', '2018-03-20 14:52:53', 'default',0);
 
 
 
