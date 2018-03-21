@@ -277,10 +277,6 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         for (Map.Entry entry : elevatorNoticeMap.entrySet()) {
             Long toStationId = (Long) entry.getKey();
             List<ElevatorNotice> elevatorNoticeList = (List<ElevatorNotice>) entry.getValue();
-            if (null == elevatorNoticeList || elevatorNoticeList.isEmpty()) {
-                CacheInfoManager.removeArrivalStationNoticeCacheByStationId(toStationId);
-                continue;
-            }
             sendWebSocketSendMessage(toStationId, elevatorNoticeList);
         }
     }
@@ -331,9 +327,6 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
                 CacheInfoManager.setArrivalStationNoticeCache(toStationId, elevatorNotice);
             }
             List<ElevatorNotice> elevatorNoticeList = CacheInfoManager.getArrivalStationNoticeCache(toStationId);
-            if (null == elevatorNoticeList || elevatorNoticeList.isEmpty()) {
-                continue;
-            }
             sendWebSocketSendMessage(toStationId, elevatorNoticeList);
         }
     }

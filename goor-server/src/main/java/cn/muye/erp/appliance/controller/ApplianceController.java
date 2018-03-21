@@ -257,7 +257,9 @@ public class ApplianceController {
         if (!dest.exists()) {
             dest.createNewFile();
         }
-        file.transferTo(dest);
+        org.apache.commons.io.FileUtils.copyInputStreamToFile(file.getInputStream(), dest);
+        //修改文件上传undertow不兼容问题
+//        file.transferTo(dest);
         return dest;
     }
 
@@ -306,5 +308,16 @@ public class ApplianceController {
         }else {
             return false;
         }
+    }
+
+    /**
+     *  根据手术室编号，获取推荐的者器械类型，根据器械的使用次数进行排序
+     *
+     * @return
+     */
+    @RequestMapping(value = "erp/appliance/recommend", method = RequestMethod.GET)
+    public AjaxResult recommend(@RequestParam("stationId") Long stationId) {
+        List<Appliance> applianceList = applianceService.recommend(stationId);
+        return AjaxResult.success(applianceList,"操作成功");
     }
 }
