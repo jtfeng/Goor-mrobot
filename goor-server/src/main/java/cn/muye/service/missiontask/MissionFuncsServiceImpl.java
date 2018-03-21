@@ -117,6 +117,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
     @Value("${mission.item.concurrentable}")
     private Boolean missionItemConcurrentable;
 
+    @Value("${mission.item.floormanager}")
+    private Boolean missionItemFloorManager;
+
     @Autowired
     private MissionWarningService missionWarningService;
 
@@ -4287,7 +4290,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
         //加入到站提醒
         String orderDetailId = mPointAtts.orderDetailMP;
-        if(!StringUtil.isNullOrEmpty(orderDetailId)){
+        logger.info("是否需要楼层管家：{}",missionItemFloorManager);
+        if(missionItemFloorManager && !StringUtil.isNullOrEmpty(orderDetailId)){
+            logger.info("开始生成楼层管家任务");
             //订单细节id
             JsonElevatorNotice jsonElevatorNotice = new JsonElevatorNotice();
             jsonElevatorNotice.setTargetFloor(mPointAtts.logicFloor);
