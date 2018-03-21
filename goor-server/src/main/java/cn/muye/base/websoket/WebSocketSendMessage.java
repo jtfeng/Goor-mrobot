@@ -49,6 +49,7 @@ public class WebSocketSendMessage {
      * @throws Exception
      */
     protected void sendWebSocketMessage(WSMessage wsMessage, Session session) {
+        log.info("send WebSocket  Message = " + JSON.toJSONString(wsMessage));
         if (null != session) {
             sendMessage(session, JSON.toJSONString(wsMessage));
         } else {

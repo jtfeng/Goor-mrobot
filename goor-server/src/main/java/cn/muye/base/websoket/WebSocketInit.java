@@ -89,7 +89,8 @@ public class WebSocketInit implements ApplicationContextAware {
             log.error("ws onError error, get userName is null");
             return;
         }
-        CacheInfoManager.removeWebSocketSessionCache(session);
+        //注释，当websocket发生错误时，不移除当前客户端的关联关系
+//        CacheInfoManager.removeWebSocketSessionCache(session);
         log.info("onError close a connect, current connect count =" + CacheInfoManager.getWebSocketSessionCacheSize());
     }
 
