@@ -316,6 +316,14 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
             stationRobotXREF.setRobotId(robotService.getByCode(robotCode, SearchConstants.FAKE_MERCHANT_STORE_ID).getId());
             stationRobotXREF.setStationId(stationId);
             stationRobotXREFMapper.insert(stationRobotXREF);
+            //新增站机器人绑定关系（缓存）
+            List<StationRobotXREF> stationRobotXREFList = CacheInfoManager.getStationRobotIdXrefListCache(stationId);
+            if (stationRobotXREFList != null) {
+                stationRobotXREFList.add(stationRobotXREF);
+            } else {
+                stationRobotXREFList = Lists.newArrayList();
+                stationRobotXREFList.add(stationRobotXREF);
+            }
         }
         // 重新更新机器人与充电桩之间的绑定关系
         robotChargerMapPointXREFService.deleteByRobotId(robotId);
@@ -618,6 +626,9 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         boolean flag = bindSceneAndRobotRelations(scene, distinctIDS);
         //更新对应的场景信息
         updateSelective(scene);
+        //因为bindSceneAndRobotRelations方法已经放了缓存，所有从缓存中获取机器人list
+        List<Robot> robotList = CacheInfoManager.getSceneBindRobotListCache(sceneId);
+        scene.setRobots(robotList);
         return scene;
     }
 
