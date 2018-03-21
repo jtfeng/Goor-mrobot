@@ -1559,7 +1559,12 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         JsonMissionItemDataPathNavigation data =
                 new JsonMissionItemDataPathNavigation();
         //工控路径ID
-        Long x86RoadPathId = Long.parseLong(mPointAtts.pathId);
+        Long x86RoadPathId = null;
+        try {
+            x86RoadPathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
+        } catch (NumberFormatException e) {
+            logger.error("解锁路径String转换Long出错");
+        }
         data.setId(x86RoadPathId);
         String sceneName = mp.getSceneName();
         String mapName = mp.getMapName();
@@ -3231,7 +3236,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //标记该点的属性
                         MPointAtts atts = new MPointAtts();
                         atts.type = MPointType_STATIC_PATH;
-                        atts.pathId = rp.getPathId();
+                        atts.pathId = rp.getPathId();//工控路径ID
+                        atts.pathCloudId = rp.getId();//路径云端主键ID
                         atts.roadpathId = rp.getPathLock();//将路径锁对象id放入。
                         mpAttrs.put(temp, atts);
                         logger.info("###### addStaticPathPoint is ok ");
@@ -3353,8 +3359,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 
             //云端在所有任务后，加一个释放该机器人所有路径锁和门锁的解锁任务
             MPointAtts mPointAtts = new MPointAtts();
-            mPointAtts.roadpathId = Constant.RELEASE_ROBOT_LOCK_ID;
-            mPointAtts.pathId = Constant.RELEASE_ROBOT_LOCK_ID + "";
+            mPointAtts.roadpathId = Constant.RELEASE_ROBOT_LOCK_ID;//路径锁ID
+            mPointAtts.pathId = Constant.RELEASE_ROBOT_LOCK_ID + "";//工控路径ID
+            mPointAtts.pathCloudId = Constant.RELEASE_ROBOT_LOCK_ID;//路径云端主键ID
             JsonMissionItemDataRoadPathUnlock json =
                     getJsonMissionItemDataRoadPathUnlock(mPointAtts);
             missionListTask.getMissionTasks().add(getRoadPathUnlockTask(order, null, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_service_missiontask_MissionFuncsServiceImpl_java_ZZSFJQRSRW"), json));
@@ -3516,7 +3523,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                         //标记该点的属性
                         MPointAtts atts = new MPointAtts();
                         atts.type = MPointType_STATIC_PATH;
-                        atts.pathId = rp.getPathId();
+                        atts.pathId = rp.getPathId();//工控路径ID
+                        atts.pathCloudId = rp.getId();//路径云端主键ID
                         atts.roadpathId = rp.getPathLock();//将路径锁对象id放入。
                         initPathMissionTaskStaticPath(
                                 missionListTask,
@@ -3676,8 +3684,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         json.setInterval_time(5);
         json.setRoadpath_id(mPointAtts.roadpathId);
         try {
-            Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
-            json.setX86_path_id(x86PathId);
+            /*Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
+            json.setX86_path_id(x86PathId);*/
+            //20180321改成路径云端主键ID
+            json.setX86_path_id(mPointAtts.pathCloudId);
         } catch (NumberFormatException e) {
             logger.error("解锁路径String转换Long出错");
         }
@@ -3707,8 +3717,10 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         json.setInterval_time(5);
         json.setRoadpath_id(mPointAtts.roadpathId);
         try {
-            Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
-            json.setX86_path_id(x86PathId);
+            /*Long x86PathId = StringUtil.isNullOrEmpty(mPointAtts.pathId)? null : Long.parseLong(mPointAtts.pathId);
+            json.setX86_path_id(x86PathId);*/
+            //20180321改成路径云端主键ID
+            json.setX86_path_id(mPointAtts.pathCloudId);
         } catch (NumberFormatException e) {
             logger.error("解锁路径String转换Long出错");
         }
@@ -3835,7 +3847,7 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
                                 if(roadPath != null) {
                                     path.setTolerance_type(roadPath.getX86PathType());
                                 }
-                                path.setScene_name(door.getoPoint().getSceneName());
+                                path.setScene_name(sceneName);
                                 obj.setPath(path);
 
                                 //通过pathid，查询到对应的逻辑路径段id
@@ -3859,8 +3871,9 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
 //                                    logger.info("Path Door find RoadPath Error: " + e.getMessage());
 //                                }
                                 //直接通过门对象关联的逻辑路径对象，判断是否加入逻辑路径锁
-                                mPointAtts.roadpathId = door.getPathLock();
-                                mPointAtts.pathId = door.getPathId();
+                                mPointAtts.roadpathId = door.getPathLock();//路径锁ID
+                                mPointAtts.pathId = door.getPathId();//工控路径ID
+                                mPointAtts.pathCloudId = roadPath.getId();//路径云端主键ID
                                 //添加路径锁或解锁
                                 addRoadPathLockOrUnlock(
                                         missionListTask,
@@ -4826,7 +4839,8 @@ public class MissionFuncsServiceImpl implements MissionFuncsService {
         public Integer logicFloor;
         public Long currentMapId;
         public Long nextMapId;
-        public String pathId;
+        public String pathId;//工控路径ID
+        public Long pathCloudId; //路径云端主键ID
         public Long roadpathId; //逻辑锁ID
         public MapPoint chargePoint;
         public MapPoint chargePrePoint;

@@ -12,7 +12,7 @@ public class JsonMissionItemDataRoadPathLock implements Serializable {
     private Long roadpath_id;
     //间隔时间
     private Integer interval_time;
-    //工控路径ID
+    //工控路径ID---->20180321在加解锁任务中改成云端主键ID，因为工控路径ID不再全局唯一。
     private Long x86_path_id;
 
     public Integer getInterval_time() {
