@@ -94,7 +94,9 @@ public class ResourceController extends BaseController {
                 resource.setOriginName(file.getOriginalFilename());
                 resource.setFileType(file.getContentType());
                 resource.setMd5(MD5Utils.encrypt(file.getBytes()));
-                file.transferTo(dest);
+                org.apache.commons.io.FileUtils.copyInputStreamToFile(file.getInputStream(), dest);
+                //修改文件上传undertow不兼容问题
+//                file.transferTo(dest);
                 bool = true;
             }
             if (bool) {

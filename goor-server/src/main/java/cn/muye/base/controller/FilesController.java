@@ -93,7 +93,9 @@ public class FilesController {
                 if (!dest.exists()) {
                     dest.createNewFile();
                 }
-                file.transferTo(dest);
+                org.apache.commons.io.FileUtils.copyInputStreamToFile(file.getInputStream(), dest);
+                //修改文件上传undertow不兼容问题
+//                file.transferTo(dest);
             }
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
