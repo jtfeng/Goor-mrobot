@@ -237,15 +237,6 @@ public class UserController implements ApplicationContextAware {
         return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_SCCG"));
     }
 
-
-//    @RequestMapping(value = {"account/user/role"}, method = RequestMethod.POST)
-//    @ApiOperation(value = "用户角色绑定接口", httpMethod = "POST", notes = "用户角色绑定接口")
-//    @ResponseBody
-//    public AjaxResult bindRole(@RequestParam String userId, @RequestParam String roleId) {
-//        User user = userService.bindRole(userId, roleId);
-//        return AjaxResult.success(user, "绑定成功");
-//    }
-
     /**
      * 正常登录
      *
@@ -304,6 +295,10 @@ public class UserController implements ApplicationContextAware {
         //如果拿到的user对象为空，则说明认证校验没有通过
         if (userDTO == null) {
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHMHMMCW"));
+        }
+        //如果用户是禁用状态则提示状态异常
+        if (userDTO.getActivated() == null || userDTO.getActivated().equals(false)) {
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_ZHZTYCQLXGLY"));
         }
         //如果用户是站管理员，绑定的站list为空或者是未激活的站，则登录失败
         if (userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))
@@ -377,6 +372,10 @@ public class UserController implements ApplicationContextAware {
         //如果拿到的user对象为空，则说明认证校验没有通过
         if (userDTO == null) {
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_YHMHMMCW"));
+        }
+        //如果用户是禁用状态则提示状态异常
+        if (userDTO.getActivated() == null || userDTO.getActivated().equals(false)) {
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_account_user_controller_UserController_java_ZHZTYCQLXGLY"));
         }
         //如果不是站管理员就不让其登录
         if (!userDTO.getRoleId().equals(Long.valueOf(RoleTypeEnum.STATION_ADMIN.getCaption()))) {
@@ -570,6 +569,14 @@ public class UserController implements ApplicationContextAware {
         userDTO.setUserName(user.getUserName());
         userDTO.setRoleId(user.getRoleId());
         userDTO.setRoleName(user.getRoleName());
+        /*List<Role> roleList = user.getRoleList();
+        List<String> roleNameList = Lists.newArrayList();
+        if (roleList != null && roleList.size() > 0) {
+            for (Role role : roleList) {
+                roleNameList.add(role.getCnName());
+            }
+        }
+        userDTO.setRoleNameList(roleNameList);*/
         userDTO.setActivated(user.getActivated());
         userDTO.setDirectLoginKey(user.getDirectLoginKey());
         List<StationDTO4User> stationDTO4UserList = new ArrayList<>();
