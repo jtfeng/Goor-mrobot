@@ -4,10 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.erp.appliance.Appliance;
 import cn.mrobot.bean.erp.appliance.ApplianceDepartmentType;
 import cn.mrobot.bean.erp.appliance.AppliancePackageType;
-import cn.mrobot.utils.ExcelUtil;
-import cn.mrobot.utils.FileUtils;
-import cn.mrobot.utils.StringUtil;
-import cn.mrobot.utils.WhereRequest;
+import cn.mrobot.utils.*;
 import cn.muye.base.bean.SearchConstants;
 import cn.muye.erp.appliance.service.ApplianceDepartmentTypeService;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
@@ -252,6 +249,11 @@ public class ApplianceController {
         }
         LOGGER.info("createResource dest.path ={} ", dest.getPath());
         String fileName = file.getOriginalFilename();
+        //文件名称添加时间戳区分
+        String dateStr = DateTimeUtils.getNormalNameDateTime();
+        String name  = fileName.substring(0,fileName.indexOf("."));
+        String suffix  = fileName.substring(fileName.indexOf("."));
+        fileName = name + "_"+ dateStr + suffix;
         dest = FileUtils.getFile(dest.getPath() + File.separator + fileName);
         LOGGER.info("createResource dest.path with fileName ={} ", dest.getPath());
         if (!dest.exists()) {
