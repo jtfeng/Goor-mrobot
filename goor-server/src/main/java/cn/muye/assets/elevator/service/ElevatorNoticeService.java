@@ -5,6 +5,7 @@ import cn.mrobot.bean.mission.task.JsonElevatorNotice;
 import cn.muye.base.service.BaseService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -34,4 +35,17 @@ public interface ElevatorNoticeService extends BaseService<ElevatorNotice> {
     void updateState(Long id, ElevatorNotice.State state);
 
     List<ElevatorNotice> listElevatorNotice(Long stationId, Integer state, Integer type);
+
+    /**
+     * 以下四个方法对楼层管家消息缓存进行封装，避免出现多线程下的
+     * ConcurrentModificationException
+     * @param orderDetailId
+     */
+    void removeArrivalStationNoticeCacheByOrderDetailId(Long orderDetailId);
+
+    List<ElevatorNotice> getArrivalStationNoticeCache(Long stationId);
+
+    void setArrivalStationNoticeCache(Long stationId, ElevatorNotice elevatorNotice);
+
+    Map<Long, List<ElevatorNotice>> getAllArrivalStationNoticeCache();
 }

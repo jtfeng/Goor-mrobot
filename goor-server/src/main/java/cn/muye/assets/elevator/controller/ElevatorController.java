@@ -615,10 +615,10 @@ public class ElevatorController {
      *
      * @return
      */
-    @GetMapping("/test/elevatorNotice/{orderDetailId}")
+    @GetMapping("/services/elevatorNotice/{orderDetailId}")
     public AjaxResult removeElevatorNotice(@PathVariable("orderDetailId") Long orderDetailId) {
         try {
-            CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);
+            elevatorNoticeService.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);
             return AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZCG"));
         } catch (Exception e) {
             return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZSB"));

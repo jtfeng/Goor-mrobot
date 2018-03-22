@@ -762,6 +762,12 @@ public class CacheInfoManager implements ApplicationContextAware {
         arrivalStationNoticeCache.put(stationId, elevatorNoticeList);
     }
 
+    /**
+     * 建议使用 elevatorNoticeService.removeArrivalStationNoticeCacheByOrderDetailId(id);
+     * 避免多线程出现 ConcurrentModificationException
+     *
+     * @param orderDetailId
+     */
     public static void removeArrivalStationNoticeCacheByOrderDetailId(Long orderDetailId) {
         Iterator iterator = arrivalStationNoticeCache.iterator();
         while (iterator.hasNext()) {
@@ -793,10 +799,6 @@ public class CacheInfoManager implements ApplicationContextAware {
             noticeMap.put(key, elevatorNotices);
         }
         return noticeMap;
-    }
-
-    public static void removeArrivalStationNoticeCacheByStationId(Long toStationId) {
-        arrivalStationNoticeCache.remove(toStationId);
     }
 
     public static Robot getRobotInfoCacheByCode(String code) {

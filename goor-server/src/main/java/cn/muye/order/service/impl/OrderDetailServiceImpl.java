@@ -7,6 +7,7 @@ import cn.mrobot.bean.order.OrderConstant;
 import cn.mrobot.bean.order.OrderDetail;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.area.station.service.StationService;
+import cn.muye.assets.elevator.service.ElevatorNoticeService;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.service.imp.BaseServiceImpl;
@@ -45,6 +46,8 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
     private MessageBellService messageBellService;
     @Autowired
     private LocaleMessageSourceService localeMessageSourceService;
+    @Autowired
+    private ElevatorNoticeService elevatorNoticeService;
 
     @Override
     public List<OrderDetail> listOrderDetailByOrderId(Long orderId) {
@@ -84,7 +87,7 @@ public class OrderDetailServiceImpl extends BaseServiceImpl<OrderDetail> impleme
         orderDetail.setFinishDate(new Date());
         updateSelective(orderDetail);
         //清除该orderDetail的到站缓存消息提示
-        CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(id);
+        elevatorNoticeService.removeArrivalStationNoticeCacheByOrderDetailId(id);
         //更新后检测order 状态
         OrderDetail getOrderDetail = super.findById(id);
         int undoneCount = orderDetailMapper.countUndoneDetail(getOrderDetail.getOrderId());

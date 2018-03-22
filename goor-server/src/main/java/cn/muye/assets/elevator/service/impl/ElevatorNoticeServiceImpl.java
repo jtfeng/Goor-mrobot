@@ -66,6 +66,7 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
     private StationStationXREFService stationStationXREFService;
 
     private ReentrantLock lock = new ReentrantLock();
+    private ReentrantLock removeLock = new ReentrantLock();
 
     @Override
     public void sendElevatorNoticeToX86(ElevatorNotice elevatorNotice, int code, String deviceId, String message) {
@@ -273,7 +274,7 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
 
     @Override
     public void sendArrivalStationNoticeCache() {
-        Map<Long, List<ElevatorNotice>> elevatorNoticeMap = CacheInfoManager.getAllArrivalStationNoticeCache();
+        Map<Long, List<ElevatorNotice>> elevatorNoticeMap = getAllArrivalStationNoticeCache();
         for (Map.Entry entry : elevatorNoticeMap.entrySet()) {
             Long toStationId = (Long) entry.getKey();
             List<ElevatorNotice> elevatorNoticeList = (List<ElevatorNotice>) entry.getValue();
@@ -303,6 +304,46 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         return elevatorNoticeMapper.selectByExample(example);
     }
 
+    @Override
+    public void removeArrivalStationNoticeCacheByOrderDetailId(Long orderDetailId) {
+        try{
+            removeLock.lock();
+            CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);
+        }finally {
+            removeLock.unlock();
+        }
+    }
+
+    @Override
+    public List<ElevatorNotice> getArrivalStationNoticeCache(Long stationId) {
+        try{
+            removeLock.lock();
+            return CacheInfoManager.getArrivalStationNoticeCache(stationId);
+        }finally {
+            removeLock.unlock();
+        }
+    }
+
+    @Override
+    public void setArrivalStationNoticeCache(Long stationId, ElevatorNotice elevatorNotice) {
+        try{
+            removeLock.lock();
+            CacheInfoManager.setArrivalStationNoticeCache(stationId, elevatorNotice);
+        }finally {
+            removeLock.unlock();
+        }
+    }
+
+    @Override
+    public Map<Long, List<ElevatorNotice>> getAllArrivalStationNoticeCache() {
+        try{
+            removeLock.lock();
+            return CacheInfoManager.getAllArrivalStationNoticeCache();
+        }finally {
+            removeLock.unlock();
+        }
+    }
+
     /**
      * 发送到站消息
      *
@@ -312,6 +353,9 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         //根据orderDetail 获取到站的ID，根据ID获取接收消息站的ID，和获取物品名称，数量和单位
         Long orderDetailId = elevatorNotice.getOrderDetailId();
         OrderDetail orderDetail = orderDetailService.getOrderDetailInfo(orderDetailId);
+        if (null == orderDetail){
+            return;
+        }
         //获取当前到站
         Long currentArrivalStationId = orderDetail.getStationId();
         //根据当前到站查询出该站的收信息的站
@@ -324,9 +368,9 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
             elevatorNotice.setToStationId(toStationId);
             elevatorNotice = checkOrSaveNotice(elevatorNotice, toStationId);
             if (ElevatorNotice.State.RECEIVED.getCode() != elevatorNotice.getState()) {
-                CacheInfoManager.setArrivalStationNoticeCache(toStationId, elevatorNotice);
+                setArrivalStationNoticeCache(toStationId, elevatorNotice);
             }
-            List<ElevatorNotice> elevatorNoticeList = CacheInfoManager.getArrivalStationNoticeCache(toStationId);
+            List<ElevatorNotice> elevatorNoticeList = getArrivalStationNoticeCache(toStationId);
             sendWebSocketSendMessage(toStationId, elevatorNoticeList);
         }
     }
