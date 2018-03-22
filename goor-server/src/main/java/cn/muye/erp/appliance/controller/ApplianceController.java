@@ -310,14 +310,14 @@ public class ApplianceController {
         }
     }
 
-//    /**
-//     *  根据手术室编号，获取推荐的者器械类型，根据器械的使用次数进行排序
-//     *
-//     * @return
-//     */
-//    @RequestMapping(value = "erp/appliance/recommend", method = RequestMethod.GET)
-//    public AjaxResult recommend(@RequestParam("stationId") Long stationId) {
-//        List<Appliance> applianceList = applianceService.recommend(stationId);
-//        return AjaxResult.success(applianceList,"操作成功");
-//    }
+    /**
+     *  根据手术室编号，获取推荐的者器械类型，根据器械的使用次数进行排序
+     *
+     * @return
+     */
+    @RequestMapping(value = "erp/appliance/recommend", method = RequestMethod.GET)
+    public AjaxResult recommend(@RequestParam("stationId") Long stationId) {
+        List<Appliance> applianceList = applianceService.recommend(stationId);
+        return AjaxResult.success(applianceList,"操作成功");
+    }
 }

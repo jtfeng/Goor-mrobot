@@ -1,6 +1,7 @@
 package cn.muye.erp.operation.controller;
 
 import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.erp.appliance.Appliance;
 import cn.mrobot.bean.erp.operation.OperationDefaultApplianceXREF;
 import cn.mrobot.bean.erp.operation.OperationDepartmentType;
 import cn.mrobot.bean.erp.operation.OperationType;
@@ -145,6 +146,17 @@ public class OperationTypeController {
         searchName = searchName.toUpperCase();
         List<OperationType> operationTypeList = operationTypeService.listBySearchName(searchName);
         return AjaxResult.success(operationTypeList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_operation_controller_OperationTypeController_java_CXCG"));
+    }
+
+    /**
+     *  根据手术室编号，获取推荐的手术类型，根据手术类型的使用次数进行排序
+     *
+     * @return
+     */
+    @RequestMapping(value = "erp/operationtype/recommend", method = RequestMethod.GET)
+    public AjaxResult recommend(@RequestParam("stationId") Long stationId) {
+        List<OperationType> applianceList = operationTypeService.recommend(stationId);
+        return AjaxResult.success(applianceList,"操作成功");
     }
 
     private void updateOperationDefaultApplianceXREF(Long operationTypeId, List<OperationDefaultApplianceXREF> applianceList) {

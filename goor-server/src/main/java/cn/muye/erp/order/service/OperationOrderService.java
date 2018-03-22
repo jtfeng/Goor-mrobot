@@ -21,4 +21,6 @@ public interface OperationOrderService extends BaseCrudService<OperationOrder> {
     List<OperationOrder> listAllOperationOrder(WhereRequest whereRequest);
 
     void updateReceiveTimeAndState(OperationOrder operationOrder);
+
+    List<OperationOrder> getOperationOrderByType(OperationOrder.Type type);
 }

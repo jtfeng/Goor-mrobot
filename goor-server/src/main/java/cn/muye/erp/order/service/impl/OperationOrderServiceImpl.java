@@ -7,6 +7,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.service.imp.BaseCrudServiceImpl;
 import cn.muye.erp.order.mapper.OperationOrderMapper;
 import cn.muye.erp.order.service.OperationOrderService;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,15 @@ public class OperationOrderServiceImpl extends BaseCrudServiceImpl<OperationOrde
     @Override
     public void updateReceiveTimeAndState(OperationOrder operationOrder) {
         operationOrderMapper.updateReceiveTimeAndState(operationOrder.getId(), operationOrder.getReceiveTime(), operationOrder.getState());
+    }
+
+    @Override
+    public List<OperationOrder> getOperationOrderByType(OperationOrder.Type type) {
+        WhereRequest whereRequest = new WhereRequest();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(SearchConstants.SEARCH_TYPE, type.getCode());
+        whereRequest.setQueryObj(JSON.toJSONString(jsonObject));
+        return listAllOperationOrder(whereRequest);
     }
 
 }

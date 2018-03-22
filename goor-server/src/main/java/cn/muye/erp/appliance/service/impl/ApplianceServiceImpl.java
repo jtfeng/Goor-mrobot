@@ -4,7 +4,10 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.erp.appliance.Appliance;
 import cn.mrobot.bean.erp.appliance.ApplianceDepartmentType;
 import cn.mrobot.bean.erp.appliance.AppliancePackageType;
+import cn.mrobot.bean.erp.order.OperationOrder;
+import cn.mrobot.bean.erp.order.OperationOrderApplianceXREF;
 import cn.mrobot.utils.ExcelUtil;
+import cn.mrobot.utils.MapUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
@@ -14,6 +17,7 @@ import cn.muye.erp.appliance.mapper.ApplianceMapper;
 import cn.muye.erp.appliance.service.AppliancePackageTypeService;
 import cn.muye.erp.appliance.service.ApplianceService;
 import cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper;
+import cn.muye.erp.order.service.OperationOrderService;
 import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -50,6 +54,9 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
 
     @Autowired
     private LocaleMessageSourceService localeMessageSourceService;
+
+    @Autowired
+    private OperationOrderService operationOrderService;
 
     private static final Logger logger = LoggerFactory.getLogger(ApplianceServiceImpl.class);
 
@@ -228,6 +235,45 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
             packageTypeId = packageType.getId();
         }
         return packageTypeId;
+    }
+
+    @Override
+    public List<Appliance> recommend(Long stationId) {
+        //获取临时器械包申请的订单
+        List<OperationOrder> operationOrderList = operationOrderService.getOperationOrderByType(OperationOrder.Type.APPLIANCE_ORDER);
+        //根据订单获取所有的器械,将器械按照使用频率排序
+        return getApplianceByOrder(operationOrderList);
+    }
+
+    private List<Appliance> getApplianceByOrder(List<OperationOrder> operationOrderList) {
+        Map<Appliance, Integer> applianceCountMap = new HashMap<>();
+        Appliance appliance = null;
+        Integer count;
+        for (OperationOrder operationOrder : operationOrderList){
+            List<OperationOrderApplianceXREF> xrefList = operationOrder.getApplianceList();
+           for (OperationOrderApplianceXREF xref : xrefList){
+               appliance = xref.getAppliance();
+               count = applianceCountMap.get(appliance);
+               if (null == count || 0 == count){
+                   count = 1;
+               }else {
+                   count += 1;
+               }
+               applianceCountMap.put(appliance, count);
+           }
+        }
+        return orderByCount(applianceCountMap);
+    }
+
+    private List<Appliance> orderByCount(Map<Appliance, Integer> applianceCountMap) {
+        //排序
+        Map<Object, Integer> map = MapUtils.sortMapByValue(applianceCountMap);
+        //遍历取出list
+        List<Appliance> applianceList = new ArrayList<>();
+        for (Object object :map.keySet()){
+            applianceList.add((Appliance)object);
+        }
+        return applianceList;
     }
 
     private int getDepartmentTypeCode(String departmentTypeName) {

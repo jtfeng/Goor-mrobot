@@ -176,7 +176,7 @@ public class OperationOrder extends BaseBean {
 
     public enum Type {
         OPERATION_TYPE_ORDER(1, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_ASSLXSQ"),
-        INTERIM_ORDER(2, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_LSSSBSQ"),
+        APPLIANCE_ORDER(2, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_LSSSBSQ"),
         OPERATION_TYPE_ORDER_WITHOUT_DEFAULT_APPLIANCE(3, "goor_domain_src_main_java_cn_mrobot_bean_erp_order_OperationOrder_java_ASSLXSQFMRQX");
 
         private int code;

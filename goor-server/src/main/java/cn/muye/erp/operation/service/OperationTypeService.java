@@ -37,4 +37,6 @@ public interface OperationTypeService extends BaseCrudService<OperationType> {
     List<OperationType> listByDepartmentTypeId(Long id);
 
     boolean importOperationDefaultApplianceExcel(File uploadFile);
+
+    List<OperationType> recommend(Long stationId);
 }

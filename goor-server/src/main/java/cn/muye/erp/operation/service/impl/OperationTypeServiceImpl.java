@@ -5,7 +5,9 @@ import cn.mrobot.bean.erp.appliance.Appliance;
 import cn.mrobot.bean.erp.operation.OperationDefaultApplianceXREF;
 import cn.mrobot.bean.erp.operation.OperationDepartmentType;
 import cn.mrobot.bean.erp.operation.OperationType;
+import cn.mrobot.bean.erp.order.OperationOrder;
 import cn.mrobot.utils.ExcelUtil;
+import cn.mrobot.utils.MapUtils;
 import cn.mrobot.utils.StringUtil;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.base.bean.SearchConstants;
@@ -15,6 +17,7 @@ import cn.muye.erp.operation.mapper.OperationDefaultApplianceXREFMapper;
 import cn.muye.erp.operation.mapper.OperationTypeMapper;
 import cn.muye.erp.operation.service.OperationDepartmentTypeService;
 import cn.muye.erp.operation.service.OperationTypeService;
+import cn.muye.erp.order.service.OperationOrderService;
 import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -52,6 +55,8 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
 
     @Autowired
     private LocaleMessageSourceService localeMessageSourceService;
+    @Autowired
+    private OperationOrderService operationOrderService;
 
     private Map<String, OperationDepartmentType> operationDepartmentTypeMap = new HashMap<>();
     private ReentrantLock operationDepartmentTypeLock = new ReentrantLock();
@@ -149,6 +154,42 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
             return false;
         }
         return analysisExcel(file, EXCEL_DATE_OPERATION_DEFAULT_APPLIANCE);
+    }
+
+    @Override
+    public List<OperationType> recommend(Long stationId) {
+        //获取手术类型申请的订单
+        List<OperationOrder>  operationOrderList = operationOrderService.getOperationOrderByType(OperationOrder.Type.OPERATION_TYPE_ORDER);
+        List<OperationOrder>  operationOrders = operationOrderService.getOperationOrderByType(OperationOrder.Type.OPERATION_TYPE_ORDER_WITHOUT_DEFAULT_APPLIANCE);
+        //合并两种类型的订单
+        operationOrderList.addAll(operationOrders);
+        return getRecommendOperationType(operationOrderList);
+    }
+
+    private List<OperationType> getRecommendOperationType(List<OperationOrder> operationOrderList) {
+        Map<OperationType, Integer> operationTypeMap = new HashMap<>();
+        OperationType operationType = null;
+        Integer count = null;
+        for (OperationOrder operationOrder : operationOrderList){
+            operationType = operationOrder.getOperationType();
+            count = operationTypeMap.get(operationType);
+            if (null == count || 0 == count){
+                count = 1;
+            }else {
+                count += 1;
+            }
+            operationTypeMap.put(operationType, count);
+        }
+        return getRecommendOperationType(operationTypeMap);
+    }
+
+    private List<OperationType> getRecommendOperationType(Map<OperationType, Integer> operationTypeMap) {
+        Map<Object, Integer> map  = MapUtils.sortMapByValue(operationTypeMap);
+        List<OperationType> operationTypeList = new ArrayList<>();
+        for (Object object : map.keySet()){
+            operationTypeList.add((OperationType)object);
+        }
+        return operationTypeList;
     }
 
     private boolean analysisExcel(File file, String type) {

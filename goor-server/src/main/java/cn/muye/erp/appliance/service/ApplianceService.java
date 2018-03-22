@@ -43,4 +43,12 @@ public interface ApplianceService extends BaseService<Appliance> {
     List<Appliance> listByPackageTypeId(Long packageTypeId);
 
     Long getPackageTypeId(String packageTypeName);
+
+    /**
+     * 获取推荐的器械信息
+     * @param stationId
+     * @return
+     */
+    List<Appliance> recommend(Long stationId);
+
 }
