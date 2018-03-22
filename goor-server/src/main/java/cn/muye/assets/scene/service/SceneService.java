@@ -84,9 +84,4 @@ public interface SceneService extends BaseService<Scene> {
      */
     void replyUpdateCloudAssetsResult(String uuid, String robotCode, Boolean result);
 
-    /**
-     * 组装场景的机器人列表属性
-     * @param currentScene
-     */
-    void sceneAssembleRobotList(Scene currentScene);
 }

@@ -6,7 +6,6 @@ import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotService;
 import cn.muye.assets.scene.service.SceneService;
-import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.util.UserUtil;
 import com.alibaba.fastjson.JSONArray;
@@ -66,14 +65,6 @@ public class SceneController {
         // TODO: 21/07/2017 创建新场景
         try {
             Object taskResult = sceneService.saveScene(scene);
-            //创建完成后添加缓存
-            List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-            if (sceneList == null || sceneList.isEmpty()) {
-                sceneList = sceneService.listAllByNoPage();
-                CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-                return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXCG"));
-            }
-            sceneList.add((Scene)taskResult);
             return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXCG"));
         } catch (Exception e) {
             return AjaxResult.failed(e.getMessage(), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XZCJXXSB"));
@@ -94,18 +85,6 @@ public class SceneController {
             Object taskResult = sceneService.updateScene(scene);
             if (taskResult instanceof AjaxResult) {
                 return (AjaxResult) taskResult;
-            }
-            //更新成功后改绑定的机器人
-            List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-            if (sceneList == null && sceneList.isEmpty()) {
-                sceneList = sceneService.listAllByNoPage();
-                CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-                return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XGCJXXCG"));
-            }
-            for (Scene sceneObj : sceneList) {
-                if (sceneObj.getId().equals(scene.getId())) {
-                    sceneObj.setRobots(((Scene)taskResult).getRobots());
-                }
             }
             return AjaxResult.success(taskResult, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_XGCJXXCG"));
         } catch (Exception e) {
@@ -234,28 +213,6 @@ public class SceneController {
             Scene currentScene = sceneService.findById(scene.getId());
             currentScene.setActive(currentScene.getActive() == 1 ? 0 : 1);
             sceneService.updateSelective(currentScene);
-            //组装绑定机器人
-            sceneService.sceneAssembleRobotList(currentScene);
-            List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-            if (sceneList == null || sceneList.isEmpty()) {
-                sceneList = sceneService.listAllByNoPage();
-                CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-                return AjaxResult.success(currentScene.getActive() == 1 ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YQY") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YJY"));
-            }
-            //初始化缓存list不存在该场景的缓存
-            for (int i = 0; i < sceneList.size(); i++) {
-                Scene s = sceneList.get(i);
-                if (s.getId().equals(currentScene.getId())) {
-                    //如果该场景缓存里的状态为启用，同时从数据库里拿出来的状态又是禁用的，此时需要把缓存移除
-                    if (s.getActive().equals(Constant.SCENE_ACTIVATED) &&
-                            currentScene.getActive().equals(Constant.SCENE_NOT_ACTIVATED)) {
-                        s.setActive(Constant.SCENE_NOT_ACTIVATED);
-                    } else if (s.getActive().equals(Constant.SCENE_NOT_ACTIVATED) &&
-                            currentScene.getActive().equals(Constant.SCENE_ACTIVATED)) {
-                        s.setActive(Constant.SCENE_ACTIVATED);
-                    }
-                }
-            }
             return AjaxResult.success(currentScene.getActive() == 1 ? localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YQY") : localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_scene_controller_SceneController_java_YJY"));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
@@ -263,13 +220,4 @@ public class SceneController {
         }
     }
 
-    /**
-     * 检查所有场景的缓存
-     * @return
-     * @throws Exception
-     */
-    @GetMapping("/assets/scene/checkSceneListCache")
-    public AjaxResult checkSceneListCache() throws Exception {
-        return AjaxResult.success(CacheInfoManager.getSceneListCache(Constant.SCENE_LIST));
-    }
 }

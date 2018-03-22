@@ -5,7 +5,6 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationRobotXREF;
 import cn.mrobot.bean.assets.robot.*;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.base.CommonInfo;
 import cn.mrobot.bean.base.PubData;
 import cn.mrobot.bean.constant.Constant;
@@ -308,7 +307,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 continue;
             }
             //校验机器人场景绑定关系
-            if (!checkSceneNameEquality(robotDb, code, orderStationId)) {
+            if (!checkSceneNameEquality(code, orderStationId)) {
                 logger.info("机器人" + code + " 上传工控场景名和云端绑定站的工控场景名不一致");
                 continue;
             }
@@ -407,13 +406,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
 
     /**
      * 检查机器人上传工控场景名和云端绑定站的工控场景名是否一致，而且该场景名也绑定了此机器人
-     * @param robot
      * @param robotCode
      * @param orderStationId
      * @return
      * @throws Exception
      */
-    private boolean checkSceneNameEquality(Robot robot, String robotCode, Long orderStationId) throws Exception {
+    private boolean checkSceneNameEquality(String robotCode, Long orderStationId) throws Exception {
         //从缓存里获取机器上上报的工控场景名
         MessageInfo messageInfo = CacheInfoManager.getMessageCache(robotCode);
         //获取工控场景名
@@ -428,13 +426,6 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         }
         if (!sceneName.equals(stationSceneName)) {
             logger.error("上传工控场景名" + sceneName + " 和云端绑定站的工控场景名"+stationSceneName+"不一致");
-            return false;
-        }
-        //设置机器人有无绑定场景的标识位，默认为false
-        boolean robotSceneBind = checkRobotBoundedByScene(robot, sceneName);
-        //如果无绑定则略过
-        if (!robotSceneBind) {
-            logger.error("机器人 "+robot+" 与场景 " + sceneName + " 无绑定关系");
             return false;
         }
         return true;
@@ -492,7 +483,7 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
             }
             //检查机器人上传工控场景名和云端绑定站的工控场景名是否一致，而且该场景名也绑定了此机器人
             try{
-                if (!checkSceneNameEquality(robot, code, stationId)) {
+                if (!checkSceneNameEquality(code, stationId)) {
                     logger.info("机器人"+ code+" 上传工控场景名和云端绑定站的工控场景名不一致");
                     continue;
                 }
@@ -1082,17 +1073,12 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
                 if (busy != null) {
 //                    robot.setBusy(busy);
                     CacheInfoManager.setRobotBusyCache(robotCode, busy);
-                    logger.info("机器人" + robotCode + "设置为"+ busy +"状态");
+                    logger.info("机器人" + robotCode + "设置为"+ (busy? "忙碌" : "空闲") +"状态");
                 }
                 if (online != null) {
                     CacheInfoManager.setRobotOnlineCache(robot.getCode(), online);
-                    logger.info("机器人" + robotCode + "设置为" + online + "状态");
+                    logger.info("机器人" + robotCode + "设置为" + (online? "在线" : "离线") + "状态");
                 }
-                //从缓存获取不需更新数据库
-//                if (busy != null || online != null) {
-//                    super.updateSelective(robot);
-//                    logger.info("机器人修改状态" + robot.toString());
-//                }
             }
         }
     }
@@ -1102,38 +1088,4 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         return robotMapper.getRobotSceneId(robotId);
     }
 
-    /**
-     * 判断机器人是否在场景中被绑定
-     * @param robot
-     * @param sceneName
-     * @return
-     * @throws Exception
-     */
-    private boolean checkRobotBoundedByScene(Robot robot, String sceneName) throws Exception {
-        boolean robotSceneBind = false;
-        //判断机器人有无绑定场景
-        List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-        if (sceneList == null) {
-            //数据库里查询所有的场景
-            sceneList = sceneService.listAllByNoPage();
-            CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-        }
-        //遍历sceneList
-        if (sceneList != null && sceneList.size() > 0) {
-            for (Scene scene : sceneList) {
-                if(scene.getMapSceneName()!=null && scene.getMapSceneName().equals(sceneName)){
-                    List<Robot> sceneRobotList = scene.getRobots();
-                    if (sceneRobotList != null) {
-                        for(Robot r : sceneRobotList){
-                            if(robot.getId().equals(r.getId())){
-                                robotSceneBind = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return robotSceneBind;
-    }
 }
