@@ -421,11 +421,11 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         //走缓存去查询站绑定的工控场景
         String stationSceneName = getStationSceneName(orderStationId);
         if (StringUtil.isEmpty(sceneName) || StringUtil.isEmpty(stationSceneName)) {
-            logger.error("上传工控场景名" + sceneName + ",和云端绑定站的工控场景名" + stationSceneName + " 为空");
+            logger.error("机器人编号: " + robotCode + " 上传工控场景名" + sceneName + " 或云端绑定站的工控场景名" + stationSceneName + " 为空");
             return false;
         }
         if (!sceneName.equals(stationSceneName)) {
-            logger.error("上传工控场景名" + sceneName + " 和云端绑定站的工控场景名"+stationSceneName+"不一致");
+            logger.error("机器人编号: " + robotCode + " 上传工控场景名" + sceneName + " 和云端绑定站的工控场景名"+stationSceneName+"不一致");
             return false;
         }
         return true;
