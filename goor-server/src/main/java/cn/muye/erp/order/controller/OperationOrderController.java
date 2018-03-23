@@ -13,6 +13,7 @@ import cn.mrobot.bean.log.LogType;
 import cn.mrobot.bean.websocket.WSMessage;
 import cn.mrobot.bean.websocket.WSMessageType;
 import cn.mrobot.utils.WhereRequest;
+import cn.muye.area.station.service.StationService;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.base.websoket.WebSocketSendMessage;
 import cn.muye.erp.appliance.service.ApplianceService;
@@ -61,6 +62,9 @@ public class OperationOrderController {
     @Autowired
     private LocaleMessageSourceService localeMessageSourceService;
 
+    @Autowired
+    private StationService stationService;
+
     //缓存手术室下单的订单编号，用做重发机制检测
     private List<Long> operationOrderIds = Lists.newArrayList();
     /**
@@ -75,6 +79,11 @@ public class OperationOrderController {
         AjaxResult asepticApparatusRoomCheckResult = checkHasAsepticApparatusRoom();
         if (!asepticApparatusRoomCheckResult.isSuccess()) {
             return asepticApparatusRoomCheckResult;
+        }
+        //判断当前下单手术室是否对机器人开放
+        Station station = stationService.findById(operationOrder.getStation().getId());
+        if (Station.RobotAccess.NOT_ACCESS.getCode() == station.getRobotAccess()){
+            return AjaxResult.failed("当前手术室不对机器人开放！请联系管理员");
         }
         StationMacPasswordXREF asepticApparatusRoomXREF = (StationMacPasswordXREF) asepticApparatusRoomCheckResult.getData();
         //添加无菌器械室在线监测,不在线提示“无菌器械包室系统离线，请联系管理员或稍后再试”
