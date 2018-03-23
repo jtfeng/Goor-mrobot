@@ -8,7 +8,6 @@ import cn.mrobot.bean.assets.elevator.ElevatorNotice;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.robot.Robot;
-import cn.mrobot.bean.assets.scene.Scene;
 import cn.mrobot.bean.charge.ChargeInfo;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.dijkstra.RoadPathMaps;
@@ -164,19 +163,9 @@ public class CacheInfoManager implements ApplicationContextAware {
     private static ConcurrentHashMapCache<Long, String> sceneMapRelationCache = new ConcurrentHashMapCache<>();
 
     /**
-     * 所有场景缓存
-     */
-    private static ConcurrentHashMapCache<String, List<Scene>> sceneListCache = new ConcurrentHashMapCache<>();
-
-    /**
      * 到站信息发送缓存
      */
     private static ConcurrentHashMapCache<Long, CopyOnWriteArrayList<ElevatorNotice>> arrivalStationNoticeCache = new ConcurrentHashMapCache<>();
-
-    /**
-     * 所有场景ID为key，机器人List为value的缓存，场景绑定机器人列表的缓存
-     */
-    private static ConcurrentHashMapCache<Long, List<Robot>> sceneBindRobotListCache = new ConcurrentHashMapCache<>();
 
     static {
 
@@ -189,10 +178,8 @@ public class CacheInfoManager implements ApplicationContextAware {
 
         robotChargeInfoCache.setMaxLifeTime(0);
         sceneRobotListCache.setMaxLifeTime(0);
-        sceneListCache.setMaxLifeTime(0);
         persistMissionState.setMaxLifeTime(0);
         arrivalStationNoticeCache.setMaxLifeTime(0);
-        sceneBindRobotListCache.setMaxLifeTime(0);
 
         //状态机缓存  存储端判断如果状态有改变则存入
         autoChargeCache.setMaxLifeTime(0);
@@ -739,14 +726,6 @@ public class CacheInfoManager implements ApplicationContextAware {
         sceneMapRelationCache.remove(sceneId);
     }
 
-    public static List<Scene> getSceneListCache(String key) {
-        return sceneListCache.get(key);
-    }
-
-    public static void setSceneListCache(String key, List<Scene> sceneList) {
-        sceneListCache.put(key, sceneList);
-    }
-
     public static List<ElevatorNotice> getArrivalStationNoticeCache(Long stationId) {
         return arrivalStationNoticeCache.get(stationId);
     }
@@ -809,15 +788,4 @@ public class CacheInfoManager implements ApplicationContextAware {
         robotInfoCacheByCode.put(code, robot);
     }
 
-    public static List<Robot> getSceneBindRobotListCache(Long id) {
-        return sceneBindRobotListCache.get(id);
-    }
-
-    public static void setSceneBindRobotListCache(Long id, List<Robot> robotList) {
-        sceneBindRobotListCache.put(id, robotList);
-    }
-
-    public static void removeSceneBindRobotListCache(Long id) {
-        sceneBindRobotListCache.remove(id);
-    }
 }

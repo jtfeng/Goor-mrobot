@@ -296,11 +296,7 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         // + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + + +
         // 重新更新机器人与场景之间的绑定关系
         sceneMapper.deleteRobotAndSceneRelationsByRobotCode(robotCode);
-        //清除场景缓存中绑定了该机器人的部分
-        deleteRobotAndSceneRelationsCacheByRobotCode(robotCode);
         sceneMapper.insertSceneAndRobotRelations(sceneId, Lists.newArrayList(robotId));
-        //新增场景绑定的机器人缓存
-        insertSceneAndRobotRelationsCache(sceneId, Lists.newArrayList(robotId));
         // 重新更新机器人与站之间的绑定关系 (站绑定关系)
         stationMapper.deleteStationWithRobotRelationByRobotCode(robotCode);
         //把站机器人绑定关系去掉
@@ -373,78 +369,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
     }
 
-    /**
-     * 1. 新增场景绑定的机器人缓存
-     * 2. 所有场景的缓存增加该场景下的机器人
-     * @param sceneId
-     * @param robotIds
-     */
-    private void insertSceneAndRobotRelationsCache(Long sceneId, List<Long> robotIds) throws Exception {
-        List<Robot> robotList = Lists.newArrayList();
-        for (int i = 0; i < robotIds.size(); i++) {
-            Long robotId = robotIds.get(i);
-            Robot robot = CacheInfoManager.getRobotInfoCacheById(robotId);
-            if (robot == null) {
-                robot = robotService.findById(robotId);
-                CacheInfoManager.setRobotInfoCacheById(robotId, robot);
-            }
-            if (robot != null) {
-                robotList.add(robot);
-            }
-        }
-        //设置sceneBindRobotListCache缓存
-        CacheInfoManager.setSceneBindRobotListCache(sceneId, robotList);
-        //设置sceneListCache缓存中该场景下的robotList
-        List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-        if (sceneList == null || sceneList.isEmpty()) {
-            sceneList = listAllByNoPage();
-            CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-        }
-        for (int i = 0; i < sceneList.size(); i++) {
-            Long sId = sceneList.get(i).getId();
-            if (sId.equals(sceneId)) {
-                sceneList.get(i).setRobots(robotList);
-            }
-        }
-    }
-
-    /**
-     * 1. 将所有场景缓存中绑定的机器人的列表里，移除该机器人,
-     * 2. 接着要移除场景ID-机器人List的缓存中的该机器人，两个缓存都需要移除，不然数据不一致
-     * @param robotCode
-     * @throws Exception
-     */
-    private void deleteRobotAndSceneRelationsCacheByRobotCode(String robotCode) throws Exception {
-        List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-        if (sceneList == null || sceneList.isEmpty()) {
-            sceneList = listAllByNoPage();
-            CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-        }
-        for (int i = 0; i < sceneList.size(); i++) {
-            List<Robot> sceneBoundRobotList = sceneList.get(i).getRobots();
-            List<Robot> robotList = CacheInfoManager.getSceneBindRobotListCache(sceneList.get(i).getId());
-            //1. 将sceneListCache缓存中绑定的机器人的列表里，移除该机器人
-            removeRobotFromListCacheInScene(robotCode, sceneBoundRobotList);
-            //2. 将sceneBindRobotListCache该场景缓存中绑定的机器人的列表里，移除该机器人
-            removeRobotFromListCacheInScene(robotCode, robotList);
-        }
-    }
-
-    /**
-     * 缓存中移除某个机器人
-     * @param robotCode
-     * @param robotList
-     */
-    private void removeRobotFromListCacheInScene(String robotCode, List<Robot> robotList) {
-        if (robotList != null && robotList.size() > 0) {
-            for (Robot r : robotList) {
-                if (r.getCode().equals(robotCode)) {
-                    robotList.remove(r);
-                    break;
-                }
-            }
-        }
-    }
 
     @Override
     public void replyGetRobotStartAssets(String uuid, String robotCode) {
@@ -514,21 +438,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         }
     }
 
-    /**
-     * 组装场景的机器人列表属性
-     * @param currentScene
-     */
-    @Override
-    public void sceneAssembleRobotList(Scene currentScene) {
-        Long sceneId = currentScene.getId();
-        //todo 注意sceneId是null的情况
-        List<Robot> robotList = CacheInfoManager.getSceneBindRobotListCache(sceneId);
-        if (robotList == null || robotList.isEmpty()) {
-            List<Robot> robotListDB = this.sceneMapper.findRobotBySceneId(sceneId);
-            CacheInfoManager.setSceneBindRobotListCache(sceneId, robotListDB);
-        }
-    }
-
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_UNCOMMITTED)
     @Override
     public Object saveScene(Scene scene) throws Exception {
@@ -538,8 +447,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         this.save(scene);//数据库中插入这条场景记录
 
         this.deleteRobotAndSceneRelations(scene.getId());
-        //删除了机器人场景关系表，需要清空缓存
-        deleteRobotAndSceneRelationsCache(scene.getId());
         boolean flag = bindSceneAndRobotRelations(scene, null);//绑定场景与机器人之间的对应关系
 
         this.deleteMapAndSceneRelations(scene.getId());
@@ -551,27 +458,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         scene.setState(0);//状态直接置为未同步
         updateSelective(scene);
         return scene;
-    }
-
-    /**
-     *  1. 所有场景的缓存中这个场景下的机器人全部置为null
-     *  2. 场景ID-机器人列表的缓存直接remove
-     * @param sceneId
-     */
-    private void deleteRobotAndSceneRelationsCache(Long sceneId) throws Exception {
-        List<Scene> sceneList = CacheInfoManager.getSceneListCache(Constant.SCENE_LIST);
-        if (sceneList == null || sceneList.isEmpty()) {
-            sceneList = listAllByNoPage();
-            CacheInfoManager.setSceneListCache(Constant.SCENE_LIST, sceneList);
-        }
-        for (int i = 0; i < sceneList.size(); i++) {
-            if (sceneList.get(i).getId().equals(sceneId)) {
-                //这个场景下的机器人全部置为null
-                sceneList.get(i).setRobots(null);
-                break;
-            }
-        }
-        CacheInfoManager.removeSceneBindRobotListCache(sceneId);
     }
 
     @Override
@@ -620,15 +506,10 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
         scene.setStoreId(STORE_ID);
         scene.setCreateTime(new Date());
         this.deleteRobotAndSceneRelations(sceneId);
-        //删除了机器人场景关系表，需要清空缓存
-        deleteRobotAndSceneRelationsCache(sceneId);
         //更新场景与机器人之间的绑定关系
         boolean flag = bindSceneAndRobotRelations(scene, distinctIDS);
         //更新对应的场景信息
         updateSelective(scene);
-        //因为bindSceneAndRobotRelations方法已经放了缓存，所有从缓存中获取机器人list
-        List<Robot> robotList = CacheInfoManager.getSceneBindRobotListCache(sceneId);
-        scene.setRobots(robotList);
         return scene;
     }
 
@@ -823,8 +704,6 @@ public class SceneServiceImpl extends BaseServiceImpl<Scene> implements SceneSer
                 //不能抛出异常信息，因为仙子阿允许绑定空元素
                 flag = true;//表示有实际的机器人进行地图下发操作
                 this.insertSceneAndRobotRelations(scene.getId(), ids);
-                //新增场景机器人关系缓存
-                insertSceneAndRobotRelationsCache(scene.getId(), ids);
             }
             if (TransactionSynchronizationManager.isActualTransactionActive()) {
                 log.info(" - - - - 当前操作正处在事务中 - - - - ");
