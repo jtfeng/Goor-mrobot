@@ -269,6 +269,18 @@ public class ScheduleTasks {
     }
 
     /**
+     * 添加定时任务，每5秒检查一次有没有楼层管家消息缓存，有，取出消息进行推送
+     */
+    @Scheduled(cron = "*/5 * * * * ?")
+    public void sendArrivalStationNoticeCache() {
+        try {
+            elevatorNoticeService.sendArrivalStationNoticeCache();
+        } catch (Exception e) {
+            logger.error("Scheduled sendElevatorNoticeCache  error", e);
+        }
+    }
+
+    /**
      * 定时任务，每个一分钟执行一次，取出数据库所有机器人，查看当前机器人状态，如果是空闲状态，则解锁该机器人所有的锁
      * 非空闲，查看机器人在线状态，如果机器人不在线，则清除所有的锁
      */

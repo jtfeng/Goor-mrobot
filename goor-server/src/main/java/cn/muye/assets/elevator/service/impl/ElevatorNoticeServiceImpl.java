@@ -309,6 +309,11 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         try{
             removeLock.lock();
             CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);
+            //立即推送该站的缓存消息
+            OrderDetail orderDetail = orderDetailService.findById(orderDetailId);
+            Long stationId = orderDetail.getStationId();
+            List<ElevatorNotice> elevatorNoticeList = CacheInfoManager.getArrivalStationNoticeCache(stationId);
+            sendWebSocketSendMessage(stationId, elevatorNoticeList);
         }finally {
             removeLock.unlock();
         }
