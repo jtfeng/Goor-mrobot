@@ -22,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Ray.Fu on 2017/6/12.
@@ -220,5 +221,24 @@ public class RobotController {
 //    @ResponseBody
 //    public AjaxResult bindChargerMapPoint(@RequestBody Robot robot) {
 //    }
+
+    /**
+     * 获取所有可用机器人数量
+     * @param stationId
+     * @return
+     */
+    @RequestMapping(value = {"assets/robot/getAvailableRobotCount/{stationId}"}, method = RequestMethod.GET)
+    @ApiOperation(value = "获取所有可用机器人数量", httpMethod = "GET", notes = "获取所有可用机器人数量")
+    @ResponseBody
+    public AjaxResult getAvailableRobotCount(@PathVariable Long stationId) {
+        try {
+            Map<String, Integer> availableRobotCountMap = CacheInfoManager.getAvailableRobotCountCache(stationId);
+            return AjaxResult.success(availableRobotCountMap, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_CXCG"));
+        } catch (Exception e){
+            LOGGER.error("############## getAvailableRobotCount error ############# {}", e);
+            return AjaxResult.failed(e.getMessage());
+        } finally {
+        }
+    }
 
 }

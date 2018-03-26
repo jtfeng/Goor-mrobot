@@ -167,6 +167,11 @@ public class CacheInfoManager implements ApplicationContextAware {
      */
     private static ConcurrentHashMapCache<Long, CopyOnWriteArrayList<ElevatorNotice>> arrivalStationNoticeCache = new ConcurrentHashMapCache<>();
 
+    /**
+     * 可用机器人数量缓存
+     */
+    private static ConcurrentHashMapCache<Long, Map<String, Integer>> availableRobotCountCache = new ConcurrentHashMapCache<>();
+
     static {
 
         // AppConfig对象缓存的最大生存时间，单位毫秒，永久保存
@@ -180,7 +185,7 @@ public class CacheInfoManager implements ApplicationContextAware {
         sceneRobotListCache.setMaxLifeTime(0);
         persistMissionState.setMaxLifeTime(0);
         arrivalStationNoticeCache.setMaxLifeTime(0);
-
+        availableRobotCountCache.setMaxLifeTime(0);
         //状态机缓存  存储端判断如果状态有改变则存入
         autoChargeCache.setMaxLifeTime(0);
         leftBaseDriverCache.setMaxLifeTime(0);
@@ -775,4 +780,11 @@ public class CacheInfoManager implements ApplicationContextAware {
         robotInfoCacheByCode.put(code, robot);
     }
 
+    public static Map<String, Integer> getAvailableRobotCountCache(Long stationId) {
+        return availableRobotCountCache.get(stationId);
+    }
+
+    public static void setAvailableRobotCountCache(Long stationId, Map<String, Integer> count) {
+        availableRobotCountCache.put(stationId, count);
+    }
 }
