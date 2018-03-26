@@ -611,7 +611,39 @@ public class ElevatorController {
     }
 
     /**
+     * 查询未接收的电梯pad和楼层管家消息
+     *  type: 1：电梯pad 2:楼层管家
+     *
+     * @return
+     */
+    @GetMapping("/elevatorNotice/list")
+    public AjaxResult listUnreceiveElevatorNotice(@RequestParam("stationId") Long stationId, @RequestParam("type") Integer type ) {
+        try {
+            List<ElevatorNotice> elevatorNoticeList = Lists.newArrayList();
+            //获取电梯消息列表
+            if (ElevatorNotice.Type.ELEVATOR_NOTICE.getCode() == type) {
+                List<Long> elevatorNoticeIdList = CacheInfoManager.getElevatorNoticeCache();
+                if (null != elevatorNoticeIdList && elevatorNoticeIdList.size() > 0) {
+                    for (Long elevatorNoticeId : elevatorNoticeIdList) {
+                        ElevatorNotice elevatorNotice = elevatorNoticeService.findById(elevatorNoticeId);
+                        if (ElevatorNotice.State.RECEIVED.getCode() != elevatorNotice.getState() && elevatorNotice.getToStationId().equals(stationId)){
+                            elevatorNoticeList.add(elevatorNotice);
+                        }
+                    }
+                }
+                //获取楼层管家消息列表
+            } else if (ElevatorNotice.Type.ARRIVAL_STATION_NOTICE.getCode() == type) {
+                elevatorNoticeList = elevatorNoticeService.getArrivalStationNoticeCache(stationId);
+            }
+            return AjaxResult.success(elevatorNoticeList, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZCG"));
+        } catch (Exception e) {
+            return AjaxResult.failed(e, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_elevator_controller_ElevatorController_java_CZSB"));
+        }
+    }
+
+    /**
      * websocket收到电梯pad消息通知反馈
+     * 测试接口
      *
      * @return
      */

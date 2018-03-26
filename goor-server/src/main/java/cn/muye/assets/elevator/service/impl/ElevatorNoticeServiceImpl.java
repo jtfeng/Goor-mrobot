@@ -122,12 +122,7 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
     private void sendElevatorNotice(ElevatorNotice elevatorNotice) {
         Long elevatorId = elevatorNotice.getElevatorId();
         List<Station> stationList = elevatorstationElevatorXREFService.findByElevator(elevatorId);
-        sendElevatorMessage(stationList, elevatorNotice);
-    }
-
-    private void sendElevatorMessage(List<Station> stationList, ElevatorNotice elevatorNotice) {
         if (stationList.isEmpty()) {
-            logger.info("消息通知发送websocket消息的站列表为空");
             return;
         }
         for (Station station : stationList) {
@@ -159,24 +154,13 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         return elevatorNotice;
     }
 
-    private boolean checkAndSendElevatorNotice(ElevatorNotice elevatorNotice) {
-        logger.info("消息未接收，重新向电梯pad发送websocket消息，elevatorNotice=" + JSON.toJSONString(elevatorNotice));
-        boolean sendSuccess = false;  //pad端是否收到消息
-        ////如果是电梯站，根据电梯ID查询未处理的消息通知，将除当前消息之外的全置为已处理，因为同一个电梯同一时间只能过一个机器人，
+    private void checkAndSendElevatorNotice(ElevatorNotice elevatorNotice) {
+        logger.info("电梯pad消息，elevatorNotice=" + JSON.toJSONString(elevatorNotice));
+        //如果是电梯站，根据电梯ID查询未处理的消息通知，将除当前消息之外的全置为已处理，因为同一个电梯同一时间只能过一个机器人，
         handleOtherNotices(elevatorNotice);
         //添加缓存
         Long elevatorNoticeId = elevatorNotice.getId();
         CacheInfoManager.setElevatorNoticeCache(elevatorNoticeId);
-        //发送之前校验消息是否接收到反馈
-        ElevatorNotice elevatorNoticeDB = findById(elevatorNoticeId);
-        if (ElevatorNotice.State.RECEIVED.getCode() == elevatorNoticeDB.getState()) {
-            sendSuccess = true;
-            //发送成功，删除缓存
-            CacheInfoManager.removeElevatorNoticeCache(elevatorNoticeId);
-        } else {
-            sendWebSocketSendMessage(elevatorNotice);
-        }
-        return sendSuccess;
     }
 
     private void handleOtherNotices(ElevatorNotice elevatorNotice) {
@@ -187,39 +171,6 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
                 elevatorNoticeMapper.updateByPrimaryKeySelective(elevatorNoticeDB);
                 //从缓存中移除该条数据
                 CacheInfoManager.removeElevatorNoticeCache(elevatorNoticeDB.getId());
-            }
-        }
-    }
-
-    private void sendWebSocketSendMessage(ElevatorNotice elevatorNotice) {
-        WSMessage ws = new WSMessage.Builder().
-                title(localeMessageSourceService.getMessage(LogType.ELEVATOR_NOTICE.getValue()))
-                .messageType(WSMessageType.NOTIFICATION)
-                .body(elevatorNotice)
-                .deviceId(elevatorNotice.getToStationId() + "")
-                .module(LogType.ELEVATOR_NOTICE.getName()).build();
-        webSocketSendMessage.sendWebSocketMessage(ws);
-    }
-
-    private void sendWebSocketSendMessage(Long toStationId, List<ElevatorNotice> elevatorNoticeList) {
-        WSMessage ws = new WSMessage.Builder().
-                title(localeMessageSourceService.getMessage(LogType.ELEVATOR_NOTICE.getValue()))
-                .messageType(WSMessageType.NOTIFICATION)
-                .body(elevatorNoticeList)
-                .deviceId(toStationId + "")
-                .module(LogType.ELEVATOR_NOTICE.getName()).build();
-        webSocketSendMessage.sendWebSocketMessage(ws);
-    }
-
-    @Override
-    public void sendElevatorNoticeCache() {
-        List<Long> elevatorNoticeIdList = CacheInfoManager.getElevatorNoticeCache();
-        if (null != elevatorNoticeIdList && elevatorNoticeIdList.size() > 0) {
-            for (Long elevatorNoticeId : elevatorNoticeIdList) {
-                ElevatorNotice elevatorNotice = findById(elevatorNoticeId);
-                if (null != elevatorNotice) {
-                    checkAndSendElevatorNotice(elevatorNotice);
-                }
             }
         }
     }
@@ -273,16 +224,6 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
     }
 
     @Override
-    public void sendArrivalStationNoticeCache() {
-        Map<Long, List<ElevatorNotice>> elevatorNoticeMap = getAllArrivalStationNoticeCache();
-        for (Map.Entry entry : elevatorNoticeMap.entrySet()) {
-            Long toStationId = (Long) entry.getKey();
-            List<ElevatorNotice> elevatorNoticeList = (List<ElevatorNotice>) entry.getValue();
-            sendWebSocketSendMessage(toStationId, elevatorNoticeList);
-        }
-    }
-
-    @Override
     public void updateState(Long id, ElevatorNotice.State state) {
         elevatorNoticeMapper.updateState(id, state.getCode());
     }
@@ -309,11 +250,6 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         try{
             removeLock.lock();
             CacheInfoManager.removeArrivalStationNoticeCacheByOrderDetailId(orderDetailId);
-            //立即推送该站的缓存消息
-            OrderDetail orderDetail = orderDetailService.findById(orderDetailId);
-            Long stationId = orderDetail.getStationId();
-            List<ElevatorNotice> elevatorNoticeList = CacheInfoManager.getArrivalStationNoticeCache(stationId);
-            sendWebSocketSendMessage(stationId, elevatorNoticeList);
         }finally {
             removeLock.unlock();
         }
@@ -339,16 +275,6 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         }
     }
 
-    @Override
-    public Map<Long, List<ElevatorNotice>> getAllArrivalStationNoticeCache() {
-        try{
-            removeLock.lock();
-            return CacheInfoManager.getAllArrivalStationNoticeCache();
-        }finally {
-            removeLock.unlock();
-        }
-    }
-
     /**
      * 发送到站消息
      *
@@ -367,7 +293,7 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
         List<Station> stationList = stationStationXREFService.getReceiveNoticeStationList(currentArrivalStationId);
         List<GoodsInfo> goodsInfoList = orderDetail.getGoodsInfoList();
         elevatorNotice.setData(JSON.toJSONString(goodsInfoList));
-        //将elevatorNotice添加到缓存列表，每次像前端发送列表
+        //将elevatorNotice添加到缓存列表，前端定时拉取
         for (Station station : stationList) {
             Long toStationId = station.getId();
             elevatorNotice.setToStationId(toStationId);
@@ -375,8 +301,6 @@ public class ElevatorNoticeServiceImpl extends BaseServiceImpl<ElevatorNotice> i
             if (ElevatorNotice.State.RECEIVED.getCode() != elevatorNotice.getState()) {
                 setArrivalStationNoticeCache(toStationId, elevatorNotice);
             }
-            List<ElevatorNotice> elevatorNoticeList = getArrivalStationNoticeCache(toStationId);
-            sendWebSocketSendMessage(toStationId, elevatorNoticeList);
         }
     }
 }

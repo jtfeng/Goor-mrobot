@@ -16,9 +16,11 @@ public interface ElevatorNoticeService extends BaseService<ElevatorNotice> {
 
     void sendElevatorNoticeToX86(ElevatorNotice elevatorNotice, int code, String deviceId, String msg);
 
+    /**
+     * 2018-3-26 取消websocket发送，改成前端5s/次请求接口
+     * @param elevatorNotice
+     */
     void sendElevatorNoticeToWebSocket(ElevatorNotice elevatorNotice);
-
-    void sendElevatorNoticeCache();
 
     ElevatorNotice findByUUIDAndToStation(String uuid, Long toStationId);
 
@@ -29,8 +31,6 @@ public interface ElevatorNoticeService extends BaseService<ElevatorNotice> {
     List<ElevatorNotice> findByElevatorId(Long elevatorId, int state);
 
     boolean hasLastRobotElevatorNotice(String code);
-
-    void sendArrivalStationNoticeCache();
 
     void updateState(Long id, ElevatorNotice.State state);
 
@@ -46,6 +46,4 @@ public interface ElevatorNoticeService extends BaseService<ElevatorNotice> {
     List<ElevatorNotice> getArrivalStationNoticeCache(Long stationId);
 
     void setArrivalStationNoticeCache(Long stationId, ElevatorNotice elevatorNotice);
-
-    Map<Long, List<ElevatorNotice>> getAllArrivalStationNoticeCache();
 }

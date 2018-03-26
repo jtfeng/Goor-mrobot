@@ -767,19 +767,6 @@ public class CacheInfoManager implements ApplicationContextAware {
         }
     }
 
-    public static Map<Long, List<ElevatorNotice>> getAllArrivalStationNoticeCache() {
-        Iterator iterator = arrivalStationNoticeCache.iterator();
-        Map<Long, List<ElevatorNotice>> noticeMap = new HashMap<>();
-        while (iterator.hasNext()) {
-            Map.Entry<Long, ConcurrentHashMapCache.ValueEntry> entry = (Map.Entry<Long, ConcurrentHashMapCache.ValueEntry>) iterator.next();
-            Long key = entry.getKey();
-            ConcurrentHashMapCache.ValueEntry valueEntry = entry.getValue();
-            CopyOnWriteArrayList<ElevatorNotice> elevatorNotices = (CopyOnWriteArrayList<ElevatorNotice>) valueEntry.getValue();
-            noticeMap.put(key, elevatorNotices);
-        }
-        return noticeMap;
-    }
-
     public static Robot getRobotInfoCacheByCode(String code) {
         return robotInfoCacheByCode.get(code);
     }
