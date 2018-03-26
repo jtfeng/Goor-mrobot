@@ -133,10 +133,11 @@ public class ScheduledHandleServiceImp implements ScheduledHandleService, Applic
         if (stationList != null && stationList.size() > 0) {
             for (Station station : stationList) {
                 try{
-                    Map map = robotService.getCountAvailableRobotByStationId(station.getId());
-                    WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName())
-                            .messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
-                    webSocketSendMessage.sendWebSocketMessage(ws);
+                    Map availableRobotCountByStationId = robotService.getCountAvailableRobotByStationId(station.getId());
+                    CacheInfoManager.setAvailableRobotCountCache(station.getId(), availableRobotCountByStationId);
+//                    WSMessage ws = new WSMessage.Builder().module(LogType.STATION_AVAILABLE_ROBOT_COUNT.getName())
+//                            .messageType(WSMessageType.NOTIFICATION).body(map).deviceId(String.valueOf(station.getId())).build();
+//                    webSocketSendMessage.sendWebSocketMessage(ws);
                 } catch (Exception e){
                     logger.error("查询可用机器人异常",e);
                 }
