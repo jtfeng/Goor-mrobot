@@ -67,7 +67,9 @@ public class OperationTypeController {
         if (!validateResult.isSuccess()){
             return validateResult;
         }
-
+        if (StringUtil.isBlank(operationType.getSearchName())) {
+            operationType.setSearchName(StringUtil.getSearchName(operationType.getName()));
+        }
         operationTypeService.updateOperationType(operationType);
         //更新手术类型的默认器械
         List<OperationDefaultApplianceXREF> applianceXREFList = operationType.getApplianceList();

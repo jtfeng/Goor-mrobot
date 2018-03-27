@@ -113,6 +113,9 @@ public class ApplianceController {
         Long packageTypeId = appliance.getPackageTypeId();
         appliance.setPackageType(appliancePackageTypeService.findTypeById(packageTypeId));
         appliance.setCreateTime(new Date());
+        if (StringUtil.isBlank(appliance.getSearchName())) {
+            appliance.setSearchName(StringUtil.getSearchName(appliance.getName()));
+        }
         applianceService.updateSelective(appliance);
         return AjaxResult.success(appliance, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_XGCG"));
     }
