@@ -83,7 +83,7 @@ public class OperationOrderController {
         //判断当前下单手术室是否对机器人开放
         Station station = stationService.findById(operationOrder.getStation().getId());
         if (Station.RobotAccess.NOT_ACCESS.getCode() == station.getRobotAccess()){
-            return AjaxResult.failed("当前手术室不对机器人开放！请联系管理员");
+            return AjaxResult.failed(905, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_order_controller_OperationOrderController_java_DQSSSBDJQRKFQLXGLY"));//返回未授权
         }
         StationMacPasswordXREF asepticApparatusRoomXREF = (StationMacPasswordXREF) asepticApparatusRoomCheckResult.getData();
         //添加无菌器械室在线监测,不在线提示“无菌器械包室系统离线，请联系管理员或稍后再试”
