@@ -32,137 +32,134 @@ public class PoiExcelExportUtil {
      * @throws Exception
      */
     public static void createExcelFile(OutputStream outputStream, List<SheetMain> sheetMainList) throws Exception {
-        try {
-            //1.创建工作簿
-            HSSFWorkbook hssfWorkbook = new HSSFWorkbook();
-            for (SheetMain sheetMain : sheetMainList) {
-                int headWidth = 0;
-                int contentHeight = 0;
-                int currentRow = 0;
-                //--数据检查
-                if (null == sheetMain) {
-                    throw new RuntimeException("创建EXCEL文件-主对象为空");
-                }
-                if (null == sheetMain.getSheetTitle()) {
-                    LOGGER.warn("创建EXCEL文件-主标题为空");
-                }
-                if (null == sheetMain.getSheetHeads() || sheetMain.getSheetHeads().size() == 0) {
-                    LOGGER.warn("创建EXCEL文件-列标题为空");
-                } else {
-                    headWidth = sheetMain.getSheetHeads().size();
-                }
-                if (null == sheetMain.getTs() || sheetMain.getTs().size() == 0) {
-                    LOGGER.warn("创建EXCEL文件-列内容为空");
-                } else {
-                    contentHeight = sheetMain.getTs().size();
-                }
-                //1.1创建合并单元格对象
-                CellRangeAddress callRangeAddress = null;
-                if (null != sheetMain.getSheetTitle()) {
-                    callRangeAddress = new CellRangeAddress(sheetMain.getStartRow(), sheetMain.getStartRow(), sheetMain.getStartCell(), (headWidth + sheetMain.getStartCell()) - (headWidth == 0 ? 0 : 1));//起始行,结束行,起始列,结束列
-                }
-                //1.2头标题样式
-                HSSFCellStyle headStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.getTitleCellStyle().getFontSize(), sheetMain.getTitleCellStyle().isFontBold(), sheetMain.getTitleCellStyle().isBorderFlag(), sheetMain.getTitleCellStyle().isAlignmentCenter(), sheetMain.getTitleCellStyle().isVerticalAlignmentCenter());
-                //1.3列标题样式
-                HSSFCellStyle colHeadStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.getHeadCellStyle().getFontSize(), sheetMain.getHeadCellStyle().isFontBold(), sheetMain.getHeadCellStyle().isBorderFlag(), sheetMain.getHeadCellStyle().isAlignmentCenter(), sheetMain.getHeadCellStyle().isVerticalAlignmentCenter());
-                //1.4列样式
-                HSSFCellStyle colStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.gettCellStyle().getFontSize(), sheetMain.gettCellStyle().isFontBold(), sheetMain.gettCellStyle().isBorderFlag(), sheetMain.gettCellStyle().isAlignmentCenter(), sheetMain.gettCellStyle().isVerticalAlignmentCenter());
-                //1.4列样式
-                HSSFCellStyle colFooterStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.getFooterCellStyle().getFontSize(), sheetMain.getFooterCellStyle().isFontBold(), sheetMain.getFooterCellStyle().isBorderFlag(), sheetMain.getFooterCellStyle().isAlignmentCenter(), sheetMain.getFooterCellStyle().isVerticalAlignmentCenter());
-                //2.创建工作表
-                HSSFSheet sheet = hssfWorkbook.createSheet();
-                hssfWorkbook.setSheetName(sheetMain.getSheetNum(), sheetMain.getSheetName());
-                //2.1加载合并单元格对象
-                if (headWidth != 0 && null != sheetMain.getSheetTitle()) {
-                    sheet.addMergedRegion(callRangeAddress);
-                }
-                //设置默认列宽
-                if (null != sheetMain.getCellWidths() && sheetMain.getCellWidths().size() != 0) {
-                    for (int i = 0; i < sheetMain.getCellWidths().size(); i++) {
-                        sheet.setColumnWidth(i, ((int) sheetMain.getCellWidths().get(i)) * 256);
-                    }
-                } else {
-                    sheet.setDefaultColumnWidth(15);
-                }
-                //3.创建行
-                //3.1创建头标题行;并且设置头标题
-                HSSFRow row = sheet.createRow(sheetMain.getStartRow());
-                HSSFCell cell = row.createCell(sheetMain.getStartCell());
-                //加载单元格样式
-                cell.setCellStyle(headStyle);
-                if (null != sheetMain.getSheetTitle()) {
-                    cell.setCellValue(sheetMain.getSheetTitle());
-                }
-                if (sheetMain.getTitleCellStyle().isBorderFlag()) {
-                    RegionUtil.setBorderBottom(BorderStyle.THIN, callRangeAddress, sheet); // 下边框
-                    RegionUtil.setBorderLeft(BorderStyle.THIN, callRangeAddress, sheet); // 左边框
-                    RegionUtil.setBorderRight(BorderStyle.THIN, callRangeAddress, sheet); // 有边框
-                    RegionUtil.setBorderTop(BorderStyle.THIN, callRangeAddress, sheet); // 上边框
-                }
 
-                if (null != sheetMain.getSheetTitle()) {
-                    currentRow = currentRow + 1;
+        //1.创建工作簿
+        HSSFWorkbook hssfWorkbook = new HSSFWorkbook();
+        for (SheetMain sheetMain : sheetMainList) {
+            int headWidth = 0;
+            int contentHeight = 0;
+            int currentRow = 0;
+            //--数据检查
+            if (null == sheetMain) {
+                throw new RuntimeException("创建EXCEL文件-主对象为空");
+            }
+            if (null == sheetMain.getSheetTitle()) {
+                LOGGER.warn("创建EXCEL文件-主标题为空");
+            }
+            if (null == sheetMain.getSheetHeads() || sheetMain.getSheetHeads().size() == 0) {
+                LOGGER.warn("创建EXCEL文件-列标题为空");
+            } else {
+                headWidth = sheetMain.getSheetHeads().size();
+            }
+            if (null == sheetMain.getTs() || sheetMain.getTs().size() == 0) {
+                LOGGER.warn("创建EXCEL文件-列内容为空");
+            } else {
+                contentHeight = sheetMain.getTs().size();
+            }
+            //1.1创建合并单元格对象
+            CellRangeAddress callRangeAddress = null;
+            if (null != sheetMain.getSheetTitle()) {
+                callRangeAddress = new CellRangeAddress(sheetMain.getStartRow(), sheetMain.getStartRow(), sheetMain.getStartCell(), (headWidth + sheetMain.getStartCell()) - (headWidth == 0 ? 0 : 1));//起始行,结束行,起始列,结束列
+            }
+            //1.2头标题样式
+            HSSFCellStyle headStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.getTitleCellStyle().getFontSize(), sheetMain.getTitleCellStyle().isFontBold(), sheetMain.getTitleCellStyle().isBorderFlag(), sheetMain.getTitleCellStyle().isAlignmentCenter(), sheetMain.getTitleCellStyle().isVerticalAlignmentCenter());
+            //1.3列标题样式
+            HSSFCellStyle colHeadStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.getHeadCellStyle().getFontSize(), sheetMain.getHeadCellStyle().isFontBold(), sheetMain.getHeadCellStyle().isBorderFlag(), sheetMain.getHeadCellStyle().isAlignmentCenter(), sheetMain.getHeadCellStyle().isVerticalAlignmentCenter());
+            //1.4列样式
+            HSSFCellStyle colStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.gettCellStyle().getFontSize(), sheetMain.gettCellStyle().isFontBold(), sheetMain.gettCellStyle().isBorderFlag(), sheetMain.gettCellStyle().isAlignmentCenter(), sheetMain.gettCellStyle().isVerticalAlignmentCenter());
+            //1.4列样式
+            HSSFCellStyle colFooterStyle = createHSSFCellStyle(hssfWorkbook, "宋体", sheetMain.getFooterCellStyle().getFontSize(), sheetMain.getFooterCellStyle().isFontBold(), sheetMain.getFooterCellStyle().isBorderFlag(), sheetMain.getFooterCellStyle().isAlignmentCenter(), sheetMain.getFooterCellStyle().isVerticalAlignmentCenter());
+            //2.创建工作表
+            HSSFSheet sheet = hssfWorkbook.createSheet();
+            hssfWorkbook.setSheetName(sheetMain.getSheetNum(), sheetMain.getSheetName());
+            //2.1加载合并单元格对象
+            if (headWidth != 0 && null != sheetMain.getSheetTitle()) {
+                sheet.addMergedRegion(callRangeAddress);
+            }
+            //设置默认列宽
+            if (null != sheetMain.getCellWidths() && sheetMain.getCellWidths().size() != 0) {
+                for (int i = 0; i < sheetMain.getCellWidths().size(); i++) {
+                    sheet.setColumnWidth(i, ((int) sheetMain.getCellWidths().get(i)) * 256);
                 }
-                //3.2创建列标题;并且设置列标题
-                if (null != sheetMain.getSheetHeads() && sheetMain.getSheetHeads().size() != 0) {
-                    HSSFRow row2 = sheet.createRow(currentRow);
-                    String[] titles = (String[]) sheetMain.getSheetHeads().toArray();
-                    for (int i = 0; i < titles.length; i++) {
-                        HSSFCell cell2 = row2.createCell(sheetMain.getStartCell() + i);
-                        //加载单元格样式
-                        cell2.setCellStyle(colHeadStyle);
-                        cell2.setCellValue(titles[i]);
-                    }
-                }
-                //4创建列表内容
-                if (null != sheetMain.getSheetHeads() && sheetMain.getSheetHeads().size() != 0) {
-                    currentRow = currentRow + 1;
-                }
-                List ts = sheetMain.getTs();
-                if (ts != null) {
-                    for (int j = 0; j < ts.size(); j++) {
-                        HSSFRow row3 = sheet.createRow(sheetMain.getStartRow() + currentRow);
-                        // 得到类对象
-                        Class shellContentCla = (Class) ts.get(j).getClass();
-                    /* 得到类中的所有属性集合 */
-                        Field[] shellContentField = shellContentCla.getDeclaredFields();
-                        for (int i = 0; i < shellContentField.length; i++) {
-                            Field field = shellContentField[i];
-                            field.setAccessible(true);
-                            Object val = field.get(ts.get(j));
-                            //创建数据行,前面有两行,头标题行和列标题行
-                            HSSFCell cell1 = row3.createCell(sheetMain.getStartCell() + i);
-                            cell1.setCellStyle(colStyle);
-                            cell1.setCellValue("");
-                            if (null != val) {
-                                cell1.setCellValue(val.toString());
-                            }
-                        }
-                        currentRow = currentRow + 1;
-                    }
-                }
-                //5创建脚标内容
-                List<SheetFooter> sheetFooters = sheetMain.getSheetFooters();
-                if(sheetFooters != null){
-                    currentRow = currentRow + 1;
-                    HSSFRow row4 = sheet.createRow(currentRow);
-                    for (int i = 0; i < sheetFooters.size(); i++) {
-                        SheetFooter sheetFooter = sheetFooters.get(i);
-                        HSSFCell cell1 = row4.createCell(sheetMain.getStartCell() + 2 * i);
-                        cell1.setCellStyle(colHeadStyle);
-                        cell1.setCellValue(sheetFooter.getName());
+            } else {
+                sheet.setDefaultColumnWidth(15);
+            }
+            //3.创建行
+            //3.1创建头标题行;并且设置头标题
+            HSSFRow row = sheet.createRow(sheetMain.getStartRow());
+            HSSFCell cell = row.createCell(sheetMain.getStartCell());
+            //加载单元格样式
+            cell.setCellStyle(headStyle);
+            if (null != sheetMain.getSheetTitle()) {
+                cell.setCellValue(sheetMain.getSheetTitle());
+            }
+            if (sheetMain.getTitleCellStyle().isBorderFlag()) {
+                RegionUtil.setBorderBottom(BorderStyle.THIN, callRangeAddress, sheet); // 下边框
+                RegionUtil.setBorderLeft(BorderStyle.THIN, callRangeAddress, sheet); // 左边框
+                RegionUtil.setBorderRight(BorderStyle.THIN, callRangeAddress, sheet); // 有边框
+                RegionUtil.setBorderTop(BorderStyle.THIN, callRangeAddress, sheet); // 上边框
+            }
 
-                        HSSFCell cell2 = row4.createCell(sheetMain.getStartCell() + 2 * i + 1);
-                        cell2.setCellStyle(colFooterStyle);
-                        cell2.setCellValue(sheetFooter.getValue());
-                    }
+            if (null != sheetMain.getSheetTitle()) {
+                currentRow = currentRow + 1;
+            }
+            //3.2创建列标题;并且设置列标题
+            if (null != sheetMain.getSheetHeads() && sheetMain.getSheetHeads().size() != 0) {
+                HSSFRow row2 = sheet.createRow(currentRow);
+                String[] titles = (String[]) sheetMain.getSheetHeads().toArray();
+                for (int i = 0; i < titles.length; i++) {
+                    HSSFCell cell2 = row2.createCell(sheetMain.getStartCell() + i);
+                    //加载单元格样式
+                    cell2.setCellStyle(colHeadStyle);
+                    cell2.setCellValue(titles[i]);
                 }
             }
-            //写入文件
-            hssfWorkbook.write(outputStream);
-        } finally {
-            outputStream.close();
+            //4创建列表内容
+            if (null != sheetMain.getSheetHeads() && sheetMain.getSheetHeads().size() != 0) {
+                currentRow = currentRow + 1;
+            }
+            List ts = sheetMain.getTs();
+            if (ts != null) {
+                for (int j = 0; j < ts.size(); j++) {
+                    HSSFRow row3 = sheet.createRow(sheetMain.getStartRow() + currentRow);
+                    // 得到类对象
+                    Class shellContentCla = (Class) ts.get(j).getClass();
+                /* 得到类中的所有属性集合 */
+                    Field[] shellContentField = shellContentCla.getDeclaredFields();
+                    for (int i = 0; i < shellContentField.length; i++) {
+                        Field field = shellContentField[i];
+                        field.setAccessible(true);
+                        Object val = field.get(ts.get(j));
+                        //创建数据行,前面有两行,头标题行和列标题行
+                        HSSFCell cell1 = row3.createCell(sheetMain.getStartCell() + i);
+                        cell1.setCellStyle(colStyle);
+                        cell1.setCellValue("");
+                        if (null != val) {
+                            cell1.setCellValue(val.toString());
+                        }
+                    }
+                    currentRow = currentRow + 1;
+                }
+            }
+            //5创建脚标内容
+            List<SheetFooter> sheetFooters = sheetMain.getSheetFooters();
+            if(sheetFooters != null){
+                currentRow = currentRow + 1;
+                HSSFRow row4 = sheet.createRow(currentRow);
+                for (int i = 0; i < sheetFooters.size(); i++) {
+                    SheetFooter sheetFooter = sheetFooters.get(i);
+                    HSSFCell cell1 = row4.createCell(sheetMain.getStartCell() + 2 * i);
+                    cell1.setCellStyle(colHeadStyle);
+                    cell1.setCellValue(sheetFooter.getName());
+
+                    HSSFCell cell2 = row4.createCell(sheetMain.getStartCell() + 2 * i + 1);
+                    cell2.setCellStyle(colFooterStyle);
+                    cell2.setCellValue(sheetFooter.getValue());
+                }
+            }
         }
+        //写入文件
+        hssfWorkbook.write(outputStream);
     }
 
     /**

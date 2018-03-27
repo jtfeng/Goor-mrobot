@@ -1,6 +1,9 @@
 package cn.muye.order.controller;
 
+import cn.mrobot.bean.AjaxResult;
+import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.utils.PoiExcelExportUtil;
+import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.controller.BaseController;
 import cn.muye.i18n.service.LocaleMessageSourceService;
 import cn.muye.order.bean.export.DestinationAnalysisVO;
@@ -15,9 +18,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -33,14 +39,15 @@ public class OrderExportDataController extends BaseController{
     @Autowired
     private OrderExportDataService orderExportDataService;
 
-    private static final String ORDER_EXPORT_FILE_NAME = "诺亚后台数据记录.xls";
+    private static final String ORDER_EXPORT_FILE_NAME = "NoahOrderData.xls";
 
     @RequestMapping(value = "logInfo/export/orderData", method = RequestMethod.GET)
-    public void exportOrderData(@RequestParam(name = "stationId", required = false)Long stationId,
-                                      @RequestParam(name = "startDate", required = false)@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")Date startDate,
-                                      @RequestParam(name = "endDate", required = false)@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")Date endDate,
-                                      HttpServletResponse response) {
+    @ResponseBody
+    public AjaxResult exportOrderData(@RequestParam(name = "stationId", required = false)Long stationId,
+                                      @RequestParam(name = "startDate")@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")Date startDate,
+                                      @RequestParam(name = "endDate")@DateTimeFormat(pattern="yyyy-MM-dd HH:mm:ss")Date endDate) {
         //查询出符合条件的数据
+        OutputStream outputStream = null;
         OrderExportData orderExportData = orderExportDataService.getOrderExportData(stationId, startDate, endDate);
         List<TransferTaskAnalysisVO> transferTaskAnalysisVOList = orderExportData.getTransferTaskAnalysisVOList();
         List<ElevatorUseAnalysisVO> elevatorUseAnalysisVOList = orderExportData.getElevatorUseAnalysisVOList();
@@ -84,21 +91,27 @@ public class OrderExportDataController extends BaseController{
             sheetMain3.setTs(destinationAnalysisVOList);
             sheetMainList.add(sheetMain3);
             //存储路径
-            /*String fileOppositePath = SearchConstants.FAKE_MERCHANT_STORE_ID + File.separator + Constant.EXPORT_DIR_NAME + File.separator + Constant.ORDER_DATA;
+            String fileOppositePath = SearchConstants.FAKE_MERCHANT_STORE_ID + File.separator + Constant.EXPORT_DIR_NAME + File.separator + Constant.ORDER_DATA + File.separator + System.currentTimeMillis();
             File fileDir = new File(DOWNLOAD_HOME + File.separator + fileOppositePath);
             if (!fileDir.exists()){
                 fileDir.mkdirs();
-            }*/
+            }
             // 下载文件的默认名称
-            response.setHeader("content-Type", "application/vnd.ms-excel");
-            response.setHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(ORDER_EXPORT_FILE_NAME, "utf-8"));
-            //outputStream = new FileOutputStream(DOWNLOAD_HOME + File.separator + fileOppositePath + File.separator + ORDER_EXPORT_FILE_NAME);
-            PoiExcelExportUtil.createExcelFile(response.getOutputStream(), sheetMainList);
+            outputStream = new FileOutputStream(DOWNLOAD_HOME + File.separator + fileOppositePath + File.separator + ORDER_EXPORT_FILE_NAME);
+            PoiExcelExportUtil.createExcelFile(outputStream, sheetMainList);
+            // 资源下载url
+            String downloadUrl = DOWNLOAD_HTTP + File.separator + fileOppositePath + File.separator + ORDER_EXPORT_FILE_NAME;
+            return AjaxResult.success(downloadUrl);
         } catch (Exception e) {
             e.printStackTrace();
             logger.error(e.getMessage());
+            return AjaxResult.failed();
         } finally {
-
+            try {
+                outputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

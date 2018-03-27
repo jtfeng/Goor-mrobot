@@ -179,7 +179,7 @@
         from OR_ORDER o
         <where>
             o.status IN (0, 1)
-            <if test="stationId != null" >
+            <if test="stationId != null and stationId != ''" >
                 AND o.start_station_id = #{stationId}
             </if>
             <if test="startDate != null" >
