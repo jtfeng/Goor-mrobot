@@ -274,4 +274,29 @@ public class MapPoint extends BaseBean {
         newP.setCreatedBy(mapPoint.getCreatedBy());
         return newP;
     }
+
+    @Override
+    public String toString() {
+        return "MapPoint{" +
+                "value=" + value +
+                ", label='" + label + '\'' +
+                ", id=" + id +
+                ", storeId=" + storeId +
+                ", createdBy=" + createdBy +
+                ", pointName='" + pointName + '\'' +
+                ", createTime=" + createTime +
+                ", pointAlias='" + pointAlias + '\'' +
+                ", sceneName='" + sceneName + '\'' +
+                ", mapName='" + mapName + '\'' +
+                ", x=" + x +
+                ", y=" + y +
+                ", th=" + th +
+                ", mapPointTypeId=" + mapPointTypeId +
+                ", ICPointType='" + ICPointType + '\'' +
+                ", cloudMapPointTypeId=" + cloudMapPointTypeId +
+                ", pointLevel=" + pointLevel +
+                ", mapZipId=" + mapZipId +
+                ", deleteFlag=" + deleteFlag +
+                '}';
+    }
 }

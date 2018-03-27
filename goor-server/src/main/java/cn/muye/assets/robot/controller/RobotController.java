@@ -4,6 +4,7 @@ import cn.mrobot.bean.AjaxResult;
 import cn.mrobot.bean.assets.robot.Robot;
 import cn.mrobot.bean.assets.robot.RobotConfig;
 import cn.mrobot.bean.assets.robot.RobotPassword;
+import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.utils.WhereRequest;
 import cn.muye.assets.robot.service.RobotConfigService;
 import cn.muye.assets.robot.service.RobotPasswordService;
@@ -12,6 +13,7 @@ import cn.muye.base.bean.SearchConstants;
 import cn.muye.base.cache.CacheInfoManager;
 import cn.muye.i18n.service.LocaleMessageSourceService;
 import com.github.pagehelper.PageInfo;
+import com.google.common.collect.Maps;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import com.wordnik.swagger.annotations.ApiParam;
@@ -236,6 +238,27 @@ public class RobotController {
             return AjaxResult.success(availableRobotCountMap, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_CXCG"));
         } catch (Exception e){
             LOGGER.error("############## getAvailableRobotCount error ############# {}", e);
+            return AjaxResult.failed(e.getMessage());
+        } finally {
+        }
+    }
+
+    /**
+     * 模拟可用机器人数量
+     * @param count
+     * @return
+     */
+    @GetMapping(value = {"assets/robot/testAvailableRobotCount"})
+    @ApiOperation(value = "模拟可用机器人数量", httpMethod = "GET", notes = "模拟可用机器人数量")
+    @ResponseBody
+    public AjaxResult mockAvailableRobotCount(@RequestParam Long stationId, @RequestParam int count) {
+        try {
+            Map<String, Integer> availableRobotCountMap = Maps.newHashMap();
+            availableRobotCountMap.put(RobotTypeEnum.TRAILER.name(), count);
+            CacheInfoManager.setAvailableRobotCountCache(stationId, availableRobotCountMap);
+            return AjaxResult.success(CacheInfoManager.getAvailableRobotCountCache(stationId), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_CXCG"));
+        } catch (Exception e){
+            LOGGER.error("############## mockAvailableRobotCount error ############# {}", e);
             return AjaxResult.failed(e.getMessage());
         } finally {
         }
