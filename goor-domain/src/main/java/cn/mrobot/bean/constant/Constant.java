@@ -56,7 +56,8 @@ public class Constant {
 
     //X86PathType
     public final static Integer X86_PATH_TYPE_STRICT_DIRECTION = 0; //0 表示终点保持原样工控路径
-    public final static Integer X86_PATH_TYPE_NO_DIRECTION = 10;  //10 代表终点无朝向要求工控路径
+    public final static Integer X86_PATH_TYPE_NO_DIRECTION = 10;  //10 代表终点无朝向、坐标范围0.5米要求工控路径
+    public final static Integer X86_PATH_TYPE_NO_DIRECTION_STICK_COORDINATE = 11;  //11 代表终点无朝向、坐标范围更小工控路径
 
     //默认工控路径权值
     public final static Long DEFAULT_ROAD_PATH_X86_WEIGHT = 1L;

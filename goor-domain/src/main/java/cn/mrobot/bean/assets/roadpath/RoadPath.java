@@ -31,7 +31,7 @@ public class RoadPath extends BaseBean{
     private Integer pathType;
     //所关联的路径锁对象
     private Long pathLock;
-    //下发协议：工控路径终点类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向要求工控路径）
+    //下发协议：工控路径终点类型（此处暂定为 0 表示终点保持原样工控路径 10 代表终点无朝向、坐标范围0.5米要求工控路径 11 代表终点无朝向、坐标范围更小工控路径）
     private Integer x86PathType;
     //受管路径开始时间
     private String restrictedStarttime;
