@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.util.StringUtils;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -232,13 +233,19 @@ public class RobotController {
     @RequestMapping(value = {"assets/robot/getAvailableRobotCount/{stationId}"}, method = RequestMethod.GET)
     @ApiOperation(value = "获取所有可用机器人数量", httpMethod = "GET", notes = "获取所有可用机器人数量")
     @ResponseBody
-    public AjaxResult getAvailableRobotCount(@PathVariable Long stationId) {
+    public AjaxResult getAvailableRobotCount(@PathVariable String stationId) {
         try {
-            Map<String, Integer> availableRobotCountMap = CacheInfoManager.getAvailableRobotCountCache(stationId);
+            if (StringUtils.isEmpty(stationId) || "null".equals(stationId)) {
+                return AjaxResult.failed("stationId不能为空");
+            }
+            Map<String, Integer> availableRobotCountMap = CacheInfoManager.getAvailableRobotCountCache(Long.valueOf(stationId));
             return AjaxResult.success(availableRobotCountMap, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_CXCG"));
+        }  catch (NumberFormatException nfe) {
+            LOGGER.error("######### getAvailableRobotCount NumberFormatException ##########", nfe);
+            return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_robot_controller_RobotController_java_QSRZQGSDSID"));
         } catch (Exception e){
-            LOGGER.error("############## getAvailableRobotCount error ############# {}", e);
-            return AjaxResult.failed(e.getMessage());
+            LOGGER.error("########### getAvailableRobotCount error ##########", e);
+            return AjaxResult.failed("获取失败");
         } finally {
         }
     }
