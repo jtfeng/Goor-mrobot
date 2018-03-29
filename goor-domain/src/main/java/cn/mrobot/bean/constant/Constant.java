@@ -54,11 +54,6 @@ public class Constant {
     public final static Integer PATH_TYPE_X86 = 1;  //工控路径
     public final static Integer PATH_TYPE_RESTRICTED = 2;  //受管路径
 
-    //X86PathType
-    public final static Integer X86_PATH_TYPE_STRICT_DIRECTION = 0; //0 表示终点保持原样工控路径
-    public final static Integer X86_PATH_TYPE_NO_DIRECTION = 10;  //10 代表终点无朝向、坐标范围0.5米要求工控路径
-    public final static Integer X86_PATH_TYPE_NO_DIRECTION_STICK_COORDINATE = 11;  //11 代表终点无朝向、坐标范围更小工控路径
-
     //默认工控路径权值
     public final static Long DEFAULT_ROAD_PATH_X86_WEIGHT = 1L;
     public final static Long DEFAULT_ELEVATOR_X86_WEIGHT = 999L;

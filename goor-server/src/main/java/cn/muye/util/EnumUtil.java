@@ -319,6 +319,7 @@ public class EnumUtil {
                 "MissionListTypeEnum",
                 "DoorType",
                 "EmployeeTypeEnum",
+                "X86PathTypeEnum",
                 "LogLevel",
                 "RobotTypeEnum"
         ));

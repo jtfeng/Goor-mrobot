@@ -8,6 +8,7 @@ import cn.mrobot.bean.area.station.Station;
 import cn.mrobot.bean.area.station.StationType;
 import cn.mrobot.bean.assets.door.DoorType;
 import cn.mrobot.bean.assets.rfidbracelet.RfidBraceletTypeEnum;
+import cn.mrobot.bean.assets.roadpath.X86PathTypeEnum;
 import cn.mrobot.bean.assets.robot.RobotTypeEnum;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.constant.VersionConstants;
@@ -631,6 +632,7 @@ public class UserController implements ApplicationContextAware {
         map.put("doorType", EnumUtil.enumListInternationalization(EnumUtil.VALUE,DoorType.class,DoorType.values(),localeMessageSourceService));
         map.put("employeeType", EnumUtil.enumListInternationalization(EnumUtil.VALUE,EmployeeTypeEnum.class,EmployeeTypeEnum.values(),localeMessageSourceService));
         map.put("logLevel", EnumUtil.enumListInternationalization(EnumUtil.VALUE,LogLevel.class,LogLevel.values(),localeMessageSourceService));
+        map.put("x86PathType", EnumUtil.enumListInternationalization(EnumUtil.VALUE,X86PathTypeEnum.class,X86PathTypeEnum.values(),localeMessageSourceService));
         map.put("applianceDepartmentType", getApplianceDepartmentTypeList());
         map.put("appliancePackageType", getAppliancePackageTypeList());
         map.put("operationDepartmentType", getOperationDepartmentTypeList());

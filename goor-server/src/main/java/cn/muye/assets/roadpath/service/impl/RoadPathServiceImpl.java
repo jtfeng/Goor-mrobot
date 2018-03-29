@@ -4,6 +4,7 @@ import cn.mrobot.bean.area.point.MapPoint;
 import cn.mrobot.bean.assets.roadpath.RoadPath;
 import cn.mrobot.bean.assets.roadpath.RoadPathDetail;
 import cn.mrobot.bean.assets.roadpath.RoadPathPoint;
+import cn.mrobot.bean.assets.roadpath.X86PathTypeEnum;
 import cn.mrobot.bean.constant.Constant;
 import cn.mrobot.bean.enums.X86PatternEnum;
 import cn.mrobot.dto.area.PathDTO;
@@ -96,6 +97,13 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                 restrictedEndtime = String.valueOf(body.get("restrictedEndtime"));
             }
 
+            Object x86PathTypeObj = body.get("x86PathType");
+            String x86PathType = null;
+            if(null != x86PathTypeObj) {
+                x86PathType = String.valueOf(x86PathTypeObj);
+            }
+            Integer x86PathTypeInt = x86PathType == null? null : Integer.parseInt(x86PathType);
+
             String sceneName = null;
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
             if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD) || pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
@@ -115,6 +123,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     //云端路径没有PathId
                     setPathId("");
                     setPathType(pathTypeInt);
+                    setX86PathType(x86PathTypeInt);
                 }};
                 if (pathTypeInt.equals(Constant.PATH_TYPE_RESTRICTED)) {
                     roadPath.setRestrictedStarttime(restrictedStarttime);
@@ -140,6 +149,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
                     setEndPoint(Long.parseLong(String.valueOf(points.get(1)))); // 设置结束点
                     setPathType(pathTypeInt);
                     setPathId(pathId);
+                    setX86PathType(x86PathTypeInt);
                 }};
                 setRoadPathSceneMapNameByPoint(roadPath, startPointId);
                 this.roadPathMapper.insert(roadPath);
@@ -170,6 +180,12 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             String pathType = String.valueOf(checkNotNull(body.get("pathType"), localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJLXBNWK")));
             Integer pathTypeInt = Integer.parseInt(pathType);
             checkNotNull(pathTypeInt, localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_assets_roadpath_service_impl_RoadPathServiceImpl_java_LJLXBNWK"));
+            Object x86PathTypeObj = body.get("x86PathType");
+            Integer x86PathTypeInt = null;
+            if(null != x86PathTypeObj) {
+                String x86PathType = String.valueOf(x86PathTypeObj);
+                x86PathTypeInt = Integer.parseInt(x86PathType);
+            }
 
             RoadPath roadPath = new RoadPath();
             roadPath.setId(id);
@@ -182,6 +198,7 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setMapName(mapName);     // 工控地图名 【此处不知道是否需要更新工控路径 ID 信息以及路径类型】
             roadPath.setCreateTime(new Date());
             roadPath.setStoreId(100L);
+            roadPath.setX86PathType(x86PathTypeInt);
 
             //只有路径类型校验是云端类型,或者新增工控路径的才判断是不是有两个以上点
             if (pathTypeInt.equals(Constant.PATH_TYPE_CLOUD)) {
@@ -558,7 +575,8 @@ public class RoadPathServiceImpl extends BaseServiceImpl<RoadPath> implements Ro
             roadPath.setWeight(length);
             roadPath.setPattern(pathDTO.getType() == null ? "" : (pathDTO.getType() + ""));
             //默认有朝向要求
-            roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);
+//            roadPath.setX86PathType(Constant.X86_PATH_TYPE_STRICT_DIRECTION);
+            roadPath.setX86PathType(X86PathTypeEnum.STRICT_DIRECTION.getCaption());
             //新协议存储点集作为数据。直线可能只有起点和终点；贝塞尔曲线是4个控制点；自定义曲线可能是一系列点。
             String data = (pathDTO.getPoints() == null || pathDTO.getPoints().size() == 0) ? null : JSON.toJSONString(pathDTO.getPoints());
             roadPath.setData(data);
