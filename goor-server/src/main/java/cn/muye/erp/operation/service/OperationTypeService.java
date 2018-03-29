@@ -30,13 +30,13 @@ public interface OperationTypeService extends BaseCrudService<OperationType> {
 
     List<OperationType> listAllOperationType(WhereRequest whereRequest);
 
-    boolean importExcel(File uploadFile);
+    int importExcel(File uploadFile);
 
     List<OperationType> listBySearchName(String searchName);
 
     List<OperationType> listByDepartmentTypeId(Long id);
 
-    boolean importOperationDefaultApplianceExcel(File uploadFile);
+    int importOperationDefaultApplianceExcel(File uploadFile);
 
     List<OperationType> recommend(Long stationId);
 }

@@ -187,8 +187,8 @@ public class ApplianceController {
             if (!validateResult.isSuccess()) {
                 return validateResult;
             }
-            boolean result = applianceService.importExcel(uploadFile);
-            return result ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
+            int dataCount = applianceService.importExcel(uploadFile);
+            return dataCount > 0 ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
@@ -210,8 +210,8 @@ public class ApplianceController {
             if (!validateResult.isSuccess()) {
                 return validateResult;
             }
-            boolean result = operationTypeService.importExcel(uploadFile);
-            return result ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
+            int dateCount = operationTypeService.importExcel(uploadFile);
+            return dateCount > 0 ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
@@ -233,8 +233,8 @@ public class ApplianceController {
             if (!validateResult.isSuccess()) {
                 return validateResult;
             }
-            boolean result = operationTypeService.importOperationDefaultApplianceExcel(uploadFile);
-            return result ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
+            int dataCount = operationTypeService.importOperationDefaultApplianceExcel(uploadFile);
+            return dataCount> 0 ? AjaxResult.success(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRCG")) : AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));
         } catch (Exception e) {
             LOGGER.info("导入文件出错", e);
             return AjaxResult.failed(localeMessageSourceService.getMessage("goor_server_src_main_java_cn_muye_erp_appliance_controller_ApplianceController_java_DRWJCC"));

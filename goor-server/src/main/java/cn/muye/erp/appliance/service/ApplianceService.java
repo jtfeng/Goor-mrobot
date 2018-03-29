@@ -17,7 +17,7 @@ public interface ApplianceService extends BaseService<Appliance> {
 
     Appliance findApplianceById(Long id);
 
-    boolean importExcel(File file);
+    int importExcel(File file);
 
     List<Appliance> lists(WhereRequest whereRequest);
 

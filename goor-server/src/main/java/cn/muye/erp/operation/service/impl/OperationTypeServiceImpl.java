@@ -131,9 +131,9 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
     }
 
     @Override
-    public boolean importExcel(File file) {
+    public int importExcel(File file) {
         if (!file.exists()) {
-            return false;
+            return 0;
         }
         return analysisExcel(file, EXCEL_DATE_OPERATION_TYPE);
     }
@@ -149,9 +149,9 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
     }
 
     @Override
-    public boolean importOperationDefaultApplianceExcel(File file) {
+    public int importOperationDefaultApplianceExcel(File file) {
         if (!file.exists()) {
-            return false;
+            return 0;
         }
         return analysisExcel(file, EXCEL_DATE_OPERATION_DEFAULT_APPLIANCE);
     }
@@ -192,9 +192,14 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
         return operationTypeList;
     }
 
-    private boolean analysisExcel(File file, String type) {
+    private int analysisExcel(File file, String type) {
+        //记录导入数据的总条数
+        int dataCount = 0;
         try {
             Map<String, List<Map<String, Object>>> result = ExcelUtil.getTableSheetData(file);
+            if(null == result || result.size()== 0){
+                return dataCount;
+            }
             Iterator<Map.Entry<String, List<Map<String, Object>>>> iterator = result.entrySet().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<String, List<Map<String, Object>>> entry = iterator.next();
@@ -202,6 +207,7 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
                 logger.info("读取工作表 " + key + " 中的数据");
                 List<Map<String, Object>> entryValue = entry.getValue();
                 int listSize = entryValue.size();
+                dataCount += listSize;
                 logger.info("记录条数 " + listSize);
                 ExecutorService executorService = Executors.newFixedThreadPool(10);
                 for (int i = 0; i < listSize; i++) {
@@ -217,9 +223,9 @@ public class OperationTypeServiceImpl extends BaseCrudServiceImpl<OperationType>
             }
         } catch (Exception e) {
             LOGGER.error("解析文件出错", e);
-            return false;
+            return 0;
         }
-        return true;
+        return dataCount;
     }
 
     private void createAndSaveOperationDefaultAppliance(Map<String, Object> map) {
