@@ -194,12 +194,15 @@ public class ApplianceServiceImpl extends BaseServiceImpl<Appliance> implements 
     }
 
     private void createAndSave(Map<String, Object> map) {
-        String chName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[0])).toString();
+        Object chNameObj = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[0]));
+        String chName = null == chNameObj ? "" : chNameObj.toString();
         logger.info("器械名称 = " + chName);
-        String departmentTypeName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[1])).toString();
+        Object departmentTypeNameObj = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[1]));
+        String departmentTypeName = null == departmentTypeNameObj ? "" : departmentTypeNameObj.toString();
         logger.info("类别 = " + departmentTypeName);
         int departmentTypeCode = getDepartmentTypeCode(departmentTypeName);
-        String packageTypeName = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[2])).toString();
+        Object packageTypeNameObj = map.get(localeMessageSourceService.getMessage(EXCEL_TITLE[2]));
+        String packageTypeName = null == packageTypeNameObj ?  "" : packageTypeNameObj.toString();
         logger.info("包装类型 = " + packageTypeName);
         Long packageTypeId = getPackageTypeId(packageTypeName);
         //重复数据校验

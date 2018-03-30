@@ -156,6 +156,20 @@ public class ExcelUtil {
         if (row == null || row.getLastCellNum() == 0 || row.getCell(0) == null) {
             return true;
         }
+        //遍历每个元素，如果都为空，返回false
+        int length = row.getLastCellNum();
+        //记录改行表格内容为空的总量
+        int count = 0;
+        for (int i = 0; i <length; i ++){
+            Cell cell = row.getCell(i);
+            if (null == cell || StringUtil.isBlank(cell.toString())){
+                count ++;
+            }
+        }
+        //如果该行表格中列内容为空的数量等于该行的列的长度，则说明该行为空
+        if (count == length){
+            return true;
+        }
         return false;
     }
 
