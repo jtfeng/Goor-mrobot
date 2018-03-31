@@ -417,11 +417,15 @@ public class RobotServiceImpl extends BaseServiceImpl<Robot> implements RobotSer
         //获取工控场景名
         //到缓存里通过messageInfo的deviceId调用MapInfoServiceIMpl的getCurrentMapInfo获取工控场景名
         String sceneName = parseMapInfoData(messageInfo);
+        if (StringUtil.isEmpty(sceneName)) {
+            logger.error("机器人编号: " + robotCode + " 上传工控场景名" + sceneName + " 为空");
+            return false;
+        }
         //获取站绑定的工控场景名
         //走缓存去查询站绑定的工控场景
         String stationSceneName = getStationSceneName(orderStationId);
-        if (StringUtil.isEmpty(sceneName) || StringUtil.isEmpty(stationSceneName)) {
-            logger.error("机器人编号: " + robotCode + " 上传工控场景名" + sceneName + " 或云端绑定站的工控场景名" + stationSceneName + " 为空");
+        if (StringUtil.isEmpty(stationSceneName)) {
+            logger.error("机器人编号: " + robotCode + " 云端绑定站的工控场景名" + stationSceneName + " 为空");
             return false;
         }
         if (!sceneName.equals(stationSceneName)) {
